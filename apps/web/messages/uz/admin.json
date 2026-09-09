@@ -1,0 +1,53 @@
+{
+  "admin": {
+    "title": "Moderatsiya",
+    "lead": "Navbatdagi e'lonlar, tashkilot tasdiqlari va shahobcha yo'l da'volari. Har qator uchun bitta qaror.",
+    "forbidden": "Bu bo'lim faqat platforma moderatorlari uchun.",
+    "tabs": {
+      "listings": "E'lonlar",
+      "kyc": "Tashkilotlar (KYC)",
+      "claims": "Shahobcha da'volari"
+    },
+    "empty": "Navbat bo'sh.",
+    "approve": "Tasdiqlash",
+    "reject": "Rad etish",
+    "reason": "Rad sababi",
+    "note": "Izoh (ixtiyoriy)",
+    "reasonRequired": "Rad etish uchun sabab yozing.",
+    "confirmReject": "Ha, rad etilsin",
+    "cancel": "Bekor",
+    "busy": "Yuborilmoqda",
+    "decided": {
+      "approved": "Tasdiqlandi",
+      "rejected": "Rad etildi"
+    },
+    "failed": "Bajarilmadi. Sahifani yangilang.",
+    "listing": {
+      "org": "Tashkilot",
+      "region": "Viloyat",
+      "price": "Narx",
+      "onRequest": "so'rov bo'yicha",
+      "photos": "rasm",
+      "created": "Yaratilgan",
+      "description": "Tavsif",
+      "contact": "Aloqa"
+    },
+    "org": {
+      "stir": "STIR",
+      "kinds": "Turlari",
+      "requestedAt": "So'ralgan",
+      "region": "Viloyat",
+      "contact": "Aloqa",
+      "noStir": "STIR yo'q"
+    },
+    "claim": {
+      "siding": "Shahobcha yo'l",
+      "registry": "Reestr",
+      "station": "Stansiya",
+      "claimant": "Da'vogar",
+      "registryOwner": "Reestrdagi egasi",
+      "claimedAt": "Da'vo sanasi",
+      "open": "Sahifasi"
+    }
+  }
+}

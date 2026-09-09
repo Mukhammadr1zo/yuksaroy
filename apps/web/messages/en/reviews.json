@@ -1,0 +1,41 @@
+{
+  "reviews": {
+    "heading": "Reviews",
+    "summary": "{avg} · {count} reviews",
+    "none": "No reviews",
+    "hidden": "{count} ratings, average shown from {min}",
+    "noneBody": "No reviews yet. Only the shipper of a completed order can leave one.",
+    "order": "order",
+    "reply": "Terminal reply",
+    "star": "{n} stars",
+    "yours": "Your review",
+    "review": "Shipper review",
+    "form": {
+      "title": "Rate this terminal",
+      "lead": "The order is complete. Rate the terminal from 1 to 5; a comment is optional. The review is public on the terminal page, the order number is masked.",
+      "rating": "Rating",
+      "text": "Comment",
+      "placeholder": "What went well, what did not go as expected",
+      "submit": "Submit review",
+      "sending": "Sending",
+      "done": "Thank you, your review has been recorded."
+    },
+    "replyForm": {
+      "cta": "Reply",
+      "edit": "Edit reply",
+      "label": "Terminal reply (public)",
+      "submit": "Send reply",
+      "sending": "Sending",
+      "cancel": "Cancel",
+      "hint": "A reply can be written within 30 days of the review."
+    },
+    "err": {
+      "REVIEW_EXISTS": "This order already has a review.",
+      "ORDER_NOT_DONE": "Only a completed order can be reviewed.",
+      "REPLY_WINDOW_CLOSED": "The 30-day reply window has closed.",
+      "NOT_SHIPPER": "Only a member of the ordering organization can review.",
+      "NOT_TERMINAL_STAFF": "Only terminal staff can reply.",
+      "failed": "Not sent. Please try again."
+    }
+  }
+}

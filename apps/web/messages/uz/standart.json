@@ -1,0 +1,71 @@
+{
+  "standart": {
+    "title": "E'lon standarti",
+    "lead": "Har bir e'lon va obyekt kartasi bir xil maydonlar bilan to'ldiriladi, shunda ularni solishtirish mumkin. Shart maydonlarsiz e'lon chiqmaydi, tavsiya maydonlar bo'lmasa ogohlantirish ko'rsatiladi.",
+    "notCert": "Bu sertifikat emas. Standart faqat e'lonning to'liqligini belgilaydi: platforma texnikaning holatini tekshirmaydi, raqamlar egasi aytgani bo'yicha.",
+    "must": "Shart",
+    "should": "Tavsiya",
+    "col": {
+      "field": "Maydon",
+      "level": "Daraja"
+    },
+    "field": {
+      "title": "Sarlavha",
+      "deal": "Bitim turi (ijara yoki sotuv)",
+      "year": "Ishlab chiqarilgan yil",
+      "condition": "Holati",
+      "regionCode": "Viloyat",
+      "photos": "Rasm (kamida 1 ta)",
+      "model": "Model",
+      "capacityT": "Yuk ko'tarish, t",
+      "priceTiyin": "Narx va birligi",
+      "terminalId": "Terminal yoki shahobcha yo'l",
+      "responseHours": "Javob muddati, soat",
+      "wagonType": "Vagon turi",
+      "qty": "Soni",
+      "truckType": "Kuzov turi",
+      "tonnage": "Tonnaj, t",
+      "serviceRegions": "Xizmat hududlari (kamida 1 ta)",
+      "routes": "Doimiy yo'nalishlar",
+      "fleetSize": "Park hajmi"
+    },
+    "terminal": {
+      "title": "Terminal",
+      "must": "Nomi, stansiya, turi, ish vaqti, kamida bitta xizmat",
+      "should": "Tariflar, pasport (yo'llar, kran, ombor, tarozi), rasm, telefon",
+      "note": "Egasi tasdiqlamagan pasport ochiq ma'lumotlardan tuziladi va shunday belgilanadi.",
+      "owner": "Tashkilot (TERMINAL turi): pasportni operator biriktiradi"
+    },
+    "siding": {
+      "title": "Shahobcha yo'l",
+      "must": "Reestr raqami, stansiya, viloyat (davlat reestridan)",
+      "should": "Uzunlik, tushirish va yuklash sig'imi, egasi",
+      "note": "Egasi nomi faqat da'vo operator tomonidan tasdiqlangach ko'rinadi. Koordinata taxminiy, uzel darajasida.",
+      "owner": "Tashkilot: da'vo operator tomonidan tasdiqlangach"
+    },
+    "rules": {
+      "heading": "Muvofiqlik qoidalari",
+      "lead": "Forma shu qoidalarni yozish paytida tekshiradi. Qoida buzilsa e'lon saqlanmaydi.",
+      "year": "Yil 1950 dan joriy yilgacha",
+      "qty": "Soni kamida 1",
+      "tonnage": "Tonnaj 1 dan 100 t gacha",
+      "rentUnits": "Ijara narxi: oyiga, kuniga yoki soatiga",
+      "saleUnits": "Sotuv narxi: jami summa",
+      "truckUnits": "Avtotransport narxi: km, tonna yoki reys uchun",
+      "priceUnit": "Narx ko'rsatilsa birligi ham ko'rsatiladi",
+      "oneObject": "Terminal yoki shahobcha yo'l: faqat bittasi bog'lanadi",
+      "serviceRegions": "Avtotransport: xizmat hududlariga bazaviy viloyat kiradi",
+      "routes": "Yo'nalishning boshi va oxiri har xil viloyat",
+      "photos": "Rasm ko'pi bilan {max} ta",
+      "expire": "E'lon {days} kundan keyin muddati o'tadi, egasi qayta e'lon qiladi",
+      "review": "Tasdiqlangan tashkilot e'loni darhol chiqadi, boshqalari tekshiruvdan o'tadi"
+    },
+    "cta": "E'lon berish",
+    "ctaNote": "Kabinetdagi forma standart bo'yicha tekshiradi: xato va ogohlantirishlar yozish paytida ko'rinadi.",
+    "owner": {
+      "label": "Kim e'lon beradi",
+      "org": "Faqat tashkilot",
+      "any": "Tashkilot yoki yakka haydovchi (telefon tasdiqlangan)"
+    }
+  }
+}

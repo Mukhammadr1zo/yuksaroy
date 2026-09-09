@@ -1,0 +1,79 @@
+{
+  "booking": {
+    "meta": {
+      "title": "Bron, taklif va narx so'rash · YukSaroy",
+      "description": "Terminal slotini band qilish, ochiq formula bilan narx hisobi va texnika egasiga so'rov: uch yo'l, bitta kabinet. Jonli tarif misoli va bugungi bo'sh slotlar."
+    },
+    "eyebrow": "Qanday ishlaydi",
+    "title": "Bron. Taklif. Narx so'rash.",
+    "lead": "Terminal xizmati uchun slot band qilinadi, narx ochiq formula bilan hisoblanadi, texnika va avtotransport bo'yicha egasiga so'rov yuboriladi. Uchala yo'l ham bir kabinetda.",
+    "facts": {
+      "terminals": "{count} faol terminal",
+      "freeSlots": "bugun {count} bo'sh slot",
+      "sidings": "{count} shahobcha yo'l reestrda"
+    },
+    "cta": {
+      "bookable": "Bugun bo'sh slotli terminallar",
+      "signup": "Ro'yxatdan o'tish",
+      "quote": "Narxni hisoblash",
+      "terminal": "Terminal sahifasi"
+    },
+    "cols": {
+      "book": {
+        "title": "Bron",
+        "body": "Terminalning bugungi yoki keyingi kunlardagi oynasini tanlaysiz. Slot 10 daqiqa ushlab turiladi, buyurtma yuborilgach tarif muzlatiladi. Terminal SLA ichida tasdiqlaydi yoki rad etadi.",
+        "link": "Terminallar"
+      },
+      "quote": {
+        "title": "Taklif",
+        "body": "Narx login'siz hisoblanadi: tarif × vazn yoki vagon soni + qo'shimcha xizmatlar. Terminal minimal summa qo'ygan bo'lsa, u ham ko'rsatiladi. Pilotda komissiya 0 %.",
+        "link": "Narx hisobi"
+      },
+      "ask": {
+        "title": "Narx so'rash",
+        "body": "Texnika va avtotransport e'lonlarida narx egasi bilan kelishiladi. So'rov kabinetdan yuboriladi, egasining telefoni faqat kirganlarga ko'rinadi.",
+        "link": "Texnika e'lonlari"
+      }
+    },
+    "example": {
+      "heading": "Jonli misol: tarif qanday yig'iladi",
+      "lead": "{terminal} joriy tariflari bo'yicha: {weight} t yuk, 1 vagon, yuklash va tarozi.",
+      "col": { "line": "Xizmat", "formula": "Hisob", "amount": "Summa" },
+      "min": "minimal summa qo'llandi",
+      "subtotal": "Xizmatlar",
+      "commission": "Platforma komissiyasi {pct} %",
+      "total": "Jami",
+      "note": "Buyurtma berilganda shu tarif muzlatiladi va aktda ko'rsatiladi. Egasi tasdiqlamagan pasport tarifi taxminiy.",
+      "empty": "Hozircha tarif e'lon qilgan faol terminal yo'q. Terminal egasi tarif qo'shganda misol shu yerda paydo bo'ladi."
+    },
+    "slots": {
+      "heading": "Bo'sh slotlar: {terminal}",
+      "today": "Bugun",
+      "free": "{count} bo'sh",
+      "none": "Yaqin 14 kunda ochiq slot yo'q. Terminal slotlarni kabinetda ochadi.",
+      "notToday": "Bugun slot ochilmagan, eng yaqin ochiq kun ko'rsatildi.",
+      "book": "Slot band qilish"
+    },
+    "chain": {
+      "heading": "Buyurtma holatlari zanjiri",
+      "lead": "Terminal har bosqichni kabinetda belgilaydi, siz buyurtma sahifasida ko'rasiz. Har belgi vaqt bilan yoziladi, kelishmovchilikka joy qolmaydi.",
+      "before": "Tasdiq kutilmoqda → Tasdiqlandi",
+      "after": "Yakunlandi: akt va hisob-faktura",
+      "steps": {
+        "ARRIVED": { "title": "Yetib keldi", "body": "Vagon terminalda, slot vaqti boshlandi" },
+        "WEIGHED": { "title": "Tortildi", "body": "Tarozi natijasi buyurtmaga yoziladi" },
+        "HANDLED": { "title": "Yuklandi / Tushirildi", "body": "Asosiy operatsiya bajarildi" },
+        "DEPARTED": { "title": "Jo'nadi", "body": "Buyurtma yakunlanadi, hujjatlar tayyor" }
+      }
+    },
+    "band": {
+      "title": "Bugun bo'sh slot bor terminallardan boshlang",
+      "body": "Katalogda faqat bugun ochiq oynasi bor terminallar. Bron uchun kabinet kerak, narx hisobi uchun kerak emas."
+    },
+    "chip": "Bugun bo'sh slot bor",
+    "quick": {
+      "submit": "Narxni ko'rish",
+      "passport": "Pasport"
+    }
+  }
+}

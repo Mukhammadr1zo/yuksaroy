@@ -1,0 +1,103 @@
+{
+  "listing": {
+    "rail": {
+      "title": "Temir yo'l texnikasi",
+      "lead": "Manevr teplovozi, elektrovoz va vagonlar: ijara yoki sotuv. Narx hammaga ochiq, egasi bilan bog'lanish uchun kirish kerak."
+    },
+    "road": {
+      "title": "Avtotransport",
+      "lead": "Yuk mashinalari va avtotashuvchilar: kuzov turi, tonnaj, xizmat hududlari va doimiy yo'nalishlar. Narx hammaga ochiq, egasi bilan bog'lanish uchun kirish kerak."
+    },
+    "tab": {
+      "all": "Barchasi",
+      "SHUNTING_LOCO": "Teplovoz",
+      "ELECTRIC_LOCO": "Elektrovoz",
+      "WAGON": "Vagon"
+    },
+    "deal": {
+      "all": "Ijara va sotuv",
+      "RENT": "Ijara",
+      "SALE": "Sotuv"
+    },
+    "filter": {
+      "truckType": "Barcha kuzovlar",
+      "tonnageMin": "Tonnaj, kamida (t)",
+      "q": "Nom, model yoki so'rov",
+      "sort": {
+        "new": "Yangi",
+        "price": "Arzon",
+        "nearest": "Yaqin"
+      }
+    },
+    "decision": {
+      "count": "{count} e'lon",
+      "onRequest": "{count} narx so'rov bo'yicha",
+      "cheapest": "eng arzon {price}",
+      "nearest": "eng yaqini {km} km",
+      "separator": " · "
+    },
+    "card": {
+      "onRequest": "Narx so'rov bo'yicha",
+      "atTerminal": "shu terminalda turibdi: {name}",
+      "atSiding": "shu shahobcha yo'lda turibdi: {name}",
+      "qty": "{count} dona",
+      "fleet": "{count} ta mashina",
+      "routes": "{count} yo'nalish",
+      "verified": "Tasdiqlangan tashkilot",
+      "regionsMore": "+{count}",
+      "noPhoto": "Rasm yo'q",
+      "phoneVerified": "Telefon tasdiqlangan",
+      "phoneUnverified": "Telefon tasdiqlanmagan"
+    },
+    "empty": {
+      "title": "Bu filtr bo'yicha e'lon topilmadi",
+      "body": "Katalog ochiq, e'lonni egalarning o'zi joylaydi. Birinchi bo'lib joylasangiz, sizni birinchi topishadi.",
+      "cta": "E'lon berish",
+      "reset": "Filtrni tozalash",
+      "standard": "E'lon standarti"
+    },
+    "detail": {
+      "specs": "Xususiyatlar",
+      "year": "Ishlab chiqarilgan yil",
+      "condition": "Holati",
+      "model": "Model",
+      "qty": "Soni",
+      "wagonType": "Vagon turi",
+      "capacityT": "Yuk ko'tarish",
+      "truckType": "Kuzov",
+      "tonnage": "Tonnaj",
+      "fleetSize": "Park",
+      "serviceRegions": "Xizmat hududlari",
+      "routes": "Doimiy yo'nalishlar",
+      "region": "Viloyat",
+      "published": "E'lon qilingan",
+      "price": "Narx",
+      "onRequest": "Narx so'rov bo'yicha",
+      "ask": "Narx so'rash",
+      "loginToContact": "Telefon va so'rov uchun kiring",
+      "loginNote": "Narx hammaga ochiq, bog'lanish ro'yxatdan o'tganlarga.",
+      "phone": "Telefon",
+      "noPhone": "Egasi telefon ko'rsatmagan, so'rov yuboring",
+      "response": "Javob {hours} soat ichida",
+      "responseNote": "egasi aytgan, o'lchanmagan",
+      "owner": "Egasi",
+      "companyPage": "Kompaniya sahifasi",
+      "object": "Qayerda turibdi",
+      "map": "Xaritada",
+      "mapNote": "Koordinata taxminiy: obyekt yoki viloyat markazi.",
+      "similar": "O'xshash e'lonlar",
+      "loading": "Yuklanmoqda",
+      "inquiry": {
+        "label": "Xabar",
+        "placeholder": "Qaysi muddatga, qancha, qayerga kerak",
+        "org": "Kimning nomidan",
+        "personal": "Shaxsan",
+        "send": "So'rov yuborish",
+        "sending": "Yuborilmoqda",
+        "sent": "So'rov yuborildi. Javobni kabinetdagi So'rovlar bo'limida ko'rasiz.",
+        "err": "Yuborilmadi, qayta urinib ko'ring.",
+        "short": "Kamida 5 ta belgi yozing."
+      }
+    }
+  }
+}

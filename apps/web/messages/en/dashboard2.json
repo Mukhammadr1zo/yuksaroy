@@ -1,0 +1,264 @@
+{
+  "dashboard2": {
+    "nav": {
+      "documents": "Documents"
+    },
+    "board": {
+      "title": "Requests",
+      "lead": "Confirm a new request within 30 minutes, otherwise the slot is released.",
+      "view": {
+        "board": "Board",
+        "list": "List"
+      },
+      "col": {
+        "PENDING": "New",
+        "CONFIRMED": "Confirmed",
+        "IN_PROGRESS": "In progress",
+        "DONE": "Done",
+        "CLOSED": "Closed"
+      },
+      "other": "Closed: {n} (rejected, expired, cancelled)",
+      "showClosed": "Show in list",
+      "updated": "updated {time}, every 30 seconds",
+      "emptyCol": "Empty",
+      "empty": "No requests in this section.",
+      "loading": "Loading",
+      "loadFailed": "Could not load the list.",
+      "noTerminal": "No terminal is linked to you. Find your terminal <link>in the catalog</link> and confirm ownership.",
+      "sla": "to respond ",
+      "load": "Loading",
+      "unload": "Unloading",
+      "noCargo": "cargo not specified",
+      "wagons": "wagons",
+      "confirm": "Confirm",
+      "confirming": "Confirming",
+      "reject": "Reject",
+      "rejectReason": "Rejection reason",
+      "rejectPlaceholder": "For example: crane under repair",
+      "cancel": "Cancel",
+      "complete": "Complete",
+      "noShow": "No show",
+      "err": {
+        "TRANSITION_NOT_ALLOWED": "The order status has changed. Refresh the page.",
+        "ORDER_NOT_ACTIVE": "The order is not active.",
+        "failed": "Failed. Try again."
+      }
+    },
+    "docs": {
+      "title": "Documents",
+      "lead": "Acts of completed work and invoices. PDFs are rendered from frozen data and verified by QR.",
+      "scope": {
+        "client": "As a client",
+        "terminal": "As a terminal"
+      },
+      "status": {
+        "all": "All",
+        "ISSUED": "Awaiting payment",
+        "OVERDUE": "Overdue",
+        "PAID_OFFLINE": "Paid",
+        "ACT": "Acts"
+      },
+      "month": "Month",
+      "anyMonth": "All months",
+      "col": {
+        "no": "Number",
+        "kind": "Type",
+        "order": "Order",
+        "org": "Counterparty",
+        "amount": "Amount",
+        "status": "Status",
+        "date": "Date"
+      },
+      "kind": {
+        "ACT": "Act",
+        "INVOICE": "Invoice"
+      },
+      "pdf": "PDF",
+      "markPaid": "Mark as paid",
+      "confirmPaid": "Mark invoice {no} as paid by bank transfer?",
+      "marking": "Marking",
+      "marked": "{no}: marked as paid.",
+      "markFailed": "Could not mark. Refresh the page and try again.",
+      "empty": "No documents yet. The act and invoice appear here once an order is completed.",
+      "emptyFiltered": "No documents match this filter.",
+      "shown": "{n} of {total} shown",
+      "loading": "Loading",
+      "loadFailed": "Could not load the list. Refresh the page.",
+      "st": {
+        "DRAFT": "Draft",
+        "ISSUED": "Awaiting payment",
+        "PAID_OFFLINE": "Paid",
+        "OVERDUE": "Overdue",
+        "VOID": "Void",
+        "READY": "Ready"
+      }
+    },
+    "home": {
+      "title": "Today",
+      "unknown": "no data",
+      "shipper": {
+        "open": "Open orders",
+        "openSub": "awaiting confirmation: {n}",
+        "next": "Next slot",
+        "noNext": "No scheduled slot",
+        "newOrder": "Place an order",
+        "invoices": "Awaiting payment",
+        "invoicesSub": "total {sum}",
+        "noInvoices": "Nothing outstanding"
+      },
+      "terminal": {
+        "pending": "New requests",
+        "pendingSub": "respond within 30 minutes",
+        "free": "Free slots today",
+        "freeSub": "across {n} terminals",
+        "noTariff": "Terminals without a tariff",
+        "noTariffSub": "Without a tariff a terminal shows no price in the catalog and takes no bookings",
+        "allTariffs": "Every terminal has a tariff"
+      },
+      "lister": {
+        "active": "Active listings",
+        "activeSub": "under review: {n}",
+        "inquiries": "Open inquiries",
+        "inquiriesSub": "price inquiries on your listings"
+      },
+      "admin": {
+        "title": "Moderation queue",
+        "listings": "Listings",
+        "kyc": "Organizations (KYC)",
+        "sidings": "Siding claims",
+        "terminals": "Terminal claims"
+      }
+    },
+    "order": {
+      "title": "My orders",
+      "newTitle": "New order",
+      "cabinet": "Cabinet",
+      "stepsAria": "Steps",
+      "step": {
+        "cargo": "Cargo",
+        "terminal": "Terminal and slot",
+        "summary": "Summary"
+      },
+      "filter": {
+        "all": "All",
+        "open": "Active",
+        "done": "Completed",
+        "closed": "Closed"
+      },
+      "loading": "Loading",
+      "loadFailed": "Could not load the list. Refresh the page.",
+      "empty": "No orders in this section.",
+      "newOrder": "Place a new order",
+      "awaitingConfirm": "awaiting confirmation",
+      "noCargo": "cargo not specified",
+      "shown": "{n} / {total} shown",
+      "notFound": "Order not found.",
+      "backToOrders": "Back to orders",
+      "updated": "Updated",
+      "terminalConfirm": "for terminal confirmation",
+      "notSet": "not set",
+      "notSpecified": "not specified",
+      "storageDays": "{n} days",
+      "noteLabel": "Note:",
+      "priceTitle": "Price (locked when the order was placed)",
+      "historyTitle": "History",
+      "slaOver": "Time is up",
+      "row": {
+        "station": "Station",
+        "operation": "Operation",
+        "slot": "Time window",
+        "cargo": "Cargo",
+        "weight": "Weight",
+        "wagons": "Wagons",
+        "wagonNumbers": "Wagon numbers",
+        "storage": "Storage",
+        "shipper": "Customer",
+        "time": "Time"
+      },
+      "cancel": {
+        "reason": "Cancellation reason (optional)",
+        "yes": "Yes, cancel it",
+        "no": "No",
+        "start": "Cancel the order",
+        "hint": "Cancellation is not possible less than 12 hours before the slot starts."
+      },
+      "statusHint": {
+        "PENDING": "Waiting for terminal confirmation. Without it the slot is released automatically.",
+        "CONFIRMED": "The slot is booked for you. Arrive at the agreed time.",
+        "IN_PROGRESS": "Work is under way at the terminal.",
+        "DONE": "The order is completed.",
+        "REJECTED": "The terminal rejected it. Choose another terminal or time.",
+        "EXPIRED": "The terminal did not answer in time, the slot was released.",
+        "CANCELLED": "The order was cancelled."
+      },
+      "actor": {
+        "CLIENT": "client",
+        "TERMINAL": "terminal",
+        "SYSTEM": "system",
+        "ADMIN": "administrator"
+      },
+      "org": "Organization",
+      "noOrg": "To place an order, first <link>create an organization</link>.",
+      "cargoOptional": "Cargo type (optional)",
+      "weightT": "Weight, tonnes",
+      "wagonCount": "Number of wagons",
+      "storage": "Storage, days",
+      "extras": "Extra services",
+      "calculating": "Calculating",
+      "showTerminals": "Show terminals",
+      "terminalHeading": "Terminal",
+      "offersLead": "{count} offers for station {station}.",
+      "offersLeadNearby": "{count} offers for station {station} (from nearby).",
+      "missingTariff": "no tariff: {services}",
+      "holding": "The slot is held for you",
+      "holdingShort": "Slot on hold:",
+      "extend": "Extend",
+      "back": "Back",
+      "next": "Continue",
+      "extraInfo": "Extra details",
+      "wagonNumbers": "Wagon numbers (optional, 8 digits, space separated)",
+      "noteOptional": "Note (optional)",
+      "sending": "Sending",
+      "placeOrder": "Place order",
+      "submitHint": "After sending, the terminal confirms within 30 minutes. Without confirmation the slot is released automatically.",
+      "err": {
+        "generic": "Something went wrong. Please try again.",
+        "noOrg": "Create an organization first.",
+        "selectStation": "Select a station.",
+        "enterWeight": "Enter the weight.",
+        "noOffers": "No terminal at this station or nearby has published a tariff.",
+        "holdExpiredPick": "The slot hold has expired. Pick another window.",
+        "cancelTooLate": "Less than 12 hours before the slot starts, cancellation is not possible. Contact the terminal.",
+        "cancelNotAllowed": "Cancellation is not possible in this status.",
+        "cancelFailed": "Not cancelled. Please try again.",
+        "SLOT_FULL": "No places left in this window. Choose another one.",
+        "SLOT_CLOSED": "This window is closed.",
+        "SLOT_PAST": "This window has passed.",
+        "HOLD_EXPIRED": "The hold has expired. Pick the window again.",
+        "HOLD_ALREADY_USED": "An order has already been placed for this slot.",
+        "HOLD_NOT_EXTENDABLE": "The hold can be extended only once.",
+        "NOT_SHIPPER": "You may not place orders on behalf of this organization.",
+        "NO_TARIFF_FOR_OPERATION": "The terminal has no tariff for this operation.",
+        "OPERATION_NOT_OFFERED": "The terminal does not perform this operation.",
+        "TERMINAL_UNAVAILABLE": "The terminal is not accepting orders right now.",
+        "STATION_NOT_FOUND": "Station not found.",
+        "CARGO_NOT_FOUND": "Cargo type not found."
+      },
+      "price": {
+        "min": "(min)",
+        "commission": "Platform commission {pct} %",
+        "total": "Total",
+        "paidByTerminal": "the terminal pays the commission",
+        "services": "services: {sum}"
+      },
+      "slots": {
+        "empty": "This terminal has no open slots in the coming days.",
+        "busy": "taken",
+        "free": "{n} places free",
+        "legendFree": "free places",
+        "legendLast": "last place",
+        "legendBusy": "taken or closed"
+      }
+    }
+  }
+}

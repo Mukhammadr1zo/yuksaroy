@@ -1,0 +1,113 @@
+{
+  "auth2": {
+    "brand": {
+      "eyebrow": "YukSaroy",
+      "title": "Sign in to the freight services market",
+      "bullets": {
+        "tariffs": { "title": "Open tariffs and today's slots", "body": "Terminal prices and free windows are visible without an account." },
+        "booking": { "title": "Booking and documents", "body": "Book a slot; the act and invoice are ready in your cabinet." },
+        "listing": { "title": "Post a listing", "body": "Rent out or sell a locomotive, wagon or truck." }
+      },
+      "note": "Browsing needs no account. Sign in only for contacts, bookings and listings."
+    },
+    "login": {
+      "lead": "Sign in with your phone and password. No password yet? Use a code.",
+      "tabs": { "password": "Password", "code": "Code" },
+      "submit": "Sign in",
+      "forgot": "Forgot password?",
+      "verify": "Sign in",
+      "or": "or",
+      "noAccount": "No account yet?",
+      "register": "Register",
+      "err": {
+        "badCredentials": "Wrong phone or password.",
+        "noPassword": "This number has no password yet.",
+        "noPasswordCode": "Sign in with a code",
+        "noPasswordOr": "or",
+        "noPasswordSet": "set a password",
+        "locked": "Too many attempts. Try again in {min} min."
+      }
+    },
+    "password": {
+      "label": "Password",
+      "confirm": "Repeat password",
+      "min": "At least {min} characters",
+      "mismatch": "Passwords do not match.",
+      "show": "Show password",
+      "hide": "Hide password",
+      "strength": { "weak": "Weak", "fair": "Fair", "strong": "Strong" }
+    },
+    "reset": {
+      "title": "Reset password",
+      "lead": "The code arrives in the Telegram bot. Enter the code and a new password.",
+      "submit": "Save password and sign in",
+      "back": "Back to sign in"
+    },
+    "attach": {
+      "title": "Link your phone number",
+      "lead": "You signed in with Google. Bookings and listings need a phone: the code arrives in the Telegram bot.",
+      "submit": "Link"
+    },
+    "google": {
+      "failed": "Google sign-in did not work.",
+      "disabled": "Google sign-in is disabled for now."
+    },
+    "err": {
+      "phoneTaken": "This number is linked to another account."
+    },
+    "register": {
+      "title": "Register",
+      "lead": "Phone, password, profile, done: four steps.",
+      "steps": { "phone": "Phone", "password": "Password", "profile": "Profile", "done": "Done" },
+      "continue": "Continue",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in",
+      "checking": "Checking",
+      "password": {
+        "title": "Set a password",
+        "lead": "Next time sign in without a code: phone and password.",
+        "submit": "Save and continue",
+        "skip": "Skip for now",
+        "err": "Could not save the password, try again."
+      },
+      "profile": {
+        "title": "Profile",
+        "who": {
+          "title": "How do you want to continue?",
+          "driver": { "title": "Individual driver", "body": "You work with your own truck. The listing goes out under your name." },
+          "org": { "title": "Organization", "body": "A company, terminal, forwarder or equipment owner." }
+        },
+        "driverLead": "Your name appears on the listing. The phone shows as verified.",
+        "driverSubmit": "Continue",
+        "lead": "Start with one organization, add the rest in the cabinet.",
+        "fullName": "Full name",
+        "kinds": "Organization type",
+        "kindsHint": "pick as many as apply",
+        "orgName": "Organization name",
+        "stir": "Tax ID (STIR)",
+        "stirHint": "9 digits, optional. Needed for verification.",
+        "region": "Region",
+        "regionAny": "Not set",
+        "submit": "Create",
+        "err": {
+          "kindRequired": "Pick at least one type.",
+          "stirTaken": "This tax ID belongs to another organization.",
+          "invalidStir": "The tax ID must be 9 digits.",
+          "generic": "Could not save, try again."
+        }
+      },
+      "done": {
+        "title": "Done",
+        "lead": "{org} is created. Pick your next step.",
+        "driverLead": "Driver profile is ready. Post your first listing.",
+        "cabinet": { "title": "Cabinet", "body": "Orders, organization, members" },
+        "listing": { "title": "Post a listing", "body": "Equipment or a truck" },
+        "driverListing": { "title": "Truck listing", "body": "Type, tonnage, service regions" },
+        "terminal": { "title": "Add a terminal", "body": "With tariffs and slots" },
+        "kycHint": "Listings of a verified organization go live immediately without review. Enter the tax ID and request verification in the cabinet.",
+        "kycLink": "Organization page",
+        "driverHint": "Individual driver listings go live after review."
+      }
+    }
+  }
+}

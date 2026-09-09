@@ -1,0 +1,36 @@
+// Tarjimalar: asosiy ../uz.json + shu papkadagi nomfazo fayllari. Har bir JSON faqat o'z nomfazosini beradi (asosiy kalitlar bilan to'qnashmasin).
+import base from '../uz.json';
+import admin from './admin.json';
+import analytics from './analytics.json';
+import auth2 from './auth2.json';
+import booking from './booking.json';
+import claim from './claim.json';
+import claimStatus from './claimStatus.json';
+import compare from './compare.json';
+import dashboard2 from './dashboard2.json';
+import developers from './developers.json';
+import companies from './companies.json';
+import hubs from './hubs.json';
+import kabinet from './kabinet.json';
+import kyc from './kyc.json';
+import listing from './listing.json';
+import map from './map.json';
+import marketing from './marketing.json';
+import nav2 from './nav2.json';
+import orgKind from './orgKind.json';
+import premium from './premium.json';
+import reviews from './reviews.json';
+import standart from './standart.json';
+import terminalsAdmin from './terminalsAdmin.json';
+import urgent from './urgent.json';
+import storefront from './storefront.json';
+import tg from './tg.json';
+import about from './about.json';
+import blog from './blog.json';
+import contact from './contact.json';
+import features from './features.json';
+import pricing from './pricing.json';
+import a11y from './a11y.json';
+import seo2 from './seo2.json';
+
+export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...developers, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2 };

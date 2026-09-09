@@ -1,0 +1,64 @@
+{
+  "pricing": {
+    "meta": {
+      "title": "Tariflar · YukSaroy",
+      "description": "Katalog, xarita va so'rovlar bepul. Premium e'lon oyiga belgilangan narxda. Bron komissiyasi hozir 0 %."
+    },
+    "eyebrow": "Tariflar",
+    "title": "Ko'rish bepul. Ajralib turish Premium.",
+    "lead": "Katalog, xarita va so'rovlar hamma uchun ochiq, narxlar mehmonlardan ham yashirilmaydi. Premium bitta e'lonni ro'yxat va xaritada yuqoriga chiqaradi.",
+    "perMonth": "so'm / oy",
+    "free": {
+      "name": "Bepul",
+      "price": "0 so'm",
+      "note": "har bir tashkilotga",
+      "f1": "E'lon 90 kun faol turadi",
+      "f2": "Katalog, xarita va solishtirish",
+      "f3": "So'rovlar va bron kabinetda",
+      "f4": "Kompaniya sahifasi va KYC belgisi",
+      "cta": "E'lon berish"
+    },
+    "premium": {
+      "name": "Premium",
+      "note": "bitta e'lon uchun",
+      "badge": "Ko'p tanlanadi",
+      "f1": "Ro'yxatda yuqorida chiqadi",
+      "f2": "Premium belgisi kartada va sahifada",
+      "f3": "Xaritada ajralib turadi",
+      "f4": "Ko'rsatkichlar: 30 kunlik ko'rishlar va so'rovlar",
+      "f5": "Muddat 1 dan 12 oygacha, o'zingiz tanlaysiz",
+      "cta": "Premium olish",
+      "hint": "Kabinetdagi E'lonlarim jadvalida Premium ustuni bor: oylar sonini tanlaysiz, summa va to'lov yo'riqnomasi chiqadi."
+    },
+    "deal": {
+      "name": "Kelishuv",
+      "price": "Kelishiladi",
+      "note": "ko'p e'lonli tashkilotlarga",
+      "f1": "Ko'p e'lon bitta hisobda",
+      "f2": "Kompaniya do'koni sahifasi: /k/nomingiz",
+      "f3": "Ochiq API orqali ma'lumot almashish",
+      "f4": "Narx e'lonlar soniga qarab kelishiladi",
+      "cta": "Bog'lanish"
+    },
+    "commission": {
+      "heading": "Bron komissiyasi",
+      "line": "Bron komissiyasi hozir 0 %, 100 ta buyurtma/oy dan oshganda 2 dan 3 % gacha, avval e'lon qilinadi.",
+      "note": "Buyurtma yuborilganda tarif muzlatiladi: komissiya o'zgarsa ham yuborilgan buyurtmalarga ta'sir qilmaydi."
+    },
+    "faq": {
+      "heading": "Ko'p so'raladigan savollar",
+      "q1": "Premium qanday to'lanadi?",
+      "a1": "Kabinetda oylar sonini tanlaysiz, summa va to'lov rekvizitlari chiqadi. Hozircha to'lov qo'lda: o'tkazmadan keyin platforma tasdiqlaydi va e'lon shu zahoti Premium bo'ladi. Payme va Click keyinroq qo'shiladi.",
+      "q2": "Premium nimani kafolatlaydi?",
+      "a2": "Faqat joylashuv va belgini: e'lon o'z turkumida tanlangan tartib ichida birinchi chiqadi, xaritada ajralib turadi, ko'rsatkichlar ochiladi. Ko'rishlar yoki so'rovlar soni kafolatlanmaydi.",
+      "q3": "Bir nechta e'lonim bo'lsa?",
+      "a3": "Premium har bir e'longa alohida olinadi. Beshdan ortiq e'lon bo'lsa Kelishuv rejasi qulayroq: bog'laning, narxni e'lonlar soniga qarab kelishamiz.",
+      "q4": "Komissiya qachon paydo bo'ladi?",
+      "a4": "Platforma orqali oyiga 100 tadan ortiq buyurtma o'tganda. Chegara aniqlangach kamida 30 kun oldin e'lon qilamiz, foiz 2 dan 3 gacha bo'ladi.",
+      "q5": "Terminal va shahobcha yo'l egalari uchun to'lov bormi?",
+      "a5": "Yo'q. Terminal sahifasi, tariflar, slotlar va bronlarni qabul qilish bepul. Reestrdagi shahobcha yo'lga egalik da'vosi ham bepul.",
+      "q6": "Narxlar mehmonlardan yashiriladimi?",
+      "a6": "Yo'q. Tariflar va e'lon narxlari login'siz ochiq. Faqat telefon raqamini ko'rish va so'rov yuborish uchun kabinet kerak."
+    }
+  }
+}

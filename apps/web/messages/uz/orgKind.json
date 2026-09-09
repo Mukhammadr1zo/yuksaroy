@@ -1,0 +1,12 @@
+{
+  "orgKind": {
+    "SHIPPER": "Yuk egasi",
+    "FORWARDER": "Ekspeditor",
+    "DECLARANT": "Deklarant",
+    "CARRIER": "Avtotashuvchi",
+    "TERMINAL": "Terminal",
+    "ASSET_OWNER": "Texnika yoki shahobcha egasi",
+    "LOCO_SERVICE": "Lokomotiv xizmati",
+    "PLATFORM": "Platforma"
+  }
+}

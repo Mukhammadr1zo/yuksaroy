@@ -1,0 +1,37 @@
+# Dev infra: Postgres 17 + Redis 7 + MinIO. App'lar lokalda pnpm dev bilan ishlaydi.
+name: yuksaroy
+
+services:
+  db:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yuksaroy
+      POSTGRES_PASSWORD: yuksaroy
+      POSTGRES_DB: yuksaroy
+    ports: ["5434:5432"] # 5432 - lokal PostgreSQL 17 xizmati band, 5433 - RailMap
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yuksaroy -d yuksaroy"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports: ["6380:6379"] # 6379 - lokal redis band
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: yuksaroy
+      MINIO_ROOT_PASSWORD: yuksaroy123
+    ports: ["9000:9000", "9001:9001"]
+    volumes: ["miniodata:/data"]
+
+volumes:
+  pgdata:
+  miniodata:

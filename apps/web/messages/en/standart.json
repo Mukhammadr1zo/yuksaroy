@@ -1,0 +1,71 @@
+{
+  "standart": {
+    "title": "Listing standard",
+    "lead": "Every listing and object card is filled with the same fields so they can be compared. A listing is not published without the required fields; missing recommended fields show a warning.",
+    "notCert": "This is not a certificate. The standard only defines listing completeness: the platform does not inspect the equipment, figures are as stated by the owner.",
+    "must": "Required",
+    "should": "Recommended",
+    "col": {
+      "field": "Field",
+      "level": "Level"
+    },
+    "field": {
+      "title": "Title",
+      "deal": "Deal type (rent or sale)",
+      "year": "Year built",
+      "condition": "Condition",
+      "regionCode": "Region",
+      "photos": "Photos (at least 1)",
+      "model": "Model",
+      "capacityT": "Load capacity, t",
+      "priceTiyin": "Price and unit",
+      "terminalId": "Terminal or siding",
+      "responseHours": "Reply time, hours",
+      "wagonType": "Wagon type",
+      "qty": "Quantity",
+      "truckType": "Body type",
+      "tonnage": "Tonnage, t",
+      "serviceRegions": "Service regions (at least 1)",
+      "routes": "Regular routes",
+      "fleetSize": "Fleet size"
+    },
+    "terminal": {
+      "title": "Terminal",
+      "must": "Name, station, type, working hours, at least one service",
+      "should": "Tariffs, passport (tracks, crane, warehouse, scale), photos, phone",
+      "note": "A passport not confirmed by the owner is compiled from open data and marked as such.",
+      "owner": "Organization (TERMINAL type): the operator links the profile"
+    },
+    "siding": {
+      "title": "Siding",
+      "must": "Registry number, station, region (from the state registry)",
+      "should": "Length, unloading and loading capacity, owner",
+      "note": "The owner name appears only after the operator approves the claim. Coordinates are approximate, at node level.",
+      "owner": "Organization: after the operator approves the claim"
+    },
+    "rules": {
+      "heading": "Conformance rules",
+      "lead": "The form checks these rules while you type. A listing that breaks a rule is not saved.",
+      "year": "Year from 1950 to the current year",
+      "qty": "Quantity at least 1",
+      "tonnage": "Tonnage from 1 to 100 t",
+      "rentUnits": "Rent price: per month, per day or per hour",
+      "saleUnits": "Sale price: total amount",
+      "truckUnits": "Road carrier price: per km, per ton or per trip",
+      "priceUnit": "A price always comes with a unit",
+      "oneObject": "Terminal or siding: only one is linked",
+      "serviceRegions": "Road carriers: the base region is among the service regions",
+      "routes": "A route starts and ends in different regions",
+      "photos": "At most {max} photos",
+      "expire": "A listing expires after {days} days, the owner republishes it",
+      "review": "A verified organization's listing goes live at once, others are reviewed"
+    },
+    "cta": "Post a listing",
+    "ctaNote": "The dashboard form checks against the standard: errors and warnings appear while you type.",
+    "owner": {
+      "label": "Who can post",
+      "org": "Organization only",
+      "any": "Organization or independent driver (phone verified)"
+    }
+  }
+}

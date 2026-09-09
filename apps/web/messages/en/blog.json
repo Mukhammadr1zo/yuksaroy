@@ -1,0 +1,20 @@
+{
+  "blog": {
+    "meta": {
+      "title": "Blog · YukSaroy",
+      "description": "Terminal vs private siding, wagon rent, SVX, today's free slot: short explainers on freight logistics."
+    },
+    "eyebrow": "Blog",
+    "title": "The market in short",
+    "lead": "Terms and processes in plain language. Every post ends with an action: open the map or book.",
+    "readMore": "Read",
+    "back": "All posts",
+    "minutes": "{n} min",
+    "cta": {
+      "heading": "Take action",
+      "map": "See on the map",
+      "booking": "Book a slot"
+    },
+    "notFound": "No such post"
+  }
+}

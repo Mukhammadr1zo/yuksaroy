@@ -1,0 +1,125 @@
+{
+  "urgent": {
+    "nav": "Shoshilinch",
+    "meta": {
+      "title": "Shoshilinch xizmat so'rovi · YukSaroy",
+      "description": "Teplovoz chaqirish, vagon ta'miri yoki kran kerak bo'lsa: bitta so'rov, yaqin atrofdagi xizmat ko'rsatuvchilar taklif yuboradi."
+    },
+    "status": { "OPEN": "Ochiq", "AWARDED": "Ijrochi tanlangan", "CLOSED": "Yopilgan", "CANCELLED": "Bekor qilingan" },
+    "offerStatus": { "SENT": "Yuborilgan", "AWARDED": "Tanlangan", "DECLINED": "Rad etilgan" },
+    "kindDesc": {
+      "LOCO_CALL": "Vagonlar stansiyada yoki shahobcha yo'lda turib qoldi, manevr teplovozi kerak.",
+      "WAGON_REPAIR": "Yo'lda nosozlik: ta'mir brigadasi joyga chiqishi kerak.",
+      "CRANE": "Og'ir yuk yoki konteynerni ko'tarish uchun kran kerak."
+    },
+    "public": {
+      "eyebrow": "Shoshilinch xizmat",
+      "title": "Teplovoz, ta'mir yoki kran bir so'rov bilan",
+      "lead": "So'rov viloyatingiz va qo'shni viloyatlardagi lokomotiv xizmatlari, texnika egalari va tashuvchilarga Telegram orqali boradi. Ular narx va yetib kelish vaqtini taklif qiladi, siz tanlaysiz.",
+      "cta": "So'rov yuborish",
+      "ctaNote": "Kirish talab qilinadi, so'rov bir daqiqada tayyor.",
+      "kindsTitle": "Qanday so'rovlar",
+      "howTitle": "Qanday ishlaydi",
+      "steps": {
+        "s1": { "title": "So'rov", "body": "Tur, viloyat, stansiya, vagon soni va telefon. Boshqa hech narsa kerak emas." },
+        "s2": { "title": "Takliflar", "body": "Yaqindagi xizmat ko'rsatuvchilar narx va yetib kelish vaqtini yozadi. Takliflar faqat sizga ko'rinadi." },
+        "s3": { "title": "Tanlov va holat", "body": "Bitta taklifni tanlaysiz. Ochiq holat havolasini hamkorlarga yuborasiz, unda narx yo'q." }
+      },
+      "noPrice": "Narxlar faqat so'rov egasiga ko'rinadi. Ochiq holat sahifasida narx ko'rsatilmaydi.",
+      "band": {
+        "title": "Xizmat ko'rsatuvchimisiz?",
+        "body": "Tashkilotingiz turi lokomotiv xizmati, texnika egasi yoki tashuvchi bo'lsa, viloyatingizdagi so'rovlar kabinetda ko'rinadi. Telegram bog'langan bo'lsa xabar ham keladi.",
+        "primary": "Ochiq so'rovlar",
+        "secondary": "Xizmat ko'rsatuvchilarga"
+      }
+    },
+    "statusPage": {
+      "eyebrow": "Shoshilinch so'rov",
+      "notFound": "So'rov topilmadi",
+      "kind": "Tur",
+      "region": "Viloyat",
+      "status": "Holat",
+      "provider": "Tanlangan ijrochi",
+      "noProvider": "hali tanlanmagan",
+      "offers": "Takliflar",
+      "timeline": "Voqealar",
+      "noPrice": "Bu sahifada narxlar ko'rsatilmaydi. Havolani hamkorlarga bemalol yuboring.",
+      "home": "YukSaroy bosh sahifa",
+      "event": {
+        "CREATED": "So'rov yuborildi",
+        "OFFER": "Taklif keldi",
+        "AWARDED": "Ijrochi tanlandi",
+        "CLOSED": "So'rov yopildi",
+        "CANCELLED": "So'rov bekor qilindi"
+      }
+    },
+    "mine": {
+      "title": "Shoshilinch so'rovlar",
+      "lead": "Teplovoz, ta'mir yoki kran so'rovlari va ularga kelgan takliflar.",
+      "tabMine": "Mening so'rovlarim",
+      "tabProvider": "Ochiq so'rovlar (ijrochi)",
+      "new": "Yangi so'rov",
+      "empty": "Hali so'rov yo'q. Yangi so'rov bir daqiqada tayyor bo'ladi.",
+      "notReady": "Shoshilinch xizmat hozircha ishga tushmagan. Birozdan keyin urinib ko'ring.",
+      "form": {
+        "kind": "So'rov turi",
+        "region": "Viloyat",
+        "regionPick": "Viloyatni tanlang",
+        "station": "Stansiya yoki joy",
+        "stationPh": "masalan, Sergeli",
+        "wagons": "Vagon soni",
+        "description": "Tavsif",
+        "descriptionPh": "Nima bo'ldi, qachon kerak, qanday vagonlar",
+        "phone": "Aloqa telefoni",
+        "org": "Kim nomidan",
+        "orgSelf": "O'zim (shaxsiy)",
+        "submit": "So'rov yuborish",
+        "sending": "Yuborilmoqda",
+        "missing": "To'ldiring: {fields}"
+      },
+      "col": { "no": "No", "kind": "Tur", "region": "Viloyat", "status": "Holat", "offers": "Takliflar", "created": "Yuborilgan" },
+      "offersCount": "{count} ta"
+    },
+    "detail": {
+      "back": "So'rovlarga qaytish",
+      "notFound": "So'rov topilmadi",
+      "region": "Viloyat",
+      "station": "Stansiya",
+      "wagons": "Vagon",
+      "phone": "Telefon",
+      "created": "Yuborilgan",
+      "description": "Tavsif",
+      "statusLink": "Ochiq holat havolasi",
+      "statusLinkHint": "Hamkorlarga yuboring: narx va telefon ko'rinmaydi.",
+      "copy": "Nusxalash",
+      "copied": "Nusxalandi",
+      "offers": "Takliflar",
+      "noOffers": "Hali taklif yo'q. Ijrochilarga xabar yuborildi, odatda bir soat ichida javob keladi.",
+      "onRequest": "narx aytilmagan",
+      "eta": "{min} daqiqada",
+      "award": "Tanlash",
+      "awarding": "Tanlanmoqda",
+      "close": "So'rovni yopish",
+      "closing": "Yopilmoqda",
+      "confirmClose": "So'rov yopiladi, yangi takliflar kelmaydi. Davom etasizmi?",
+      "awardedNote": "Ijrochi tanlandi. Ish tugagach so'rovni yoping."
+    },
+    "provider": {
+      "title": "Ochiq so'rovlar",
+      "lead": "Tashkilotingiz viloyatlari va qo'shni viloyatlardagi ochiq shoshilinch so'rovlar. Taklifda narx va yetib borish vaqtini yozing.",
+      "empty": "Hozir ochiq so'rov yo'q. Yangi so'rov kelganda Telegramga xabar boradi.",
+      "phone": "Buyurtmachi telefoni",
+      "offer": {
+        "title": "Taklif yuborish",
+        "price": "Narx (so'm)",
+        "priceHint": "Bo'sh qoldirilsa narx kelishiladi",
+        "eta": "Yetib borish (daqiqa)",
+        "message": "Izoh",
+        "send": "Taklif yuborish",
+        "sending": "Yuborilmoqda",
+        "sent": "Taklif yuborildi. Buyurtmachi tanlasa holat kabinetda o'zgaradi.",
+        "mine": "Sizning taklifingiz"
+      }
+    }
+  }
+}

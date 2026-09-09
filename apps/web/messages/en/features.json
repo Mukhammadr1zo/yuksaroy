@@ -1,0 +1,88 @@
+{
+  "features": {
+    "meta": {
+      "title": "Features · YukSaroy",
+      "description": "Find, list, book and settle, data: the platform's real features with links."
+    },
+    "eyebrow": "Features",
+    "title": "The market works in four steps",
+    "lead": "Every feature leads to a page. What is here is what the catalog has: a link, not a promise.",
+    "groups": {
+      "find": { "title": "Find", "lead": "Terminals, private sidings, equipment and road carriers in one place." },
+      "list": { "title": "List", "lead": "The owner writes it and answers it." },
+      "book": { "title": "Book and settle", "lead": "Open prices, frozen tariff, documents in the dashboard." },
+      "data": { "title": "Data", "lead": "Registry, standard, companies and the open API." }
+    },
+    "items": {
+      "catalog": { "title": "Catalog and filters", "body": "Terminals, sidings, equipment, road carriers: by region, service, type and price." },
+      "map": { "title": "Map", "body": "Every object on one map, in sync with the list. Near me and by corridor." },
+      "assistant": { "title": "Assistant search", "body": "Type one line: region, service, equipment, date. Dictionary first, AI only when needed." },
+      "compare": { "title": "Compare", "body": "Up to four objects in one table: tariff, slot, distance, rating." },
+      "hubs": { "title": "Region pages", "body": "A page per region: terminals, sidings, listings." },
+      "listing": { "title": "Equipment and carrier listing", "body": "Locomotive, wagon, truck: rent or sale. Standard check, photos, price." },
+      "terminal": { "title": "Terminal page", "body": "Services, tariffs, hours, slots. The owner runs it from the dashboard." },
+      "siding": { "title": "Claim a siding", "body": "Find your siding in the registry, send an ownership claim, the page becomes yours." },
+      "premium": { "title": "Premium", "body": "Listing ranked first in the list and on the map, with a badge. Monthly, per listing." },
+      "analytics": { "title": "Analytics", "body": "30-day views by surface: list, map, page, compare, bot. Inquiry count." },
+      "quote": { "title": "Price quote", "body": "Tariff × weight + extra services. No login, open formula." },
+      "booking": { "title": "Slot booking", "body": "Pick a free window today, the order goes to the terminal, answer within the SLA." },
+      "frozen": { "title": "Frozen tariff and documents", "body": "The price is fixed when the order is sent. Act and invoice PDF at the end." },
+      "reviews": { "title": "Reviews", "body": "Only the owner of a completed order rates. The terminal replies." },
+      "urgent": { "title": "Urgent request", "body": "Locomotive call, wagon repair, crane: providers in the region send offers." },
+      "registry": { "title": "Private sidings registry", "body": "Sidings across the country by station and node. Coordinates approximate, node level." },
+      "standards": { "title": "Listing standard", "body": "Required and recommended fields per type. Not a certificate, a completeness measure." },
+      "companies": { "title": "Companies and KYC", "body": "Organization page, object counts, verified tax ID badge." },
+      "api": { "title": "Open API", "body": "Lists, terminals, ontology: anonymous read, per-minute limit, versioned." },
+      "blog": { "title": "Blog", "body": "Terminal vs siding, wagon rent, SVX, free slot: short explainers." }
+    },
+    "how": {
+      "heading": "How it works",
+      "s1": { "title": "Find", "body": "Catalog, map or one line of search: region, service, equipment type." },
+      "s2": { "title": "Compare", "body": "Tariffs, today's slots and distance side by side, up to four objects in one table." },
+      "s3": { "title": "Connect", "body": "The owner's phone and the inquiry form in the dashboard. No middleman." },
+      "s4": { "title": "Book", "body": "Pick a slot, the tariff freezes, act and invoice at the end." }
+    },
+    "numbers": {
+      "heading": "Platform numbers",
+      "terminals": "active terminals",
+      "sidings": "sidings in the registry",
+      "listings": "active listings",
+      "companies": "companies",
+      "freeSlotsToday": "free slots today"
+    },
+    "assistant": {
+      "meta": {
+        "title": "Assistant search · YukSaroy",
+        "description": "Type one line, the platform turns it into filters. Dictionary first, AI only at low confidence. Guests 10 a day, users 100."
+      },
+      "eyebrow": "Assistant",
+      "title": "Type one line, we set the filters",
+      "lead": "The assistant turns a query into filters: region, service, equipment type, date. It never invents objects, prices or availability; it relies only on catalog data.",
+      "example": {
+        "heading": "Real example",
+        "query": "Toshkentda bugun bo'sh slot konteyner",
+        "chips": "Understood filters",
+        "result": "Result",
+        "decision": "{terminals} terminals · {free} free today",
+        "cheapest": "cheapest {price}",
+        "open": "Open on the map",
+        "source": { "dictionary": "Understood by the dictionary", "llm": "AI used for a closer reading" },
+        "unavailable": "The API did not answer right now, the example is shown statically."
+      },
+      "rule": {
+        "heading": "The rule",
+        "r1": "Dictionary first: regions, stations, services and equipment names come from the dictionary. Free and unlimited.",
+        "r2": "AI is called only when confidence is below {threshold} or unresolved words remain; the answer takes at most 8 seconds.",
+        "r3": "AI returns filters only: it never invents objects, prices or availability. Regions come only from the code list.",
+        "r4": "If AI is unavailable or the quota is spent, the dictionary result is shown. Search never stops."
+      },
+      "limits": {
+        "heading": "Limits",
+        "guest": "Guest: {n} AI queries a day",
+        "user": "Signed-in user: {n} AI queries a day",
+        "note": "The counter resets at midnight Tashkent time. Dictionary search is unlimited."
+      },
+      "cta": { "primary": "Try the search", "secondary": "Log in" }
+    }
+  }
+}

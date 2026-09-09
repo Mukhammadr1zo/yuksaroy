@@ -1,0 +1,20 @@
+{
+  "blog": {
+    "meta": {
+      "title": "Blog · YukSaroy",
+      "description": "Terminal va shahobcha yo'l farqi, vagon ijarasi, SVX, bugungi bo'sh slot: yuk logistikasi haqida qisqa tushuntirishlar."
+    },
+    "eyebrow": "Blog",
+    "title": "Bozor haqida qisqa",
+    "lead": "Atamalar va jarayonlar oddiy tilda. Har maqola oxirida amal: xaritani ochish yoki bron qilish.",
+    "readMore": "O'qish",
+    "back": "Barcha maqolalar",
+    "minutes": "{n} daqiqa",
+    "cta": {
+      "heading": "Amalga o'tish",
+      "map": "Xaritada ko'rish",
+      "booking": "Bron qilish"
+    },
+    "notFound": "Bunday maqola yo'q"
+  }
+}

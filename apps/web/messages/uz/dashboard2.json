@@ -1,0 +1,264 @@
+{
+  "dashboard2": {
+    "nav": {
+      "documents": "Hujjatlar"
+    },
+    "board": {
+      "title": "Talabnomalar",
+      "lead": "Yangi talabnomani 30 daqiqa ichida tasdiqlang, aks holda slot bo'shaydi.",
+      "view": {
+        "board": "Taxta",
+        "list": "Ro'yxat"
+      },
+      "col": {
+        "PENDING": "Yangi",
+        "CONFIRMED": "Tasdiqlangan",
+        "IN_PROGRESS": "Jarayonda",
+        "DONE": "Yakunlangan",
+        "CLOSED": "Yopilgan"
+      },
+      "other": "Yopilgan: {n} (rad etilgan, muddati o'tgan, bekor qilingan)",
+      "showClosed": "Ro'yxatda ko'rish",
+      "updated": "yangilandi {time}, har 30 soniyada",
+      "emptyCol": "Bo'sh",
+      "empty": "Bu bo'limda talabnoma yo'q.",
+      "loading": "Yuklanmoqda",
+      "loadFailed": "Ro'yxatni yuklab bo'lmadi.",
+      "noTerminal": "Sizga biriktirilgan terminal yo'q. Terminalni <link>katalogdan topib</link> egalikni tasdiqlang.",
+      "sla": "javob berishga ",
+      "load": "Yuklash",
+      "unload": "Tushirish",
+      "noCargo": "yuk ko'rsatilmagan",
+      "wagons": "vagon",
+      "confirm": "Tasdiqlash",
+      "confirming": "Tasdiqlanmoqda",
+      "reject": "Rad etish",
+      "rejectReason": "Rad etish sababi",
+      "rejectPlaceholder": "Masalan: kran ta'mirda",
+      "cancel": "Bekor",
+      "complete": "Yakunlash",
+      "noShow": "Kelmadi",
+      "err": {
+        "TRANSITION_NOT_ALLOWED": "Buyurtma holati o'zgargan. Sahifani yangilang.",
+        "ORDER_NOT_ACTIVE": "Buyurtma faol emas.",
+        "failed": "Bajarilmadi. Qayta urinib ko'ring."
+      }
+    },
+    "docs": {
+      "title": "Hujjatlar",
+      "lead": "Bajarilgan ishlar dalolatnomalari va to'lov uchun hisoblar. PDF muzlatilgan ma'lumotdan chiziladi, QR orqali tekshiriladi.",
+      "scope": {
+        "client": "Mijoz sifatida",
+        "terminal": "Terminal sifatida"
+      },
+      "status": {
+        "all": "Hammasi",
+        "ISSUED": "To'lov kutilmoqda",
+        "OVERDUE": "Muddati o'tgan",
+        "PAID_OFFLINE": "To'langan",
+        "ACT": "Aktlar"
+      },
+      "month": "Oy",
+      "anyMonth": "Barcha oylar",
+      "col": {
+        "no": "Raqam",
+        "kind": "Turi",
+        "order": "Buyurtma",
+        "org": "Kontragent",
+        "amount": "Summa",
+        "status": "Holat",
+        "date": "Sana"
+      },
+      "kind": {
+        "ACT": "Akt",
+        "INVOICE": "Hisob"
+      },
+      "pdf": "PDF",
+      "markPaid": "To'landi deb belgilash",
+      "confirmPaid": "{no} hisobi bank o'tkazmasi bilan to'langan deb belgilansinmi?",
+      "marking": "Belgilanmoqda",
+      "marked": "{no}: to'landi deb belgilandi.",
+      "markFailed": "Belgilanmadi. Sahifani yangilab qayta urinib ko'ring.",
+      "empty": "Hujjat yo'q. Buyurtma yakunlangach akt va hisob shu yerda paydo bo'ladi.",
+      "emptyFiltered": "Bu filtr bo'yicha hujjat yo'q.",
+      "shown": "{n} / {total} ko'rsatildi",
+      "loading": "Yuklanmoqda",
+      "loadFailed": "Ro'yxatni yuklab bo'lmadi. Sahifani yangilang.",
+      "st": {
+        "DRAFT": "Qoralama",
+        "ISSUED": "To'lov kutilmoqda",
+        "PAID_OFFLINE": "To'landi",
+        "OVERDUE": "Muddati o'tgan",
+        "VOID": "Bekor qilingan",
+        "READY": "Tayyor"
+      }
+    },
+    "home": {
+      "title": "Bugungi holat",
+      "unknown": "ma'lumot yo'q",
+      "shipper": {
+        "open": "Ochiq buyurtmalar",
+        "openSub": "tasdiq kutilmoqda: {n}",
+        "next": "Keyingi slot",
+        "noNext": "Rejalashtirilgan slot yo'q",
+        "newOrder": "Yangi buyurtma berish",
+        "invoices": "To'lov kutilmoqda",
+        "invoicesSub": "jami {sum}",
+        "noInvoices": "Qarzdorlik yo'q"
+      },
+      "terminal": {
+        "pending": "Yangi talabnomalar",
+        "pendingSub": "30 daqiqa ichida javob bering",
+        "free": "Bugun bo'sh slotlar",
+        "freeSub": "{n} ta terminal bo'yicha",
+        "noTariff": "Tarifsiz terminallar",
+        "noTariffSub": "Tarifsiz terminal katalogda narx ko'rsatmaydi va bron qabul qilmaydi",
+        "allTariffs": "Barcha terminallarda tarif bor"
+      },
+      "lister": {
+        "active": "Faol e'lonlar",
+        "activeSub": "tekshiruvda: {n}",
+        "inquiries": "Ochiq so'rovlar",
+        "inquiriesSub": "e'lonlaringizga kelgan narx so'rovlari"
+      },
+      "admin": {
+        "title": "Moderatsiya navbati",
+        "listings": "E'lonlar",
+        "kyc": "Tashkilotlar (KYC)",
+        "sidings": "Shahobcha da'volari",
+        "terminals": "Terminal da'volari"
+      }
+    },
+    "order": {
+      "title": "Buyurtmalarim",
+      "newTitle": "Yangi buyurtma",
+      "cabinet": "Kabinet",
+      "stepsAria": "Qadamlar",
+      "step": {
+        "cargo": "Yuk",
+        "terminal": "Terminal va slot",
+        "summary": "Xulosa"
+      },
+      "filter": {
+        "all": "Hammasi",
+        "open": "Faol",
+        "done": "Yakunlangan",
+        "closed": "Yopilgan"
+      },
+      "loading": "Yuklanmoqda",
+      "loadFailed": "Ro'yxatni yuklab bo'lmadi. Sahifani yangilang.",
+      "empty": "Bu bo'limda buyurtma yo'q.",
+      "newOrder": "Yangi buyurtma berish",
+      "awaitingConfirm": "tasdiq kutilmoqda",
+      "noCargo": "yuk ko'rsatilmagan",
+      "shown": "{n} / {total} ko'rsatildi",
+      "notFound": "Buyurtma topilmadi.",
+      "backToOrders": "Buyurtmalarga qaytish",
+      "updated": "Yangilandi",
+      "terminalConfirm": "terminal tasdig'i uchun",
+      "notSet": "belgilanmagan",
+      "notSpecified": "ko'rsatilmagan",
+      "storageDays": "{n} kun",
+      "noteLabel": "Izoh:",
+      "priceTitle": "Narx (buyurtma berilganda muzlatilgan)",
+      "historyTitle": "Tarix",
+      "slaOver": "Muddat tugadi",
+      "row": {
+        "station": "Stansiya",
+        "operation": "Operatsiya",
+        "slot": "Vaqt oynasi",
+        "cargo": "Yuk",
+        "weight": "Vazn",
+        "wagons": "Vagon",
+        "wagonNumbers": "Vagon raqamlari",
+        "storage": "Saqlash",
+        "shipper": "Buyurtmachi",
+        "time": "Vaqt"
+      },
+      "cancel": {
+        "reason": "Bekor qilish sababi (ixtiyoriy)",
+        "yes": "Ha, bekor qilinsin",
+        "no": "Yo'q",
+        "start": "Buyurtmani bekor qilish",
+        "hint": "Slot boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi."
+      },
+      "statusHint": {
+        "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa slot avtomatik bo'shaydi.",
+        "CONFIRMED": "Slot siz uchun band. Belgilangan vaqtda yetib boring.",
+        "IN_PROGRESS": "Terminalda ish davom etmoqda.",
+        "DONE": "Buyurtma yakunlandi.",
+        "REJECTED": "Terminal rad etdi. Boshqa terminal yoki vaqtni tanlang.",
+        "EXPIRED": "Terminal vaqtida javob bermadi, slot bo'shatildi.",
+        "CANCELLED": "Buyurtma bekor qilindi."
+      },
+      "actor": {
+        "CLIENT": "mijoz",
+        "TERMINAL": "terminal",
+        "SYSTEM": "tizim",
+        "ADMIN": "administrator"
+      },
+      "org": "Tashkilot",
+      "noOrg": "Buyurtma berish uchun avval <link>tashkilot yarating</link>.",
+      "cargoOptional": "Yuk turi (ixtiyoriy)",
+      "weightT": "Vazn, tonna",
+      "wagonCount": "Vagon soni",
+      "storage": "Saqlash, kun",
+      "extras": "Qo'shimcha xizmatlar",
+      "calculating": "Hisoblanmoqda",
+      "showTerminals": "Terminallarni ko'rish",
+      "terminalHeading": "Terminal",
+      "offersLead": "{station} stansiyasi bo'yicha {count} taklif.",
+      "offersLeadNearby": "{station} stansiyasi bo'yicha {count} taklif (yaqin atrofdan).",
+      "missingTariff": "tarifi yo'q: {services}",
+      "holding": "Slot siz uchun ushlab turilibdi",
+      "holdingShort": "Slot ushlab turilmoqda:",
+      "extend": "Uzaytirish",
+      "back": "Orqaga",
+      "next": "Davom etish",
+      "extraInfo": "Qo'shimcha ma'lumot",
+      "wagonNumbers": "Vagon raqamlari (ixtiyoriy, 8 xonali, probel bilan)",
+      "noteOptional": "Izoh (ixtiyoriy)",
+      "sending": "Yuborilmoqda",
+      "placeOrder": "Buyurtma berish",
+      "submitHint": "Buyurtma yuborilgach terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa slot avtomatik bo'shaydi.",
+      "err": {
+        "generic": "Xatolik yuz berdi. Qayta urinib ko'ring.",
+        "noOrg": "Avval tashkilot yarating.",
+        "selectStation": "Stansiyani tanlang.",
+        "enterWeight": "Vaznni kiriting.",
+        "noOffers": "Bu stansiya va yaqin atrofda tarif e'lon qilgan terminal topilmadi.",
+        "holdExpiredPick": "Slot ushlab turish muddati tugadi. Boshqa oynani tanlang.",
+        "cancelTooLate": "Slot boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
+        "cancelNotAllowed": "Bu holatda bekor qilib bo'lmaydi.",
+        "cancelFailed": "Bekor qilinmadi. Qayta urinib ko'ring.",
+        "SLOT_FULL": "Bu oynada joy qolmadi. Boshqasini tanlang.",
+        "SLOT_CLOSED": "Bu oyna yopiq.",
+        "SLOT_PAST": "Bu oyna o'tib ketdi.",
+        "HOLD_EXPIRED": "Ushlab turish muddati tugadi. Oynani qaytadan tanlang.",
+        "HOLD_ALREADY_USED": "Bu slot bo'yicha buyurtma allaqachon berilgan.",
+        "HOLD_NOT_EXTENDABLE": "Muddat faqat bir marta uzaytiriladi.",
+        "NOT_SHIPPER": "Bu tashkilot nomidan buyurtma berish huquqingiz yo'q.",
+        "NO_TARIFF_FOR_OPERATION": "Terminalda bu operatsiya uchun tarif yo'q.",
+        "OPERATION_NOT_OFFERED": "Terminal bu operatsiyani bajarmaydi.",
+        "TERMINAL_UNAVAILABLE": "Terminal hozir buyurtma qabul qilmaydi.",
+        "STATION_NOT_FOUND": "Stansiya topilmadi.",
+        "CARGO_NOT_FOUND": "Yuk turi topilmadi."
+      },
+      "price": {
+        "min": "(min)",
+        "commission": "Platforma komissiyasi {pct} %",
+        "total": "Jami",
+        "paidByTerminal": "komissiyani terminal to'laydi",
+        "services": "xizmatlar: {sum}"
+      },
+      "slots": {
+        "empty": "Bu terminalda yaqin kunlarga ochiq slot yo'q.",
+        "busy": "band",
+        "free": "{n} joy bo'sh",
+        "legendFree": "bo'sh joy soni",
+        "legendLast": "oxirgi joy",
+        "legendBusy": "band yoki yopiq"
+      }
+    }
+  }
+}

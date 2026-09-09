@@ -1,0 +1,402 @@
+{
+  "kabinet": {
+    "nav": {
+      "home": "Cabinet",
+      "orders": "My orders",
+      "terminal": "Terminal",
+      "listings": "My listings",
+      "inquiries": "Inquiries",
+      "org": "Organization",
+      "sidings": "My sidings",
+      "admin": "Moderation",
+      "newOrder": "New order",
+      "new": "New",
+      "profile": "Profile"
+    },
+    "common": {
+      "loading": "Loading",
+      "save": "Save",
+      "saving": "Saving",
+      "saved": "Saved",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "loadFailed": "Could not load the list. Refresh the page.",
+      "failed": "Failed. Try again.",
+      "required": "required",
+      "recommended": "recommended",
+      "none": "none",
+      "onRequest": "on request",
+      "back": "Back"
+    },
+    "home": {
+      "title": "Cabinet",
+      "logout": "Sign out",
+      "telegramLinked": "Telegram linked",
+      "telegramNot": "Telegram not linked",
+      "noPhone": "no phone linked",
+      "phoneBanner": {
+        "title": "Link your phone number",
+        "body": "Listings and inquiries need a phone. The code arrives in the Telegram bot.",
+        "cta": "Link phone"
+      },
+      "orgs": "My organizations",
+      "noOrgs": "No organization yet. Listings and orders are made on behalf of an organization.",
+      "manageOrgs": "Manage organization",
+      "createOrg": "Create organization",
+      "owner": "owner",
+      "roles": "roles",
+      "quick": {
+        "title": "Quick actions",
+        "newListing": "Post a listing",
+        "listings": "My listings",
+        "inquiries": "Inquiries",
+        "newOrder": "New order"
+      }
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "PENDING_REVIEW": "Under review",
+      "ACTIVE": "Active",
+      "REJECTED": "Rejected",
+      "ARCHIVED": "Archived",
+      "EXPIRED": "Expired"
+    },
+    "listings": {
+      "title": "My listings",
+      "new": "New listing",
+      "empty": "No listings yet. A rail equipment or truck listing takes a few minutes.",
+      "emptyCta": "Post the first listing",
+      "col": {
+        "title": "Title",
+        "kind": "Kind",
+        "status": "Status",
+        "price": "Price",
+        "views": "Views",
+        "updated": "Updated",
+        "owner": "Posted as"
+      },
+      "publish": "Publish",
+      "republish": "Resubmit",
+      "archive": "Archive",
+      "confirmDelete": "Delete this draft?",
+      "rejectReason": "Rejection reason",
+      "expires": "until",
+      "open": "Page",
+      "published": {
+        "PENDING_REVIEW": "Sent for review",
+        "ACTIVE": "Listing is active"
+      }
+    },
+    "form": {
+      "titleNew": "New listing",
+      "titleEdit": "Edit listing",
+      "notFound": "Listing not found.",
+      "backToList": "Back to listings",
+      "pickKind": "What are you offering?",
+      "kindHint": {
+        "SHUNTING_LOCO": "Rent or sale, at a terminal or siding",
+        "ELECTRIC_LOCO": "Rent or sale",
+        "WAGON": "Type, quantity, capacity, rent or sale",
+        "TRUCK": "Road carrier: truck type, tonnage, service regions"
+      },
+      "changeKind": "Change kind",
+      "org": "Organization",
+      "noOrg": "Rail equipment is listed on behalf of an organization only. Create one first.",
+      "createOrg": "Create organization",
+      "section": {
+        "main": "Basics",
+        "specs": "Specifications",
+        "price": "Price",
+        "place": "Location",
+        "coverage": "Service regions and routes",
+        "photos": "Photos",
+        "contact": "Contact"
+      },
+      "field": {
+        "title": "Title",
+        "description": "Description",
+        "deal": "Deal",
+        "year": "Year built",
+        "condition": "Condition",
+        "regionCode": "Region",
+        "photos": "Photos",
+        "model": "Model",
+        "capacityT": "Capacity, t",
+        "qty": "Quantity",
+        "wagonType": "Wagon type",
+        "truckType": "Truck type",
+        "tonnage": "Tonnage, t",
+        "fleetSize": "Trucks in fleet",
+        "serviceRegions": "Service regions",
+        "routes": "Regular routes",
+        "priceTiyin": "Price",
+        "priceUnit": "Unit",
+        "terminalId": "Terminal or siding",
+        "sidingId": "Siding",
+        "responseHours": "Response time, hours",
+        "contactPhone": "Contact phone",
+        "ownerType": "Post as"
+      },
+      "placeholder": {
+        "title": "For example: TEM2 shunting locomotive, 1998",
+        "description": "Condition, documents, extra terms",
+        "model": "For example: TEM2, VL80, 12-132",
+        "contactPhone": "+998 90 123 45 67"
+      },
+      "hint": {
+        "title": "Kind, model and year make the listing easy to find",
+        "regionCode": "Where the equipment is now",
+        "serviceRegions": "The base region must be included",
+        "responseHours": "Stated by the owner, not measured",
+        "contactPhone": "Visible to signed-in users only",
+        "terminalId": "A linked listing also appears on the object page",
+        "photos": "JPEG, PNG or WebP, up to 5 MB each, at most {max}"
+      },
+      "deal": {
+        "RENT": "Rent",
+        "SALE": "Sale"
+      },
+      "askPrice": "Price on request",
+      "priceSom": "Price, UZS",
+      "objectNone": "Not linked",
+      "objectTerminals": "My terminals",
+      "objectSidings": "My sidings",
+      "routeFrom": "From",
+      "routeTo": "To",
+      "addRoute": "Add route",
+      "remove": "Remove",
+      "photoAdd": "Add photo",
+      "photoUploading": "Uploading",
+      "warningsTitle": "Recommended: fill these in to get more views",
+      "warningMissing": "{field} not set",
+      "errorsTitle": "Fix the errors to save",
+      "saveDraft": "Save draft",
+      "publish": "Publish",
+      "busy": "Sending",
+      "saved": "Draft saved",
+      "published": {
+        "PENDING_REVIEW": "Sent for review. The listing goes live once a moderator approves it.",
+        "ACTIVE": "Listing is active. The organization is verified, no moderation needed."
+      },
+      "currentStatus": "Status",
+      "err": {
+        "REQUIRED": "Required",
+        "INVALID": "Invalid value",
+        "RANGE": "Out of range",
+        "DEAL_NOT_ALLOWED": "Trucks have no deal type",
+        "ONE_OBJECT_ONLY": "Only one: terminal or siding",
+        "PRICE_UNIT_REQUIRED": "Pick a price unit",
+        "UNIT_NOT_FOR_DEAL": "This unit does not match the deal",
+        "SERVICE_REGIONS_MUST_INCLUDE_BASE": "The base region must be among the service regions",
+        "ROUTE_SAME_REGION": "Route start and end must differ",
+        "TOO_MANY": "Too many",
+        "LISTING_INVALID": "The form is incomplete, fix the marked fields.",
+        "NOT_LISTER": "This organization cannot post such a listing. Check its kinds.",
+        "NOT_ORG_MEMBER": "You are not a member of this organization.",
+        "OBJECT_NOT_FOUND": "The selected object was not found.",
+        "LISTING_NOT_FOUND": "Listing not found.",
+        "TRANSITION_NOT_ALLOWED": "This action is not available in the current status. Refresh the page.",
+        "NOT_DRAFT": "Only drafts can be deleted, archive the rest.",
+        "FILE_TYPE": "JPEG, PNG or WebP only.",
+        "FILE_TOO_LARGE": "File is larger than 5 MB.",
+        "UPLOAD": "Photo upload failed. Try again.",
+        "ORG_REQUIRED": "This kind can only be listed by an organization."
+      },
+      "owner": "Post as",
+      "ownerSelf": "Myself, independent driver",
+      "ownerHint": "Personal listings go through moderation; listings of a verified organization go live immediately.",
+      "ownerPersonNote": "The listing is posted in your own name as an independent driver. To post on behalf of an organization, create one first.",
+      "orgRequired": "Rail equipment is listed on behalf of an organization only."
+    },
+    "inquiries": {
+      "title": "Inquiries",
+      "lead": "Price inquiries: received on your listings and sent by you.",
+      "tabs": {
+        "owner": "Received",
+        "mine": "Sent"
+      },
+      "empty": {
+        "owner": "No inquiries yet. They appear here once a listing is active.",
+        "mine": "You have not sent any inquiries yet."
+      },
+      "emptyCta": {
+        "owner": "Post a listing",
+        "mine": "Browse catalog"
+      },
+      "fromPrivate": "Private person",
+      "openListing": "Open listing"
+    },
+    "org": {
+      "title": "Organization",
+      "lead": "Listings, orders and terminals are run on behalf of an organization. Verified organizations publish without moderation.",
+      "new": "New organization",
+      "create": "Create",
+      "created": "Organization created",
+      "field": {
+        "name": "Name",
+        "kinds": "Activity kinds",
+        "description": "Description",
+        "telegram": "Telegram",
+        "website": "Website",
+        "phone": "Phone",
+        "address": "Address",
+        "regionCode": "Region",
+        "stir": "Tax ID (STIR)"
+      },
+      "hint": {
+        "kinds": "At least one. Kinds define the available roles and listings.",
+        "stir": "9 digits. Required for verification.",
+        "telegram": "@username or link"
+      },
+      "regionNone": "Not set",
+      "readOnly": "Only the owner can edit.",
+      "yourRoles": "Your roles",
+      "owner": "owner",
+      "kyc": {
+        "title": "Verification",
+        "request": "Submit for verification",
+        "needStir": "Enter and save the STIR first.",
+        "requestedAt": "Submitted",
+        "note": "Moderator note",
+        "hint": {
+          "NONE": "Listings of a verified organization go live immediately, without moderation.",
+          "PENDING": "A moderator is reviewing the request.",
+          "VERIFIED": "Listings go live immediately, without moderation.",
+          "REJECTED": "Rejected. Fix the details and submit again."
+        }
+      },
+      "members": {
+        "title": "Add member",
+        "phone": "Phone",
+        "roles": "Roles",
+        "invite": "Add",
+        "invited": "Member added"
+      },
+      "role": {
+        "CLIENT": "Client",
+        "FORWARDER": "Forwarder",
+        "DECLARANT": "Customs broker",
+        "CARRIER": "Road carrier",
+        "DRIVER": "Driver",
+        "TERMINAL_OPERATOR": "Terminal operator",
+        "TERMINAL_ADMIN": "Terminal manager",
+        "ASSET_OWNER": "Equipment owner",
+        "LOCO_SERVICE": "Locomotive service",
+        "JOB_SEEKER": "Job seeker",
+        "PLATFORM_OPERATOR": "Platform operator",
+        "PLATFORM_ADMIN": "Platform admin"
+      },
+      "err": {
+        "STIR_TAKEN": "This STIR is registered to another organization.",
+        "INVALID_STIR": "STIR must be 9 digits.",
+        "KIND_NOT_ALLOWED": "This kind cannot be selected.",
+        "KIND_REQUIRED": "Pick at least one kind.",
+        "NOT_OWNER": "Only the owner can change this.",
+        "STIR_REQUIRED": "A STIR is required for verification.",
+        "KYC_ALREADY": "The request was already sent or the organization is verified.",
+        "ROLES_NOT_ALLOWED": "The selected roles do not match the organization kinds.",
+        "INVALID_PHONE": "Invalid phone number."
+      }
+    },
+    "sidings": {
+      "title": "My sidings",
+      "lead": "Sidings you claimed from the registry and the claim status.",
+      "empty": "No siding is assigned to you.",
+      "emptyCta": "Find one in the registry and claim it",
+      "col": {
+        "no": "Registry",
+        "station": "Station",
+        "region": "Region",
+        "length": "Length",
+        "status": "Claim status"
+      },
+      "open": "Page"
+    },
+    "profile": {
+      "title": "Profile",
+      "lead": "Personal details, phone, password and account settings.",
+      "noName": "No name yet",
+      "since": "Member since {date}",
+      "avatar": {
+        "upload": "Upload photo",
+        "uploading": "Uploading",
+        "remove": "Remove photo"
+      },
+      "personal": {
+        "title": "Personal details",
+        "fullName": "Full name",
+        "email": "Email",
+        "emailLocked": "Linked to your Google account and cannot be changed.",
+        "locale": "Language"
+      },
+      "phone": {
+        "title": "Phone",
+        "none": "No phone linked",
+        "change": "Change number",
+        "add": "Link a number",
+        "new": "New number",
+        "hint": "The code is sent to the new number via the Telegram bot.",
+        "request": "Get code",
+        "code": "Code",
+        "sent": "Code sent to",
+        "link": {
+          "title": "The new number is not linked to the bot",
+          "body": "Open the bot and share the contact, then enter the code here.",
+          "open": "Open bot"
+        },
+        "confirm": "Confirm",
+        "back": "Change number",
+        "changed": "Phone number updated."
+      },
+      "password": {
+        "title": "Password",
+        "has": "Password is set. You can sign in with phone and password.",
+        "none": "No password yet. You currently sign in with a code only.",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Repeat new password",
+        "hint": "At least {min} characters. Mixing letters and digits is better.",
+        "mismatch": "Passwords do not match.",
+        "set": "Set password",
+        "change": "Change password",
+        "done": "Password saved."
+      },
+      "linked": {
+        "title": "Linked accounts",
+        "yes": "linked",
+        "no": "not linked",
+        "telegramHint": "Sign-in codes arrive in the bot.",
+        "googleNo": "Google sign-in is not connected."
+      },
+      "danger": {
+        "title": "Delete account",
+        "lead": "Delete the account? This cannot be undone.",
+        "removed": "Removed: phone, email, Google and Telegram links, password, active sessions. Your personal listings are archived.",
+        "kept": "Kept: orders and documents (legal retention). Organizations with other members pass to the earliest member; organizations with no other members get their listings archived and terminals hidden.",
+        "confirmLabel": "Type DELETE or your phone number to confirm",
+        "button": "Delete account",
+        "busy": "Deleting",
+        "done": "Account deleted. Taking you to the home page."
+      },
+      "err": {
+        "EMAIL_TAKEN": "This email belongs to another account.",
+        "EMAIL_LOCKED": "The email of a Google account cannot be changed.",
+        "SAME_PHONE": "This is already your current number.",
+        "PHONE_TAKEN": "This number is linked to another account.",
+        "INVALID_PHONE": "Invalid phone number.",
+        "TOO_MANY_REQUESTS": "Too many requests. Wait a moment.",
+        "OTP_WRONG": "Wrong code.",
+        "OTP_EXPIRED": "The code has expired, request a new one.",
+        "OTP_LOCKED": "No attempts left, request a new code.",
+        "OTP_NOT_FOUND": "Request a code first.",
+        "BAD_CREDENTIALS": "The current password is wrong.",
+        "LOGIN_LOCKED": "Too many attempts. Try again in 15 minutes.",
+        "CONFIRM_MISMATCH": "The confirmation text did not match.",
+        "FILE_TYPE": "JPEG, PNG or WebP only.",
+        "FILE_TOO_LARGE": "File is larger than 5 MB.",
+        "UPLOAD": "Photo upload failed. Try again."
+      }
+    }
+  }
+}

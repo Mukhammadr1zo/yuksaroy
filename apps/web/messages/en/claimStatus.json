@@ -1,0 +1,8 @@
+{
+  "claimStatus": {
+    "NONE": "Unclaimed",
+    "PENDING": "Claim under review",
+    "APPROVED": "Owner confirmed",
+    "REJECTED": "Claim rejected"
+  }
+}

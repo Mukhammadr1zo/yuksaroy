@@ -1,0 +1,528 @@
+{
+  "brand": {
+    "name": "YukSaroy"
+  },
+  "meta": {
+    "site": {
+      "title": "YukSaroy",
+      "description": "Freight logistics marketplace: terminal services, private sidings, rail equipment and road transport in one place. Owners list their services and equipment, you find what you need."
+    },
+    "terminals": {
+      "title": "Terminals · YukSaroy",
+      "description": "Catalog of freight terminals and freight yards: site profile, working hours, services and terms."
+    },
+    "terminal": {
+      "title": "{name} · YukSaroy",
+      "description": "{kind}, {station} station. {hours}.",
+      "notFound": "Terminal not found"
+    },
+    "sidings": {
+      "title": "Private sidings registry · YukSaroy",
+      "description": "Registry of 1,300+ private sidings: location, length, capacity. Contact the owner once they confirm."
+    },
+    "texnika": {
+      "title": "Rail equipment · YukSaroy",
+      "description": "Shunting locomotives, electric locomotives and wagons: listings for sale or rent."
+    },
+    "avtotransport": {
+      "title": "Road transport · YukSaroy",
+      "description": "Trucks and road carriers: find a truck nearby or list your own."
+    },
+    "quote": {
+      "title": "Price calculator · YukSaroy",
+      "description": "Calculate terminal service costs without signing in: rate × weight + extra services. Commission 0 %."
+    }
+  },
+  "nav": {
+    "terminals": "Terminals",
+    "sidings": "Private sidings",
+    "cabinet": "Dashboard",
+    "login": "Log in",
+    "aria": {
+      "home": "YukSaroy home page",
+      "main": "Main navigation",
+      "mainMobile": "Main navigation (mobile)"
+    }
+  },
+  "footer": {
+    "tagline": "Freight logistics marketplace: terminal services, private sidings, rail equipment and road transport. An independent private platform.",
+    "catalog": {
+      "heading": "Catalog",
+      "sidingsRegistry": "Private sidings registry",
+      "customsWarehouses": "Bonded warehouses"
+    },
+    "platform": {
+      "heading": "Platform",
+      "login": "Log in / sign up",
+      "telegramBot": "Telegram bot"
+    },
+    "legal": "© {year} YukSaroy",
+    "apps": {
+      "heading": "App",
+      "download": "Get the app",
+      "appStore": "App Store",
+      "googlePlay": "Google Play"
+    }
+  },
+  "hero": {
+    "title": "Freight services system",
+    "subtitle": "Find. Compare. Connect.",
+    "lead": "Finding a terminal service, a private siding, a shunting locomotive or a truck should not take days of phone calls. Find what you need in one place and contact the owner directly.",
+    "search": {
+      "placeholder": "Terminal, siding or equipment",
+      "aria": "What are you looking for",
+      "submit": "Search",
+      "note": "Browse without signing up, search is free"
+    },
+    "browse": {
+      "heading": "Or browse by service",
+      "terminalServices": "Terminal services",
+      "siding": "Private siding",
+      "railEquipment": "Locomotives and wagons",
+      "truck": "Truck"
+    },
+    "door": {
+      "shipper": "I am shipping cargo",
+      "owner": "I have a facility or equipment",
+      "registry": "Open registry"
+    },
+    "stat": {
+      "sidings": "private sidings",
+      "terminals": "terminals",
+      "serviceTypes": "service types"
+    },
+    "map": {
+      "aria": "Interactive map: terminals, railways and roads",
+      "legend": {
+        "aria": "Map legend",
+        "rail": "Railway",
+        "road": "Road",
+        "terminal": "Terminal"
+      }
+    }
+  },
+  "category": {
+    "heading": "What you'll find here",
+    "lead": "Every facility belongs to its owner. The owner lists it and writes the services and terms themselves.",
+    "terminals": {
+      "label": "Terminal and freight yard services",
+      "note": "Loading, unloading, weighbridge, storage, bonded warehouse, containers"
+    },
+    "sidings": {
+      "note": "Private sidings: loading, lease, sale",
+      "label": "Private sidings"
+    },
+    "rail": {
+      "label": "Rail equipment",
+      "note": "Shunting locomotives, electric locomotives, wagons: purchase or lease"
+    },
+    "road": {
+      "label": "Road transport",
+      "note": "Trucks and carriers, last mile"
+    },
+    "container": {
+      "label": "Container yards",
+      "note": "Container receipt and storage"
+    },
+    "services": {
+      "heading": "Search by service"
+    },
+    "siding": {
+      "note": "Private sidings: loading, rent, sale"
+    }
+  },
+  "how": {
+    "heading": "How the platform works",
+    "buyer": {
+      "title": "Looking for a service",
+      "lead": "If you are a cargo owner, freight forwarder or customs declarant",
+      "step1": "Search by location or service",
+      "step2": "See the terms on the owner's page",
+      "step3": "Leave a request for the time you need",
+      "cta": "Open catalog"
+    },
+    "seller": {
+      "title": "Selling a service",
+      "lead": "If you own a terminal, freight yard or private siding",
+      "step1": "Register your facility",
+      "step2": "Write your own services and terms",
+      "step3": "Receive requests in your account",
+      "cta": "Add your asset"
+    }
+  },
+  "landing": {
+    "cta": {
+      "addObject": "Add facility"
+    },
+    "owner": {
+      "title": "Own a terminal or a private siding",
+      "body": "List your facility, mark the operations you handle, and receive requests in your account. Free during the pilot.",
+      "ctaCatalog": "View catalog"
+    }
+  },
+  "terminals": {
+    "lead": "Freight yards, container terminals, logistics centres and bonded warehouses: with a facility profile and published rates.",
+    "count": "{count} facilities",
+    "empty": {
+      "title": "No terminals found for this filter.",
+      "reset": "Clear filter"
+    }
+  },
+  "filter": {
+    "kind": {
+      "all": "All types"
+    },
+    "service": {
+      "all": "All services"
+    },
+    "sort": {
+      "rating": "Rating",
+      "name": "Name",
+      "price": "Price"
+    },
+    "apply": "Apply",
+    "region": {
+      "all": "Nationwide"
+    }
+  },
+  "pagination": {
+    "aria": "Pages",
+    "prev": "← previous",
+    "next": "next →"
+  },
+  "terminal": {
+    "breadcrumb": {
+      "aria": "Breadcrumb"
+    },
+    "status": {
+      "openNow": "Open now",
+      "closedNow": "Closed now"
+    },
+    "badge": {
+      "unverifiedPassport": "Profile not verified"
+    },
+    "station": {
+      "suffix": "station"
+    },
+    "rju": {
+      "suffix": "junction"
+    },
+    "cta": {
+      "quote": "Calculate price",
+      "bookSlot": "Book a slot"
+    },
+    "claim": {
+      "title": "Is this your terminal?",
+      "body": "The facility profile is compiled from public sources, so the rates are indicative. Create a TERMINAL organization in your account: the operator links the profile to you, and you manage rates and slots yourself."
+    },
+    "tariffs": {
+      "heading": "Rates",
+      "empty": "No rates published, price on request.",
+      "col": {
+        "service": "Service",
+        "cargoGroup": "Cargo group",
+        "min": "Minimum"
+      },
+      "allCargo": "all cargo"
+    },
+    "services": {
+      "heading": "Services",
+      "leadTime": "{minutes} min in advance",
+      "immediate": "immediate"
+    },
+    "passport": {
+      "heading": "Facility profile",
+      "tracks": "Tracks",
+      "cranes": "Cranes",
+      "warehouse": "Covered warehouse",
+      "openArea": "Open storage area",
+      "scale": "Weighbridge",
+      "svx": "Bonded warehouse",
+      "containerSlots": "Container slots",
+      "customsPost": "Customs post",
+      "tracksValue": "{count} · {length} m"
+    },
+    "hours": {
+      "heading": "Working hours",
+      "dayOffShort": "off"
+    },
+    "stationCard": {
+      "esr": "ESR",
+      "rju": "Junction",
+      "typeClass": "Type / class",
+      "coords": "Coordinates"
+    },
+    "sidingsLink": "{count} private sidings at this station →",
+    "slots": {
+      "heading": "Today's slots",
+      "free": "{count} free",
+      "none": "No open slots today",
+      "book": "Book a slot"
+    }
+  },
+  "sidings": {
+    "lead": "Registry of private railway sidings: location, length, loading and unloading capacity. The owner's name appears only after the owner claims the siding and the operator verifies it.",
+    "count": "Sidings: {count}",
+    "search": {
+      "placeholder": "Location name or code"
+    },
+    "col": {
+      "no": "№",
+      "location": "Location",
+      "length": "Length",
+      "capacity": "Unloading / loading",
+      "owner": "Owner"
+    },
+    "owner": {
+      "pending": "pending verification",
+      "unclaimed": "owner not confirmed, this is mine"
+    },
+    "empty": "Nothing found."
+  },
+  "texnika": {
+    "lead": "Shunting locomotives, electric locomotives and wagons. The owner posts the listing for sale or rent and sets the terms himself.",
+    "example": {
+      "1": "Shunting locomotive: sale, or hourly and daily rent",
+      "2": "Electric locomotive: rent for shunting work",
+      "3": "Covered wagon, gondola, flat wagon, tank wagon",
+      "4": "Servicing and repair offers"
+    }
+  },
+  "avtotransport": {
+    "lead": "Trucks and road carriers. Last mile from the terminal to the warehouse, or haulage over the full route.",
+    "example": {
+      "1": "Tilt, reefer, tipper, container truck",
+      "2": "Available trucks nearby",
+      "3": "Carriers on regular routes",
+      "4": "Last mile: terminal to warehouse"
+    }
+  },
+  "empty": {
+    "title": "No listings in this section yet",
+    "body": "The catalog is open, owners add their own listings. Add yours first and you will be the first one found in search.",
+    "cta": "Post a listing",
+    "examplesHeading": "What goes here"
+  },
+  "quote": {
+    "heading": "Price calculation",
+    "lead": {
+      "prefix": "Open formula:",
+      "formula": "tariff × weight (or number of wagons) + extra services",
+      "suffix": ". During the pilot the platform commission is 0 %: the price is the terminal tariff itself."
+    },
+    "disclaimer": "The calculation is for reference; when an order is placed the tariff is locked and the same price goes into the act. The «Estimated» mark means the tariff has not been confirmed by the passport owner yet.",
+    "terminalPrefix": "Terminal:",
+    "station": {
+      "placeholder": "Station (ESR)"
+    },
+    "cargo": {
+      "placeholderCompact": "Cargo type"
+    },
+    "weight": {
+      "aria": "Weight, tonnes"
+    },
+    "field": {
+      "operation": "Operation",
+      "wagons": "Number of wagons",
+      "storageDays": "Storage, days"
+    },
+    "op": {
+      "load": "Loading",
+      "unload": "Unloading"
+    },
+    "extras": {
+      "legend": "Extra services"
+    },
+    "submit": {
+      "busy": "Calculating"
+    },
+    "err": {
+      "selectStation": "Select a station.",
+      "enterWeight": "Enter the weight (tonnes).",
+      "stationNotFound": "Station not found.",
+      "terminalNotFound": "Terminal not found.",
+      "generic": "Calculation error. Please try again."
+    },
+    "result": {
+      "empty": "No terminal at this station or nearby has published a {operation} tariff yet.",
+      "nearbyNote": "No terminal at the station. Cheapest offers in the same rail node (RJU):",
+      "detailLink": "Detailed calculation (extra services, days)"
+    },
+    "offer": {
+      "approxTariff": ", tariff is estimated",
+      "commission": "Platform commission {pct} %",
+      "minApplied": "(min)",
+      "missing": "No tariff, agreed separately: {services}",
+      "book": "Book"
+    }
+  },
+  "auth": {
+    "title": "Sign in",
+    "lead": "The code comes to the Telegram bot, not by SMS.",
+    "phone": {
+      "label": "Phone number",
+      "placeholder": "+998 90 123 45 67"
+    },
+    "requestCode": "Get code",
+    "link": {
+      "title": "This number is not linked to the bot yet.",
+      "body": "Open the bot, tap “Send my phone number”, the code arrives there.",
+      "openBot": "Open the bot"
+    },
+    "code": {
+      "sent": "The code has been sent to the Telegram bot.",
+      "label": "6-digit code"
+    },
+    "changeNumber": "Change number",
+    "err": {
+      "invalidPhone": "Invalid phone number.",
+      "tooManyRequests": "Wait a moment and try again.",
+      "otpWrong": "Wrong code.",
+      "otpExpired": "The code has expired, request a new one.",
+      "otpLocked": "No attempts left, request a new code.",
+      "otpNotFound": "Request a code first.",
+      "generic": "Something went wrong."
+    }
+  },
+  "catalog": {
+    "station": {
+      "placeholder": "Station name or ESR code"
+    },
+    "cargo": {
+      "placeholder": "Cargo type (ETSNG): cement, wheat, 281000…"
+    },
+    "nearMe": {
+      "idle": "Near me",
+      "busy": "Locating",
+      "active": "Near me, {radius} km",
+      "err": {
+        "unsupported": "Your browser does not provide location.",
+        "denied": "Location access was denied."
+      }
+    },
+    "chips": {
+      "remove": "Remove {label}",
+      "unresolved": "not understood: {words}"
+    },
+    "decision": {
+      "terminals": "{count, plural, one {# terminal} other {# terminals}}",
+      "freeToday": "{count} with free slots today",
+      "cheapest": "cheapest {price}",
+      "nearest": "nearest {km} km",
+      "separator": " · "
+    }
+  },
+  "card": {
+    "rating": {
+      "none": "No rating"
+    },
+    "price": {
+      "from": "from {price}",
+      "onRequest": "Price on request"
+    },
+    "unverifiedPassport": "Not confirmed by the passport holder",
+    "slots": {
+      "freeToday": "{count} free slots today",
+      "none": "No free slots today"
+    },
+    "distance": "{km} km"
+  },
+  "sidingMap": {
+    "aria": "Private siding layout at {station} station: {count} tracks",
+    "mainTrack": "{station}, main track",
+    "legend": {
+      "approved": "owner confirmed",
+      "registry": "registry (owner hidden)"
+    },
+    "more": "… {count} more in the list"
+  },
+  "common": {
+    "price": "Price",
+    "station": "Station",
+    "region": "Region",
+    "yes": "yes",
+    "no": "no",
+    "unit": {
+      "meter": "m",
+      "ton": "t",
+      "wagonShort": "wag"
+    },
+    "count": {
+      "pieces": "pcs"
+    }
+  },
+  "format": {
+    "hours": {
+      "unknown": "Working hours not listed",
+      "dayOff": "Closed"
+    },
+    "day": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "pricePer": {
+      "ton": "t",
+      "wagon": "wagon",
+      "day": "day",
+      "operation": "operation"
+    },
+    "currency": {
+      "som": "UZS"
+    },
+    "month": {
+      "long": "January, February, March, April, May, June, July, August, September, October, November, December",
+      "short": "Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec"
+    }
+  },
+  "service": {
+    "LOAD": "Loading",
+    "UNLOAD": "Unloading",
+    "WEIGH": "Weighbridge",
+    "STORAGE": "Warehouse storage",
+    "SVX": "Bonded warehouse",
+    "CONTAINER": "Container handling",
+    "LAST_MILE": "Last mile (truck)",
+    "SHUNTING": "Shunting (locomotive)"
+  },
+  "kind": {
+    "YARD": "Freight yard",
+    "CONTAINER": "Container terminal",
+    "LC": "Logistics center",
+    "SVX": "Bonded warehouse"
+  },
+  "rju": {
+    "TAS": "Tashkent",
+    "KOK": "Kokand",
+    "BUX": "Bukhara",
+    "KUN": "Kungrad",
+    "KAR": "Karshi",
+    "TER": "Termez"
+  },
+  "unit": {
+    "PER_TON": "ton",
+    "PER_WAGON": "wagon",
+    "PER_OPERATION": "operation",
+    "PER_DAY": "day"
+  },
+  "region": {
+    "UZ-TK": "Tashkent city",
+    "UZ-TO": "Tashkent region",
+    "UZ-SI": "Sirdarya region",
+    "UZ-JI": "Jizzakh region",
+    "UZ-SA": "Samarkand region",
+    "UZ-BU": "Bukhara region",
+    "UZ-NW": "Navoi region",
+    "UZ-QA": "Kashkadarya region",
+    "UZ-SU": "Surkhandarya Region",
+    "UZ-XO": "Khorezm Region",
+    "UZ-QR": "Republic of Karakalpakstan",
+    "UZ-AN": "Andijan Region",
+    "UZ-NG": "Namangan Region",
+    "UZ-FA": "Fergana Region"
+  }
+}

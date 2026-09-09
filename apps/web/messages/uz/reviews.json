@@ -1,0 +1,41 @@
+{
+  "reviews": {
+    "heading": "Baholar",
+    "summary": "{avg} · {count} baho",
+    "none": "Baho yo'q",
+    "hidden": "{count} baho, {min} tadan keyin ko'rsatiladi",
+    "noneBody": "Hali baho yo'q. Baho faqat yakunlangan buyurtmadan keyin, yuk egasi tomonidan beriladi.",
+    "order": "buyurtma",
+    "reply": "Terminal javobi",
+    "star": "{n} yulduz",
+    "yours": "Sizning bahoyingiz",
+    "review": "Yuk egasi bahosi",
+    "form": {
+      "title": "Baho bering",
+      "lead": "Buyurtma yakunlandi. Terminal ishini 1 dan 5 gacha baholang, izoh ixtiyoriy. Baho terminal sahifasida ochiq ko'rinadi, buyurtma raqami yashiriladi.",
+      "rating": "Baho",
+      "text": "Izoh",
+      "placeholder": "Nima yaxshi bo'ldi, nima kutilganidek bo'lmadi",
+      "submit": "Bahoni yuborish",
+      "sending": "Yuborilmoqda",
+      "done": "Rahmat, bahoyingiz qabul qilindi."
+    },
+    "replyForm": {
+      "cta": "Javob berish",
+      "edit": "Javobni o'zgartirish",
+      "label": "Terminal javobi (ochiq ko'rinadi)",
+      "submit": "Javobni yuborish",
+      "sending": "Yuborilmoqda",
+      "cancel": "Bekor",
+      "hint": "Javob baho berilganidan keyin 30 kun ichida yoziladi."
+    },
+    "err": {
+      "REVIEW_EXISTS": "Bu buyurtmaga baho berilgan.",
+      "ORDER_NOT_DONE": "Baho faqat yakunlangan buyurtmaga beriladi.",
+      "REPLY_WINDOW_CLOSED": "Javob muddati (30 kun) o'tgan.",
+      "NOT_SHIPPER": "Baho faqat buyurtmachi tashkilot a'zosi tomonidan beriladi.",
+      "NOT_TERMINAL_STAFF": "Javobni faqat terminal xodimi yozadi.",
+      "failed": "Yuborilmadi. Qayta urinib ko'ring."
+    }
+  }
+}

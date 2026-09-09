@@ -1,0 +1,79 @@
+{
+  "booking": {
+    "meta": {
+      "title": "Booking, quotes and price requests · YukSaroy",
+      "description": "Book a terminal slot, get a price from an open formula, send a request to an equipment owner: three paths, one cabinet. Live tariff example and today's free slots."
+    },
+    "eyebrow": "How it works",
+    "title": "Book. Quote. Ask a price.",
+    "lead": "A terminal service gets a booked slot, the price comes from an open formula, equipment and truck listings take a request to the owner. All three live in one cabinet.",
+    "facts": {
+      "terminals": "{count} active terminals",
+      "freeSlots": "{count} free slots today",
+      "sidings": "{count} sidings in the registry"
+    },
+    "cta": {
+      "bookable": "Terminals with free slots today",
+      "signup": "Sign up",
+      "quote": "Calculate a price",
+      "terminal": "Terminal page"
+    },
+    "cols": {
+      "book": {
+        "title": "Book",
+        "body": "Pick a terminal window for today or the coming days. The slot is held for 10 minutes, the tariff is frozen once the order is sent. The terminal confirms or rejects within the SLA.",
+        "link": "Terminals"
+      },
+      "quote": {
+        "title": "Quote",
+        "body": "The price is calculated without logging in: tariff × weight or wagon count + extra services. If the terminal set a minimum amount, it is shown too. Commission is 0 % in the pilot.",
+        "link": "Price calculator"
+      },
+      "ask": {
+        "title": "Ask a price",
+        "body": "For equipment and truck listings the price is agreed with the owner. The request goes from the cabinet, the owner's phone is visible only to logged-in users.",
+        "link": "Equipment listings"
+      }
+    },
+    "example": {
+      "heading": "Live example: how a tariff adds up",
+      "lead": "Using the current tariffs of {terminal}: {weight} t of cargo, 1 wagon, loading and weighing.",
+      "col": { "line": "Service", "formula": "Calculation", "amount": "Amount" },
+      "min": "minimum amount applied",
+      "subtotal": "Services",
+      "commission": "Platform commission {pct} %",
+      "total": "Total",
+      "note": "When you place an order this tariff is frozen and shown on the act. A tariff from a passport not confirmed by the owner is an estimate.",
+      "empty": "No active terminal has published a tariff yet. The example appears here once a terminal owner adds one."
+    },
+    "slots": {
+      "heading": "Free slots: {terminal}",
+      "today": "Today",
+      "free": "{count} free",
+      "none": "No open slots in the next 14 days. The terminal opens slots from its cabinet.",
+      "notToday": "No slots opened for today, the nearest open day is shown.",
+      "book": "Book a slot"
+    },
+    "chain": {
+      "heading": "Order state chain",
+      "lead": "The terminal marks each step in its cabinet, you see it on the order page. Every mark is timestamped, leaving no room for disputes.",
+      "before": "Pending → Confirmed",
+      "after": "Done: act and invoice",
+      "steps": {
+        "ARRIVED": { "title": "Arrived", "body": "Wagon at the terminal, slot time started" },
+        "WEIGHED": { "title": "Weighed", "body": "Scale result written to the order" },
+        "HANDLED": { "title": "Loaded / Unloaded", "body": "Main operation completed" },
+        "DEPARTED": { "title": "Departed", "body": "Order closes, documents are ready" }
+      }
+    },
+    "band": {
+      "title": "Start with terminals that have a free slot today",
+      "body": "The catalog shows only terminals with an open window today. Booking needs a cabinet, the price calculator does not."
+    },
+    "chip": "Free slot today",
+    "quick": {
+      "submit": "Show price",
+      "passport": "Passport"
+    }
+  }
+}

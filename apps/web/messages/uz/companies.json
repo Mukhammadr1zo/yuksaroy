@@ -1,0 +1,42 @@
+{
+  "companies": {
+    "title": "Kompaniyalar",
+    "lead": "Platformadagi tashkilotlar: terminal, avtotashuvchi, texnika egasi va boshqalar. Ro'yxatga tasdiqlangan yoki kamida bitta faol obyekti bor tashkilotlar kiradi.",
+    "filter": {
+      "kindAll": "Barcha turlar",
+      "q": "Nomi bo'yicha"
+    },
+    "count": "{count} tashkilot",
+    "counts": {
+      "terminals": "terminal",
+      "sidings": "shahobcha yo'l",
+      "listings": "e'lon"
+    },
+    "empty": {
+      "title": "Bu filtr bo'yicha kompaniya topilmadi",
+      "reset": "Filtrni tozalash"
+    },
+    "detail": {
+      "about": "Tashkilot haqida",
+      "contact": "Bog'lanish",
+      "telegram": "Telegram",
+      "website": "Sayt",
+      "phone": "Telefon",
+      "loginToSee": "kirib ko'ring",
+      "noPhone": "ko'rsatilmagan",
+      "noContact": "Ochiq kontakt ko'rsatilmagan, obyekt sahifasidan so'rov yuboring.",
+      "terminals": "Terminallar",
+      "sidings": "Shahobcha yo'llar",
+      "listings": "E'lonlar",
+      "map": "Obyektlar xaritada",
+      "mapNote": "Koordinatalar taxminiy.",
+      "none": "hali yo'q",
+      "sidingCols": {
+        "no": "Reestr No",
+        "station": "Stansiya",
+        "length": "Uzunlik",
+        "capacity": "Tushirish / yuklash"
+      }
+    }
+  }
+}

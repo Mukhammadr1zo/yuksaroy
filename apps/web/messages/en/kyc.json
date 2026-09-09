@@ -1,0 +1,8 @@
+{
+  "kyc": {
+    "NONE": "Not verified",
+    "PENDING": "Under review",
+    "VERIFIED": "Verified",
+    "REJECTED": "Rejected"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "premium": {
+    "badge": "Premium",
+    "col": "Premium",
+    "get": "Get Premium",
+    "extend": "Extend",
+    "notEligible": "active listings only",
+    "modal": {
+      "title": "Premium: {title}",
+      "lead": "A Premium listing comes first in lists and on the map and gets the Premium badge. Price is per listing.",
+      "months": "Duration",
+      "month": "{n} mo",
+      "perMonth": "{price} / month",
+      "total": "Total",
+      "submit": "Place order",
+      "sending": "Sending",
+      "cancel": "Cancel",
+      "close": "Close",
+      "created": "Order received",
+      "orderNo": "Order ID",
+      "amount": "Amount",
+      "pay": "Payment",
+      "afterPay": "Premium turns on once the payment is confirmed, usually within 1 business day.",
+      "failed": "Order was not created. Please try again."
+    },
+    "admin": {
+      "tab": "Premium payments",
+      "lead": "Manual payment: check the transfer and confirm; the listing's Premium period is extended.",
+      "status": { "PENDING": "Awaiting payment", "PAID": "Paid", "CANCELLED": "Cancelled" },
+      "months": "{n} mo",
+      "org": "Organization",
+      "created": "Requested",
+      "paidAt": "Paid",
+      "until": "Premium until",
+      "noPremium": "none yet",
+      "confirm": "Confirm payment",
+      "confirming": "Confirming",
+      "confirmed": "Confirmed, Premium until {until}",
+      "failed": "Not confirmed. Refresh the page.",
+      "empty": "Queue is empty."
+    },
+    "messages": {
+      "tab": "Messages",
+      "lead": "Requests from the contact form. Reply by phone or email within 24 hours.",
+      "topic": { "demo": "Demo", "question": "Question", "tech": "Technical", "partner": "Partnership" },
+      "shown": "{n} / {total}",
+      "empty": "No messages."
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "listing": {
+    "rail": {
+      "title": "Rail equipment",
+      "lead": "Shunting locomotives, electric locomotives and wagons: rent or sale. Prices are public, contacting the owner requires login."
+    },
+    "road": {
+      "title": "Road carriers",
+      "lead": "Trucks and road carriers: body type, tonnage, service regions and regular routes. Prices are public, contacting the owner requires login."
+    },
+    "tab": {
+      "all": "All",
+      "SHUNTING_LOCO": "Shunting loco",
+      "ELECTRIC_LOCO": "Electric loco",
+      "WAGON": "Wagon"
+    },
+    "deal": {
+      "all": "Rent and sale",
+      "RENT": "Rent",
+      "SALE": "Sale"
+    },
+    "filter": {
+      "truckType": "All body types",
+      "tonnageMin": "Tonnage, at least (t)",
+      "q": "Title, model or query",
+      "sort": {
+        "new": "Newest",
+        "price": "Cheapest",
+        "nearest": "Nearest"
+      }
+    },
+    "decision": {
+      "count": "{count, plural, one {# listing} other {# listings}}",
+      "onRequest": "{count} price on request",
+      "cheapest": "cheapest {price}",
+      "nearest": "nearest {km} km",
+      "separator": " · "
+    },
+    "card": {
+      "onRequest": "Price on request",
+      "atTerminal": "located at terminal: {name}",
+      "atSiding": "located at siding: {name}",
+      "qty": "{count} pcs",
+      "fleet": "{count} trucks",
+      "routes": "{count} routes",
+      "verified": "Verified organization",
+      "regionsMore": "+{count}",
+      "noPhoto": "No photo",
+      "phoneVerified": "Phone verified",
+      "phoneUnverified": "Phone not verified"
+    },
+    "empty": {
+      "title": "No listings match this filter",
+      "body": "The catalog is open, owners post their own listings. Post first and you will be found first.",
+      "cta": "Post a listing",
+      "reset": "Clear filters",
+      "standard": "Listing standard"
+    },
+    "detail": {
+      "specs": "Specifications",
+      "year": "Year built",
+      "condition": "Condition",
+      "model": "Model",
+      "qty": "Quantity",
+      "wagonType": "Wagon type",
+      "capacityT": "Load capacity",
+      "truckType": "Body type",
+      "tonnage": "Tonnage",
+      "fleetSize": "Fleet",
+      "serviceRegions": "Service regions",
+      "routes": "Regular routes",
+      "region": "Region",
+      "published": "Published",
+      "price": "Price",
+      "onRequest": "Price on request",
+      "ask": "Ask for a price",
+      "loginToContact": "Log in to see the phone and send an inquiry",
+      "loginNote": "Prices are public, contact is for registered users.",
+      "phone": "Phone",
+      "noPhone": "The owner did not list a phone, send an inquiry",
+      "response": "Reply within {hours} h",
+      "responseNote": "as stated by the owner, not measured",
+      "owner": "Owner",
+      "companyPage": "Company page",
+      "object": "Location",
+      "map": "On the map",
+      "mapNote": "Approximate coordinate: object or region center.",
+      "similar": "Similar listings",
+      "loading": "Loading",
+      "inquiry": {
+        "label": "Message",
+        "placeholder": "For how long, how many, where",
+        "org": "On behalf of",
+        "personal": "Personally",
+        "send": "Send inquiry",
+        "sending": "Sending",
+        "sent": "Inquiry sent. The reply appears in your dashboard under Inquiries.",
+        "err": "Not sent, please try again.",
+        "short": "Write at least 5 characters."
+      }
+    }
+  }
+}

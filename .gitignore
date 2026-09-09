@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+.turbo/
+.env
+.env.*.local
+*.log
+.impeccable/
+.playwright-mcp/
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+
+# tahlil uchun yig'ilgan raqobatchi skrinshotlari (repoga kerak emas)
+docs/rasm/
+*.tsbuildinfo
+.impeccable/
+.playwright-mcp/

@@ -1,0 +1,53 @@
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { Logo } from './Logo';
+
+export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
+  const [t, nav, tm, tp, tf, ta, tc, tb] = await Promise.all([
+    getTranslations('footer'), getTranslations('nav'), getTranslations('marketing'),
+    getTranslations('pricing'), getTranslations('features'), getTranslations('about'), getTranslations('contact'), getTranslations('blog'),
+  ]);
+  const dark = tone === 'dark';
+  const muted = dark ? 'text-white/55' : 'text-muted';
+  const hover = dark ? 'hover:text-white' : 'hover:text-navy';
+  // Ustunlar: Katalog, Platforma (mahsulot), Kompaniya (biz haqimizda, blog, API)
+  const platform = [
+    ['/pricing', tp('eyebrow')], ['/features', tf('eyebrow')], ['/for-shippers', tm('footer.shippers')], ['/for-providers', tm('footer.providers')],
+    ['/booking', tm('footer.booking')], ['/urgent', tf('items.urgent.title')], ['/login', t('platform.login')],
+  ] as const;
+  const company = [['/about', ta('eyebrow')], ['/contact', tc('eyebrow')], ['/blog', tb('eyebrow')], ['/developers', tf('items.api.title')]] as const;
+  return (
+    <footer className={dark ? 'border-t border-white/10 bg-[#0A1626] text-white' : 'border-t border-line bg-white'}>
+      <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+        <div className="sm:col-span-2 lg:col-span-1">
+          <Logo light={dark} />
+          <p className={`mt-3 max-w-sm text-sm ${muted}`}>{t('tagline')}</p>
+        </div>
+        <div>
+          <h3 className="text-sm font-bold">{t('catalog.heading')}</h3>
+          <ul className={`mt-3 space-y-2 text-sm ${muted}`}>
+            <li><Link className={hover} href="/terminals">{nav('terminals')}</Link></li>
+            <li><Link className={hover} href="/sidings">{t('catalog.sidingsRegistry')}</Link></li>
+            <li><Link className={hover} href="/terminals?kind=SVX">{t('catalog.customsWarehouses')}</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="text-sm font-bold">{t('platform.heading')}</h3>
+          <ul className={`mt-3 space-y-2 text-sm ${muted}`}>
+            {platform.map(([href, label]) => <li key={href}><Link className={hover} href={href}>{label}</Link></li>)}
+            <li><a className={hover} href="https://t.me/yuksaroy_bot" target="_blank" rel="noreferrer">{t('platform.telegramBot')}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="text-sm font-bold">{ta('company')}</h3>
+          <ul className={`mt-3 space-y-2 text-sm ${muted}`}>
+            {company.map(([href, label]) => <li key={href}><Link className={hover} href={href}>{label}</Link></li>)}
+          </ul>
+        </div>
+      </div>
+      <div className={dark ? 'border-t border-white/10' : 'border-t border-line'}>
+        <p className={`mx-auto max-w-6xl px-6 py-4 font-mono text-xs ${muted}`}>{t('legal', { year: new Date().getFullYear() })}</p>
+      </div>
+    </footer>
+  );
+}

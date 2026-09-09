@@ -1,0 +1,40 @@
+{
+  "contact": {
+    "meta": {
+      "title": "Contact · YukSaroy",
+      "description": "Demo, question, technical issue or partnership. Write through the form, we answer within 24 hours."
+    },
+    "eyebrow": "Contact",
+    "title": "Write to us, we answer within 24 hours",
+    "lead": "A demo, a question about the platform, a technical issue or a partnership offer. All in one form.",
+    "form": {
+      "name": "Your name",
+      "contact": "Phone or email",
+      "contactHint": "We reply to this address",
+      "topic": "Topic",
+      "topics": { "demo": "Demo", "question": "Question", "tech": "Technical issue", "partner": "Partnership" },
+      "message": "Message",
+      "messageHint": "At least 10 characters",
+      "submit": "Send",
+      "sending": "Sending"
+    },
+    "success": {
+      "title": "Received",
+      "body": "We answer within 24 hours. If it is urgent, write to the Telegram bot.",
+      "again": "Write again"
+    },
+    "error": {
+      "generic": "Not sent. Check the fields and try again.",
+      "rate": "Too many attempts. Try again in a minute."
+    },
+    "aside": {
+      "heading": "Other ways",
+      "bot": "Telegram bot",
+      "botNote": "Catalog, inquiries and notifications are in the bot too.",
+      "pricing": "Pricing and FAQ",
+      "pricingNote": "Answers about Premium, commission and payment.",
+      "developers": "Open API",
+      "developersNote": "Lists and ontology, anonymous read."
+    }
+  }
+}

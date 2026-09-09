@@ -1,0 +1,74 @@
+{
+  "map": {
+    "nav": "Map",
+    "open": "Open the map",
+    "meta": {
+      "title": "Map: terminals, private sidings, equipment and road carriers",
+      "description": "Freight terminals, private sidings, rail equipment and road carrier listings across Uzbekistan on one map. Search by corridor, region or a radius around you."
+    },
+    "aria": "Interactive map: terminals, private sidings, equipment and road carriers",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "search": {
+      "placeholder": "For example: Termez to Tashkent, container",
+      "aria": "Search on the map",
+      "submit": "Search"
+    },
+    "cat": {
+      "terminal": "Terminal",
+      "siding": "Private siding",
+      "equipment": "Equipment",
+      "truck": "Road transport"
+    },
+    "catAria": "Categories with counts in view",
+    "decision": {
+      "objects": "{count, plural, one {# object} other {# objects}} in view"
+    },
+    "list": {
+      "aria": "Objects in view"
+    },
+    "empty": {
+      "title": "No objects in this area yet",
+      "zoomOut": "Show the whole map"
+    },
+    "siding": {
+      "count": "{count, plural, one {# private siding} other {# private sidings}}",
+      "approx": "approximate location, by station",
+      "open": "Station list"
+    },
+    "approxRegion": "region centre, approximate location",
+    "popup": {
+      "open": "Details",
+      "freeToday": "{count} free slots today",
+      "noSlots": "no free slots today",
+      "onRequest": "price on request",
+      "from": "from {price}"
+    },
+    "legend": {
+      "aria": "Map legend",
+      "terminal": "Terminal",
+      "siding": "Siding (station)",
+      "equipment": "Equipment",
+      "truck": "Road transport"
+    },
+    "sheet": {
+      "list": "List",
+      "map": "Map",
+      "handle": "Panel height"
+    },
+    "loading": "Loading the map",
+    "strip": {
+      "aria": "Map: all objects, tap to open"
+    },
+    "draw": {
+      "aria": "Draw area tools",
+      "start": "Draw area",
+      "points": "{count, plural, one {# point} other {# points}}",
+      "finish": "Finish",
+      "cancel": "Cancel",
+      "clear": "Clear",
+      "active": "Drawn area",
+      "hint": "Click points on the map. Double click or Finish closes the shape, Esc cancels."
+    }
+  }
+}

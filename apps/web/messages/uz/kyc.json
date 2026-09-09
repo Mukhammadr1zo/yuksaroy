@@ -1,0 +1,8 @@
+{
+  "kyc": {
+    "NONE": "Tasdiqlanmagan",
+    "PENDING": "Tekshiruvda",
+    "VERIFIED": "Tasdiqlangan",
+    "REJECTED": "Rad etilgan"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "analytics": {
+    "title": "Analytics",
+    "tab": "Analytics",
+    "leadListing": "Last 30 days: where the listing was shown and how many inquiries came in.",
+    "leadTerminal": "Last 30 days: where the terminal was shown, inquiries and orders received.",
+    "surface": { "list": "List", "map": "Map", "detail": "Page", "compare": "Compare", "bot": "Bot" },
+    "total": "Impressions, 30 days",
+    "inquiries": "Inquiries, 30 days",
+    "views": "Page views, total",
+    "orders": "Orders, 30 days",
+    "chartAria": "Daily impressions by surface",
+    "dayTitle": "{day}: {n} impressions",
+    "empty": "No impressions in the last 30 days. Once the object is active, catalog, map, compare and bot impressions are collected here.",
+    "loading": "Loading",
+    "loadFailed": "Could not load analytics.",
+    "back": "Back to listings",
+    "link": "Analytics",
+    "unsaved": "Analytics opens after the terminal is saved."
+  }
+}

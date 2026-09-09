@@ -1,0 +1,28 @@
+{
+  "compare": {
+    "check": "Solishtirish",
+    "checked": "Tanlandi",
+    "full": "Ko'pi bilan 3 ta",
+    "tray": { "aria": "Solishtirish savati", "go": "Solishtirish", "clear": "Tozalash", "count": "{count} / 3" },
+    "cat": { "terminals": "Terminallar", "equipment": "Texnika", "carriers": "Avtotransport" },
+    "title": { "terminals": "Terminallarni solishtirish", "equipment": "Texnikani solishtirish", "carriers": "Avtotransportni solishtirish" },
+    "lead": "Ustunlar yonma-yon: raqamlar ochiq tarif va e'londan olingan, hech narsa hisoblanmagan.",
+    "empty": { "title": "Solishtirish uchun obyekt tanlanmagan", "body": "Katalogda kartaning pastidagi \"Solishtirish\" belgisini bosing, ko'pi bilan 3 ta.", "back": "Katalogga qaytish" },
+    "remove": "Olib tashlash",
+    "open": "Sahifasini ochish",
+    "share": "Havolani nusxalash",
+    "shared": "Nusxalandi",
+    "notFound": "{count} ta topilmadi yoki faol emas",
+    "none": "yo'q",
+    "onRequest": "so'rov bo'yicha",
+    "noRating": "baho yo'q",
+    "row": {
+      "kind": "Turi", "region": "Viloyat", "station": "Stansiya", "hours": "Ish vaqti", "tariffs": "Tariflar", "freeToday": "Bugun bo'sh slot",
+      "services": "Xizmatlar", "distance": "Masofa", "rating": "Reyting", "passport": "Pasport",
+      "deal": "Ijara yoki sotuv", "price": "Narx", "year": "Yil", "condition": "Holati", "model": "Model", "qty": "Soni", "wagonType": "Vagon turi",
+      "capacityT": "Yuk ko'tarish", "truckType": "Kuzov", "tonnage": "Tonnaj", "fleetSize": "Park", "serviceRegions": "Xizmat hududlari",
+      "routes": "Yo'nalishlar", "owner": "Egasi", "kyc": "Tasdiq", "object": "Qayerda turibdi", "response": "Javob muddati"
+    },
+    "unit": { "km": "{km} km", "t": "{n} t", "pcs": "{n} dona", "trucks": "{n} ta mashina", "routes": "{n} yo'nalish", "hours": "{n} soat", "slots": "{n} ta" }
+  }
+}

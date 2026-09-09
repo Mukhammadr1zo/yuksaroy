@@ -1,0 +1,50 @@
+{
+  "premium": {
+    "badge": "Premium",
+    "col": "Premium",
+    "get": "Premium olish",
+    "extend": "Uzaytirish",
+    "notEligible": "faol e'longa",
+    "modal": {
+      "title": "Premium: {title}",
+      "lead": "Premium e'lon ro'yxatda va xaritada birinchi chiqadi, Premium belgisi oladi. Narx bitta e'lon uchun.",
+      "months": "Muddat",
+      "month": "{n} oy",
+      "perMonth": "{price} / oy",
+      "total": "Jami",
+      "submit": "Buyurtma berish",
+      "sending": "Yuborilmoqda",
+      "cancel": "Bekor",
+      "close": "Yopish",
+      "created": "Buyurtma qabul qilindi",
+      "orderNo": "Buyurtma ID",
+      "amount": "Summa",
+      "pay": "To'lov",
+      "afterPay": "To'lov tasdiqlangach Premium yoqiladi. Tasdiq odatda 1 ish kuni ichida.",
+      "failed": "Buyurtma yaratilmadi. Qayta urinib ko'ring."
+    },
+    "admin": {
+      "tab": "Premium to'lovlar",
+      "lead": "Qo'lda to'lov: summa kelganini tekshirib tasdiqlang, e'lon Premium muddati uzayadi.",
+      "status": { "PENDING": "To'lov kutilmoqda", "PAID": "To'langan", "CANCELLED": "Bekor qilingan" },
+      "months": "{n} oy",
+      "org": "Tashkilot",
+      "created": "So'ralgan",
+      "paidAt": "To'langan",
+      "until": "Premium muddati",
+      "noPremium": "hali yo'q",
+      "confirm": "To'lovni tasdiqlash",
+      "confirming": "Tasdiqlanmoqda",
+      "confirmed": "Tasdiqlandi, Premium {until} gacha",
+      "failed": "Tasdiqlanmadi. Sahifani yangilang.",
+      "empty": "Navbat bo'sh."
+    },
+    "messages": {
+      "tab": "Xabarlar",
+      "lead": "Aloqa formasidan kelgan murojaatlar. Javob telefon yoki email orqali, 24 soat ichida.",
+      "topic": { "demo": "Demo", "question": "Savol", "tech": "Texnik", "partner": "Hamkorlik" },
+      "shown": "{n} / {total}",
+      "empty": "Murojaat yo'q."
+    }
+  }
+}

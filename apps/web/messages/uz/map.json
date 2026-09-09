@@ -1,0 +1,74 @@
+{
+  "map": {
+    "nav": "Xarita",
+    "open": "Xaritada ochish",
+    "meta": {
+      "title": "Xarita: terminallar, shahobcha yo'llar, texnika va avtotransport",
+      "description": "O'zbekiston bo'ylab yuk terminallari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport e'lonlari bitta xaritada. Koridor, viloyat yoki yoningizdagi radius bo'yicha toping."
+    },
+    "aria": "Interaktiv xarita: terminallar, shahobcha yo'llar, texnika va avtotransport",
+    "zoomIn": "Yaqinlashtirish",
+    "zoomOut": "Uzoqlashtirish",
+    "search": {
+      "placeholder": "Masalan: Termizdan Toshkentgacha konteyner",
+      "aria": "Xaritada qidirish",
+      "submit": "Qidirish"
+    },
+    "cat": {
+      "terminal": "Terminal",
+      "siding": "Shahobcha yo'l",
+      "equipment": "Texnika",
+      "truck": "Avtotransport"
+    },
+    "catAria": "Toifalar, ko'rinishdagi soni bilan",
+    "decision": {
+      "objects": "{count} obyekt ko'rinishda"
+    },
+    "list": {
+      "aria": "Ko'rinishdagi obyektlar"
+    },
+    "empty": {
+      "title": "Bu hududda hali obyekt yo'q",
+      "zoomOut": "Butun xaritani ko'rish"
+    },
+    "siding": {
+      "count": "{count} ta shahobcha yo'l",
+      "approx": "taxminiy joylashuv, stansiya bo'yicha",
+      "open": "Stansiya ro'yxati"
+    },
+    "approxRegion": "viloyat markazi, taxminiy joylashuv",
+    "popup": {
+      "open": "Batafsil",
+      "freeToday": "bugun {count} bo'sh slot",
+      "noSlots": "bugun bo'sh slot yo'q",
+      "onRequest": "narx so'rov bo'yicha",
+      "from": "{price} dan"
+    },
+    "legend": {
+      "aria": "Xarita legendasi",
+      "terminal": "Terminal",
+      "siding": "Shahobcha (stansiya)",
+      "equipment": "Texnika",
+      "truck": "Avtotransport"
+    },
+    "sheet": {
+      "list": "Ro'yxat",
+      "map": "Xarita",
+      "handle": "Panel balandligi"
+    },
+    "loading": "Xarita yuklanmoqda",
+    "strip": {
+      "aria": "Xarita: barcha obyektlar, ochish uchun bosing"
+    },
+    "draw": {
+      "aria": "Hudud chizish asboblari",
+      "start": "Hudud chizish",
+      "points": "{count} nuqta",
+      "finish": "Tugatish",
+      "cancel": "Bekor",
+      "clear": "Tozalash",
+      "active": "Chizilgan hudud",
+      "hint": "Xaritada nuqtalarni bosing. Ikki marta bosish yoki Tugatish yakunlaydi, Esc bekor qiladi."
+    }
+  }
+}

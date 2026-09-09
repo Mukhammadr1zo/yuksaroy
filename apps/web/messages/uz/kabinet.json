@@ -1,0 +1,402 @@
+{
+  "kabinet": {
+    "nav": {
+      "home": "Kabinet",
+      "orders": "Buyurtmalarim",
+      "terminal": "Terminal",
+      "listings": "E'lonlarim",
+      "inquiries": "So'rovlar",
+      "org": "Tashkilot",
+      "sidings": "Shahobchalarim",
+      "admin": "Moderatsiya",
+      "newOrder": "Yangi buyurtma",
+      "new": "Yangi",
+      "profile": "Profil"
+    },
+    "common": {
+      "loading": "Yuklanmoqda",
+      "save": "Saqlash",
+      "saving": "Saqlanmoqda",
+      "saved": "Saqlandi",
+      "cancel": "Bekor",
+      "edit": "Tahrirlash",
+      "delete": "O'chirish",
+      "loadFailed": "Ro'yxatni yuklab bo'lmadi. Sahifani yangilang.",
+      "failed": "Bajarilmadi. Qayta urinib ko'ring.",
+      "required": "shart",
+      "recommended": "tavsiya",
+      "none": "yo'q",
+      "onRequest": "so'rov bo'yicha",
+      "back": "Orqaga"
+    },
+    "home": {
+      "title": "Kabinet",
+      "logout": "Chiqish",
+      "telegramLinked": "Telegram bog'langan",
+      "telegramNot": "Telegram bog'lanmagan",
+      "noPhone": "telefon bog'lanmagan",
+      "phoneBanner": {
+        "title": "Telefon raqamingizni bog'lang",
+        "body": "E'lon berish va so'rov yuborish uchun telefon kerak. Kod Telegram botga keladi.",
+        "cta": "Raqamni bog'lash"
+      },
+      "orgs": "Tashkilotlarim",
+      "noOrgs": "Hali tashkilot yo'q. E'lon berish va buyurtma uchun tashkilot kerak.",
+      "manageOrgs": "Tashkilotni boshqarish",
+      "createOrg": "Tashkilot yaratish",
+      "owner": "egasi",
+      "roles": "rollar",
+      "quick": {
+        "title": "Tez harakatlar",
+        "newListing": "E'lon berish",
+        "listings": "E'lonlarim",
+        "inquiries": "So'rovlar",
+        "newOrder": "Yangi buyurtma"
+      }
+    },
+    "status": {
+      "DRAFT": "Qoralama",
+      "PENDING_REVIEW": "Tekshiruvda",
+      "ACTIVE": "Faol",
+      "REJECTED": "Rad etilgan",
+      "ARCHIVED": "Arxiv",
+      "EXPIRED": "Muddati o'tgan"
+    },
+    "listings": {
+      "title": "E'lonlarim",
+      "new": "Yangi e'lon",
+      "empty": "Hali e'lon yo'q. Texnika yoki avtotransport e'loni bir necha daqiqada tayyor bo'ladi.",
+      "emptyCta": "Birinchi e'lonni berish",
+      "col": {
+        "title": "Nomi",
+        "kind": "Turi",
+        "status": "Holat",
+        "price": "Narx",
+        "views": "Ko'rishlar",
+        "updated": "Yangilangan",
+        "owner": "Kim nomidan"
+      },
+      "publish": "E'lon berish",
+      "republish": "Qayta yuborish",
+      "archive": "Arxivlash",
+      "confirmDelete": "Qoralama o'chirilsinmi?",
+      "rejectReason": "Rad sababi",
+      "expires": "muddati",
+      "open": "Sahifasi",
+      "published": {
+        "PENDING_REVIEW": "Tekshiruvga yuborildi",
+        "ACTIVE": "E'lon faol"
+      }
+    },
+    "form": {
+      "titleNew": "Yangi e'lon",
+      "titleEdit": "E'lonni tahrirlash",
+      "notFound": "E'lon topilmadi.",
+      "backToList": "E'lonlarga qaytish",
+      "pickKind": "Nima e'lon qilasiz?",
+      "kindHint": {
+        "SHUNTING_LOCO": "Ijara yoki sotuv, terminal yoki shahobchada",
+        "ELECTRIC_LOCO": "Ijara yoki sotuv",
+        "WAGON": "Tur, soni, yuk ko'tarish, ijara yoki sotuv",
+        "TRUCK": "Avtotashuvchi: mashina turi, tonnaj, xizmat hududlari"
+      },
+      "changeKind": "Turini o'zgartirish",
+      "org": "Tashkilot",
+      "noOrg": "Temir yo'l texnikasi faqat tashkilot nomidan e'lon qilinadi. Avval tashkilot yarating.",
+      "createOrg": "Tashkilot yaratish",
+      "section": {
+        "main": "Asosiy",
+        "specs": "Texnik ma'lumot",
+        "price": "Narx",
+        "place": "Joylashuv",
+        "coverage": "Xizmat hududi va yo'nalishlar",
+        "photos": "Rasmlar",
+        "contact": "Aloqa"
+      },
+      "field": {
+        "title": "Sarlavha",
+        "description": "Tavsif",
+        "deal": "Bitim",
+        "year": "Ishlab chiqarilgan yil",
+        "condition": "Holati",
+        "regionCode": "Viloyat",
+        "photos": "Rasmlar",
+        "model": "Model",
+        "capacityT": "Yuk ko'tarish, t",
+        "qty": "Soni",
+        "wagonType": "Vagon turi",
+        "truckType": "Mashina turi",
+        "tonnage": "Tonnaj, t",
+        "fleetSize": "Parkdagi mashinalar soni",
+        "serviceRegions": "Xizmat hududlari",
+        "routes": "Doimiy yo'nalishlar",
+        "priceTiyin": "Narx",
+        "priceUnit": "Birlik",
+        "terminalId": "Terminal yoki shahobcha",
+        "sidingId": "Shahobcha yo'l",
+        "responseHours": "Javob muddati, soat",
+        "contactPhone": "Aloqa telefoni",
+        "ownerType": "Kim nomidan"
+      },
+      "placeholder": {
+        "title": "Masalan: TEM2 manevr teplovozi, 1998",
+        "description": "Holati, hujjatlari, qo'shimcha shartlar",
+        "model": "Masalan: TEM2, VL80, 12-132",
+        "contactPhone": "+998 90 123 45 67"
+      },
+      "hint": {
+        "title": "Turi, model va yil ko'rsatilsa qidiruvda tez topiladi",
+        "regionCode": "Texnika hozir qayerda turadi",
+        "serviceRegions": "Bazaviy viloyat ham kiritilishi shart",
+        "responseHours": "Egasi aytgan, o'lchanmagan",
+        "contactPhone": "Faqat kirgan foydalanuvchilarga ko'rinadi",
+        "terminalId": "Bog'lansa e'lon obyekt sahifasida ham chiqadi",
+        "photos": "JPEG, PNG yoki WebP, har biri 5 MB gacha, {max} tagacha"
+      },
+      "deal": {
+        "RENT": "Ijara",
+        "SALE": "Sotuv"
+      },
+      "askPrice": "Narx so'rov bo'yicha",
+      "priceSom": "Narx, so'm",
+      "objectNone": "Bog'lanmagan",
+      "objectTerminals": "Terminallarim",
+      "objectSidings": "Shahobchalarim",
+      "routeFrom": "Qayerdan",
+      "routeTo": "Qayerga",
+      "addRoute": "Yo'nalish qo'shish",
+      "remove": "Olib tashlash",
+      "photoAdd": "Rasm qo'shish",
+      "photoUploading": "Yuklanmoqda",
+      "warningsTitle": "Tavsiya: to'ldirsangiz e'lon ko'proq ko'riladi",
+      "warningMissing": "{field} ko'rsatilmagan",
+      "errorsTitle": "Saqlash uchun xatolarni tuzating",
+      "saveDraft": "Qoralama saqlash",
+      "publish": "E'lon berish",
+      "busy": "Yuborilmoqda",
+      "saved": "Qoralama saqlandi",
+      "published": {
+        "PENDING_REVIEW": "Tekshiruvga yuborildi. Moderator ko'rib chiqqach e'lon faol bo'ladi.",
+        "ACTIVE": "E'lon faol. Tashkilot tasdiqlangan, moderatsiya shart emas."
+      },
+      "currentStatus": "Holat",
+      "err": {
+        "REQUIRED": "Shart",
+        "INVALID": "Noto'g'ri qiymat",
+        "RANGE": "Diapazondan tashqari",
+        "DEAL_NOT_ALLOWED": "Avtotransport uchun bitim tanlanmaydi",
+        "ONE_OBJECT_ONLY": "Faqat bittasi: terminal yoki shahobcha",
+        "PRICE_UNIT_REQUIRED": "Narx birligini tanlang",
+        "UNIT_NOT_FOR_DEAL": "Bu birlik tanlangan bitimga mos emas",
+        "SERVICE_REGIONS_MUST_INCLUDE_BASE": "Bazaviy viloyat xizmat hududlariga kirishi shart",
+        "ROUTE_SAME_REGION": "Yo'nalishning boshi va oxiri bir xil bo'lmasin",
+        "TOO_MANY": "Juda ko'p",
+        "LISTING_INVALID": "Forma to'liq emas, belgilangan maydonlarni tuzating.",
+        "NOT_LISTER": "Bu tashkilot nomidan bunday e'lon bera olmaysiz. Tashkilot turini tekshiring.",
+        "NOT_ORG_MEMBER": "Siz bu tashkilot a'zosi emassiz.",
+        "OBJECT_NOT_FOUND": "Tanlangan obyekt topilmadi.",
+        "LISTING_NOT_FOUND": "E'lon topilmadi.",
+        "TRANSITION_NOT_ALLOWED": "Bu holatda bunday harakat mumkin emas. Sahifani yangilang.",
+        "NOT_DRAFT": "Faqat qoralama o'chiriladi, qolganlarini arxivlang.",
+        "FILE_TYPE": "Faqat JPEG, PNG yoki WebP.",
+        "FILE_TOO_LARGE": "Fayl 5 MB dan katta.",
+        "UPLOAD": "Rasm yuklanmadi. Qayta urinib ko'ring.",
+        "ORG_REQUIRED": "Bu tur faqat tashkilot nomidan beriladi."
+      },
+      "owner": "Kim nomidan",
+      "ownerSelf": "Shaxsan, yakka haydovchi",
+      "ownerHint": "Shaxsiy e'lon moderatsiyadan o'tadi, tasdiqlangan tashkilot e'loni darhol faol bo'ladi.",
+      "ownerPersonNote": "E'lon o'z nomingizdan, yakka haydovchi sifatida chiqadi. Tashkilot nomidan berish uchun avval tashkilot yarating.",
+      "orgRequired": "Temir yo'l texnikasi faqat tashkilot nomidan e'lon qilinadi."
+    },
+    "inquiries": {
+      "title": "So'rovlar",
+      "lead": "Narx so'rovlari: e'lonlaringizga kelganlar va siz yuborganlar.",
+      "tabs": {
+        "owner": "Kelgan",
+        "mine": "Yuborgan"
+      },
+      "empty": {
+        "owner": "Hali so'rov kelmagan. E'lon faol bo'lsa, so'rovlar shu yerda ko'rinadi.",
+        "mine": "Siz hali so'rov yubormagansiz."
+      },
+      "emptyCta": {
+        "owner": "E'lon berish",
+        "mine": "Katalogni ko'rish"
+      },
+      "fromPrivate": "Xususiy shaxs",
+      "openListing": "E'lonni ochish"
+    },
+    "org": {
+      "title": "Tashkilot",
+      "lead": "E'lon, buyurtma va terminal tashkilot nomidan yuritiladi. Tasdiqlangan tashkilot e'lonlari moderatsiyasiz chiqadi.",
+      "new": "Yangi tashkilot",
+      "create": "Yaratish",
+      "created": "Tashkilot yaratildi",
+      "field": {
+        "name": "Nomi",
+        "kinds": "Faoliyat turlari",
+        "description": "Tavsif",
+        "telegram": "Telegram",
+        "website": "Veb-sayt",
+        "phone": "Telefon",
+        "address": "Manzil",
+        "regionCode": "Viloyat",
+        "stir": "STIR"
+      },
+      "hint": {
+        "kinds": "Kamida bittasi. Turlar qaysi rollar va e'lonlar mumkinligini belgilaydi.",
+        "stir": "9 raqam. Tasdiqlash uchun shart.",
+        "telegram": "@foydalanuvchi yoki havola"
+      },
+      "regionNone": "Tanlanmagan",
+      "readOnly": "Faqat egasi tahrirlaydi.",
+      "yourRoles": "Rollaringiz",
+      "owner": "egasi",
+      "kyc": {
+        "title": "Tasdiqlash",
+        "request": "Tasdiqlashga yuborish",
+        "needStir": "Avval STIR kiriting va saqlang.",
+        "requestedAt": "Yuborilgan",
+        "note": "Moderator izohi",
+        "hint": {
+          "NONE": "Tasdiqlangan tashkilot e'lonlari moderatsiyasiz darhol faol bo'ladi.",
+          "PENDING": "Moderator ko'rib chiqmoqda.",
+          "VERIFIED": "E'lonlar moderatsiyasiz darhol faol bo'ladi.",
+          "REJECTED": "Rad etildi. Ma'lumotlarni tuzatib qayta yuborishingiz mumkin."
+        }
+      },
+      "members": {
+        "title": "A'zo qo'shish",
+        "phone": "Telefon",
+        "roles": "Rollar",
+        "invite": "Qo'shish",
+        "invited": "A'zo qo'shildi"
+      },
+      "role": {
+        "CLIENT": "Mijoz",
+        "FORWARDER": "Ekspeditor",
+        "DECLARANT": "Deklarant",
+        "CARRIER": "Avtotashuvchi",
+        "DRIVER": "Haydovchi",
+        "TERMINAL_OPERATOR": "Terminal operatori",
+        "TERMINAL_ADMIN": "Terminal rahbari",
+        "ASSET_OWNER": "Texnika egasi",
+        "LOCO_SERVICE": "Lokomotiv xizmati",
+        "JOB_SEEKER": "Ish izlovchi",
+        "PLATFORM_OPERATOR": "Platforma operatori",
+        "PLATFORM_ADMIN": "Platforma admini"
+      },
+      "err": {
+        "STIR_TAKEN": "Bu STIR boshqa tashkilotda ro'yxatdan o'tgan.",
+        "INVALID_STIR": "STIR 9 raqamdan iborat bo'lishi kerak.",
+        "KIND_NOT_ALLOWED": "Bu tur tanlanmaydi.",
+        "KIND_REQUIRED": "Kamida bitta turni tanlang.",
+        "NOT_OWNER": "Faqat egasi o'zgartira oladi.",
+        "STIR_REQUIRED": "Tasdiqlash uchun STIR shart.",
+        "KYC_ALREADY": "So'rov allaqachon yuborilgan yoki tashkilot tasdiqlangan.",
+        "ROLES_NOT_ALLOWED": "Tanlangan rollar tashkilot turlariga mos emas.",
+        "INVALID_PHONE": "Telefon raqam noto'g'ri."
+      }
+    },
+    "sidings": {
+      "title": "Shahobchalarim",
+      "lead": "Reestrdan da'vo qilgan shahobcha yo'llaringiz va da'vo holati.",
+      "empty": "Sizga biriktirilgan shahobcha yo'l yo'q.",
+      "emptyCta": "Reestrdan topib da'vo qiling",
+      "col": {
+        "no": "Reestr",
+        "station": "Stansiya",
+        "region": "Viloyat",
+        "length": "Uzunlik",
+        "status": "Da'vo holati"
+      },
+      "open": "Sahifasi"
+    },
+    "profile": {
+      "title": "Profil",
+      "lead": "Shaxsiy ma'lumotlar, telefon, parol va hisob sozlamalari.",
+      "noName": "Ism kiritilmagan",
+      "since": "Ro'yxatdan o'tgan: {date}",
+      "avatar": {
+        "upload": "Rasm yuklash",
+        "uploading": "Yuklanmoqda",
+        "remove": "Rasmni olib tashlash"
+      },
+      "personal": {
+        "title": "Shaxsiy ma'lumotlar",
+        "fullName": "Ism va familiya",
+        "email": "Email",
+        "emailLocked": "Google hisobiga bog'langan, o'zgartirib bo'lmaydi.",
+        "locale": "Til"
+      },
+      "phone": {
+        "title": "Telefon",
+        "none": "Telefon bog'lanmagan",
+        "change": "Raqamni o'zgartirish",
+        "add": "Raqam bog'lash",
+        "new": "Yangi raqam",
+        "hint": "Kod yangi raqamga Telegram bot orqali keladi.",
+        "request": "Kod olish",
+        "code": "Kod",
+        "sent": "Kod yuborildi:",
+        "link": {
+          "title": "Yangi raqam botga bog'lanmagan",
+          "body": "Botni oching va kontaktni yuboring, keyin kodni shu yerga kiriting.",
+          "open": "Botni ochish"
+        },
+        "confirm": "Tasdiqlash",
+        "back": "Raqamni o'zgartirish",
+        "changed": "Telefon raqami yangilandi."
+      },
+      "password": {
+        "title": "Parol",
+        "has": "Parol o'rnatilgan. Telefon va parol bilan kira olasiz.",
+        "none": "Parol o'rnatilmagan. Hozir faqat kod bilan kirasiz.",
+        "current": "Joriy parol",
+        "new": "Yangi parol",
+        "confirm": "Yangi parolni takrorlang",
+        "hint": "Kamida {min} belgi. Harf va raqam aralash bo'lsa yaxshi.",
+        "mismatch": "Parollar mos emas.",
+        "set": "Parol o'rnatish",
+        "change": "Parolni o'zgartirish",
+        "done": "Parol saqlandi."
+      },
+      "linked": {
+        "title": "Bog'langan hisoblar",
+        "yes": "bog'langan",
+        "no": "bog'lanmagan",
+        "telegramHint": "Kirish kodlari botga keladi.",
+        "googleNo": "Google bilan kirish ulanmagan."
+      },
+      "danger": {
+        "title": "Hisobni o'chirish",
+        "lead": "Hisob o'chirilsinmi? Qaytarib bo'lmaydi.",
+        "removed": "O'chiriladi: telefon, email, Google va Telegram bog'lanishlari, parol, faol sessiyalar. Shaxsiy e'lonlaringiz arxivlanadi.",
+        "kept": "Qoladi: buyurtmalar va hujjatlar (qonuniy saqlash muddati). Boshqa a'zosi bor tashkilotlar eng eski a'zoga o'tadi; yolg'iz tashkilotlar e'lonlari arxivlanadi, terminallari yashiriladi.",
+        "confirmLabel": "Tasdiqlash uchun DELETE yoki telefon raqamingizni yozing",
+        "button": "Hisobni o'chirish",
+        "busy": "O'chirilmoqda",
+        "done": "Hisob o'chirildi. Bosh sahifaga o'tilmoqda."
+      },
+      "err": {
+        "EMAIL_TAKEN": "Bu email boshqa hisobda.",
+        "EMAIL_LOCKED": "Google hisobiga bog'langan email o'zgartirilmaydi.",
+        "SAME_PHONE": "Bu sizning joriy raqamingiz.",
+        "PHONE_TAKEN": "Bu raqam boshqa hisobga bog'langan.",
+        "INVALID_PHONE": "Telefon raqam noto'g'ri.",
+        "TOO_MANY_REQUESTS": "Juda ko'p so'rov. Biroz kuting.",
+        "OTP_WRONG": "Kod noto'g'ri.",
+        "OTP_EXPIRED": "Kod muddati o'tgan, qaytadan oling.",
+        "OTP_LOCKED": "Urinishlar tugadi, yangi kod oling.",
+        "OTP_NOT_FOUND": "Avval kod so'rang.",
+        "BAD_CREDENTIALS": "Joriy parol noto'g'ri.",
+        "LOGIN_LOCKED": "Urinishlar ko'p. 15 daqiqadan keyin qayta urinib ko'ring.",
+        "CONFIRM_MISMATCH": "Tasdiq matni mos kelmadi.",
+        "FILE_TYPE": "Faqat JPEG, PNG yoki WebP.",
+        "FILE_TOO_LARGE": "Fayl 5 MB dan katta.",
+        "UPLOAD": "Rasm yuklanmadi. Qayta urinib ko'ring."
+      }
+    }
+  }
+}

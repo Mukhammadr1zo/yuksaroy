@@ -1,0 +1,12 @@
+{
+  "a11y": {
+    "skip": "Skip to content",
+    "menu": "Menu",
+    "close": "Close",
+    "remove": "Remove",
+    "sort": "Sort",
+    "locale": "Language",
+    "breadcrumb": "Breadcrumb",
+    "loading": "Loading"
+  }
+}

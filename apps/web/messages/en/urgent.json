@@ -1,0 +1,125 @@
+{
+  "urgent": {
+    "nav": "Urgent",
+    "meta": {
+      "title": "Urgent service request · YukSaroy",
+      "description": "Need a locomotive, wagon repair or a crane: one request, nearby providers send offers."
+    },
+    "status": { "OPEN": "Open", "AWARDED": "Provider chosen", "CLOSED": "Closed", "CANCELLED": "Cancelled" },
+    "offerStatus": { "SENT": "Sent", "AWARDED": "Chosen", "DECLINED": "Declined" },
+    "kindDesc": {
+      "LOCO_CALL": "Wagons are stuck at a station or a siding, a shunting locomotive is needed.",
+      "WAGON_REPAIR": "A fault on the way: a repair crew has to come on site.",
+      "CRANE": "A crane is needed to lift heavy cargo or a container."
+    },
+    "public": {
+      "eyebrow": "Urgent service",
+      "title": "Locomotive, repair or crane with one request",
+      "lead": "The request goes by Telegram to locomotive services, equipment owners and carriers in your region and the neighbouring ones. They offer a price and an arrival time, you choose.",
+      "cta": "Send a request",
+      "ctaNote": "Login required, the request takes a minute.",
+      "kindsTitle": "Request types",
+      "howTitle": "How it works",
+      "steps": {
+        "s1": { "title": "Request", "body": "Type, region, station, wagon count and phone. Nothing else is needed." },
+        "s2": { "title": "Offers", "body": "Nearby providers write a price and an arrival time. Only you see the offers." },
+        "s3": { "title": "Choice and status", "body": "You pick one offer. Send the public status link to partners, it carries no prices." }
+      },
+      "noPrice": "Only the request owner sees prices. The public status page shows none.",
+      "band": {
+        "title": "Are you a provider?",
+        "body": "If your organization is a locomotive service, equipment owner or carrier, requests from your region appear in the dashboard. With Telegram linked you also get a message.",
+        "primary": "Open requests",
+        "secondary": "For providers"
+      }
+    },
+    "statusPage": {
+      "eyebrow": "Urgent request",
+      "notFound": "Request not found",
+      "kind": "Type",
+      "region": "Region",
+      "status": "Status",
+      "provider": "Chosen provider",
+      "noProvider": "not chosen yet",
+      "offers": "Offers",
+      "timeline": "Timeline",
+      "noPrice": "No prices are shown on this page. The link is safe to share with partners.",
+      "home": "YukSaroy home",
+      "event": {
+        "CREATED": "Request sent",
+        "OFFER": "Offer received",
+        "AWARDED": "Provider chosen",
+        "CLOSED": "Request closed",
+        "CANCELLED": "Request cancelled"
+      }
+    },
+    "mine": {
+      "title": "Urgent requests",
+      "lead": "Locomotive, repair or crane requests and the offers they received.",
+      "tabMine": "My requests",
+      "tabProvider": "Open requests (provider)",
+      "new": "New request",
+      "empty": "No requests yet. A new one takes a minute.",
+      "notReady": "The urgent service is not live yet. Try again shortly.",
+      "form": {
+        "kind": "Request type",
+        "region": "Region",
+        "regionPick": "Pick a region",
+        "station": "Station or place",
+        "stationPh": "e.g. Sergeli",
+        "wagons": "Wagon count",
+        "description": "Description",
+        "descriptionPh": "What happened, when it is needed, which wagons",
+        "phone": "Contact phone",
+        "org": "On behalf of",
+        "orgSelf": "Myself (personal)",
+        "submit": "Send request",
+        "sending": "Sending",
+        "missing": "Fill in: {fields}"
+      },
+      "col": { "no": "No", "kind": "Type", "region": "Region", "status": "Status", "offers": "Offers", "created": "Sent" },
+      "offersCount": "{count}"
+    },
+    "detail": {
+      "back": "Back to requests",
+      "notFound": "Request not found",
+      "region": "Region",
+      "station": "Station",
+      "wagons": "Wagons",
+      "phone": "Phone",
+      "created": "Sent",
+      "description": "Description",
+      "statusLink": "Public status link",
+      "statusLinkHint": "Share with partners: price and phone stay hidden.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "offers": "Offers",
+      "noOffers": "No offers yet. Providers were notified, replies usually arrive within an hour.",
+      "onRequest": "no price given",
+      "eta": "in {min} min",
+      "award": "Choose",
+      "awarding": "Choosing",
+      "close": "Close request",
+      "closing": "Closing",
+      "confirmClose": "The request will be closed and no new offers will arrive. Continue?",
+      "awardedNote": "Provider chosen. Close the request once the job is done."
+    },
+    "provider": {
+      "title": "Open requests",
+      "lead": "Open urgent requests in your organization's regions and the neighbouring ones. Put a price and an arrival time in the offer.",
+      "empty": "No open requests right now. A Telegram message arrives when a new one comes in.",
+      "phone": "Customer phone",
+      "offer": {
+        "title": "Send an offer",
+        "price": "Price (som)",
+        "priceHint": "Leave empty to negotiate",
+        "eta": "Arrival time (minutes)",
+        "message": "Note",
+        "send": "Send offer",
+        "sending": "Sending",
+        "sent": "Offer sent. If the customer picks you the status changes in the dashboard.",
+        "mine": "Your offer"
+      }
+    }
+  }
+}

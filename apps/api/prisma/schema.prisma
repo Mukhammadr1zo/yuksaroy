@@ -1,0 +1,804 @@
+// YukSaroy: sxema v0.2 (identity + organizations + catalog). Enum'lar packages/domain bilan bir xil.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  FORWARDER
+  DECLARANT
+  CARRIER
+  DRIVER
+  TERMINAL_OPERATOR
+  TERMINAL_ADMIN
+  ASSET_OWNER
+  LOCO_SERVICE
+  JOB_SEEKER
+  PLATFORM_OPERATOR
+  PLATFORM_ADMIN
+}
+
+enum OrgKind {
+  SHIPPER
+  FORWARDER
+  DECLARANT
+  CARRIER
+  TERMINAL
+  ASSET_OWNER
+  LOCO_SERVICE
+  PLATFORM
+}
+
+enum KycStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id            String        @id @default(cuid())
+  phone         String?       @unique // E.164: +998901234567; Google orqali kirganda bo'sh bo'lishi mumkin
+  email         String?       @unique
+  googleSub     String?       @unique
+  avatarUrl     String?
+  fullName      String?
+  locale        String        @default("uz")
+  personalRoles Role[]        @default([]) // DRIVER, JOB_SEEKER: tashkilotsiz
+  isActive      Boolean       @default(true)
+  passwordHash  String? // argon2/bcrypt; bo'sh bo'lsa faqat kod yoki Google bilan kiradi
+  passwordSetAt DateTime?     @db.Timestamptz(3)
+  failedLogins  Int           @default(0) // PASSWORD.maxAttempts dan keyin lockedUntil
+  lockedUntil   DateTime?     @db.Timestamptz(3)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(3)
+  telegram      TelegramLink?
+  memberships   Membership[]
+  sessions      Session[]
+  listings      Listing[] // yakka haydovchi e'lonlari (ownerUserId)
+}
+
+/// Telefon ↔ Telegram chat bog'lanishi. OTP shu chatga yuboriladi (SMS yo'q).
+model TelegramLink {
+  userId   String   @id
+  chatId   BigInt   @unique
+  username String?
+  linkedAt DateTime @default(now()) @db.Timestamptz(3)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Web'dan boshlangan kirish urinishi: telefon kiritildi → kod bot orqali yuboriladi.
+model OtpCode {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @db.Timestamptz(3)
+  consumedAt DateTime? @db.Timestamptz(3)
+  /// Bot deep-link tokeni: telefon hali botga bog'lanmagan bo'lsa, /start login_<token> bilan bog'lanadi
+  linkToken  String?   @unique
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([phone, createdAt])
+}
+
+/// Refresh-token sessiyasi (rotation: har yangilashda yangi qator, eskisi revokedAt).
+model Session {
+  id           String    @id @default(cuid())
+  userId       String
+  refreshHash  String    @unique
+  userAgent    String?
+  ip           String?
+  expiresAt    DateTime  @db.Timestamptz(3)
+  revokedAt    DateTime? @db.Timestamptz(3)
+  replacedById String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Organization {
+  id             String       @id @default(cuid())
+  kind           OrgKind // = kinds[0], eski kod uchun
+  kinds          OrgKind[]    @default([])
+  slug           String?      @unique
+  name           String
+  description    String?
+  telegram       String?
+  website        String?
+  stir           String?      @unique // STIR/INN: 9 raqam
+  kycStatus      KycStatus    @default(NONE)
+  kycRequestedAt DateTime?    @db.Timestamptz(3)
+  kycNote        String?
+  phone          String?
+  address        String?
+  regionCode     String? // viloyat kodi (ESR/SOATO): katalog filtrlari uchun
+  storefront     Json? // /k/[slug] do'kon: { tagline, about, logoUrl, coverUrl, showListings, showTerminals, contactTelegram, contactPhonePublic }
+  createdAt      DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime     @updatedAt @db.Timestamptz(3)
+  members        Membership[]
+  terminals      Terminal[]
+  sidings        Siding[]
+  orders         Order[]      @relation("OrderShipper")
+  documents      Document[]
+  invoices       Invoice[]    @relation("InvoicePayer")
+  supplied       Invoice[]    @relation("InvoiceSupplier")
+  listings       Listing[]
+  reviews        Review[]
+
+  @@index([kind])
+}
+
+model Membership {
+  id        String       @id @default(cuid())
+  userId    String
+  orgId     String
+  roles     Role[]
+  isOwner   Boolean      @default(false)
+  createdAt DateTime     @default(now()) @db.Timestamptz(3)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+}
+
+/// Kim, nima, qachon: barcha muhim o'zgarishlar. Immutable.
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String // e.g. auth.login, org.create
+  entity    String?
+  entityId  String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+}
+
+// ───────────────────────── Katalog (S2) ─────────────────────────
+
+enum Rju {
+  TAS
+  KOK
+  BUX
+  KUN
+  KAR
+  TER
+}
+
+enum TerminalKind {
+  YARD
+  CONTAINER
+  LC
+  SVX
+}
+
+enum TerminalStatus {
+  DRAFT
+  ACTIVE
+  HIDDEN
+}
+
+enum ServiceCode {
+  LOAD
+  UNLOAD
+  WEIGH
+  STORAGE
+  SVX
+  CONTAINER
+  LAST_MILE
+  SHUNTING
+}
+
+enum TariffUnit {
+  PER_TON
+  PER_WAGON
+  PER_OPERATION
+  PER_DAY
+}
+
+enum ClaimStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// O'TY 2026 rasmiy stansiya reestri (276) + ESR kodi (6 raqam: 5 + nazorat) shahobcha reestridan.
+model Station {
+  id          String     @id @default(cuid())
+  esrCode     String?    @unique
+  nameUz      String
+  nameRu      String?
+  rju         Rju
+  stationType String? // passenger/freight/mixed/junction/yard/terminal/border/halt
+  classRank   String? // 1..5, extra
+  isTariff    Boolean    @default(true)
+  lat         Float?
+  lng         Float?
+  createdAt   DateTime   @default(now()) @db.Timestamptz(3)
+  terminals   Terminal[]
+  sidings     Siding[]
+  orders      Order[]
+
+  @@index([nameUz])
+  @@index([rju])
+}
+
+/// ETSNG yuk pozitsiyalari (407): code..codeTo oralig'idagi yuk kodlari shu pozitsiyaga kiradi.
+model CargoType {
+  id        String  @id @default(cuid())
+  code      String  @unique // pozitsiya kodi, 5 raqam
+  codeTo    String
+  name      String // ru (rasmiy)
+  nameUz    String?
+  groupCode String
+  groupName String
+  orders    Order[]
+
+  @@index([name])
+  @@index([groupCode])
+}
+
+/// Shahobcha yo'llar milliy reestri (1 393). Egasi claim qilib tasdiqlanmaguncha ownerNameRaw ommaga ko'rsatilmaydi.
+model Siding {
+  id             String        @id @default(cuid())
+  registryNo     Int           @unique // reestrdagi № (idempotent import kaliti)
+  stationId      String?
+  station        Station?      @relation(fields: [stationId], references: [id], onDelete: SetNull)
+  stationNameRaw String
+  esrCode        String?
+  rju            Rju?
+  ownerNameRaw   String // reestrdagi vetvevladelets nomi (yashirin)
+  ownerOrgId     String?
+  ownerOrg       Organization? @relation(fields: [ownerOrgId], references: [id], onDelete: SetNull)
+  claimStatus    ClaimStatus   @default(NONE)
+  claimedAt      DateTime?     @db.Timestamptz(3)
+  regionCode     String? // viloyat, joylashuvdan hisoblanadi
+  lat            Float? // reestrda koordinata yo'q: tutashgan joy nuqtasi, taqribiy
+  lng            Float?
+  lengthM        Int?
+  unloadCapacity Int           @default(0) // bir vaqtda tushirish uchun vagon
+  loadCapacity   Int           @default(0)
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+  listings       Listing[]
+
+  @@index([stationId])
+  @@index([esrCode])
+  @@index([ownerOrgId])
+}
+
+/// Terminal pasporti. orgId bo'sh: jamoa ochiq ma'lumotdan kiritgan («claim your terminal»).
+model Terminal {
+  id          String            @id @default(cuid())
+  orgId       String?
+  org         Organization?     @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  stationId   String
+  station     Station           @relation(fields: [stationId], references: [id])
+  kind        TerminalKind
+  slug        String            @unique
+  name        String
+  description String?
+  address     String?
+  phone       String?
+  lat         Float?
+  lng         Float?
+  is24h       Boolean           @default(false)
+  hours       Json? // { mon: [["08:00","18:00"]], ... }: is24h bo'lsa e'tiborsiz
+  passport    Json? // { tracks, tracksLengthM, cranes: [{ type, capacityT }], warehouseM2, openAreaM2, hasSvx, hasScale }
+  photos      String[]          @default([])
+  status      TerminalStatus    @default(DRAFT)
+  claimStatus ClaimStatus       @default(NONE) // terminal da'vosi: PENDING -> admin hal qiladi
+  claimOrgId  String? // da'vo qilgan tashkilot; tasdiqlansa orgId ga ko'chadi
+  claimedAt   DateTime?         @db.Timestamptz(3)
+  regionCode  String? // viloyat (UZ-TK, UZ-TO, ...), koordinatadan hisoblanadi
+  ratingAvg   Float             @default(0)
+  ratingCount Int               @default(0)
+  createdAt   DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
+  slotConfig  Json? // { windows: [{ window, start, end, capacity }] }: slot generatsiyasi uchun
+  services    TerminalService[]
+  tariffs     Tariff[]
+  slots       TimeSlot[]
+  orders      Order[]
+  listings    Listing[]
+  reviews     Review[]
+
+  @@index([stationId])
+  @@index([status, kind])
+  @@index([claimStatus])
+}
+
+model TerminalService {
+  id          String      @id @default(cuid())
+  terminalId  String
+  terminal    Terminal    @relation(fields: [terminalId], references: [id], onDelete: Cascade)
+  serviceCode ServiceCode
+  isEnabled   Boolean     @default(true)
+  leadTimeMin Int         @default(0)
+
+  @@unique([terminalId, serviceCode])
+}
+
+/// Append-only tarif versiyalari. Amaldagi: validFrom <= now < validTo (yoki validTo null).
+/// Migratsiyada EXCLUDE gist: bitta terminal × xizmat × yuk guruhi uchun davrlar kesishmaydi.
+model Tariff {
+  id             String      @id @default(cuid())
+  terminalId     String
+  terminal       Terminal    @relation(fields: [terminalId], references: [id], onDelete: Cascade)
+  serviceCode    ServiceCode
+  cargoGroupCode String? // null: barcha yuklar uchun
+  version        Int
+  validFrom      DateTime    @db.Timestamptz(3)
+  validTo        DateTime?   @db.Timestamptz(3)
+  priceTiyin     BigInt
+  unit           TariffUnit
+  minTiyin       BigInt?
+  note           String?
+  createdById    String?
+  createdAt      DateTime    @default(now()) @db.Timestamptz(3)
+
+  @@unique([terminalId, serviceCode, version])
+  @@index([terminalId, serviceCode, validFrom])
+}
+
+/// Platforma sozlamalari (komissiya, SLA, TTL). Kalitlar: packages/domain PLATFORM_DEFAULTS.
+model PlatformConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+// ───────────────────────── Booking + Orders (S3) ─────────────────────────
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  EXPIRED
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum BookingStatus {
+  HOLD
+  CONFIRMED
+  RELEASED
+}
+
+enum SlotStatus {
+  OPEN
+  CLOSED
+}
+
+enum Direction {
+  LOCAL
+  IMPORT
+  EXPORT
+}
+
+enum CommissionPayer {
+  CLIENT
+  TERMINAL
+}
+
+/// Tayim-slot: terminal × kun (Toshkent vaqti) × oyna. Sig'im bitta raqam (7.4 #3).
+/// Migratsiyada CHECK: booked >= 0, held >= 0, booked + held <= capacity.
+model TimeSlot {
+  id         String        @id @default(cuid())
+  terminalId String
+  terminal   Terminal      @relation(fields: [terminalId], references: [id], onDelete: Cascade)
+  localDate  DateTime      @db.Date // Toshkent kuni
+  window     Int // 1..n, terminal sozlamasidagi oyna raqami
+  startsAt   DateTime      @db.Timestamptz(3)
+  endsAt     DateTime      @db.Timestamptz(3)
+  capacity   Int
+  booked     Int           @default(0)
+  held       Int           @default(0)
+  status     SlotStatus    @default(OPEN)
+  createdAt  DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime      @updatedAt @db.Timestamptz(3)
+  bookings   SlotBooking[]
+
+  @@unique([terminalId, localDate, window])
+  @@index([terminalId, startsAt])
+}
+
+/// Slot bandligi: HOLD (10 daq) → CONFIRMED (buyurtma tasdiqlanganda) yoki RELEASED.
+model SlotBooking {
+  id            String        @id @default(cuid())
+  slotId        String
+  slot          TimeSlot      @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  userId        String
+  orgId         String?
+  orderId       String?       @unique
+  order         Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  status        BookingStatus @default(HOLD)
+  holdExpiresAt DateTime?     @db.Timestamptz(3)
+  extendedOnce  Boolean       @default(false)
+  confirmedAt   DateTime?     @db.Timestamptz(3)
+  releasedAt    DateTime?     @db.Timestamptz(3)
+  releaseReason String? // EXPIRED | CANCELLED | REJECTED | MANUAL
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([slotId, status])
+  @@index([status, holdExpiresAt])
+  @@index([userId, createdAt])
+}
+
+/// Buyurtma. Narx yaratilganda muzlatiladi (OrderItem.tariffId + unitPriceTiyin).
+model Order {
+  id              String               @id @default(cuid())
+  no              String               @unique // YS-1041
+  shipperOrgId    String
+  shipperOrg      Organization         @relation("OrderShipper", fields: [shipperOrgId], references: [id])
+  createdById     String
+  terminalId      String
+  terminal        Terminal             @relation(fields: [terminalId], references: [id])
+  stationId       String
+  station         Station              @relation(fields: [stationId], references: [id])
+  direction       Direction            @default(LOCAL)
+  operation       ServiceCode // LOAD | UNLOAD
+  cargoTypeId     String?
+  cargoType       CargoType?           @relation(fields: [cargoTypeId], references: [id])
+  weightKg        Int
+  wagonCount      Int                  @default(1)
+  storageDays     Int?
+  wagonNumbers    String[]             @default([]) // tushirishda mijoz kiritadi (F1 da qo'lda)
+  note            String?
+  subtotalTiyin   BigInt
+  commissionPct   Int                  @default(0) // 300 = 3,00 %
+  commissionPayer CommissionPayer      @default(TERMINAL)
+  commissionTiyin BigInt               @default(0)
+  totalTiyin      BigInt
+  status          OrderStatus          @default(PENDING)
+  slaConfirmUntil DateTime?            @db.Timestamptz(3)
+  confirmedAt     DateTime?            @db.Timestamptz(3)
+  closedAt        DateTime?            @db.Timestamptz(3)
+  createdAt       DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime             @updatedAt @db.Timestamptz(3)
+  items           OrderItem[]
+  history         OrderStatusHistory[]
+  documents       Document[]
+  invoice         Invoice?
+  booking         SlotBooking?
+
+  @@index([shipperOrgId, createdAt])
+  @@index([terminalId, status, slaConfirmUntil])
+  @@index([status, slaConfirmUntil])
+}
+
+/// Buyurtma qatori: xizmat × miqdor × muzlatilgan tarif.
+model OrderItem {
+  id             String      @id @default(cuid())
+  orderId        String
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  serviceCode    ServiceCode
+  tariffId       String? // muzlatilgan tarif versiyasi (nizoda "qaysi tarif bilan")
+  qty            Float
+  unit           TariffUnit
+  unitPriceTiyin BigInt
+  amountTiyin    BigInt
+  minApplied     Boolean     @default(false)
+
+  @@index([orderId])
+}
+
+/// Append-only: holat o'tishlari va ichki hodisalar (ARRIVED/WEIGHED/LOADED…).
+model OrderStatusHistory {
+  id         String       @id @default(cuid())
+  orderId    String
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus?
+  code       String? // ORDER_EVENT_CODES: ARRIVED | WEIGHED | LOADED | UNLOADED | DEPARTED | NO_SHOW
+  actorId    String?
+  actorRole  String? // CLIENT | TERMINAL | SYSTEM | ADMIN
+  reason     String?
+  payload    Json?
+  at         DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@index([orderId, at])
+}
+
+/// Takroriy POST himoyasi (Idempotency-Key). Javob keshlanadi, muddat 24 soat.
+model IdempotencyKey {
+  key       String   @id
+  userId    String
+  endpoint  String
+  status    Int
+  response  Json
+  expiresAt DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}
+
+// ── Hujjatlar va hisob (M5.1) ──
+enum DocKind {
+  ACT
+  INVOICE
+}
+
+enum DocumentStatus {
+  READY
+  VOID
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID_OFFLINE
+  OVERDUE
+  VOID
+}
+
+/// Hujjat: PDF fayl saqlanmaydi, `payload` muzlatilgan ma'lumot va PDF har safar shundan chiziladi.
+/// ponytail: fayl ombori (MinIO) F2 da; hozir bitta manba yetarli va hujjat hech qachon eskirmaydi.
+model Document {
+  id        String         @id @default(cuid())
+  no        String         @unique
+  kind      DocKind
+  status    DocumentStatus @default(READY)
+  orgId     String
+  org       Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orderId   String?
+  order     Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  payload   Json
+  sha256    String
+  qrToken   String         @unique
+  slaDueAt  DateTime?      @db.Timestamptz(3)
+  createdAt DateTime       @default(now()) @db.Timestamptz(3)
+
+  @@index([orgId, createdAt])
+  @@index([orderId])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  no             String        @unique
+  status         InvoiceStatus @default(DRAFT)
+  orgId          String
+  org            Organization  @relation("InvoicePayer", fields: [orgId], references: [id], onDelete: Cascade)
+  supplierOrgId  String?
+  supplier       Organization? @relation("InvoiceSupplier", fields: [supplierOrgId], references: [id], onDelete: SetNull)
+  orderId        String?       @unique
+  order          Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  amountTiyin    BigInt
+  vatTiyin       BigInt        @default(0)
+  dueAt          DateTime      @db.Timestamptz(3)
+  paidAt         DateTime?     @db.Timestamptz(3)
+  paidMarkedById String?
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([orgId, status])
+  @@index([status, dueAt])
+}
+
+// ───────────────────────── E'lonlar (texnika va avtotransport) ─────────────────────────
+
+enum ListingKind {
+  SHUNTING_LOCO
+  ELECTRIC_LOCO
+  WAGON
+  TRUCK
+}
+
+enum DealKind {
+  RENT
+  SALE
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  ARCHIVED
+  EXPIRED
+}
+
+enum Condition {
+  NEW
+  GOOD
+  NEEDS_REPAIR
+}
+
+enum PriceUnit {
+  TOTAL
+  PER_MONTH
+  PER_DAY
+  PER_HOUR
+  PER_KM
+  PER_TON
+  PER_TRIP
+}
+
+/// E'lon: teplovoz / elektrovoz / vagon (ijara yoki sotuv) yoki avtotashuvchi. Qoidalar: packages/domain LISTING_RULES.
+/// Migratsiyada CHECK: terminalId yoki sidingId (ikkalasi emas); priceTiyin bo'lsa priceUnit shart;
+/// listing_owner: orgId yoki ownerUserId (yakka haydovchi, faqat TRUCK) bo'lishi shart.
+model Listing {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  orgId          String?
+  org            Organization?  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  ownerUserId    String? // yakka shaxs e'loni: tashkilotsiz
+  ownerUser      User?          @relation(fields: [ownerUserId], references: [id], onDelete: SetNull)
+  createdById    String
+  kind           ListingKind
+  deal           DealKind? // TRUCK uchun null
+  status         ListingStatus  @default(DRAFT)
+  title          String
+  description    String?
+  regionCode     String
+  terminalId     String?
+  terminal       Terminal?      @relation(fields: [terminalId], references: [id], onDelete: SetNull)
+  sidingId       String?
+  siding         Siding?        @relation(fields: [sidingId], references: [id], onDelete: SetNull)
+  lat            Float?
+  lng            Float?
+  priceTiyin     BigInt?
+  priceUnit      PriceUnit?
+  photos         String[]       @default([])
+  year           Int?
+  condition      Condition?
+  model          String?
+  qty            Int            @default(1)
+  wagonType      String?
+  capacityT      Int?
+  truckType      String?
+  tonnage        Int?
+  fleetSize      Int?
+  serviceRegions String[]       @default([])
+  routes         Json? // [{ from, to }] viloyat kodlari
+  contactPhone   String?
+  responseHours  Int?
+  premiumUntil   DateTime?      @db.Timestamptz(3)
+  publishedAt    DateTime?      @db.Timestamptz(3)
+  expiresAt      DateTime?      @db.Timestamptz(3)
+  rejectReason   String?
+  views          Int            @default(0)
+  createdAt      DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @db.Timestamptz(3)
+  inquiries      Inquiry[]
+  premiumOrders  PremiumOrder[]
+
+  @@index([status, kind, regionCode])
+  @@index([orgId, status])
+  @@index([ownerUserId, status])
+  @@index([terminalId])
+  @@index([sidingId])
+  @@index([status, expiresAt])
+}
+
+/// Narx so'rovi: e'lon egasiga xabar. status: OPEN | CLOSED (F1 da matn).
+model Inquiry {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  fromOrgId  String?
+  fromUserId String
+  message    String
+  status     String   @default("OPEN")
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([listingId, createdAt])
+  @@index([fromUserId, createdAt])
+}
+
+// ── Ishonch va monetizatsiya (5-bosqich) ──
+
+/// Bajarilgan buyurtma uchun bitta baho (orderNo unique). Terminal.ratingAvg/ratingCount shundan qayta hisoblanadi.
+model Review {
+  id         String       @id @default(cuid())
+  orderNo    String       @unique
+  terminalId String
+  terminal   Terminal     @relation(fields: [terminalId], references: [id], onDelete: Cascade)
+  orgId      String // yuk egasi tashkiloti
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userId     String
+  rating     Int // 1..5
+  text       String? // <= 1000 belgi
+  reply      String? // terminal javobi
+  excluded   Boolean      @default(false) // arms-length: buyurtmachi va terminal egasi bir tomon; sharh ko'rinadi, reytingga kirmaydi
+  repliedAt  DateTime?    @db.Timestamptz(3)
+  createdAt  DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@index([terminalId, createdAt])
+}
+
+/// Ko'rsatishlar: kun va yuza bo'yicha yig'ilgan hisob, foydalanuvchi ma'lumoti yo'q.
+model Impression {
+  id       String   @id @default(cuid())
+  kind     String // 'listing' | 'terminal'
+  targetId String
+  day      DateTime @db.Date
+  surface  String // 'list' | 'map' | 'detail' | 'compare' | 'bot'
+  count    Int      @default(0)
+
+  @@unique([kind, targetId, day, surface])
+}
+
+/// Premium buyurtmasi: hozircha qo'lda to'lov (manual), keyin Payme/Click.
+model PremiumOrder {
+  id          String    @id @default(cuid())
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  orgId       String?
+  userId      String
+  months      Int // 1..12
+  amountTiyin BigInt
+  status      String    @default("PENDING") // PENDING | PAID | CANCELLED
+  provider    String? // 'manual'
+  paidAt      DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([listingId])
+  @@index([status])
+}
+
+/// /contact formasi xabari.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  contact   String
+  topic     String
+  message   String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+}
+
+// ── Shoshilinch xizmat so'rovlari (/urgent) ──
+
+/// Shoshilinch so'rov: teplovoz chaqirish, vagon ta'miri, kran. no = 'UR-' + urgent_no_seq (migratsiyada).
+/// kind: URGENT_KINDS, status: URGENT_STATUSES (packages/domain). statusToken: ommaviy holat havolasi (narxsiz).
+model UrgentRequest {
+  id             String        @id @default(cuid())
+  no             String        @unique
+  kind           String // LOCO_CALL | WAGON_REPAIR | CRANE | OTHER
+  regionCode     String
+  lat            Float?
+  lng            Float?
+  stationName    String?
+  wagonCount     Int?
+  description    String // <= 2000 belgi
+  contactPhone   String
+  createdById    String
+  orgId          String?
+  status         String        @default("OPEN") // OPEN | AWARDED | CLOSED | CANCELLED
+  awardedOfferId String?
+  statusToken    String        @unique
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+  offers         UrgentOffer[]
+
+  @@index([status, regionCode])
+  @@index([createdById])
+}
+
+/// Provayder taklifi: narx (tiyin) va yetib kelish vaqti (daqiqa). status: URGENT_OFFER_STATUSES.
+model UrgentOffer {
+  id             String        @id @default(cuid())
+  requestId      String
+  request        UrgentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerOrgId  String?
+  providerUserId String
+  priceTiyin     BigInt?
+  etaMinutes     Int?
+  message        String?
+  status         String        @default("SENT") // SENT | AWARDED | DECLINED
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([requestId])
+}

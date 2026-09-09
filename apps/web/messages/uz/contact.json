@@ -1,0 +1,40 @@
+{
+  "contact": {
+    "meta": {
+      "title": "Bog'lanish · YukSaroy",
+      "description": "Demo, savol, texnik muammo yoki hamkorlik. Forma orqali yozing, 24 soat ichida javob beramiz."
+    },
+    "eyebrow": "Bog'lanish",
+    "title": "Yozing, 24 soat ichida javob beramiz",
+    "lead": "Demo ko'rsatish, platforma haqida savol, texnik muammo yoki hamkorlik taklifi. Barchasi bitta formada.",
+    "form": {
+      "name": "Ismingiz",
+      "contact": "Telefon yoki email",
+      "contactHint": "Javobni shu manzilga yuboramiz",
+      "topic": "Mavzu",
+      "topics": { "demo": "Demo", "question": "Savol", "tech": "Texnik muammo", "partner": "Hamkorlik" },
+      "message": "Xabar",
+      "messageHint": "Kamida 10 ta belgi",
+      "submit": "Yuborish",
+      "sending": "Yuborilmoqda"
+    },
+    "success": {
+      "title": "Qabul qilindi",
+      "body": "24 soat ichida javob beramiz. Shoshilinch bo'lsa Telegram botga yozing.",
+      "again": "Yana yozish"
+    },
+    "error": {
+      "generic": "Yuborilmadi. Maydonlarni tekshirib qayta urinib ko'ring.",
+      "rate": "Juda ko'p urinish. Bir daqiqadan keyin qayta yuboring."
+    },
+    "aside": {
+      "heading": "Boshqa yo'llar",
+      "bot": "Telegram bot",
+      "botNote": "Katalog, so'rovlar va bildirishnomalar botda ham bor.",
+      "pricing": "Tariflar va savollar",
+      "pricingNote": "Premium, komissiya va to'lov haqida javoblar.",
+      "developers": "Ochiq API",
+      "developersNote": "Ro'yxatlar va ontologiya, anonim o'qish."
+    }
+  }
+}

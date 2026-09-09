@@ -1,0 +1,130 @@
+{
+  "marketing": {
+    "footer": {
+      "shippers": "For shippers",
+      "providers": "For providers",
+      "booking": "Booking"
+    },
+    "common": {
+      "how": "How it was calculated",
+      "disclaimer": "The calculation relies only on the numbers you entered. The platform does not guarantee savings or revenue; the result is for information.",
+      "perYear": "per year",
+      "faq": "Frequently asked questions",
+      "values": "What you get"
+    },
+    "shippers": {
+      "meta": {
+        "title": "For shippers · YukSaroy",
+        "description": "Open tariffs, today's slots, a frozen price and documents. Savings calculator: what waiting days and phone hours cost you."
+      },
+      "eyebrow": "For shippers and forwarders",
+      "title": "Pick a terminal, book a slot, get the documents",
+      "lead": "Compare tariffs without calling, see a free window and book it, and find the act and invoice waiting in your cabinet at the end.",
+      "facts": {
+        "terminals": "{count} active terminals",
+        "freeSlots": "{count} free slots today",
+        "sidings": "{count} sidings"
+      },
+      "cta": { "primary": "Browse terminals", "secondary": "Calculate a price" },
+      "values": {
+        "tariffs": { "title": "Open tariffs", "body": "Terminal tariffs are public in the catalog: price per ton, wagon or operation plus the minimum amount. Compare without a single call." },
+        "slots": { "title": "Today's slots", "body": "Every terminal's working windows and free places are visible. Pick a window and book it, no waiting in line." },
+        "frozen": { "title": "Frozen price and documents", "body": "The tariff is frozen when the order is sent. At the end the act and invoice PDFs are ready in the cabinet." },
+        "chain": { "title": "State chain", "body": "Arrived, weighed, loaded, departed: the terminal marks it, you see it on the order page. No room for disputes." },
+        "registry": { "title": "One place: registry, equipment, trucks", "body": "The sidings registry, shunting locomotive and wagon rental, road carriers for the last mile. Each with its owner's page." }
+      },
+      "roi": {
+        "heading": "Savings calculator",
+        "lead": "Enter what waiting days and phone hours cost you. The formula is open, the calculation runs in your browser.",
+        "fields": {
+          "wagonDay": "Wagon-day fee, UZS",
+          "daysSaved": "Waiting days saved per order",
+          "orders": "Orders per month",
+          "hours": "Hours saved per order",
+          "rate": "Staff hourly rate, UZS"
+        },
+        "result": "Yearly saving",
+        "perOrder": "{amount} per order",
+        "formula": "Yearly saving = 12 × orders per month × (days saved × wagon-day fee + hours saved × hourly rate)"
+      },
+      "faq": {
+        "q1": "Do I need to register to book?",
+        "a1": "The price calculator and the catalog are open without login. Booking a slot, sending a request and seeing a phone number need a cabinet: one minute via phone number or Google.",
+        "q2": "How is the price calculated?",
+        "a2": "Tariff × weight (or wagon count) + extra services. If the terminal set a minimum amount, it applies. Platform commission is 0 % in the pilot.",
+        "q3": "What if the terminal does not confirm?",
+        "a3": "If the order is not confirmed within the SLA it expires, the slot is released and you turn to another terminal. A rejection reason is shown on the order page.",
+        "q4": "How reliable are the tariffs?",
+        "a4": "A tariff of an owner-confirmed terminal is published by the terminal itself. A tariff from an unconfirmed passport is compiled from open data and marked as an estimate.",
+        "q5": "Where do I get the documents?",
+        "a5": "Once the order is done, the act and invoice PDFs sit in the Documents section of the cabinet. Each document shows the frozen tariff and the weighing result."
+      },
+      "band": {
+        "title": "Place your first order today",
+        "body": "The catalog is open, the price calculator needs no login. A cabinet opens in a minute.",
+        "primary": "Terminals with free slots today",
+        "secondary": "Sign up"
+      }
+    },
+    "providers": {
+      "meta": {
+        "title": "For providers · YukSaroy",
+        "description": "For terminal, equipment and truck owners: a standard listing, requests only from logged-in users, an order board and documents. Revenue calculator."
+      },
+      "eyebrow": "For terminals, equipment and truck owners",
+      "title": "Publish a listing, receive requests and orders",
+      "lead": "Clients find you by region and corridor, see your tariffs and slots, and their request or order lands in your cabinet.",
+      "facts": {
+        "companies": "{count} companies in the catalog",
+        "listings": "{count} active listings",
+        "terminals": "{count} active terminals"
+      },
+      "cta": { "primary": "Publish a listing", "secondary": "Add a terminal" },
+      "values": {
+        "catalog": { "title": "A listing by the standard", "body": "Every listing has the same fields, so clients can compare and find you. You show up in searches by region and corridor." },
+        "inquiries": { "title": "Requests only from logged-in users", "body": "Your phone number is visible only to registered users. Requests arrive in the cabinet, no spam." },
+        "terminal": { "title": "Terminal: tariff, slots, order board", "body": "Publish a tariff, open daily capacity, orders arrive on the board: confirm, mark states, complete." },
+        "documents": { "title": "Act and invoice, automatically", "body": "Once an order is done, the act and invoice PDFs are generated. You mark payment in the cabinet." },
+        "claim": { "title": "Claim your object", "body": "If your terminal or siding is already in the registry, claim it as the owner: you manage the passport." }
+      },
+      "roi": {
+        "heading": "Revenue calculator",
+        "lead": "Enter the number of listings, expected demand and the average order value. The platform price is subtracted.",
+        "fields": {
+          "listings": "Number of listings",
+          "avgValue": "Average order value, UZS"
+        },
+        "demand": {
+          "label": "Expected demand",
+          "low": "Conservative",
+          "mid": "Typical",
+          "high": "High demand",
+          "hint": "{n} extra orders / listing / month"
+        },
+        "gross": "Yearly revenue",
+        "price": "Platform price (Premium, planned)",
+        "priceNote": "{price} / listing / month. Listing is free in the pilot.",
+        "net": "Net revenue",
+        "formula": "Yearly revenue = 12 × listings × demand × average value; platform price = 12 × listings × {price}"
+      },
+      "faq": {
+        "q1": "Is publishing paid?",
+        "a1": "Free in the pilot. Premium placement is planned later: a monthly price per listing, shown in the calculator.",
+        "q2": "Who can publish a listing?",
+        "a2": "An organization: terminal, equipment or siding owner, locomotive service, road carrier. A truck listing can also be published by an individual driver.",
+        "q3": "How long does review take?",
+        "a3": "A listing from a KYC-verified organization goes live immediately. Others pass moderation; if rejected, the reason is shown and the listing can be resubmitted.",
+        "q4": "How does a terminal receive orders?",
+        "a4": "On the board in the cabinet: a new order arrives with an SLA timer, you confirm or reject, then mark the states. Every step is visible to the client.",
+        "q5": "My object is already in the registry",
+        "a5": "The object page has a claim button. Once the operator approves, you manage the passport, tariffs and slots."
+      },
+      "band": {
+        "title": "Get your listing into the catalog today",
+        "body": "The standard form takes 10 minutes. A listing from a KYC-verified organization goes live immediately.",
+        "primary": "Publish a listing",
+        "secondary": "Sign up"
+      }
+    }
+  }
+}

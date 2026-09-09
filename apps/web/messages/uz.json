@@ -1,0 +1,528 @@
+{
+  "brand": {
+    "name": "YukSaroy"
+  },
+  "meta": {
+    "site": {
+      "title": "YukSaroy",
+      "description": "Yuk logistikasi bozori: terminal xizmatlari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport bir joyda. Egalar o'z xizmat va texnikasini e'lon qiladi, siz keraklisini topasiz."
+    },
+    "terminals": {
+      "title": "Terminallar · YukSaroy",
+      "description": "Yuk terminallari va yuk saroylari katalogi: pasport, ish vaqti, xizmatlar va shartlar."
+    },
+    "terminal": {
+      "title": "{name} · YukSaroy",
+      "description": "{kind}, {station} stansiyasi. {hours}.",
+      "notFound": "Terminal topilmadi"
+    },
+    "sidings": {
+      "title": "Shahobcha yo'llar reestri · YukSaroy",
+      "description": "1 300+ xususiy shahobcha yo'l reestri: joylashuv, uzunlik, sig'im. Egasi tasdiqlagach, bog'lanish."
+    },
+    "texnika": {
+      "title": "Temir yo'l texnikasi · YukSaroy",
+      "description": "Teplovoz, elektrovoz va vagonlar: sotib olish yoki arendaga olish e'lonlari."
+    },
+    "avtotransport": {
+      "title": "Avtotransport · YukSaroy",
+      "description": "Yuk mashinalari va avtotashuvchilar: yaqin atrofdan mashina toping yoki o'z mashinangizni e'lon qiling."
+    },
+    "quote": {
+      "title": "Narx hisobi · YukSaroy",
+      "description": "Terminal xizmatlari narxini login'siz hisoblang: tarif × vazn + qo'shimcha xizmatlar. Komissiya 0 %."
+    }
+  },
+  "nav": {
+    "terminals": "Terminallar",
+    "sidings": "Shahobcha yo'llar",
+    "cabinet": "Kabinet",
+    "login": "Kirish",
+    "aria": {
+      "home": "YukSaroy bosh sahifa",
+      "main": "Asosiy",
+      "mainMobile": "Asosiy (mobil)"
+    }
+  },
+  "footer": {
+    "tagline": "Yuk logistikasi bozori: terminal xizmatlari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport. Mustaqil xususiy platforma.",
+    "catalog": {
+      "heading": "Katalog",
+      "sidingsRegistry": "Shahobcha yo'llar reestri",
+      "customsWarehouses": "Bojxona omborlari"
+    },
+    "platform": {
+      "heading": "Platforma",
+      "login": "Kirish / ro'yxatdan o'tish",
+      "telegramBot": "Telegram bot"
+    },
+    "legal": "© {year} YukSaroy",
+    "apps": {
+      "heading": "Ilova",
+      "download": "Telefonga yuklab olish",
+      "appStore": "App Store",
+      "googlePlay": "Google Play"
+    }
+  },
+  "hero": {
+    "title": "Yuk xizmatlari tizimi",
+    "subtitle": "Toping. Solishtiring. Bog'laning.",
+    "lead": "Terminal xizmati, shahobcha yo'l, teplovoz yoki yuk mashinasi izlash kunlab qo'ng'iroq qilishni talab qilmasligi kerak. Keraklisini bir joyda toping va egasiga to'g'ridan-to'g'ri murojaat qiling.",
+    "search": {
+      "placeholder": "Terminal, shahobcha yo'l yoki texnika",
+      "aria": "Nima qidiryapsiz",
+      "submit": "Qidirish",
+      "note": "Ro'yxatdan o'tmasdan ko'rish mumkin, izlash bepul"
+    },
+    "browse": {
+      "heading": "Yoki xizmat bo'yicha",
+      "terminalServices": "Terminal xizmatlari",
+      "siding": "Shahobcha yo'l",
+      "railEquipment": "Teplovoz va vagon",
+      "truck": "Yuk mashinasi"
+    },
+    "door": {
+      "shipper": "Men yuk jo'natyapman",
+      "owner": "Menda obyekt yoki texnika bor",
+      "registry": "Reestrni ochish"
+    },
+    "stat": {
+      "sidings": "shaxsiy yo'l",
+      "terminals": "terminal",
+      "serviceTypes": "xizmat turi"
+    },
+    "map": {
+      "aria": "Interaktiv xarita: terminallar, temir yo'llar va avtomobil yo'llari",
+      "legend": {
+        "aria": "Xarita legendasi",
+        "rail": "Temir yo'l",
+        "road": "Avtomobil yo'li",
+        "terminal": "Terminal"
+      }
+    }
+  },
+  "category": {
+    "heading": "Bu yerda nima bor",
+    "lead": "Har bir obyekt o'z egasiga tegishli. Egasi uni ro'yxatga oladi, xizmat va shartlarini o'zi yozadi.",
+    "terminals": {
+      "label": "Terminal va yuk saroyi xizmatlari",
+      "note": "Yuklash, tushirish, tarozi, saqlash, SVX, konteyner"
+    },
+    "sidings": {
+      "note": "Xususiy shahobcha yo'llar: yuk ortish, arenda, sotish",
+      "label": "Shahobcha yo'llar"
+    },
+    "rail": {
+      "label": "Temir yo'l texnikasi",
+      "note": "Teplovoz, elektrovoz, vagon: sotib olish yoki arenda"
+    },
+    "road": {
+      "label": "Avtotransport",
+      "note": "Yuk mashinalari va avtotashuvchilar, oxirgi milya"
+    },
+    "container": {
+      "label": "Konteyner maydonlari",
+      "note": "Konteyner qabul qilish va saqlash"
+    },
+    "services": {
+      "heading": "Xizmat bo'yicha qidirish"
+    },
+    "siding": {
+      "note": "Xususiy shahobcha yo'llar: yuk ortish, arenda, sotish"
+    }
+  },
+  "how": {
+    "heading": "Platforma qanday ishlaydi",
+    "buyer": {
+      "title": "Xizmat qidiryapsizmi",
+      "lead": "Yuk egasi, ekspeditor yoki deklarant bo'lsangiz",
+      "step1": "Joylashuv yoki xizmat bo'yicha qidirasiz",
+      "step2": "Egasining sahifasida shartlarini ko'rasiz",
+      "step3": "Kerakli vaqtga ariza qoldirasiz",
+      "cta": "Katalogni ochish"
+    },
+    "seller": {
+      "title": "Xizmat sotasizmi",
+      "lead": "Terminal, yuk saroyi yoki shahobcha yo'l egasi bo'lsangiz",
+      "step1": "Obyektingizni ro'yxatdan o'tkazasiz",
+      "step2": "Xizmat va shartlaringizni o'zingiz yozasiz",
+      "step3": "Arizalarni o'z kabinetingizda qabul qilasiz",
+      "cta": "Obyektni qo'shish"
+    }
+  },
+  "landing": {
+    "cta": {
+      "addObject": "Obyektni qo'shish"
+    },
+    "owner": {
+      "title": "Terminal yoki shahobcha yo'l egasimisiz",
+      "body": "Obyektingizni ro'yxatga oling, bajaradigan ishlaringizni belgilang va arizalarni kabinetingizda qabul qiling. Pilot davomida bepul.",
+      "ctaCatalog": "Katalogni ko'rish"
+    }
+  },
+  "terminals": {
+    "lead": "Yuk saroylari, konteyner terminallari, logistika markazlari va SVX: pasport va ochiq tarif bilan.",
+    "count": "{count} ta obyekt",
+    "empty": {
+      "title": "Bu filtr bo'yicha terminal topilmadi.",
+      "reset": "Filtrni tozalash"
+    }
+  },
+  "filter": {
+    "kind": {
+      "all": "Barcha turlar"
+    },
+    "service": {
+      "all": "Barcha xizmatlar"
+    },
+    "sort": {
+      "rating": "Reyting",
+      "name": "Nom",
+      "price": "Narx"
+    },
+    "apply": "Qo'llash",
+    "region": {
+      "all": "Butun respublika"
+    }
+  },
+  "pagination": {
+    "aria": "Sahifalar",
+    "prev": "← oldingi",
+    "next": "keyingi →"
+  },
+  "terminal": {
+    "breadcrumb": {
+      "aria": "Yo'l"
+    },
+    "status": {
+      "openNow": "Hozir ochiq",
+      "closedNow": "Hozir yopiq"
+    },
+    "badge": {
+      "unverifiedPassport": "Pasport tasdiqlanmagan"
+    },
+    "station": {
+      "suffix": "stansiyasi"
+    },
+    "rju": {
+      "suffix": "uzeli"
+    },
+    "cta": {
+      "quote": "Narxni hisoblash",
+      "bookSlot": "Slot band qilish"
+    },
+    "claim": {
+      "title": "Bu sizning terminalingizmi?",
+      "body": "Pasport ochiq ma'lumotlardan tuzilgan, tariflar taxminiy. Kabinetda TERMINAL tashkiloti yarating: operator pasportni sizga biriktiradi va siz tarif hamda slotlarni o'zingiz boshqarasiz."
+    },
+    "tariffs": {
+      "heading": "Tariflar",
+      "empty": "Tarif e'lon qilinmagan, narx so'rov bo'yicha.",
+      "col": {
+        "service": "Xizmat",
+        "cargoGroup": "Yuk guruhi",
+        "min": "Minimal"
+      },
+      "allCargo": "barcha yuklar"
+    },
+    "services": {
+      "heading": "Xizmatlar",
+      "leadTime": "oldindan {minutes} daq",
+      "immediate": "darhol"
+    },
+    "passport": {
+      "heading": "Pasport",
+      "tracks": "Yo'llar",
+      "cranes": "Kranlar",
+      "warehouse": "Yopiq ombor",
+      "openArea": "Ochiq maydon",
+      "scale": "Tarozi",
+      "svx": "SVX (bojxona ombori)",
+      "containerSlots": "Konteyner o'rinlari",
+      "customsPost": "Bojxona posti",
+      "tracksValue": "{count} ta · {length} m"
+    },
+    "hours": {
+      "heading": "Ish vaqti",
+      "dayOffShort": "dam"
+    },
+    "stationCard": {
+      "esr": "ESR",
+      "rju": "Uzel",
+      "typeClass": "Tur / klass",
+      "coords": "Koordinata"
+    },
+    "sidingsLink": "Shu stansiyada {count} ta shahobcha yo'l →",
+    "slots": {
+      "heading": "Bugungi slotlar",
+      "free": "{count} ta bo'sh",
+      "none": "Bugun ochiq slot yo'q",
+      "book": "Slot band qilish"
+    }
+  },
+  "sidings": {
+    "lead": "Xususiy shahobcha yo'llar reestri: joylashuv, uzunlik, yuklash va tushirish sig'imi. Egasining nomi u o'zi tasdiqlab, operator tekshirgandan keyingina ko'rsatiladi.",
+    "count": "{count} ta yo'l",
+    "search": {
+      "placeholder": "Joy nomi yoki kod"
+    },
+    "col": {
+      "no": "№",
+      "location": "Joylashuv",
+      "length": "Uzunlik",
+      "capacity": "Tushirish / yuklash",
+      "owner": "Egasi"
+    },
+    "owner": {
+      "pending": "tasdiq kutilmoqda",
+      "unclaimed": "egasi tasdiqlamagan, meniki"
+    },
+    "empty": "Topilmadi."
+  },
+  "texnika": {
+    "lead": "Teplovoz, elektrovoz va vagonlar. Egasi texnikasini sotish yoki arendaga berish uchun e'lon qo'yadi, shartlarni o'zi belgilaydi.",
+    "example": {
+      "1": "Teplovoz: sotuv yoki soatlik hamda kunlik arenda",
+      "2": "Elektrovoz: arenda, manevr ishlari uchun",
+      "3": "Yopiq vagon, yarim vagon, platforma, sisterna",
+      "4": "Texnikaga xizmat va ta'mirlash takliflari"
+    }
+  },
+  "avtotransport": {
+    "lead": "Yuk mashinalari va avtotashuvchilar. Terminaldan omborgacha bo'lgan oxirgi milya yoki to'liq yo'nalish bo'yicha tashish.",
+    "example": {
+      "1": "Tent, refrijerator, samosval, konteyner tashuvchi",
+      "2": "Yaqin atrofdagi bo'sh mashinalar",
+      "3": "Doimiy yo'nalish bo'yicha tashuvchilar",
+      "4": "Oxirgi milya: terminaldan omborgacha"
+    }
+  },
+  "empty": {
+    "title": "Bu bo'limda hali e'lon yo'q",
+    "body": "Katalog ochiq, e'lonlarni egalarning o'zi qo'shadi. Birinchi bo'lib qo'shsangiz, sizni qidiruvda birinchi topishadi.",
+    "cta": "E'lon joylash",
+    "examplesHeading": "Bu yerga nimalar qo'shiladi"
+  },
+  "quote": {
+    "heading": "Narx hisobi",
+    "lead": {
+      "prefix": "Ochiq formula:",
+      "formula": "tarif × vazn (yoki vagon soni) + qo'shimcha xizmatlar",
+      "suffix": ". Pilotda platforma komissiyasi 0 %: narx terminal tarifining o'zi."
+    },
+    "disclaimer": "Hisob ma'lumot uchun; buyurtma berilganda tarif muzlatiladi va aktda shu narx ko'rsatiladi. «Taxminiy» belgisi: pasport egasi tomonidan hali tasdiqlanmagan tarif.",
+    "terminalPrefix": "Terminal:",
+    "station": {
+      "placeholder": "Stansiya (ESR)"
+    },
+    "cargo": {
+      "placeholderCompact": "Yuk turi"
+    },
+    "weight": {
+      "aria": "Vazn, tonna"
+    },
+    "field": {
+      "operation": "Operatsiya",
+      "wagons": "Vagon soni",
+      "storageDays": "Saqlash, kun"
+    },
+    "op": {
+      "load": "Yuklash",
+      "unload": "Tushirish"
+    },
+    "extras": {
+      "legend": "Qo'shimcha xizmatlar"
+    },
+    "submit": {
+      "busy": "Hisoblanmoqda"
+    },
+    "err": {
+      "selectStation": "Stansiyani tanlang.",
+      "enterWeight": "Vaznni kiriting (tonna).",
+      "stationNotFound": "Stansiya topilmadi.",
+      "terminalNotFound": "Terminal topilmadi.",
+      "generic": "Hisoblashda xatolik. Qayta urinib ko'ring."
+    },
+    "result": {
+      "empty": "Bu stansiya va yaqin atrofda hali {operation} tarifi e'lon qilgan terminal yo'q.",
+      "nearbyNote": "Stansiyada terminal yo'q. Shu uzeldagi (RJU) eng arzon takliflar:",
+      "detailLink": "Batafsil hisob (qo'shimcha xizmatlar, kunlar)"
+    },
+    "offer": {
+      "approxTariff": ", tarif taxminiy",
+      "commission": "Platforma komissiyasi {pct} %",
+      "minApplied": "(min)",
+      "missing": "Tarifi yo'q, alohida kelishiladi: {services}",
+      "book": "Band qilish"
+    }
+  },
+  "auth": {
+    "title": "Kirish",
+    "lead": "Kod SMS emas, Telegram botga keladi.",
+    "phone": {
+      "label": "Telefon raqam",
+      "placeholder": "+998 90 123 45 67"
+    },
+    "requestCode": "Kod olish",
+    "link": {
+      "title": "Raqam hali botga bog'lanmagan.",
+      "body": "Botni oching, «Telefon raqamimni yuborish» tugmasini bosing, kod o'sha yerga keladi.",
+      "openBot": "Botni ochish"
+    },
+    "code": {
+      "sent": "Kod Telegram botga yuborildi.",
+      "label": "6 xonali kod"
+    },
+    "changeNumber": "Raqamni o'zgartirish",
+    "err": {
+      "invalidPhone": "Telefon raqam noto'g'ri.",
+      "tooManyRequests": "Biroz kuting va qayta urinib ko'ring.",
+      "otpWrong": "Kod noto'g'ri.",
+      "otpExpired": "Kod muddati o'tgan, qaytadan oling.",
+      "otpLocked": "Urinishlar tugadi, yangi kod oling.",
+      "otpNotFound": "Avval kod so'rang.",
+      "generic": "Xatolik yuz berdi."
+    }
+  },
+  "catalog": {
+    "station": {
+      "placeholder": "Stansiya nomi yoki ESR kodi"
+    },
+    "cargo": {
+      "placeholder": "Yuk turi (ETSNG): sement, bug'doy, 281000…"
+    },
+    "nearMe": {
+      "idle": "Mening yonimda",
+      "busy": "Aniqlanmoqda",
+      "active": "Yonimda, {radius} km",
+      "err": {
+        "unsupported": "Brauzer joylashuvni bermaydi.",
+        "denied": "Joylashuvga ruxsat berilmadi."
+      }
+    },
+    "chips": {
+      "remove": "{label} chipini olib tashlash",
+      "unresolved": "tushunilmadi: {words}"
+    },
+    "decision": {
+      "terminals": "{count} terminal",
+      "freeToday": "{count} tasida bugun bo'sh slot",
+      "cheapest": "eng arzon {price}",
+      "nearest": "eng yaqini {km} km",
+      "separator": " · "
+    }
+  },
+  "card": {
+    "rating": {
+      "none": "Baho yo'q"
+    },
+    "price": {
+      "from": "{price} dan",
+      "onRequest": "Narx so'rov bo'yicha"
+    },
+    "unverifiedPassport": "Pasport egasi tomonidan tasdiqlanmagan",
+    "slots": {
+      "freeToday": "Bugun {count} ta bo'sh slot",
+      "none": "Bugun bo'sh slot yo'q"
+    },
+    "distance": "{km} km"
+  },
+  "sidingMap": {
+    "aria": "{station} stansiyasi shahobcha yo'llari sxemasi: {count} ta yo'l",
+    "mainTrack": "{station}, asosiy yo'l",
+    "legend": {
+      "approved": "egasi tasdiqlangan",
+      "registry": "reestr (egasi yashirin)"
+    },
+    "more": "… yana {count} ta ro'yxatda"
+  },
+  "common": {
+    "price": "Narx",
+    "station": "Stansiya",
+    "region": "Viloyat",
+    "yes": "bor",
+    "no": "yo'q",
+    "unit": {
+      "meter": "m",
+      "ton": "t",
+      "wagonShort": "vag"
+    },
+    "count": {
+      "pieces": "ta"
+    }
+  },
+  "format": {
+    "hours": {
+      "unknown": "Ish vaqti ko'rsatilmagan",
+      "dayOff": "Dam olish"
+    },
+    "day": {
+      "mon": "Du",
+      "tue": "Se",
+      "wed": "Cho",
+      "thu": "Pa",
+      "fri": "Ju",
+      "sat": "Sha",
+      "sun": "Ya"
+    },
+    "pricePer": {
+      "ton": "t",
+      "wagon": "vagon",
+      "day": "kun",
+      "operation": "operatsiya"
+    },
+    "currency": {
+      "som": "so'm"
+    },
+    "month": {
+      "long": "yanvar, fevral, mart, aprel, may, iyun, iyul, avgust, sentabr, oktabr, noyabr, dekabr",
+      "short": "yan, fev, mar, apr, may, iyun, iyul, avg, sen, okt, noy, dek"
+    }
+  },
+  "service": {
+    "LOAD": "Yuklash",
+    "UNLOAD": "Tushirish",
+    "WEIGH": "Tarozi",
+    "STORAGE": "Omborda saqlash",
+    "SVX": "SVX (bojxona ombori)",
+    "CONTAINER": "Konteyner bilan ishlash",
+    "LAST_MILE": "Oxirgi milya (avto)",
+    "SHUNTING": "Manevr (teplovoz)"
+  },
+  "kind": {
+    "YARD": "Yuk saroyi",
+    "CONTAINER": "Konteyner terminali",
+    "LC": "Logistika markazi",
+    "SVX": "Vaqtinchalik saqlash ombori"
+  },
+  "rju": {
+    "TAS": "Toshkent",
+    "KOK": "Qo'qon",
+    "BUX": "Buxoro",
+    "KUN": "Qo'ng'irot",
+    "KAR": "Qarshi",
+    "TER": "Termiz"
+  },
+  "unit": {
+    "PER_TON": "tonna",
+    "PER_WAGON": "vagon",
+    "PER_OPERATION": "operatsiya",
+    "PER_DAY": "kun"
+  },
+  "region": {
+    "UZ-TK": "Toshkent shahri",
+    "UZ-TO": "Toshkent viloyati",
+    "UZ-SI": "Sirdaryo viloyati",
+    "UZ-JI": "Jizzax viloyati",
+    "UZ-SA": "Samarqand viloyati",
+    "UZ-BU": "Buxoro viloyati",
+    "UZ-NW": "Navoiy viloyati",
+    "UZ-QA": "Qashqadaryo viloyati",
+    "UZ-SU": "Surxondaryo viloyati",
+    "UZ-XO": "Xorazm viloyati",
+    "UZ-QR": "Qoraqalpog'iston Respublikasi",
+    "UZ-AN": "Andijon viloyati",
+    "UZ-NG": "Namangan viloyati",
+    "UZ-FA": "Farg'ona viloyati"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "claimStatus": {
+    "NONE": "Da'vo yo'q",
+    "PENDING": "Da'vo tekshiruvda",
+    "APPROVED": "Egasi tasdiqlangan",
+    "REJECTED": "Da'vo rad etilgan"
+  }
+}

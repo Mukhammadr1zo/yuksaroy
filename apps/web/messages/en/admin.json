@@ -1,0 +1,53 @@
+{
+  "admin": {
+    "title": "Moderation",
+    "lead": "Queue of listings, organization verifications and siding claims. One decision per row.",
+    "forbidden": "This section is for platform moderators only.",
+    "tabs": {
+      "listings": "Listings",
+      "kyc": "Organizations (KYC)",
+      "claims": "Siding claims"
+    },
+    "empty": "The queue is empty.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reason": "Rejection reason",
+    "note": "Note (optional)",
+    "reasonRequired": "Give a reason for the rejection.",
+    "confirmReject": "Yes, reject",
+    "cancel": "Cancel",
+    "busy": "Sending",
+    "decided": {
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "failed": "Failed. Refresh the page.",
+    "listing": {
+      "org": "Organization",
+      "region": "Region",
+      "price": "Price",
+      "onRequest": "on request",
+      "photos": "photos",
+      "created": "Created",
+      "description": "Description",
+      "contact": "Contact"
+    },
+    "org": {
+      "stir": "STIR",
+      "kinds": "Kinds",
+      "requestedAt": "Requested",
+      "region": "Region",
+      "contact": "Contact",
+      "noStir": "No STIR"
+    },
+    "claim": {
+      "siding": "Siding",
+      "registry": "Registry",
+      "station": "Station",
+      "claimant": "Claimant",
+      "registryOwner": "Owner per registry",
+      "claimedAt": "Claimed",
+      "open": "Page"
+    }
+  }
+}

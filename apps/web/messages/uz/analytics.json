@@ -1,0 +1,21 @@
+{
+  "analytics": {
+    "title": "Ko'rsatkichlar",
+    "tab": "Ko'rsatkichlar",
+    "leadListing": "Oxirgi 30 kun: e'lon qayerda ko'rsatildi va nechta so'rov keldi.",
+    "leadTerminal": "Oxirgi 30 kun: terminal qayerda ko'rsatildi, nechta so'rov va buyurtma keldi.",
+    "surface": { "list": "Ro'yxat", "map": "Xarita", "detail": "Sahifa", "compare": "Solishtirish", "bot": "Bot" },
+    "total": "Ko'rsatishlar, 30 kun",
+    "inquiries": "So'rovlar, 30 kun",
+    "views": "Sahifa ochilishi, jami",
+    "orders": "Buyurtmalar, 30 kun",
+    "chartAria": "Kunlik ko'rsatishlar, yuzalar bo'yicha",
+    "dayTitle": "{day}: {n} ko'rsatish",
+    "empty": "Oxirgi 30 kunda ko'rsatish yo'q. Obyekt faol bo'lganda katalog, xarita, solishtirish va bot ko'rsatishlari shu yerda yig'iladi.",
+    "loading": "Yuklanmoqda",
+    "loadFailed": "Ko'rsatkichlarni yuklab bo'lmadi.",
+    "back": "E'lonlarga qaytish",
+    "link": "Ko'rsatkichlar",
+    "unsaved": "Ko'rsatkichlar terminal saqlangandan keyin ochiladi."
+  }
+}

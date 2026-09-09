@@ -1,0 +1,48 @@
+{
+  "about": {
+    "meta": {
+      "title": "About · YukSaroy",
+      "description": "YukSaroy is an independent private platform with no relation to the state railway. Owners list, clients find and connect directly."
+    },
+    "eyebrow": "About",
+    "title": "An independent private platform",
+    "lead": "YukSaroy is a private company. It has no relation to the state railway: we are neither a carrier nor a terminal owner. We are the market: owners list, clients find and talk to the owner directly.",
+    "who": {
+      "heading": "Who we are",
+      "body": "A team that has worked in freight logistics for years. Finding a terminal, asking for a tariff and locating a free wagon still happen by phone; we turned that into one open catalog. Built for Uzbekistan, in three languages, with private funding."
+    },
+    "what": {
+      "heading": "What the platform does",
+      "i1": "Terminal services: tariff, hours, today's free slots, booking and documents.",
+      "i2": "Private sidings registry: by station and node; the owner claims it and gets a page.",
+      "i3": "Rail equipment and road carrier listings: rent or sale, with the owner's page.",
+      "i4": "Companies: KYC badge, their objects, data through the open API."
+    },
+    "principles": {
+      "heading": "Principles",
+      "open": {
+        "title": "Open price",
+        "body": "Tariffs and listing prices are visible without login. Where the price is hidden there is no comparison; where there is no comparison there is no market."
+      },
+      "fair": {
+        "title": "Fair ranking",
+        "body": "The list order is open: newest, price or distance. Premium sits higher only within that order and carries a badge. No hidden advertising."
+      },
+      "owners": {
+        "title": "Owners' listings",
+        "body": "Every object belongs to its owner. The owner writes the terms and answers the inquiry. The platform is not a middleman and does not alter the data."
+      }
+    },
+    "notRailway": {
+      "heading": "What we are not",
+      "body": "We are not the state railway, nor its division or agent. For wagon orders, tariff policy and timetables contact the railway authorities. We show only the market of private owners."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body": "For a question, a demo or a partnership write through the form; we answer within 24 hours. The Telegram bot also has the catalog and inquiries.",
+      "cta": "Send a message",
+      "telegram": "Telegram bot"
+    },
+    "company": "Company"
+  }
+}

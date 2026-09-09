@@ -1,0 +1,45 @@
+{
+  "storefront": {
+    "tab": { "info": "Ma'lumotlar", "shop": "Do'kon" },
+    "title": "Do'kon sahifasi",
+    "lead": "Ochiq mini sayt: muqova, logotip, shior va kontakt. Faol terminallar, shahobcha yo'llar va e'lonlar avtomatik chiqadi.",
+    "address": "Manzil",
+    "noSlug": "Do'kon manzili tashkilot saqlangach paydo bo'ladi.",
+    "preview": "Do'konni ochish",
+    "field": {
+      "tagline": "Shior",
+      "about": "Biz haqimizda",
+      "logo": "Logotip",
+      "cover": "Muqova rasmi",
+      "showTerminals": "Terminallarni ko'rsatish",
+      "showListings": "E'lonlarni ko'rsatish",
+      "contactTelegram": "Telegram",
+      "contactPhonePublic": "Telefon hammaga ochiq"
+    },
+    "hint": {
+      "tagline": "160 belgigacha, nom ostida chiqadi",
+      "logo": "Kvadrat PNG yoki JPG",
+      "cover": "Keng rasm, 3:1 nisbat tavsiya",
+      "telegram": "@ belgisiz foydalanuvchi nomi",
+      "phonePublic": "O'chiq bo'lsa telefon faqat kirgan foydalanuvchilarga ko'rinadi"
+    },
+    "public": {
+      "meta": "{name}: terminallar, e'lonlar va aloqa. YukSaroy do'koni.",
+      "contact": "Bog'lanish",
+      "telegram": "Telegramda yozish",
+      "call": "Qo'ng'iroq qilish",
+      "website": "Sayt",
+      "noContact": "Aloqa ma'lumoti ko'rsatilmagan.",
+      "about": "Biz haqimizda",
+      "terminals": "Terminallar",
+      "listings": "Texnika va transport",
+      "sidings": "Shahobcha yo'llar",
+      "map": "Obyektlar xaritada",
+      "mapNote": "Koordinatalar taxminiy.",
+      "none": "hali yo'q",
+      "sidingCols": { "no": "Reestr No", "station": "Stansiya", "length": "Uzunlik" },
+      "with": "YukSaroy bilan",
+      "fullProfile": "To'liq profil"
+    }
+  }
+}

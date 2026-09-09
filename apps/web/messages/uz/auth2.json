@@ -1,0 +1,113 @@
+{
+  "auth2": {
+    "brand": {
+      "eyebrow": "YukSaroy",
+      "title": "Yuk xizmatlari bozoriga kirish",
+      "bullets": {
+        "tariffs": { "title": "Ochiq tariflar va bugungi slotlar", "body": "Terminal narxlari va bo'sh oynalar ro'yxatdan o'tmasdan ham ko'rinadi." },
+        "booking": { "title": "Bron va hujjatlar", "body": "Slot band qiling, dalolatnoma va hisob-faktura kabinetda tayyor bo'ladi." },
+        "listing": { "title": "E'lon berish", "body": "Teplovoz, vagon yoki yuk mashinasini ijara va sotuvga qo'ying." }
+      },
+      "note": "Ro'yxatdan o'tmasdan ko'rish mumkin. Kirish faqat kontakt, bron va e'lon uchun kerak."
+    },
+    "login": {
+      "lead": "Telefon va parol bilan kiring. Parol o'rnatmagan bo'lsangiz, kod bilan.",
+      "tabs": { "password": "Parol bilan", "code": "Kod bilan" },
+      "submit": "Kirish",
+      "forgot": "Parolni unutdim",
+      "verify": "Kirish",
+      "or": "yoki",
+      "noAccount": "Hisobingiz yo'qmi?",
+      "register": "Ro'yxatdan o'ting",
+      "err": {
+        "badCredentials": "Telefon yoki parol noto'g'ri.",
+        "noPassword": "Bu raqamga parol o'rnatilmagan.",
+        "noPasswordCode": "Kod bilan kiring",
+        "noPasswordOr": "yoki",
+        "noPasswordSet": "parol o'rnating",
+        "locked": "Urinishlar ko'payib ketdi. {min} daqiqadan keyin qayta urinib ko'ring."
+      }
+    },
+    "password": {
+      "label": "Parol",
+      "confirm": "Parolni takrorlang",
+      "min": "Kamida {min} belgi",
+      "mismatch": "Parollar mos kelmadi.",
+      "show": "Parolni ko'rsatish",
+      "hide": "Parolni yashirish",
+      "strength": { "weak": "Kuchsiz", "fair": "O'rtacha", "strong": "Kuchli" }
+    },
+    "reset": {
+      "title": "Parolni tiklash",
+      "lead": "Kod Telegram botga keladi. Kod bilan birga yangi parolni kiriting.",
+      "submit": "Parolni saqlash va kirish",
+      "back": "Kirishga qaytish"
+    },
+    "attach": {
+      "title": "Telefon raqamingizni bog'lang",
+      "lead": "Google orqali kirdingiz. Bron va e'lon uchun telefon kerak: kod Telegram botga keladi.",
+      "submit": "Bog'lash"
+    },
+    "google": {
+      "failed": "Google orqali kirish amalga oshmadi.",
+      "disabled": "Google orqali kirish hozircha o'chirilgan."
+    },
+    "err": {
+      "phoneTaken": "Bu raqam boshqa hisobga bog'langan."
+    },
+    "register": {
+      "title": "Ro'yxatdan o'tish",
+      "lead": "Telefon, parol, profil, tayyor: to'rt qadam.",
+      "steps": { "phone": "Telefon", "password": "Parol", "profile": "Profil", "done": "Tayyor" },
+      "continue": "Davom etish",
+      "hasAccount": "Hisobingiz bormi?",
+      "login": "Kirish",
+      "checking": "Tekshirilmoqda",
+      "password": {
+        "title": "Parol o'rnating",
+        "lead": "Keyingi safar kodsiz, telefon va parol bilan kirasiz.",
+        "submit": "Saqlash va davom etish",
+        "skip": "Hozircha o'tkazib yuborish",
+        "err": "Parolni saqlab bo'lmadi, qayta urinib ko'ring."
+      },
+      "profile": {
+        "title": "Profil",
+        "who": {
+          "title": "Kim sifatida davom etasiz?",
+          "driver": { "title": "Yakka haydovchi", "body": "O'z yuk mashinangizda ishlaysiz. E'lon o'z nomingizdan chiqadi." },
+          "org": { "title": "Tashkilot", "body": "Kompaniya, terminal, ekspeditor yoki texnika egasi." }
+        },
+        "driverLead": "Ism e'londa ko'rinadi. Telefon tasdiqlangan belgi bilan chiqadi.",
+        "driverSubmit": "Davom etish",
+        "lead": "Bitta tashkilot bilan boshlang, qolganini kabinetda qo'shasiz.",
+        "fullName": "Ism va familiya",
+        "kinds": "Tashkilot turi",
+        "kindsHint": "bir nechtasini tanlash mumkin",
+        "orgName": "Tashkilot nomi",
+        "stir": "STIR",
+        "stirHint": "9 raqam, ixtiyoriy. Tasdiqlash uchun kerak bo'ladi.",
+        "region": "Viloyat",
+        "regionAny": "Tanlanmagan",
+        "submit": "Yaratish",
+        "err": {
+          "kindRequired": "Kamida bitta tur tanlang.",
+          "stirTaken": "Bu STIR boshqa tashkilotga tegishli.",
+          "invalidStir": "STIR 9 ta raqamdan iborat bo'lishi kerak.",
+          "generic": "Saqlab bo'lmadi, qayta urinib ko'ring."
+        }
+      },
+      "done": {
+        "title": "Tayyor",
+        "lead": "{org} yaratildi. Keyingi qadamni tanlang.",
+        "driverLead": "Haydovchi profili tayyor. Birinchi e'loningizni bering.",
+        "cabinet": { "title": "Kabinet", "body": "Buyurtmalar, tashkilot, a'zolar" },
+        "listing": { "title": "E'lon berish", "body": "Texnika yoki yuk mashinasi" },
+        "driverListing": { "title": "Yuk mashinasi e'loni", "body": "Turi, tonnaji, xizmat viloyatlari" },
+        "terminal": { "title": "Terminal qo'shish", "body": "Tariflar va slotlar bilan" },
+        "kycHint": "Tasdiqlangan tashkilot e'lonlari tekshiruvsiz darhol chiqadi. STIR kiritib, kabinetda tasdiqlashga yuboring.",
+        "kycLink": "Tashkilot sahifasi",
+        "driverHint": "Yakka haydovchi e'loni tekshiruvdan o'tgach faol bo'ladi."
+      }
+    }
+  }
+}

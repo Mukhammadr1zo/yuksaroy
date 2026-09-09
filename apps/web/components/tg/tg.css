@@ -1,0 +1,46 @@
+/* Telegram Mini App: themeParams (TgProvider --tg-theme-* ga yozadi) brend tokenlariga bog'lanadi.
+   Telegram tashqarisida o'zgaruvchilar bo'lmaydi va brend ranglari qoladi. Teal asosiy harakat rangi o'zgarmaydi. */
+.tg-root {
+  --tg-bg: var(--tg-theme-bg-color, #F1F4F8);
+  --tg-card: var(--tg-theme-secondary-bg-color, #FFFFFF);
+  --tg-text: var(--tg-theme-text-color, #0B2340);
+  --tg-hint: var(--tg-theme-hint-color, #52677E);
+  --tg-link: var(--tg-theme-link-color, #077F84);
+  --tg-button: var(--tg-theme-button-color, #077F84);
+  --tg-button-text: var(--tg-theme-button-text-color, #FFFFFF);
+  --tg-line: color-mix(in srgb, var(--tg-hint) 28%, transparent);
+  /* Tailwind tokenlari shu doirada qayta bog'lanadi: sand = fon, ink = matn, muted = maslahat, line = chiziq */
+  --color-sand: var(--tg-bg);
+  --color-ink: var(--tg-text);
+  --color-muted: var(--tg-hint);
+  --color-line: var(--tg-line);
+  background: var(--tg-bg);
+  color: var(--tg-text);
+  min-height: var(--tg-vh, 100dvh);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* Kartalar: Telegram'ning ikkinchi foni (tashqarida oq) */
+.tg-root .bg-white { background-color: var(--tg-card); }
+/* Telegram tugma rangi: MainButton bilan bir xil ko'rinadigan ikkinchi darajali tugma */
+.tg-btn-tg { background: var(--tg-button); color: var(--tg-button-text); }
+.tg-root a { -webkit-tap-highlight-color: transparent; }
+
+/* Qorong'i tema: to'q "siyoh" matnlar och rangga, och chip fonlari shaffof rangga */
+[data-tg-scheme="dark"] { color-scheme: dark; }
+[data-tg-scheme="dark"] .tg-root {
+  --color-teal-ink: #6FD8DD;
+  --color-teal-soft: rgb(5 151 158 / 0.2);
+  --color-amber-ink: #F8B15B;
+  --color-amber-soft: rgb(253 123 3 / 0.18);
+  --color-navy-2: #1B4F8C;
+}
+[data-tg-scheme="dark"] .tg-root .text-navy { color: var(--tg-text); }
+[data-tg-scheme="dark"] .tg-root .bg-red-50 { background-color: rgb(220 38 38 / 0.16); }
+[data-tg-scheme="dark"] .tg-root .text-red-700 { color: #FCA5A5; }
+[data-tg-scheme="dark"] .tg-root .border-red-200 { border-color: rgb(220 38 38 / 0.4); }
+[data-tg-scheme="dark"] .tg-root .bg-line\/40, [data-tg-scheme="dark"] .tg-root .bg-line\/60 { background-color: rgb(255 255 255 / 0.08); }
+
+/* Gorizontal tasmalar: chiziqsiz, kartalar bo'yicha to'xtaydi */
+.tg-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; }
+.tg-strip::-webkit-scrollbar { display: none; }
+.tg-strip > * { scroll-snap-align: start; flex: 0 0 auto; }

@@ -1,0 +1,103 @@
+{
+  "developers": {
+    "nav": "Developers",
+    "meta": {
+      "title": "Open API for developers",
+      "description": "YukSaroy read-only open API: active listings, terminals, facets and ontology. No key, JSON, 120 requests per minute."
+    },
+    "eyebrow": "Open API",
+    "title": "Open API for developers",
+    "lead": "Active listings, terminals, counts and the code dictionary are available with plain GET requests. No key and no login: plug it into your system, bot or spreadsheet.",
+    "facts": {
+      "version": "Contract {version}",
+      "rate": "{n} requests per minute per IP",
+      "auth": "No key, no login",
+      "cache": "Response cache 60 seconds"
+    },
+    "start": {
+      "heading": "Getting started",
+      "base": "Base URL",
+      "rules": {
+        "get": "GET only, JSON responses (UTF-8). Money in tiyin (integer), dates in ISO 8601.",
+        "active": "Active objects only: ACTIVE listings, open terminals. Phone numbers and other contact data are never returned.",
+        "limit": "Over the limit you get 429 with code {code}; pace requests by the headers.",
+        "version": "Fields are never removed or renamed; new fields may appear. Breaking changes ship as a new version."
+      },
+      "headers": "Response headers",
+      "header": {
+        "version": "contract version",
+        "limit": "per-minute limit",
+        "remaining": "requests left in this minute"
+      }
+    },
+    "endpoints": {
+      "heading": "Endpoints",
+      "col": {
+        "path": "Path",
+        "params": "Parameters",
+        "desc": "What it returns"
+      },
+      "none": "no parameters",
+      "listings": {
+        "desc": "Active equipment and road transport listings: title, region, price and unit, condition, organisation name and KYC badge. Paginated: items, total, page, limit.",
+        "params": "kind (comma-separated: SHUNTING_LOCO, ELECTRIC_LOCO, WAGON, TRUCK), region (comma-separated: UZ-TK, UZ-SA ...), page, limit (1 to 50)"
+      },
+      "terminals": {
+        "desc": "Open terminals: name, station, kind, services, tariffs, free slots today. Paginated: items, total, page, limit.",
+        "params": "region (comma-separated), kind (YARD, CONTAINER, LC, SVX), service (comma-separated, all required: LOAD, UNLOAD, WEIGH, STORAGE, SVX, CONTAINER, LAST_MILE, SHUNTING), page, limit (1 to 50)"
+      },
+      "facets": {
+        "desc": "Counts: terminals by kind, region and service; listings by kind, region and deal. Every code is present, even with zero.",
+        "params": ""
+      },
+      "ontology": {
+        "desc": "Code dictionary in three languages: regions, services, terminal and listing kinds, deal, condition, wagon and truck body types, price units, organisation kinds.",
+        "params": ""
+      },
+      "changelog": {
+        "desc": "Version history: version, date, notes in three languages.",
+        "params": ""
+      }
+    },
+    "example": {
+      "show": "Example",
+      "curl": "Request",
+      "json": "Response",
+      "unavailable": "No live example yet: the API did not respond. The page retries in 60 seconds.",
+      "truncated": "truncated, full response in the request"
+    },
+    "ontology": {
+      "heading": "Ontology",
+      "lead": "Every code has a label in three languages. Filters and responses use only these codes: load the dictionary once and map it to your own codes.",
+      "open": "Show all codes ({count})",
+      "groups": {
+        "regions": "Regions",
+        "services": "Services",
+        "terminalKinds": "Terminal kinds",
+        "listingKinds": "Listing kinds",
+        "deals": "Deal",
+        "conditions": "Condition",
+        "wagonTypes": "Wagon types",
+        "truckTypes": "Truck body types",
+        "priceUnits": "Price units",
+        "orgKinds": "Organisation kinds"
+      }
+    },
+    "changelog": {
+      "heading": "Changelog",
+      "unavailable": "History comes from the API; no response right now. Current contract: {version}."
+    },
+    "terms": {
+      "heading": "Terms of use",
+      "attribution": "When you show the data, credit the source: \"YukSaroy data\" with a link to yuksaroy.uz.",
+      "resale": "No reselling the database, redistributing dumps or copying into a competing catalogue. Showing it inside your own product is fine.",
+      "contact": "The API carries no contact data; reach owners only through the YukSaroy page. The page link is in each card (slug).",
+      "limit": "Stay under {n} requests per minute; cache. Need more: write to us and we will set a separate limit.",
+      "guarantee": "No uptime guarantee; important changes are announced in the history on this page."
+    },
+    "cta": {
+      "body": "A question, or need a higher limit? Write on Telegram: replies within a working day.",
+      "telegram": "Write on Telegram"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "a11y": {
+    "skip": "Asosiy mazmunga o'tish",
+    "menu": "Menyu",
+    "close": "Yopish",
+    "remove": "Olib tashlash",
+    "sort": "Saralash",
+    "locale": "Til",
+    "breadcrumb": "Yo'l",
+    "loading": "Yuklanmoqda"
+  }
+}

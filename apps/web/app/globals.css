@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/* YukSaroy dizayn tokenlari: bitta manba (8.1). Radius: tugma pill, input/karta 14 px. */
+@theme {
+  /* Palitra logotipdan olingan: navy #002352, teal #05979E, orange #FD7B03.
+     Tugma teal'i biroz to'qroq, chunki oq matn bilan WCAG AA (4.5:1) talab qilinadi. */
+  --color-navy: #002352;
+  --color-navy-2: #013A70;
+  --color-teal: #077F84;
+  --color-teal-ink: #05666B;
+  --color-teal-lit: #05979E;
+  --color-teal-soft: #E2F2F3;
+  --color-amber: #FD7B03;
+  --color-amber-ink: #A85C06;
+  --color-amber-soft: #FDF0DC;
+  --color-sand: #F1F4F8;
+  --color-ink: #0B2340;
+  --color-muted: #52677E;
+  --color-line: #DCE4EC;
+  --radius-card: 14px;
+  --ease-out-quart: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-emph: cubic-bezier(0.05, 0.7, 0.1, 1);
+
+  /* Landing "naryad" (tarif varaqasi), qorong'i tema: siyoh chizadi, teal harakat qiladi,
+     amber eng arzonni belgilaydi, plastina ushlab turadi. Karta, soya va gradient yo'q. */
+  --color-plate: #0A1626;
+  --color-paper: #F6F1E7;
+  --color-amber-lit: #E8A24A;
+  --color-rule1: rgb(246 241 231 / 0.24);
+  --color-rule2: rgb(246 241 231 / 0.13);
+  --color-rule3: rgb(246 241 231 / 0.07);
+  --color-fill1: rgb(246 241 231 / 0.035);
+  --color-fill2: rgb(246 241 231 / 0.07);
+}
+
+/* next/font o'zgaruvchilari html'da, @theme inline runtime var'ni o'qiydi */
+@theme inline {
+  --font-display: var(--font-unbounded), system-ui, sans-serif;
+  --font-body: var(--font-manrope), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html { color-scheme: light; scroll-padding-top: 96px; }
+body { @apply bg-sand text-ink font-body antialiased; }
+h1, h2, h3 { text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--color-teal); outline-offset: 2px; }
+
+/* Sarlavha va gigant raqam bir marta ochiladi: clip, translate yo'q (izlanish emas, bosib chiqarish hissi) */
+@media (prefers-reduced-motion: no-preference) {
+  .doc-wipe { animation: doc-wipe 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .doc-rule-draw { animation: doc-rule 700ms cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: left center; }
+}
+@keyframes doc-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes doc-rule { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Xarita markerlari naryad tilida: nuqta + yetakchi chiziq + 2px yorliq. Puls, glow va pill yo'q.
+   Amber faqat bitta narsani bildiradi: eng arzon tarif. */
+.rm-marker { position: relative; width: 0; height: 0; }
+.rm-dot { position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; background: #F6F1E7; }
+.rm-lead { position: absolute; left: 3px; top: 0; width: 26px; height: 1px; background: rgb(246 241 231 / 0.45); }
+.rm-chip { position: absolute; left: 30px; top: -11px; display: flex; gap: 8px; align-items: baseline; white-space: nowrap;
+  padding: 3px 7px; border-radius: 2px; font-size: 12px; color: #F6F1E7; letter-spacing: -0.01em;
+  background: rgb(10 22 38 / 0.82); border: 1px solid rgb(246 241 231 / 0.18); pointer-events: auto;
+  transition: border-color 240ms cubic-bezier(0.16, 1, 0.3, 1), background 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+.rm-marker.rm-left .rm-chip { left: auto; right: 30px; }
+.rm-marker.rm-left .rm-lead { left: auto; right: 3px; }
+.rm-marker.rm-far .rm-chip { opacity: 0; pointer-events: none; }
+.rm-chip span { font-family: var(--font-jetbrains), monospace; font-size: 11px; color: rgb(246 241 231 / 0.7); }
+/* Ro'yxatda qator hover → xaritada shu marker ajraladi */
+.rm-marker.is-hot .rm-dot { background: #2FBFAC; }
+.rm-marker.is-hot .rm-chip { border-color: rgb(47 191 172 / 0.8); background: rgb(10 22 38 / 0.95); }
+.maplibregl-ctrl-attrib { background: transparent !important; color: rgb(246 241 231 / .4) !important; font-size: 10px !important; }
+.maplibregl-ctrl-attrib a { color: rgb(246 241 231 / .55) !important; }
+.maplibregl-ctrl-attrib-button { filter: invert(1) opacity(.5); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* Kichik ikonka tugmalari uchun 40x40 bosish maydoni: element o'zi relative yoki absolute bo'lishi kerak */
+.tap-40::after { content: ''; position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; transform: translate(-50%, -50%); }
+
+/* Gorizontal scroll bo'ladigan tor joylar uchun: chiziq ko'rinmasin */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* /map: mobil pastki panel ustida masshtab tugmalari (--sheet: panel balandligi, MapView beradi) */
+.ys-map .maplibregl-ctrl-bottom-right { bottom: var(--sheet, 0px); transition: bottom 300ms var(--ease-out-quart); }

@@ -1,0 +1,12 @@
+{
+  "orgKind": {
+    "SHIPPER": "Shipper",
+    "FORWARDER": "Forwarder",
+    "DECLARANT": "Customs broker",
+    "CARRIER": "Road carrier",
+    "TERMINAL": "Terminal",
+    "ASSET_OWNER": "Equipment or siding owner",
+    "LOCO_SERVICE": "Locomotive service",
+    "PLATFORM": "Platform"
+  }
+}

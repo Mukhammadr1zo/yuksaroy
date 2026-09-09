@@ -1,0 +1,48 @@
+{
+  "about": {
+    "meta": {
+      "title": "Biz haqimizda · YukSaroy",
+      "description": "YukSaroy mustaqil xususiy platforma: davlat temir yo'liga aloqasi yo'q. Egalar e'lon beradi, mijozlar topadi va to'g'ridan-to'g'ri bog'lanadi."
+    },
+    "eyebrow": "Biz haqimizda",
+    "title": "Mustaqil xususiy platforma",
+    "lead": "YukSaroy xususiy kompaniya. Davlat temir yo'liga aloqasi yo'q: biz na tashuvchi, na terminal egasimiz. Biz bozor: egalar e'lon beradi, mijozlar topadi va egasi bilan to'g'ridan-to'g'ri gaplashadi.",
+    "who": {
+      "heading": "Kim biz",
+      "body": "Yuk logistikasi bilan yillar davomida shug'ullangan jamoa. Terminal qidirish, tarif so'rash va bo'sh vagon topish hali ham telefon orqali bo'ladi; biz shuni bitta ochiq katalogga aylantirdik. Platforma O'zbekiston uchun, uch tilda, xususiy mablag' bilan."
+    },
+    "what": {
+      "heading": "Platforma nima qiladi",
+      "i1": "Terminal xizmatlari: tarif, ish vaqti, bugungi slotlar, bron va hujjatlar.",
+      "i2": "Shahobcha yo'llar reestri: stansiya va uzel bo'yicha, egasi da'vo qilib sahifasini oladi.",
+      "i3": "Temir yo'l texnikasi va avtotransport e'lonlari: ijara yoki sotuv, egasining sahifasi bilan.",
+      "i4": "Kompaniyalar: KYC belgisi, obyektlari, ochiq API orqali ma'lumot."
+    },
+    "principles": {
+      "heading": "Tamoyillar",
+      "open": {
+        "title": "Ochiq narx",
+        "body": "Tariflar va e'lon narxlari login'siz ko'rinadi. Narx yashirilgan joyda solishtirish yo'q, solishtirish yo'q joyda bozor yo'q."
+      },
+      "fair": {
+        "title": "Halol joylashuv",
+        "body": "Ro'yxat tartibi ochiq: yangi, narx yoki masofa. Premium faqat shu tartib ichida yuqorida turadi va belgi bilan ajratiladi. Yashirin reklama yo'q."
+      },
+      "owners": {
+        "title": "Egalar e'loni",
+        "body": "Har obyekt o'z egasiga tegishli. Shartlarni egasi yozadi, so'rovga egasi javob beradi. Platforma vositachi emas, ma'lumotni buzmaydi."
+      }
+    },
+    "notRailway": {
+      "heading": "Nima emasmiz",
+      "body": "Biz davlat temir yo'li emasmiz, uning bo'linmasi yoki agenti ham emasmiz. Vagon buyurtmasi, tarif siyosati va harakat jadvali bo'yicha temir yo'l idoralariga murojaat qiling. Biz faqat xususiy egalar bozorini ko'rsatamiz."
+    },
+    "contact": {
+      "heading": "Bog'lanish",
+      "body": "Savol, demo yoki hamkorlik uchun forma orqali yozing, 24 soat ichida javob beramiz. Telegram botda katalog va so'rovlar ham bor.",
+      "cta": "Murojaat yuborish",
+      "telegram": "Telegram bot"
+    },
+    "company": "Kompaniya"
+  }
+}

@@ -1,0 +1,38 @@
+// E'lon, kompaniya va shahobcha yo'l javob shakllari (apps/api listings/mappers.ts va companies.controller.ts bilan bir xil).
+import type { Condition, DealKind, KycStatus, ListingKind, ListingStatus, OrgKind, PriceUnit } from '@yuksaroy/domain';
+import type { Siding, TerminalCard } from './types';
+
+/** Egasi: tashkilot (KYC) yoki yakka haydovchi (telefon OTP orqali tasdiqlangan). */
+export type ListingOwner =
+  | { type: 'org'; name: string; slug: string | null; kyc: KycStatus }
+  | { type: 'person'; name: string; phoneVerified: boolean };
+
+export interface ListingCard {
+  id: string; slug: string; kind: ListingKind; deal: DealKind | null; title: string; regionCode: string;
+  year: number | null; condition: Condition | null; model: string | null; qty: number; wagonType: string | null; capacityT: number | null;
+  truckType: string | null; tonnage: number | null; fleetSize: number | null; serviceRegions: string[]; routes: { from: string; to: string }[];
+  priceTiyin: number | null; priceUnit: PriceUnit | null; photo: string | null; lat: number | null; lng: number | null; distanceKm: number | null;
+  owner: ListingOwner;
+  /** Eski taxallus: faqat tashkilot egasi uchun, shaxsiy e'londa null. */
+  org: { name: string; slug: string | null; kyc: KycStatus } | null;
+  object: { type: 'terminal' | 'siding'; id: string; name: string; slug?: string } | null;
+  premium: boolean; publishedAt: string | null;
+}
+export interface ListingDetail extends ListingCard {
+  description: string | null; photos: string[]; responseHours: number | null;
+  /** Faqat kirganlarga (1A qarori), mehmonga null. */
+  contactPhone: string | null; status: ListingStatus; createdAt: string;
+}
+export interface ListingSummary { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null; onRequest: number; nearestKm: number | null }
+export interface ListingPage { items: ListingCard[]; total: number; page: number; limit: number; summary: ListingSummary }
+
+export interface CompanyCard {
+  id: string; slug: string | null; name: string; kinds: OrgKind[]; kyc: KycStatus; regionCode: string | null;
+  counts: { terminals: number; sidings: number; listings: number };
+}
+export interface CompanyDetail extends CompanyCard {
+  description: string | null; telegram: string | null; website: string | null; phone: string | null;
+  terminals: TerminalCard[]; sidings: Siding[]; listings: ListingCard[];
+}
+
+export type SidingDetail = Siding;
