@@ -94,7 +94,6 @@ function Wizard() {
 
   async function toStep2(e: React.FormEvent) {
     e.preventDefault(); setErr(null);
-    if (!orgId) return setErr(t('err.noOrg'));
     if (!station) return setErr(t('err.selectStation'));
     if (!(weightKg > 0)) return setErr(t('err.enterWeight'));
     setBusy(true);
@@ -125,7 +124,7 @@ function Wizard() {
     setErr(null); setBusy(true);
     try {
       if (hold) await releaseHold(hold.id);
-      setHold(await post<Hold>(`/slots/${s.id}/hold`, { orgId }));
+      setHold(await post<Hold>(`/slots/${s.id}/hold`, orgId ? { orgId } : {}));
       await refreshSlots(); // ushlangan joy katakda darhol ko'rinsin
     } catch (e) { setErr(msg(e, t)); setHold(null); await refreshSlots(); } finally { setBusy(false); }
   }
@@ -150,7 +149,7 @@ function Wizard() {
     idemKey.current ??= crypto.randomUUID();
     try {
       const order = await post<Order>('/orders', {
-        orgId, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg,
+        orgId: orgId || undefined, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg,
         wagonCount: Number(wagons) || 1, storageDays: extras.includes('STORAGE') ? Number(storageDays) || 1 : undefined,
         services: extras, note: note.trim() || undefined,
         wagonNumbers: wagonNumbers.split(/[\s,]+/).map((x) => x.trim()).filter((x) => /^\d{8}$/.test(x)),
@@ -196,7 +195,7 @@ function Wizard() {
             </label>
           ) : null}
           {orgs.length === 0 ? (
-            <p className="rounded-xl bg-amber-soft p-4 text-sm">{t.rich('noOrg', { link: (c) => <Link href="/dashboard" className="font-semibold underline">{c}</Link> })}</p>
+            <p className="rounded-xl bg-teal-soft p-4 text-sm text-teal-ink">{t('orgAuto')}</p>
           ) : null}
 
           <fieldset>

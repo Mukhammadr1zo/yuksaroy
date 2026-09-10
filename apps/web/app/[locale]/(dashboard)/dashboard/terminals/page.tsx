@@ -50,7 +50,6 @@ export default function MyTerminalsPage() {
           <p className="mt-1 text-sm text-muted">{t('emptyHint')}</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <Link href="/dashboard/terminals/new" className="rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink">{t('emptyCta')}</Link>
-            <Link href="/terminals" className={`${BTN_GHOST} py-2.5`}>{t('emptyClaim')}</Link>
           </div>
         </div>
       ) : null}

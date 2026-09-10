@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -10,7 +9,7 @@ import type { CompanyDetail } from '@/lib/types-listing';
 import { ListingCard, regionName } from '@/components/catalog/ListingCard';
 import { TerminalCard } from '@/components/catalog/TerminalCard';
 import { KycBadge } from '@/components/catalog/KycBadge';
-import { AuthedPhone } from '@/components/catalog/AuthedPhone';
+import { PhoneLink } from '@/components/catalog/PhoneLink';
 import { MiniMap, type Pin } from '@/components/catalog/MiniMap';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
 
@@ -29,8 +28,7 @@ export default async function CompanyPage({ params }: Params) {
   const lang = locale as SearchLang;
   const o = await sapiOrNull<CompanyDetail>(`/companies/${slug}`, 60);
   if (!o) notFound();
-  const [t, tk, tc, c] = await Promise.all([getTranslations('companies'), getTranslations('orgKind'), getTranslations('claim'), cookies()]);
-  const authed = c.has('ys_access') || c.has('ys_refresh');
+  const [t, tk, tc] = await Promise.all([getTranslations('companies'), getTranslations('orgKind'), getTranslations('claim')]);
   const tg = o.telegram ? o.telegram.replace(/^@|^https?:\/\/t\.me\//, '') : null;
   const site = o.website ? (o.website.startsWith('http') ? o.website : `https://${o.website}`) : null;
   const pins: Pin[] = [
@@ -103,8 +101,7 @@ export default async function CompanyPage({ params }: Params) {
               {tg ? <li className="flex items-center gap-2"><TelegramLogoIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><a href={`https://t.me/${tg}`} target="_blank" rel="noreferrer" className="font-semibold text-navy hover:text-teal-ink">@{tg}</a></li> : null}
               {site ? <li className="flex items-center gap-2"><GlobeIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><a href={site} target="_blank" rel="noreferrer" className="font-semibold text-navy hover:text-teal-ink">{site.replace(/^https?:\/\//, '')}</a></li> : null}
               <li className="flex items-center gap-2">
-                <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />
-                {authed ? <AuthedPhone path={`/companies/${slug}`} field="phone" none={t('detail.noPhone')} /> : <Link href={`/login?next=/companies/${slug}`} className="text-muted underline decoration-dotted hover:text-navy">{t('detail.loginToSee')}</Link>}
+                {o.phone ? <PhoneLink phone={o.phone} kind="terminal" targetId={o.id} /> : <><PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><span className="text-muted">{t('detail.noPhone')}</span></>}
               </li>
             </ul>
             {!tg && !site ? <p className="mt-3 text-xs text-muted">{t('detail.noContact')}</p> : null}

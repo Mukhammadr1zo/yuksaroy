@@ -2,17 +2,32 @@
   "terminalsAdmin": {
     "nav": "Terminallarim",
     "adminTab": "Terminal da'volari",
-    "status": { "DRAFT": "Qoralama", "ACTIVE": "Faol", "HIDDEN": "Yashirilgan" },
-    "tabs": { "info": "Ma'lumot", "tariffs": "Tariflar", "slots": "Slotlar" },
+    "status": {
+      "DRAFT": "Qoralama",
+      "ACTIVE": "Faol",
+      "HIDDEN": "Yashirilgan"
+    },
+    "tabs": {
+      "info": "Ma'lumot",
+      "tariffs": "Tariflar",
+      "slots": "Slotlar"
+    },
     "list": {
       "title": "Terminallarim",
       "lead": "Pasport, tariflar va slotlar shu yerdan boshqariladi. Faol terminal katalogda ko'rinadi va bron qilinadi.",
       "new": "Terminal qo'shish",
       "empty": "Hali terminal yo'q.",
-      "emptyHint": "Yangi terminal qo'shing yoki katalogda o'zingiznikini topib da'vo qiling.",
+      "emptyHint": "Terminalni katalogga faqat egasi qo'shadi: pasport, tariflar va slotlar sizning nazoratingizda bo'ladi.",
       "emptyCta": "Terminal qo'shing",
-      "emptyClaim": "Katalogda o'zingiznikini topib da'vo qiling",
-      "col": { "name": "Nomi", "kind": "Turi", "status": "Holat", "station": "Stansiya", "region": "Viloyat", "freeToday": "Bugun bo'sh", "tariffs": "Tariflar" },
+      "col": {
+        "name": "Nomi",
+        "kind": "Turi",
+        "status": "Holat",
+        "station": "Stansiya",
+        "region": "Viloyat",
+        "freeToday": "Bugun bo'sh",
+        "tariffs": "Tariflar"
+      },
       "activate": "Faollashtirish",
       "hide": "Yashirish",
       "open": "Sahifasi",
@@ -26,7 +41,14 @@
       "backToList": "Terminallarga qaytish",
       "notFound": "Terminal topilmadi.",
       "unsavedTabs": "Tariflar va slotlar terminal saqlangandan keyin ochiladi. Avval Ma'lumot bo'limini saqlang.",
-      "section": { "main": "Asosiy", "place": "Joylashuv", "hours": "Ish vaqti", "passport": "Pasport", "photos": "Rasmlar", "services": "Xizmatlar" },
+      "section": {
+        "main": "Asosiy",
+        "place": "Joylashuv",
+        "hours": "Ish vaqti",
+        "passport": "Pasport",
+        "photos": "Rasmlar",
+        "services": "Xizmatlar"
+      },
       "field": {
         "org": "Tashkilot",
         "station": "Stansiya",
@@ -61,7 +83,13 @@
         "services": "Yoqilgan xizmat tarif va buyurtmada tanlanadi. Oldindan: mijoz necha daqiqa oldin buyurtma berishi kerak (0 = darhol).",
         "photos": "JPEG, PNG yoki WebP, har biri 5 MB gacha"
       },
-      "placeholder": { "name": "Masalan: Sergeli yuk saroyi", "description": "Xizmatlar, texnika, ish tartibi", "address": "Ko'cha, uy", "phone": "+998 71 123 45 67", "craneType": "Masalan: kozlovoy" },
+      "placeholder": {
+        "name": "Masalan: Sergeli yuk saroyi",
+        "description": "Xizmatlar, texnika, ish tartibi",
+        "address": "Ko'cha, uy",
+        "phone": "+998 71 123 45 67",
+        "craneType": "Masalan: kozlovoy"
+      },
       "noOrg": "Terminal faqat TERMINAL turidagi tashkilot nomidan qo'shiladi. Tashkilotda shu turni belgilang.",
       "toOrg": "Tashkilotni sozlash",
       "addRange": "Oraliq qo'shish",
@@ -94,11 +122,27 @@
       "history": "Tarixni ko'rsatish",
       "hideHistory": "Faqat amaldagi",
       "empty": "Tarif e'lon qilinmagan. Tarifsiz terminal narx so'rov bo'yicha ko'rinadi va bron qilinmaydi.",
-      "col": { "service": "Xizmat", "cargoGroup": "Yuk guruhi", "price": "Narx", "min": "Minimal", "validFrom": "Kuchga kirish", "validTo": "Tugash", "version": "Versiya" },
+      "col": {
+        "service": "Xizmat",
+        "cargoGroup": "Yuk guruhi",
+        "price": "Narx",
+        "min": "Minimal",
+        "validFrom": "Kuchga kirish",
+        "validTo": "Tugash",
+        "version": "Versiya"
+      },
       "allCargo": "barcha yuklar",
       "open": "ochiq",
       "new": "Yangi tarif e'lon qilish",
-      "field": { "service": "Xizmat", "cargoGroup": "Yuk guruhi (ixtiyoriy)", "priceSom": "Narx, so'm", "unit": "Birlik", "minSom": "Minimal summa, so'm", "validFrom": "Kuchga kirish sanasi", "note": "Izoh" },
+      "field": {
+        "service": "Xizmat",
+        "cargoGroup": "Yuk guruhi (ixtiyoriy)",
+        "priceSom": "Narx, so'm",
+        "unit": "Birlik",
+        "minSom": "Minimal summa, so'm",
+        "validFrom": "Kuchga kirish sanasi",
+        "note": "Izoh"
+      },
       "hint": {
         "cargoGroup": "Bo'sh qoldirsangiz barcha yuklar uchun. ETSNG guruhi tanlansa faqat shu guruhga.",
         "validFrom": "Bo'sh bo'lsa hozirdan. Amaldagi tarif shu kundan yopiladi.",

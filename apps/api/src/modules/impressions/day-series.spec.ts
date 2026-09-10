@@ -25,10 +25,10 @@ describe('daySeries', () => {
       keys,
     );
     expect(r.days).toEqual([
-      { day: '2026-09-06', list: 0, map: 2, detail: 0, compare: 0, bot: 0 },
-      { day: '2026-09-07', list: 0, map: 0, detail: 0, compare: 0, bot: 0 },
-      { day: '2026-09-08', list: 4, map: 0, detail: 1, compare: 0, bot: 0 },
+      { day: '2026-09-06', list: 0, map: 2, detail: 0, compare: 0, bot: 0, contact: 0 },
+      { day: '2026-09-07', list: 0, map: 0, detail: 0, compare: 0, bot: 0, contact: 0 },
+      { day: '2026-09-08', list: 4, map: 0, detail: 1, compare: 0, bot: 0, contact: 0 },
     ]);
-    expect(r.totals).toEqual({ list: 4, map: 2, detail: 1, compare: 0, bot: 0, all: 7 });
+    expect(r.totals).toEqual({ list: 4, map: 2, detail: 1, compare: 0, bot: 0, contact: 0, all: 7 });
   });
 });

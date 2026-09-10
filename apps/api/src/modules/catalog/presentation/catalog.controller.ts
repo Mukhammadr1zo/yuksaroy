@@ -62,6 +62,7 @@ export class CatalogController {
         ...stationParam(station), rju: pickIn(rju, RJUS), kind: pickIn(kind, TERMINAL_KINDS),
         service: services.length ? services : undefined, q: q?.trim() || undefined,
         region: regions.length ? regions : undefined, near: geo,
+        owned: true, // terminalni faqat egasi qo'shadi: egasiz obyekt ochiq katalogda yo'q
       },
       now,
     );
@@ -87,7 +88,7 @@ export class CatalogController {
   async terminal(@Param('slug') slug: string) {
     const now = new Date();
     const t = await this.repo.findTerminalBySlug(slug, now);
-    if (!t || t.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    if (!t || t.status !== 'ACTIVE' || t.orgId === null) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     const free = await this.repo.freeTodayByTerminal([t.id], now);
     return publicTerminal(t, free[t.id] ?? 0);
   }
@@ -129,7 +130,7 @@ export class CatalogController {
     const picked = listIn(cat, SEARCH_CATEGORIES), cats = picked.length ? picked : [...SEARCH_CATEGORIES];
     const kinds: ListingKind[] = [...(cats.includes('equipment') ? EQUIPMENT_KINDS : []), ...(cats.includes('truck') ? (['TRUCK'] as const) : [])];
     const [terminals, objects, listings] = await Promise.all([
-      cats.includes('terminal') ? this.repo.listTerminals({ region: regions.length ? regions : undefined }, now) : [],
+      cats.includes('terminal') ? this.repo.listTerminals({ region: regions.length ? regions : undefined, owned: true }, now) : [],
       cats.includes('siding') ? this.repo.mapObjects() : null,
       kinds.length ? this.listings.listPublic({ kinds, regions }, now) : [],
     ]);

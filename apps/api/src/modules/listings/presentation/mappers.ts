@@ -22,14 +22,18 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
   };
 }
 
-export function listingDetail(l: ListingRecord, authed: boolean) {
+/**
+ * E'lon ommaviy tijorat taklifi: telefon hammaga ochiq (egasi aynan qo'ng'iroqni kutadi).
+ * Platforma orqali so'rov yuborish esa kirishni talab qiladi.
+ */
+export function listingDetail(l: ListingRecord) {
   return {
     ...listingCard(l), description: l.description, photos: l.photos, responseHours: l.responseHours,
-    contactPhone: authed ? l.contactPhone : null, status: l.status, createdAt: l.createdAt,
+    contactPhone: l.contactPhone, status: l.status, createdAt: l.createdAt,
   };
 }
 
 /** Kabinet va admin: tafsilot + orgId, ko'rishlar, rad sababi, muddat. */
 export function ownerListing(l: ListingRecord) {
-  return { ...listingDetail(l, true), orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt };
+  return { ...listingDetail(l), orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt };
 }

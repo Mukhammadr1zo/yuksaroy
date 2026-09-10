@@ -12,7 +12,7 @@ import { publicOrder, orderCard } from './mappers';
 import { groupBoard } from '../domain/board';
 
 class CreateOrderDto {
-  @IsString() orgId!: string;
+  @IsOptional() @IsString() orgId?: string;
   @IsString() bookingId!: string;
   @IsIn(OPERATIONS) operation!: Operation;
   @IsOptional() @IsIn(DIRECTIONS) direction?: Direction;

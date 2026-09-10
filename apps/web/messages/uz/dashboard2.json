@@ -258,7 +258,8 @@
         "legendFree": "bo'sh joy soni",
         "legendLast": "oxirgi joy",
         "legendBusy": "band yoki yopiq"
-      }
+      },
+      "orgAuto": "Tashkilotingiz yo'q: buyurtma berilganda ismingiz bilan yuk egasi tashkiloti avtomatik ochiladi, STIR keyin hujjat kerak bo'lganda so'raladi."
     }
   }
 }

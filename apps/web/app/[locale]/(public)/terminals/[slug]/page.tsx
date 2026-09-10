@@ -1,12 +1,10 @@
 import { Link } from '@/i18n/navigation';
-import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { REVIEW } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
 import { DAYS, hoursSummary, isOpenNow, num, pricePer, som, uzTime, uzToday } from '@/lib/format';
 import type { Page, Siding, Slot, TerminalDetail } from '@/lib/types';
-import { ClaimTerminal } from '@/components/terminal/ClaimTerminal';
 import { TerminalReviews } from '@/components/reviews/TerminalReviews';
 import { Impressions } from '@/components/catalog/Impressions';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
@@ -32,14 +30,12 @@ export default async function TerminalPage({ params }: Params) {
   if (!t) notFound();
   const today = uzToday();
   // tr: terminal nomfazosi; tn nav, tc common, tk kind, ts service, trj rju, td hafta kunlari
-  const [sidings, slots, tr, tn, tc, tk, ts, trj, td, tcl, ck] = await Promise.all([
+  const [sidings, slots, tr, tn, tc, tk, ts, trj, td] = await Promise.all([
     sapi<Page<Siding>>(`/sidings?station=${t.station.id}&limit=1`, 300).catch(() => null),
     sapi<Slot[]>(`/terminals/${t.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]),
     getTranslations('terminal'), getTranslations('nav'), getTranslations('common'), getTranslations('kind'), getTranslations('service'), getTranslations('rju'), getTranslations('format.day'),
-    getTranslations('terminalsAdmin.claim'), cookies(),
   ]);
   const trv = await getTranslations('reviews');
-  const authed = ck.has('ys_access') || ck.has('ys_refresh');
   const open = isOpenNow(t.hours, t.is24h);
   const p = t.passport ?? {};
   const yes = tc('yes');
@@ -90,18 +86,6 @@ export default async function TerminalPage({ params }: Params) {
           {t.phone ? <a href={`tel:${t.phone}`} className="text-center font-mono text-sm text-muted">{t.phone}</a> : null}
         </div>
       </header>
-
-      {/* Egasiz terminal: da'vo (kirgan bo'lsa forma, bo'lmasa login?next=); PENDING bo'lsa faqat holat */}
-      {!t.claimed ? (
-        <div className="mt-6 rounded-card border border-amber/40 bg-amber-soft p-4 text-sm">
-          <p><b>{tr('claim.title')}</b> {tr('claim.body')}</p>
-          <div className="mt-3">
-            {t.claimStatus === 'PENDING' ? <p className="font-semibold text-amber-ink">{tcl('pending')}</p>
-              : authed ? <ClaimTerminal terminalId={t.id} />
-              : <Link href={`/login?next=/terminals/${t.slug}`} className="inline-block rounded-full bg-navy px-6 py-2.5 font-semibold text-white transition hover:bg-navy-2">{tcl('ctaLogin')}</Link>}
-          </div>
-        </div>
-      ) : null}
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">

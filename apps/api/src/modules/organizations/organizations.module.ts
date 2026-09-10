@@ -10,6 +10,6 @@ import { OrgsController } from './presentation/orgs.controller';
   imports: [IdentityModule],
   controllers: [OrgsController],
   providers: [{ provide: ORG_REPOSITORY, useClass: PrismaOrganizationRepository }, CreateOrgUseCase, PlatformAdmin],
-  exports: [ORG_REPOSITORY, PlatformAdmin],
+  exports: [ORG_REPOSITORY, PlatformAdmin, CreateOrgUseCase],
 })
 export class OrganizationsModule {}

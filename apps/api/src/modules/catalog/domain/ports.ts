@@ -55,6 +55,11 @@ export interface TerminalFilter {
   status?: TerminalStatus | 'ANY';
   orgIds?: string[];
   claimStatus?: ClaimStatus;
+  /**
+   * Terminalni faqat egasi qo'shadi: ochiq katalogda egasiz obyekt ko'rinmaydi.
+   * true = faqat egali, false = faqat egasiz (admin reestri), undefined = hammasi.
+   */
+  owned?: boolean;
 }
 
 export interface SidingRecord {

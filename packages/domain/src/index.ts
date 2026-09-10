@@ -117,7 +117,8 @@ export function ratingDisplay(r: { avg: number; count: number }): { show: boolea
   return { show, avg: show ? r.avg : null, count: r.count };
 }
 /** Ko'rsatish yuzalari (Impression.surface). */
-export const IMPRESSION_SURFACES = ['list', 'map', 'detail', 'compare', 'bot'] as const;
+/** 'contact': telefon ochilgani (kim kimning raqamini olgani izi, firibgarlik tekshiruvi uchun) */
+export const IMPRESSION_SURFACES = ['list', 'map', 'detail', 'compare', 'bot', 'contact'] as const;
 export type ImpressionSurface = (typeof IMPRESSION_SURFACES)[number];
 
 /** Yangi baho qo'shilganda o'rtacha (2 xona) va sonni qayta hisoblash. Chiqarib tashlangan (excluded) baho bu yerga kelmaydi. */

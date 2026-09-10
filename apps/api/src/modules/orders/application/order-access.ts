@@ -1,6 +1,8 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../../catalog/domain/ports';
 import { ORG_REPOSITORY, type OrganizationRepository } from '../../organizations/domain/ports';
+import { CreateOrgUseCase } from '../../organizations/application/create-org.usecase';
+import { PrismaService } from '../../../common/prisma.service';
 
 /** Buyurtmani kim ko'radi va kim o'zgartiradi: mijoz (o'z tashkiloti) va terminal (o'z obyekti). */
 @Injectable()
@@ -8,7 +10,23 @@ export class OrderAccess {
   constructor(
     @Inject(ORG_REPOSITORY) private readonly orgs: OrganizationRepository,
     @Inject(CATALOG_REPOSITORY) private readonly catalog: CatalogRepository,
+    private readonly createOrg: CreateOrgUseCase,
+    private readonly prisma: PrismaService,
   ) {}
+
+  /**
+   * Buyurtma uchun tashkilot: berilgan bo'lsa tekshiriladi, bo'lmasa mavjudi olinadi,
+   * u ham bo'lmasa foydalanuvchi nomi bilan yuk egasi tashkiloti ochiladi (STIR keyin, hujjat kerak bo'lganda).
+   */
+  async resolveShipperOrg(userId: string, orgId?: string | null): Promise<string> {
+    if (orgId) { await this.assertShipper(userId, orgId); return orgId; }
+    const mine = await this.shipperOrgIds(userId);
+    if (mine.length) return mine[0]!;
+    const u = await this.prisma.user.findUnique({ where: { id: userId }, select: { fullName: true, phone: true } });
+    const name = u?.fullName?.trim() || (u?.phone ? `Yuk egasi ${u.phone.slice(-4)}` : 'Yuk egasi');
+    const org = await this.createOrg.execute(userId, { kinds: ['SHIPPER'], name, roles: ['CLIENT'] });
+    return org.id;
+  }
 
   /** Buyurtma bera oladigan tashkilotlar: yuk egasi yoki ekspeditor. */
   async shipperOrgIds(userId: string): Promise<string[]> {

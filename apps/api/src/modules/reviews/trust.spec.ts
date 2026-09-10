@@ -36,7 +36,7 @@ describe('maskOrderNo', () => {
 describe('REVIEW va IMPRESSION_SURFACES', () => {
   it('chegaralar va yuzalar', () => {
     expect(REVIEW).toEqual({ min: 1, max: 5, maxText: 1000, maxReplyDays: 30, minToShow: 3 });
-    expect([...IMPRESSION_SURFACES]).toEqual(['list', 'map', 'detail', 'compare', 'bot']);
+    expect([...IMPRESSION_SURFACES]).toEqual(['list', 'map', 'detail', 'compare', 'bot', 'contact']);
   });
 });
 

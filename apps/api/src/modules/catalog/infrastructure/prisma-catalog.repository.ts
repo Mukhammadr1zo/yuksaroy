@@ -89,7 +89,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
         stationId: f.stationId,
         station: f.stationEsr ? { esrCode: f.stationEsr } : f.rju ? { rju: f.rju } : undefined,
         kind: f.kind,
-        orgId: f.orgIds ? { in: f.orgIds } : undefined,
+        orgId: f.orgIds ? { in: f.orgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
         claimStatus: f.claimStatus,
         // Har bir so'ralgan xizmat yoqilgan bo'lishi shart
         AND: services.map((s) => ({ services: { some: { serviceCode: s, isEnabled: true } } })),
@@ -235,7 +235,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
   async mapObjects() {
     const [terminals, sidingGroups] = await Promise.all([
       this.prisma.terminal.findMany({
-        where: { status: 'ACTIVE', lat: { not: null }, lng: { not: null } },
+        where: { status: 'ACTIVE', orgId: { not: null }, lat: { not: null }, lng: { not: null } },
         select: { id: true, slug: true, name: true, kind: true, lat: true, lng: true },
       }),
       this.prisma.siding.groupBy({ by: ['stationId', 'regionCode'], where: { stationId: { not: null } }, _count: { _all: true } }),
@@ -266,9 +266,9 @@ export class PrismaCatalogRepository implements CatalogRepository {
   async publicStats() {
     const now = new Date();
     const [terminals, sidings, stations, listings, companies, free] = await Promise.all([
-      this.prisma.terminal.count({ where: { status: 'ACTIVE' } }), this.prisma.siding.count(), this.prisma.station.count(),
+      this.prisma.terminal.count({ where: { status: 'ACTIVE', orgId: { not: null } } }), this.prisma.siding.count(), this.prisma.station.count(),
       this.prisma.listing.count({ where: activeListing(now) }), this.prisma.organization.count({ where: visibleCompany(now) }),
-      this.freeToday({ terminal: { status: 'ACTIVE' } }, now),
+      this.freeToday({ terminal: { status: 'ACTIVE', orgId: { not: null } } }, now),
     ]);
     return { terminals, sidings, stations, listings, companies, freeSlotsToday: Object.values(free).reduce((a, b) => a + b, 0) };
   }

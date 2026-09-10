@@ -2,17 +2,32 @@
   "terminalsAdmin": {
     "nav": "My terminals",
     "adminTab": "Terminal claims",
-    "status": { "DRAFT": "Draft", "ACTIVE": "Active", "HIDDEN": "Hidden" },
-    "tabs": { "info": "Details", "tariffs": "Tariffs", "slots": "Slots" },
+    "status": {
+      "DRAFT": "Draft",
+      "ACTIVE": "Active",
+      "HIDDEN": "Hidden"
+    },
+    "tabs": {
+      "info": "Details",
+      "tariffs": "Tariffs",
+      "slots": "Slots"
+    },
     "list": {
       "title": "My terminals",
       "lead": "Passport, tariffs and slots are managed here. An active terminal is listed in the catalog and can be booked.",
       "new": "Add terminal",
       "empty": "No terminals yet.",
-      "emptyHint": "Add a new terminal or find yours in the catalog and claim it.",
+      "emptyHint": "Only the owner adds a terminal to the catalog: passport, tariffs and slots stay under your control.",
       "emptyCta": "Add a terminal",
-      "emptyClaim": "Find yours in the catalog and claim it",
-      "col": { "name": "Name", "kind": "Kind", "status": "Status", "station": "Station", "region": "Region", "freeToday": "Free today", "tariffs": "Tariffs" },
+      "col": {
+        "name": "Name",
+        "kind": "Kind",
+        "status": "Status",
+        "station": "Station",
+        "region": "Region",
+        "freeToday": "Free today",
+        "tariffs": "Tariffs"
+      },
       "activate": "Activate",
       "hide": "Hide",
       "open": "Page",
@@ -26,7 +41,14 @@
       "backToList": "Back to terminals",
       "notFound": "Terminal not found.",
       "unsavedTabs": "Tariffs and slots open once the terminal is saved. Save the Details section first.",
-      "section": { "main": "Main", "place": "Location", "hours": "Opening hours", "passport": "Passport", "photos": "Photos", "services": "Services" },
+      "section": {
+        "main": "Main",
+        "place": "Location",
+        "hours": "Opening hours",
+        "passport": "Passport",
+        "photos": "Photos",
+        "services": "Services"
+      },
       "field": {
         "org": "Organization",
         "station": "Station",
@@ -61,7 +83,13 @@
         "services": "An enabled service can be tariffed and ordered. Lead time: how many minutes ahead a client must order (0 = immediately).",
         "photos": "JPEG, PNG or WebP, up to 5 MB each"
       },
-      "placeholder": { "name": "For example: Sergeli freight yard", "description": "Services, equipment, working order", "address": "Street, building", "phone": "+998 71 123 45 67", "craneType": "For example: gantry" },
+      "placeholder": {
+        "name": "For example: Sergeli freight yard",
+        "description": "Services, equipment, working order",
+        "address": "Street, building",
+        "phone": "+998 71 123 45 67",
+        "craneType": "For example: gantry"
+      },
       "noOrg": "A terminal is added only on behalf of a TERMINAL organization. Set that kind on your organization.",
       "toOrg": "Set up organization",
       "addRange": "Add range",
@@ -94,11 +122,27 @@
       "history": "Show history",
       "hideHistory": "Current only",
       "empty": "No tariffs published. Without a tariff the terminal shows price on request and cannot be booked.",
-      "col": { "service": "Service", "cargoGroup": "Cargo group", "price": "Price", "min": "Minimum", "validFrom": "Valid from", "validTo": "Until", "version": "Version" },
+      "col": {
+        "service": "Service",
+        "cargoGroup": "Cargo group",
+        "price": "Price",
+        "min": "Minimum",
+        "validFrom": "Valid from",
+        "validTo": "Until",
+        "version": "Version"
+      },
       "allCargo": "all cargo",
       "open": "open",
       "new": "Publish a new tariff",
-      "field": { "service": "Service", "cargoGroup": "Cargo group (optional)", "priceSom": "Price, som", "unit": "Unit", "minSom": "Minimum amount, som", "validFrom": "Effective date", "note": "Note" },
+      "field": {
+        "service": "Service",
+        "cargoGroup": "Cargo group (optional)",
+        "priceSom": "Price, som",
+        "unit": "Unit",
+        "minSom": "Minimum amount, som",
+        "validFrom": "Effective date",
+        "note": "Note"
+      },
       "hint": {
         "cargoGroup": "Leave empty for all cargo. Pick an ETSNG group to limit the tariff to it.",
         "validFrom": "Empty: from now. The current tariff closes on that day.",

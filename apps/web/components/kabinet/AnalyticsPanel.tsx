@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import type { Analytics } from '@/lib/types-trust';
 
-const COLOR: Record<ImpressionSurface, string> = { list: '#002352', map: '#077F84', detail: '#FD7B03', compare: '#05979E', bot: '#52677E' };
+const COLOR: Record<ImpressionSurface, string> = { list: '#002352', map: '#077F84', detail: '#FD7B03', compare: '#05979E', bot: '#52677E', contact: '#1B8A5A' };
 const W = 600, H = 128, PAD = 4, AXIS = 4; // sana yorliqlari SVG tashqarisida (390 da o'qiladigan bo'lsin)
 const sum = (d: Record<ImpressionSurface, number>) => IMPRESSION_SURFACES.reduce((s, k) => s + d[k], 0);
 

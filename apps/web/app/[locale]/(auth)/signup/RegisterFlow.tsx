@@ -3,7 +3,7 @@
 // Google (telefonsiz) yoki parolli foydalanuvchi 2-qadamni o'tkazib yuboradi; kirgan foydalanuvchi telefon qadamini ko'rmaydi.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRightIcon, BuildingsIcon, CheckCircleIcon, CheckIcon, TruckIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, BuildingsIcon, CheckCircleIcon, CheckIcon, PackageIcon, TruckIcon } from '@phosphor-icons/react';
 import { ORG_KINDS, REGIONS, type OrgKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
@@ -16,7 +16,7 @@ import { stripLocale } from '../login/LoginCard';
 
 const KINDS = ORG_KINDS.filter((k) => k !== 'PLATFORM');
 const STEPS = ['phone', 'password', 'profile', 'done'] as const;
-const WHO = [{ key: 'driver', Icon: TruckIcon }, { key: 'org', Icon: BuildingsIcon }] as const;
+const WHO = [{ key: 'shipper', Icon: PackageIcon }, { key: 'driver', Icon: TruckIcon }, { key: 'org', Icon: BuildingsIcon }] as const;
 const ORG_ERR: Record<string, string> = { STIR_TAKEN: 'stirTaken', INVALID_STIR: 'invalidStir', KIND_REQUIRED: 'kindRequired' };
 
 export function RegisterFlow({ next }: { next: string | null }) {
@@ -49,6 +49,12 @@ export function RegisterFlow({ next }: { next: string | null }) {
 
   const patchMe = (extra: object = {}) => api('/auth/me', { method: 'PATCH', body: JSON.stringify({ fullName: form.fullName.trim(), ...extra }) });
 
+  const submitShipper = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Tashkilot so'ralmaydi: birinchi buyurtmada ism bilan avtomatik ochiladi (STIR keyin, hujjat kerak bo'lganda)
+    void run(async () => { await patchMe(); setStep(4); }, () => t('profile.err.generic'));
+  };
+
   const submitDriver = (e: React.FormEvent) => {
     e.preventDefault();
     void run(async () => { await patchMe({ personalRoles: ['DRIVER'] }); setStep(4); }, () => t('profile.err.generic'));
@@ -75,7 +81,9 @@ export function RegisterFlow({ next }: { next: string | null }) {
   // Tayyor qadam: haydovchi uchun e'lon va kabinet, tashkilot uchun kabinet, e'lon, terminal
   const actions = org
     ? [{ key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }, { key: 'listing', href: '/dashboard/listings/new' }, { key: 'terminal', href: '/dashboard/terminal' }]
-    : [{ key: 'driverListing', href: { pathname: '/dashboard/listings/new', query: { kind: 'TRUCK' } } }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }];
+    : who === 'shipper'
+      ? [{ key: 'findTerminal', href: '/terminals' }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }]
+      : [{ key: 'driverListing', href: { pathname: '/dashboard/listings/new', query: { kind: 'TRUCK' } } }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }];
 
   return (
     <div className="rounded-card border border-line bg-white p-6 sm:p-8">
@@ -148,6 +156,15 @@ export function RegisterFlow({ next }: { next: string | null }) {
               })}
             </div>
           </fieldset>
+
+          {who === 'shipper' && (
+            <form key="shipper" className="ys-step space-y-4 border-t border-line pt-4" onSubmit={submitShipper}>
+              <p className="text-sm text-muted">{t('profile.shipperLead')}</p>
+              {fullNameField}
+              <button disabled={busy} className={primary}>{t('profile.shipperSubmit')}</button>
+              {err && <p role="alert" className="text-sm text-red-700">{err}</p>}
+            </form>
+          )}
 
           {who === 'driver' && (
             <form key="driver" className="ys-step space-y-4 border-t border-line pt-4" onSubmit={submitDriver}>

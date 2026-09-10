@@ -5,7 +5,7 @@ export type DayRow = { day: Date | string; surface: string; count: number };
 export type SurfaceCounts = Record<ImpressionSurface, number>;
 export type DayPoint = { day: string } & SurfaceCounts;
 
-const zero = (): SurfaceCounts => ({ list: 0, map: 0, detail: 0, compare: 0, bot: 0 });
+const zero = (): SurfaceCounts => ({ list: 0, map: 0, detail: 0, compare: 0, bot: 0, contact: 0 });
 /** DB Date (UTC yarim tun) yoki "YYYY-MM-DD" -> "YYYY-MM-DD". */
 const keyOf = (d: Date | string) => (typeof d === 'string' ? d.slice(0, 10) : d.toISOString().slice(0, 10));
 

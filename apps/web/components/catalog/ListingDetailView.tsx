@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
@@ -9,6 +8,7 @@ import type { ListingDetail, ListingPage } from '@/lib/types-listing';
 import { KIND_ICON, ListingCard, listingHref, regionName } from './ListingCard';
 import { KycBadge, PhoneBadge } from './KycBadge';
 import { ListingContact } from './ListingContact';
+import { PhoneLink } from './PhoneLink';
 import { MiniMap } from './MiniMap';
 import { PremiumBadge } from './PremiumBadge';
 import { Impressions } from './Impressions';
@@ -24,8 +24,7 @@ export async function listingMetadata(slug: string) {
 export async function ListingDetailView({ slug, section }: { slug: string; section: Section }) {
   const l = await sapiOrNull<ListingDetail>(`/listings/${slug}`, 60);
   if (!l || (l.kind === 'TRUCK') !== (section === 'carriers')) notFound();
-  const [lang, t, c] = await Promise.all([getLocale() as Promise<SearchLang>, getTranslations('listing.detail'), cookies()]);
-  const authed = c.has('ys_access') || c.has('ys_refresh');
+  const [lang, t] = await Promise.all([getLocale() as Promise<SearchLang>, getTranslations('listing.detail')]);
   const L = LISTING_LABELS[lang];
   const truck = l.kind === 'TRUCK';
   const similar = await sapi<ListingPage>(`/listings?kind=${l.kind}&region=${l.regionCode}&limit=4`, 60).then((d) => d.items.filter((x) => x.id !== l.id).slice(0, 3)).catch(() => []);
@@ -107,13 +106,9 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
             {l.priceTiyin != null ? (
               <p className="mt-1 font-display text-2xl font-bold text-navy tabular-nums">{formatSom(l.priceTiyin)}{l.priceUnit && l.priceUnit !== 'TOTAL' ? <span className="ml-2 font-mono text-sm font-normal text-muted">{L.priceUnit[l.priceUnit]}</span> : null}</p>
             ) : <p className="mt-1 font-display text-xl font-bold text-navy">{t('onRequest')}</p>}
-            <div className="mt-4">
-              {authed ? <ListingContact slug={l.slug} listingId={l.id} /> : (
-                <>
-                  <Link href={`/login?next=${listingHref(l)}`} className="block rounded-full bg-teal px-6 py-3 text-center font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('ask')}</Link>
-                  <p className="mt-2 text-xs text-muted">{t('loginToContact')}. {t('loginNote')}</p>
-                </>
-              )}
+            <div className="mt-4 space-y-3">
+              {l.contactPhone ? <PhoneLink phone={l.contactPhone} kind="listing" targetId={l.id} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}
+              <ListingContact listingId={l.id} next={listingHref(l)} />
             </div>
             {l.responseHours ? <p className="mt-3 text-xs text-muted"><span className="font-mono text-ink">{t('response', { hours: l.responseHours })}</span> · {t('responseNote')}</p> : null}
           </section>

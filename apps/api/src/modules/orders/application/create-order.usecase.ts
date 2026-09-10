@@ -11,7 +11,8 @@ import { ORDER_REPOSITORY, type OrderRecord, type OrderRepository } from '../dom
 import { OrderAccess } from './order-access';
 
 export interface CreateOrderInput {
-  orgId: string;
+  /** Bo'sh bo'lsa: mavjud tashkilot olinadi yoki foydalanuvchi nomi bilan yangisi ochiladi */
+  orgId?: string | null;
   bookingId: string;
   operation: Operation;
   direction?: Direction;
@@ -43,7 +44,7 @@ export class CreateOrderUseCase {
 
   async execute(userId: string, input: CreateOrderInput): Promise<OrderRecord> {
     const now = new Date();
-    await this.access.assertShipper(userId, input.orgId);
+    const shipperOrgId = await this.access.resolveShipperOrg(userId, input.orgId);
     const booking = await this.holds.assertUsable(userId, input.bookingId, now);
 
     const slot = await this.bookings.findSlot(booking.slotId);
@@ -52,8 +53,10 @@ export class CreateOrderUseCase {
 
     const terminal = await this.catalog.findTerminalById(slot.terminalId, now);
     if (!terminal || terminal.status !== 'ACTIVE') throw new ConflictException({ code: 'TERMINAL_UNAVAILABLE' });
+    // Terminalni faqat egasi qo'shadi: egasiz obyektda tasdiqlaydigan tomon yo'q, shuning uchun bron ochilmaydi
+    if (terminal.orgId === null) throw new ConflictException({ code: 'TERMINAL_NOT_JOINED' });
     // Arms-length: terminal egasi o'z tashkiloti nomidan o'z terminaliga buyurtma bera olmaydi (o'ziga baho qo'yish yo'li)
-    if (terminal.orgId !== null && terminal.orgId === input.orgId) throw new ConflictException({ code: 'SELF_ORDER' });
+    if (terminal.orgId !== null && terminal.orgId === shipperOrgId) throw new ConflictException({ code: 'SELF_ORDER' });
     if (!terminal.services.some((s) => s.isEnabled && s.serviceCode === input.operation)) {
       throw new BadRequestException({ code: 'OPERATION_NOT_OFFERED', operation: input.operation });
     }
@@ -71,7 +74,7 @@ export class CreateOrderUseCase {
     if (!quote.lines.some((l) => l.serviceCode === input.operation)) throw new ConflictException({ code: 'NO_TARIFF_FOR_OPERATION' });
 
     const order = await this.orders.create({
-      shipperOrgId: input.orgId, createdById: userId, terminalId: terminal.id, stationId: terminal.stationId,
+      shipperOrgId, createdById: userId, terminalId: terminal.id, stationId: terminal.stationId,
       direction: input.direction ?? 'LOCAL', operation: input.operation, cargoTypeId: cargo?.id ?? null,
       weightKg: input.weightKg, wagonCount: input.wagonCount ?? 1, storageDays: input.storageDays ?? null,
       wagonNumbers: (input.wagonNumbers ?? []).slice(0, 100), note: input.note?.slice(0, 1000) ?? null,

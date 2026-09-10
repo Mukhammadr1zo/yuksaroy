@@ -59,7 +59,8 @@ async function seedSidings() {
   console.log(`Siding: ${rows.length} (stansiyaga bog'langan ${linked})`);
 }
 
-// ── Pilot terminallar (14.5): jamoa ochiq ma'lumotdan kiritgan pasportlar, orgId yo'q → «claim your terminal».
+// Ochiq ma'lumotdan yig'ilgan terminal reestri: orgId yo'q, ya'ni ochiq katalogda ko'rinmaydi.
+// Bu ro'yxat faqat egasiga murojaat qilish (da'vo havolasi) uchun; terminalni katalogga faqat egasi qo'shadi.
 const H8_18 = { mon: [['08:00', '18:00']], tue: [['08:00', '18:00']], wed: [['08:00', '18:00']], thu: [['08:00', '18:00']], fri: [['08:00', '18:00']], sat: [['09:00', '14:00']], sun: [] };
 const som = (n: number) => BigInt(n) * 100n;
 type T = { serviceCode: ServiceCode; unit: TariffUnit; priceSom: number; minSom?: number };
@@ -127,7 +128,8 @@ main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma
 
 /** Pilot terminallar uchun slot kalendari: standart 6 oyna × 30 kun (BOOKING.horizonDays). */
 async function seedSlots() {
-  const terminals = await prisma.terminal.findMany({ where: { status: 'ACTIVE' }, select: { id: true, is24h: true } });
+  // Slot faqat egasi platformada bo'lgan terminalda: egasiz obyektda tasdiqlaydigan tomon yo'q
+  const terminals = await prisma.terminal.findMany({ where: { status: 'ACTIVE', orgId: { not: null } }, select: { id: true, is24h: true } });
   const today = new Date();
   let created = 0;
   for (const t of terminals) {
@@ -145,5 +147,5 @@ async function seedSlots() {
       }
     }
   }
-  console.log(`TimeSlot: ${created} (terminal ${terminals.length} × ${BOOKING.horizonDays} kun)`);
+  console.log(`TimeSlot: ${created} (egali terminal ${terminals.length} × ${BOOKING.horizonDays} kun)`);
 }

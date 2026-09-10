@@ -47,7 +47,7 @@ export class ListingsController {
     const l = await this.repo.findBySlug(slug);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
     this.repo.bumpViews(l.id);
-    return listingDetail(l, this.userIdOf(req) !== null);
+    return listingDetail(l);
   }
 
   /** Ixtiyoriy kirish: token bo'lsa va to'g'ri bo'lsa foydalanuvchi, aks holda mehmon. */

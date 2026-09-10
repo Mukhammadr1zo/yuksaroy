@@ -69,11 +69,17 @@ export class TerminalAdminController {
     return t;
   }
 
-  /** Moderatsiya navbati: default PENDING; da'vogar nomi (claimOrgName) admin uchun. */
+  /**
+   * Moderatsiya navbati: default PENDING; da'vogar nomi (claimOrgName) admin uchun.
+   * `pool=1`: ochiq ma'lumotdan yig'ilgan egasiz terminallar reestri (katalogda ko'rinmaydi, murojaat uchun).
+   */
   @Get('admin/terminals')
-  async adminTerminals(@CurrentUserId() userId: string, @Query('claim') claim?: string) {
+  async adminTerminals(@CurrentUserId() userId: string, @Query('claim') claim?: string, @Query('pool') pool?: string) {
     await this.admin.assertPlatformAdmin(userId);
-    const items = await this.repo.listTerminals({ claimStatus: pickIn(claim, CLAIM_STATUSES) ?? 'PENDING', status: 'ANY' }, new Date());
+    const filter = pool === '1'
+      ? { owned: false as const, status: 'ANY' as const }
+      : { claimStatus: pickIn(claim, CLAIM_STATUSES) ?? ('PENDING' as const), status: 'ANY' as const };
+    const items = await this.repo.listTerminals(filter, new Date());
     const ids = [...new Set(items.flatMap((t) => (t.claimOrgId ? [t.claimOrgId] : [])))];
     const names = new Map((await Promise.all(ids.map((id) => this.orgs.findById(id)))).flatMap((o) => (o ? [[o.id, o.name] as const] : [])));
     return items.map((t) => ({ ...t, claimOrgName: t.claimOrgId ? (names.get(t.claimOrgId) ?? null) : null }));

@@ -48,7 +48,7 @@ export class PublicApiController {
   async terminals(@Query('region') region?: string, @Query('kind') kind?: string, @Query('service') service?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
     const now = new Date(), p = clampInt(page, 1, 1, 1000), l = clampInt(limit, 20, 1, 50);
     const services = listIn(service, SERVICE_CODES), regions = listIn(region, REGIONS);
-    const all = await this.repo.listTerminals({ kind: pickIn(kind, TERMINAL_KINDS), service: services.length ? services : undefined, region: regions.length ? regions : undefined }, now);
+    const all = await this.repo.listTerminals({ owned: true, kind: pickIn(kind, TERMINAL_KINDS), service: services.length ? services : undefined, region: regions.length ? regions : undefined }, now);
     const pageRows = all.slice((p - 1) * l, p * l);
     const free = await this.repo.freeTodayByTerminal(pageRows.map((t) => t.id), now);
     return { items: pageRows.map((t) => publicTerminalCard(t, free[t.id] ?? 0)), total: all.length, page: p, limit: l };
@@ -59,7 +59,7 @@ export class PublicApiController {
   async facets() {
     const now = new Date();
     // ponytail: xotirada sanash (repo cheklovlari 200 terminal / 500 e'lon); undan oshsa Prisma groupBy
-    const [terminals, listings] = await Promise.all([this.repo.listTerminals({}, now), this.listings.listPublic({ kinds: [], regions: [] }, now)]);
+    const [terminals, listings] = await Promise.all([this.repo.listTerminals({ owned: true }, now), this.listings.listPublic({ kinds: [], regions: [] }, now)]);
     return { version: PUBLIC_API.version, generatedAt: now.toISOString(), ...facets(terminals, listings) };
   }
 

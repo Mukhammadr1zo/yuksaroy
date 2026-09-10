@@ -65,11 +65,10 @@ export class CompaniesController {
     ]);
     const free = await this.repo.freeTodayByTerminal(terminals.map((t) => t.id), now);
     const storefront = (o.storefront as Storefront | null) ?? null;
-    // Telefon: kirganlarga yoki egasi do'konda ochiq qilgan bo'lsa (contactPhonePublic)
-    const authed = optionalUserId(req, this.tokens) !== null || storefront?.contactPhonePublic === true;
+    // Telefon hammaga ochiq: kompaniya sahifasi ommaviy tijorat profili (so'rov yuborish esa kirish bilan)
     return {
       ...companyCard(o),
-      description: o.description, telegram: o.telegram, website: o.website, phone: authed ? o.phone : null, storefront,
+      description: o.description, telegram: o.telegram, website: o.website, phone: o.phone, storefront,
       terminals: terminals.map((t) => publicTerminalCard(t, free[t.id] ?? 0)),
       sidings: sidings.items.map(publicSiding),
       listings: listings.map((l) => listingCard(toListingRecord(l), undefined, now)),
