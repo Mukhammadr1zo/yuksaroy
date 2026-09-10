@@ -13,7 +13,7 @@ export const BTN = {
 
 /** Sarlavha bloki: eyebrow, h1, lead, real sanoqlar (/stats), ikki CTA. facts bo'sh bo'lsa qator chizilmaydi. */
 export async function Hero({ side, facts, primary, secondary }: { side: Side; facts: string[]; primary: string; secondary: string }) {
-  const t = await getTranslations(`marketing.${side}`);
+  const [t, tc] = await Promise.all([getTranslations(`marketing.${side}`), getTranslations('marketing.common')]);
   return (
     <section className="border-b border-line bg-white">
       <div className="mx-auto max-w-6xl px-6 py-14 md:py-20">
@@ -22,8 +22,8 @@ export async function Hero({ side, facts, primary, secondary }: { side: Side; fa
         <p className="mt-4 max-w-[58ch] text-lg text-muted">{t('lead')}</p>
         {facts.length ? <p className="mt-6 font-mono text-sm text-navy tabular-nums">{facts.join(' · ')}</p> : null}
         <div className="mt-8 flex flex-wrap gap-3">
-          <DashLink href={primary} className={BTN.primary}>{t('cta.primary')}</DashLink>
-          <DashLink href={secondary} className={BTN.outline}>{t('cta.secondary')}</DashLink>
+          <DashLink href={primary} className={BTN.primary} signupLabel={tc('guestCta')}>{t('cta.primary')}</DashLink>
+          <DashLink href={secondary} className={BTN.outline} signupLabel={tc('guestCta')}>{t('cta.secondary')}</DashLink>
         </div>
       </div>
     </section>
@@ -76,7 +76,8 @@ export async function Faq({ side, ns, count = 5 }: { side?: Side; ns?: string; c
 
 type Cta = { href: string; label: string };
 /** To'q ko'k CTA tasmasi (landing bilan bir xil). Matnlar tayyor holda keladi. */
-export function CtaBand({ title, body, primary, secondary }: { title: string; body: string; primary: Cta; secondary: Cta }) {
+export async function CtaBand({ title, body, primary, secondary }: { title: string; body: string; primary: Cta; secondary: Cta }) {
+  const guestCta = (await getTranslations('marketing.common'))('guestCta');
   return (
     <section className="bg-navy">
       <div className="mx-auto grid max-w-6xl gap-8 px-6 py-14 md:grid-cols-[1.4fr_1fr] md:items-center md:py-20">
@@ -85,7 +86,7 @@ export function CtaBand({ title, body, primary, secondary }: { title: string; bo
           <p className="mt-3 max-w-[52ch] text-white/70">{body}</p>
         </div>
         <div className="flex flex-wrap gap-3 md:justify-end">
-          <DashLink href={primary.href} className={BTN.primary}>{primary.label}</DashLink>
+          <DashLink href={primary.href} className={BTN.primary} signupLabel={guestCta}>{primary.label}</DashLink>
           <Link href={secondary.href} className="rounded-full border border-white/25 px-6 py-3 text-center font-semibold text-white transition duration-200 hover:bg-white/10">{secondary.label}</Link>
         </div>
       </div>

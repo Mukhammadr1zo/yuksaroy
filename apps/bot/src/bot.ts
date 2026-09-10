@@ -18,12 +18,13 @@ const env = z.object({
   INTERNAL_SECRET: z.string().min(16),
 }).parse(process.env);
 
-// web_app tugma faqat https bilan ishlaydi; aks holda oddiy url tugma (bir marta ogohlantiramiz)
+// Telegram faqat OMMAVIY https havolani qabul qiladi (web_app tugma ham, url tugma ham):
+// localhost yoki ichki manzil bo'lsa tugma umuman qo'yilmaydi, aks holda butun xabar
+// "Wrong HTTP URL" bilan yuborilmay qoladi va foydalanuvchi hech nima ko'rmaydi.
 const APP_URL = env.TG_APP_URL ?? `${env.WEB_URL}/tg`;
-const WEB_APP = APP_URL.startsWith('https://');
-// Telegram faqat ommaviy https havolani qabul qiladi: localhost bo'lsa tugma umuman qo'yilmaydi,
-// aks holda butun xabar "Wrong HTTP URL" bilan yuborilmay qoladi.
-const PUBLIC_LINK = /^https:\/\//.test(env.WEB_URL) && !/localhost|127\.0\.0\.1|\.local(?::|\/|$)/.test(env.WEB_URL);
+const publicHttps = (u: string) => /^https:\/\//.test(u) && !/localhost|127\.0\.0\.1|\.local(?::|\/|$)/.test(u);
+const WEB_APP = publicHttps(APP_URL);
+const PUBLIC_LINK = publicHttps(env.WEB_URL);
 if (!WEB_APP) console.warn(`bot: ${APP_URL} https emas, web_app o'rniga url tugmalar ishlatiladi`);
 if (!PUBLIC_LINK) console.warn(`bot: ${env.WEB_URL} ommaviy https emas, xabarlarda havola tugmalari qo'yilmaydi`);
 
@@ -294,6 +295,8 @@ bot.catch((err, ctx) => {
   console.error('bot xatosi:', ctx.updateType, err);
 });
 
-bot.launch().then(() => console.log('bot: polling'));
+// launch() promise'i to'xtaganda bajariladi: shuning uchun "ishga tushdi" xabari callbackda,
+// xato esa ushlanadi (aks holda jim yiqilardi).
+bot.launch(() => console.log('bot: polling')).catch((e) => { console.error('bot: launch failed', e); process.exit(1); });
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));

@@ -4,7 +4,14 @@
     "tab": "Ko'rsatkichlar",
     "leadListing": "Oxirgi 30 kun: e'lon qayerda ko'rsatildi va nechta so'rov keldi.",
     "leadTerminal": "Oxirgi 30 kun: terminal qayerda ko'rsatildi, nechta so'rov va buyurtma keldi.",
-    "surface": { "list": "Ro'yxat", "map": "Xarita", "detail": "Sahifa", "compare": "Solishtirish", "bot": "Bot" },
+    "surface": {
+      "list": "Ro'yxat",
+      "map": "Xarita",
+      "detail": "Sahifa",
+      "compare": "Solishtirish",
+      "bot": "Bot",
+      "contact": "Telefon"
+    },
     "total": "Ko'rsatishlar, 30 kun",
     "inquiries": "So'rovlar, 30 kun",
     "views": "Sahifa ochilishi, jami",

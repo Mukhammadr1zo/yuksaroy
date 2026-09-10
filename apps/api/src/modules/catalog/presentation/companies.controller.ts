@@ -1,11 +1,8 @@
-import { Controller, Get, Inject, NotFoundException, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Inject, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { FastifyRequest } from 'fastify';
 import { Prisma } from '@prisma/client';
 import { ORG_KINDS, REGIONS } from '@yuksaroy/domain';
 import { PrismaService } from '../../../common/prisma.service';
-import { TokenService } from '../../identity/application/token.service';
-import { optionalUserId } from '../../identity/presentation/jwt.guard';
 import { listingCard } from '../../listings/presentation/mappers';
 import { listingInclude, toRecord as toListingRecord } from '../../listings/infrastructure/prisma-listing.repository';
 import type { Storefront } from '../../organizations/domain/ports';
@@ -30,7 +27,6 @@ export class CompaniesController {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CATALOG_REPOSITORY) private readonly repo: CatalogRepository,
-    private readonly tokens: TokenService,
   ) {}
 
   @Get()
@@ -49,9 +45,9 @@ export class CompaniesController {
     return { items: rows.map(companyCard), total, page: p, limit: l };
   }
 
-  /** Telefon faqat kirganlarga (1A qarori); telegram va sayt ochiq. */
+  /** Telefon hammaga ochiq (egasi qarori): so'rov yuborish esa kirishni talab qiladi. */
   @Get(':slug')
-  async detail(@Param('slug') slug: string, @Req() req: FastifyRequest) {
+  async detail(@Param('slug') slug: string) {
     const now = new Date();
     const o = await this.prisma.organization.findFirst({
       where: { slug, ...visible(now) },

@@ -69,8 +69,8 @@ export class ReviewsService {
 
   /** Ochiq ro'yxat: yangi birinchi, yuk egasi tashkilot nomi, buyurtma raqami YS-10** ko'rinishida. */
   async listForTerminal(slug: string, page: number, limit = 20) {
-    const t = await this.prisma.terminal.findUnique({ where: { slug }, select: { id: true, status: true, ratingAvg: true, ratingCount: true } });
-    if (!t || t.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    const t = await this.prisma.terminal.findUnique({ where: { slug }, select: { id: true, status: true, orgId: true, ratingAvg: true, ratingCount: true } });
+    if (!t || t.status !== 'ACTIVE' || t.orgId === null) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     const where = { terminalId: t.id };
     const [rows, total] = await Promise.all([
       this.prisma.review.findMany({ where, include: { org: { select: { name: true } } }, orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit }),

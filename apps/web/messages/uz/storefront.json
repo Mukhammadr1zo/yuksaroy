@@ -1,6 +1,9 @@
 {
   "storefront": {
-    "tab": { "info": "Ma'lumotlar", "shop": "Do'kon" },
+    "tab": {
+      "info": "Ma'lumotlar",
+      "shop": "Do'kon"
+    },
     "title": "Do'kon sahifasi",
     "lead": "Ochiq mini sayt: muqova, logotip, shior va kontakt. Faol terminallar, shahobcha yo'llar va e'lonlar avtomatik chiqadi.",
     "address": "Manzil",
@@ -13,15 +16,13 @@
       "cover": "Muqova rasmi",
       "showTerminals": "Terminallarni ko'rsatish",
       "showListings": "E'lonlarni ko'rsatish",
-      "contactTelegram": "Telegram",
-      "contactPhonePublic": "Telefon hammaga ochiq"
+      "contactTelegram": "Telegram"
     },
     "hint": {
       "tagline": "160 belgigacha, nom ostida chiqadi",
       "logo": "Kvadrat PNG yoki JPG",
       "cover": "Keng rasm, 3:1 nisbat tavsiya",
-      "telegram": "@ belgisiz foydalanuvchi nomi",
-      "phonePublic": "O'chiq bo'lsa telefon faqat kirgan foydalanuvchilarga ko'rinadi"
+      "telegram": "@ belgisiz foydalanuvchi nomi"
     },
     "public": {
       "meta": "{name}: terminallar, e'lonlar va aloqa. YukSaroy do'koni.",
@@ -37,7 +38,11 @@
       "map": "Obyektlar xaritada",
       "mapNote": "Koordinatalar taxminiy.",
       "none": "hali yo'q",
-      "sidingCols": { "no": "Reestr No", "station": "Stansiya", "length": "Uzunlik" },
+      "sidingCols": {
+        "no": "Reestr No",
+        "station": "Stansiya",
+        "length": "Uzunlik"
+      },
       "with": "YukSaroy bilan",
       "fullProfile": "To'liq profil"
     }

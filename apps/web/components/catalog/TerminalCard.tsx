@@ -18,7 +18,7 @@ export async function TerminalCard({ t }: { t: T }) {
   return (
     <div className="relative">
     <Link href={`/terminals/${t.slug}`} className="group flex min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative h-[72px] w-[96px] shrink-0 overflow-hidden rounded-t-[48px] rounded-b-md bg-gradient-to-b from-teal/40 to-navy">
+      <div className="relative h-[72px] w-20 shrink-0 overflow-hidden rounded-t-[48px] rounded-b-md bg-gradient-to-b from-teal/40 to-navy sm:w-[96px]">
         {t.photos[0] ? <img src={t.photos[0]} alt="" className="h-full w-full object-cover" /> : null}
       </div>
       <div className="min-w-0 flex-1">
@@ -37,7 +37,7 @@ export async function TerminalCard({ t }: { t: T }) {
         </div>
         {stack.length ? (
           <ul className="mt-2 space-y-0.5 font-mono text-xs tabular-nums">
-            {stack.map((x) => <li key={x.serviceCode} className="flex justify-between gap-3"><span className="text-muted">{c(`service.${x.serviceCode}`)}</span><span className="font-semibold text-navy">{pricePer(x.priceTiyin, x.unit)}</span></li>)}
+            {stack.map((x) => <li key={x.serviceCode} className="flex min-w-0 justify-between gap-3"><span className="truncate text-muted">{c(`service.${x.serviceCode}`)}</span><span className="shrink-0 font-semibold text-navy">{pricePer(x.priceTiyin, x.unit)}</span></li>)}
           </ul>
         ) : null}
         {t.freeToday !== undefined ? (

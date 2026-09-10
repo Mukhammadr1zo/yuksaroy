@@ -40,7 +40,7 @@ export async function ListingCard({ l }: { l: L }) {
           {l.premium ? <PremiumBadge className="shrink-0" /> : null}
           {l.distanceKm != null ? <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{Math.round(l.distanceKm)} km</span> : null}
         </div>
-        <p className="mt-0.5 truncate text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
+        <p className="mt-0.5 text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
         <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}</p>
         {truck ? (
           <div className="mt-2 flex flex-wrap items-center gap-1">

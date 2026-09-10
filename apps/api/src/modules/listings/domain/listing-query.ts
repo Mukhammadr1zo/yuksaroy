@@ -14,7 +14,7 @@ export interface ListingRecord {
   createdAt: Date; updatedAt: Date;
   org: { name: string; slug: string | null; kycStatus: KycStatus } | null;
   ownerUser: { fullName: string | null; phone: string | null } | null; // yakka haydovchi (orgId null)
-  terminal: { id: string; name: string; slug: string } | null;
+  terminal: { id: string; name: string; slug: string; orgId: string | null } | null;
   siding: { id: string; registryNo: number; stationNameRaw: string; station?: { nameUz: string } | null } | null;
 }
 

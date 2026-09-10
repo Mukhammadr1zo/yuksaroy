@@ -62,10 +62,9 @@ export function StorefrontForm({ orgId, slug, initial, disabled, onSaved }: { or
       <Field label={t('field.contactTelegram')} hint={t('hint.telegram')}>
         <input className={INPUT} maxLength={80} value={d.contactTelegram} disabled={disabled} onChange={(e) => set({ contactTelegram: e.target.value })} />
       </Field>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {flag('showTerminals', t('field.showTerminals'))}
         {flag('showListings', t('field.showListings'))}
-        {flag('contactPhonePublic', t('field.contactPhonePublic'), t('hint.phonePublic'))}
       </div>
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
       {!disabled ? (

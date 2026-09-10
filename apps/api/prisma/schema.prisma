@@ -722,10 +722,10 @@ model Review {
 /// Ko'rsatishlar: kun va yuza bo'yicha yig'ilgan hisob, foydalanuvchi ma'lumoti yo'q.
 model Impression {
   id       String   @id @default(cuid())
-  kind     String // 'listing' | 'terminal'
+  kind     String // 'listing' | 'terminal' | 'org'
   targetId String
   day      DateTime @db.Date
-  surface  String // 'list' | 'map' | 'detail' | 'compare' | 'bot'
+  surface  String // 'list' | 'map' | 'detail' | 'compare' | 'bot' | 'contact'
   count    Int      @default(0)
 
   @@unique([kind, targetId, day, surface])

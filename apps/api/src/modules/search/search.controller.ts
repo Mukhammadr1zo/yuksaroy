@@ -56,7 +56,7 @@ export class SearchController {
     const near = filters.near ?? undefined;
     // Hech narsa tanilmasa matn nom/manzil bo'yicha qidiruvga tushadi, aks holda q ro'yxatni bo'shatib qo'yadi
     const q = filters.chips.length ? undefined : dto.q.trim();
-    const all = await this.repo.listTerminals({ region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near, q }, now);
+    const all = await this.repo.listTerminals({ region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near, q, owned: true }, now);
     const free = await this.repo.freeTodayByTerminal(all.map((t) => t.id), now);
 
     // /terminals va GET /v1/terminals uchun URL parametrlari

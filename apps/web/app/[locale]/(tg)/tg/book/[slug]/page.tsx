@@ -16,7 +16,7 @@ import { SlotGrid } from '@/components/order/SlotGrid';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { PriceLines, slotLabel } from '@/components/order/bits';
 import { haptic, useClosingConfirmation, useMainButton } from '@/components/tg/TgProvider';
-import { BTN_GHOST, CARD, CHIP, Err, INPUT, Row, Skeleton } from '@/components/tg/bits';
+import { CARD, CHIP, Err, INPUT, Row, Skeleton } from '@/components/tg/bits';
 
 const STEPS = ['cargo', 'slot', 'confirm'] as const;
 const shipper = (m: Membership) => m.isOwner || m.roles.includes('CLIENT') || m.roles.includes('FORWARDER');
@@ -30,7 +30,6 @@ export default function TgBookPage() {
   const [terminal, setTerminal] = useState<TerminalDetail | null>(null);
   const [orgs, setOrgs] = useState<Membership[] | null>(null);
   const [orgId, setOrgId] = useState('');
-  const [orgName, setOrgName] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [operation, setOperation] = useState<Operation>('UNLOAD');
@@ -56,22 +55,11 @@ export default function TgBookPage() {
   // API kodi tarjimada bo'lsa shu, bo'lmasa umumiy matn
   const fail = (e: unknown) => { const code = e instanceof ApiError ? String(e.body?.code ?? '') : ''; setErr(code && t.has(`err.${code}`) ? t(`err.${code}`) : tc('failed')); };
 
-  async function createOrg() {
-    if (orgName.trim().length < 2) return;
-    setBusy(true); setErr(null);
-    try {
-      const o = await post<{ id: string; name: string }>('/orgs', { name: orgName.trim(), kinds: ['SHIPPER'] });
-      const ms = await api<Membership[]>('/orgs/mine').catch(() => [] as Membership[]);
-      const s = ms.filter(shipper); setOrgs(s); setOrgId(o.id); haptic('medium');
-    } catch (e) { fail(e); } finally { setBusy(false); }
-  }
-
   const releaseHold = useCallback(async (id: string) => { try { await api(`/holds/${id}`, { method: 'DELETE' }); } catch { /* allaqachon bo'shagan */ } }, []);
   const refreshSlots = useCallback(async (o: QuoteOffer | null = offer) => { if (o) setSlots(await api<Slot[]>(`/terminals/${o.terminal.id}/slots`).catch(() => [])); }, [offer]);
 
   async function toSlots() {
     setErr(null);
-    if (!orgId) return setErr(t('err.ORG'));
     if (!station) return setErr(t('err.STATION'));
     if (!(weightKg > 0)) return setErr(t('err.WEIGHT'));
     setBusy(true);
@@ -94,7 +82,7 @@ export default function TgBookPage() {
     setErr(null); setBusy(true);
     try {
       if (hold) await releaseHold(hold.id);
-      setHold(await post<Hold>(`/slots/${s.id}/hold`, { orgId }));
+      setHold(await post<Hold>(`/slots/${s.id}/hold`, orgId ? { orgId } : {}));
       haptic();
       await refreshSlots();
     } catch (e) { fail(e); setHold(null); await refreshSlots(); } finally { setBusy(false); }
@@ -113,7 +101,7 @@ export default function TgBookPage() {
     idemKey.current ??= crypto.randomUUID();
     try {
       const o = await post<Order>('/orders', {
-        orgId, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg, wagonCount: Number(wagons) || 1, note: note.trim() || undefined,
+        orgId: orgId || undefined, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg, wagonCount: Number(wagons) || 1, note: note.trim() || undefined,
         wagonNumbers: wagonNumbers.split(/[\s,]+/).filter((x) => /^\d{8}$/.test(x)),
       }, { 'Idempotency-Key': idemKey.current });
       haptic('medium');
@@ -133,7 +121,7 @@ export default function TgBookPage() {
     return () => window.removeEventListener('pagehide', onLeave);
   }, [hold?.id]);
 
-  const main = step === 0 ? { text: busy ? t('quoting') : t('quote'), onClick: () => void toSlots(), disabled: !orgs || !orgId }
+  const main = step === 0 ? { text: busy ? t('quoting') : t('quote'), onClick: () => void toSlots(), disabled: !orgs }
     : step === 1 ? { text: t('next'), onClick: () => { haptic(); setStep(2); }, disabled: !hold }
     : { text: busy ? t('sending') : t('submit'), onClick: () => void submit(), disabled: !hold };
   useMainButton({ ...main, busy });
@@ -155,11 +143,7 @@ export default function TgBookPage() {
       {step === 0 ? (
         <form onSubmit={(e) => { e.preventDefault(); void toSlots(); }} className="mt-4 space-y-4">
           {orgs === null ? <Skeleton n={1} h="h-12" /> : orgs.length === 0 ? (
-            <div className={`${CARD} border-amber/40 p-4`}>
-              <p className="text-sm">{t('orgNone')}</p>
-              <label className="mt-2 block text-sm font-semibold">{t('orgName')}<input value={orgName} onChange={(e) => setOrgName(e.target.value)} maxLength={120} className={`${INPUT} mt-1 font-normal`} /></label>
-              <button type="button" onClick={createOrg} disabled={busy || orgName.trim().length < 2} className={`${BTN_GHOST} mt-2`}>{t('orgCreate')}</button>
-            </div>
+            <p className={`${CARD} p-4 text-sm`}>{t('orgAuto')}</p>
           ) : orgs.length > 1 ? (
             <label className="block text-sm font-semibold">{t('org')}
               <select value={orgId} onChange={(e) => setOrgId(e.target.value)} className={`${INPUT} mt-1 font-normal`}>{orgs.map((m) => <option key={m.orgId} value={m.orgId}>{m.org.name}</option>)}</select>

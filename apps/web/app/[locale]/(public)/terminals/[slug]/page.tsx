@@ -8,6 +8,8 @@ import type { Page, Siding, Slot, TerminalDetail } from '@/lib/types';
 import { TerminalReviews } from '@/components/reviews/TerminalReviews';
 import { Impressions } from '@/components/catalog/Impressions';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
+import { DashLink } from '@/components/site/DashLink';
+import { PhoneLink } from '@/components/catalog/PhoneLink';
 
 export const revalidate = 300;
 
@@ -82,8 +84,8 @@ export default async function TerminalPage({ params }: Params) {
         </div>
         <div className="flex flex-col gap-2">
           <Link href={`/quote?terminal=${t.id}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>
-          <Link href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</Link>
-          {t.phone ? <a href={`tel:${t.phone}`} className="text-center font-mono text-sm text-muted">{t.phone}</a> : null}
+          <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>
+          {t.phone ? <span className="text-center"><PhoneLink phone={t.phone} kind="terminal" targetId={t.id} /></span> : null}
         </div>
       </header>
 
@@ -151,7 +153,7 @@ export default async function TerminalPage({ params }: Params) {
                 })}
               </ul>
             )}
-            <Link href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tr('slots.book')} →</Link>
+            <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tr('slots.book')} →</DashLink>
           </section>
           <section className="rounded-card border border-line bg-white p-5">
             <h2 className="text-sm font-bold">{tr('hours.heading')}</h2>

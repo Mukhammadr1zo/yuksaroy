@@ -18,10 +18,15 @@ export class OrderAccess {
    * Buyurtma uchun tashkilot: berilgan bo'lsa tekshiriladi, bo'lmasa mavjudi olinadi,
    * u ham bo'lmasa foydalanuvchi nomi bilan yuk egasi tashkiloti ochiladi (STIR keyin, hujjat kerak bo'lganda).
    */
-  async resolveShipperOrg(userId: string, orgId?: string | null): Promise<string> {
+  /** Bor tashkilot: yo'q bo'lsa null. Yangisi createShipperOrg bilan, faqat hamma tekshiruvdan keyin ochiladi. */
+  async existingShipperOrg(userId: string, orgId?: string | null): Promise<string | null> {
     if (orgId) { await this.assertShipper(userId, orgId); return orgId; }
     const mine = await this.shipperOrgIds(userId);
-    if (mine.length) return mine[0]!;
+    return mine.length ? mine[0]! : null;
+  }
+
+  /** Birinchi buyurtmada avtomatik yuk egasi tashkiloti (STIR keyin, hujjat kerak bo'lganda so'raladi). */
+  async createShipperOrg(userId: string): Promise<string> {
     const u = await this.prisma.user.findUnique({ where: { id: userId }, select: { fullName: true, phone: true } });
     const name = u?.fullName?.trim() || (u?.phone ? `Yuk egasi ${u.phone.slice(-4)}` : 'Yuk egasi');
     const org = await this.createOrg.execute(userId, { kinds: ['SHIPPER'], name, roles: ['CLIENT'] });

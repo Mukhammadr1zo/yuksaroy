@@ -88,11 +88,13 @@
     },
     "book": {
       "title": "Book a slot",
-      "steps": { "cargo": "Cargo", "slot": "Slot", "confirm": "Confirm" },
+      "steps": {
+        "cargo": "Cargo",
+        "slot": "Slot",
+        "confirm": "Confirm"
+      },
       "org": "Organization",
-      "orgNone": "Orders are placed on behalf of an organization. Type a name and a shipper organization is created right away.",
-      "orgName": "Organization name",
-      "orgCreate": "Create",
+      "orgAuto": "An organization is created automatically with your first order. The tax ID is asked later, when documents are issued.",
       "operation": "Operation",
       "LOAD": "Loading",
       "UNLOAD": "Unloading",
@@ -113,7 +115,13 @@
       "submit": "Place order",
       "sending": "Sending",
       "slaNote": "The terminal confirms within 30 minutes. Otherwise the slot is released automatically.",
-      "summary": { "cargo": "Cargo", "noCargo": "not specified", "weight": "Weight", "wagons": "Wagons", "time": "Time" },
+      "summary": {
+        "cargo": "Cargo",
+        "noCargo": "not specified",
+        "weight": "Weight",
+        "wagons": "Wagons",
+        "time": "Time"
+      },
       "err": {
         "ORG": "Create an organization first.",
         "STATION": "Choose a station.",
@@ -134,7 +142,12 @@
     },
     "orders": {
       "title": "My orders",
-      "filter": { "open": "Active", "done": "Completed", "closed": "Closed", "all": "All" },
+      "filter": {
+        "open": "Active",
+        "done": "Completed",
+        "closed": "Closed",
+        "all": "All"
+      },
       "empty": "No orders in this section.",
       "emptyCta": "Find a terminal",
       "sla": "awaiting confirmation",
@@ -175,7 +188,12 @@
           "EXPIRED": "The terminal did not respond in time, the slot was released.",
           "CANCELLED": "Order cancelled."
         },
-        "actor": { "CLIENT": "customer", "TERMINAL": "terminal", "SYSTEM": "system", "ADMIN": "administrator" },
+        "actor": {
+          "CLIENT": "customer",
+          "TERMINAL": "terminal",
+          "SYSTEM": "system",
+          "ADMIN": "administrator"
+        },
         "err": {
           "CANCEL_TOO_LATE": "Less than 12 hours before the slot, cancellation is unavailable. Contact the terminal.",
           "TRANSITION_NOT_ALLOWED": "Cannot cancel in this status."
@@ -227,8 +245,14 @@
         "remove": "Remove",
         "submit": "Publish",
         "sending": "Sending",
-        "done": { "ACTIVE": "The listing is active.", "PENDING_REVIEW": "The listing was sent for review." },
-        "err": { "LISTING_INVALID": "The form is incomplete: fix the marked fields.", "UPLOAD": "Photo upload failed." }
+        "done": {
+          "ACTIVE": "The listing is active.",
+          "PENDING_REVIEW": "The listing was sent for review."
+        },
+        "err": {
+          "LISTING_INVALID": "The form is incomplete: fix the marked fields.",
+          "UPLOAD": "Photo upload failed."
+        }
       }
     },
     "profile": {
@@ -239,11 +263,17 @@
       "noPhone": "not linked",
       "locale": "Language",
       "site": "Full site",
-      "siteLinks": { "dashboard": "Dashboard", "terminals": "Terminals", "listings": "Listings" },
+      "siteLinks": {
+        "dashboard": "Dashboard",
+        "terminals": "Terminals",
+        "listings": "Listings"
+      },
       "logout": "Sign out",
       "loggedOut": "Signed out. Next time you open the app you sign in through Telegram.",
       "telegram": "Telegram @{username}"
     },
-    "map": { "title": "Map" }
+    "map": {
+      "title": "Map"
+    }
   }
 }

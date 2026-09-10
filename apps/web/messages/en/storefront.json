@@ -1,6 +1,9 @@
 {
   "storefront": {
-    "tab": { "info": "Details", "shop": "Storefront" },
+    "tab": {
+      "info": "Details",
+      "shop": "Storefront"
+    },
     "title": "Storefront page",
     "lead": "A public mini site: cover, logo, tagline and contacts. Active terminals, sidings and listings appear automatically.",
     "address": "Address",
@@ -13,15 +16,13 @@
       "cover": "Cover image",
       "showTerminals": "Show terminals",
       "showListings": "Show listings",
-      "contactTelegram": "Telegram",
-      "contactPhonePublic": "Phone visible to everyone"
+      "contactTelegram": "Telegram"
     },
     "hint": {
       "tagline": "Up to 160 characters, shown under the name",
       "logo": "Square PNG or JPG",
       "cover": "Wide image, 3:1 recommended",
-      "telegram": "Username without @",
-      "phonePublic": "When off, only logged-in users see the phone"
+      "telegram": "Username without @"
     },
     "public": {
       "meta": "{name}: terminals, listings and contacts. A YukSaroy storefront.",
@@ -37,7 +38,11 @@
       "map": "Objects on the map",
       "mapNote": "Coordinates are approximate.",
       "none": "none yet",
-      "sidingCols": { "no": "Registry No", "station": "Station", "length": "Length" },
+      "sidingCols": {
+        "no": "Registry No",
+        "station": "Station",
+        "length": "Length"
+      },
       "with": "With YukSaroy",
       "fullProfile": "Full profile"
     }

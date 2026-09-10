@@ -7,6 +7,7 @@ import { pricePer, som, unitLabel, uzDayShort, uzTime, uzToday } from '@/lib/for
 import type { Page, QuoteResponse, Slot, Stats, TerminalCard } from '@/lib/types';
 import { BTN, CtaBand } from '@/components/marketing/bits';
 import { alt } from '@/lib/seo';
+import { DashLink } from '@/components/site/DashLink';
 
 export const revalidate = 300;
 type Params = { params: Promise<{ locale: string }> };
@@ -141,8 +142,8 @@ export default async function BookingPage({ params }: Params) {
                   {day !== today ? <p className="mt-2 text-xs text-muted">{t('slots.notToday')}</p> : null}
                 </>
               ) : <p className="mt-2 text-sm text-muted">{t('slots.none')}</p>}
-              {/* Kirmagan bo'lsa proxy /login?next=/dashboard/orders/new?terminal=... ga yuboradi */}
-              <Link href={`/dashboard/orders/new?terminal=${term.slug}`} className="mt-4 inline-block text-sm font-semibold text-teal-ink underline">{t('slots.book')} →</Link>
+              {/* Mehmon ro'yxatdan o'tish sahifasiga boradi (kabinet manzili ko'rsatilmaydi) */}
+              <DashLink href={`/dashboard/orders/new?terminal=${term.slug}`} className="mt-4 inline-block text-sm font-semibold text-teal-ink underline">{t('slots.book')} →</DashLink>
             </aside>
           ) : null}
         </div>

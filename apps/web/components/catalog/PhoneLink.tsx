@@ -3,7 +3,7 @@
 import { PhoneIcon } from '@phosphor-icons/react';
 import { post } from '@/lib/api';
 
-export function PhoneLink({ phone, kind, targetId }: { phone: string; kind: 'listing' | 'terminal'; targetId: string }) {
+export function PhoneLink({ phone, kind, targetId }: { phone: string; kind: 'listing' | 'terminal' | 'org'; targetId: string }) {
   return (
     <a
       href={`tel:${phone}`}

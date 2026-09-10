@@ -3,7 +3,7 @@ import { uzLocalDate } from '@yuksaroy/domain';
 import { PrismaService } from '../../common/prisma.service';
 import { dayKeys, daySeries } from './day-series';
 
-export type ImpressionKind = 'listing' | 'terminal';
+export type ImpressionKind = 'listing' | 'terminal' | 'org';
 export interface ImpressionItem { kind: ImpressionKind; targetId: string; surface: string }
 
 /** Ko'rsatishlar: kun bo'yicha yig'ma (foydalanuvchi ma'lumoti yo'q). */

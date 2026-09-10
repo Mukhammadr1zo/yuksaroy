@@ -5,6 +5,7 @@ import { URGENT_KIND_LABELS, type SearchLang, type UrgentKind } from '@yuksaroy/
 import { Link } from '@/i18n/navigation';
 import { CtaBand } from '@/components/marketing/bits';
 import { alt } from '@/lib/seo';
+import { DashLink } from '@/components/site/DashLink';
 
 type Params = { params: Promise<{ locale: string }> };
 const KINDS: { kind: UrgentKind; Icon: typeof TrainIcon }[] = [{ kind: 'LOCO_CALL', Icon: TrainIcon }, { kind: 'WAGON_REPAIR', Icon: WrenchIcon }, { kind: 'CRANE', Icon: CraneIcon }];
@@ -29,7 +30,7 @@ export default async function UrgentPage({ params }: Params) {
           <h1 className="font-display mt-3 max-w-[20ch] text-3xl font-bold text-navy md:text-5xl">{t('title')}</h1>
           <p className="mt-4 max-w-[62ch] text-lg text-muted">{t('lead')}</p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Link href="/dashboard/urgent" className="rounded-full bg-teal px-7 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('cta')}</Link>
+            <DashLink href="/dashboard/urgent" className="rounded-full bg-teal px-7 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('cta')}</DashLink>
             <span className="text-sm text-muted">{t('ctaNote')}</span>
           </div>
         </div>

@@ -20,11 +20,19 @@ export class CreateOrgUseCase {
     const roles = filterRoles(input.roles, kinds);
     if (!roles.length) throw new BadRequestException({ code: 'ROLES_NOT_ALLOWED', allowed: rolesForKinds(kinds) });
     const name = input.name.trim();
-    return this.orgs.create(
-      { kind: kinds[0]!, kinds, slug: await this.uniqueSlug(name), name, stir, phone: input.phone ?? null,
-        description: input.description ?? null, telegram: input.telegram ?? null, website: input.website ?? null, regionCode: input.regionCode ?? null },
-      ownerUserId, roles,
-    );
+    const base = {
+      kind: kinds[0]!, kinds, name, stir, phone: input.phone ?? null,
+      description: input.description ?? null, telegram: input.telegram ?? null, website: input.website ?? null, regionCode: input.regionCode ?? null,
+    };
+    // Bir xil nomli ikki tashkilot bir vaqtda ochilsa uniqueSlug ikkalasiga bir xil slug beradi:
+    // Prisma P2002 da bir marta tasodifiy qo'shimcha bilan qayta uriniladi
+    try {
+      return await this.orgs.create({ ...base, slug: await this.uniqueSlug(name) }, ownerUserId, roles);
+    } catch (e) {
+      if ((e as { code?: string }).code !== 'P2002') throw e;
+      const suffix = Math.random().toString(36).slice(2, 6);
+      return this.orgs.create({ ...base, slug: `${orgSlug(name)}-${suffix}` }, ownerUserId, roles);
+    }
   }
 
   /** Egasi tahrirlaydi; slug o'zgarmaydi (havolalar buzilmasin). */

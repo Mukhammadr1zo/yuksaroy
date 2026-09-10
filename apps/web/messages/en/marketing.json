@@ -10,7 +10,8 @@
       "disclaimer": "The calculation relies only on the numbers you entered. The platform does not guarantee savings or revenue; the result is for information.",
       "perYear": "per year",
       "faq": "Frequently asked questions",
-      "values": "What you get"
+      "values": "What you get",
+      "guestCta": "Create an account"
     },
     "shippers": {
       "meta": {
@@ -25,13 +26,31 @@
         "freeSlots": "{count} free slots today",
         "sidings": "{count} sidings"
       },
-      "cta": { "primary": "Browse terminals", "secondary": "Calculate a price" },
+      "cta": {
+        "primary": "Browse terminals",
+        "secondary": "Calculate a price"
+      },
       "values": {
-        "tariffs": { "title": "Open tariffs", "body": "Terminal tariffs are public in the catalog: price per ton, wagon or operation plus the minimum amount. Compare without a single call." },
-        "slots": { "title": "Today's slots", "body": "Every terminal's working windows and free places are visible. Pick a window and book it, no waiting in line." },
-        "frozen": { "title": "Frozen price and documents", "body": "The tariff is frozen when the order is sent. At the end the act and invoice PDFs are ready in the cabinet." },
-        "chain": { "title": "State chain", "body": "Arrived, weighed, loaded, departed: the terminal marks it, you see it on the order page. No room for disputes." },
-        "registry": { "title": "One place: registry, equipment, trucks", "body": "The sidings registry, shunting locomotive and wagon rental, road carriers for the last mile. Each with its owner's page." }
+        "tariffs": {
+          "title": "Open tariffs",
+          "body": "Terminal tariffs are public in the catalog: price per ton, wagon or operation plus the minimum amount. Compare without a single call."
+        },
+        "slots": {
+          "title": "Today's slots",
+          "body": "Every terminal's working windows and free places are visible. Pick a window and book it, no waiting in line."
+        },
+        "frozen": {
+          "title": "Frozen price and documents",
+          "body": "The tariff is frozen when the order is sent. At the end the act and invoice PDFs are ready in the cabinet."
+        },
+        "chain": {
+          "title": "State chain",
+          "body": "Arrived, weighed, loaded, departed: the terminal marks it, you see it on the order page. No room for disputes."
+        },
+        "registry": {
+          "title": "One place: registry, equipment, trucks",
+          "body": "The sidings registry, shunting locomotive and wagon rental, road carriers for the last mile. Each with its owner's page."
+        }
       },
       "roi": {
         "heading": "Savings calculator",
@@ -79,13 +98,31 @@
         "listings": "{count} active listings",
         "terminals": "{count} active terminals"
       },
-      "cta": { "primary": "Publish a listing", "secondary": "Add a terminal" },
+      "cta": {
+        "primary": "Publish a listing",
+        "secondary": "Add a terminal"
+      },
       "values": {
-        "catalog": { "title": "A listing by the standard", "body": "Every listing has the same fields, so clients can compare and find you. You show up in searches by region and corridor." },
-        "inquiries": { "title": "Requests only from logged-in users", "body": "Your phone number is visible only to registered users. Requests arrive in the cabinet, no spam." },
-        "terminal": { "title": "Terminal: tariff, slots, order board", "body": "Publish a tariff, open daily capacity, orders arrive on the board: confirm, mark states, complete." },
-        "documents": { "title": "Act and invoice, automatically", "body": "Once an order is done, the act and invoice PDFs are generated. You mark payment in the cabinet." },
-        "claim": { "title": "Claim your object", "body": "If your terminal or siding is already in the registry, claim it as the owner: you manage the passport." }
+        "catalog": {
+          "title": "A listing by the standard",
+          "body": "Every listing has the same fields, so clients can compare and find you. You show up in searches by region and corridor."
+        },
+        "inquiries": {
+          "title": "Requests only from logged-in users",
+          "body": "Your phone number is visible only to registered users. Requests arrive in the cabinet, no spam."
+        },
+        "terminal": {
+          "title": "Terminal: tariff, slots, order board",
+          "body": "Publish a tariff, open daily capacity, orders arrive on the board: confirm, mark states, complete."
+        },
+        "documents": {
+          "title": "Act and invoice, automatically",
+          "body": "Once an order is done, the act and invoice PDFs are generated. You mark payment in the cabinet."
+        },
+        "claim": {
+          "title": "Claim your object",
+          "body": "If your terminal or siding is already in the registry, claim it as the owner: you manage the passport."
+        }
       },
       "roi": {
         "heading": "Revenue calculator",

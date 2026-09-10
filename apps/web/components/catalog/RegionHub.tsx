@@ -22,7 +22,7 @@ export async function regionPolygon(code: RegionCode) {
 }
 
 /** Bo'sh holatdagi harakat: terminal egasi kabinetga, e'lon beruvchi formaga, reestr o'ziga. */
-const CTA: Record<HubCat, string> = { terminals: '/login?next=/dashboard/terminal', sidings: '/sidings', equipment: '/dashboard/listings/new', carriers: '/dashboard/listings/new' };
+const CTA: Record<HubCat, string> = { terminals: '/dashboard/terminals/new', sidings: '/sidings', equipment: '/dashboard/listings/new', carriers: '/dashboard/listings/new' };
 
 /** Viloyat hubi: h1, lead, xarita, qo'shni viloyatlar, boshqa kategoriyalar, xaritada ochish, ro'yxat (children), pastda viloyat chiplari.
  *  count: jami, shown: ko'rsatilgani (50 dan ko'p bo'lsa filtrli katalogga havola). */

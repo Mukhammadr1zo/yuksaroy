@@ -1,11 +1,16 @@
 'use client';
-// Marketing sahifalaridagi harakat tugmasi: kirgan foydalanuvchi kabinetga, mehmon ro'yxatdan o'tishga boradi.
-// Mehmonga kabinet manzili ko'rsatilmaydi (tugma bosilganda bo'sh sahifaga tushmaydi).
+// Kabinet havolasi: kirgan foydalanuvchi to'g'ri manzilga, mehmon ro'yxatdan o'tishga boradi.
+// Ochiq manzil (masalan /terminals) hamma uchun oddiy havola bo'lib qoladi.
+// signupLabel berilsa mehmonga kabinet amali ("Terminal qo'shish") emas, ro'yxat taklifi ko'rinadi.
 import { Link } from '@/i18n/navigation';
 import { useAuthed } from './AuthOnly';
 
-export function DashLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
+export function DashLink({ href, className, children, signupLabel }: {
+  href: string; className?: string; children: React.ReactNode; signupLabel?: string;
+}) {
   const authed = useAuthed();
-  const to = authed ? href : `/signup?next=${encodeURIComponent(href)}`;
-  return <Link href={to} className={className}>{children}</Link>;
+  if (!href.startsWith('/dashboard')) return <Link href={href} className={className}>{children}</Link>;
+  if (authed === undefined) return null;
+  if (authed) return <Link href={href} className={className}>{children}</Link>;
+  return <Link href={`/signup?next=${encodeURIComponent(href)}`} className={className}>{signupLabel ?? children}</Link>;
 }

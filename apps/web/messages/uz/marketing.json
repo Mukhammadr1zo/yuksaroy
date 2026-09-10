@@ -10,7 +10,8 @@
       "disclaimer": "Hisob faqat siz kiritgan raqamlarga tayanadi. Platforma tejamni yoki daromadni kafolatlamaydi, natija ma'lumot uchun.",
       "perYear": "yiliga",
       "faq": "Ko'p so'raladigan savollar",
-      "values": "Nima beradi"
+      "values": "Nima beradi",
+      "guestCta": "Ro'yxatdan o'tish"
     },
     "shippers": {
       "meta": {
@@ -25,13 +26,31 @@
         "freeSlots": "bugun {count} bo'sh slot",
         "sidings": "{count} shahobcha yo'l"
       },
-      "cta": { "primary": "Terminallarni ko'rish", "secondary": "Narxni hisoblash" },
+      "cta": {
+        "primary": "Terminallarni ko'rish",
+        "secondary": "Narxni hisoblash"
+      },
       "values": {
-        "tariffs": { "title": "Ochiq tariflar", "body": "Terminal tariflari katalogda ochiq: tonna, vagon yoki operatsiya uchun narx va minimal summa. Qo'ng'iroq qilmasdan solishtirasiz." },
-        "slots": { "title": "Bugungi slotlar", "body": "Har terminalning ish oynalari va bo'sh joylari ko'rinib turadi. Oynani tanlab band qilasiz, navbatda kutmaysiz." },
-        "frozen": { "title": "Muzlatilgan narx va hujjatlar", "body": "Buyurtma yuborilganda tarif muzlatiladi. Yakunda akt va hisob-faktura PDF kabinetda tayyor turadi." },
-        "chain": { "title": "Holatlar zanjiri", "body": "Yetib keldi, tortildi, yuklandi, jo'nadi: terminal belgilaydi, siz buyurtma sahifasida ko'rasiz. Kelishmovchilikka joy qolmaydi." },
-        "registry": { "title": "Bir joyda: reestr, texnika, avtotransport", "body": "Shahobcha yo'llar reestri, manevr teplovozi va vagon ijarasi, oxirgi milya uchun avtotashuvchilar. Har biri egasining sahifasi bilan." }
+        "tariffs": {
+          "title": "Ochiq tariflar",
+          "body": "Terminal tariflari katalogda ochiq: tonna, vagon yoki operatsiya uchun narx va minimal summa. Qo'ng'iroq qilmasdan solishtirasiz."
+        },
+        "slots": {
+          "title": "Bugungi slotlar",
+          "body": "Har terminalning ish oynalari va bo'sh joylari ko'rinib turadi. Oynani tanlab band qilasiz, navbatda kutmaysiz."
+        },
+        "frozen": {
+          "title": "Muzlatilgan narx va hujjatlar",
+          "body": "Buyurtma yuborilganda tarif muzlatiladi. Yakunda akt va hisob-faktura PDF kabinetda tayyor turadi."
+        },
+        "chain": {
+          "title": "Holatlar zanjiri",
+          "body": "Yetib keldi, tortildi, yuklandi, jo'nadi: terminal belgilaydi, siz buyurtma sahifasida ko'rasiz. Kelishmovchilikka joy qolmaydi."
+        },
+        "registry": {
+          "title": "Bir joyda: reestr, texnika, avtotransport",
+          "body": "Shahobcha yo'llar reestri, manevr teplovozi va vagon ijarasi, oxirgi milya uchun avtotashuvchilar. Har biri egasining sahifasi bilan."
+        }
       },
       "roi": {
         "heading": "Tejam hisobi",
@@ -79,13 +98,31 @@
         "listings": "{count} faol e'lon",
         "terminals": "{count} faol terminal"
       },
-      "cta": { "primary": "E'lon berish", "secondary": "Terminal qo'shish" },
+      "cta": {
+        "primary": "E'lon berish",
+        "secondary": "Terminal qo'shish"
+      },
       "values": {
-        "catalog": { "title": "Standart bo'yicha e'lon", "body": "Har e'lon bir xil maydonlar bilan to'ldiriladi, shuning uchun mijoz sizni solishtira oladi va topadi. Viloyat va koridor bo'yicha qidiruvda chiqasiz." },
-        "inquiries": { "title": "So'rovlar faqat kirganlardan", "body": "Telefon raqamingiz faqat ro'yxatdan o'tgan foydalanuvchiga ko'rinadi. So'rovlar kabinetda, spam yo'q." },
-        "terminal": { "title": "Terminal: tarif, slot, buyurtma taxtasi", "body": "Tarifni e'lon qilasiz, kunlik sig'imni ochasiz, buyurtmalar taxtada keladi: tasdiqlash, holat belgilash, yakunlash." },
-        "documents": { "title": "Akt va hisob-faktura avtomatik", "body": "Buyurtma yakunlangach akt va hisob-faktura PDF hosil bo'ladi. To'lovni kabinetda belgilaysiz." },
-        "claim": { "title": "O'z obyektingizni da'vo qiling", "body": "Terminal yoki shahobcha yo'l reestrda allaqachon bo'lsa, egasi sifatida da'vo qiling: pasportni siz boshqarasiz." }
+        "catalog": {
+          "title": "Standart bo'yicha e'lon",
+          "body": "Har e'lon bir xil maydonlar bilan to'ldiriladi, shuning uchun mijoz sizni solishtira oladi va topadi. Viloyat va koridor bo'yicha qidiruvda chiqasiz."
+        },
+        "inquiries": {
+          "title": "So'rovlar faqat kirganlardan",
+          "body": "Telefon raqamingiz faqat ro'yxatdan o'tgan foydalanuvchiga ko'rinadi. So'rovlar kabinetda, spam yo'q."
+        },
+        "terminal": {
+          "title": "Terminal: tarif, slot, buyurtma taxtasi",
+          "body": "Tarifni e'lon qilasiz, kunlik sig'imni ochasiz, buyurtmalar taxtada keladi: tasdiqlash, holat belgilash, yakunlash."
+        },
+        "documents": {
+          "title": "Akt va hisob-faktura avtomatik",
+          "body": "Buyurtma yakunlangach akt va hisob-faktura PDF hosil bo'ladi. To'lovni kabinetda belgilaysiz."
+        },
+        "claim": {
+          "title": "O'z obyektingizni da'vo qiling",
+          "body": "Terminal yoki shahobcha yo'l reestrda allaqachon bo'lsa, egasi sifatida da'vo qiling: pasportni siz boshqarasiz."
+        }
       },
       "roi": {
         "heading": "Daromad hisobi",

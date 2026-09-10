@@ -91,7 +91,9 @@
         "OVERDUE": "Overdue",
         "VOID": "Void",
         "READY": "Ready"
-      }
+      },
+      "stirMissing": "Your organization has no tax ID on the invoice. Add it for your accountant.",
+      "stirAdd": "Organization details"
     },
     "home": {
       "title": "Today",

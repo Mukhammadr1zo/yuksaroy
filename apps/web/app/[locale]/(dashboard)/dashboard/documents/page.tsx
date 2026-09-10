@@ -25,15 +25,21 @@ export default function DocumentsPage() {
   const [scope, setScope] = useState<Scope>('client');
   const [data, setData] = useState<MineDocs | null>(null);
   const [err, setErr] = useState(false);
+  const [noStir, setNoStir] = useState(false);
   const [status, setStatus] = useState<Status>('all');
   const [month, setMonth] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
 
-  // Terminal tashkiloti bo'lsa standart ko'rinish terminalniki
+  // Terminal tashkiloti bo'lsa standart ko'rinish terminalniki.
+  // STIR birinchi buyurtmada so'ralmaydi, lekin hisob-fakturada kerak: bo'sh bo'lsa shu yerda eslatiladi.
   useEffect(() => {
     api<Membership[]>('/orgs/mine')
-      .then((ms) => { const has = ms.some((m) => (m.org.kinds?.length ? m.org.kinds : [m.org.kind]).includes('TERMINAL')); setIsTerminal(has); if (has) setScope('terminal'); })
+      .then((ms) => {
+        const has = ms.some((m) => (m.org.kinds?.length ? m.org.kinds : [m.org.kind]).includes('TERMINAL'));
+        setIsTerminal(has); if (has) setScope('terminal');
+        setNoStir(ms.some((m) => m.isOwner && !m.org.stir));
+      })
       .catch(() => setIsTerminal(false));
   }, []);
   useEffect(() => {
@@ -60,6 +66,12 @@ export default function DocumentsPage() {
     <main className="mx-auto max-w-6xl px-6 py-10">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 max-w-2xl text-muted">{t('lead')}</p>
+      {noStir ? (
+        <p className="mt-4 rounded-card border border-amber/40 bg-amber-soft px-4 py-3 text-sm">
+          {t('stirMissing')}{' '}
+          <Link href="/dashboard/organization" className="font-semibold text-amber-ink underline">{t('stirAdd')}</Link>
+        </p>
+      ) : null}
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
         {isTerminal ? (

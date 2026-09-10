@@ -44,7 +44,7 @@ export class CreateOrderUseCase {
 
   async execute(userId: string, input: CreateOrderInput): Promise<OrderRecord> {
     const now = new Date();
-    const shipperOrgId = await this.access.resolveShipperOrg(userId, input.orgId);
+    let shipperOrgId = await this.access.existingShipperOrg(userId, input.orgId);
     const booking = await this.holds.assertUsable(userId, input.bookingId, now);
 
     const slot = await this.bookings.findSlot(booking.slotId);
@@ -72,6 +72,9 @@ export class CreateOrderUseCase {
       { commissionPct: cfg.commissionPct, commissionPayer: cfg.commissionPayer },
     );
     if (!quote.lines.some((l) => l.serviceCode === input.operation)) throw new ConflictException({ code: 'NO_TARIFF_FOR_OPERATION' });
+
+    // Tashkilot eng oxirida ochiladi: yuqoridagi tekshiruvlardan biri rad etsa bo'sh tashkilot qolib ketmasin
+    shipperOrgId ??= await this.access.createShipperOrg(userId);
 
     const order = await this.orders.create({
       shipperOrgId, createdById: userId, terminalId: terminal.id, stationId: terminal.stationId,

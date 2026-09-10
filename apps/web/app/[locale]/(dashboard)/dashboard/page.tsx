@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { api, post } from '@/lib/api';
+import { api, clearAuthedCache, post } from '@/lib/api';
 import { som } from '@/lib/format';
 import type { OrderCard, Page } from '@/lib/types';
 import type { Me, Membership, MySiding, OrgRecord, OwnerListing, Inquiry } from '@/lib/types-kabinet';
@@ -37,7 +37,7 @@ export default function KabinetPage() {
             {me.phone ?? me.email ?? t('home.noPhone')} · {me.telegramLinked ? t('home.telegramLinked') : t('home.telegramNot')}
           </p>
         </div>
-        <button onClick={async () => { await post('/auth/logout', {}); router.replace('/'); }} className="shrink-0 text-sm text-muted underline hover:text-ink">{t('home.logout')}</button>
+        <button onClick={async () => { await post('/auth/logout', {}); clearAuthedCache(); router.replace('/'); }} className="shrink-0 text-sm text-muted underline hover:text-ink">{t('home.logout')}</button>
       </header>
 
       {me.phone === null ? (

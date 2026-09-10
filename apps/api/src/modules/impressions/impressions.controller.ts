@@ -11,7 +11,7 @@ import { OrderAccess } from '../orders/application/order-access';
 import { ImpressionsService, type ImpressionKind } from './impressions.service';
 
 class ImpressionItemDto {
-  @IsIn(['listing', 'terminal']) kind!: ImpressionKind;
+  @IsIn(['listing', 'terminal', 'org']) kind!: ImpressionKind;
   @IsString() @Length(1, 40) targetId!: string;
   @IsIn(IMPRESSION_SURFACES) surface!: ImpressionSurface;
 }

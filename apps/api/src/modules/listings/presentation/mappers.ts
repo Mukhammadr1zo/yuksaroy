@@ -14,7 +14,7 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
     distanceKm: near && l.lat != null && l.lng != null ? round1(distanceKm(near.lat, near.lng, l.lat, l.lng)) : null,
     owner: listingOwner(l),
     org: l.org ? { name: l.org.name, slug: l.org.slug, kyc: l.org.kycStatus } : null, // eski mijozlar uchun taxallus; shaxsiy e'londa null
-    object: l.terminal
+    object: l.terminal && l.terminal.orgId !== null
       ? { type: 'terminal' as const, id: l.terminal.id, name: l.terminal.name, slug: l.terminal.slug }
       : l.siding ? { type: 'siding' as const, id: l.siding.id, name: `${l.siding.station?.nameUz ?? l.siding.stationNameRaw} No ${l.siding.registryNo}` } : null,
     premium: l.premiumUntil !== null && l.premiumUntil > now,

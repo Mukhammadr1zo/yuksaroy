@@ -394,7 +394,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
           <p className="truncate font-bold">{o.p.name}</p>
           {o.km != null ? <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{Math.round(o.km)} km</span> : null}
         </div>
-        <p className="truncate text-xs text-muted">{kindLabel(o)} · {region(o)}</p>
+        <p className="text-xs text-muted">{kindLabel(o)} · {region(o)}</p>
         {o.p.kind === 'siding' ? <p className="mt-0.5 text-[11px] text-amber-ink">{t('siding.approx')}</p> : null}
         {priceLine(o) ? <p className="mt-1 font-mono text-xs text-navy tabular-nums">{priceLine(o)}</p> : null}
       </div>

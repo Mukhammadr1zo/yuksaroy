@@ -2,7 +2,7 @@
 /**
  * Idempotent seed: PlatformConfig, stansiyalar, ETSNG, shahobchalar, pilot terminallar (Toshkent tuguni).
  *   pnpm --filter @yuksaroy/api db:seed
- * Manba JSON'lar: prisma/seed/data (build-data.ts bilan yasaladi). Qayta ishga tushirish xavfsiz — upsert.
+ * Manba JSON'lar: prisma/seed/data (build-data.ts bilan yasaladi). Qayta ishga tushirish xavfsiz - upsert.
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -99,7 +99,7 @@ async function seedTerminals() {
   const validFrom = new Date('2026-09-01T00:00:00+05:00');
   for (const p of PILOT) {
     const st = byRu.get(key(p.stationRu));
-    if (!st) { console.log(`  ! stansiya topilmadi: ${p.stationRu} — ${p.name} o'tkazib yuborildi`); continue; }
+    if (!st) { console.log(`  ! stansiya topilmadi: ${p.stationRu} - ${p.name} o'tkazib yuborildi`); continue; }
     const slug = slugify(p.name);
     const base = { name: p.name, stationId: st.id, kind: p.kind, is24h: p.is24h, address: p.address, description: p.description, lat: st.lat, lng: st.lng,
       hours: p.is24h ? undefined : (H8_18 as Prisma.InputJsonValue), passport: p.passport as Prisma.InputJsonValue, status: 'ACTIVE' as const };

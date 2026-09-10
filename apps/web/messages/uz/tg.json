@@ -88,11 +88,13 @@
     },
     "book": {
       "title": "Slot band qilish",
-      "steps": { "cargo": "Yuk", "slot": "Slot", "confirm": "Tasdiq" },
+      "steps": {
+        "cargo": "Yuk",
+        "slot": "Slot",
+        "confirm": "Tasdiq"
+      },
       "org": "Tashkilot",
-      "orgNone": "Buyurtma tashkilot nomidan beriladi. Nomini yozing, yuk egasi tashkiloti darrov yaratiladi.",
-      "orgName": "Tashkilot nomi",
-      "orgCreate": "Yaratish",
+      "orgAuto": "Tashkilot birinchi buyurtmada avtomatik ochiladi. STIR keyin, hujjat kerak bo'lganda so'raladi.",
       "operation": "Operatsiya",
       "LOAD": "Yuklash",
       "UNLOAD": "Tushirish",
@@ -113,7 +115,13 @@
       "submit": "Buyurtma berish",
       "sending": "Yuborilmoqda",
       "slaNote": "Terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa slot avtomatik bo'shaydi.",
-      "summary": { "cargo": "Yuk", "noCargo": "ko'rsatilmagan", "weight": "Vazn", "wagons": "Vagon", "time": "Vaqt" },
+      "summary": {
+        "cargo": "Yuk",
+        "noCargo": "ko'rsatilmagan",
+        "weight": "Vazn",
+        "wagons": "Vagon",
+        "time": "Vaqt"
+      },
       "err": {
         "ORG": "Avval tashkilot yarating.",
         "STATION": "Stansiyani tanlang.",
@@ -134,7 +142,12 @@
     },
     "orders": {
       "title": "Buyurtmalarim",
-      "filter": { "open": "Faol", "done": "Yakunlangan", "closed": "Yopilgan", "all": "Hammasi" },
+      "filter": {
+        "open": "Faol",
+        "done": "Yakunlangan",
+        "closed": "Yopilgan",
+        "all": "Hammasi"
+      },
       "empty": "Bu bo'limda buyurtma yo'q.",
       "emptyCta": "Terminal topish",
       "sla": "tasdiq kutilmoqda",
@@ -175,7 +188,12 @@
           "EXPIRED": "Terminal vaqtida javob bermadi, slot bo'shatildi.",
           "CANCELLED": "Buyurtma bekor qilindi."
         },
-        "actor": { "CLIENT": "mijoz", "TERMINAL": "terminal", "SYSTEM": "tizim", "ADMIN": "administrator" },
+        "actor": {
+          "CLIENT": "mijoz",
+          "TERMINAL": "terminal",
+          "SYSTEM": "tizim",
+          "ADMIN": "administrator"
+        },
         "err": {
           "CANCEL_TOO_LATE": "Slot boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
           "TRANSITION_NOT_ALLOWED": "Bu holatda bekor qilib bo'lmaydi."
@@ -227,8 +245,14 @@
         "remove": "Olib tashlash",
         "submit": "E'lon berish",
         "sending": "Yuborilmoqda",
-        "done": { "ACTIVE": "E'lon faol.", "PENDING_REVIEW": "E'lon tekshiruvga yuborildi." },
-        "err": { "LISTING_INVALID": "Forma to'liq emas: belgilangan maydonlarni tuzating.", "UPLOAD": "Rasm yuklanmadi." }
+        "done": {
+          "ACTIVE": "E'lon faol.",
+          "PENDING_REVIEW": "E'lon tekshiruvga yuborildi."
+        },
+        "err": {
+          "LISTING_INVALID": "Forma to'liq emas: belgilangan maydonlarni tuzating.",
+          "UPLOAD": "Rasm yuklanmadi."
+        }
       }
     },
     "profile": {
@@ -239,11 +263,17 @@
       "noPhone": "bog'lanmagan",
       "locale": "Til",
       "site": "To'liq sayt",
-      "siteLinks": { "dashboard": "Kabinet", "terminals": "Terminallar", "listings": "E'lonlar" },
+      "siteLinks": {
+        "dashboard": "Kabinet",
+        "terminals": "Terminallar",
+        "listings": "E'lonlar"
+      },
       "logout": "Chiqish",
       "loggedOut": "Chiqdingiz. Ilovani qayta ochganda Telegram orqali kirasiz.",
       "telegram": "Telegram @{username}"
     },
-    "map": { "title": "Xarita" }
+    "map": {
+      "title": "Xarita"
+    }
   }
 }

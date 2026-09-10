@@ -37,13 +37,14 @@ export class QuoteUseCase {
     let nearby = false;
     if (r.terminalId) {
       const t = await this.repo.findTerminalById(r.terminalId, now);
-      if (!t || t.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+      // Egasiz terminal ochiq mahsulotda yo'q: narx ham berilmaydi (bron qilib bo'lmaydi)
+      if (!t || t.status !== 'ACTIVE' || t.orgId === null) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
       terminals = [t];
     } else {
       const st = r.stationId ? await this.repo.findStationById(r.stationId) : await this.repo.findStationByEsr(r.stationEsr!);
       if (!st) throw new NotFoundException({ code: 'STATION_NOT_FOUND' });
-      terminals = await this.repo.listTerminals({ stationId: st.id }, now);
-      if (!terminals.length) { terminals = await this.repo.listTerminals({ rju: st.rju }, now); nearby = true; }
+      terminals = await this.repo.listTerminals({ stationId: st.id, owned: true }, now);
+      if (!terminals.length) { terminals = await this.repo.listTerminals({ rju: st.rju, owned: true }, now); nearby = true; }
     }
 
     const offers = terminals

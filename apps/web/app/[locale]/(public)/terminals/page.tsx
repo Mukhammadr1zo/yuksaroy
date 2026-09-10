@@ -126,7 +126,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
           <p>{tt('empty.title')}</p>
           <Link href="/terminals" className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tt('empty.reset')}</Link>
           <p className="mt-6 border-t border-line pt-5 text-sm">{tt('empty.owner')}</p>
-          <AuthOnly>
+          <AuthOnly guest={<Link href="/signup?next=%2Fdashboard%2Fterminals%2Fnew" className="mt-3 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{tt('empty.ownerSignup')}</Link>}>
             <Link href="/dashboard/terminals/new" className="mt-3 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{tt('empty.ownerCta')}</Link>
           </AuthOnly>
         </div>

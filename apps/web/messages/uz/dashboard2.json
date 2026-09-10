@@ -91,7 +91,9 @@
         "OVERDUE": "Muddati o'tgan",
         "VOID": "Bekor qilingan",
         "READY": "Tayyor"
-      }
+      },
+      "stirMissing": "Hisob-fakturada tashkilotingizning STIR raqami ko'rsatilmagan. Buxgalteriya uchun uni qo'shing.",
+      "stirAdd": "Tashkilot ma'lumotlari"
     },
     "home": {
       "title": "Bugungi holat",

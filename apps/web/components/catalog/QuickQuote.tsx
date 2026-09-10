@@ -8,6 +8,7 @@ import { pricePer, som } from '@/lib/format';
 import type { QuoteOffer, QuoteResponse } from '@/lib/types';
 import { CargoSearch, type CargoPick } from './CargoSearch';
 import { StationSearch, type StationPick } from './StationSearch';
+import { DashLink } from '@/components/site/DashLink';
 
 const EXTRAS: ServiceCode[] = ['WEIGH', 'STORAGE', 'CONTAINER', 'SVX', 'LAST_MILE', 'SHUNTING'];
 type Tone = 'light' | 'dark';
@@ -152,7 +153,7 @@ function Offer({ o, full, dark }: { o: QuoteOffer; full: boolean; dark: boolean 
       <div className="mt-3 flex gap-2">
         <Link href={`/terminals/${o.terminal.slug}`} className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${dark ? 'border-white/20 hover:bg-white/10' : 'border-line hover:bg-sand'}`}>{tb('passport')}</Link>
         {/* Kirmaganni proxy /login?next=... ga yuboradi; kirgan vizardga shu terminal bilan tushadi */}
-        <Link href={`/dashboard/orders/new?terminal=${o.terminal.slug}`} className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white ${dark ? 'bg-teal hover:bg-teal-ink' : 'bg-navy hover:bg-navy-2'}`}>{t('offer.book')}</Link>
+        <DashLink href={`/dashboard/orders/new?terminal=${o.terminal.slug}`} className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white ${dark ? 'bg-teal hover:bg-teal-ink' : 'bg-navy hover:bg-navy-2'}`}>{t('offer.book')}</DashLink>
       </div>
     </div>
   );
