@@ -7,6 +7,7 @@ import { NearMeButton } from '@/components/catalog/NearMeButton';
 import { RegionChips } from '@/components/catalog/RegionChips';
 import { SidingsTable } from '@/components/catalog/SidingsTable';
 import { alt } from '@/lib/seo';
+import { DashLink } from '@/components/site/DashLink';
 
 export const revalidate = 300;
 
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function SidingsPage({ searchParams }: { searchParams: Promise<SP> }) {
   // t: sidings nomfazosi; tn nav, tf filter, tp pagination, th hubs
   const [sp, t, tn, tf, tp, th] = await Promise.all([searchParams, getTranslations('sidings'), getTranslations('nav'), getTranslations('filter'), getTranslations('pagination'), getTranslations('hubs')]);
+  const tg = await getTranslations('marketing.common');
   const f = {
     region: one(sp.region), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), station: one(sp.station),
     page: Number(one(sp.page)) || 1,
@@ -49,6 +51,13 @@ export default async function SidingsPage({ searchParams }: { searchParams: Prom
       </form>
 
       <div className="mt-3"><NearMeButton path="/sidings" radiusKm={25} /></div>
+
+      {data.total === 0 && !f.q && !f.region && !f.station ? (
+        <div className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center">
+          <p className="mx-auto max-w-[52ch] text-muted">{t('emptyOwner')}</p>
+          <DashLink href="/dashboard/sidings" className="mt-4 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t('emptyOwnerCta')}</DashLink>
+        </div>
+      ) : null}
 
       <div className="mt-6"><SidingsTable items={data.items} /></div>
 
