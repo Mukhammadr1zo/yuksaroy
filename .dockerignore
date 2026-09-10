@@ -1,0 +1,14 @@
+# Konteyner obraziga kirmasin: bog'liqliklar konteyner ichida o'rnatiladi (host symlinklari yaroqsiz)
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+.git
+.env
+.env.*
+*.log
+docs/rasm
+.impeccable
+.playwright-mcp
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep

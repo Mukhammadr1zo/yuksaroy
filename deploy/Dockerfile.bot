@@ -5,7 +5,7 @@ RUN corepack enable
 WORKDIR /app
 
 FROM base AS deps
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY apps/bot/package.json apps/bot/
@@ -15,15 +15,13 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 FROM deps AS build
 COPY packages/domain packages/domain
 COPY apps/bot apps/bot
-RUN pnpm --filter @yuksaroy/domain build && pnpm --filter @yuksaroy/bot build && pnpm prune --prod
+RUN pnpm --filter @yuksaroy/domain build \
+ && pnpm --filter @yuksaroy/bot build \
+ && pnpm deploy --filter=@yuksaroy/bot --prod /prod/bot
 
 FROM base AS run
 ENV NODE_ENV=production
-COPY --from=build /app/node_modules node_modules
-COPY --from=build /app/packages/domain packages/domain
-COPY --from=build /app/apps/bot/node_modules apps/bot/node_modules
-COPY --from=build /app/apps/bot/dist apps/bot/dist
-COPY --from=build /app/apps/bot/package.json apps/bot/package.json
-WORKDIR /app/apps/bot
+WORKDIR /app
+COPY --from=build /prod/bot ./
 USER node
 CMD ["node", "dist/bot.js"]

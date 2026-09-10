@@ -7,7 +7,7 @@ WORKDIR /app
 
 # ── bog'liqliklar (lockfile o'zgarmasa qatlam keshdan olinadi) ──
 FROM base AS deps
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 COPY apps/bot/package.json apps/bot/
@@ -18,24 +18,21 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 FROM deps AS build
 COPY packages/domain packages/domain
 COPY apps/api apps/api
+# pnpm deploy: faqat API va uning prod bog'liqliklari ko'chiriladi (ildizdagi butun node_modules emas)
 RUN pnpm --filter @yuksaroy/domain build \
  && pnpm --filter @yuksaroy/api exec prisma generate \
  && pnpm --filter @yuksaroy/api build \
- && pnpm prune --prod
+ && pnpm deploy --filter=@yuksaroy/api --prod /prod/api \
+ && cd /prod/api && node_modules/.bin/prisma generate --schema=prisma/schema.prisma
 
 # ── ishga tushirish ──
 FROM base AS run
 ENV NODE_ENV=production
-COPY --from=build /app/node_modules node_modules
-COPY --from=build /app/packages/domain packages/domain
-COPY --from=build /app/apps/api/node_modules apps/api/node_modules
-COPY --from=build /app/apps/api/dist apps/api/dist
-COPY --from=build /app/apps/api/prisma apps/api/prisma
-COPY --from=build /app/apps/api/package.json apps/api/package.json
-WORKDIR /app/apps/api
+WORKDIR /app
+COPY --from=build /prod/api ./
 # Yuklangan fayllar volume'da: konteyner almashsa ham qoladi
 RUN mkdir -p uploads && chown -R node:node uploads
 USER node
 EXPOSE 4000
-# Migratsiya har ishga tushishda qo'llanadi (deploy: prisma migrate deploy), keyin server
-CMD ["sh", "-c", "node ../../node_modules/prisma/build/index.js migrate deploy && node dist/main.js"]
+# Migratsiya har ishga tushishda qo'llanadi, keyin server
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node dist/main.js"]
