@@ -5,6 +5,7 @@ import { REGIONS, REGION_ADJACENCY, REGION_CENTERS, type RegionCode } from '@yuk
 import { sapiOrNull } from '@/lib/server-api';
 import { MiniMap, type Pin, type Poly } from '@/components/catalog/MiniMap';
 import { RegionChips } from '@/components/catalog/RegionChips';
+import { AuthOnly } from '@/components/site/AuthOnly';
 
 export type HubCat = 'terminals' | 'sidings' | 'equipment' | 'carriers';
 const CATS: HubCat[] = ['terminals', 'sidings', 'equipment', 'carriers'];
@@ -59,7 +60,9 @@ export async function RegionHub({ cat, code, count, shown, pins, children }: { c
           <div className="rounded-card border border-dashed border-line bg-white p-10 text-center">
             <p className="mx-auto max-w-[52ch] text-muted">{t(`${cat}.empty`, { region })}</p>
             <p className="mt-3">{neighbours}</p>
-            <Link href={CTA[cat]} className="mt-5 inline-block rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t(`${cat}.cta`)}</Link>
+            <AuthOnly>
+              <Link href={CTA[cat]} className="mt-5 inline-block rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t(`${cat}.cta`)}</Link>
+            </AuthOnly>
           </div>
         ) : children}
         {count > shown ? <p className="mt-4"><Link href={`/${cat}?region=${code}`} className="text-sm font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{t('more', { count })}</Link></p> : null}

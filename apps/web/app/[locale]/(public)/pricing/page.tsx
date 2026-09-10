@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckIcon } from '@phosphor-icons/react/dist/ssr';
 import { PRICING } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
+import { DashLink } from '@/components/site/DashLink';
 import { num } from '@/lib/format';
 import { BTN, Faq } from '@/components/marketing/bits';
 import { alt } from '@/lib/seo';
@@ -53,7 +54,7 @@ export default async function PricingPage({ params }: Params) {
                   </li>
                 ))}
               </ul>
-              <Link href={p.href} className={`mt-6 ${p.hot ? BTN.primary : BTN.outline}`}>{t(`${p.key}.cta`)}</Link>
+              <DashLink href={p.href} className={`mt-6 ${p.hot ? BTN.primary : BTN.outline}`}>{t(`${p.key}.cta`)}</DashLink>
               {p.key === 'premium' ? <p className="mt-3 text-xs leading-relaxed text-muted">{t('premium.hint')}</p> : null}
             </li>
           ))}

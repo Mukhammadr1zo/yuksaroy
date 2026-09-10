@@ -1,0 +1,86 @@
+# Prod: bitta VPS, bitta domen. Caddy TLS ni o'zi oladi va /api/v1 ni NestJS ga uzatadi.
+# Ishga tushirish: cd /opt/yuksaroy && docker compose -f deploy/compose.prod.yml --env-file .env up -d --build
+name: yuksaroy
+
+services:
+  db:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-yuksaroy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD kerak}
+      POSTGRES_DB: ${POSTGRES_DB:-yuksaroy}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-yuksaroy} -d ${POSTGRES_DB:-yuksaroy}"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+    # Port tashqariga ochilmaydi: faqat ichki tarmoq
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    env_file: [../.env]
+    environment:
+      NODE_ENV: production
+      API_PORT: 4000
+      TRUST_PROXY: "1" # Caddy ortida: haqiqiy IP X-Forwarded-For dan
+    depends_on:
+      db: { condition: service_healthy }
+    volumes: ["uploads:/app/apps/api/uploads"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL kerak}
+        NEXT_PUBLIC_BOT_USERNAME: ${NEXT_PUBLIC_BOT_USERNAME:-}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # Server komponentlar va /api/v1 rewrite ichki tarmoq orqali
+      API_INTERNAL_URL: http://api:4000
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    depends_on:
+      api: { condition: service_started }
+
+  bot:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.bot
+    restart: unless-stopped
+    env_file: [../.env]
+    environment:
+      NODE_ENV: production
+      API_URL: http://api:4000
+    depends_on:
+      api: { condition: service_started }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN kerak, masalan yuksaroy.uz}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, api]
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:

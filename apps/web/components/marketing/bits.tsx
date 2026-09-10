@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { Icon } from '@phosphor-icons/react';
 import { CaretDownIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
+import { DashLink } from '@/components/site/DashLink';
 
 // Marketing sahifalari (for-shippers, for-providers, booking) uchun umumiy bo'laklar. Matnlar marketing.<side> nomfazosidan.
 export type Side = 'shippers' | 'providers';
@@ -21,8 +22,8 @@ export async function Hero({ side, facts, primary, secondary }: { side: Side; fa
         <p className="mt-4 max-w-[58ch] text-lg text-muted">{t('lead')}</p>
         {facts.length ? <p className="mt-6 font-mono text-sm text-navy tabular-nums">{facts.join(' · ')}</p> : null}
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href={primary} className={BTN.primary}>{t('cta.primary')}</Link>
-          <Link href={secondary} className={BTN.outline}>{t('cta.secondary')}</Link>
+          <DashLink href={primary} className={BTN.primary}>{t('cta.primary')}</DashLink>
+          <DashLink href={secondary} className={BTN.outline}>{t('cta.secondary')}</DashLink>
         </div>
       </div>
     </section>
@@ -84,7 +85,7 @@ export function CtaBand({ title, body, primary, secondary }: { title: string; bo
           <p className="mt-3 max-w-[52ch] text-white/70">{body}</p>
         </div>
         <div className="flex flex-wrap gap-3 md:justify-end">
-          <Link href={primary.href} className={BTN.primary}>{primary.label}</Link>
+          <DashLink href={primary.href} className={BTN.primary}>{primary.label}</DashLink>
           <Link href={secondary.href} className="rounded-full border border-white/25 px-6 py-3 text-center font-semibold text-white transition duration-200 hover:bg-white/10">{secondary.label}</Link>
         </div>
       </div>

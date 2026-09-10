@@ -1,0 +1,38 @@
+# TLS sertifikat avtomatik (Let's Encrypt). DOMAIN compose'dan keladi.
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Yuklangan fayllar va API to'g'ridan-to'g'ri NestJS ga
+	handle /v1/* {
+		reverse_proxy api:4000
+	}
+	# Brauzer /api/v1/... ga murojaat qiladi (cookie bir xil origin uchun): /api prefiksi olib tashlanadi
+	handle /api/v1/* {
+		uri strip_prefix /api
+		reverse_proxy api:4000
+	}
+	# Qolgani Next.js
+	handle {
+		reverse_proxy web:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output file /data/access.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+	}
+}
+
+# www -> asosiy domen
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}

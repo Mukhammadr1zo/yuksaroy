@@ -86,12 +86,12 @@ export function RegisterFlow({ next }: { next: string | null }) {
       : [{ key: 'driverListing', href: { pathname: '/dashboard/listings/new', query: { kind: 'TRUCK' } } }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }];
 
   return (
-    <div className="rounded-card border border-line bg-white p-6 sm:p-8">
+    <div className="rounded-card border border-line bg-white p-4 sm:p-8">
       <h1 className="font-display text-2xl font-bold text-navy">{t('title')}</h1>
       <p className="mt-2 text-sm text-muted">{t('lead')}</p>
 
       {/* Stepper: o'tilgan teal + belgi, joriy navy, keyingisi chiziqli */}
-      <ol className="mt-6 flex items-center gap-2" aria-label={t('lead')}>
+      <ol className="mt-6 flex items-center gap-1.5 sm:gap-2" aria-label={t('lead')}>
         {STEPS.map((s, i) => {
           const n = i + 1;
           const state = step > n ? 'done' : step === n ? 'now' : 'todo';
@@ -102,7 +102,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
                 {state === 'done' ? <CheckIcon size={14} weight="bold" aria-hidden="true" /> : n}
               </span>
               {/* Tor ekranda faqat joriy qadam yozuvi ko'rinadi, qolganlari raqam bilan qoladi */}
-              <span className={`truncate text-xs font-semibold ${state === 'todo' ? 'text-muted' : 'text-ink'} ${state === 'now' ? '' : 'hidden sm:inline'}`}>{t(`steps.${s}`)}</span>
+              <span className={`shrink-0 whitespace-nowrap text-xs font-semibold ${state === 'todo' ? 'text-muted' : 'text-ink'} ${state === 'now' ? '' : 'hidden sm:inline'}`}>{t(`steps.${s}`)}</span>
               {i < STEPS.length - 1 && <span className={`h-px min-w-3 flex-1 transition-colors duration-200 ${state === 'done' ? 'bg-teal' : 'bg-line'}`} aria-hidden="true" />}
             </li>
           );

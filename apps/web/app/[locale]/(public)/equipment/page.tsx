@@ -5,6 +5,7 @@ import { EQUIPMENT_KINDS, REGIONS, chipLabel, corridorRegions, parseQuery, type 
 import { sapi, qs } from '@/lib/server-api';
 import type { ListingPage } from '@/lib/types-listing';
 import { ListingCard, listingPrice } from '@/components/catalog/ListingCard';
+import { AuthOnly } from '@/components/site/AuthOnly';
 import { RegionFilter } from '@/components/catalog/RegionFilter';
 import { NearMeButton } from '@/components/catalog/NearMeButton';
 import { Sel } from '@/components/catalog/Sel';
@@ -131,7 +132,9 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
           <p className="font-display text-lg font-bold text-navy">{t('empty.title')}</p>
           <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.body')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <AuthOnly>
             <Link href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('empty.cta')}</Link>
+            </AuthOnly>
             {filtered ? <Link href="/equipment" className="text-sm font-semibold text-teal-ink underline">{t('empty.reset')}</Link> : null}
           </div>
         </div>

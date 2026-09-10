@@ -21,7 +21,11 @@ const env = z.object({
 // web_app tugma faqat https bilan ishlaydi; aks holda oddiy url tugma (bir marta ogohlantiramiz)
 const APP_URL = env.TG_APP_URL ?? `${env.WEB_URL}/tg`;
 const WEB_APP = APP_URL.startsWith('https://');
+// Telegram faqat ommaviy https havolani qabul qiladi: localhost bo'lsa tugma umuman qo'yilmaydi,
+// aks holda butun xabar "Wrong HTTP URL" bilan yuborilmay qoladi.
+const PUBLIC_LINK = /^https:\/\//.test(env.WEB_URL) && !/localhost|127\.0\.0\.1|\.local(?::|\/|$)/.test(env.WEB_URL);
 if (!WEB_APP) console.warn(`bot: ${APP_URL} https emas, web_app o'rniga url tugmalar ishlatiladi`);
+if (!PUBLIC_LINK) console.warn(`bot: ${env.WEB_URL} ommaviy https emas, xabarlarda havola tugmalari qo'yilmaydi`);
 
 const bot = new Telegraf(env.BOT_TOKEN);
 const pendingToken = new Map<number, string>(); // chatId -> login token (/start login_<token>)
@@ -154,10 +158,17 @@ const price = (tiyin: number, unit: string | null, lang: Lang) =>
 
 const webPath = (lang: Lang, p: string) => `${env.WEB_URL}${lang === 'uz' ? '' : `/${lang}`}${p}`;
 
-/** Mini App tugmasi: https bo'lsa web_app (APP_URL + path), aks holda saytdagi sahifaga url. */
+/** Mini App tugmasi: https bo'lsa web_app (APP_URL + path), ommaviy sayt bo'lsa url, aks holda tugma yo'q. */
 const appBtn = (text: string, path: string, lang: Lang, sitePath = path) =>
-  WEB_APP ? Markup.button.webApp(text, `${APP_URL}${path}`) : Markup.button.url(text, webPath(lang, sitePath));
-const appKeyboard = (lang: Lang) => Markup.inlineKeyboard([[appBtn(T[lang].app, '', lang)]]);
+  WEB_APP ? Markup.button.webApp(text, `${APP_URL}${path}`) : PUBLIC_LINK ? Markup.button.url(text, webPath(lang, sitePath)) : null;
+type Btn = ReturnType<typeof Markup.button.url> | ReturnType<typeof Markup.button.webApp>;
+/** Faqat haqiqiy tugmalar qoladi: bo'sh qator Telegram xatosiga olib keladi. */
+const rowsOf = (rows: (Btn | null)[][]) =>
+  rows.map((r) => r.filter((b): b is Btn => b !== null)).filter((r) => r.length > 0);
+const appKeyboard = (lang: Lang) => {
+  const rows = rowsOf([[appBtn(T[lang].app, '', lang)]]);
+  return rows.length ? Markup.inlineKeyboard(rows) : undefined;
+};
 
 async function search(ctx: Context, q: string, lang: Lang) {
   const t = T[lang];
@@ -196,11 +207,11 @@ async function search(ctx: Context, q: string, lang: Lang) {
 
   const text = [`<b>${esc(decision)}</b>`, chips ? `${t.filter}: ${esc(chips)}` : null, '', body.length ? body.join('\n\n') : t.none].filter((x) => x !== null).join('\n');
   // Har karta o'z qatorida: "Ilovada ochish N" web_app (https) yoki "Ochish N" sayt havolasi
-  const rows = [
+  const rows = rowsOf([
     ...cards.map((c, i) => [appBtn(`${WEB_APP ? t.inApp : t.open} ${i + 1}`, `/terminals/${c.slug}`, lang)]),
-    [Markup.button.url(t.map, webPath(lang, `/terminals?${new URLSearchParams(parsed.query)}`))],
-  ];
-  return ctx.reply(text, { parse_mode: 'HTML', link_preview_options: { is_disabled: true }, ...Markup.inlineKeyboard(rows) });
+    [PUBLIC_LINK ? Markup.button.url(t.map, webPath(lang, `/terminals?${new URLSearchParams(parsed.query)}`)) : null],
+  ]);
+  return ctx.reply(text, { parse_mode: 'HTML', link_preview_options: { is_disabled: true }, ...(rows.length ? Markup.inlineKeyboard(rows) : {}) });
 }
 
 // ── Kirish oqimi ──
@@ -223,7 +234,8 @@ const askContact = (ctx: Context, text: string) => {
 bot.start(async (ctx) => {
   const payload = ctx.payload?.trim();
   if (payload?.startsWith('login_')) pendingToken.set(ctx.chat.id, payload.slice('login_'.length));
-  await ctx.reply('YukSaroy ga xush kelibsiz.', appKeyboard(langOf(ctx.from.language_code)));
+  const kb = appKeyboard(langOf(ctx.from.language_code));
+  await ctx.reply('YukSaroy ga xush kelibsiz.', kb);
   await askContact(ctx, 'Saytga kirish kodini shu yerda olasiz. Avval telefon raqamingizni tasdiqlang:');
 });
 

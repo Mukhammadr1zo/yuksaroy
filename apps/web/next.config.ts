@@ -34,6 +34,9 @@ const OLD_ROUTES: [string, string][] = [
 
 const config: NextConfig = {
   transpilePackages: ['@yuksaroy/domain'],
+  // Konteynerda faqat .next/standalone kerak (node_modules siz kichik obraz)
+  output: process.env.NEXT_STANDALONE === '1' ? 'standalone' : undefined,
+  outputFileTracingRoot: resolve(process.cwd(), '../..'),
   experimental: { globalNotFound: true },
   // Bir xil origin: brauzer /api/v1/* → NestJS. httpOnly cookie'lar shu tufayli ishlaydi.
   async rewrites() {

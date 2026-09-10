@@ -167,7 +167,8 @@
       "title": "No terminals found for this filter.",
       "reset": "Clear filter",
       "owner": "If the terminal is yours: only the owner adds it to the catalog, tariffs and slots stay under your control.",
-      "ownerCta": "Add my terminal"
+      "ownerCta": "Add my terminal",
+      "ownerSignup": "Sign up"
     }
   },
   "filter": {

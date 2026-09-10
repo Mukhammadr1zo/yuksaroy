@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckCircleIcon, InfoIcon } from '@phosphor-icons/react/dist/ssr';
 import { LISTING, LISTING_KINDS, LISTING_LABELS, LISTING_RULES, type SearchLang } from '@yuksaroy/domain';
 import { alt } from '@/lib/seo';
+import { AuthOnly } from '@/components/site/AuthOnly';
 
 type Params = { params: Promise<{ locale: string }> };
 const FIELD = ['title', 'deal', 'year', 'condition', 'regionCode', 'photos', 'model', 'capacityT', 'priceTiyin', 'terminalId', 'responseHours', 'wagonType', 'qty', 'truckType', 'tonnage', 'serviceRegions', 'routes', 'fleetSize'] as const;
@@ -81,7 +82,9 @@ export default async function StandartPage({ params }: Params) {
 
       <section className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-card border border-line bg-white p-6">
         <p className="max-w-[56ch] text-sm text-muted">{t('ctaNote')}</p>
+        <AuthOnly>
         <Link href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('cta')}</Link>
+        </AuthOnly>
       </section>
     </div>
   );

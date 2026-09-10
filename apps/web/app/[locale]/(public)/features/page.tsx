@@ -6,6 +6,7 @@ import {
   MapPinIcon, MapTrifoldIcon, PathIcon, SirenIcon, SparkleIcon, StarIcon, TagIcon, TrainIcon, WarehouseIcon, CalculatorIcon,
 } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
+import { DashLink } from '@/components/site/DashLink';
 import { Steps } from '@/components/landing/HowItWorks';
 import { alt } from '@/lib/seo';
 
@@ -75,7 +76,7 @@ export default async function FeaturesPage({ params }: Params) {
             <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {g.items.map(({ key, href, Icon }) => (
                 <li key={key}>
-                  <Link href={href} className="group flex h-full gap-4 rounded-card border border-line bg-white p-5 transition duration-200 hover:border-teal/60">
+                  <DashLink href={href} className="group flex h-full gap-4 rounded-card border border-line bg-white p-5 transition duration-200 hover:border-teal/60">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-soft text-teal-ink"><Icon size={22} aria-hidden="true" /></span>
                     <span className="flex-1">
                       <span className="flex items-center justify-between gap-2 font-semibold text-ink">
@@ -84,7 +85,7 @@ export default async function FeaturesPage({ params }: Params) {
                       </span>
                       <span className="mt-1 block text-sm leading-relaxed text-muted">{t(`items.${key}.body`)}</span>
                     </span>
-                  </Link>
+                  </DashLink>
                 </li>
               ))}
             </ul>

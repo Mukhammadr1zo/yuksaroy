@@ -167,7 +167,8 @@
       "title": "Bu filtr bo'yicha terminal topilmadi.",
       "reset": "Filtrni tozalash",
       "owner": "Terminal sizniki bo'lsa: obyektni katalogga faqat egasi qo'shadi, tarif va slotlar sizning nazoratingizda.",
-      "ownerCta": "Terminalimni qo'shish"
+      "ownerCta": "Terminalimni qo'shish",
+      "ownerSignup": "Ro'yxatdan o'tish"
     }
   },
   "filter": {
