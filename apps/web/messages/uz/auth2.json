@@ -93,19 +93,26 @@
       },
       "profile": {
         "title": "Profil",
+        "intent": {
+          "title": "Nima qilmoqchisiz?",
+          "need": {
+            "title": "Xizmat izlayapman",
+            "body": "Terminal, slot, texnika yoki tashuvchi kerak. Faqat ismingiz so'raladi."
+          },
+          "offer": {
+            "title": "Xizmat ko'rsataman",
+            "body": "Terminal, shahobcha yo'l, texnika yoki avtotransport egasisiz. E'lon berasiz."
+          }
+        },
         "who": {
-          "title": "Kim sifatida davom etasiz?",
+          "title": "Kim nomidan ishlaysiz?",
           "driver": {
             "title": "Yakka haydovchi",
             "body": "O'z yuk mashinangizda ishlaysiz. E'lon o'z nomingizdan chiqadi."
           },
           "org": {
             "title": "Tashkilot",
-            "body": "Kompaniya, terminal, ekspeditor yoki texnika egasi."
-          },
-          "shipper": {
-            "title": "Yuk egasi",
-            "body": "Terminal xizmati, slot va narx: tashkilot birinchi buyurtmada avtomatik ochiladi"
+            "body": "Kompaniya, terminal, ekspeditor yoki texnika egasi. E'lon tashkilot nomidan chiqadi."
           }
         },
         "driverLead": "Ism e'londa ko'rinadi. Telefon tasdiqlangan belgi bilan chiqadi.",

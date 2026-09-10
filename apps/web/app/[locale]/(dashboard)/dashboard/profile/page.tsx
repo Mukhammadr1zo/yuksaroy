@@ -1,15 +1,15 @@
 'use client';
-// Profil: avatar (POST /uploads + PATCH /auth/me), shaxsiy ma'lumotlar, telefon (OTP bilan almashtirish), parol, bog'langan hisoblar, hisobni o'chirish.
+// Profil: avatar (POST /uploads + PATCH /auth/me), shaxsiy ma'lumotlar, platformadagi rol, telefon (OTP bilan almashtirish), parol, bog'langan hisoblar, hisobni o'chirish.
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { GoogleLogoIcon, TelegramLogoIcon } from '@phosphor-icons/react';
 import { PASSWORD } from '@yuksaroy/domain';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { routing, type Locale } from '@/i18n/routing';
 import { api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import type { OtpRequestResponse } from '@/lib/types-auth';
-import type { Me } from '@/lib/types-kabinet';
+import type { Me, Membership } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, Field, INPUT, Notice, errText } from '@/components/kabinet/bits';
 import { uploadOne } from '@/components/kabinet/PhotoUpload';
 
@@ -50,6 +50,7 @@ export default function ProfilePage() {
         <div className="mt-6 space-y-5">
           <Head me={me} onChange={setMe} />
           <Personal me={me} onChange={setMe} />
+          <Activity me={me} onChange={setMe} />
           <Phone me={me} onChange={setMe} />
           <Password me={me} onChange={setMe} />
           <Linked me={me} />
@@ -138,6 +139,52 @@ function Personal({ me, onChange }: Props) {
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
       <button type="submit" disabled={busy} className={BTN_NAVY}>{busy ? tc('saving') : tc('save')}</button>
     </form>
+  );
+}
+
+/** Platformada nima qilaman: ro'yxatdan o'tishdagi niyat tanlovi shu yerda o'zgaradi.
+ *  Tashkiloti bori uchun almashtirgich yo'q: tashkilotni o'z bo'limida boshqaradi. */
+function Activity({ me, onChange }: Props) {
+  const t = useTranslations('kabinet.profile.activity');
+  const tc = useTranslations('kabinet.common');
+  const { busy, note, run } = useSection();
+  const [orgs, setOrgs] = useState<Membership[] | null>(null);
+  useEffect(() => { api<Membership[]>('/orgs/mine').then(setOrgs).catch(() => setOrgs([])); }, []);
+
+  const isDriver = me.personalRoles.includes('DRIVER');
+  const hasOrg = !!orgs?.length;
+  const setRoles = (roles: string[]) => run(async () => {
+    onChange(await api<Me>('/auth/me', { method: 'PATCH', body: JSON.stringify({ personalRoles: roles }) }));
+  }, tc('saved'));
+
+  const card = (on: boolean, title: string, body: string, onClick: () => void) => (
+    <button type="button" role="radio" aria-checked={on} disabled={busy} onClick={onClick}
+      className={`flex-1 rounded-xl border p-4 text-left transition-colors duration-150 disabled:opacity-60 ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white hover:border-teal'}`}>
+      <span className="block font-semibold">{title}</span>
+      <span className={`mt-0.5 block text-sm ${on ? 'text-white/70' : 'text-muted'}`}>{body}</span>
+    </button>
+  );
+
+  return (
+    <section className="space-y-3 rounded-card border border-line bg-white p-5">
+      <h2 className="font-semibold">{t('title')}</h2>
+      {hasOrg ? (
+        <p className="text-sm">{t('orgHas', { name: orgs![0]!.org.name })}{' '}
+          <Link href="/dashboard/organization" className="font-semibold text-teal-ink hover:underline">{t('orgManage')}</Link>
+        </p>
+      ) : (
+        <>
+          <div role="radiogroup" aria-label={t('title')} className="flex flex-col gap-3 sm:flex-row">
+            {card(!isDriver, t('need'), t('needBody'), () => void setRoles([]))}
+            {card(isDriver, t('offer'), t('offerBody'), () => void setRoles(['DRIVER']))}
+          </div>
+          <p className="text-sm text-muted">{t('orgLead')}{' '}
+            <Link href="/dashboard/organization" className="font-semibold text-teal-ink hover:underline">{t('orgOpen')}</Link>
+          </p>
+        </>
+      )}
+      {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
+    </section>
   );
 }
 

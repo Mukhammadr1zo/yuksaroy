@@ -1,9 +1,9 @@
 'use client';
-// Ro'yxat: 1 telefon (yoki Google) -> 2 parol -> 3 profil (yakka haydovchi yoki tashkilot) -> 4 tayyor.
+// Ro'yxat: 1 telefon (yoki Google) -> 2 parol -> 3 profil (niyat, keyin kerak bo'lsa yuridik shakl) -> 4 tayyor.
 // Google (telefonsiz) yoki parolli foydalanuvchi 2-qadamni o'tkazib yuboradi; kirgan foydalanuvchi telefon qadamini ko'rmaydi.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRightIcon, BuildingsIcon, CheckCircleIcon, CheckIcon, PackageIcon, TruckIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, BuildingsIcon, CheckCircleIcon, CheckIcon, MagnifyingGlassIcon, StorefrontIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { ORG_KINDS, REGIONS, type OrgKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
@@ -16,8 +16,39 @@ import { stripLocale } from '../login/LoginCard';
 
 const KINDS = ORG_KINDS.filter((k) => k !== 'PLATFORM');
 const STEPS = ['phone', 'password', 'profile', 'done'] as const;
-const WHO = [{ key: 'shipper', Icon: PackageIcon }, { key: 'driver', Icon: TruckIcon }, { key: 'org', Icon: BuildingsIcon }] as const;
+// Birinchi savol niyat bo'yicha, yuridik shakl bo'yicha emas: mijozning ko'pchiligi yuridik shaxs,
+// shuning uchun "Tashkilot" varianti uni provayder yo'liga tortib ketardi. Yuridik shakl faqat
+// xizmat ko'rsatuvchidan so'raladi; mijozga tashkilot birinchi buyurtmada avtomatik ochiladi.
+const INTENT = [{ key: 'need', Icon: MagnifyingGlassIcon }, { key: 'offer', Icon: StorefrontIcon }] as const;
+const OFFER = [{ key: 'driver', Icon: TruckIcon }, { key: 'org', Icon: BuildingsIcon }] as const;
+type Who = 'shipper' | 'driver' | 'org';
 const ORG_ERR: Record<string, string> = { STIR_TAKEN: 'stirTaken', INVALID_STIR: 'invalidStir', KIND_REQUIRED: 'kindRequired' };
+
+/** Tanlov kartalari: niyat uchun ham, yuridik shakl uchun ham bir xil ko'rinish. */
+function Cards({ list, value, label, onPick }: {
+  list: readonly { key: string; Icon: Icon }[];
+  value: string | null;
+  label: (key: string, part: 'title' | 'body') => string;
+  onPick: (key: string) => void;
+}) {
+  return (
+    <div className="mt-2 grid gap-3 sm:grid-cols-2">
+      {list.map(({ key, Icon }) => {
+        const on = value === key;
+        return (
+          <button key={key} type="button" role="radio" aria-checked={on} onClick={() => onPick(key)}
+            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors duration-150 ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white hover:border-teal'}`}>
+            <Icon size={26} weight="duotone" className={`shrink-0 ${on ? 'text-teal-lit' : 'text-teal'}`} aria-hidden="true" />
+            <span className="min-w-0">
+              <span className="block font-semibold">{label(key, 'title')}</span>
+              <span className={`mt-0.5 block text-sm ${on ? 'text-white/70' : 'text-muted'}`}>{label(key, 'body')}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export function RegisterFlow({ next }: { next: string | null }) {
   const t = useTranslations('auth2.register');
@@ -26,7 +57,8 @@ export function RegisterFlow({ next }: { next: string | null }) {
   // 0 = kirganmi tekshirilmoqda
   const [step, setStep] = useState<0 | 1 | 2 | 3 | 4>(0);
   const [pw, setPw] = useState<string | null>(null);
-  const [who, setWho] = useState<(typeof WHO)[number]['key'] | null>(null);
+  const [intent, setIntent] = useState<'need' | 'offer' | null>(null);
+  const [who, setWho] = useState<Who | null>(null);
   const [form, setForm] = useState({ fullName: '', kinds: [] as OrgKind[], name: '', stir: '', regionCode: '' });
   const [org, setOrg] = useState<OrgRecord | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -139,23 +171,18 @@ export function RegisterFlow({ next }: { next: string | null }) {
         <div key="s3" className="ys-step mt-6 space-y-4">
           <h2 className="font-semibold">{t('profile.title')}</h2>
           <fieldset>
-            <legend className="text-sm text-muted">{t('profile.who.title')}</legend>
-            <div className="mt-2 grid gap-3 sm:grid-cols-2">
-              {WHO.map(({ key, Icon }) => {
-                const on = who === key;
-                return (
-                  <button key={key} type="button" role="radio" aria-checked={on} onClick={() => { setWho(key); setErr(null); }}
-                    className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors duration-150 ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white hover:border-teal'}`}>
-                    <Icon size={26} weight="duotone" className={`shrink-0 ${on ? 'text-teal-lit' : 'text-teal'}`} aria-hidden="true" />
-                    <span className="min-w-0">
-                      <span className="block font-semibold">{t(`profile.who.${key}.title`)}</span>
-                      <span className={`mt-0.5 block text-sm ${on ? 'text-white/70' : 'text-muted'}`}>{t(`profile.who.${key}.body`)}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <legend className="text-sm text-muted">{t('profile.intent.title')}</legend>
+            <Cards list={INTENT} value={intent} label={(k, part) => t(`profile.intent.${k}.${part}`)}
+              onPick={(k) => { setIntent(k as 'need' | 'offer'); setWho(k === 'need' ? 'shipper' : null); setErr(null); }} />
           </fieldset>
+
+          {intent === 'offer' && (
+            <fieldset key="offer" className="ys-step">
+              <legend className="text-sm text-muted">{t('profile.who.title')}</legend>
+              <Cards list={OFFER} value={who} label={(k, part) => t(`profile.who.${k}.${part}`)}
+                onPick={(k) => { setWho(k as Who); setErr(null); }} />
+            </fieldset>
+          )}
 
           {who === 'shipper' && (
             <form key="shipper" className="ys-step space-y-4 border-t border-line pt-4" onSubmit={submitShipper}>

@@ -21,7 +21,7 @@ export async function Header() {
     <header className="sticky top-0 z-30 border-b border-line/70 bg-sand/85 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         {/* Belgi siqilmaydi: 768 da olti havola sig'magani uchun ular chip qatoriga tushadi (lg dan yuqori gorizontal menyu) */}
-        <Link href="/" aria-label={t('aria.home')} className="shrink-0"><Logo /></Link>
+        <Link href="/" aria-label={t('aria.home')} className="shrink-0"><Logo compact /></Link>
         <nav aria-label={t('aria.main')} className="hidden min-w-0 items-center gap-1 lg:flex">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-ink/80 hover:bg-white hover:text-navy">

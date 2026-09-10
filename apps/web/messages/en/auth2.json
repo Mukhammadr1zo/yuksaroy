@@ -93,19 +93,26 @@
       },
       "profile": {
         "title": "Profile",
+        "intent": {
+          "title": "What do you want to do?",
+          "need": {
+            "title": "I am looking for a service",
+            "body": "You need a terminal, a slot, equipment or a carrier. We only ask for your name."
+          },
+          "offer": {
+            "title": "I provide a service",
+            "body": "You own a terminal, a private siding, equipment or trucks. You will post listings."
+          }
+        },
         "who": {
-          "title": "How do you want to continue?",
+          "title": "Who do you work as?",
           "driver": {
             "title": "Individual driver",
             "body": "You work with your own truck. The listing goes out under your name."
           },
           "org": {
             "title": "Organization",
-            "body": "A company, terminal, forwarder or equipment owner."
-          },
-          "shipper": {
-            "title": "Cargo owner",
-            "body": "Terminal services, slots and prices: an organization is created with your first order"
+            "body": "A company, terminal, forwarder or equipment owner. Listings appear under the organization name."
           }
         },
         "driverLead": "Your name appears on the listing. The phone shows as verified.",

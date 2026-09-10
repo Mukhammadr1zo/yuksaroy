@@ -330,6 +330,17 @@
         "emailLocked": "Linked to your Google account and cannot be changed.",
         "locale": "Language"
       },
+      "activity": {
+        "title": "What I do here",
+        "need": "I am looking for a service",
+        "needBody": "You look for a terminal, a slot, equipment or a carrier. An organization is created automatically with your first order.",
+        "offer": "I provide a service",
+        "offerBody": "You post listings as an individual: the listing goes out under your own name.",
+        "orgLead": "Want to work under a company name?",
+        "orgOpen": "Create an organization",
+        "orgHas": "You provide services through {name}.",
+        "orgManage": "Organization section"
+      },
       "phone": {
         "title": "Phone",
         "none": "No phone linked",

@@ -330,6 +330,17 @@
         "emailLocked": "Google hisobiga bog'langan, o'zgartirib bo'lmaydi.",
         "locale": "Til"
       },
+      "activity": {
+        "title": "Platformada nima qilaman",
+        "need": "Xizmat izlayapman",
+        "needBody": "Terminal, slot, texnika yoki tashuvchi qidirasiz. Tashkilot birinchi buyurtmada avtomatik ochiladi.",
+        "offer": "Xizmat ko'rsataman",
+        "offerBody": "Yakka tartibda e'lon berasiz: e'lon o'z nomingizdan chiqadi.",
+        "orgLead": "Tashkilot nomidan ishlamoqchimisiz?",
+        "orgOpen": "Tashkilot ochish",
+        "orgHas": "Siz {name} tashkiloti orqali xizmat ko'rsatasiz.",
+        "orgManage": "Tashkilot bo'limi"
+      },
       "phone": {
         "title": "Telefon",
         "none": "Telefon bog'lanmagan",
