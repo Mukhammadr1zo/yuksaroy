@@ -25,8 +25,10 @@ export function AdminUsers() {
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
 
+  // Kutilmagan javob sahifani yiqitmasin: items doim massiv bo'ladi
   const load = (p = 1) => api<Page>(`/admin/users?page=${p}&q=${encodeURIComponent(q.trim())}${onlyBlocked ? '&blocked=1' : ''}`)
-    .then(setPage).catch(() => setNote({ tone: 'err', text: tc('loadFailed') }));
+    .then((r) => setPage({ items: r?.items ?? [], total: r?.total ?? 0, page: r?.page ?? p, limit: r?.limit ?? 30 }))
+    .catch(() => setNote({ tone: 'err', text: tc('loadFailed') }));
 
   useEffect(() => { void load(1); }, [onlyBlocked]); // eslint-disable-line react-hooks/exhaustive-deps
 
