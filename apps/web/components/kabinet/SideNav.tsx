@@ -1,5 +1,5 @@
 'use client';
-// Ish maydonining chap menyusi: o'n ikkita yassi banddan besh bandga tushdi.
+// Ish maydonining chap menyusi: o'n ikkita yassi banddan olti bandga tushdi.
 // Har band bitta savolga javob beradi (nima kutilyapti, nimam bor, ish qaysi bosqichda, hujjat, tashkilot).
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
@@ -8,6 +8,7 @@ const LINKS: { href: string; key: string; exact?: boolean }[] = [
   { href: '/dashboard', key: 'now', exact: true },
   { href: '/dashboard/objects', key: 'objects' },
   { href: '/dashboard/orders', key: 'orders' },
+  { href: '/dashboard/inquiries', key: 'chats' },
   { href: '/dashboard/documents', key: 'documents' },
   { href: '/dashboard/organization', key: 'org' },
 ];

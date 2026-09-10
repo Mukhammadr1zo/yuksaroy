@@ -40,9 +40,9 @@ export default function ObjectsPage() {
   useEffect(() => {
     let alive = true;
     const fail = () => { if (alive) setFailed(true); };
-    api<{ items: MyTerminal[] }>('/terminals/mine').then((r) => alive && setTerminals(r.items)).catch(() => { setTerminals([]); fail(); });
+    api<MyTerminal[]>('/terminals/mine').then((r) => alive && setTerminals(r)).catch(() => { setTerminals([]); fail(); });
     api<{ items: MySiding[] }>('/sidings/mine').then((r) => alive && setSidings(r.items)).catch(() => { setSidings([]); fail(); });
-    api<{ items: OwnerListing[] }>('/listings/mine').then((r) => alive && setListings(r.items)).catch(() => { setListings([]); fail(); });
+    api<OwnerListing[]>('/listings/mine').then((r) => alive && setListings(r)).catch(() => { setListings([]); fail(); });
     return () => { alive = false; };
   }, []);
 

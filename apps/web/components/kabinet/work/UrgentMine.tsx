@@ -1,5 +1,6 @@
 'use client';
 // Shoshilinch so'rovlarim: yangi so'rov shakli va ro'yxat. Ijrochi ko'rinishi /dashboard/urgent/offers.
+// Sarlavha ota sahifada: bu yerda faqat harakat tugmalari va ro'yxat.
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { REGIONS, URGENT_KINDS, type UrgentKind } from '@yuksaroy/domain';
@@ -16,7 +17,7 @@ type Draft = { kind: UrgentKind; regionCode: string; stationName: string; wagonC
 const EMPTY: Draft = { kind: 'LOCO_CALL', regionCode: '', stationName: '', wagonCount: '', description: '', contactPhone: '', orgId: '' };
 const notLive = (e: unknown) => e instanceof ApiError && e.status === 404;
 
-export default function UrgentMinePage() {
+export function UrgentMine() {
   const t = useTranslations('urgent.mine');
   const locale = useLocale();
   const tc = useTranslations('kabinet.common');
@@ -55,12 +56,9 @@ export default function UrgentMinePage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
-          <p className="mt-1 text-muted">{t('lead')}</p>
-        </div>
+        <p className="text-sm text-muted">{t('lead')}</p>
         <div className="flex flex-wrap gap-2">
           <Link href="/dashboard/urgent/offers" className={BTN_GHOST}>{tp('title')}</Link>
           <button type="button" onClick={() => setOpen((o) => !o)} className={BTN_NAVY} aria-expanded={open}>{open ? tc('cancel') : t('new')}</button>
@@ -147,6 +145,6 @@ export default function UrgentMinePage() {
           </table>
         </div>
       ) : null}
-    </main>
+    </>
   );
 }

@@ -423,6 +423,7 @@
       "now": "Now",
       "objects": "My objects",
       "orders": "Orders",
+      "chats": "Chats",
       "documents": "Documents",
       "org": "Organization"
     },
@@ -505,6 +506,14 @@
       },
       "open": "Open the chat",
       "lastMessage": "Last message"
+    },
+    "work": {
+      "tab": {
+        "incoming": "Incoming",
+        "mine": "My orders",
+        "urgent": "Urgent"
+      },
+      "title": "Orders"
     }
   }
 }

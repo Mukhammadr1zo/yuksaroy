@@ -1,0 +1,28 @@
+# VPS ustki qatlami: 80/443 ni nginx egallagan, shuning uchun Caddy ishlamaydi.
+# Konteynerlar faqat localhost portlarida turadi, nginx ularga proxy qiladi.
+#
+#   cd /opt/yuksaroy
+#   docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env up -d
+#
+# Xotira chegaralari: serverda 24 ta boshqa konteyner ishlayapti, biror jarayon
+# nazoratdan chiqsa qolganini yiqitmasligi kerak.
+
+services:
+  db:
+    mem_limit: 320m
+    shm_size: 128m
+
+  api:
+    mem_limit: 420m
+    ports: ["127.0.0.1:4200:4000"]
+    environment:
+      NODE_OPTIONS: --max-old-space-size=320
+
+  web:
+    mem_limit: 300m
+    ports: ["127.0.0.1:3200:3000"]
+    environment:
+      NODE_OPTIONS: --max-old-space-size=240
+
+  bot:
+    mem_limit: 128m

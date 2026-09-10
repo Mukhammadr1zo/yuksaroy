@@ -15,12 +15,9 @@ const OLD_ROUTES: [string, string][] = [
   ['/kabinet/buyurtma/yangi', '/dashboard/orders/new'],
   ['/kabinet/elonlar/yangi', '/dashboard/listings/new'],
   ['/kabinet/elonlar', '/dashboard/listings'],
-  ['/kabinet/sorovlar', '/dashboard/inquiries'],
   ['/kabinet/tashkilot', '/dashboard/organization'],
   ['/kabinet/shahobchalar', '/dashboard/sidings'],
-  ['/kabinet/admin', '/dashboard/admin'],
   ['/kabinet', '/dashboard'],
-  ['/terminal', '/dashboard/terminal'],
   ['/kirish', '/login'],
   ['/royxat', '/signup'],
   ['/terminallar', '/terminals'],
@@ -30,6 +27,17 @@ const OLD_ROUTES: [string, string][] = [
   ['/kompaniyalar', '/companies'],
   ['/standart', '/standards'],
   ['/hisob', '/quote'],
+];
+
+// Ko'chgan sahifalar: aniq yo'lning o'zi yo'naltiriladi, ichki yo'llari tegilmaydi
+// (/dashboard/urgent -> band, lekin /dashboard/urgent/:id o'z sahifasida qoladi).
+const MOVED: [string, string][] = [
+  ['/dashboard/terminal', '/dashboard/orders?tab=incoming'],
+  ['/dashboard/urgent', '/dashboard/orders?tab=urgent'],
+  ['/dashboard/admin', '/admin'],
+  ['/kabinet/sorovlar', '/dashboard/inquiries'],
+  ['/kabinet/admin', '/admin'],
+  ['/terminal', '/dashboard/orders?tab=incoming'],
 ];
 
 const config: NextConfig = {
@@ -44,12 +52,18 @@ const config: NextConfig = {
   },
   async redirects() {
     // Har bir eski yo'l: prefiksiz (uz) va /:locale bilan, oddiy va ichki (:path*)
-    return OLD_ROUTES.flatMap(([from, to]) =>
-      ['', '/:locale(uz|ru|en)'].flatMap((p) => [
-        { source: `${p}${from}`, destination: `${p}${to}`, permanent: true },
-        { source: `${p}${from}/:path*`, destination: `${p}${to}/:path*`, permanent: true },
-      ]),
-    );
+    const prefixes = ['', '/:locale(uz|ru|en)'];
+    return [
+      // MOVED birinchi: aniq yo'llar OLD_ROUTES dagi umumiy /kabinet/:path* dan oldin tekshirilsin.
+      // Vaqtinchalik (307): kabinet ichki tuzilishi hali o'zgarishi mumkin, brauzer keshlab qolmasin.
+      ...MOVED.flatMap(([from, to]) => prefixes.map((p) => ({ source: `${p}${from}`, destination: `${p}${to}`, permanent: false }))),
+      ...OLD_ROUTES.flatMap(([from, to]) =>
+        prefixes.flatMap((p) => [
+          { source: `${p}${from}`, destination: `${p}${to}`, permanent: true },
+          { source: `${p}${from}/:path*`, destination: `${p}${to}/:path*`, permanent: true },
+        ]),
+      ),
+    ];
   },
 };
 

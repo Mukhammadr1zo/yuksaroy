@@ -1,5 +1,6 @@
 'use client';
-// Terminal kabineti: talabnomalar taxtasi (4 ustun, har 30 s yangilanadi) yoki ro'yxat. Har kartada shu holat uchun kerakli harakat bor, ortiqchasi yo'q.
+// Menga kelgan talabnomalar: taxta (4 ustun, har 30 s yangilanadi) yoki ro'yxat.
+// Har kartada shu holat uchun kerakli harakat bor, ortiqchasi yo'q. Sarlavha ota sahifada.
 import { Link } from '@/i18n/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -27,7 +28,7 @@ const EVENTS: Record<'LOAD' | 'UNLOAD', OrderEventCode[]> = {
   UNLOAD: ['ARRIVED', 'UNLOADED', 'WEIGHED', 'DEPARTED'],
 };
 
-export default function TerminalInboxPage() {
+export function TerminalBoard() {
   const t = useTranslations('dashboard2.board');
   const [view, setView] = useState<View>('board');
   const [tab, setTab] = useState('PENDING');
@@ -41,21 +42,13 @@ export default function TerminalInboxPage() {
   useEffect(() => { loadCounts().catch(() => {}); }, [loadCounts]);
 
   if (terminals === 0) {
-    return (
-      <main className="mx-auto max-w-3xl px-6 py-16 text-center">
-        <h1 className="font-display text-2xl font-bold">{t('title')}</h1>
-        <p className="mt-2 text-muted">{t.rich('noTerminal', { link: (c) => <Link href="/terminals" className="underline">{c}</Link> })}</p>
-      </main>
-    );
+    return <p className="rounded-card border border-dashed border-line bg-white p-10 text-center text-muted">{t.rich('noTerminal', { link: (c) => <Link href="/terminals" className="underline">{c}</Link> })}</p>;
   }
 
   return (
-    <main className="mx-auto max-w-7xl">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
-          <p className="mt-1 text-muted">{t('lead')}</p>
-        </div>
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted">{t('lead')}</p>
         <div role="group" aria-label={t('view.board')} className="flex rounded-full border border-line bg-white p-0.5">
           {(['board', 'list'] as View[]).map((v) => (
             <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${view === v ? 'bg-navy text-white' : 'text-muted hover:text-ink'}`}>
@@ -68,7 +61,7 @@ export default function TerminalInboxPage() {
       {view === 'board'
         ? <BoardView onChange={loadCounts} showClosed={() => { setTab('CLOSED'); setView('list'); }} />
         : <ListView tab={tab} setTab={setTab} counts={counts} onChange={loadCounts} />}
-    </main>
+    </>
   );
 }
 

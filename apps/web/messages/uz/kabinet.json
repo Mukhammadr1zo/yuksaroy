@@ -423,6 +423,7 @@
       "now": "Hozir",
       "objects": "Mening obyektlarim",
       "orders": "Buyurtmalar",
+      "chats": "Suhbatlar",
       "documents": "Hujjatlar",
       "org": "Tashkilot"
     },
@@ -505,6 +506,14 @@
       },
       "open": "Yozishmani ochish",
       "lastMessage": "Oxirgi xabar"
+    },
+    "work": {
+      "tab": {
+        "incoming": "Menga kelgan",
+        "mine": "Men bergan",
+        "urgent": "Shoshilinch"
+      },
+      "title": "Buyurtmalar"
     }
   }
 }

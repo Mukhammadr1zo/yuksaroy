@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ArrowRightIcon, BuildingsIcon, CheckCircleIcon, CheckIcon, MagnifyingGlassIcon, StorefrontIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { ORG_KINDS, REGIONS, type OrgKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
-import { ApiError, api, post } from '@/lib/api';
+import { ApiError, api, clearAuthedCache, post } from '@/lib/api';
 import type { LoginResponse, Me, OrgRecord } from '@/lib/types-auth';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PasswordFields } from '@/components/auth/PasswordFields';
@@ -64,7 +64,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const loggedIn = (u: Me) => { setForm((f) => ({ ...f, fullName: u.fullName ?? '' })); setStep(u.hasPassword || !u.phone ? 3 : 2); };
+  const loggedIn = (u: Me) => { clearAuthedCache(); setForm((f) => ({ ...f, fullName: u.fullName ?? '' })); setStep(u.hasPassword || !u.phone ? 3 : 2); };
   useEffect(() => { api<Me>('/auth/me').then(loggedIn).catch(() => setStep(1)); }, []);
 
   const run = async (fn: () => Promise<void>, fail: (code: string | null) => string) => {
@@ -112,7 +112,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
 
   // Tayyor qadam: haydovchi uchun e'lon va kabinet, tashkilot uchun kabinet, e'lon, terminal
   const actions = org
-    ? [{ key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }, { key: 'listing', href: '/dashboard/listings/new' }, { key: 'terminal', href: '/dashboard/terminal' }]
+    ? [{ key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }, { key: 'listing', href: '/dashboard/listings/new' }, { key: 'terminal', href: '/dashboard/orders?tab=incoming' }]
     : who === 'shipper'
       ? [{ key: 'findTerminal', href: '/terminals' }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }]
       : [{ key: 'driverListing', href: { pathname: '/dashboard/listings/new', query: { kind: 'TRUCK' } } }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }];

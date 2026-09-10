@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { PASSWORD } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { ApiError, post } from '@/lib/api';
+import { ApiError, clearAuthedCache, post } from '@/lib/api';
 import type { LoginResponse } from '@/lib/types-auth';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PasswordFields } from '@/components/auth/PasswordFields';
@@ -31,7 +31,8 @@ export function LoginCard({ next, attach, reset }: { next: string | null; attach
   const [noPassword, setNoPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const done = () => router.push(next ? stripLocale(next) : '/dashboard');
+  // Mehmon keshi ('men kirmaganman') qolib ketmasin: sarlavha darhol yangi holatga o'tsin
+  const done = () => { clearAuthedCache(); router.push(next ? stripLocale(next) : '/dashboard'); };
   const href = (pathname: '/login' | '/signup', query: Record<string, string> = {}) => ({ pathname, query: next ? { ...query, next } : query });
   const switchMode = (m: (typeof MODES)[number]) => { setMode(m); setErr(null); setNoPassword(false); };
 

@@ -3,6 +3,7 @@
 // Sessiya bayrog'i bo'lmasa server so'rovi umuman ketmaydi (mehmonda konsol toza qoladi).
 import { useEffect, useState } from 'react';
 import { api, hasSession } from '@/lib/api';
+// Kesh kaliti lib/api.ts dagi clearAuthedCache bilan bir xil bo'lishi shart
 import type { Me } from '@/lib/types-auth';
 
 const KEY = 'ys-me';
@@ -35,7 +36,3 @@ export function useMe(): Me | null | undefined {
   return me;
 }
 
-/** Keshni tozalash: kirish, chiqish yoki 401 dan keyin. */
-export function forgetMe() {
-  try { sessionStorage.removeItem(KEY); } catch { /* xususiy rejim */ }
-}

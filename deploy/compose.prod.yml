@@ -19,6 +19,7 @@ services:
     # Port tashqariga ochilmaydi: faqat ichki tarmoq
 
   api:
+    image: ghcr.io/mukhammadr1zo/yuksaroy-api:latest
     build:
       context: ..
       dockerfile: deploy/Dockerfile.api
@@ -39,6 +40,7 @@ services:
       start_period: 40s
 
   web:
+    image: ghcr.io/mukhammadr1zo/yuksaroy-web:latest
     build:
       context: ..
       dockerfile: deploy/Dockerfile.web
@@ -56,6 +58,7 @@ services:
       api: { condition: service_started }
 
   bot:
+    image: ghcr.io/mukhammadr1zo/yuksaroy-bot:latest
     build:
       context: ..
       dockerfile: deploy/Dockerfile.bot
@@ -69,6 +72,9 @@ services:
 
   caddy:
     image: caddy:2-alpine
+    # Faqat 80/443 bo'sh bo'lgan serverda kerak: docker compose --profile caddy up -d
+    # Nginx allaqachon turgan VPS da compose.vps.yml ishlatiladi, Caddy ishga tushmaydi.
+    profiles: ["caddy"]
     restart: unless-stopped
     ports: ["80:80", "443:443"]
     environment:

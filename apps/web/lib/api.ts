@@ -5,9 +5,10 @@ export function hasSession(): boolean {
   try { return document.cookie.includes('ys_in=1') || !!tgTokens(); } catch { return false; }
 }
 
-/** AuthOnly/AuthButton keshi: sessiya tugaganda darhol tozalanadi (chiqqan odam kabinet tugmasini ko'rmasin). */
+/** Sessiya keshlari: kirish, chiqish va 401 dan keyin tozalanadi.
+ * Ikkalasi birga: aks holda kirgan odam sarlavhada hamon "Kirish" tugmasini ko'radi. */
 export function clearAuthedCache() {
-  try { sessionStorage.removeItem('ys-authed'); } catch { /* xususiy rejim */ }
+  try { sessionStorage.removeItem('ys-authed'); sessionStorage.removeItem('ys-me'); } catch { /* xususiy rejim */ }
 }
 
 export class ApiError extends Error {

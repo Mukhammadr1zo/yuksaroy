@@ -32,7 +32,7 @@ export default function NowPage() {
         api<Membership[]>('/orgs/mine').catch(() => [] as Membership[]),
         api<Inquiry[]>('/inquiries?scope=owner').catch(() => [] as Inquiry[]),
         api<MineDocs>('/documents/mine?scope=client&limit=100').catch(() => ({ items: [], total: 0, page: 1, limit: 0 }) as MineDocs),
-        api<{ items: OwnerListing[] }>('/listings/mine').catch(() => ({ items: [] })),
+        api<OwnerListing[]>('/listings/mine').catch(() => [] as OwnerListing[]),
       ]);
       if (!alive) return;
       setOrgs(ms);
@@ -42,14 +42,14 @@ export default function NowPage() {
 
       const now = Date.now();
       const list: Task[] = [];
-      if (pending) list.push({ key: 'ordersToConfirm', count: pending, href: '/dashboard/orders', tone: 'warn' });
+      if (pending) list.push({ key: 'ordersToConfirm', count: pending, href: '/dashboard/orders?tab=incoming', tone: 'warn' });
       const open = inq.filter((i) => i.status === 'OPEN').length;
       if (open) list.push({ key: 'inquiries', count: open, href: '/dashboard/inquiries' });
       const unpaid = docs.items.filter((d) => d.kind === 'INVOICE' && (d.status === 'ISSUED' || d.status === 'OVERDUE')).length;
       if (unpaid) list.push({ key: 'invoices', count: unpaid, href: '/dashboard/documents' });
-      const expiring = listings.items.filter((l) => l.status === 'ACTIVE' && l.expiresAt && new Date(l.expiresAt).getTime() - now < WEEK).length;
+      const expiring = listings.filter((l) => l.status === 'ACTIVE' && l.expiresAt && new Date(l.expiresAt).getTime() - now < WEEK).length;
       if (expiring) list.push({ key: 'expiring', count: expiring, href: '/dashboard/objects' });
-      const drafts = listings.items.filter((l) => l.status === 'DRAFT').length;
+      const drafts = listings.filter((l) => l.status === 'DRAFT').length;
       if (drafts) list.push({ key: 'drafts', count: drafts, href: '/dashboard/objects' });
       if (me.phone === null) list.push({ key: 'phone', href: '/login?attach=1&next=/dashboard', tone: 'warn' });
       if (ms.some((m) => m.isOwner && !m.org.stir)) list.push({ key: 'stir', href: '/dashboard/organization' });

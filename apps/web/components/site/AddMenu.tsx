@@ -15,7 +15,7 @@ const OFFER = [
 ] as const;
 const NEED = [
   { key: 'order', href: '/dashboard/orders/new', Icon: PackageIcon },
-  { key: 'urgent', href: '/dashboard/urgent', Icon: LightningIcon },
+  { key: 'urgent', href: '/dashboard/orders?tab=urgent', Icon: LightningIcon },
 ] as const;
 
 export function AddMenu() {
