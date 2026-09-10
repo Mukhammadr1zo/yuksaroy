@@ -49,7 +49,7 @@ export default function AdminPage() {
   const tabLabel = (k: Tab) => (k === 'terminalClaims' ? ta('adminTab') : k === 'premium' ? tp('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="mx-auto max-w-5xl">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 text-muted">{t('lead')}</p>
 

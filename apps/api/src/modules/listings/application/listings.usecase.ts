@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { LISTING, REGION_CENTERS, TransitionError, assertListingTransition, slugify, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
 import { uniqueSlug, type ListingRecord } from '../domain/listing-query';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { notifyTelegram, webUrl } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
@@ -21,7 +22,12 @@ const expiry = (now: Date) => new Date(now.getTime() + LISTING.expireDays * 86_4
 
 @Injectable()
 export class ListingsUseCase {
-  constructor(private readonly repo: PrismaListingRepository, private readonly access: ListingAccess, private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly repo: PrismaListingRepository,
+    private readonly access: ListingAccess,
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /** orgId bo'lsa tashkilot nomidan (ruxsat tekshiriladi), bo'lmasa shaxsan (faqat TRUCK; validateListing ORG_REQUIRED). */
   async create(userId: string, orgId: string | null, input: ListingInput) {
@@ -82,18 +88,24 @@ export class ListingsUseCase {
     const l = await this.repo.findById(listingId);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
     if (orgId && !(await this.access.membership(userId, orgId))) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
-    const inquiry = await this.repo.createInquiry({ listingId, fromOrgId: orgId, fromUserId: userId, message: message.trim() });
-    void this.notifyOwner(l, userId, orgId, message.trim()).catch(() => {}); // javobni kutmaydi
+    const text = message.trim();
+    const inquiry = await this.repo.createInquiry({ listingId, fromOrgId: orgId, fromUserId: userId, message: text });
+    // So'rovning o'zi yozishmaning birinchi xabari: keyin ikki tomon shu tredda gaplashadi
+    await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, readBy: [userId] } });
+    await this.prisma.inquiry.update({ where: { id: inquiry.id }, data: { lastMessageAt: new Date() } });
+    void this.notifyOwner(l, userId, orgId, text, inquiry.id).catch(() => {}); // javobni kutmaydi
     return inquiry;
   }
 
   /** E'lon egasiga (tashkilot a'zolari yoki shaxsiy egasi) Telegram xabari; bog'lanmagan bo'lsa hech narsa. */
-  private async notifyOwner(l: ListingRecord, fromUserId: string, fromOrgId: string | null, message: string) {
+  private async notifyOwner(l: ListingRecord, fromUserId: string, fromOrgId: string | null, message: string, inquiryId: string) {
     const from = fromOrgId
       ? ((await this.prisma.organization.findUnique({ where: { id: fromOrgId }, select: { name: true } }))?.name ?? '')
       : await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true, phone: true } }).then((u) => u?.fullName || u?.phone || '');
+    const to = (await this.notifications.recipients({ orgIds: [l.orgId], userIds: [l.ownerUserId] })).filter((id) => id !== fromUserId);
+    await this.notifications.push(to, { kind: 'inquiry', title: l.title, body: message.slice(0, 200), href: `/dashboard/inquiries/${inquiryId}` });
     await notifyTelegram(this.prisma, { orgIds: [l.orgId], userIds: [l.ownerUserId], exceptUserId: fromUserId }, 'inquiry', {
-      title: l.title, from, message: message.slice(0, 500), url: webUrl('/dashboard/inquiries'),
+      title: l.title, from, message: message.slice(0, 500), url: webUrl(`/dashboard/inquiries/${inquiryId}`),
     });
   }
 

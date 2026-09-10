@@ -43,7 +43,7 @@ export default function MyListingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
         <Link href="/dashboard/listings/new" className={BTN_NAVY}>{t('new')}</Link>

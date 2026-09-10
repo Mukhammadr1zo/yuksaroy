@@ -417,6 +417,94 @@
         "FILE_TOO_LARGE": "File is larger than 5 MB.",
         "UPLOAD": "Photo upload failed. Try again."
       }
+    },
+    "side": {
+      "aria": "Workspace menu",
+      "now": "Now",
+      "objects": "My objects",
+      "orders": "Orders",
+      "documents": "Documents",
+      "org": "Organization"
+    },
+    "objects": {
+      "title": "My objects",
+      "lead": "Terminals, sidings, equipment and road transport in one list.",
+      "add": "Add",
+      "open": "Public page",
+      "empty": "No objects yet.",
+      "filter": {
+        "all": "All",
+        "terminal": "Terminal",
+        "siding": "Siding",
+        "equipment": "Equipment",
+        "truck": "Road transport"
+      },
+      "terminalStatus": {
+        "DRAFT": "Draft",
+        "ACTIVE": "Active",
+        "HIDDEN": "Hidden"
+      },
+      "freeToday": "{count} free slots today",
+      "claimedAt": "Claim: {date}",
+      "views": "{count} views"
+    },
+    "now": {
+      "hello": "Hello, {name}",
+      "friend": "there",
+      "lead": "Waiting for you:",
+      "leadClear": "Nothing is waiting for you.",
+      "task": {
+        "ordersToConfirm": {
+          "title": "{count} orders await confirmation",
+          "body": "They expire if unanswered within 30 minutes"
+        },
+        "inquiries": {
+          "title": "{count} inquiries without an answer",
+          "body": "Sent to your listings"
+        },
+        "invoices": {
+          "title": "{count} unpaid invoices",
+          "body": "Open the documents section"
+        },
+        "expiring": {
+          "title": "{count} listings are about to expire",
+          "body": "They go to the archive within a week"
+        },
+        "drafts": {
+          "title": "{count} drafts",
+          "body": "Not published, nobody sees them"
+        },
+        "phone": {
+          "title": "No phone number linked",
+          "body": "Needed for orders and inquiries"
+        },
+        "stir": {
+          "title": "The organization has no tax ID",
+          "body": "It is printed on the invoice"
+        }
+      },
+      "clear": {
+        "title": "All clear",
+        "body": "New inquiries and orders will appear here.",
+        "browse": "Browse terminals",
+        "objects": "My objects"
+      },
+      "noOrg": "No organization yet: one is created automatically with your first order.",
+      "noOrgCta": "Create it now",
+      "since": "Member since {date}"
+    },
+    "chat": {
+      "back": "Back to inquiries",
+      "openListing": "Open the listing",
+      "send": "Send",
+      "placeholder": "Write a message",
+      "hint": "Ctrl+Enter also sends. The conversation is kept on the platform.",
+      "role": {
+        "owner": "Inquiry on my listing",
+        "client": "My inquiry"
+      },
+      "open": "Open the chat",
+      "lastMessage": "Last message"
     }
   }
 }

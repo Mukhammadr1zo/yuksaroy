@@ -417,6 +417,94 @@
         "FILE_TOO_LARGE": "Fayl 5 MB dan katta.",
         "UPLOAD": "Rasm yuklanmadi. Qayta urinib ko'ring."
       }
+    },
+    "side": {
+      "aria": "Ish maydoni menyusi",
+      "now": "Hozir",
+      "objects": "Mening obyektlarim",
+      "orders": "Buyurtmalar",
+      "documents": "Hujjatlar",
+      "org": "Tashkilot"
+    },
+    "objects": {
+      "title": "Mening obyektlarim",
+      "lead": "Terminal, shahobcha yo'l, texnika va avtotransport e'lonlari bitta ro'yxatda.",
+      "add": "Qo'shish",
+      "open": "Ochiq sahifa",
+      "empty": "Hali obyekt qo'shilmagan.",
+      "filter": {
+        "all": "Hammasi",
+        "terminal": "Terminal",
+        "siding": "Shahobcha yo'l",
+        "equipment": "Texnika",
+        "truck": "Avtotransport"
+      },
+      "terminalStatus": {
+        "DRAFT": "Qoralama",
+        "ACTIVE": "Faol",
+        "HIDDEN": "Yashirin"
+      },
+      "freeToday": "Bugun {count} ta bo'sh slot",
+      "claimedAt": "Da'vo: {date}",
+      "views": "{count} ko'rish"
+    },
+    "now": {
+      "hello": "Salom, {name}",
+      "friend": "do'st",
+      "lead": "Sizdan kutilayotgan ishlar:",
+      "leadClear": "Kutilayotgan ish yo'q.",
+      "task": {
+        "ordersToConfirm": {
+          "title": "{count} ta buyurtma tasdiq kutmoqda",
+          "body": "30 daqiqada javob berilmasa muddati o'tadi"
+        },
+        "inquiries": {
+          "title": "{count} ta javobsiz so'rov",
+          "body": "E'lonlaringizga kelgan so'rovlar"
+        },
+        "invoices": {
+          "title": "{count} ta to'lanmagan hisob",
+          "body": "Hujjatlar bo'limida ko'rish"
+        },
+        "expiring": {
+          "title": "{count} ta e'lon muddati tugayapti",
+          "body": "Bir hafta ichida arxivga tushadi"
+        },
+        "drafts": {
+          "title": "{count} ta qoralama",
+          "body": "E'lon berilmagan, hech kim ko'rmaydi"
+        },
+        "phone": {
+          "title": "Telefon raqami bog'lanmagan",
+          "body": "Buyurtma va so'rov uchun kerak"
+        },
+        "stir": {
+          "title": "Tashkilotda STIR yo'q",
+          "body": "Hisob-fakturada ko'rsatiladi"
+        }
+      },
+      "clear": {
+        "title": "Hammasi joyida",
+        "body": "Yangi so'rov yoki buyurtma kelganda shu yerda chiqadi.",
+        "browse": "Terminallarni ko'rish",
+        "objects": "Obyektlarim"
+      },
+      "noOrg": "Tashkilot ochilmagan: birinchi buyurtmada avtomatik ochiladi.",
+      "noOrgCta": "Hozir ochish",
+      "since": "Ro'yxatdan o'tgan: {date}"
+    },
+    "chat": {
+      "back": "So'rovlarga qaytish",
+      "openListing": "E'lonni ochish",
+      "send": "Yuborish",
+      "placeholder": "Xabar yozing",
+      "hint": "Ctrl+Enter bilan ham yuboriladi. Yozishma platformada saqlanadi.",
+      "role": {
+        "owner": "Mening e'lonimga so'rov",
+        "client": "Men yuborgan so'rov"
+      },
+      "open": "Yozishmani ochish",
+      "lastMessage": "Oxirgi xabar"
     }
   }
 }

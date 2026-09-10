@@ -65,7 +65,7 @@ export default function OrderPage() {
     (code && ORDER_EVENT_LABELS[lang][code as OrderEventCode]) || (to && ORDER_STATUS_LABELS[lang][to]) || code || t('updated');
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-4xl">
       <nav aria-label={ta('breadcrumb')} className="font-mono text-xs text-muted"><Link href="/dashboard/orders" className="hover:text-navy">{t('title')}</Link> / {o.no}</nav>
 
       <header className="mt-2 flex flex-wrap items-center gap-3">

@@ -96,7 +96,8 @@
         "sending": "Yuborilmoqda",
         "sent": "So'rov yuborildi. Javobni kabinetdagi So'rovlar bo'limida ko'rasiz.",
         "err": "Yuborilmadi, qayta urinib ko'ring.",
-        "short": "Kamida 5 ta belgi yozing."
+        "short": "Kamida 5 ta belgi yozing.",
+        "openChat": "Yozishmani ochish"
       }
     }
   }

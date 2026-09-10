@@ -13,6 +13,7 @@ type Scope = 'owner' | 'mine';
 export default function InquiriesPage() {
   const t = useTranslations('kabinet.inquiries');
   const locale = useLocale();
+  const tch = useTranslations('kabinet.chat');
   const tc = useTranslations('kabinet.common');
   const L = useListingLabels();
   const [scope, setScope] = useState<Scope>('owner');
@@ -25,7 +26,7 @@ export default function InquiriesPage() {
   }, [scope]);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <>
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 text-muted">{t('lead')}</p>
 
@@ -53,10 +54,11 @@ export default function InquiriesPage() {
               <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(i.createdAt, locale)}</span>
             </div>
             {scope === 'owner' ? <p className="mt-1 text-sm text-muted">{i.fromOrgName ?? t('fromPrivate')}</p> : null}
-            <p className="mt-2 whitespace-pre-line text-sm">{i.message}</p>
+            <p className="mt-2 line-clamp-3 whitespace-pre-line text-sm">{i.message}</p>
+            <Link href={`/dashboard/inquiries/${i.id}`} className="mt-2 inline-block text-sm font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{tch('open')}</Link>
           </li>
         ))}
       </ul>
-    </main>
+    </>
   );
 }

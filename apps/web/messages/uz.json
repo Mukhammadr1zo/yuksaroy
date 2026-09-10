@@ -42,6 +42,48 @@
       "home": "YukSaroy bosh sahifa",
       "main": "Asosiy",
       "mainMobile": "Asosiy (mobil)"
+    },
+    "user": {
+      "workspace": "Ish maydoni",
+      "profile": "Profil",
+      "org": "Tashkilot",
+      "admin": "Moderatsiya",
+      "logout": "Chiqish"
+    },
+    "add": {
+      "label": "Qo'shish",
+      "offer": "Xizmat ko'rsataman",
+      "need": "Xizmat izlayapman",
+      "terminal": {
+        "title": "Terminal yoki yuk saroyi",
+        "body": "Xizmatlar, tariflar, ish vaqti, slotlar"
+      },
+      "siding": {
+        "title": "Shahobcha yo'l",
+        "body": "Reestrdan o'zingiznikini topib biriktirasiz"
+      },
+      "equipment": {
+        "title": "Texnika e'loni",
+        "body": "Teplovoz, vagon: ijara yoki sotuv"
+      },
+      "truck": {
+        "title": "Avtotransport e'loni",
+        "body": "Yuk mashinasi yoki tashuvchi xizmati"
+      },
+      "order": {
+        "title": "Buyurtma berish",
+        "body": "Terminalda slot band qilish"
+      },
+      "urgent": {
+        "title": "Shoshilinch so'rov",
+        "body": "Viloyatdagi ijrochilarga tarqatiladi"
+      }
+    },
+    "notifications": {
+      "title": "Bildirishnomalar",
+      "aria": "Bildirishnomalar, {count} ta yangi",
+      "empty": "Hozircha xabar yo'q.",
+      "loading": "Yuklanmoqda"
     }
   },
   "footer": {

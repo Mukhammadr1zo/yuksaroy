@@ -42,7 +42,7 @@ export default function ProfilePage() {
   useEffect(() => { api<Me>('/auth/me').then(setMe).catch(() => setFailed(true)); }, []);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
+    <main className="mx-auto max-w-3xl">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 text-muted">{t('lead')}</p>
       {failed ? <p role="alert" className="mt-6 text-sm text-red-700">{tc('loadFailed')}</p> : null}

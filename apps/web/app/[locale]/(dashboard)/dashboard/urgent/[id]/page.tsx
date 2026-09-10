@@ -44,7 +44,7 @@ export default function UrgentDetailPage() {
   }
 
   if (r === undefined) return <main className="mx-auto max-w-4xl px-6 py-10 text-sm text-muted">{tc('loading')}</main>;
-  if (!r) return <main className="mx-auto max-w-4xl px-6 py-10"><Notice tone="err">{err ?? t('notFound')}</Notice><Link href="/dashboard/urgent" className={`${BTN_GHOST} mt-4 inline-block`}>{t('back')}</Link></main>;
+  if (!r) return <main className="mx-auto max-w-4xl"><Notice tone="err">{err ?? t('notFound')}</Notice><Link href="/dashboard/urgent" className={`${BTN_GHOST} mt-4 inline-block`}>{t('back')}</Link></main>;
 
   const url = r.statusUrl ?? (r.statusToken && origin ? `${origin}/status/${r.statusToken}` : null);
   const offers = r.offers ?? [];

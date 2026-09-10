@@ -33,7 +33,7 @@ export default function OrdersPage() {
   }, [filter]);
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="mx-auto max-w-5xl">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
 
       <div className="mt-5 flex flex-wrap gap-2">

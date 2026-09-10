@@ -169,7 +169,7 @@ function Wizard() {
   const selectedSlot = useMemo(() => slots.find((s) => s.id === hold?.slotId) ?? null, [slots, hold]);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-4xl">
       <nav aria-label={ta('breadcrumb')} className="font-mono text-xs text-muted"><Link href="/dashboard" className="hover:text-navy">{t('cabinet')}</Link> / {t('newTitle')}</nav>
       <h1 className="font-display mt-2 text-3xl font-bold">{t('newTitle')}</h1>
 

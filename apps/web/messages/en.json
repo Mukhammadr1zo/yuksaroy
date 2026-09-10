@@ -42,6 +42,48 @@
       "home": "YukSaroy home page",
       "main": "Main navigation",
       "mainMobile": "Main navigation (mobile)"
+    },
+    "user": {
+      "workspace": "Workspace",
+      "profile": "Profile",
+      "org": "Organization",
+      "admin": "Moderation",
+      "logout": "Log out"
+    },
+    "add": {
+      "label": "Add",
+      "offer": "I provide a service",
+      "need": "I am looking for a service",
+      "terminal": {
+        "title": "Terminal or freight yard",
+        "body": "Services, tariffs, hours, slots"
+      },
+      "siding": {
+        "title": "Private siding",
+        "body": "Find yours in the registry and attach it"
+      },
+      "equipment": {
+        "title": "Equipment listing",
+        "body": "Locomotive, wagon: rent or sale"
+      },
+      "truck": {
+        "title": "Road transport listing",
+        "body": "A truck or a carrier service"
+      },
+      "order": {
+        "title": "Place an order",
+        "body": "Book a slot at a terminal"
+      },
+      "urgent": {
+        "title": "Urgent request",
+        "body": "Sent to providers in the region"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "aria": "Notifications, {count} new",
+      "empty": "No notifications yet.",
+      "loading": "Loading"
     }
   },
   "footer": {

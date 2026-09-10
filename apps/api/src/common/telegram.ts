@@ -39,6 +39,11 @@ const fill = (t: string, v: Vars) => t.replace(/\{(\w+)\}/g, (_, k: string) => e
 
 /** Bildirishnoma shablonlari. Oxirgi qator - sayt havolasi. */
 const TEXTS = {
+  inquiryMessage: {
+    uz: "💬 <b>Yangi xabar</b>\n{title}\n\n{message}\n\nJavob berish: {url}",
+    ru: '💬 <b>Новое сообщение</b>\n{title}\n\n{message}\n\nОтветить: {url}',
+    en: '💬 <b>New message</b>\n{title}\n\n{message}\n\nReply: {url}',
+  },
   inquiry: {
     uz: "📨 <b>E'loningizga so'rov</b>\n{title}\n{from}\n\n{message}\n\nJavob berish: {url}",
     ru: '📨 <b>Запрос по вашему объявлению</b>\n{title}\n{from}\n\n{message}\n\nОтветить: {url}',

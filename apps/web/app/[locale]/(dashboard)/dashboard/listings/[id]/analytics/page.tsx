@@ -14,7 +14,7 @@ export default function ListingAnalyticsPage() {
   const [title, setTitle] = useState<string | null>(null);
   useEffect(() => { api<OwnerListing[]>('/listings/mine').then((ls) => setTitle(ls.find((l) => l.id === id)?.title ?? null)).catch(() => {}); }, [id]);
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-4xl">
       <nav aria-label="Yo'l" className="font-mono text-xs text-muted"><Link href="/dashboard/listings" className="hover:text-navy">{t('back')}</Link>{title ? ` / ${title}` : ''}</nav>
       <h1 className="mt-2 font-display text-3xl font-bold">{t('title')}</h1>
       <div className="mt-6"><AnalyticsPanel path={`/listings/${id}/analytics`} kind="listing" /></div>

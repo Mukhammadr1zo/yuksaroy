@@ -64,7 +64,7 @@ export default function DocumentsPage() {
     (status === 'all' || (status === 'ACT' ? d.kind === 'ACT' : d.kind === 'INVOICE' && d.status === status)) && (!month || monthOf(d.createdAt) === month));
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="mx-auto max-w-6xl">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 max-w-2xl text-muted">{t('lead')}</p>
       {noStir ? (

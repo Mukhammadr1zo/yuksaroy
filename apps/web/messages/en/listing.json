@@ -96,7 +96,8 @@
         "sending": "Sending",
         "sent": "Inquiry sent. The reply appears in your dashboard under Inquiries.",
         "err": "Not sent, please try again.",
-        "short": "Write at least 5 characters."
+        "short": "Write at least 5 characters.",
+        "openChat": "Open the chat"
       }
     }
   }

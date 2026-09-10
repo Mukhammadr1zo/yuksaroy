@@ -15,6 +15,7 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
   const [msg, setMsg] = useState('');
   const [orgId, setOrgId] = useState('');
   const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'err' | 'short'>('idle');
+  const [threadId, setThreadId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -33,7 +34,8 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
     if (msg.trim().length < 5) return setState('short');
     setState('busy');
     try {
-      await post(`/listings/${listingId}/inquiries`, { message: msg.trim(), orgId: orgId || undefined });
+      const inq = await post<{ id: string }>(`/listings/${listingId}/inquiries`, { message: msg.trim(), orgId: orgId || undefined });
+      setThreadId(inq.id);
       setState('sent');
     } catch { setState('err'); }
   }
@@ -47,7 +49,12 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
       </>
     );
   }
-  if (state === 'sent') return <p className="rounded-xl bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{t('inquiry.sent')}</p>;
+  if (state === 'sent') return (
+    <div className="rounded-xl bg-teal-soft px-4 py-3 text-sm text-teal-ink">
+      <p className="font-semibold">{t('inquiry.sent')}</p>
+      {threadId ? <Link href={`/dashboard/inquiries/${threadId}`} className="mt-1 inline-block font-semibold underline">{t('inquiry.openChat')}</Link> : null}
+    </div>
+  );
   if (!open) return <button type="button" onClick={() => setOpen(true)} className="w-full rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('ask')}</button>;
   return (
     <form onSubmit={send} className="space-y-2">

@@ -61,6 +61,7 @@ model User {
   memberships   Membership[]
   sessions      Session[]
   listings      Listing[] // yakka haydovchi e'lonlari (ownerUserId)
+  notifications Notification[]
 }
 
 /// Telefon ↔ Telegram chat bog'lanishi. OTP shu chatga yuboriladi (SMS yo'q).
@@ -685,17 +686,52 @@ model Listing {
 
 /// Narx so'rovi: e'lon egasiga xabar. status: OPEN | CLOSED (F1 da matn).
 model Inquiry {
-  id         String   @id @default(cuid())
-  listingId  String
-  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  fromOrgId  String?
-  fromUserId String
-  message    String
-  status     String   @default("OPEN")
-  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  id            String            @id @default(cuid())
+  listingId     String
+  listing       Listing           @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  fromOrgId     String?
+  fromUserId    String
+  message       String
+  status        String            @default("OPEN")
+  createdAt     DateTime          @default(now()) @db.Timestamptz(3)
+  /// Yozishmadagi oxirgi xabar: ro'yxat shu bo'yicha tartiblanadi
+  lastMessageAt DateTime?         @db.Timestamptz(3)
+  messages      InquiryMessage[]
 
   @@index([listingId, createdAt])
   @@index([fromUserId, createdAt])
+}
+
+/// So'rov ichidagi yozishma: mijoz va xizmat ko'rsatuvchi shu yerda gaplashadi.
+/// Kim o'qigani readBy da: bir so'rovda ikki tomon bor, alohida jadval ochilmaydi.
+model InquiryMessage {
+  id         String   @id @default(cuid())
+  inquiryId  String
+  inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  fromUserId String
+  text       String
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  readBy     String[] @default([])
+
+  @@index([inquiryId, createdAt])
+}
+
+/// Saytdagi bildirishnoma. Telegram xabari yuborilgan joyda shu yozuv ham qo'shiladi:
+/// Telegramni bog'lamagan foydalanuvchi ham hodisani ko'radi.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 'inquiry' | 'message' | 'orderNew' | 'orderStatus' | 'claim' | 'kyc' | 'premium'
+  kind      String
+  title     String
+  body      String?
+  /// Sayt ichidagi manzil (masalan /dashboard/inquiries/<id>)
+  href      String?
+  readAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, readAt, createdAt])
 }
 
 // ── Ishonch va monetizatsiya (5-bosqich) ──
