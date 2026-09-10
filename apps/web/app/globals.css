@@ -77,6 +77,58 @@ h1, h2, h3 { text-wrap: balance; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
+/* Ochilgan ro'yxatni brauzer OS uslubida chizadi va uni CSS bilan bo'yab bo'lmaydi.
+   `appearance: base-select` ro'yxatni sahifa ichiga olib kiradi, shundan keyin u ham
+   YukSaroy uslubida bo'ladi: oq plastina, teal tanlangan qator, bir xil radius.
+   Qo'llab-quvvatlamaydigan brauzerda bu blok umuman qo'llanmaydi va odatdagi
+   ro'yxat chiqadi, ya'ni hech narsa buzilmaydi. <select> o'zi qoladi, shuning uchun
+   klaviatura, mobil g'ildirak va JS'siz GET forma ishlayveradi. */
+@supports (appearance: base-select) {
+  select, ::picker(select) { appearance: base-select; }
+
+  /* Yopiq holat: matn chapda, ko'rsatkich o'ngda. Rang va chegara Tailwind klasslaridan. */
+  select { display: inline-flex; align-items: center; justify-content: space-between; gap: 0.5rem; text-align: start; }
+  /* Brauzerning uchburchagi o'rniga saytdagi boshqa menyular bilan bir xil chevron */
+  select::picker-icon {
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%2352677E' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    width: 1rem; height: 1rem;
+    transition: transform 160ms var(--ease-emph);
+  }
+  select:open::picker-icon { transform: rotate(180deg); }
+
+  ::picker(select) {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: #fff;
+    padding: 0.25rem;
+    margin-block: 0.375rem;
+    box-shadow: 0 14px 34px -14px rgb(0 35 82 / 0.3);
+    /* Uzun ro'yxat o'z ichida aylanadi, sahifa emas */
+    max-height: 18rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
+
+  option {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  /* Brauzerning standart belgisi joyni siljitadi: tanlangan qatorni rang bilan ko'rsatamiz */
+  option::checkmark { display: none; }
+  option:hover, option:focus { background: var(--color-sand); outline: none; }
+  option:checked { background: var(--color-teal-soft); color: var(--color-teal-ink); font-weight: 600; }
+  option:disabled { color: var(--color-muted); cursor: not-allowed; }
+  /* Barmoq bilan bosiladigan ekranda qator balandligi 44 px dan kam bo'lmasin */
+  @media (pointer: coarse) {
+    option { padding: 0.75rem 0.875rem; font-size: 1rem; }
+  }
+}
+
 /* Kichik ikonka tugmalari uchun 40x40 bosish maydoni: element o'zi relative yoki absolute bo'lishi kerak */
 .tap-40::after { content: ''; position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; transform: translate(-50%, -50%); }
 
