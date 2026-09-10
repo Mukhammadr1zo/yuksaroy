@@ -9,6 +9,7 @@ import { api, post } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { asList, type UrgentRequest } from '@/lib/types-urgent';
 import { UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
+import { PhoneField } from '@/components/ui/fields';
 import { haptic, useClosingConfirmation, useMainButton, useTg } from '@/components/tg/TgProvider';
 import { CARD, Empty, Err, INPUT, PhoneCard, Skeleton } from '@/components/tg/bits';
 
@@ -74,7 +75,7 @@ export default function TgUrgentPage() {
           <label className="block text-sm font-semibold">{tf('form.wagons')}<input inputMode="numeric" value={d.wagonCount} onChange={(e) => set({ wagonCount: e.target.value.replace(/\D/g, '').slice(0, 3) })} className={`${INPUT} mt-1 font-mono font-normal`} /></label>
         </div>
         <label className="block text-sm font-semibold">{tf('form.description')}<textarea value={d.description} required maxLength={2000} rows={3} placeholder={tf('form.descriptionPh')} onChange={(e) => set({ description: e.target.value })} className={`${INPUT} mt-1 font-normal`} /></label>
-        <label className="block text-sm font-semibold">{tf('form.phone')}<input inputMode="tel" required value={d.contactPhone} placeholder="+998 90 123 45 67" onChange={(e) => set({ contactPhone: e.target.value })} className={`${INPUT} mt-1 font-mono font-normal`} /></label>
+        <label className="block text-sm font-semibold">{tf('form.phone')}<PhoneField required value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} className={`${INPUT} mt-1 font-mono font-normal`} /></label>
         {err ? <Err>{err}</Err> : null}
         <button type="submit" className="sr-only">{tf('form.submit')}</button>
       </form>

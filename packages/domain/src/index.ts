@@ -402,5 +402,4 @@ export function formatUrgentNo(seq: number): string {
 export const YORDAMCHI = { llmThreshold: 0.6, guestDaily: 10, userDaily: 100, timeoutMs: 8000, maxTokens: 512 } as const;
 
 /** Ochiq o'qish API (/v1/public): kontrakt versiyasi va IP bo'yicha daqiqalik limit. */
-export const PUBLIC_API = { version: '2026-09-09.v1', ratePerMinute: 120 } as const;
 

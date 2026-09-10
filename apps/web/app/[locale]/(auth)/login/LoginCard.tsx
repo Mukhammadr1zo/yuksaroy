@@ -11,6 +11,7 @@ import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PasswordFields } from '@/components/auth/PasswordFields';
 import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { input, inputMono, primary } from '@/components/auth/styles';
+import { PasswordField, PhoneField } from '@/components/ui/fields';
 
 /** ?next til prefiksi bilan keladi (/ru/dashboard); i18n router o'zi prefiks qo'shadi, shuning uchun olib tashlanadi. */
 export const stripLocale = (p: string) => p.replace(new RegExp(`^/(${routing.locales.join('|')})(?=/|$)`), '') || '/';
@@ -90,15 +91,14 @@ export function LoginCard({ next, attach, reset }: { next: string | null; attach
       {mode === 'password' ? (
         <form key="password" className="ys-step mt-6 space-y-4" onSubmit={login}>
           <label className="block text-sm font-semibold">{t('phone.label')}
-            <input className={inputMono} placeholder={t('phone.placeholder')} value={phone} onChange={(e) => setPhone(e.target.value)}
-              type="tel" inputMode="tel" autoComplete="tel" autoFocus required />
+            <PhoneField className={inputMono} placeholder={t('phone.placeholder')} value={phone} onChange={setPhone} autoFocus required />
           </label>
           <div>
             <div className="flex items-center justify-between text-sm font-semibold">
               <label htmlFor="login-password">{t2('password.label')}</label>
               <Link href={href('/login', { reset: '1' })} className="text-xs text-teal-ink hover:underline">{t2('login.forgot')}</Link>
             </div>
-            <input id="login-password" className={input} type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" required />
+            <PasswordField id="login-password" className={input} value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" required />
           </div>
           <button disabled={busy} className={primary}>{t2('login.submit')}</button>
           {noPassword && (

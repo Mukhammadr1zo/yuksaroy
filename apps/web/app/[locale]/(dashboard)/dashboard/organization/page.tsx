@@ -8,6 +8,7 @@ import { uzDateTime } from '@/lib/format';
 import type { Membership, OrgRecord } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, Field, INPUT, Notice, errText, useLang } from '@/components/kabinet/bits';
 import { StorefrontForm } from '@/components/kabinet/StorefrontForm';
+import { PhoneField } from '@/components/ui/fields';
 
 const KINDS = ORG_KINDS.filter((k) => k !== 'PLATFORM');
 const KYC_TONE: Record<KycStatus, string> = { NONE: 'bg-line text-ink/70', PENDING: 'bg-amber-soft text-amber-ink', VERIFIED: 'bg-teal text-white', REJECTED: 'bg-red-50 text-red-700' };
@@ -72,7 +73,7 @@ function OrgFields({ d, set, disabled }: { d: Draft; set: (p: Partial<Draft>) =>
           </select>
         </Field>
         <Field label={t('field.phone')}>
-          <input className={`${INPUT} font-mono`} inputMode="tel" value={d.phone} maxLength={40} disabled={disabled} onChange={(e) => set({ phone: e.target.value })} />
+          <PhoneField className={`${INPUT} font-mono`} value={d.phone} disabled={disabled} onChange={(phone) => set({ phone })} />
         </Field>
         <Field label={t('field.telegram')} hint={t('hint.telegram')}>
           <input className={INPUT} value={d.telegram} maxLength={80} disabled={disabled} onChange={(e) => set({ telegram: e.target.value })} />
@@ -168,7 +169,7 @@ function OrgCard({ m, onChange }: { m: Membership; onChange: () => void }) {
           <h3 className="font-semibold">{t('members.title')}</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_2fr]">
             <Field label={t('members.phone')} required>
-              <input className={`${INPUT} font-mono`} inputMode="tel" required value={invite.phone} placeholder="+998 90 123 45 67" onChange={(e) => setInvite({ ...invite, phone: e.target.value })} />
+              <PhoneField className={`${INPUT} font-mono`} required value={invite.phone} onChange={(phone) => setInvite({ ...invite, phone })} />
             </Field>
             <Field group label={t('members.roles')} required>
               <div className="flex flex-wrap gap-2">

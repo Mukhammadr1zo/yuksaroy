@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  PUBLIC_API, REGIONS, REGION_ADJACENCY, URGENT_KINDS, URGENT_KIND_LABELS, URGENT_OFFER_STATUSES, URGENT_STATUSES, YORDAMCHI,
+  REGIONS, REGION_ADJACENCY, URGENT_KINDS, URGENT_KIND_LABELS, URGENT_OFFER_STATUSES, URGENT_STATUSES, YORDAMCHI,
   chipLabel, corridorRegions, formatUrgentNo, normalizeQuery, parseQuery,
 } from '@yuksaroy/domain';
 
@@ -144,10 +144,9 @@ describe("urgent va yordamchi lug'ati", () => {
     expect(URGENT_OFFER_STATUSES).toEqual(['SENT', 'AWARDED', 'DECLINED']);
   });
 
-  it('YORDAMCHI va PUBLIC_API chegaralari', () => {
+  it('YORDAMCHI chegaralari', () => {
     expect(YORDAMCHI.llmThreshold).toBe(0.6);
     expect(YORDAMCHI.guestDaily).toBeLessThan(YORDAMCHI.userDaily);
     expect(YORDAMCHI.timeoutMs).toBe(8000);
-    expect(PUBLIC_API).toEqual({ version: '2026-09-09.v1', ratePerMinute: 120 });
   });
 });

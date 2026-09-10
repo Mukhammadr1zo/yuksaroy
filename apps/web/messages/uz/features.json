@@ -8,39 +8,119 @@
     "title": "Bozor to'rt qadamda ishlaydi",
     "lead": "Har bir imkoniyat sahifaga olib boradi. Katalogda nima bo'lsa, shu yerda yozilgan: va'da emas, havola.",
     "groups": {
-      "find": { "title": "Topish", "lead": "Terminal, shahobcha yo'l, texnika va avtotransport bir joyda." },
-      "list": { "title": "E'lon berish", "lead": "Egasi o'zi yozadi, o'zi javob beradi." },
-      "book": { "title": "Bron va hisob-kitob", "lead": "Narx ochiq, tarif muzlatiladi, hujjat kabinetda." },
-      "data": { "title": "Ma'lumot", "lead": "Reestr, standart, kompaniyalar va ochiq API." }
+      "find": {
+        "title": "Topish",
+        "lead": "Terminal, shahobcha yo'l, texnika va avtotransport bir joyda."
+      },
+      "list": {
+        "title": "E'lon berish",
+        "lead": "Egasi o'zi yozadi, o'zi javob beradi."
+      },
+      "book": {
+        "title": "Bron va hisob-kitob",
+        "lead": "Narx ochiq, tarif muzlatiladi, hujjat kabinetda."
+      },
+      "data": {
+        "title": "Ma'lumot",
+        "lead": "Reestr, standart, kompaniyalar va ochiq API."
+      }
     },
     "items": {
-      "catalog": { "title": "Katalog va filtrlar", "body": "Terminallar, shahobcha yo'llar, texnika, avtotransport: viloyat, xizmat, tur va narx bo'yicha." },
-      "map": { "title": "Xarita", "body": "Barcha obyektlar bitta xaritada, ro'yxat bilan sinxron. Yaqinimdagilar va yo'nalish bo'yicha." },
-      "assistant": { "title": "Yordamchi qidiruv", "body": "Bitta qator yozasiz: viloyat, xizmat, texnika, sana. Lug'at avval, AI faqat kerak bo'lganda." },
-      "compare": { "title": "Solishtirish", "body": "To'rttagacha obyekt bitta jadvalda: tarif, slot, masofa, reyting." },
-      "hubs": { "title": "Viloyat sahifalari", "body": "Har viloyat uchun alohida sahifa: terminallar, yo'llar, e'lonlar." },
-      "listing": { "title": "Texnika va avtotransport e'loni", "body": "Teplovoz, vagon, yuk mashinasi: ijara yoki sotuv. Standart bo'yicha tekshiruv, foto, narx." },
-      "terminal": { "title": "Terminal sahifasi", "body": "Xizmatlar, tariflar, ish vaqti, slotlar. Egasi kabinetda yuritadi." },
-      "siding": { "title": "Shahobcha yo'lga da'vo", "body": "Reestrdagi yo'lingizni toping, egalik da'vosini yuboring, sahifa sizniki bo'ladi." },
-      "premium": { "title": "Premium", "body": "E'lon ro'yxatda va xaritada yuqorida, belgi bilan. Oyiga to'lov, bitta e'lon uchun." },
-      "analytics": { "title": "Ko'rsatkichlar", "body": "30 kunlik ko'rishlar yuzalar bo'yicha: ro'yxat, xarita, sahifa, solishtirish, bot. So'rovlar soni." },
-      "quote": { "title": "Narx hisobi", "body": "Tarif × vazn + qo'shimcha xizmatlar. Login'siz, formula ochiq." },
-      "booking": { "title": "Slot bron", "body": "Bugungi bo'sh oynani tanlaysiz, buyurtma terminalga boradi, SLA ichida javob." },
-      "frozen": { "title": "Muzlatilgan tarif va hujjatlar", "body": "Buyurtma yuborilganda narx qotadi. Yakunda akt va hisob-faktura PDF." },
-      "reviews": { "title": "Baholar", "body": "Faqat yakunlangan buyurtma egasi baholaydi. Terminal javob yozadi." },
-      "urgent": { "title": "Shoshilinch so'rov", "body": "Teplovoz chaqiruv, vagon ta'miri, kran: viloyatdagi xizmatchilar taklif yuboradi." },
-      "registry": { "title": "Shahobcha yo'llar reestri", "body": "Respublika bo'ylab yo'llar stansiya va uzel bo'yicha. Koordinata taxminiy, uzel darajasida." },
-      "standards": { "title": "E'lon standarti", "body": "Har tur uchun shart va tavsiya maydonlari. Bu sertifikat emas, to'liqlik o'lchovi." },
-      "companies": { "title": "Kompaniyalar va KYC", "body": "Tashkilot sahifasi, obyektlari soni, tasdiqlangan STIR belgisi." },
-      "api": { "title": "Ochiq API", "body": "Ro'yxatlar, terminallar, ontologiya: anonim o'qish, daqiqasiga limit, versiya." },
-      "blog": { "title": "Blog", "body": "Terminal va shahobcha yo'l farqi, vagon ijarasi, SVX, bo'sh slot: qisqa tushuntirishlar." }
+      "catalog": {
+        "title": "Katalog va filtrlar",
+        "body": "Terminallar, shahobcha yo'llar, texnika, avtotransport: viloyat, xizmat, tur va narx bo'yicha."
+      },
+      "map": {
+        "title": "Xarita",
+        "body": "Barcha obyektlar bitta xaritada, ro'yxat bilan sinxron. Yaqinimdagilar va yo'nalish bo'yicha."
+      },
+      "assistant": {
+        "title": "Yordamchi qidiruv",
+        "body": "Bitta qator yozasiz: viloyat, xizmat, texnika, sana. Lug'at avval, AI faqat kerak bo'lganda."
+      },
+      "compare": {
+        "title": "Solishtirish",
+        "body": "To'rttagacha obyekt bitta jadvalda: tarif, slot, masofa, reyting."
+      },
+      "hubs": {
+        "title": "Viloyat sahifalari",
+        "body": "Har viloyat uchun alohida sahifa: terminallar, yo'llar, e'lonlar."
+      },
+      "listing": {
+        "title": "Texnika va avtotransport e'loni",
+        "body": "Teplovoz, vagon, yuk mashinasi: ijara yoki sotuv. Standart bo'yicha tekshiruv, foto, narx."
+      },
+      "terminal": {
+        "title": "Terminal sahifasi",
+        "body": "Xizmatlar, tariflar, ish vaqti, slotlar. Egasi kabinetda yuritadi."
+      },
+      "siding": {
+        "title": "Shahobcha yo'lga da'vo",
+        "body": "Reestrdagi yo'lingizni toping, egalik da'vosini yuboring, sahifa sizniki bo'ladi."
+      },
+      "premium": {
+        "title": "Premium",
+        "body": "E'lon ro'yxatda va xaritada yuqorida, belgi bilan. Oyiga to'lov, bitta e'lon uchun."
+      },
+      "analytics": {
+        "title": "Ko'rsatkichlar",
+        "body": "30 kunlik ko'rishlar yuzalar bo'yicha: ro'yxat, xarita, sahifa, solishtirish, bot. So'rovlar soni."
+      },
+      "quote": {
+        "title": "Narx hisobi",
+        "body": "Tarif × vazn + qo'shimcha xizmatlar. Login'siz, formula ochiq."
+      },
+      "booking": {
+        "title": "Slot bron",
+        "body": "Bugungi bo'sh oynani tanlaysiz, buyurtma terminalga boradi, SLA ichida javob."
+      },
+      "frozen": {
+        "title": "Muzlatilgan tarif va hujjatlar",
+        "body": "Buyurtma yuborilganda narx qotadi. Yakunda akt va hisob-faktura PDF."
+      },
+      "reviews": {
+        "title": "Baholar",
+        "body": "Faqat yakunlangan buyurtma egasi baholaydi. Terminal javob yozadi."
+      },
+      "urgent": {
+        "title": "Shoshilinch so'rov",
+        "body": "Teplovoz chaqiruv, vagon ta'miri, kran: viloyatdagi xizmatchilar taklif yuboradi."
+      },
+      "registry": {
+        "title": "Shahobcha yo'llar reestri",
+        "body": "Respublika bo'ylab yo'llar stansiya va uzel bo'yicha. Koordinata taxminiy, uzel darajasida."
+      },
+      "standards": {
+        "title": "E'lon standarti",
+        "body": "Har tur uchun shart va tavsiya maydonlari. Bu sertifikat emas, to'liqlik o'lchovi."
+      },
+      "companies": {
+        "title": "Kompaniyalar va KYC",
+        "body": "Tashkilot sahifasi, obyektlari soni, tasdiqlangan STIR belgisi."
+      },
+      "blog": {
+        "title": "Blog",
+        "body": "Terminal va shahobcha yo'l farqi, vagon ijarasi, SVX, bo'sh slot: qisqa tushuntirishlar."
+      }
     },
     "how": {
       "heading": "Qanday ishlaydi",
-      "s1": { "title": "Toping", "body": "Katalog, xarita yoki bitta qator qidiruv: viloyat, xizmat, texnika turi." },
-      "s2": { "title": "Solishtiring", "body": "Tariflar, bugungi slotlar va masofa yonma-yon, to'rttagacha obyekt bitta jadvalda." },
-      "s3": { "title": "Bog'laning", "body": "Egasining telefoni va so'rov formasi kabinetda. Vositachi yo'q." },
-      "s4": { "title": "Bron qiling", "body": "Slotni tanlaysiz, tarif muzlatiladi, yakunda akt va hisob-faktura." }
+      "s1": {
+        "title": "Toping",
+        "body": "Katalog, xarita yoki bitta qator qidiruv: viloyat, xizmat, texnika turi."
+      },
+      "s2": {
+        "title": "Solishtiring",
+        "body": "Tariflar, bugungi slotlar va masofa yonma-yon, to'rttagacha obyekt bitta jadvalda."
+      },
+      "s3": {
+        "title": "Bog'laning",
+        "body": "Egasining telefoni va so'rov formasi kabinetda. Vositachi yo'q."
+      },
+      "s4": {
+        "title": "Bron qiling",
+        "body": "Slotni tanlaysiz, tarif muzlatiladi, yakunda akt va hisob-faktura."
+      }
     },
     "numbers": {
       "heading": "Platforma raqamlari",
@@ -66,7 +146,10 @@
         "decision": "{terminals} terminal · bugun {free} bo'sh",
         "cheapest": "eng arzon {price}",
         "open": "Xaritada ochish",
-        "source": { "dictionary": "Lug'at bilan tushunildi", "llm": "Aniqroq tushunish uchun AI ishlatildi" },
+        "source": {
+          "dictionary": "Lug'at bilan tushunildi",
+          "llm": "Aniqroq tushunish uchun AI ishlatildi"
+        },
         "unavailable": "API hozir javob bermadi, misol statik ko'rsatilmoqda."
       },
       "rule": {
@@ -82,7 +165,10 @@
         "user": "Kirgan foydalanuvchi: kuniga {n} ta AI so'rov",
         "note": "Hisob Toshkent vaqti bo'yicha yarim tunda yangilanadi. Lug'at qidiruvi limitsiz."
       },
-      "cta": { "primary": "Qidiruvni sinash", "secondary": "Kirish" }
+      "cta": {
+        "primary": "Qidiruvni sinash",
+        "secondary": "Kirish"
+      }
     }
   }
 }

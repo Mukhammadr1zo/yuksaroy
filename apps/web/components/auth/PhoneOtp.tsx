@@ -6,6 +6,7 @@ import { TelegramLogoIcon } from '@phosphor-icons/react';
 import { ApiError, post } from '@/lib/api';
 import type { LoginResponse, OtpRequestResponse } from '@/lib/types-auth';
 import { inputMono, primary } from './styles';
+import { PhoneField, phoneDisplay } from '@/components/ui/fields';
 
 type Step = { kind: 'phone' } | { kind: 'code'; botUrl?: string };
 type Props = {
@@ -58,8 +59,7 @@ export function PhoneOtp({ submitLabel, onDone, requestPath = '/auth/otp/request
       {step.kind === 'phone' ? (
         <form key="phone" className="ys-step space-y-4" onSubmit={(e) => { e.preventDefault(); void requestCode(); }}>
           <label className="block text-sm font-semibold">{t('phone.label')}
-            <input className={inputMono} placeholder={t('phone.placeholder')} value={phone} onChange={(e) => setPhone(e.target.value)}
-              type="tel" inputMode="tel" autoComplete="tel" autoFocus required />
+            <PhoneField className={inputMono} placeholder={t('phone.placeholder')} value={phone} onChange={setPhone} autoFocus required />
           </label>
           <button disabled={busy} className={primary}>{t('requestCode')}</button>
           <p className="flex items-center gap-2 text-xs text-muted">
@@ -78,7 +78,7 @@ export function PhoneOtp({ submitLabel, onDone, requestPath = '/auth/otp/request
               </a>
             </div>
           ) : (
-            <p className="rounded-xl bg-teal-soft p-4 text-sm text-teal-ink">{t('code.sent')} <span className="font-mono">{phone}</span></p>
+            <p className="rounded-xl bg-teal-soft p-4 text-sm text-teal-ink">{t('code.sent')} <span className="font-mono">{phoneDisplay(phone)}</span></p>
           )}
           <label className="block text-sm font-semibold">{t('code.label')}
             <input className={`${inputMono} text-lg tracking-[0.3em]`} maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}

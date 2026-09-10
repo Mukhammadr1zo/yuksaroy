@@ -12,6 +12,7 @@ import type { OtpRequestResponse } from '@/lib/types-auth';
 import type { Me, Membership } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, Field, INPUT, Notice, errText } from '@/components/kabinet/bits';
 import { uploadOne } from '@/components/kabinet/PhotoUpload';
+import { PasswordField, PhoneField, phoneDisplay } from '@/components/ui/fields';
 
 const BOT = process.env.NEXT_PUBLIC_BOT_USERNAME ?? 'yuksaroy_bot';
 const LOCALE_LABEL: Record<Locale, string> = { uz: "O'zbekcha", ru: 'Русский', en: 'English' };
@@ -218,7 +219,7 @@ function Phone({ me, onChange }: Props) {
       {open && botUrl === undefined ? (
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void request(); }}>
           <Field label={t('new')} hint={t('hint')}>
-            <input className={`${INPUT} font-mono`} type="tel" inputMode="tel" autoComplete="tel" placeholder="+998 90 123 45 67" value={phone} required autoFocus onChange={(e) => setPhone(e.target.value)} />
+            <PhoneField className={`${INPUT} font-mono`} value={phone} required autoFocus onChange={setPhone} />
           </Field>
           <div className="flex gap-2">
             <button type="submit" disabled={busy} className={BTN_NAVY}>{busy ? tc('saving') : t('request')}</button>
@@ -236,7 +237,7 @@ function Phone({ me, onChange }: Props) {
               </a>
             </div>
           ) : (
-            <p className="rounded-xl bg-teal-soft p-3 text-sm text-teal-ink">{t('sent')} <span className="font-mono">{phone}</span></p>
+            <p className="rounded-xl bg-teal-soft p-3 text-sm text-teal-ink">{t('sent')} <span className="font-mono">{phoneDisplay(phone)}</span></p>
           )}
           <Field label={t('code')}>
             <input className={`${INPUT} font-mono text-lg tracking-[0.3em] sm:max-w-xs`} inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} autoFocus onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
@@ -280,14 +281,14 @@ function Password({ me, onChange }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         {needCurrent ? (
           <Field label={t('current')} className="sm:col-span-2">
-            <input className={`${INPUT} sm:max-w-sm`} type="password" autoComplete="current-password" value={cur} required onChange={(e) => setCur(e.target.value)} />
+            <PasswordField className={`${INPUT} sm:max-w-sm`} autoComplete="current-password" value={cur} required onChange={(e) => setCur(e.target.value)} />
           </Field>
         ) : null}
         <Field label={t('new')} hint={t('hint', { min: PASSWORD.minLength })}>
-          <input className={INPUT} type="password" autoComplete="new-password" minLength={PASSWORD.minLength} maxLength={200} value={pw} required onChange={(e) => setPw(e.target.value)} />
+          <PasswordField className={INPUT} autoComplete="new-password" minLength={PASSWORD.minLength} maxLength={200} value={pw} required onChange={(e) => setPw(e.target.value)} />
         </Field>
         <Field label={t('confirm')} error={pw2 && pw !== pw2 ? t('mismatch') : undefined}>
-          <input className={INPUT} type="password" autoComplete="new-password" minLength={PASSWORD.minLength} maxLength={200} value={pw2} required onChange={(e) => setPw2(e.target.value)} />
+          <PasswordField className={INPUT} autoComplete="new-password" minLength={PASSWORD.minLength} maxLength={200} value={pw2} required onChange={(e) => setPw2(e.target.value)} />
         </Field>
       </div>
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}

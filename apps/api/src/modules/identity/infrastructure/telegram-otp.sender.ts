@@ -6,7 +6,7 @@ import { env } from '../../../common/env';
 @Injectable()
 export class TelegramOtpSender implements OtpSender {
   async sendCode(chatId: bigint, code: string): Promise<void> {
-    const text = `🔐 YukSaroy kirish kodi: <b>${code}</b>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang.`;
+    const text = `🔐 YukSaroy kirish kodi: <code>${code}</code>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang.`;
     const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

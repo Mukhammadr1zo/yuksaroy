@@ -14,6 +14,7 @@ import { ApiError, api, post } from '@/lib/api';
 import type { Membership, MySiding, MyTerminal, OwnerListing } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_PRIMARY, CHIP, Field, INPUT, ListingStatusPill, Notice, useListingLabels } from './bits';
 import { PhotoUpload } from './PhotoUpload';
+import { PhoneField } from '@/components/ui/fields';
 
 const KIND_ICON = { SHUNTING_LOCO: Train, ELECTRIC_LOCO: TrainRegional, WAGON: TrainSimple, TRUCK: Truck } as const;
 
@@ -348,7 +349,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
         <h2 className="font-semibold">{t('section.contact')}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('field.contactPhone')} hint={t('hint.contactPhone')} error={fieldErr('contactPhone')}>
-            <input inputMode="tel" className={`${INPUT} font-mono`} value={input.contactPhone ?? ''} maxLength={40} placeholder={t('placeholder.contactPhone')} onChange={(e) => set({ contactPhone: strOr(e.target.value) })} />
+            <PhoneField className={`${INPUT} font-mono`} value={input.contactPhone ?? ''} placeholder={t('placeholder.contactPhone')} onChange={(v) => set({ contactPhone: strOr(v) })} />
           </Field>
           <Field label={t('field.responseHours')} recommended={rec('responseHours')} hint={t('hint.responseHours')} error={fieldErr('responseHours')}>
             <input type="number" min={1} className={`${INPUT} font-mono`} value={input.responseHours ?? ''} onChange={(e) => set({ responseHours: numOr(e.target.value) })} />

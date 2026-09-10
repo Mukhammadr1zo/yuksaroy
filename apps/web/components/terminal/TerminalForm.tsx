@@ -16,6 +16,7 @@ import { MapPicker } from './MapPicker';
 import { TariffsTab } from './TariffsTab';
 import { SlotsTab } from './SlotsTab';
 import { AnalyticsPanel } from '@/components/kabinet/AnalyticsPanel';
+import { PhoneField } from '@/components/ui/fields';
 
 type Tab = 'info' | 'tariffs' | 'slots' | 'stats';
 const TABS: Tab[] = ['info', 'tariffs', 'slots', 'stats'];
@@ -193,7 +194,7 @@ export function TerminalForm({ initial, onSaved }: { initial?: MyTerminal; onSav
           <textarea className={`${INPUT} min-h-24`} value={d.description} maxLength={2000} placeholder={t('placeholder.description')} onChange={(e) => set({ description: e.target.value })} />
         </Field>
         <Field label={t('field.phone')}>
-          <input inputMode="tel" className={NUM} value={d.phone} maxLength={40} placeholder={t('placeholder.phone')} onChange={(e) => set({ phone: e.target.value })} />
+          <PhoneField className={NUM} value={d.phone} placeholder={t('placeholder.phone')} onChange={(phone) => set({ phone })} />
         </Field>
       </section>
 

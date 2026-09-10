@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Icon } from '@phosphor-icons/react';
 import {
-  ArrowRightIcon, ArticleIcon, BuildingsIcon, CalendarCheckIcon, ChartBarIcon, CodeIcon, ColumnsIcon, FilesIcon, ListChecksIcon, MagnifyingGlassIcon,
+  ArrowRightIcon, ArticleIcon, BuildingsIcon, CalendarCheckIcon, ChartBarIcon, ColumnsIcon, FilesIcon, ListChecksIcon, MagnifyingGlassIcon,
   MapPinIcon, MapTrifoldIcon, PathIcon, SirenIcon, SparkleIcon, StarIcon, TagIcon, TrainIcon, WarehouseIcon, CalculatorIcon,
 } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
@@ -46,7 +46,6 @@ const GROUPS: { key: 'find' | 'list' | 'book' | 'data'; items: Item[] }[] = [
     { key: 'registry', href: '/sidings', Icon: PathIcon },
     { key: 'standards', href: '/standards', Icon: ListChecksIcon },
     { key: 'companies', href: '/companies', Icon: BuildingsIcon },
-    { key: 'api', href: '/developers', Icon: CodeIcon },
     { key: 'blog', href: '/blog', Icon: ArticleIcon },
   ] },
 ];

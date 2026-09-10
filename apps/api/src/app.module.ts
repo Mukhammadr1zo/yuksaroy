@@ -13,7 +13,6 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ImpressionsModule } from './modules/impressions/impressions.module';
 import { PremiumModule } from './modules/premium/premium.module';
 import { ContactModule } from './modules/contact/contact.module';
-import { PublicApiModule } from './modules/public-api/public-api.module';
 import { UrgentModule } from './modules/urgent/urgent.module';
 import { HealthController } from './health.controller';
 
@@ -21,7 +20,7 @@ import { HealthController } from './health.controller';
   imports: [
     CommonModule, IdentityModule, OrganizationsModule, CatalogModule, PricingModule, BookingModule, OrdersModule, DocumentsModule, SearchModule, ListingsModule,
     ReviewsModule, ImpressionsModule, PremiumModule, ContactModule, // 5-bosqich: baho, ko'rsatishlar, premium, murojaat
-    PublicApiModule, UrgentModule, // 6-bosqich: ochiq o'qish API (/v1/public), shoshilinch so'rovlar
+    UrgentModule, // 6-bosqich: shoshilinch so'rovlar
   ],
   controllers: [HealthController],
 })

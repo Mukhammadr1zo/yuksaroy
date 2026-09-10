@@ -10,6 +10,7 @@ import type { Me, Membership } from '@/lib/types-kabinet';
 import { asList, type UrgentRequest } from '@/lib/types-urgent';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
+import { PhoneField } from '@/components/ui/fields';
 
 type Draft = { kind: UrgentKind; regionCode: string; stationName: string; wagonCount: string; description: string; contactPhone: string; orgId: string };
 const EMPTY: Draft = { kind: 'LOCO_CALL', regionCode: '', stationName: '', wagonCount: '', description: '', contactPhone: '', orgId: '' };
@@ -86,7 +87,7 @@ export default function UrgentMinePage() {
               <input className={`${INPUT} font-mono`} type="number" min={1} max={999} inputMode="numeric" value={d.wagonCount} onChange={(e) => set({ wagonCount: e.target.value.replace(/\D/g, '').slice(0, 3) })} />
             </Field>
             <Field label={t('form.phone')} required>
-              <input className={`${INPUT} font-mono`} inputMode="tel" required value={d.contactPhone} placeholder="+998 90 123 45 67" onChange={(e) => set({ contactPhone: e.target.value })} />
+              <PhoneField className={`${INPUT} font-mono`} required value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} />
             </Field>
           </div>
           <Field label={t('form.description')} required>

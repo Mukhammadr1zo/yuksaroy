@@ -8,7 +8,6 @@ import claim from './claim.json';
 import claimStatus from './claimStatus.json';
 import compare from './compare.json';
 import dashboard2 from './dashboard2.json';
-import developers from './developers.json';
 import companies from './companies.json';
 import hubs from './hubs.json';
 import kabinet from './kabinet.json';
@@ -33,4 +32,4 @@ import pricing from './pricing.json';
 import a11y from './a11y.json';
 import seo2 from './seo2.json';
 
-export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...developers, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2 };
+export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2 };
