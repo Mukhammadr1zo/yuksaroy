@@ -39,7 +39,7 @@ export default async function TgTerminalPage({ params }: Params) {
             {x.tariffs.map((r) => (
               <li key={r.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                 <span>{ts(r.serviceCode)}{r.cargoGroupCode ? <span className="ml-1 font-mono text-xs text-muted">{r.cargoGroupCode}</span> : null}</span>
-                <span className="text-right font-mono tabular-nums"><span className="font-semibold text-navy">{pricePer(r.priceTiyin, r.unit)}</span>{r.minTiyin ? <span className="block text-[11px] text-muted">min {som(r.minTiyin)}</span> : null}</span>
+                <span className="text-right font-mono tabular-nums"><span className="font-semibold text-navy">{pricePer(r.priceTiyin, r.unit, lang)}</span>{r.minTiyin ? <span className="block text-[11px] text-muted">min {som(r.minTiyin, lang)}</span> : null}</span>
               </li>
             ))}
           </ul>
@@ -65,7 +65,7 @@ export default async function TgTerminalPage({ params }: Params) {
 
       <section className="mt-3 rounded-card border border-line bg-white p-4">
         <dl className="text-sm">
-          <div className="flex justify-between gap-4 py-1"><dt className="text-muted">{t('hours')}</dt><dd className="text-right font-mono tabular-nums">{hoursSummary(x.hours, x.is24h)}</dd></div>
+          <div className="flex justify-between gap-4 py-1"><dt className="text-muted">{t('hours')}</dt><dd className="text-right font-mono tabular-nums">{hoursSummary(x.hours, x.is24h, lang)}</dd></div>
           {x.address ? <div className="flex justify-between gap-4 py-1"><dt className="text-muted">·</dt><dd className="text-right">{x.address}</dd></div> : null}
         </dl>
       </section>

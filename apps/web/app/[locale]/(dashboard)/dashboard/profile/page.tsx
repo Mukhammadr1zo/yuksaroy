@@ -79,7 +79,7 @@ function Head({ me, onChange }: Props) {
   }
   const initials = (me.fullName ?? '').split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
   // Brauzer ICU da o'zbekcha oy nomlari yo'q (M09 chiqadi), shuning uchun uz uchun o'z formatimiz
-  const since = locale === 'uz' ? `${uzDate(me.createdAt)} ${new Date(me.createdAt).getFullYear()}` : new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'Asia/Tashkent' }).format(new Date(me.createdAt));
+  const since = locale === 'uz' ? `${uzDate(me.createdAt, locale)} ${new Date(me.createdAt).getFullYear()}` : new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'Asia/Tashkent' }).format(new Date(me.createdAt));
 
   return (
     <section className="flex flex-wrap items-center gap-5 rounded-card border border-line bg-white p-5">

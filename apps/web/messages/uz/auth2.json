@@ -162,7 +162,9 @@
         "findTerminal": {
           "title": "Terminal topish",
           "body": "Bugungi bo'sh slotlar va tariflar"
-        }
+        },
+        "shipperLead": "Hisobingiz tayyor. Terminal qidirishni boshlashingiz mumkin.",
+        "shipperHint": "Tashkilot birinchi buyurtmada avtomatik ochiladi, STIR esa hujjat kerak bo'lganda so'raladi."
       }
     }
   }

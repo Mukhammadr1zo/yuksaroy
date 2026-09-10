@@ -1,7 +1,7 @@
 'use client';
 // Ijrochi ko'rinishi: viloyatimdagi (va qo'shni) ochiq so'rovlar, har biriga taklif: narx so'mda (tiyinga aylanadi), yetib borish daqiqa, izoh.
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
@@ -14,6 +14,7 @@ const EMPTY: Draft = { price: '', eta: '', message: '' };
 
 export default function UrgentOffersPage() {
   const t = useTranslations('urgent.provider');
+  const locale = useLocale();
   const tm = useTranslations('urgent.mine');
   const td = useTranslations('urgent.detail');
   const tc = useTranslations('kabinet.common');
@@ -73,7 +74,7 @@ export default function UrgentOffersPage() {
                 <span className="font-mono font-semibold text-navy">{r.no}</span>
                 <span className="rounded-full bg-teal-soft px-2.5 py-0.5 text-xs font-semibold text-teal-ink">{L.kind[r.kind] ?? r.kind}</span>
                 <UrgentStatusPill status={r.status} />
-                <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(r.createdAt)}</span>
+                <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(r.createdAt, locale)}</span>
               </div>
               <p className="mt-2 text-sm text-muted">
                 {L.region(r.regionCode)}{r.stationName ? ` · ${r.stationName}` : ''}{r.wagonCount != null ? ` · ${r.wagonCount} ${td('wagons').toLowerCase()}` : ''}
@@ -84,7 +85,7 @@ export default function UrgentOffersPage() {
               {mine ? (
                 <div className="mt-4 rounded-xl bg-sand p-3 text-sm">
                   <p className="font-semibold">{t('offer.mine')}</p>
-                  <p className="mt-1 font-mono text-navy tabular-nums">{mine.priceTiyin != null ? som(mine.priceTiyin) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}</p>
+                  <p className="mt-1 font-mono text-navy tabular-nums">{mine.priceTiyin != null ? som(mine.priceTiyin, locale) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}</p>
                   {sent[r.id] ? <p className="mt-1 text-teal-ink">{t('offer.sent')}</p> : null}
                 </div>
               ) : r.status === 'OPEN' ? (

@@ -46,7 +46,8 @@ export class LinkTelegramUseCase {
     const code = generateOtpCode();
     await this.otps.consume(pending.id);
     await this.otps.create({ phone, codeHash: hashSecret(code, env.JWT_SECRET), expiresAt: otpExpiry(), linkToken: null });
-    await this.sender.sendCode(input.chatId, code);
+    const u = await this.users.findByPhone(phone);
+    await this.sender.sendCode(input.chatId, code, u?.locale ?? null);
     return { linked: true, codeSent: true };
   }
 }

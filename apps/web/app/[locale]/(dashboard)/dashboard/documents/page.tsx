@@ -1,7 +1,7 @@
 'use client';
 // Hujjatlar: akt va hisoblar bitta jadvalda. Terminal hisobni "to'landi" deb belgilaydi (bank o'tkazmasi, F1 da onlayn to'lov yo'q).
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
@@ -21,6 +21,7 @@ const monthOf = (d: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asi
 
 export default function DocumentsPage() {
   const t = useTranslations('dashboard2.docs');
+  const locale = useLocale();
   const [isTerminal, setIsTerminal] = useState<boolean | null>(null);
   const [scope, setScope] = useState<Scope>('client');
   const [data, setData] = useState<MineDocs | null>(null);
@@ -119,11 +120,11 @@ export default function DocumentsPage() {
                     <td className="px-3 py-3">{t(`kind.${d.kind}`)}</td>
                     <td className="px-3 py-3"><Link href={`/dashboard/orders/${d.orderNo}`} className="font-mono hover:underline">{d.orderNo}</Link></td>
                     <td className="px-3 py-3">{d.orgName}</td>
-                    <td className="px-3 py-3 text-right font-mono tabular-nums">{som(d.amountTiyin)}</td>
+                    <td className="px-3 py-3 text-right font-mono tabular-nums">{som(d.amountTiyin, locale)}</td>
                     <td className="px-3 py-3">
                       <span className={`inline-block whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${TONE[d.status] ?? 'bg-line text-ink/70'}`}>{t.has(`st.${d.status}`) ? t(`st.${d.status}`) : d.status}</span>
                     </td>
-                    <td className="px-3 py-3 font-mono text-xs text-muted">{uzDateTime(d.createdAt)}</td>
+                    <td className="px-3 py-3 font-mono text-xs text-muted">{uzDateTime(d.createdAt, locale)}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2 whitespace-nowrap">
                         {/* Rewrite orqali cookie bilan boradi: /api/v1/documents/:id/download */}

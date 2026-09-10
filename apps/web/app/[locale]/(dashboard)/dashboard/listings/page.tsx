@@ -85,7 +85,7 @@ export default function MyListingsPage() {
                     <td className="px-4 py-3">
                       <Link href={`/dashboard/listings/${l.id}`} className="font-semibold hover:underline">{l.title}</Link>
                       {l.status === 'REJECTED' && l.rejectReason ? <p className="mt-0.5 text-xs text-red-700">{t('rejectReason')}: {l.rejectReason}</p> : null}
-                      {l.status === 'ACTIVE' && l.expiresAt ? <p className="mt-0.5 font-mono text-xs text-muted">{t('expires')} {uzDateTime(l.expiresAt)}</p> : null}
+                      {l.status === 'ACTIVE' && l.expiresAt ? <p className="mt-0.5 font-mono text-xs text-muted">{t('expires')} {uzDateTime(l.expiresAt, lang)}</p> : null}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">{L.kind[l.kind]}{l.deal ? <span className="text-muted"> · {td(l.deal)}</span> : null}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{l.owner.type === 'org' ? l.owner.name : <span className="text-muted">{LISTING_OWNER_LABELS[lang].person}</span>}</td>
@@ -97,10 +97,10 @@ export default function MyListingsPage() {
                         : l.premium ? null : <span className="text-muted">·</span>}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right font-mono tabular-nums">
-                      {l.priceTiyin != null ? <>{som(l.priceTiyin)}{l.priceUnit ? <span className="text-muted"> / {L.priceUnit[l.priceUnit]}</span> : null}</> : <span className="text-muted">{tc('onRequest')}</span>}
+                      {l.priceTiyin != null ? <>{som(l.priceTiyin, lang)}{l.priceUnit ? <span className="text-muted"> / {L.priceUnit[l.priceUnit]}</span> : null}</> : <span className="text-muted">{tc('onRequest')}</span>}
                     </td>
                     <td className="px-4 py-3 text-right font-mono tabular-nums">{l.views}</td>
-                    <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-muted">{uzDateTime(l.updatedAt)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-muted">{uzDateTime(l.updatedAt, lang)}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap justify-end gap-1.5">
                         {publishable ? <button type="button" disabled={busy?.startsWith(`${l.id}:`)} onClick={() => act(l, 'publish')} className="rounded-full bg-teal px-3 py-1 text-xs font-semibold text-white transition hover:bg-teal-ink disabled:opacity-60">{busy === `${l.id}:publish` ? '...' : l.status === 'DRAFT' ? t('publish') : t('republish')}</button> : null}

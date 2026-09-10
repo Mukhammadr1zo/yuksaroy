@@ -22,6 +22,7 @@ class CreateOrgDto {
   @IsOptional() @IsString() @MaxLength(200) website?: string;
   @IsOptional() @IsIn(REGIONS) regionCode?: RegionCode;
   @IsOptional() @IsArray() @IsIn(ROLES, { each: true }) roles?: Role[];
+  @IsOptional() @IsString() @MaxLength(300) address?: string;
 }
 class UpdateOrgDto extends PartialType(PickType(CreateOrgDto, ['name', 'kinds', 'stir', 'phone', 'description', 'telegram', 'website', 'regionCode'] as const)) {
   @IsOptional() @IsString() @MaxLength(300) address?: string;

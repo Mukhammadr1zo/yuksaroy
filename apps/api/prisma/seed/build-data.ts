@@ -5,10 +5,10 @@
  *   pnpm --filter @yuksaroy/api db:build-data -- [--railmap DIR] [--sidings XLSX] [--etsng XLSX]
  *
  * Manbalar:
- *  - RailMap/packages/database/seed-data/stations-2026.ts — O'TY 2026 rasmiy reestri (276 stansiya, RJU, tur, klass)
- *  - Шахобча йўллар.xlsx — 1 393 shahobcha (egasi, «ESR - stansiya», uzunlik, sig'im) → ESR kodlari ham shu yerdan
- *  - yuklar.xlsx — ETSNG pozitsiyalari (407)
- *  - (ixtiyoriy) RAILMAP_DATABASE_URL — koordinatalar (PostGIS `stations.location`); ulanmasa o'tkazib yuboriladi
+ *  - RailMap/packages/database/seed-data/stations-2026.ts - O'TY 2026 rasmiy reestri (276 stansiya, RJU, tur, klass)
+ *  - Шахобча йўллар.xlsx - 1 393 shahobcha (egasi, «ESR - stansiya», uzunlik, sig'im) → ESR kodlari ham shu yerdan
+ *  - yuklar.xlsx - ETSNG pozitsiyalari (407)
+ *  - (ixtiyoriy) RAILMAP_DATABASE_URL - koordinatalar (PostGIS `stations.location`); ulanmasa o'tkazib yuboriladi
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

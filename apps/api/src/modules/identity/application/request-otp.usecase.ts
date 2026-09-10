@@ -37,7 +37,7 @@ export class RequestOtpUseCase {
     await this.otps.create({ phone, codeHash: hashSecret(code, env.JWT_SECRET), expiresAt: otpExpiry(), linkToken });
 
     if (linked) {
-      await this.sender.sendCode(linked, code);
+      await this.sender.sendCode(linked, code, user?.locale ?? null);
       return { status: 'SENT', resendAfter: OTP.resendAfterSeconds };
     }
     return {

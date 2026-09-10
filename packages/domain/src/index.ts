@@ -138,9 +138,10 @@ export const PLATFORM_DEFAULTS = {
 export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
 
 /** Tiyin → "12 670 so'm". */
-export function formatSom(tiyin: number): string {
+const CURRENCY_WORD: Record<SearchLang, string> = { uz: "so'm", ru: 'сум', en: 'UZS' };
+export function formatSom(tiyin: number, lang: SearchLang = 'uz'): string {
   const som = Math.round(tiyin / 100);
-  return `${som.toLocaleString('ru-RU').replace(/ /g, ' ')} so'm`;
+  return `${som.toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU').replace(/[  ]/g, ' ')} ${CURRENCY_WORD[lang]}`;
 }
 
 /** "Toshkent-tovar" → "toshkent-tovar". */
@@ -396,10 +397,9 @@ export function formatUrgentNo(seq: number): string {
   return `UR-${seq}`;
 }
 
-// ── Yordamchi LLM chegaralari va ochiq API ──
+// ── Yordamchi LLM chegaralari ──
 
 /** Lug'at parseri ishonchi shu chegaradan past bo'lsa LLM chaqiriladi; kunlik limitlar foydalanuvchi va mehmon uchun. */
 export const YORDAMCHI = { llmThreshold: 0.6, guestDaily: 10, userDaily: 100, timeoutMs: 8000, maxTokens: 512 } as const;
 
-/** Ochiq o'qish API (/v1/public): kontrakt versiyasi va IP bo'yicha daqiqalik limit. */
 

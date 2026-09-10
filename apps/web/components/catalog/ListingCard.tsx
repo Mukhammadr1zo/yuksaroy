@@ -57,7 +57,7 @@ export async function ListingCard({ l }: { l: L }) {
             <span className="truncate">{l.owner.name}</span>
             {l.owner.type === 'person' ? <span className="shrink-0 text-[11px]">· {LISTING_OWNER_LABELS[lang].person}</span> : null}
           </span>
-          <span className="shrink-0 font-mono text-sm font-semibold text-navy tabular-nums">{l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : t('onRequest')}</span>
+          <span className="font-mono text-sm font-semibold text-navy tabular-nums">{l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : t('onRequest')}</span>
         </div>
         {l.object ? <p className="mt-1 truncate text-[11px] text-teal-ink">{t(l.object.type === 'terminal' ? 'atTerminal' : 'atSiding', { name: l.object.name })}</p> : null}
       </div>

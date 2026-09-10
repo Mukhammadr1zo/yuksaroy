@@ -102,7 +102,7 @@ export default async function ShopPage({ params }: Params) {
                         <tr key={s.id} className="border-t border-line/70">
                           <td className="px-4 py-2 font-mono text-xs"><Link href={`/sidings/${s.id}`} className="text-navy underline decoration-dotted hover:text-teal-ink">{s.registryNo}</Link></td>
                           <td className="px-4 py-2 font-semibold">{s.station?.nameUz ?? s.stationNameRaw}</td>
-                          <td className="px-4 py-2 text-right font-mono tabular-nums">{s.lengthM ? `${num(s.lengthM)} m` : '·'}</td>
+                          <td className="px-4 py-2 text-right font-mono tabular-nums">{s.lengthM ? `${num(s.lengthM, lang)} m` : '·'}</td>
                         </tr>
                       ))}
                     </tbody>

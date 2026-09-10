@@ -17,6 +17,7 @@ import { KYC_STATUS_LABELS, ORG_KIND_LABELS, type OrgKind } from '@yuksaroy/doma
 export default function KabinetPage() {
   const router = useRouter();
   const t = useTranslations('kabinet');
+  const tOrg = useTranslations('kabinet.org');
   const lang = useLang();
   const [me, setMe] = useState<Me | null>(null);
   const [orgs, setOrgs] = useState<Membership[]>([]);
@@ -68,7 +69,7 @@ export default function KabinetPage() {
                   {kinds.map((k) => <span key={k} className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{ORG_KIND_LABELS[lang][k]}</span>)}
                 </div>
                 <p className="mt-1 font-mono text-xs text-muted">
-                  STIR {m.org.stir ?? '·'} · KYC {KYC_STATUS_LABELS[lang][m.org.kycStatus]} · {t('home.roles')}: {m.roles.join(', ')}{m.isOwner ? ` · ${t('home.owner')}` : ''}
+                  STIR {m.org.stir ?? '·'} · KYC {KYC_STATUS_LABELS[lang][m.org.kycStatus]} · {t('home.roles')}: {m.roles.map((r) => (tOrg.has(`role.${r}`) ? tOrg(`role.${r}`) : r)).join(', ')}{m.isOwner ? ` · ${t('home.owner')}` : ''}
                 </p>
               </li>
             );
@@ -122,6 +123,7 @@ function Tile({ label, value, sub, href, warn }: { label: string; value: number 
 const OPEN = 'PENDING,CONFIRMED,IN_PROGRESS';
 
 function ShipperTiles() {
+  const lang = useLang();
   const t = useTranslations('dashboard2.home.shipper');
   const [orders, setOrders] = useState<Page<OrderCard> | null | undefined>();
   const [docs, setDocs] = useState<MineDocs | null | undefined>();
@@ -141,7 +143,7 @@ function ShipperTiles() {
         value={orders === undefined ? undefined : orders === null ? null : next ? slotLabel(next.slot!.startsAt, next.slot!.endsAt) : t('noNext')}
         sub={next ? `${next.no} · ${next.terminal.name}` : orders ? t('newOrder') : undefined}
       />
-      <Tile label={t('invoices')} value={docs === undefined ? undefined : docs === null ? null : due!.length} sub={due ? (due.length ? t('invoicesSub', { sum: som(dueSum) }) : t('noInvoices')) : undefined} href="/dashboard/documents" />
+      <Tile label={t('invoices')} value={docs === undefined ? undefined : docs === null ? null : due!.length} sub={due ? (due.length ? t('invoicesSub', { sum: som(dueSum, lang) }) : t('noInvoices')) : undefined} href="/dashboard/documents" />
     </>
   );
 }

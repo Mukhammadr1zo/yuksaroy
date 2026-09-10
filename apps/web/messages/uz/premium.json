@@ -17,7 +17,7 @@
       "cancel": "Bekor",
       "close": "Yopish",
       "created": "Buyurtma qabul qilindi",
-      "orderNo": "Buyurtma ID",
+      "orderNo": "To'lov izohiga yozing",
       "amount": "Summa",
       "pay": "To'lov",
       "afterPay": "To'lov tasdiqlangach Premium yoqiladi. Tasdiq odatda 1 ish kuni ichida.",
@@ -26,7 +26,11 @@
     "admin": {
       "tab": "Premium to'lovlar",
       "lead": "Qo'lda to'lov: summa kelganini tekshirib tasdiqlang, e'lon Premium muddati uzayadi.",
-      "status": { "PENDING": "To'lov kutilmoqda", "PAID": "To'langan", "CANCELLED": "Bekor qilingan" },
+      "status": {
+        "PENDING": "To'lov kutilmoqda",
+        "PAID": "To'langan",
+        "CANCELLED": "Bekor qilingan"
+      },
       "months": "{n} oy",
       "org": "Tashkilot",
       "created": "So'ralgan",
@@ -42,7 +46,12 @@
     "messages": {
       "tab": "Xabarlar",
       "lead": "Aloqa formasidan kelgan murojaatlar. Javob telefon yoki email orqali, 24 soat ichida.",
-      "topic": { "demo": "Demo", "question": "Savol", "tech": "Texnik", "partner": "Hamkorlik" },
+      "topic": {
+        "demo": "Demo",
+        "question": "Savol",
+        "tech": "Texnik",
+        "partner": "Hamkorlik"
+      },
       "shown": "{n} / {total}",
       "empty": "Murojaat yo'q."
     }

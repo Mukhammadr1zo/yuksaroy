@@ -12,7 +12,12 @@
       "contact": "Phone or email",
       "contactHint": "We reply to this address",
       "topic": "Topic",
-      "topics": { "demo": "Demo", "question": "Question", "tech": "Technical issue", "partner": "Partnership" },
+      "topics": {
+        "demo": "Demo",
+        "question": "Question",
+        "tech": "Technical issue",
+        "partner": "Partnership"
+      },
       "message": "Message",
       "messageHint": "At least 10 characters",
       "submit": "Send",
@@ -32,9 +37,7 @@
       "bot": "Telegram bot",
       "botNote": "Catalog, inquiries and notifications are in the bot too.",
       "pricing": "Pricing and FAQ",
-      "pricingNote": "Answers about Premium, commission and payment.",
-      "developers": "Open API",
-      "developersNote": "Lists and ontology, anonymous read."
+      "pricingNote": "Answers about Premium, commission and payment."
     }
   }
 }

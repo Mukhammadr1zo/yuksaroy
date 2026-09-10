@@ -1,7 +1,7 @@
 'use client';
 // So'rovlar: kelgan (mening e'lonlarimga) va yuborgan (men) ikki bo'lim. Faqat o'qish, javob telefon orqali.
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
@@ -12,6 +12,7 @@ type Scope = 'owner' | 'mine';
 
 export default function InquiriesPage() {
   const t = useTranslations('kabinet.inquiries');
+  const locale = useLocale();
   const tc = useTranslations('kabinet.common');
   const L = useListingLabels();
   const [scope, setScope] = useState<Scope>('owner');
@@ -49,7 +50,7 @@ export default function InquiriesPage() {
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <Link href={listingHref(i.listing)} className="font-semibold hover:underline">{i.listing.title}</Link>
               <span className="rounded-full bg-teal-soft px-2.5 py-0.5 text-xs font-semibold text-teal-ink">{L.kind[i.listing.kind]}</span>
-              <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(i.createdAt)}</span>
+              <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(i.createdAt, locale)}</span>
             </div>
             {scope === 'owner' ? <p className="mt-1 text-sm text-muted">{i.fromOrgName ?? t('fromPrivate')}</p> : null}
             <p className="mt-2 whitespace-pre-line text-sm">{i.message}</p>

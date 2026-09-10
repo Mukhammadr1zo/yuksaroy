@@ -15,7 +15,7 @@ export interface ListingRecord {
   org: { name: string; slug: string | null; kycStatus: KycStatus } | null;
   ownerUser: { fullName: string | null; phone: string | null } | null; // yakka haydovchi (orgId null)
   terminal: { id: string; name: string; slug: string; orgId: string | null } | null;
-  siding: { id: string; registryNo: number; stationNameRaw: string; station?: { nameUz: string } | null } | null;
+  siding: { id: string; registryNo: number; stationNameRaw: string; ownerOrgId: string | null; station?: { nameUz: string } | null } | null;
 }
 
 /** Ochiq egasi bloki: tashkilot (KYC) yoki yakka shaxs (telefon OTP orqali biriktirilgan = tasdiqlangan). */

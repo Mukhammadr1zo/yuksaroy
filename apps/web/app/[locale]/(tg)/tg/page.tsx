@@ -96,7 +96,7 @@ export default function TgHome() {
             {orders.map((o) => (
               <li key={o.no}>
                 <Link href={`/tg/orders/${o.no}`} onClick={() => haptic()} className={`${CARD} block p-3 active:bg-sand`}>
-                  <div className="flex items-center gap-2"><span className="font-mono text-sm font-bold">{o.no}</span><StatusPill status={o.status} /><span className="ml-auto font-mono text-sm font-semibold tabular-nums">{som(o.totalTiyin)}</span></div>
+                  <div className="flex items-center gap-2"><span className="font-mono text-sm font-bold">{o.no}</span><StatusPill status={o.status} /><span className="ml-auto font-mono text-sm font-semibold tabular-nums">{som(o.totalTiyin, lang)}</span></div>
                   <p className="mt-1 truncate text-sm">{o.terminal.name}</p>
                 </Link>
               </li>

@@ -8,7 +8,7 @@ export const listingInclude = {
   org: { select: { name: true, slug: true, kycStatus: true } },
   ownerUser: { select: { fullName: true, phone: true } },
   terminal: { select: { id: true, name: true, slug: true, orgId: true } },
-  siding: { select: { id: true, registryNo: true, stationNameRaw: true, station: { select: { nameUz: true } } } },
+  siding: { select: { id: true, registryNo: true, stationNameRaw: true, ownerOrgId: true, station: { select: { nameUz: true } } } },
 } as const;
 const include = listingInclude;
 type Row = Prisma.ListingGetPayload<{ include: typeof include }>;
@@ -80,7 +80,10 @@ export class PrismaListingRepository {
   /** Bog'langan obyekt nuqtasi; obyekt yo'q bo'lsa null. */
   async objectPoint(type: 'terminal' | 'siding', id: string): Promise<{ lat: number | null; lng: number | null } | null> {
     const select = { lat: true, lng: true };
-    if (type === 'siding') return this.prisma.siding.findUnique({ where: { id }, select });
+    if (type === 'siding') {
+      const sd = await this.prisma.siding.findUnique({ where: { id }, select: { ...select, ownerOrgId: true } });
+      return sd && sd.ownerOrgId !== null ? { lat: sd.lat, lng: sd.lng } : null;
+    }
     // Egasiz terminal ochiq mahsulotda yo'q: unga e'lon ham bog'lanmaydi
     const t = await this.prisma.terminal.findUnique({ where: { id }, select: { ...select, orgId: true } });
     return t && t.orgId !== null ? { lat: t.lat, lng: t.lng } : null;

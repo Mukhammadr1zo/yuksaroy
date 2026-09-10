@@ -6,8 +6,9 @@ import { CLAIM_STATUS_LABELS, type ClaimStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { num } from '@/lib/format';
-import type { MySiding } from '@/lib/types-kabinet';
+import type { Membership, MySiding } from '@/lib/types-kabinet';
 import { useLang } from '@/components/kabinet/bits';
+import { SidingRegistry } from '@/components/kabinet/SidingRegistry';
 
 const TONE: Record<ClaimStatus, string> = { NONE: 'bg-line text-ink/70', PENDING: 'bg-amber-soft text-amber-ink', APPROVED: 'bg-teal text-white', REJECTED: 'bg-red-50 text-red-700' };
 
@@ -17,9 +18,11 @@ export default function MySidingsPage() {
   const tr = useTranslations('region');
   const lang = useLang();
   const [items, setItems] = useState<MySiding[] | null>(null);
+  const [orgs, setOrgs] = useState<Membership[]>([]);
   const [err, setErr] = useState(false);
 
-  useEffect(() => { api<{ items: MySiding[] }>('/sidings/mine').then((p) => setItems(p.items)).catch(() => setErr(true)); }, []);
+  const load = () => api<{ items: MySiding[] }>('/sidings/mine').then((p) => setItems(p.items)).catch(() => setErr(true));
+  useEffect(() => { void load(); api<Membership[]>('/orgs/mine').then(setOrgs).catch(() => setOrgs([])); }, []);
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
@@ -32,7 +35,6 @@ export default function MySidingsPage() {
       {items && items.length === 0 ? (
         <div className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center">
           <p className="text-muted">{t('empty')}</p>
-          <Link href="/sidings" className="mt-4 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink">{t('emptyCta')}</Link>
         </div>
       ) : null}
 
@@ -55,7 +57,7 @@ export default function MySidingsPage() {
                   <td className="px-4 py-3 font-mono tabular-nums">{s.registryNo}</td>
                   <td className="px-4 py-3">{s.station?.nameUz ?? s.stationNameRaw}</td>
                   <td className="px-4 py-3 text-muted">{s.regionCode && tr.has(s.regionCode) ? tr(s.regionCode) : '·'}</td>
-                  <td className="px-4 py-3 text-right font-mono tabular-nums">{s.lengthM != null ? `${num(s.lengthM)} m` : '·'}</td>
+                  <td className="px-4 py-3 text-right font-mono tabular-nums">{s.lengthM != null ? `${num(s.lengthM, lang)} m` : '·'}</td>
                   <td className="px-4 py-3"><span className={`inline-block whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${TONE[s.claimStatus]}`}>{CLAIM_STATUS_LABELS[lang][s.claimStatus]}</span></td>
                   <td className="px-4 py-3 text-right"><Link href={`/sidings/${s.id}`} className="text-sm font-semibold text-teal-ink underline">{t('open')}</Link></td>
                 </tr>
@@ -64,6 +66,7 @@ export default function MySidingsPage() {
           </table>
         </div>
       ) : null}
+      <SidingRegistry orgs={orgs} onClaimed={() => { void load(); }} />
     </main>
   );
 }

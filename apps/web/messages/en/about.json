@@ -16,7 +16,7 @@
       "i1": "Terminal services: tariff, hours, today's free slots, booking and documents.",
       "i2": "Private sidings registry: by station and node; the owner claims it and gets a page.",
       "i3": "Rail equipment and road carrier listings: rent or sale, with the owner's page.",
-      "i4": "Companies: KYC badge, their objects, data through the open API."
+      "i4": "Companies: KYC badge, their objects and contacts."
     },
     "principles": {
       "heading": "Principles",

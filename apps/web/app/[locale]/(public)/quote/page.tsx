@@ -3,10 +3,12 @@ import { getTranslations } from 'next-intl/server';
 import { QuickQuote } from '@/components/catalog/QuickQuote';
 import { sapiOrNull } from '@/lib/server-api';
 import type { TerminalDetail } from '@/lib/types';
+import { alt } from '@/lib/seo';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const t = await getTranslations({ locale: (await params).locale, namespace: 'meta.quote' });
-  return { title: t('title'), description: t('description') };
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.quote' });
+  return { title: t('title'), description: t('description'), ...alt(locale, '/quote') };
 }
 
 export default async function QuotePage({ searchParams }: { searchParams: Promise<{ terminal?: string }> }) {

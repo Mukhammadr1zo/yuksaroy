@@ -37,7 +37,7 @@ export default async function SidingPage({ params }: Params) {
     [t('registryNo'), s.registryNo],
     [t('station'), <>{station}{s.esrCode ? <span className="ml-1 text-muted">({s.esrCode})</span> : null}{s.rju ? <span className="ml-1 text-muted">· {rjuLabel(s.rju)}</span> : null}</>],
     [t('region'), regionName(s.regionCode, lang) || '·'],
-    [t('length'), s.lengthM ? `${num(s.lengthM)} m` : '·'],
+    [t('length'), s.lengthM ? `${num(s.lengthM, lang)} m` : '·'],
     [t('unload'), t('wagons', { count: s.unloadCapacity })],
     [t('load'), t('wagons', { count: s.loadCapacity })],
     [t('status'), ts(s.claimStatus)],

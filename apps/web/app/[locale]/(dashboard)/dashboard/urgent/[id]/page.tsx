@@ -2,7 +2,7 @@
 // So'rov tafsiloti: faktlar, ochiq holat havolasi (nusxalash), takliflar, tanlash (award), yopish (close).
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
@@ -20,6 +20,7 @@ async function loadOne(id: string): Promise<UrgentRequest | null> {
 export default function UrgentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const t = useTranslations('urgent.detail');
+  const locale = useLocale();
   const tc = useTranslations('kabinet.common');
   const L = useUrgentLabels();
   const [r, setR] = useState<UrgentRequest | null | undefined>(undefined);
@@ -53,7 +54,7 @@ export default function UrgentDetailPage() {
     [t('station'), r.stationName ?? '·'],
     [t('wagons'), r.wagonCount != null ? String(r.wagonCount) : '·'],
     [t('phone'), r.contactPhone],
-    [t('created'), uzDateTime(r.createdAt)],
+    [t('created'), uzDateTime(r.createdAt, locale)],
   ];
 
   return (
@@ -96,10 +97,10 @@ export default function UrgentDetailPage() {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="font-semibold">{offerName(o) ?? '·'}</span>
                 <OfferStatusPill status={o.status} />
-                <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(o.createdAt)}</span>
+                <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(o.createdAt, locale)}</span>
               </div>
               <p className="mt-2 font-mono text-sm text-navy tabular-nums">
-                {o.priceTiyin != null ? som(o.priceTiyin) : t('onRequest')}{o.etaMinutes != null ? ` · ${t('eta', { min: o.etaMinutes })}` : ''}
+                {o.priceTiyin != null ? som(o.priceTiyin, locale) : t('onRequest')}{o.etaMinutes != null ? ` · ${t('eta', { min: o.etaMinutes })}` : ''}
               </p>
               {o.message ? <p className="mt-1 whitespace-pre-line text-sm text-ink/85">{o.message}</p> : null}
               {r.status === 'OPEN' && o.status === 'SENT' ? (

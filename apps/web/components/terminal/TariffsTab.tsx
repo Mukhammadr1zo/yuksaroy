@@ -1,7 +1,7 @@
 'use client';
 // Tariflar: amaldagi jadval (tarix bilan), yangi versiya e'lon qilish (so'm -> tiyin). API xato kodlari terminalsAdmin.tariffs.err da.
 import { useCallback, useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { SERVICE_CODES, TARIFF_UNITS, uzLocalToUtc, type ServiceCode, type TariffUnit } from '@yuksaroy/domain';
 import { api, post } from '@/lib/api';
 import { som, uzDate } from '@/lib/format';
@@ -11,6 +11,7 @@ import { CargoSearch, type CargoPick } from '@/components/catalog/CargoSearch';
 
 export function TariffsTab({ terminalId, services }: { terminalId: string | null; services: ServiceCode[] }) {
   const t = useTranslations('terminalsAdmin.tariffs');
+  const locale = useLocale();
   const te = useTranslations('terminalsAdmin.tariffs.err');
   const tc = useTranslations('kabinet.common');
   const ts = useTranslations('service');
@@ -80,10 +81,10 @@ export function TariffsTab({ terminalId, services }: { terminalId: string | null
                     <tr key={x.id} className={`border-b border-line/70 last:border-0 ${past ? 'text-muted' : ''}`}>
                       <td className="px-4 py-2 font-semibold">{ts(x.serviceCode)}</td>
                       <td className="px-4 py-2 font-mono text-xs text-muted">{x.cargoGroupCode ?? t('allCargo')}</td>
-                      <td className="px-4 py-2 text-right font-mono tabular-nums">{som(x.priceTiyin)} <span className="text-muted">/ {tu(x.unit)}</span></td>
-                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums">{x.minTiyin ? som(x.minTiyin) : '·'}</td>
-                      <td className="px-4 py-2 font-mono text-xs">{uzDate(x.validFrom)}</td>
-                      <td className="px-4 py-2 font-mono text-xs">{x.validTo ? uzDate(x.validTo) : <span className="text-teal-ink">{t('open')}</span>}</td>
+                      <td className="px-4 py-2 text-right font-mono tabular-nums">{som(x.priceTiyin, locale)} <span className="text-muted">/ {tu(x.unit)}</span></td>
+                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums">{x.minTiyin ? som(x.minTiyin, locale) : '·'}</td>
+                      <td className="px-4 py-2 font-mono text-xs">{uzDate(x.validFrom, locale)}</td>
+                      <td className="px-4 py-2 font-mono text-xs">{x.validTo ? uzDate(x.validTo, locale) : <span className="text-teal-ink">{t('open')}</span>}</td>
                       <td className="px-4 py-2 text-right font-mono text-xs">v{x.version}</td>
                     </tr>
                   );

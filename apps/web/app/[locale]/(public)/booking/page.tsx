@@ -99,16 +99,16 @@ export default async function BookingPage({ params }: Params) {
                       {offer.lines.map((l) => (
                         <tr key={l.serviceCode} className="border-t border-line/70">
                           <td className="px-4 py-2 font-semibold">{ts(l.serviceCode)}</td>
-                          <td className="px-4 py-2 font-mono text-xs text-muted whitespace-nowrap">{l.qty} {unitLabel(l.unit)} × {pricePer(l.unitPriceTiyin, l.unit)}{l.minApplied ? ` (${t('example.min')})` : ''}</td>
-                          <td className="px-4 py-2 text-right font-mono tabular-nums whitespace-nowrap">{som(l.amountTiyin)}</td>
+                          <td className="px-4 py-2 font-mono text-xs text-muted whitespace-nowrap">{l.qty} {unitLabel(l.unit)} × {pricePer(l.unitPriceTiyin, l.unit, locale)}{l.minApplied ? ` (${t('example.min')})` : ''}</td>
+                          <td className="px-4 py-2 text-right font-mono tabular-nums whitespace-nowrap">{som(l.amountTiyin, locale)}</td>
                         </tr>
                       ))}
                       {offer.commissionPayer === 'CLIENT' && offer.commissionTiyin > 0 ? (
-                        <tr className="border-t border-line/70"><td className="px-4 py-2" colSpan={2}>{commission}</td><td className="px-4 py-2 text-right font-mono tabular-nums whitespace-nowrap">{som(offer.commissionTiyin)}</td></tr>
+                        <tr className="border-t border-line/70"><td className="px-4 py-2" colSpan={2}>{commission}</td><td className="px-4 py-2 text-right font-mono tabular-nums whitespace-nowrap">{som(offer.commissionTiyin, locale)}</td></tr>
                       ) : null}
                       <tr className="border-t-2 border-line bg-sand/60">
                         <td className="px-4 py-3 font-semibold" colSpan={2}>{t('example.total')}<span className="ml-2 font-mono text-xs font-normal text-muted">{commission}</span></td>
-                        <td className="px-4 py-3 text-right font-display text-lg font-bold text-navy tabular-nums whitespace-nowrap">{som(offer.totalTiyin)}</td>
+                        <td className="px-4 py-3 text-right font-display text-lg font-bold text-navy tabular-nums whitespace-nowrap">{som(offer.totalTiyin, locale)}</td>
                       </tr>
                     </tbody>
                   </table>

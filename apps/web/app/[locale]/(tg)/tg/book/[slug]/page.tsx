@@ -3,7 +3,7 @@
 // MainButton qadamlarni yuritadi. Tashkilot: birinchi CLIENT/FORWARDER yoki egalik; bo'lmasa nom bilan SHIPPER tashkilot yaratiladi.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { OPERATIONS, type Operation } from '@yuksaroy/domain';
 import { useRouter } from '@/i18n/navigation';
 import { ApiError, api, authHeaders, post } from '@/lib/api';
@@ -24,6 +24,7 @@ const shipper = (m: Membership) => m.isOwner || m.roles.includes('CLIENT') || m.
 export default function TgBookPage() {
   const { slug } = useParams<{ slug: string }>();
   const t = useTranslations('tg.book');
+  const locale = useLocale();
   const tc = useTranslations('tg.common');
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -98,11 +99,15 @@ export default function TgBookPage() {
   async function submit() {
     if (!offer || !hold) return;
     setErr(null); setBusy(true);
+    // Noto'g'ri vagon raqami jimgina tushib qolmasin
+    const wagonList = wagonNumbers.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
+    const badWagons = wagonList.filter((x) => !/^\d{8}$/.test(x));
+    if (badWagons.length) { setBusy(false); return setErr(t('err.wagonNumbers', { list: badWagons.join(', ') })); }
     idemKey.current ??= crypto.randomUUID();
     try {
       const o = await post<Order>('/orders', {
         orgId: orgId || undefined, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg, wagonCount: Number(wagons) || 1, note: note.trim() || undefined,
-        wagonNumbers: wagonNumbers.split(/[\s,]+/).filter((x) => /^\d{8}$/.test(x)),
+        wagonNumbers: wagonList,
       }, { 'Idempotency-Key': idemKey.current });
       haptic('medium');
       router.replace(`/tg/orders/${o.no}`);
@@ -166,11 +171,11 @@ export default function TgBookPage() {
       {step === 1 && offer ? (
         <div className="mt-4 space-y-3">
           <div className={`${CARD} p-4`}>
-            <div className="flex items-baseline justify-between gap-3"><p className="font-bold">{offer.terminal.name}</p><span className="font-mono font-semibold tabular-nums">{som(offer.totalTiyin)}</span></div>
+            <div className="flex items-baseline justify-between gap-3"><p className="font-bold">{offer.terminal.name}</p><span className="font-mono font-semibold tabular-nums">{som(offer.totalTiyin, locale)}</span></div>
             {offers.length > 1 ? (
               <details className="mt-2 text-sm">
                 <summary className="cursor-pointer text-teal-ink">{t('otherOffers')} ({offers.length - 1})</summary>
-                <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between rounded-xl border border-line px-3 text-left"><span>{o.terminal.name}</span><span className="font-mono tabular-nums">{som(o.totalTiyin)}</span></button></li>)}</ul>
+                <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between rounded-xl border border-line px-3 text-left"><span>{o.terminal.name}</span><span className="font-mono tabular-nums">{som(o.totalTiyin, locale)}</span></button></li>)}</ul>
               </details>
             ) : null}
           </div>

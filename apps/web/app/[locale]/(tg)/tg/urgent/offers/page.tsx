@@ -2,7 +2,7 @@
 // Ijrochi ko'rinishi: viloyatimdagi ochiq so'rovlar, har biriga narx (so'm), yetib borish (daqiqa), izoh. ?id= bo'lsa shu so'rov ochiq holda.
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
@@ -16,6 +16,7 @@ const EMPTY: Draft = { price: '', eta: '', message: '' };
 
 export default function TgOffersPage() {
   const t = useTranslations('urgent.provider');
+  const locale = useLocale();
   const td = useTranslations('urgent.detail');
   const tu = useTranslations('tg.urgent');
   const tc = useTranslations('tg.common');
@@ -58,7 +59,7 @@ export default function TgOffersPage() {
               return (
                 <li key={r.id} id={`ur-${r.id}`} className={`${CARD} p-3 ${focusId === r.id ? 'border-teal' : ''}`}>
                   <button type="button" onClick={() => { haptic(); setOpen(isOpen ? null : r.id); }} aria-expanded={isOpen} className="w-full text-left">
-                    <div className="flex flex-wrap items-center gap-2"><span className="font-mono text-sm font-bold">{r.no}</span><UrgentStatusPill status={r.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(r.createdAt)}</span></div>
+                    <div className="flex flex-wrap items-center gap-2"><span className="font-mono text-sm font-bold">{r.no}</span><UrgentStatusPill status={r.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(r.createdAt, locale)}</span></div>
                     <p className="mt-1 text-sm font-semibold">{L.kind[r.kind] ?? r.kind} · {L.region(r.regionCode)}{r.stationName ? ` · ${r.stationName}` : ''}{r.wagonCount ? ` · ${r.wagonCount} vag` : ''}</p>
                     <p className={`mt-0.5 text-sm text-muted ${isOpen ? 'whitespace-pre-line' : 'truncate'}`}>{r.description}</p>
                   </button>
@@ -66,7 +67,7 @@ export default function TgOffersPage() {
                     <div className="mt-3 border-t border-line pt-3">
                       <p className="font-mono text-sm"><span className="text-muted">{t('phone')}: </span><a href={`tel:${r.contactPhone}`} className="font-semibold text-navy">{r.contactPhone}</a></p>
                       {mine ? (
-                        <p className="mt-2 rounded-xl bg-teal-soft px-3 py-2 text-sm text-teal-ink"><b>{t('offer.mine')}:</b> {mine.priceTiyin != null ? som(mine.priceTiyin) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}</p>
+                        <p className="mt-2 rounded-xl bg-teal-soft px-3 py-2 text-sm text-teal-ink"><b>{t('offer.mine')}:</b> {mine.priceTiyin != null ? som(mine.priceTiyin, locale) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}</p>
                       ) : (
                         <form onSubmit={(e) => { e.preventDefault(); void send(r); }} className="mt-2 space-y-2">
                           <div className="grid grid-cols-2 gap-2">

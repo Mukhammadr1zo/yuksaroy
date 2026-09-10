@@ -311,7 +311,16 @@
         "length": "Length",
         "status": "Claim status"
       },
-      "open": "Page"
+      "open": "Page",
+      "registry": {
+        "title": "Find your siding",
+        "lead": "Search by station name or code and attach the one that is yours. After review it appears in the public catalog.",
+        "placeholder": "Station name or code",
+        "search": "Search",
+        "claim": "Attach",
+        "claimed": "Request sent, an operator will review it.",
+        "none": "Nothing found."
+      }
     },
     "profile": {
       "title": "Profile",

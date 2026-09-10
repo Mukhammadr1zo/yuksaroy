@@ -100,7 +100,7 @@ export class CatalogController {
     @Query('region') region?: string, @Query('near') near?: string, @Query('radius') radius?: string,
   ) {
     const r = await this.repo.listSidings(
-      { ...stationParam(station), rju: pickIn(rju, RJUS), q: q?.trim() || undefined, region: pickIn(region, REGIONS), near: geoNear(near, radius) },
+      { ...stationParam(station), rju: pickIn(rju, RJUS), q: q?.trim() || undefined, region: pickIn(region, REGIONS), near: geoNear(near, radius), owned: true },
       clampInt(page, 1, 1, 10000), clampInt(limit, 30, 1, 100),
     );
     return { ...r, items: r.items.map(publicSiding) };
@@ -109,7 +109,8 @@ export class CatalogController {
   @Get('sidings/:id')
   async siding(@Param('id') id: string) {
     const s = await this.repo.findSidingById(id);
-    if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
+    // Egasiz shahobcha yo'l ochiq mahsulotda yo'q (reestr faqat admin uchun)
+    if (!s || s.ownerOrgId === null) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
     return publicSiding(s);
   }
 

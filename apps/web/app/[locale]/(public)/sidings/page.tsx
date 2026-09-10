@@ -23,11 +23,13 @@ export default async function SidingsPage({ searchParams }: { searchParams: Prom
   // t: sidings nomfazosi; tn nav, tf filter, tp pagination, th hubs
   const [sp, t, tn, tf, tp, th] = await Promise.all([searchParams, getTranslations('sidings'), getTranslations('nav'), getTranslations('filter'), getTranslations('pagination'), getTranslations('hubs')]);
   const f = {
-    region: one(sp.region), q: one(sp.q), near: one(sp.near), radius: one(sp.radius),
+    region: one(sp.region), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), station: one(sp.station),
     page: Number(one(sp.page)) || 1,
   };
   const data = await sapi<Page<Siding>>(`/sidings${qs({ ...f, limit: 30 })}`, 300);
   const pages = Math.max(1, Math.ceil(data.total / data.limit));
+  // Diapazondan tashqari ?page= bo'sh jadval ustida "200 / 47" ko'rsatardi
+  const cur = Math.min(data.page, pages);
   const mapHref = `/map${qs({ cat: 'siding', region: f.region, near: f.near, radius: f.radius, q: f.q })}`;
 
   return (
@@ -52,9 +54,9 @@ export default async function SidingsPage({ searchParams }: { searchParams: Prom
 
       {pages > 1 && (
         <nav aria-label={tp('aria')} className="mt-6 flex flex-wrap items-center justify-center gap-2 font-mono text-sm">
-          {data.page > 1 ? <Link href={`/sidings${qs({ ...f, page: data.page - 1 })}`} className="rounded-full border border-line bg-white px-3 py-1 hover:bg-sand">{tp('prev')}</Link> : null}
-          <span className="px-2 text-muted">{data.page} / {pages}</span>
-          {data.page < pages ? <Link href={`/sidings${qs({ ...f, page: data.page + 1 })}`} className="rounded-full border border-line bg-white px-3 py-1 hover:bg-sand">{tp('next')}</Link> : null}
+          {cur > 1 ? <Link href={`/sidings${qs({ ...f, page: cur - 1 })}`} className="rounded-full border border-line bg-white px-3 py-1 hover:bg-sand">{tp('prev')}</Link> : null}
+          <span className="px-2 text-muted">{cur} / {pages}</span>
+          {cur < pages ? <Link href={`/sidings${qs({ ...f, page: cur + 1 })}`} className="rounded-full border border-line bg-white px-3 py-1 hover:bg-sand">{tp('next')}</Link> : null}
         </nav>
       )}
       <RegionChips base="/sidings" />

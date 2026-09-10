@@ -12,7 +12,12 @@
       "contact": "Telefon yoki email",
       "contactHint": "Javobni shu manzilga yuboramiz",
       "topic": "Mavzu",
-      "topics": { "demo": "Demo", "question": "Savol", "tech": "Texnik muammo", "partner": "Hamkorlik" },
+      "topics": {
+        "demo": "Demo",
+        "question": "Savol",
+        "tech": "Texnik muammo",
+        "partner": "Hamkorlik"
+      },
       "message": "Xabar",
       "messageHint": "Kamida 10 ta belgi",
       "submit": "Yuborish",
@@ -32,9 +37,7 @@
       "bot": "Telegram bot",
       "botNote": "Katalog, so'rovlar va bildirishnomalar botda ham bor.",
       "pricing": "Tariflar va savollar",
-      "pricingNote": "Premium, komissiya va to'lov haqida javoblar.",
-      "developers": "Ochiq API",
-      "developersNote": "Ro'yxatlar va ontologiya, anonim o'qish."
+      "pricingNote": "Premium, komissiya va to'lov haqida javoblar."
     }
   }
 }

@@ -6,6 +6,7 @@ import { sapiOrNull } from '@/lib/server-api';
 import { MiniMap, type Pin, type Poly } from '@/components/catalog/MiniMap';
 import { RegionChips } from '@/components/catalog/RegionChips';
 import { AuthOnly } from '@/components/site/AuthOnly';
+import { DashLink } from '@/components/site/DashLink';
 
 export type HubCat = 'terminals' | 'sidings' | 'equipment' | 'carriers';
 const CATS: HubCat[] = ['terminals', 'sidings', 'equipment', 'carriers'];
@@ -27,7 +28,7 @@ const CTA: Record<HubCat, string> = { terminals: '/dashboard/terminals/new', sid
 /** Viloyat hubi: h1, lead, xarita, qo'shni viloyatlar, boshqa kategoriyalar, xaritada ochish, ro'yxat (children), pastda viloyat chiplari.
  *  count: jami, shown: ko'rsatilgani (50 dan ko'p bo'lsa filtrli katalogga havola). */
 export async function RegionHub({ cat, code, count, shown, pins, children }: { cat: HubCat; code: RegionCode; count: number; shown: number; pins: Pin[]; children: React.ReactNode }) {
-  const [t, tr, polygon] = await Promise.all([getTranslations('hubs'), getTranslations('region'), regionPolygon(code)]);
+  const [t, tr, tg, polygon] = await Promise.all([getTranslations('hubs'), getTranslations('region'), getTranslations('marketing.common'), regionPolygon(code)]);
   const region = tr(code);
   const c = REGION_CENTERS[code];
   // Bo'sh viloyatda qo'shni viloyatlar bo'sh holat blokida, aks holda sarlavha ostida (bir marta)
@@ -60,9 +61,7 @@ export async function RegionHub({ cat, code, count, shown, pins, children }: { c
           <div className="rounded-card border border-dashed border-line bg-white p-10 text-center">
             <p className="mx-auto max-w-[52ch] text-muted">{t(`${cat}.empty`, { region })}</p>
             <p className="mt-3">{neighbours}</p>
-            <AuthOnly>
-              <Link href={CTA[cat]} className="mt-5 inline-block rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t(`${cat}.cta`)}</Link>
-            </AuthOnly>
+            <DashLink href={CTA[cat]} className="mt-5 inline-block rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t(`${cat}.cta`)}</DashLink>
           </div>
         ) : children}
         {count > shown ? <p className="mt-4"><Link href={`/${cat}?region=${code}`} className="text-sm font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{t('more', { count })}</Link></p> : null}

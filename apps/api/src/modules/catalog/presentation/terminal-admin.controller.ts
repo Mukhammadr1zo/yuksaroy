@@ -1,6 +1,6 @@
 import { Body, ConflictException, Controller, Get, Inject, NotFoundException, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { CLAIM_STATUSES } from '@yuksaroy/domain';
+import { CLAIM_STATUSES, REGIONS } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
@@ -14,6 +14,7 @@ import { TerminalAccess } from '../application/terminal-access';
 import { PlatformAdmin } from '../../organizations/application/platform-admin';
 import { ClaimDecideDto, ClaimSidingDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateTerminalDto } from './dto';
 import { pickIn } from './catalog.controller';
+import { publicSiding } from './mappers';
 
 /** Terminal kabineti va shahobcha claim: faqat kirgan foydalanuvchi; ruxsat use-case ichida (TerminalAccess), moderatsiya PlatformAdmin. */
 @ApiTags('catalog-admin')
@@ -125,6 +126,21 @@ export class TerminalAdminController {
   async mySidings(@CurrentUserId() userId: string) {
     const orgIds = await this.access.orgIdsOf(userId);
     return orgIds.length ? this.repo.listSidings({ ownerOrgIds: orgIds }, 1, 100) : { items: [], total: 0, page: 1, limit: 100 };
+  }
+
+  /**
+   * Reestr qidiruvi (faqat kirganlar uchun): egasiz shahobcha yo'l ochiq katalogda ko'rinmaydi,
+   * lekin egasi o'zinikini topib biriktira olishi kerak. Reestrdagi egasi nomi berilmaydi.
+   */
+  @Get('sidings/registry')
+  async registry(@Query('q') q?: string, @Query('region') region?: string, @Query('station') station?: string) {
+    const text = q?.trim();
+    if (!text && !region && !station) return { items: [], total: 0, page: 1, limit: 20 };
+    const r = await this.repo.listSidings(
+      { q: text || undefined, region: pickIn(region, REGIONS), stationId: station || undefined, owned: false },
+      1, 20,
+    );
+    return { ...r, items: r.items.map(publicSiding) };
   }
 
   @Post('sidings/:id/claim')

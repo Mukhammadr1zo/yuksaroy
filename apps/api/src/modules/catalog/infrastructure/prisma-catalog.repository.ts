@@ -199,7 +199,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       stationId: f.stationId,
       esrCode: f.stationEsr,
       rju: f.rju,
-      ownerOrgId: f.ownerOrgIds ? { in: f.ownerOrgIds } : undefined,
+      ownerOrgId: f.ownerOrgIds ? { in: f.ownerOrgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
       claimStatus: f.claimStatus,
       regionCode: f.region,
       ...(f.near ? bbox(f.near) : {}),
@@ -238,7 +238,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
         where: { status: 'ACTIVE', orgId: { not: null }, lat: { not: null }, lng: { not: null } },
         select: { id: true, slug: true, name: true, kind: true, lat: true, lng: true },
       }),
-      this.prisma.siding.groupBy({ by: ['stationId', 'regionCode'], where: { stationId: { not: null } }, _count: { _all: true } }),
+      this.prisma.siding.groupBy({ by: ['stationId', 'regionCode'], where: { stationId: { not: null }, ownerOrgId: { not: null } }, _count: { _all: true } }),
     ]);
     // Stansiya bo'yicha yig'indi; viloyat kodi birinchi bo'sh bo'lmagani (bir stansiya odatda bitta viloyatda).
     const byStation = new Map<string, { count: number; regionCode: string | null }>();
@@ -266,7 +266,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
   async publicStats() {
     const now = new Date();
     const [terminals, sidings, stations, listings, companies, free] = await Promise.all([
-      this.prisma.terminal.count({ where: { status: 'ACTIVE', orgId: { not: null } } }), this.prisma.siding.count(), this.prisma.station.count(),
+      this.prisma.terminal.count({ where: { status: 'ACTIVE', orgId: { not: null } } }), this.prisma.siding.count({ where: { ownerOrgId: { not: null } } }), this.prisma.station.count(),
       this.prisma.listing.count({ where: activeListing(now) }), this.prisma.organization.count({ where: visibleCompany(now) }),
       this.freeToday({ terminal: { status: 'ACTIVE', orgId: { not: null } } }, now),
     ]);

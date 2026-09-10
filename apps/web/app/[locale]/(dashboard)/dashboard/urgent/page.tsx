@@ -1,7 +1,7 @@
 'use client';
 // Shoshilinch so'rovlarim: yangi so'rov shakli va ro'yxat. Ijrochi ko'rinishi /dashboard/urgent/offers.
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { REGIONS, URGENT_KINDS, type UrgentKind } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
@@ -18,6 +18,7 @@ const notLive = (e: unknown) => e instanceof ApiError && e.status === 404;
 
 export default function UrgentMinePage() {
   const t = useTranslations('urgent.mine');
+  const locale = useLocale();
   const tc = useTranslations('kabinet.common');
   const tp = useTranslations('urgent.provider');
   const tr = useTranslations('region');
@@ -139,7 +140,7 @@ export default function UrgentMinePage() {
                   <td className="px-4 py-3">{L.region(r.regionCode)}</td>
                   <td className="px-4 py-3"><UrgentStatusPill status={r.status} /></td>
                   <td className="px-4 py-3 text-right font-mono tabular-nums">{r.offersCount ?? r.offers?.length ?? 0}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted">{uzDateTime(r.createdAt)}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted">{uzDateTime(r.createdAt, locale)}</td>
                 </tr>
               ))}
             </tbody>

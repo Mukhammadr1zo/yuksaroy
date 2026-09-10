@@ -29,7 +29,7 @@ export default function TgOrderPage() {
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
 
-  const load = useCallback(() => api<Order>(`/orders/${no}`).then(setOrder).catch(() => setErr(t('notFound'))), [no, t]);
+  const load = useCallback(() => api<Order>(`/orders/${no}`).then(setOrder).catch((e) => setErr(e instanceof ApiError && e.status === 404 ? t('notFound') : tc('failed'))), [no, t, tc]);
   useEffect(() => { void load(); api<Docs>(`/orders/${no}/documents`).then(setDocs).catch(() => setDocs({ documents: [], invoice: null })); }, [load, no]);
   useEffect(() => {
     if (o?.status !== 'PENDING') return;

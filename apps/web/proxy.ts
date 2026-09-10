@@ -14,11 +14,18 @@ function stripLocale(pathname: string) {
   return pathname;
 }
 
+/** Manzildagi til prefiksi: /ru/dashboard -> ru (standart tilda prefiks yo'q). */
+function localeOf(pathname: string) {
+  return routing.locales.find((l) => l !== routing.defaultLocale && (pathname === `/${l}` || pathname.startsWith(`/${l}/`)));
+}
+
 export function proxy(req: NextRequest) {
   const path = stripLocale(req.nextUrl.pathname);
   const guarded = path.startsWith('/dashboard');
   if (guarded && !(req.cookies.has('ys_access') || req.cookies.has('ys_refresh'))) {
-    const to = new URL('/login', req.url);
+    // Kirish sahifasi ham o'sha tilda ochilsin (ilgari ruscha havola o'zbekcha formaga tushardi)
+    const loc = localeOf(req.nextUrl.pathname);
+    const to = new URL(loc ? `/${loc}/login` : '/login', req.url);
     to.searchParams.set('next', req.nextUrl.pathname + req.nextUrl.search);
     return NextResponse.redirect(to);
   }

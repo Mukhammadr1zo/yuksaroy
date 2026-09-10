@@ -19,7 +19,6 @@ export default async function ContactPage({ params, searchParams }: Props) {
   const [{ topic }, t] = await Promise.all([searchParams, getTranslations('contact')]);
   const links = [
     { key: 'pricing', href: '/pricing' },
-    { key: 'developers', href: '/developers' },
   ] as const;
   return (
     <>

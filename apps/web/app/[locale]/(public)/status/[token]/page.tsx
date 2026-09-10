@@ -55,7 +55,7 @@ export default async function StatusPage({ params }: Params) {
             const ev = String(e.event ?? e.type ?? e.status ?? '').toUpperCase();
             return (
               <li key={i} className="flex flex-wrap items-baseline gap-3 rounded-card border border-line bg-white px-4 py-3 text-sm">
-                <span className="font-mono text-xs text-muted tabular-nums">{uzDateTime(e.at)}</span>
+                <span className="font-mono text-xs text-muted tabular-nums">{uzDateTime(e.at, lang)}</span>
                 <span className="font-semibold">{t.has(`event.${ev}`) ? t(`event.${ev}`) : ev}</span>
               </li>
             );

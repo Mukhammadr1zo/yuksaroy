@@ -305,7 +305,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   const decision = [
     t('decision.objects', { count: listed.length }),
     terms.length ? tc('decision.freeToday', { count: terms.filter((o) => (o.p.freeToday ?? 0) > 0).length }) : null,
-    Number.isFinite(cheapest) ? tc('decision.cheapest', { price: pricePer(cheapest, 'PER_TON') }) : null,
+    Number.isFinite(cheapest) ? tc('decision.cheapest', { price: pricePer(cheapest, 'PER_TON', locale) }) : null,
     eff.near && listed[0]?.km != null ? tc('decision.nearest', { km: Math.round(listed[0].km) }) : null,
   ].filter(Boolean).join(tc('decision.separator'));
 
@@ -319,7 +319,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
     if (o.p.kind === 'terminal') {
       return [
         o.p.freeToday != null ? (o.p.freeToday > 0 ? t('popup.freeToday', { count: o.p.freeToday }) : t('popup.noSlots')) : null,
-        o.p.fromPriceTiyin != null ? t('popup.from', { price: pricePer(o.p.fromPriceTiyin, 'PER_TON') }) : null,
+        o.p.fromPriceTiyin != null ? t('popup.from', { price: pricePer(o.p.fromPriceTiyin, 'PER_TON', locale) }) : null,
       ].filter(Boolean).join(' · ');
     }
     if (o.p.kind === 'siding') return '';
@@ -416,7 +416,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
             onPointerUp={onHandleUp}
             className="mx-auto block h-6 w-16 touch-none cursor-grab before:mx-auto before:mt-2.5 before:block before:h-1.5 before:w-10 before:rounded-full before:bg-line before:content-['']"
           />
-          <p className="truncate px-4 pb-2 font-mono text-sm text-navy tabular-nums">{decision}</p>
+          <p className="line-clamp-2 px-4 pb-2 font-mono text-sm text-navy tabular-nums">{decision}</p>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
           <form

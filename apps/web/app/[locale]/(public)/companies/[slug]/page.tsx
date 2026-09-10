@@ -55,7 +55,7 @@ export default async function CompanyPage({ params }: Params) {
       <dl className="mt-6 grid grid-cols-3 gap-3">
         {tiles.map(([k, n]) => (
           <a key={k} href={`#${k}`} className="rounded-card border border-line bg-white px-4 py-3 transition hover:border-teal">
-            <dd className={`font-display text-2xl font-bold tabular-nums ${n ? 'text-navy' : 'text-muted'}`}>{num(n)}</dd>
+            <dd className={`font-display text-2xl font-bold tabular-nums ${n ? 'text-navy' : 'text-muted'}`}>{num(n, lang)}</dd>
             <dt className="text-xs text-muted">{t(`detail.${k}`)}</dt>
           </a>
         ))}
@@ -79,7 +79,7 @@ export default async function CompanyPage({ params }: Params) {
                       <tr key={s.id} className="border-t border-line/70">
                         <td className="px-4 py-2 font-mono text-xs"><Link href={`/sidings/${s.id}`} className="text-navy underline decoration-dotted hover:text-teal-ink">{s.registryNo}</Link></td>
                         <td className="px-4 py-2 font-semibold">{s.station?.nameUz ?? s.stationNameRaw}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{s.lengthM ? `${num(s.lengthM)} m` : '·'}</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums">{s.lengthM ? `${num(s.lengthM, lang)} m` : '·'}</td>
                         <td className="px-4 py-2 text-right font-mono tabular-nums">{tc('wagons', { count: `${s.unloadCapacity} / ${s.loadCapacity}` })}</td>
                       </tr>
                     ))}

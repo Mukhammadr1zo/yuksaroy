@@ -194,7 +194,7 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
         <Link href={`/dashboard/orders/${o.no}`} className="font-mono text-sm font-bold hover:underline">{o.no}</Link>
         {compact ? null : <StatusPill status={s} />}
         {s === 'PENDING' && o.slaConfirmUntil ? <SlaTimer until={o.slaConfirmUntil} prefix={t('sla')} onExpire={onDone} /> : null}
-        <span className="ml-auto font-mono font-semibold tabular-nums">{som(o.totalTiyin)}</span>
+        <span className="ml-auto font-mono font-semibold tabular-nums">{som(o.totalTiyin, lang)}</span>
       </div>
 
       <p className="mt-2 font-semibold">{o.shipper.name}</p>

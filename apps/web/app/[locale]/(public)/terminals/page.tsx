@@ -70,7 +70,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
   const decision = [
     t('decision.terminals', { count: data.total }),
     s && data.total ? t('decision.freeToday', { count: s.freeToday }) : null,
-    s?.cheapestTiyin != null && s.cheapestUnit ? t('decision.cheapest', { price: pricePer(s.cheapestTiyin, s.cheapestUnit) }) : null,
+    s?.cheapestTiyin != null && s.cheapestUnit ? t('decision.cheapest', { price: pricePer(s.cheapestTiyin, s.cheapestUnit, locale) }) : null,
     s?.nearestKm != null ? t('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
   ].filter(Boolean).join(t('decision.separator'));
 
@@ -117,7 +117,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
         </div>
       ) : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        <p className="font-mono text-sm text-navy tabular-nums">{decision}</p>
+        {data.items.length ? <p className="font-mono text-sm text-navy tabular-nums">{decision}</p> : <span />}
         <Link href={mapHref} className="text-xs font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{th('viewOnMap')}</Link>
       </div>
 

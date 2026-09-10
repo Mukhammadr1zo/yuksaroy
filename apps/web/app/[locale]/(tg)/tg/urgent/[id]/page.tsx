@@ -2,7 +2,7 @@
 // So'rov tafsiloti: faktlar, takliflar, tanlash, yopish, ochiq holat havolasini Telegram orqali ulashish yoki nusxalash.
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { ApiError, api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
 import { asList, offerName, type UrgentRequest } from '@/lib/types-urgent';
@@ -20,6 +20,7 @@ async function loadOne(id: string): Promise<UrgentRequest | null> {
 export default function TgUrgentDetail() {
   const { id } = useParams<{ id: string }>();
   const t = useTranslations('urgent.detail');
+  const locale = useLocale();
   const tu = useTranslations('tg.urgent');
   const tc = useTranslations('tg.common');
   const { tg } = useTg();
@@ -63,7 +64,7 @@ export default function TgUrgentDetail() {
           {r.stationName ? <Row k={t('station')} v={r.stationName} /> : null}
           {r.wagonCount != null ? <Row k={t('wagons')} v={String(r.wagonCount)} mono /> : null}
           <Row k={t('phone')} v={r.contactPhone} mono />
-          <Row k={t('created')} v={uzDateTime(r.createdAt)} mono />
+          <Row k={t('created')} v={uzDateTime(r.createdAt, locale)} mono />
         </dl>
         <p className="mt-2 whitespace-pre-line text-sm">{r.description}</p>
       </section>
@@ -85,8 +86,8 @@ export default function TgUrgentDetail() {
         <ul className="mt-2 space-y-2">
           {offers.map((o) => (
             <li key={o.id} className={`${CARD} p-3 ${o.status === 'AWARDED' ? 'border-teal' : ''}`}>
-              <div className="flex flex-wrap items-center gap-2"><span className="font-semibold">{offerName(o) ?? '·'}</span><OfferStatusPill status={o.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(o.createdAt)}</span></div>
-              <p className="mt-1 font-mono text-sm text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin) : t('onRequest')}{o.etaMinutes != null ? ` · ${t('eta', { min: o.etaMinutes })}` : ''}</p>
+              <div className="flex flex-wrap items-center gap-2"><span className="font-semibold">{offerName(o) ?? '·'}</span><OfferStatusPill status={o.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(o.createdAt, locale)}</span></div>
+              <p className="mt-1 font-mono text-sm text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin, locale) : t('onRequest')}{o.etaMinutes != null ? ` · ${t('eta', { min: o.etaMinutes })}` : ''}</p>
               {o.message ? <p className="mt-1 whitespace-pre-line text-sm">{o.message}</p> : null}
               {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => act('award', o.id)} disabled={busy !== null} className={`${BTN} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}
             </li>

@@ -162,7 +162,9 @@
         "findTerminal": {
           "title": "Find a terminal",
           "body": "Free slots today and tariffs"
-        }
+        },
+        "shipperLead": "Your account is ready. You can start looking for a terminal.",
+        "shipperHint": "An organization is created automatically with your first order; the tax ID is asked when documents are issued."
       }
     }
   }

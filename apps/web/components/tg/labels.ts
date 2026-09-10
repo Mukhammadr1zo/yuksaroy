@@ -4,5 +4,5 @@ import { LISTING_LABELS, SEARCH_LABELS, formatSom, type PriceUnit, type RegionCo
 export const regionName = (code: string | null | undefined, lang: SearchLang) => (code ? SEARCH_LABELS[lang].region[code as RegionCode] ?? code : '');
 /** "18 500 000 so'm oyiga"; SALE (TOTAL) da birlik yozilmaydi. */
 export const listingPrice = (tiyin: number, unit: PriceUnit | null, lang: SearchLang) =>
-  unit && unit !== 'TOTAL' ? `${formatSom(tiyin)} ${LISTING_LABELS[lang].priceUnit[unit]}` : formatSom(tiyin);
+  unit && unit !== 'TOTAL' ? `${formatSom(tiyin, lang)} ${LISTING_LABELS[lang].priceUnit[unit]}` : formatSom(tiyin, lang);
 export const tgListingHref = (l: { kind: string; slug: string }) => `/tg/${l.kind === 'TRUCK' ? 'carriers' : 'equipment'}/${l.slug}`;

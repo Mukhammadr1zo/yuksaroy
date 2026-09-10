@@ -72,7 +72,14 @@ export interface SidingRecord {
   lat: number | null; lng: number | null;
 }
 
-export interface SidingFilter { stationEsr?: string; stationId?: string; rju?: Rju; q?: string; ownerOrgIds?: string[]; region?: string; near?: GeoNear; claimStatus?: ClaimStatus }
+export interface SidingFilter {
+  stationEsr?: string; stationId?: string; rju?: Rju; q?: string; ownerOrgIds?: string[]; region?: string; near?: GeoNear; claimStatus?: ClaimStatus;
+  /**
+   * Shahobcha yo'lni ham faqat egasi qo'shadi: ochiq katalogda egasiz obyekt ko'rinmaydi.
+   * true = faqat egali, false = faqat egasiz (admin reestri), undefined = hammasi.
+   */
+  owned?: boolean;
+}
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number }
 

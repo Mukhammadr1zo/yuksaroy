@@ -5,7 +5,7 @@ import { filterRoles, rolesForKinds } from '../domain/rules';
 
 export interface CreateOrgInput {
   kind?: OrgKind; kinds?: OrgKind[]; name: string; stir?: string; phone?: string; roles?: Role[];
-  description?: string; telegram?: string; website?: string; regionCode?: string;
+  description?: string; telegram?: string; website?: string; regionCode?: string; address?: string;
 }
 export type UpdateOrgInput = Partial<Pick<CreateOrgInput, 'name' | 'kinds' | 'description' | 'telegram' | 'website' | 'phone' | 'stir' | 'regionCode'>> & { address?: string };
 
@@ -22,7 +22,7 @@ export class CreateOrgUseCase {
     const name = input.name.trim();
     const base = {
       kind: kinds[0]!, kinds, name, stir, phone: input.phone ?? null,
-      description: input.description ?? null, telegram: input.telegram ?? null, website: input.website ?? null, regionCode: input.regionCode ?? null,
+      description: input.description ?? null, telegram: input.telegram ?? null, website: input.website ?? null, regionCode: input.regionCode ?? null, address: input.address ?? null,
     };
     // Bir xil nomli ikki tashkilot bir vaqtda ochilsa uniqueSlug ikkalasiga bir xil slug beradi:
     // Prisma P2002 da bir marta tasodifiy qo'shimcha bilan qayta uriniladi

@@ -244,7 +244,8 @@
         "OPERATION_NOT_OFFERED": "Terminal bu operatsiyani bajarmaydi.",
         "TERMINAL_UNAVAILABLE": "Terminal hozir buyurtma qabul qilmaydi.",
         "STATION_NOT_FOUND": "Stansiya topilmadi.",
-        "CARGO_NOT_FOUND": "Yuk turi topilmadi."
+        "CARGO_NOT_FOUND": "Yuk turi topilmadi.",
+        "wagonNumbers": "Vagon raqami 8 ta raqamdan iborat bo'lishi kerak: {list}"
       },
       "price": {
         "min": "(min)",

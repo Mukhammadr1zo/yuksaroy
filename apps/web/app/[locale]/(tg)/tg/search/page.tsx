@@ -52,7 +52,7 @@ export default async function TgSearchPage({ params, searchParams }: { params: P
     decision = [
       tc('decision.terminals', { count: d.total }),
       s && d.total ? tc('decision.freeToday', { count: s.freeToday }) : null,
-      s?.cheapestTiyin != null && s.cheapestUnit ? tc('decision.cheapest', { price: pricePer(s.cheapestTiyin, s.cheapestUnit) }) : null,
+      s?.cheapestTiyin != null && s.cheapestUnit ? tc('decision.cheapest', { price: pricePer(s.cheapestTiyin, s.cheapestUnit, locale) }) : null,
       s?.nearestKm != null ? tc('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
     ].filter(Boolean).join(tc('decision.separator'));
     list = d.items.map((x) => <TerminalRow key={x.id} t={x} lang={lang} />);

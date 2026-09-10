@@ -29,7 +29,7 @@ interface Data {
   main: number[][];   // tekis [x0,y0,x1,y1,...]
   branch: number[][];
   stations: { n: string; x: number; y: number }[];
-  terminals: { n: string; s: string; st: string; p: number | null; x: number; y: number }[]; // p — eng arzon tonna narxi (tiyin)
+  terminals: { n: string; s: string; st: string; p: number | null; x: number; y: number }[]; // p - eng arzon tonna narxi (tiyin)
   path: Coord[];      // kamera yo'li: Toshkent → Qo'qon → Buxoro → Urganch → Nukus
 }
 
@@ -92,7 +92,7 @@ async function main() {
     const pl = (pts: Coord[]) => pts.map(([x, y]) => `${x},${Y(y)}`).join(' ');
     const r1 = (c: Coord): Coord => [Math.round(c[0] * 10) / 10, Math.round(c[1] * 10) / 10];
     const len = (p: Coord[]) => p.reduce((s, c, i) => (i ? s + Math.hypot(c[0] - p[i - 1]![0], c[1] - p[i - 1]![1]) : 0), 0);
-    // Poster: mayda OSM parchalari (< 0.3 birlik ≈ 13 km) tashlanadi, 1 kasr — hajm 5× kichik
+    // Poster: mayda OSM parchalari (< 0.3 birlik ≈ 13 km) tashlanadi, 1 kasr - hajm 5× kichik
     const posterPaths = posterLines
       .flatMap((l) => { const g = JSON.parse(l.g) as { type: string; coordinates: Coord[][] | Coord[] }; return (g.type === 'MultiLineString' ? (g.coordinates as Coord[][]) : [g.coordinates as Coord[]]).map((p) => p.map(proj)); })
       .filter((p) => len(p) >= 0.3).map((p) => p.map(r1));
@@ -107,7 +107,7 @@ async function main() {
     writeFileSync(OUT_SVG, svg);
 
     // 6) Vektor xarita (SVG, landing): soddaroq yo'llar, SVG koordinatalar (y pastga), 1 kasr. ~10 k nuqta.
-    // OSM parchalari (11 k) avval birlashtiriladi (LineMerge), keyin soddalashtiriladi — uzluksiz yo'llar, kam path
+    // OSM parchalari (11 k) avval birlashtiriladi (LineMerge), keyin soddalashtiriladi - uzluksiz yo'llar, kam path
     const svgLines = await rm.$queryRawUnsafe<Array<{ usage: string; g: string }>>(
       `SELECT usage::text AS usage, ST_AsGeoJSON(ST_Simplify(ST_LineMerge(ST_Union(geometry)), CASE WHEN usage='main' THEN 0.006 ELSE 0.015 END)) AS g
        FROM lines WHERE deleted_at IS NULL AND usage IN ('main','branch') GROUP BY usage`,
@@ -133,7 +133,7 @@ async function main() {
     writeFileSync(OUT_SVG_JSON, JSON.stringify(svgData));
     console.log(`railmap-svg.json: ${(JSON.stringify(svgData).length / 1024).toFixed(0)} KB, main ${svgMain.length} / branch ${svgBranch.length} path, viewBox ${svgData.w}×${svgData.h}`);
 
-    // 7) Real xarita (MapLibre GL): GeoJSON lon/lat — yo'llar (usage bo'yicha bitta MultiLineString), stansiyalar, terminallar; kamera yo'li lon/lat
+    // 7) Real xarita (MapLibre GL): GeoJSON lon/lat - yo'llar (usage bo'yicha bitta MultiLineString), stansiyalar, terminallar; kamera yo'li lon/lat
     const geoLines = await rm.$queryRawUnsafe<Array<{ usage: string; g: string }>>(
       `SELECT usage::text AS usage, ST_AsGeoJSON(ST_Simplify(ST_LineMerge(ST_Union(geometry)), 0.003), 4) AS g
        FROM lines WHERE deleted_at IS NULL AND usage IN ('main','branch') GROUP BY usage`,

@@ -264,8 +264,8 @@
     }
   },
   "sidings": {
-    "lead": "Xususiy shahobcha yo'llar reestri: joylashuv, uzunlik, yuklash va tushirish sig'imi. Egasining nomi u o'zi tasdiqlab, operator tekshirgandan keyingina ko'rsatiladi.",
-    "count": "{count} ta yo'l",
+    "lead": "Egalari o'zlari qo'shgan xususiy shahobcha yo'llar: joylashuv, uzunlik, yuklash va tushirish sig'imi. Yo'l sizniki bo'lsa, kabinetdan biriktiring.",
+    "count": "{count, number} ta yo'l",
     "search": {
       "placeholder": "Joy nomi yoki kod"
     },
@@ -280,7 +280,9 @@
       "pending": "tasdiq kutilmoqda",
       "unclaimed": "egasi tasdiqlamagan, meniki"
     },
-    "empty": "Topilmadi."
+    "empty": "Topilmadi.",
+    "emptyOwner": "Hozircha egasi qo'shgan shahobcha yo'l yo'q.",
+    "emptyOwnerCta": "Shahobcha yo'lni biriktirish"
   },
   "texnika": {
     "lead": "Teplovoz, elektrovoz va vagonlar. Egasi texnikasini sotish yoki arendaga berish uchun e'lon qo'yadi, shartlarni o'zi belgilaydi.",

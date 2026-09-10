@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 const PLANS = [
   { key: 'free', n: 4, href: '/dashboard/listings/new', hot: false },
   { key: 'premium', n: 5, href: '/dashboard/listings?premium=1', hot: true },
-  { key: 'deal', n: 4, href: '/contact?topic=partner', hot: false },
+  { key: 'deal', n: 3, href: '/contact?topic=partner', hot: false },
 ] as const;
 
 export default async function PricingPage({ params }: Params) {
@@ -44,7 +44,7 @@ export default async function PricingPage({ params }: Params) {
               {p.hot ? <span className="absolute -top-3 left-6 rounded-full bg-navy px-3 py-1 font-mono text-[11px] font-semibold text-white">{t('premium.badge')}</span> : null}
               <h2 className="font-display text-lg font-bold text-navy">{t(`${p.key}.name`)}</h2>
               <p className="mt-3 font-display text-3xl font-bold tabular-nums text-navy">
-                {p.key === 'premium' ? <>{num(PRICING.premiumPerListingPerMonthSom)} <span className="font-mono text-base font-normal text-muted">{t('perMonth')}</span></> : t(`${p.key}.price`)}
+                {p.key === 'premium' ? <>{num(PRICING.premiumPerListingPerMonthSom, locale)} <span className="font-mono text-base font-normal text-muted">{t('perMonth')}</span></> : t(`${p.key}.price`)}
               </p>
               <p className="mt-1 text-sm text-muted">{t(`${p.key}.note`)}</p>
               <ul className="mt-5 flex-1 space-y-2.5">

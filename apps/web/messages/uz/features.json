@@ -22,7 +22,7 @@
       },
       "data": {
         "title": "Ma'lumot",
-        "lead": "Reestr, standart, kompaniyalar va ochiq API."
+        "lead": "Reestr, standart va kompaniyalar."
       }
     },
     "items": {
@@ -150,7 +150,7 @@
           "dictionary": "Lug'at bilan tushunildi",
           "llm": "Aniqroq tushunish uchun AI ishlatildi"
         },
-        "unavailable": "API hozir javob bermadi, misol statik ko'rsatilmoqda."
+        "unavailable": "Bu misoldagi raqamlar hozir yangilanmadi, oxirgi ma'lum holat ko'rsatilyapti."
       },
       "rule": {
         "heading": "Qoida",

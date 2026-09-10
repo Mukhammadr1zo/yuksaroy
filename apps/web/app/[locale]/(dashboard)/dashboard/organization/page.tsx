@@ -8,7 +8,7 @@ import { uzDateTime } from '@/lib/format';
 import type { Membership, OrgRecord } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, Field, INPUT, Notice, errText, useLang } from '@/components/kabinet/bits';
 import { StorefrontForm } from '@/components/kabinet/StorefrontForm';
-import { PhoneField } from '@/components/ui/fields';
+import { PhoneField, phoneDisplay } from '@/components/ui/fields';
 
 const KINDS = ORG_KINDS.filter((k) => k !== 'PLATFORM');
 const KYC_TONE: Record<KycStatus, string> = { NONE: 'bg-line text-ink/70', PENDING: 'bg-amber-soft text-amber-ink', VERIFIED: 'bg-teal text-white', REJECTED: 'bg-red-50 text-red-700' };
@@ -122,7 +122,7 @@ function OrgCard({ m, onChange }: { m: Membership; onChange: () => void }) {
   }
   async function addMember(e: React.FormEvent) {
     e.preventDefault(); setBusy('invite'); setNote(null);
-    try { await post(`/orgs/${o.id}/members`, invite); setInvite({ phone: '', roles: [] }); setNote({ tone: 'ok', text: t('members.invited') }); }
+    try { const added = phoneDisplay(invite.phone); await post(`/orgs/${o.id}/members`, invite); setInvite({ phone: '', roles: [] }); setNote({ tone: 'ok', text: `${t('members.invited')} ${added}` }); }
     catch (er) {
       const allowed = er instanceof ApiError && Array.isArray(er.body?.allowed) ? ` (${er.body.allowed.join(', ')})` : '';
       setNote({ tone: 'err', text: errText(er, te, te.has, tc('failed')) + allowed });
@@ -138,7 +138,7 @@ function OrgCard({ m, onChange }: { m: Membership; onChange: () => void }) {
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-lg font-bold">{o.name}</h2>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${KYC_TONE[o.kycStatus]}`}>{KYC_STATUS_LABELS[lang][o.kycStatus]}</span>
-        <span className="ml-auto font-mono text-xs text-muted">{t('yourRoles')}: {m.roles.join(', ')}{m.isOwner ? ` · ${t('owner')}` : ''}</span>
+        <span className="ml-auto font-mono text-xs text-muted">{t('yourRoles')}: {m.roles.map((r) => (t.has(`role.${r}`) ? t(`role.${r}`) : r)).join(', ')}{m.isOwner ? ` · ${t('owner')}` : ''}</span>
       </div>
       {!m.isOwner ? <p className="mt-2 text-sm text-muted">{t('readOnly')}</p> : null}
       <div className="mt-4 flex gap-2">
@@ -154,7 +154,7 @@ function OrgCard({ m, onChange }: { m: Membership; onChange: () => void }) {
       <div className="mt-6 border-t border-line pt-4">
         <h3 className="font-semibold">{t('kyc.title')}</h3>
         <p className="mt-1 text-sm text-muted">{t(`kyc.hint.${o.kycStatus}`)}</p>
-        {o.kycRequestedAt ? <p className="mt-1 font-mono text-xs text-muted">{t('kyc.requestedAt')}: {uzDateTime(o.kycRequestedAt)}</p> : null}
+        {o.kycRequestedAt ? <p className="mt-1 font-mono text-xs text-muted">{t('kyc.requestedAt')}: {uzDateTime(o.kycRequestedAt, lang)}</p> : null}
         {o.kycNote ? <p className="mt-2 rounded-xl bg-sand p-3 text-sm"><span className="text-muted">{t('kyc.note')}: </span>{o.kycNote}</p> : null}
         {canKyc ? (
           <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -203,7 +203,7 @@ function NewOrgForm({ onCreated }: { onCreated: () => void }) {
     e.preventDefault(); setBusy(true); setNote(null);
     try {
       const b = toBody(d);
-      await post('/orgs', { ...b, description: b.description || undefined, telegram: b.telegram || undefined, website: b.website || undefined, phone: b.phone || undefined, address: undefined });
+      await post('/orgs', { ...b, description: b.description || undefined, telegram: b.telegram || undefined, website: b.website || undefined, phone: b.phone || undefined, address: b.address || undefined });
       setD(EMPTY); setOpen(false); setNote({ tone: 'ok', text: t('created') }); onCreated();
     } catch (er) { setNote({ tone: 'err', text: errText(er, te, te.has, tc('failed')) }); } finally { setBusy(false); }
   }

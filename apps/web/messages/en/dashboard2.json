@@ -244,7 +244,8 @@
         "OPERATION_NOT_OFFERED": "The terminal does not perform this operation.",
         "TERMINAL_UNAVAILABLE": "The terminal is not accepting orders right now.",
         "STATION_NOT_FOUND": "Station not found.",
-        "CARGO_NOT_FOUND": "Cargo type not found."
+        "CARGO_NOT_FOUND": "Cargo type not found.",
+        "wagonNumbers": "A wagon number must be 8 digits: {list}"
       },
       "price": {
         "min": "(min)",

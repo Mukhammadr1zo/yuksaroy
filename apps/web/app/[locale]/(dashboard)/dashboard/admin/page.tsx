@@ -129,10 +129,10 @@ function ListingRow({ l }: { l: OwnerListing }) {
       <div className="flex flex-wrap items-center gap-3">
         <span className="rounded-full bg-teal-soft px-2.5 py-0.5 text-xs font-semibold text-teal-ink">{L.kind[l.kind]}</span>
         <span className="font-semibold">{l.title}</span>
-        <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(l.createdAt)}</span>
+        <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(l.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
-        {l.owner.type === 'org' ? t('org') : LISTING_OWNER_LABELS[lang].person}: {l.owner.name} · {t('region')}: {tr.has(l.regionCode) ? tr(l.regionCode) : l.regionCode} · {t('price')}: <span className="font-mono">{l.priceTiyin != null ? `${som(l.priceTiyin)}${l.priceUnit ? ` / ${L.priceUnit[l.priceUnit]}` : ''}` : t('onRequest')}</span> · <span className="font-mono">{l.photos.length}</span> {t('photos')}
+        {l.owner.type === 'org' ? t('org') : LISTING_OWNER_LABELS[lang].person}: {l.owner.name} · {t('region')}: {tr.has(l.regionCode) ? tr(l.regionCode) : l.regionCode} · {t('price')}: <span className="font-mono">{l.priceTiyin != null ? `${som(l.priceTiyin, lang)}${l.priceUnit ? ` / ${L.priceUnit[l.priceUnit]}` : ''}` : t('onRequest')}</span> · <span className="font-mono">{l.photos.length}</span> {t('photos')}
         {l.year ? <> · <span className="font-mono">{l.year}</span></> : null}{l.condition ? ` · ${L.condition[l.condition]}` : ''}{l.model ? ` · ${l.model}` : ''}
       </p>
       {l.description ? <p className="mt-2 whitespace-pre-line text-sm">{l.description}</p> : null}
@@ -159,7 +159,7 @@ function OrgRow({ o }: { o: OrgRecord }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-semibold">{o.name}</span>
         {kinds.map((k) => <span key={k} className="rounded-full bg-teal-soft px-2.5 py-0.5 text-xs font-semibold text-teal-ink">{ORG_KIND_LABELS[lang][k]}</span>)}
-        {o.kycRequestedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('requestedAt')} {uzDateTime(o.kycRequestedAt)}</span> : null}
+        {o.kycRequestedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('requestedAt')} {uzDateTime(o.kycRequestedAt, lang)}</span> : null}
       </div>
       <p className="mt-1 font-mono text-sm">
         {t('stir')}: {o.stir ?? t('noStir')}{o.regionCode && tr.has(o.regionCode) ? <span className="text-muted"> · {t('region')}: {tr(o.regionCode)}</span> : null}
@@ -172,6 +172,7 @@ function OrgRow({ o }: { o: OrgRecord }) {
 }
 
 function ClaimRow({ s }: { s: MySiding }) {
+  const lang = useLang();
   const t = useTranslations('admin.claim');
   const tr = useTranslations('region');
   return (
@@ -179,10 +180,10 @@ function ClaimRow({ s }: { s: MySiding }) {
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-semibold">{t('siding')} <span className="font-mono">No {s.registryNo}</span></span>
         <span className="text-sm text-muted">{t('station')}: {s.station?.nameUz ?? s.stationNameRaw}{s.regionCode && tr.has(s.regionCode) ? ` · ${tr(s.regionCode)}` : ''}</span>
-        {s.claimedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('claimedAt')} {uzDateTime(s.claimedAt)}</span> : null}
+        {s.claimedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('claimedAt')} {uzDateTime(s.claimedAt, lang)}</span> : null}
       </div>
       <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{s.ownerOrgName ?? s.ownerOrgId ?? '·'}</span></p>
-      <p className="mt-0.5 text-sm text-muted">{t('registryOwner')}: {s.ownerNameRaw || '·'}{s.lengthM != null ? <> · <span className="font-mono">{num(s.lengthM)} m</span></> : null}</p>
+      <p className="mt-0.5 text-sm text-muted">{t('registryOwner')}: {s.ownerNameRaw || '·'}{s.lengthM != null ? <> · <span className="font-mono">{num(s.lengthM, lang)} m</span></> : null}</p>
       <Link href={`/sidings/${s.id}`} className="mt-1 inline-block text-sm text-teal-ink underline">{t('open')}</Link>
       <Decide path={`/sidings/${s.id}/claim/decide`} reasonKey="reason" reasonRequired={false} />
     </article>
@@ -210,6 +211,7 @@ function TerminalClaimRow({ x }: { x: AdminTerminal }) {
 
 /** Premium to'lovi (qo'lda): e'lon, tashkilot, oylar, summa; tasdiq POST /admin/premium/:id/confirm -> PAID va premiumUntil uzayadi. */
 function PremiumRow({ o }: { o: AdminPremiumOrder }) {
+  const lang = useLang();
   const t = useTranslations('premium.admin');
   const [busy, setBusy] = useState(false);
   const [until, setUntil] = useState<string | null>(null);
@@ -224,13 +226,13 @@ function PremiumRow({ o }: { o: AdminPremiumOrder }) {
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-semibold">{o.listing.title}</span>
         <span className="rounded-full bg-amber-soft px-2.5 py-0.5 text-xs font-semibold text-amber-ink">{t(`status.${o.status}`)}</span>
-        <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(o.createdAt)}</span>
+        <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(o.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
-        {t('org')}: <span className="text-ink">{o.listing.orgName ?? '·'}</span> · <span className="font-mono">{t('months', { n: o.months })}</span> · <span className="font-mono font-semibold text-navy">{som(o.amountTiyin)}</span> · {t('until')}: <span className="font-mono">{o.listing.premiumUntil ? uzDateTime(o.listing.premiumUntil) : t('noPremium')}</span>
+        {t('org')}: <span className="text-ink">{o.listing.orgName ?? '·'}</span> · <span className="font-mono">{t('months', { n: o.months })}</span> · <span className="font-mono font-semibold text-navy">{som(o.amountTiyin, lang)}</span> · {t('until')}: <span className="font-mono">{o.listing.premiumUntil ? uzDateTime(o.listing.premiumUntil, lang) : t('noPremium')}</span>
       </p>
       <p className="mt-1 font-mono text-xs text-muted">{o.id}</p>
-      {until ? <p className="mt-3 text-sm font-semibold text-teal-ink">{t('confirmed', { until: uzDateTime(until) })}</p> : (
+      {until ? <p className="mt-3 text-sm font-semibold text-teal-ink">{t('confirmed', { until: uzDateTime(until, lang) })}</p> : (
         <div className="mt-3">
           <button type="button" disabled={busy} onClick={confirm} className="rounded-full bg-teal px-6 py-2 text-sm font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98] disabled:opacity-60">{busy ? t('confirming') : t('confirm')}</button>
           {err ? <p role="alert" className="mt-2 text-sm text-red-700">{t('failed')}</p> : null}
@@ -242,6 +244,7 @@ function PremiumRow({ o }: { o: AdminPremiumOrder }) {
 
 /** Aloqa formasidan kelgan murojaat: faqat o'qish, javob telefon yoki email orqali. */
 function ContactRow({ m }: { m: ContactPage['items'][number] }) {
+  const lang = useLang();
   const t = useTranslations('premium.messages');
   return (
     <article className="rounded-card border border-line bg-white p-4">
@@ -249,7 +252,7 @@ function ContactRow({ m }: { m: ContactPage['items'][number] }) {
         <span className="rounded-full bg-teal-soft px-2.5 py-0.5 text-xs font-semibold text-teal-ink">{t.has(`topic.${m.topic}`) ? t(`topic.${m.topic}`) : m.topic}</span>
         <span className="font-semibold">{m.name}</span>
         <span className="font-mono text-sm">{m.contact}</span>
-        <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(m.createdAt)}</span>
+        <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(m.createdAt, lang)}</span>
       </div>
       <p className="mt-2 whitespace-pre-line text-sm">{m.message}</p>
     </article>

@@ -48,7 +48,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
         [t('qty'), l.kind === 'WAGON' || l.qty > 1 ? l.qty : null],
         [t('capacityT'), l.capacityT ? `${l.capacityT} t` : null],
       ];
-  specs.push([t('region'), regionName(l.regionCode, lang)], [t('published'), l.publishedAt ? uzDate(l.publishedAt) : null]);
+  specs.push([t('region'), regionName(l.regionCode, lang)], [t('published'), l.publishedAt ? uzDate(l.publishedAt, lang) : null]);
   const rows = specs.filter(([, v]) => v !== null && v !== undefined && v !== '');
 
   return (
@@ -104,7 +104,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
           <section className="rounded-card border border-line bg-white p-5">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('price')}</h2>
             {l.priceTiyin != null ? (
-              <p className="mt-1 font-display text-2xl font-bold text-navy tabular-nums">{formatSom(l.priceTiyin)}{l.priceUnit && l.priceUnit !== 'TOTAL' ? <span className="ml-2 font-mono text-sm font-normal text-muted">{L.priceUnit[l.priceUnit]}</span> : null}</p>
+              <p className="mt-1 font-display text-2xl font-bold text-navy tabular-nums">{formatSom(l.priceTiyin, lang)}{l.priceUnit && l.priceUnit !== 'TOTAL' ? <span className="ml-2 font-mono text-sm font-normal text-muted">{L.priceUnit[l.priceUnit]}</span> : null}</p>
             ) : <p className="mt-1 font-display text-xl font-bold text-navy">{t('onRequest')}</p>}
             <div className="mt-4 space-y-3">
               {l.contactPhone ? <PhoneLink phone={l.contactPhone} kind="listing" targetId={l.id} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}

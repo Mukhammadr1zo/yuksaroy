@@ -2,6 +2,19 @@ import { Injectable } from '@nestjs/common';
 import type { OtpSender } from '../domain/ports';
 import { env } from '../../../common/env';
 
+// Kod xabari uch tilda: <code> ustiga bosilganda Telegram nusxa oladi
+const TEXT: Record<'uz' | 'ru' | 'en', (code: string) => string> = {
+  uz: (c) => `YukSaroy kirish kodi: <code>${c}</code>
+
+Kod 5 daqiqa amal qiladi. Uni hech kimga bermang.`,
+  ru: (c) => `Код входа YukSaroy: <code>${c}</code>
+
+Код действует 5 минут. Никому его не передавайте.`,
+  en: (c) => `YukSaroy sign-in code: <code>${c}</code>
+
+The code is valid for 5 minutes. Do not share it.`,
+};
+
 /** Telegram Bot API ga to'g'ridan-to'g'ri (Telegraf kerak emas). Bot jarayoni bilan bir xil token. */
 @Injectable()
 export class TelegramOtpSender implements OtpSender {

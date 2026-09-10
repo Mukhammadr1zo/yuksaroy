@@ -34,7 +34,7 @@
       "must": "Name, station, type, working hours, at least one service",
       "should": "Tariffs, passport (tracks, crane, warehouse, scale), photos, phone",
       "note": "A passport not confirmed by the owner is compiled from open data and marked as such.",
-      "owner": "Organization (TERMINAL type): the operator links the profile"
+      "owner": "Organization (type: Terminal): the operator links the profile"
     },
     "siding": {
       "title": "Siding",

@@ -62,7 +62,7 @@ export interface OtpStore {
 
 export interface OtpSender {
   /** Kodni foydalanuvchining Telegram chatiga yuboradi. */
-  sendCode(chatId: bigint, code: string): Promise<void>;
+  sendCode(chatId: bigint, code: string, locale?: string | null): Promise<void>;
 }
 
 export interface SessionStore {

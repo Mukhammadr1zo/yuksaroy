@@ -1,7 +1,7 @@
 'use client';
 // Premium buyurtma: oylar (1..12), jami so'm, POST /listings/:id/premium, keyin to'lov ko'rsatmasi. Tashqarini bosish yoki Esc yopadi.
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { PRICING, premiumAmountTiyin } from '@yuksaroy/domain';
 import { post } from '@/lib/api';
 import { som } from '@/lib/format';
@@ -12,6 +12,7 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 export function PremiumModal({ listing, onClose }: { listing: { id: string; title: string }; onClose: () => void }) {
   const t = useTranslations('premium.modal');
+  const locale = useLocale();
   const [months, setMonths] = useState(1);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(false);
@@ -59,7 +60,7 @@ export function PremiumModal({ listing, onClose }: { listing: { id: string; titl
             <Notice tone="ok">{t('created')}</Notice>
             <dl className="space-y-1">
               <div className="flex justify-between gap-4"><dt className="text-muted">{t('orderNo')}</dt><dd className="font-mono">{res.order.id}</dd></div>
-              <div className="flex justify-between gap-4"><dt className="text-muted">{t('amount')}</dt><dd className="font-mono font-semibold tabular-nums">{som(res.order.amountTiyin)}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-muted">{t('amount')}</dt><dd className="font-mono font-semibold tabular-nums">{som(res.order.amountTiyin, locale)}</dd></div>
             </dl>
             <div>
               <p className="text-xs font-semibold text-muted">{t('pay')}</p>
@@ -77,7 +78,7 @@ export function PremiumModal({ listing, onClose }: { listing: { id: string; titl
               </select>
             </label>
             <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl bg-sand px-4 py-3">
-              <span className="font-mono text-sm text-muted tabular-nums">{t('perMonth', { price: som(PRICING.premiumPerListingPerMonthSom * 100) })}</span>
+              <span className="font-mono text-sm text-muted tabular-nums">{t('perMonth', { price: som(PRICING.premiumPerListingPerMonthSom * 100, locale) })}</span>
               <span className="font-mono text-lg font-bold text-navy tabular-nums">{t('total')}: {som(premiumAmountTiyin(months))}</span>
             </div>
             {err ? <Notice tone="err">{t('failed')}</Notice> : null}

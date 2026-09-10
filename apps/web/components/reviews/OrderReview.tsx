@@ -2,7 +2,7 @@
 // Buyurtma sahifasidagi baho: yuk egasi (DONE, baho yo'q) beradi, terminal xodimi javob yozadi.
 // Rol: /orgs/mine ichida buyurtmachi tashkilot bo'lsa yuk egasi, aks holda terminal tomoni (sahifani faqat tomonlar ochadi).
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { REVIEW } from '@yuksaroy/domain';
 import { api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
@@ -67,6 +67,7 @@ function ReviewForm({ no, onDone }: { no: string; onDone: (r: R) => void }) {
 
 /** Berilgan baho: yuk egasiga o'z bahosi, terminalga javob tugmasi (REVIEW.maxReplyDays ichida qayta yozish mumkin). */
 function ReviewCard({ r, canReply, onReply }: { r: R; canReply: boolean; onReply: (r: R) => void }) {
+  const locale = useLocale();
   const t = useTranslations('reviews');
   const te = useTranslations('reviews.err');
   const [editing, setEditing] = useState(false);
@@ -86,12 +87,12 @@ function ReviewCard({ r, canReply, onReply }: { r: R; canReply: boolean; onReply
       <h3 className="font-semibold">{canReply ? t('review') : t('yours')}</h3>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         <Stars n={r.rating} className="text-base" />
-        <span className="font-mono text-xs text-muted">{uzDate(r.createdAt)}</span>
+        <span className="font-mono text-xs text-muted">{uzDate(r.createdAt, locale)}</span>
       </div>
       {r.text ? <p className="mt-2 whitespace-pre-line text-sm">{r.text}</p> : null}
       {r.reply && !editing ? (
         <div className="mt-3 rounded-xl bg-sand px-3 py-2 text-sm">
-          <p className="text-xs font-semibold text-muted">{t('reply')}{r.repliedAt ? ` · ${uzDate(r.repliedAt)}` : ''}</p>
+          <p className="text-xs font-semibold text-muted">{t('reply')}{r.repliedAt ? ` · ${uzDate(r.repliedAt, locale)}` : ''}</p>
           <p className="mt-0.5 whitespace-pre-line">{r.reply}</p>
         </div>
       ) : null}

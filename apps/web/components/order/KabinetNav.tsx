@@ -55,7 +55,7 @@ export function KabinetNav() {
   return (
     // Tasma emas, o'ralgan qatorlar: telefon ekranida ham hamma havola ko'rinadi, CTA doim o'ngda
     <div className="flex min-w-0 flex-1 items-start gap-2">
-    <nav aria-label={t9('menu')} className="flex min-w-0 flex-1 flex-wrap items-center gap-1 text-sm">
+    <nav aria-label={t9('menu')} className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm sm:flex-wrap sm:overflow-visible">
       {links.map((l) => {
         const active = l.href === '/dashboard' ? path === '/dashboard' : path === l.href || path.startsWith(`${l.href}/`);
         return (

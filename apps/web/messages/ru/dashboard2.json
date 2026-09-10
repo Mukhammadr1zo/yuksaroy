@@ -244,7 +244,8 @@
         "OPERATION_NOT_OFFERED": "Терминал не выполняет эту операцию.",
         "TERMINAL_UNAVAILABLE": "Терминал сейчас не принимает заказы.",
         "STATION_NOT_FOUND": "Станция не найдена.",
-        "CARGO_NOT_FOUND": "Тип груза не найден."
+        "CARGO_NOT_FOUND": "Тип груза не найден.",
+        "wagonNumbers": "Номер вагона должен состоять из 8 цифр: {list}"
       },
       "price": {
         "min": "(мин.)",

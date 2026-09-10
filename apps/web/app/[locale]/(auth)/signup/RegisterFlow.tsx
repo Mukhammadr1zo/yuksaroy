@@ -134,7 +134,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
                 {state === 'done' ? <CheckIcon size={14} weight="bold" aria-hidden="true" /> : n}
               </span>
               {/* Tor ekranda faqat joriy qadam yozuvi ko'rinadi, qolganlari raqam bilan qoladi */}
-              <span className={`shrink-0 whitespace-nowrap text-xs font-semibold ${state === 'todo' ? 'text-muted' : 'text-ink'} ${state === 'now' ? '' : 'hidden sm:inline'}`}>{t(`steps.${s}`)}</span>
+              <span className={`min-w-0 truncate text-xs font-semibold ${state === 'todo' ? 'text-muted' : 'text-ink'} ${state === 'now' ? '' : 'hidden sm:inline'}`}>{t(`steps.${s}`)}</span>
               {i < STEPS.length - 1 && <span className={`h-px min-w-3 flex-1 transition-colors duration-200 ${state === 'done' ? 'bg-teal' : 'bg-line'}`} aria-hidden="true" />}
             </li>
           );
@@ -249,7 +249,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
             <CheckCircleIcon size={36} weight="fill" className="shrink-0 text-teal" aria-hidden="true" />
             <div>
               <h2 className="font-display text-xl font-bold text-navy">{t('done.title')}</h2>
-              <p className="text-sm text-muted">{org ? t('done.lead', { org: org.name }) : t('done.driverLead')}</p>
+              <p className="text-sm text-muted">{org ? t('done.lead', { org: org.name }) : who === 'shipper' ? t('done.shipperLead') : t('done.driverLead')}</p>
             </div>
           </div>
           <ul className="mt-6 space-y-2">
@@ -268,7 +268,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
           <p className="mt-5 rounded-xl bg-amber-soft p-4 text-sm">
             {org ? (
               <>{t('done.kycHint')}{' '}<Link href="/dashboard/organization" className="font-semibold text-amber-ink hover:underline">{t('done.kycLink')}</Link></>
-            ) : t('done.driverHint')}
+            ) : who === 'shipper' ? t('done.shipperHint') : t('done.driverHint')}
           </p>
         </div>
       )}

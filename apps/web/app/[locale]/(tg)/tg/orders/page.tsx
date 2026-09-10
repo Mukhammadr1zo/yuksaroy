@@ -1,7 +1,7 @@
 'use client';
 // Buyurtmalarim: holat pilli bilan ixcham ro'yxat, filtr chiplari.
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { OrderStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -21,6 +21,7 @@ const FILTERS: { key: 'open' | 'done' | 'closed' | 'all'; status?: OrderStatus[]
 
 export default function TgOrdersPage() {
   const t = useTranslations('tg.orders');
+  const locale = useLocale();
   const tc = useTranslations('tg.common');
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('open');
   const [data, setData] = useState<Page<OrderCard> | null>(null);
@@ -49,7 +50,7 @@ export default function TgOrdersPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-sm font-bold">{o.no}</span>
                     <StatusPill status={o.status} />
-                    <span className="ml-auto font-mono text-sm font-semibold tabular-nums">{som(o.totalTiyin)}</span>
+                    <span className="ml-auto font-mono text-sm font-semibold tabular-nums">{som(o.totalTiyin, locale)}</span>
                   </div>
                   {o.status === 'PENDING' && o.slaConfirmUntil ? <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">{t('sla')} <SlaTimer until={o.slaConfirmUntil} /></p> : null}
                   <p className="mt-1.5 truncate font-semibold">{o.terminal.name}</p>

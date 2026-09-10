@@ -12,6 +12,7 @@ import { Sel } from '@/components/catalog/Sel';
 import { RegionChips } from '@/components/catalog/RegionChips';
 import { Impressions } from '@/components/catalog/Impressions';
 import { alt } from '@/lib/seo';
+import { DashLink } from '@/components/site/DashLink';
 
 export const revalidate = 60;
 type Params = { params: Promise<{ locale: string }> };
@@ -41,6 +42,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
   setRequestLocale(locale);
   const lang = locale as SearchLang;
   const [sp, t, tc, tf, tp, th] = await Promise.all([searchParams, getTranslations('listing'), getTranslations('catalog'), getTranslations('filter'), getTranslations('pagination'), getTranslations('hubs')]);
+  const tg = await getTranslations('marketing.common');
   const raw = { region: one(sp.region), truckType: one(sp.truckType), tonnage: one(sp.tonnage), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), corridor: one(sp.corridor), sort: one(sp.sort) };
 
   const [nLng, nLat] = raw.near.split(',').map(Number);
@@ -130,9 +132,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
           <p className="font-display text-lg font-bold text-navy">{t('empty.title')}</p>
           <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.body')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <AuthOnly>
-            <Link href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('empty.cta')}</Link>
-            </AuthOnly>
+            <DashLink href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink>
             {filtered ? <Link href="/carriers" className="text-sm font-semibold text-teal-ink underline">{t('empty.reset')}</Link> : null}
           </div>
         </div>

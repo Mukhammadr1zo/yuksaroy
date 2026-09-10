@@ -22,7 +22,7 @@
       },
       "data": {
         "title": "Data",
-        "lead": "Registry, standard, companies and the open API."
+        "lead": "Registry, standard and companies."
       }
     },
     "items": {
@@ -140,17 +140,17 @@
       "lead": "The assistant turns a query into filters: region, service, equipment type, date. It never invents objects, prices or availability; it relies only on catalog data.",
       "example": {
         "heading": "Real example",
-        "query": "Toshkentda bugun bo'sh slot konteyner",
+        "query": "Free container slot in Tashkent today",
         "chips": "Understood filters",
         "result": "Result",
-        "decision": "{terminals} terminals · {free} free today",
+        "decision": "{terminals, plural, one {# terminal} other {# terminals}} · {free} free today",
         "cheapest": "cheapest {price}",
         "open": "Open on the map",
         "source": {
           "dictionary": "Understood by the dictionary",
           "llm": "AI used for a closer reading"
         },
-        "unavailable": "The API did not answer right now, the example is shown statically."
+        "unavailable": "The numbers in this example could not be refreshed; the last known state is shown."
       },
       "rule": {
         "heading": "The rule",

@@ -39,7 +39,7 @@ export default function TgListingsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2"><p className="truncate font-bold">{l.title}</p><ListingStatusPill status={l.status} /></div>
                   <p className="mt-0.5 truncate text-xs text-muted">{L.kind[l.kind]} · {l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : tc('onRequest')}</p>
-                  <p className="mt-0.5 font-mono text-[11px] text-muted">{t('views', { count: l.views })} · {uzDate(l.updatedAt)}</p>
+                  <p className="mt-0.5 font-mono text-[11px] text-muted">{t('views', { count: l.views })} · {uzDate(l.updatedAt, lang)}</p>
                   {l.rejectReason ? <p className="mt-1 text-xs text-red-700">{l.rejectReason}</p> : null}
                   <button type="button" onClick={() => edit(l)} className="mt-1 text-xs font-semibold text-teal-ink underline">{t('openSite')}</button>
                 </div>

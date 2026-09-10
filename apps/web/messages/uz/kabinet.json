@@ -95,7 +95,7 @@
       "backToList": "E'lonlarga qaytish",
       "pickKind": "Nima e'lon qilasiz?",
       "kindHint": {
-        "SHUNTING_LOCO": "Ijara yoki sotuv, terminal yoki shahobchada",
+        "SHUNTING_LOCO": "Ijara yoki sotuv, terminal yoki shahobcha yo'lda",
         "ELECTRIC_LOCO": "Ijara yoki sotuv",
         "WAGON": "Tur, soni, yuk ko'tarish, ijara yoki sotuv",
         "TRUCK": "Avtotashuvchi: mashina turi, tonnaj, xizmat hududlari"
@@ -132,7 +132,7 @@
         "routes": "Doimiy yo'nalishlar",
         "priceTiyin": "Narx",
         "priceUnit": "Birlik",
-        "terminalId": "Terminal yoki shahobcha",
+        "terminalId": "Terminal yoki shahobcha yo'l",
         "sidingId": "Shahobcha yo'l",
         "responseHours": "Javob muddati, soat",
         "contactPhone": "Aloqa telefoni",
@@ -185,7 +185,7 @@
         "INVALID": "Noto'g'ri qiymat",
         "RANGE": "Diapazondan tashqari",
         "DEAL_NOT_ALLOWED": "Avtotransport uchun bitim tanlanmaydi",
-        "ONE_OBJECT_ONLY": "Faqat bittasi: terminal yoki shahobcha",
+        "ONE_OBJECT_ONLY": "Faqat bittasi: terminal yoki shahobcha yo'l",
         "PRICE_UNIT_REQUIRED": "Narx birligini tanlang",
         "UNIT_NOT_FOR_DEAL": "Bu birlik tanlangan bitimga mos emas",
         "SERVICE_REGIONS_MUST_INCLUDE_BASE": "Bazaviy viloyat xizmat hududlariga kirishi shart",
@@ -311,7 +311,16 @@
         "length": "Uzunlik",
         "status": "Da'vo holati"
       },
-      "open": "Sahifasi"
+      "open": "Sahifasi",
+      "registry": {
+        "title": "Shahobcha yo'lingizni toping",
+        "lead": "Reestr raqami, stansiya nomi yoki kod bo'yicha qidiring va o'zingiznikini biriktiring. Tasdiqdan keyin u ochiq katalogda ko'rinadi.",
+        "placeholder": "Stansiya nomi yoki kod",
+        "search": "Qidirish",
+        "claim": "Biriktirish",
+        "claimed": "Da'vo yuborildi, operator tekshiradi.",
+        "none": "Topilmadi."
+      }
     },
     "profile": {
       "title": "Profil",

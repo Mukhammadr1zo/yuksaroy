@@ -8,9 +8,9 @@
     "title": "Book. Quote. Ask a price.",
     "lead": "A terminal service gets a booked slot, the price comes from an open formula, equipment and truck listings take a request to the owner. All three live in one cabinet.",
     "facts": {
-      "terminals": "{count} active terminals",
-      "freeSlots": "{count} free slots today",
-      "sidings": "{count} sidings in the registry"
+      "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
+      "freeSlots": "{count, plural, one {# free slot today} other {# free slots today}}",
+      "sidings": "{count, plural, one {# siding} other {# sidings}} in the registry"
     },
     "cta": {
       "bookable": "Terminals with free slots today",
@@ -38,7 +38,11 @@
     "example": {
       "heading": "Live example: how a tariff adds up",
       "lead": "Using the current tariffs of {terminal}: {weight} t of cargo, 1 wagon, loading and weighing.",
-      "col": { "line": "Service", "formula": "Calculation", "amount": "Amount" },
+      "col": {
+        "line": "Service",
+        "formula": "Calculation",
+        "amount": "Amount"
+      },
       "min": "minimum amount applied",
       "subtotal": "Services",
       "commission": "Platform commission {pct} %",
@@ -60,10 +64,22 @@
       "before": "Pending → Confirmed",
       "after": "Done: act and invoice",
       "steps": {
-        "ARRIVED": { "title": "Arrived", "body": "Wagon at the terminal, slot time started" },
-        "WEIGHED": { "title": "Weighed", "body": "Scale result written to the order" },
-        "HANDLED": { "title": "Loaded / Unloaded", "body": "Main operation completed" },
-        "DEPARTED": { "title": "Departed", "body": "Order closes, documents are ready" }
+        "ARRIVED": {
+          "title": "Arrived",
+          "body": "Wagon at the terminal, slot time started"
+        },
+        "WEIGHED": {
+          "title": "Weighed",
+          "body": "Scale result written to the order"
+        },
+        "HANDLED": {
+          "title": "Loaded / Unloaded",
+          "body": "Main operation completed"
+        },
+        "DEPARTED": {
+          "title": "Departed",
+          "body": "Order closes, documents are ready"
+        }
       }
     },
     "band": {

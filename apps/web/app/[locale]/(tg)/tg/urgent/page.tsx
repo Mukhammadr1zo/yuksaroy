@@ -1,11 +1,11 @@
 'use client';
 // Shoshilinch so'rov: tur plitkalari, viloyat, stansiya, vagon, tavsif, telefon (profil raqami oldindan) -> POST /urgent. Pastda mening so'rovlarim.
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { CraneIcon, QuestionIcon, TrainIcon, WrenchIcon } from '@phosphor-icons/react';
 import { REGIONS, URGENT_KINDS, type UrgentKind } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
-import { api, post } from '@/lib/api';
+import { ApiError, api, post } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { asList, type UrgentRequest } from '@/lib/types-urgent';
 import { UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
@@ -18,6 +18,7 @@ type Draft = { kind: UrgentKind; regionCode: string; stationName: string; wagonC
 
 export default function TgUrgentPage() {
   const t = useTranslations('tg.urgent');
+  const locale = useLocale();
   const tf = useTranslations('urgent.mine');
   const tc = useTranslations('tg.common');
   const tr = useTranslations('region');
@@ -34,7 +35,8 @@ export default function TgUrgentPage() {
   useEffect(() => { if (me?.phone) setD((x) => ({ ...x, contactPhone: x.contactPhone || me.phone || '' })); }, [me?.phone]);
   const dirty = !!(d.regionCode || d.description || d.stationName);
   useClosingConfirmation(dirty);
-  const valid = !!d.regionCode && d.description.trim().length >= 5 && d.contactPhone.trim().length >= 7;
+  // PhoneField E.164 beradi: yarim raqamda tugma faol qolib, server rad etardi
+  const valid = !!d.regionCode && d.description.trim().length >= 5 && /^\+998\d{9}$/.test(d.contactPhone);
 
   async function submit() {
     if (!valid) return;
@@ -43,7 +45,11 @@ export default function TgUrgentPage() {
       const r = await post<UrgentRequest>('/urgent', { kind: d.kind, regionCode: d.regionCode, stationName: d.stationName.trim() || undefined, wagonCount: d.wagonCount ? Number(d.wagonCount) : undefined, description: d.description.trim(), contactPhone: d.contactPhone.trim() });
       haptic('medium');
       router.replace(`/tg/urgent/${r.id}`);
-    } catch { setErr(tc('failed')); setBusy(false); }
+    } catch (e) {
+      const code = e instanceof ApiError ? String(e.body?.code ?? '') : '';
+      setErr(code && tf.has(`err.${code}`) ? tf(`err.${code}`) : tc('failed'));
+      setBusy(false);
+    }
   }
   useMainButton({ text: busy ? tf('form.sending') : tf('form.submit'), onClick: () => void submit(), disabled: !valid, busy });
 
@@ -89,7 +95,7 @@ export default function TgUrgentPage() {
                 <Link href={`/tg/urgent/${r.id}`} onClick={() => haptic()} className={`${CARD} block p-3 active:bg-sand`}>
                   <div className="flex flex-wrap items-center gap-2"><span className="font-mono text-sm font-bold">{r.no}</span><UrgentStatusPill status={r.status} /><span className="ml-auto font-mono text-xs text-muted">{t('offersCount', { count: r.offersCount ?? r.offers?.length ?? 0 })}</span></div>
                   <p className="mt-1 truncate text-sm">{L.kind[r.kind] ?? r.kind} · {L.region(r.regionCode)}{r.stationName ? ` · ${r.stationName}` : ''}</p>
-                  <p className="mt-0.5 font-mono text-xs text-muted">{uzDateTime(r.createdAt)}</p>
+                  <p className="mt-0.5 font-mono text-xs text-muted">{uzDateTime(r.createdAt, locale)}</p>
                 </Link>
               </li>
             ))}

@@ -17,7 +17,7 @@
       "cancel": "Cancel",
       "close": "Close",
       "created": "Order received",
-      "orderNo": "Order ID",
+      "orderNo": "Put this in the payment reference",
       "amount": "Amount",
       "pay": "Payment",
       "afterPay": "Premium turns on once the payment is confirmed, usually within 1 business day.",
@@ -26,7 +26,11 @@
     "admin": {
       "tab": "Premium payments",
       "lead": "Manual payment: check the transfer and confirm; the listing's Premium period is extended.",
-      "status": { "PENDING": "Awaiting payment", "PAID": "Paid", "CANCELLED": "Cancelled" },
+      "status": {
+        "PENDING": "Awaiting payment",
+        "PAID": "Paid",
+        "CANCELLED": "Cancelled"
+      },
       "months": "{n} mo",
       "org": "Organization",
       "created": "Requested",
@@ -42,7 +46,12 @@
     "messages": {
       "tab": "Messages",
       "lead": "Requests from the contact form. Reply by phone or email within 24 hours.",
-      "topic": { "demo": "Demo", "question": "Question", "tech": "Technical", "partner": "Partnership" },
+      "topic": {
+        "demo": "Demo",
+        "question": "Question",
+        "tech": "Technical",
+        "partner": "Partnership"
+      },
       "shown": "{n} / {total}",
       "empty": "No messages."
     }

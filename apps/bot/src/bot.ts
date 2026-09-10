@@ -175,13 +175,15 @@ async function search(ctx: Context, q: string, lang: Lang) {
   const t = T[lang];
   let parsed: ParseRes, cards: Card[];
   try {
-    const p = await api('/search/parse', { method: 'POST', body: JSON.stringify({ q, lang }) });
+    // Uzun matn API da 400 beradi: kesib yuboriladi
+    const p = await api('/search/parse', { method: 'POST', body: JSON.stringify({ q: q.slice(0, 300), lang }) });
     if (!p.ok) throw new Error(`parse ${p.status}`);
     parsed = (await p.json()) as ParseRes;
-    if (parsed.filters.confidence === 0 && parsed.chips.length === 0) return ctx.reply(t.hint);
-    // q nom bo'yicha filtrlaydi, ro'yxat uchun faqat tahlil qilingan filtrlar kerak
-    const { q: _q, ...params } = parsed.query;
-    const r = await api(`/terminals?${new URLSearchParams({ ...params, limit: '3' })}`);
+    // Oddiy nom ("Sergeli") hech qanday chip bermaydi, lekin nom bo'yicha topiladi:
+    // maslahat matni faqat nom qidiruvi ham bo'sh bo'lganda ko'rsatiladi
+    if (parsed.filters.confidence === 0 && parsed.chips.length === 0 && parsed.decision.terminals === 0) return ctx.reply(t.hint);
+    // q nom bo'yicha filtrlaydi va ro'yxatda ham qoladi (aks holda "Sergeli" hamma terminalni beradi)
+    const r = await api(`/terminals?${new URLSearchParams({ ...parsed.query, limit: '3' })}`);
     if (!r.ok) throw new Error(`terminals ${r.status}`);
     cards = ((await r.json()) as { items: Card[] }).items;
   } catch (e) {
@@ -285,7 +287,9 @@ bot.command('qidir', (ctx) => {
 
 // Erkin matn: login kutilayotgan bo'lsa kontakt so'raymiz, aks holda qidiruv
 bot.on('text', (ctx) => {
-  if (pendingToken.has(ctx.chat.id)) return askContact(ctx, 'Kirish uchun telefon raqamingizni tasdiqlang.');
+  // Bir marta so'raladi va qulf bo'shatiladi: tashlab ketilgan kirish havolasi
+  // shu chat uchun erkin qidiruvni butunlay o'chirib qo'yardi
+  if (pendingToken.has(ctx.chat.id)) { pendingToken.delete(ctx.chat.id); return askContact(ctx, 'Kirish uchun telefon raqamingizni tasdiqlang.'); }
   const q = ctx.message.text.trim();
   if (q.startsWith('/')) return ctx.reply(HELP);
   return search(ctx, q, langOf(ctx.from.language_code));

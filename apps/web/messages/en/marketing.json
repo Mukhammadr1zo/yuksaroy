@@ -22,9 +22,9 @@
       "title": "Pick a terminal, book a slot, get the documents",
       "lead": "Compare tariffs without calling, see a free window and book it, and find the act and invoice waiting in your cabinet at the end.",
       "facts": {
-        "terminals": "{count} active terminals",
-        "freeSlots": "{count} free slots today",
-        "sidings": "{count} sidings"
+        "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
+        "freeSlots": "{count, plural, one {# free slot today} other {# free slots today}}",
+        "sidings": "{count, plural, one {# siding} other {# sidings}}"
       },
       "cta": {
         "primary": "Browse terminals",
@@ -95,8 +95,8 @@
       "lead": "Clients find you by region and corridor, see your tariffs and slots, and their request or order lands in your cabinet.",
       "facts": {
         "companies": "{count} companies in the catalog",
-        "listings": "{count} active listings",
-        "terminals": "{count} active terminals"
+        "listings": "{count, plural, one {# active listing} other {# active listings}}",
+        "terminals": "{count, plural, one {# active terminal} other {# active terminals}}"
       },
       "cta": {
         "primary": "Publish a listing",
@@ -136,7 +136,7 @@
           "low": "Conservative",
           "mid": "Typical",
           "high": "High demand",
-          "hint": "{n} extra orders / listing / month"
+          "hint": "{n, plural, one {# extra order} other {# extra orders}} per listing per month"
         },
         "gross": "Yearly revenue",
         "price": "Platform price (Premium, planned)",

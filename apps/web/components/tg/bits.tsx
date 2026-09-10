@@ -59,7 +59,7 @@ export function TerminalRow({ t, lang }: { t: TerminalCard; lang: SearchLang }) 
       <span className={`mt-2 inline-block max-w-full truncate whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${free > 0 ? 'bg-teal-soft text-teal-ink' : 'bg-sand text-muted'}`}>
         {free > 0 ? tt('slots.freeToday', { count: free }) : tt('slots.none')}
       </span>
-      <p className="mt-1.5 truncate font-mono text-sm font-semibold text-navy tabular-nums">{t.fromPriceTiyin != null ? tt('price.from', { price: pricePer(t.fromPriceTiyin, 'PER_TON') }) : tt('price.onRequest')}</p>
+      <p className="mt-1.5 truncate font-mono text-sm font-semibold text-navy tabular-nums">{t.fromPriceTiyin != null ? tt('price.from', { price: pricePer(t.fromPriceTiyin, 'PER_TON', lang) }) : tt('price.onRequest')}</p>
       {t.ratingAvg != null ? <p className="mt-1 font-mono text-[11px] text-muted">★ {t.ratingAvg.toFixed(1)} ({t.ratingCount})</p> : null}
     </Link>
   );

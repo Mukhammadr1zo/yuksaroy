@@ -33,7 +33,7 @@ export async function TgListingView({ slug, section }: { slug: string; section: 
         [tl('qty'), l.kind === 'WAGON' || l.qty > 1 ? l.qty : null],
         [tl('capacityT'), l.capacityT ? `${l.capacityT} t` : null],
       ];
-  specs.push([tl('region'), regionName(l.regionCode, lang)], [tl('published'), l.publishedAt ? uzDate(l.publishedAt) : null]);
+  specs.push([tl('region'), regionName(l.regionCode, lang)], [tl('published'), l.publishedAt ? uzDate(l.publishedAt, lang) : null]);
   const rows = specs.filter(([, v]) => v !== null && v !== undefined && v !== '');
 
   return (

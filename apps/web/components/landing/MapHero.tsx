@@ -3,10 +3,11 @@
 // Ustida karta yoki panel yo'q: qidiruv to'g'ridan-to'g'ri xaritada turadi. Matn ustunidan tashqarida
 // sichqoncha xaritaga tegadi (pointer-events), shuning uchun xaritani surish va yaqinlashtirish mumkin.
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { ArrowRightIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
+import { num } from '@/lib/format';
 import type { MapState } from '@/components/map/state';
 
 const LightMap = dynamic(() => import('./LightMap'), { ssr: false });
@@ -43,6 +44,7 @@ const DOORS = [
 export function MapHero({ sidings, terminals }: { sidings: number; terminals: number }) {
   const t = useTranslations('hero');
   const tm = useTranslations('map');
+  const locale = useLocale();
   const wide = useWide();
 
   return (
@@ -127,7 +129,7 @@ export function MapHero({ sidings, terminals }: { sidings: number; terminals: nu
 
           <dl className="mt-9 flex flex-wrap gap-x-8 gap-y-3 border-t border-line/80 pt-5">
             {[
-              [sidings.toLocaleString('ru-RU').replace(/ /g, ' '), t('stat.sidings')],
+              [num(sidings, locale), t('stat.sidings')],
               [String(terminals), t('stat.terminals')],
               ['8', t('stat.serviceTypes')],
             ].map(([v, l]) => (

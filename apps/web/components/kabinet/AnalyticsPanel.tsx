@@ -1,7 +1,7 @@
 'use client';
 // Ko'rsatkichlar: 30 kunlik ko'rsatishlar yuzalar bo'yicha (SVG ustunlar, kutubxonasiz), jami, so'rovlar, ko'rishlar yoki buyurtmalar. Faqat shu raqamlar.
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { IMPRESSION_SURFACES, type ImpressionSurface } from '@yuksaroy/domain';
 import { api } from '@/lib/api';
 import { uzDate } from '@/lib/format';
@@ -12,6 +12,7 @@ const W = 600, H = 128, PAD = 4, AXIS = 4; // sana yorliqlari SVG tashqarisida (
 const sum = (d: Record<ImpressionSurface, number>) => IMPRESSION_SURFACES.reduce((s, k) => s + d[k], 0);
 
 export function AnalyticsPanel({ path, kind }: { path: string; kind: 'listing' | 'terminal' }) {
+  const locale = useLocale();
   const t = useTranslations('analytics');
   const [a, setA] = useState<Analytics | null | undefined>(undefined);
   useEffect(() => { setA(undefined); api<Analytics>(path).then(setA).catch(() => setA(null)); }, [path]);
@@ -44,7 +45,7 @@ export function AnalyticsPanel({ path, kind }: { path: string; kind: 'listing' |
             let y = H - AXIS;
             return (
               <g key={d.day}>
-                <title>{t('dayTitle', { day: uzDate(d.day), n: total })}</title>
+                <title>{t('dayTitle', { day: uzDate(d.day, locale), n: total })}</title>
                 {total === 0 ? <rect x={x} y={H - AXIS - 2} width={w} height={2} fill="#DCE4EC" /> : null}
                 {IMPRESSION_SURFACES.map((k) => {
                   if (!d[k]) return null;
@@ -57,7 +58,7 @@ export function AnalyticsPanel({ path, kind }: { path: string; kind: 'listing' |
           })}
         </svg>
         <div className="flex justify-between font-mono text-[10px] text-muted">
-          {[0, 14, 29].map((i) => <span key={i}>{a.days[i] ? uzDate(a.days[i]!.day) : ''}</span>)}
+          {[0, 14, 29].map((i) => <span key={i}>{a.days[i] ? uzDate(a.days[i]!.day, locale) : ''}</span>)}
         </div>
         <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted">
           {IMPRESSION_SURFACES.map((k) => (

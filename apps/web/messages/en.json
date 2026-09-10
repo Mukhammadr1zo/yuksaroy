@@ -264,8 +264,8 @@
     }
   },
   "sidings": {
-    "lead": "Registry of private railway sidings: location, length, loading and unloading capacity. The owner's name appears only after the owner claims the siding and the operator verifies it.",
-    "count": "Sidings: {count}",
+    "lead": "Private sidings added by their owners: location, length, loading and unloading capacity. If a siding is yours, attach it from your dashboard.",
+    "count": "{count, number} sidings",
     "search": {
       "placeholder": "Location name or code"
     },
@@ -280,7 +280,9 @@
       "pending": "pending verification",
       "unclaimed": "owner not confirmed, this is mine"
     },
-    "empty": "Nothing found."
+    "empty": "Nothing found.",
+    "emptyOwner": "No owner has added a siding yet.",
+    "emptyOwnerCta": "Attach a siding"
   },
   "texnika": {
     "lead": "Shunting locomotives, electric locomotives and wagons. The owner posts the listing for sale or rent and sets the terms himself.",
@@ -521,11 +523,11 @@
     "UZ-BU": "Bukhara region",
     "UZ-NW": "Navoi region",
     "UZ-QA": "Kashkadarya region",
-    "UZ-SU": "Surkhandarya Region",
-    "UZ-XO": "Khorezm Region",
+    "UZ-SU": "Surkhandarya region",
+    "UZ-XO": "Khorezm region",
     "UZ-QR": "Republic of Karakalpakstan",
-    "UZ-AN": "Andijan Region",
-    "UZ-NG": "Namangan Region",
-    "UZ-FA": "Fergana Region"
+    "UZ-AN": "Andijan region",
+    "UZ-NG": "Namangan region",
+    "UZ-FA": "Fergana region"
   }
 }

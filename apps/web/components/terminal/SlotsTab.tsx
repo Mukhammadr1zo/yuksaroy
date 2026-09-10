@@ -85,7 +85,7 @@ export function SlotsTab({ terminalId }: { terminalId: string | null }) {
             </table>
           </div>
           {cap.windows.length < 24 ? (
-            <button type="button" onClick={() => setCap((c) => { const last = c.windows[c.windows.length - 1]; return { ...c, windows: [...c.windows, { window: c.windows.length + 1, start: last?.end ?? '08:00', end: last?.end ?? '10:00', capacity: BOOKING.defaultCapacity }] }; })} className={`${BTN_GHOST} mt-2`}>{t('capacity.addWindow')}</button>
+            <button type="button" onClick={() => setCap((c) => { const last = c.windows[c.windows.length - 1]; const start = last?.end ?? '08:00'; const h = Number(start.slice(0, 2)); const end = h >= 22 ? '23:59' : `${String(h + 2).padStart(2, '0')}${start.slice(2)}`; return { ...c, windows: [...c.windows, { window: c.windows.length + 1, start, end, capacity: BOOKING.defaultCapacity }] }; })} className={`${BTN_GHOST} mt-2`}>{t('capacity.addWindow')}</button>
           ) : null}
         </div>
         <p className="text-xs text-muted">{t('capacity.hint')}</p>

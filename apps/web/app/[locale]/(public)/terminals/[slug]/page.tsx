@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Params) {
   const { locale, slug } = await params;
   const [t, tm, tk] = await Promise.all([sapiOrNull<TerminalDetail>(`/terminals/${slug}`), getTranslations({ locale, namespace: 'meta.terminal' }), getTranslations({ locale, namespace: 'kind' })]);
   return t
-    ? { title: tm('title', { name: t.name }), description: tm('description', { kind: tk(t.kind), station: t.station.nameUz, hours: hoursSummary(t.hours, t.is24h) }), ...alt(locale, `/terminals/${slug}`) }
+    ? { title: tm('title', { name: t.name }), description: tm('description', { kind: tk(t.kind), station: t.station.nameUz, hours: hoursSummary(t.hours, t.is24h, locale) }), ...alt(locale, `/terminals/${slug}`) }
     : { title: tm('notFound') };
 }
 
@@ -44,15 +44,17 @@ export default async function TerminalPage({ params }: Params) {
   const no = tc('no');
   const ton = tc('unit.ton');
   const facts: [string, string][] = [
-    [tr('passport.tracks'), p.tracks ? (p.tracksLengthM ? tr('passport.tracksValue', { count: p.tracks, length: num(p.tracksLengthM) }) : `${p.tracks} ${tc('count.pieces')}`) : no],
+    [tr('passport.tracks'), p.tracks ? (p.tracksLengthM ? tr('passport.tracksValue', { count: p.tracks, length: num(p.tracksLengthM, locale) }) : `${p.tracks} ${tc('count.pieces')}`) : no],
     [tr('passport.cranes'), p.cranes?.length ? p.cranes.map((c) => `${c.type} ${c.capacityT} ${ton}`).join(', ') : no],
-    [tr('passport.warehouse'), p.warehouseM2 ? `${num(p.warehouseM2)} m²` : no],
-    [tr('passport.openArea'), p.openAreaM2 ? `${num(p.openAreaM2)} m²` : no],
+    [tr('passport.warehouse'), p.warehouseM2 ? `${num(p.warehouseM2, locale)} ${tc('unit.meter')}²` : no],
+    [tr('passport.openArea'), p.openAreaM2 ? `${num(p.openAreaM2, locale)} ${tc('unit.meter')}²` : no],
     [tr('passport.scale'), p.hasScale ? (p.scaleT ? `${p.scaleT} ${ton}` : yes) : no],
     [tr('passport.svx'), p.hasSvx ? yes : no],
-    ...(p.containerSlots ? [[tr('passport.containerSlots'), num(p.containerSlots)] as [string, string]] : []),
+    ...(p.containerSlots ? [[tr('passport.containerSlots'), num(p.containerSlots, locale)] as [string, string]] : []),
     ...(p.customsPost ? [[tr('passport.customsPost'), yes] as [string, string]] : []),
   ];
+  // To'ldirilmagan pasport oltita "yo'q" plitkasi bo'lib chiqardi: bo'sh qatorlar ko'rsatilmaydi
+  const rows = facts.filter(([, v]) => v !== no);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -74,7 +76,7 @@ export default async function TerminalPage({ params }: Params) {
         <div className="max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(t.kind)}</span>
-            <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h)}</span>
+            <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>
             {!t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber">{tr('badge.unverifiedPassport')}</span> : null}
             <a href="#reviews" className={`rounded-full border border-line bg-white px-3 py-1 font-mono text-xs font-semibold tabular-nums ${t.ratingAvg != null ? 'text-navy' : 'text-muted'}`}>{t.ratingAvg != null ? `★ ${t.ratingAvg.toFixed(1)} (${t.ratingCount})` : t.ratingCount ? trv('hidden', { count: t.ratingCount, min: REVIEW.minToShow }) : trv('none')}</a>
           </div>
@@ -102,8 +104,8 @@ export default async function TerminalPage({ params }: Params) {
                       <tr key={x.id} className="border-t border-line/70">
                         <td className="px-4 py-2 font-semibold">{ts(x.serviceCode)}</td>
                         <td className="px-4 py-2 font-mono text-xs text-muted">{x.cargoGroupCode ?? tr('tariffs.allCargo')}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{pricePer(x.priceTiyin, x.unit)}</td>
-                        <td className="px-4 py-2 text-right font-mono text-xs text-muted tabular-nums">{x.minTiyin ? som(x.minTiyin) : no}</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums">{pricePer(x.priceTiyin, x.unit, locale)}</td>
+                        <td className="px-4 py-2 text-right font-mono text-xs text-muted tabular-nums">{x.minTiyin ? som(x.minTiyin, locale) : no}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -125,10 +127,10 @@ export default async function TerminalPage({ params }: Params) {
             </ul>
           </section>
 
-          <section>
+          <section hidden={rows.length === 0}>
             <h2 className="text-lg font-bold">{tr('passport.heading')}</h2>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-              {facts.map(([k, v]) => (
+              {rows.map(([k, v]) => (
                 <div key={k} className="rounded-xl border border-line bg-white px-4 py-3"><dt className="text-xs text-muted">{k}</dt><dd className="mt-0.5 font-semibold">{v}</dd></div>
               ))}
             </dl>

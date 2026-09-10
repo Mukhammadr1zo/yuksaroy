@@ -147,12 +147,16 @@ function Wizard() {
     if (!offer || !hold) return;
     setErr(null); setBusy(true);
     idemKey.current ??= crypto.randomUUID();
+    // Noto'g'ri vagon raqami jimgina tushib qolmasin: 8 raqam bo'lishi shart
+    const wagonList = wagonNumbers.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
+    const badWagons = wagonList.filter((x) => !/^\d{8}$/.test(x));
+    if (badWagons.length) { setBusy(false); return setErr(t('err.wagonNumbers', { list: badWagons.join(', ') })); }
     try {
       const order = await post<Order>('/orders', {
         orgId: orgId || undefined, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg,
         wagonCount: Number(wagons) || 1, storageDays: extras.includes('STORAGE') ? Number(storageDays) || 1 : undefined,
         services: extras, note: note.trim() || undefined,
-        wagonNumbers: wagonNumbers.split(/[\s,]+/).map((x) => x.trim()).filter((x) => /^\d{8}$/.test(x)),
+        wagonNumbers: wagonList,
       }, { 'Idempotency-Key': idemKey.current });
       try { localStorage.removeItem(DRAFT); } catch { /* ignore */ }
       router.push(`/dashboard/orders/${order.no}`);

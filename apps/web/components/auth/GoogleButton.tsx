@@ -33,7 +33,9 @@ export function GoogleButton({ onLogin }: { onLogin: (r: LoginResponse) => void 
       window.google?.accounts.id.renderButton(el, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', locale, width: Math.min(400, el.clientWidth) });
     };
     if (window.google) { render(); return; }
-    const s = document.querySelector<HTMLScriptElement>(`script[src="${GSI}"]`) ?? Object.assign(document.createElement('script'), { src: GSI, async: true });
+    // hl bilan: aks holda brauzer birinchi keshlangan tugmani (o'zbekchani) qayta ishlatadi
+    const src = `${GSI}?hl=${locale}`;
+    const s = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`) ?? Object.assign(document.createElement('script'), { src, async: true });
     s.addEventListener('load', render);
     if (!s.isConnected) document.head.appendChild(s);
     return () => s.removeEventListener('load', render);

@@ -20,6 +20,7 @@ export default function OrderPage() {
   const locale = useLocale();
   const lang = useLang();
   const t = useTranslations('dashboard2.order');
+  const tc = useTranslations('kabinet.common');
   const ts = useTranslations('service');
   const ta = useTranslations('a11y');
   const tdoc = useTranslations('dashboard2.docs');
@@ -30,7 +31,8 @@ export default function OrderPage() {
   const [reason, setReason] = useState('');
   const [docs, setDocs] = useState<OrderDoc[]>([]);
 
-  const load = useCallback(() => api<Order>(`/orders/${no}`).then(setOrder).catch(() => setErr(t('notFound'))), [no, t]);
+  // 404 va server xatosi bir xil ko'rsatilardi: bron qilgan mijoz "buyurtma yo'q" deb o'ylardi
+  const load = useCallback(() => api<Order>(`/orders/${no}`).then(setOrder).catch((e) => setErr(e instanceof ApiError && e.status === 404 ? t('notFound') : tc('loadFailed'))), [no, t, tc]);
   useEffect(() => { void load(); }, [load]);
 
   // Yakunlangan buyurtmada akt va hisob-faktura chiqariladi

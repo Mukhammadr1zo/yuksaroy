@@ -34,7 +34,7 @@
       "must": "Nomi, stansiya, turi, ish vaqti, kamida bitta xizmat",
       "should": "Tariflar, pasport (yo'llar, kran, ombor, tarozi), rasm, telefon",
       "note": "Egasi tasdiqlamagan pasport ochiq ma'lumotlardan tuziladi va shunday belgilanadi.",
-      "owner": "Tashkilot (TERMINAL turi): pasportni operator biriktiradi"
+      "owner": "Tashkilot (turi: Terminal): pasportni operator biriktiradi"
     },
     "siding": {
       "title": "Shahobcha yo'l",
