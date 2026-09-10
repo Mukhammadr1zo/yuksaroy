@@ -117,7 +117,7 @@ const single: ExpressionSpecification = ['!', ['has', 'point_count']];
  * hollow: oq ichli halqa (taxminiy joylashuv: stansiya yoki viloyat markazi); label: nuqta ichida `count`.
  * Hero: pinLayers('terminals', 'terminals', { color: PIN.terminal, halo: true }) avvalgi bilan bir xil.
  */
-export function pinLayers(prefix: string, source: string, o: { color: string; halo?: boolean; hollow?: boolean; label?: boolean }): LayerSpecification[] {
+export function pinLayers(prefix: string, source: string, o: { color: string; halo?: boolean; hollow?: boolean; label?: boolean; icon?: string }): LayerSpecification[] {
   const layers: LayerSpecification[] = [];
   if (o.halo) layers.push({
     id: `${prefix}-halo`, type: 'circle', source, filter: single,
@@ -127,7 +127,13 @@ export function pinLayers(prefix: string, source: string, o: { color: string; ha
     id: prefix, type: 'circle', source, filter: single,
     paint: o.hollow
       ? { 'circle-radius': z(5, 7, 10, 11), 'circle-color': '#FFFFFF', 'circle-stroke-width': 2.5, 'circle-stroke-color': o.color, 'circle-opacity': DIM, 'circle-stroke-opacity': DIM }
-      : { 'circle-radius': z(5, 5, 10, 8), 'circle-color': o.color, 'circle-stroke-width': 2, 'circle-stroke-color': '#FFFFFF', 'circle-opacity': DIM, 'circle-stroke-opacity': DIM },
+      : { 'circle-radius': z(5, 5, 10, 9), 'circle-color': o.color, 'circle-stroke-width': 2, 'circle-stroke-color': '#FFFFFF', 'circle-opacity': DIM, 'circle-stroke-opacity': DIM },
+  });
+  // Rang yetarli emas edi: doira ichida toifa belgisi (konteyner, vagon, fura, relslar)
+  if (o.icon) layers.push({
+    id: `${prefix}-icon`, type: 'symbol', source, filter: single,
+    layout: { 'icon-image': o.icon, 'icon-size': z(5, 0.5, 10, 0.8), 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+    paint: { 'icon-opacity': DIM },
   });
   if (o.label) layers.push({
     id: `${prefix}-label`, type: 'symbol', source, filter: ['all', single, ['has', 'count']],

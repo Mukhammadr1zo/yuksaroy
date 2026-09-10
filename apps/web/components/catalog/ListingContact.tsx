@@ -2,7 +2,7 @@
 // So'rov yuborish: kirish talab qilinadi (telefon esa hammaga ochiq, PhoneLink da).
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { api, post } from '@/lib/api';
+import { api, hasSession, post } from '@/lib/api';
 import { Link } from '@/i18n/navigation';
 
 type Org = { orgId: string; org: { name: string } };
@@ -18,6 +18,7 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
 
   useEffect(() => {
     (async () => {
+      if (!hasSession()) return setAuthed(false);
       const me = await api('/auth/me').catch(() => null);
       setAuthed(me !== null);
       if (!me) return;

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { api } from '@/lib/api';
+import { api, hasSession } from '@/lib/api';
 
 // Kirish holati mijozda tekshiriladi, shuning uchun Header serverda cookies() chaqirmaydi va (public) sahifalar statik qoladi.
 // Natija sessionStorage'da 60 s: bir sessiyada har sahifada yangi so'rov ketmasin.
@@ -24,6 +24,7 @@ export function AuthButton() {
   useEffect(() => {
     const c = cached();
     if (c !== null) { setAuthed(c); return; }
+    if (!hasSession()) { setAuthed(false); return; }
     let alive = true;
     api('/auth/me').then(() => true, () => false).then((v) => {
       if (!alive) return;

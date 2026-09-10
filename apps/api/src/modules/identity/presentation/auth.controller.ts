@@ -13,7 +13,7 @@ import { TokenService, ACCESS_TTL_SEC, REFRESH_TTL_SEC } from '../application/to
 import { BadCredentialsError, LoginLockedError, NoPasswordError, OtpInvalidError, PhoneTakenError } from '../domain/errors';
 import { deleteConfirmed } from '../domain/account';
 import { DeleteMeDto, GoogleLoginDto, LoginDto, RequestOtpDto, ResetPasswordDto, SetPasswordDto, TelegramLinkDto, TelegramWebAppDto, UpdateMeDto, VerifyOtpDto } from './dto';
-import { ACCESS_COOKIE, REFRESH_COOKIE, CurrentUserId, JwtGuard, optionalUserId } from './jwt.guard';
+import { ACCESS_COOKIE, REFRESH_COOKIE, SESSION_FLAG_COOKIE, CurrentUserId, JwtGuard, optionalUserId } from './jwt.guard';
 import { InternalGuard } from './internal.guard';
 import { USER_REPOSITORY, type UserPatch, type UserRecord, type UserRepository } from '../domain/ports';
 import { PlatformAdmin } from '../../organizations/application/platform-admin';
@@ -237,10 +237,13 @@ export class AuthController {
   private setCookies(res: FastifyReply, access: string, refresh: string) {
     res.setCookie(ACCESS_COOKIE, access, { ...cookieBase, maxAge: ACCESS_TTL_SEC });
     res.setCookie(REFRESH_COOKIE, refresh, { ...cookieBase, maxAge: REFRESH_TTL_SEC });
+    // httpOnly emas: brauzer o'qiy oladi va mehmon uchun /auth/me va /auth/refresh so'rovlari umuman yuborilmaydi
+    res.setCookie(SESSION_FLAG_COOKIE, '1', { ...cookieBase, httpOnly: false, maxAge: REFRESH_TTL_SEC });
   }
   private clearCookies(res: FastifyReply) {
     // Brauzer /api/v1/... ga so'rov yuboradi, shuning uchun refresh cookie ham path '/'; eski /v1/auth qoldig'i ham tozalanadi
     res.clearCookie(ACCESS_COOKIE, { path: '/' }); res.clearCookie(REFRESH_COOKIE, { path: '/' }); res.clearCookie(REFRESH_COOKIE, { path: '/v1/auth' });
+    res.clearCookie(SESSION_FLAG_COOKIE, { path: '/' });
   }
 }
 

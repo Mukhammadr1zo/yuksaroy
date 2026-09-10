@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { Icon } from '@phosphor-icons/react';
 import { CaretDownIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
+import { AuthOnly } from '@/components/site/AuthOnly';
 import { DashLink } from '@/components/site/DashLink';
 
 // Marketing sahifalari (for-shippers, for-providers, booking) uchun umumiy bo'laklar. Matnlar marketing.<side> nomfazosidan.
@@ -87,7 +88,7 @@ export async function CtaBand({ title, body, primary, secondary }: { title: stri
         </div>
         <div className="flex flex-wrap gap-3 md:justify-end">
           <DashLink href={primary.href} className={BTN.primary} signupLabel={guestCta}>{primary.label}</DashLink>
-          <Link href={secondary.href} className="rounded-full border border-white/25 px-6 py-3 text-center font-semibold text-white transition duration-200 hover:bg-white/10">{secondary.label}</Link>
+          <AuthOnly guest={<Link href={secondary.href} className="rounded-full border border-white/25 px-6 py-3 text-center font-semibold text-white transition duration-200 hover:bg-white/10">{secondary.label}</Link>}>{null}</AuthOnly>
         </div>
       </div>
     </section>

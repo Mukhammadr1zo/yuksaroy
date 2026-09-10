@@ -7,11 +7,12 @@ import { LngLatBounds, Map as MLMap, NavigationControl, setWorkerUrl, type GeoJS
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { CrosshairIcon, MagnifyingGlassIcon, PolygonIcon } from '@phosphor-icons/react';
+import { CrosshairIcon, MagnifyingGlassIcon, PathIcon, PolygonIcon, ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { LISTING_LABELS, REGIONS, REGION_CENTERS, SEARCH_LABELS, chipLabel, distanceKm, formatSom, type PriceUnit, type RegionCode, type SearchLang, type TerminalKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { pricePer } from '@/lib/format';
 import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers } from './mapStyle';
+import { addPinIcons } from './pinIcons';
 import { KINDS, effective, inArea, materialize, parseState, toParams, withoutChip, type Area, type Kind, type MapState } from './state';
 
 setWorkerUrl(WORKER_URL);
@@ -34,15 +35,29 @@ const SNAP_K = { peek: 0, half: 0.45, full: 0.85 } as const;
 const ORDER = ['peek', 'half', 'full'] as const;
 type Snap = (typeof ORDER)[number];
 const PIN_STYLE: Record<Kind, Parameters<typeof pinLayers>[2]> = {
-  terminal: { color: PIN.terminal, halo: true },
+  terminal: { color: PIN.terminal, halo: true, icon: 'ys-pin-terminal' },
+  // Shahobcha pinida stansiyadagi yo'llar soni turadi, shuning uchun belgi qo'yilmaydi
   siding: { color: PIN.siding, hollow: true, label: true },
-  equipment: { color: PIN.equipment },
-  truck: { color: PIN.truck, hollow: true },
+  equipment: { color: PIN.equipment, icon: 'ys-pin-equipment' },
+  truck: { color: PIN.truck, hollow: true, icon: 'ys-pin-truck' },
 };
 /** Legenda va toifa tugmalaridagi kichik belgi: pin bilan bir xil rang va shakl (halqa = taxminiy joylashuv). */
 const SWATCH: Record<Kind, string> = {
   terminal: 'bg-[#FD7B03] ring-1 ring-white', siding: 'border-2 border-teal bg-white', equipment: 'bg-navy ring-1 ring-white', truck: 'border-2 border-[#FD7B03] bg-white',
 };
+// Xaritadagi pin ichidagi belgi bilan bir xil ikonka: rang yolg'iz yetarli emas edi
+const KIND_ICON: Record<Kind, Icon> = { terminal: ShippingContainerIcon, siding: PathIcon, equipment: TrainIcon, truck: TruckIcon };
+const ICON_TONE: Record<Kind, string> = { terminal: 'text-white', siding: 'text-teal', equipment: 'text-white', truck: 'text-[#FD7B03]' };
+
+/** Toifa belgisi: rangli doira va ichida ikonka (legenda, chiplar, ro'yxat uchun bir xil). */
+function KindBadge({ kind, className = '' }: { kind: Kind; className?: string }) {
+  const I = KIND_ICON[kind];
+  return (
+    <span aria-hidden="true" className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${SWATCH[kind]} ${className}`}>
+      <I size={9} weight="bold" className={ICON_TONE[kind]} />
+    </span>
+  );
+}
 
 /** Radius doirasi: 64 nuqtali poligon (turf'siz). */
 function circle([lng, lat]: [number, number], km: number, n = 64): [number, number][] {
@@ -121,7 +136,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
         }).filter((o) => !keep || keep.has(o.key)));
       });
 
-    map.on('load', () => {
+    map.on('load', async () => {
       localize(map, localeRef.current);
       const sym = addBaseLayers(map);
       const none: Filter = ['in', ['get', 'code'], ['literal', []]];
@@ -140,6 +155,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
       map.addLayer({ id: 'ys-area-line', type: 'line', source: 'area', filter: ['!=', ['geometry-type'], 'Point'], layout: { 'line-join': 'round' }, paint: { 'line-color': PIN.siding, 'line-width': 2 } }, sym);
       map.addSource('sel', { type: 'geojson', data: EMPTY });
       map.addLayer({ id: 'ys-sel', type: 'circle', source: 'sel', paint: { 'circle-radius': 15, 'circle-color': 'transparent', 'circle-stroke-width': 3, 'circle-stroke-color': PIN.siding } });
+      await addPinIcons(map);
       // Qatlam tartibi: terminal eng ustida (shahobcha klasterlari ko'p, terminalni yopmasin)
       for (const k of ['siding', 'truck', 'equipment', 'terminal'] as const) {
         // lit: klasterda kamida bitta yorug' nuqta bo'lsa klaster ham yorug' (mapStyle CLUSTER_DIM)
@@ -388,7 +404,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
 
   const row = (o: Listed) => (
     <div className="flex items-start gap-3 rounded-card border border-line bg-white p-3">
-      <span aria-hidden="true" className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${SWATCH[o.p.kind]}`} />
+      <KindBadge kind={o.p.kind} className="mt-0.5" />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className="truncate font-bold">{o.p.name}</p>
@@ -448,7 +464,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               const on = eff.cat.includes(k);
               return (
                 <button key={k} type="button" aria-pressed={on} onClick={() => toggle(k)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}>
-                  <span aria-hidden="true" className={`h-2 w-2 rounded-full ${SWATCH[k]}`} />
+                  <KindBadge kind={k} />
                   {t(`cat.${k}`)}
                   <span className={`font-mono tabular-nums ${on ? 'text-white/70' : 'text-muted'}`}>{counts[k]}</span>
                 </button>
@@ -503,7 +519,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
 
         {/* Legenda: 4 pin uslubi + attributsiya (ODbL, CARTO) */}
         <ul aria-label={t('legend.aria')} className="pointer-events-none absolute bottom-[calc(var(--sheet)+12px)] left-3 z-10 flex max-w-[calc(100%-80px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-line bg-white/90 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.08em] text-muted transition-[bottom] duration-300">
-          {KINDS.map((k) => <li key={k} className="flex items-center gap-1.5"><span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${SWATCH[k]}`} />{t(`legend.${k}`)}</li>)}
+          {KINDS.map((k) => <li key={k} className="flex items-center gap-1.5"><KindBadge kind={k} />{t(`legend.${k}`)}</li>)}
           <li className="normal-case tracking-normal text-muted/70">
             <a className="pointer-events-auto hover:text-navy" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a>
             {', '}

@@ -1,5 +1,10 @@
 // Brauzer → /api/v1 (Next rewrite → NestJS). Cookie'lar avtomatik. 401 da bir marta refresh.
 // Telegram Mini App: token sessionStorage'da (ys-tg-token), bo'lsa Authorization: Bearer qo'shiladi va refresh token bilan yangilanadi.
+/** Sessiya bayrog'i (httpOnly emas): mehmonda /auth/me va /auth/refresh umuman chaqirilmaydi. */
+export function hasSession(): boolean {
+  try { return document.cookie.includes('ys_in=1') || !!tgTokens(); } catch { return false; }
+}
+
 /** AuthOnly/AuthButton keshi: sessiya tugaganda darhol tozalanadi (chiqqan odam kabinet tugmasini ko'rmasin). */
 export function clearAuthedCache() {
   try { sessionStorage.removeItem('ys-authed'); } catch { /* xususiy rejim */ }
@@ -44,7 +49,7 @@ export async function api<T = unknown>(path: string, init: RequestInit = {}, ret
   let res = await raw(path, init);
   // 401 da bir marta refresh: access cookie 15 daqiqada tugaydi, refresh 30 kun turadi.
   // Busiz kirgan foydalanuvchi 15 daqiqadan keyin mehmon deb hisoblanardi (kabinet tugmalari yo'qolardi).
-  if (res.status === 401 && retry && path !== '/auth/refresh') {
+  if (res.status === 401 && retry && path !== '/auth/refresh' && hasSession()) {
     if (await refresh()) res = await raw(path, init);
     else clearAuthedCache();
   }

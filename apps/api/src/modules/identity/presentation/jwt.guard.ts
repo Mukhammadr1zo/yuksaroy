@@ -5,6 +5,8 @@ import { SESSION_STORE, USER_REPOSITORY, type SessionStore, type UserRepository 
 
 export const ACCESS_COOKIE = 'ys_access';
 export const REFRESH_COOKIE = 'ys_refresh';
+/** Mijozga ko'rinadigan bayroq (token emas): sessiya bormi. Mehmon uchun ortiqcha so'rov yubormaslikka xizmat qiladi. */
+export const SESSION_FLAG_COOKIE = 'ys_in';
 
 export interface AuthedRequest extends FastifyRequest { userId: string }
 
