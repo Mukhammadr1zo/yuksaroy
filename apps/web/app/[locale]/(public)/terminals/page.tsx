@@ -11,6 +11,7 @@ import { NearMeButton } from '@/components/catalog/NearMeButton';
 import { RegionChips } from '@/components/catalog/RegionChips';
 import { Impressions } from '@/components/catalog/Impressions';
 import { alt } from '@/lib/seo';
+import { MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
 
 export const revalidate = 60;
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -118,7 +119,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
       ) : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
         {data.items.length ? <p className="font-mono text-sm text-navy tabular-nums">{decision}</p> : <span />}
-        <Link href={mapHref} className="text-xs font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{th('viewOnMap')}</Link>
+        <Link href={mapHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink"><MapTrifoldIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewOnMap')}</Link>
       </div>
 
       {data.items.length === 0 ? (

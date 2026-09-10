@@ -8,6 +8,7 @@ import { RegionChips } from '@/components/catalog/RegionChips';
 import { SidingsTable } from '@/components/catalog/SidingsTable';
 import { alt } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
+import { MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
 
 export const revalidate = 300;
 
@@ -41,7 +42,10 @@ export default async function SidingsPage({ searchParams }: { searchParams: Prom
           <h1 className="font-display text-3xl font-bold">{tn('sidings')}</h1>
           <p className="mt-2 max-w-2xl text-muted">{t('lead')}</p>
         </div>
-        <p className="font-mono text-sm text-muted">{t('count', { count: data.total })} · <Link href={mapHref} className="font-body text-xs font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{th('viewOnMap')}</Link></p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="font-mono text-sm text-muted">{t('count', { count: data.total })}</p>
+          <Link href={mapHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink"><MapTrifoldIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewOnMap')}</Link>
+        </div>
       </div>
 
       <form className="mt-6 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-[1.2fr_1.4fr_auto]" action="/sidings">
@@ -59,7 +63,7 @@ export default async function SidingsPage({ searchParams }: { searchParams: Prom
         </div>
       ) : null}
 
-      <div className="mt-6"><SidingsTable items={data.items} /></div>
+      {data.total || f.q || f.region || f.station ? <div className="mt-6"><SidingsTable items={data.items} /></div> : null}
 
       {pages > 1 && (
         <nav aria-label={tp('aria')} className="mt-6 flex flex-wrap items-center justify-center gap-2 font-mono text-sm">
