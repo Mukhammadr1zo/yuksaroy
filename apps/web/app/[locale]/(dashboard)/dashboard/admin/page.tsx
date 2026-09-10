@@ -9,9 +9,11 @@ import { num, som, uzDateTime } from '@/lib/format';
 import { listingHref, type AdminTerminal, type Me, type MySiding, type OrgRecord, type OwnerListing } from '@/lib/types-kabinet';
 import type { AdminPremiumOrder, ContactPage } from '@/lib/types-trust';
 import { BTN_GHOST, CHIP, INPUT, Notice, useLang, useListingLabels } from '@/components/kabinet/bits';
+import { AdminUsers } from '@/components/kabinet/AdminUsers';
+import { AdminOverview } from '@/components/kabinet/AdminOverview';
 
-type Tab = 'listings' | 'kyc' | 'claims' | 'terminalClaims' | 'premium' | 'contact';
-const TABS: Tab[] = ['listings', 'kyc', 'claims', 'terminalClaims', 'premium', 'contact'];
+type Tab = 'listings' | 'kyc' | 'claims' | 'terminalClaims' | 'premium' | 'contact' | 'users';
+const TABS: Tab[] = ['listings', 'kyc', 'claims', 'terminalClaims', 'premium', 'contact', 'users'];
 
 export default function AdminPage() {
   const t = useTranslations('admin');
@@ -27,6 +29,7 @@ export default function AdminPage() {
   const [prem, setPrem] = useState<AdminPremiumOrder[] | null>(null);
   const [msgs, setMsgs] = useState<ContactPage | null>(null);
   const [err, setErr] = useState(false);
+  const tu = useTranslations('admin.users');
 
   useEffect(() => { api<Me>('/auth/me').then(setMe).catch(() => setMe(null)); }, []);
   useEffect(() => {
@@ -45,8 +48,8 @@ export default function AdminPage() {
   if (me === undefined) return <main className="mx-auto max-w-5xl px-6 py-10 text-muted">{tc('loading')}</main>;
   if (!me?.isPlatformAdmin) return <main className="mx-auto max-w-3xl px-6 py-16 text-center text-muted">{t('forbidden')}</main>;
 
-  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, terminalClaims: tclaims?.length ?? null, premium: prem?.length ?? null, contact: msgs?.total ?? null };
-  const tabLabel = (k: Tab) => (k === 'terminalClaims' ? ta('adminTab') : k === 'premium' ? tp('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
+  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, terminalClaims: tclaims?.length ?? null, premium: prem?.length ?? null, contact: msgs?.total ?? null, users: null };
+  const tabLabel = (k: Tab) => (k === 'terminalClaims' ? ta('adminTab') : k === 'premium' ? tp('admin.tab') : k === 'contact' ? tp('messages.tab') : k === 'users' ? tu('tab') : t(`tabs.${k}`));
 
   return (
     <main className="mx-auto max-w-5xl">
@@ -63,6 +66,11 @@ export default function AdminPage() {
 
       {err ? <p role="alert" className="mt-6 text-sm text-red-700">{tc('loadFailed')}</p> : null}
 
+      <AdminOverview />
+
+      {tab === 'users' ? <div className="mt-6"><AdminUsers /></div> : null}
+
+      {tab !== 'users' ? (
       <ul className="mt-6 space-y-3">
         {tab === 'listings' ? (listings ? listings.map((l) => <li key={l.id}><ListingRow l={l} /></li>) : <Loading err={err} />) : null}
         {tab === 'kyc' ? (orgs ? orgs.map((o) => <li key={o.id}><OrgRow o={o} /></li>) : <Loading err={err} />) : null}
@@ -71,8 +79,9 @@ export default function AdminPage() {
         {tab === 'premium' ? (prem ? prem.map((o) => <li key={o.id}><PremiumRow o={o} /></li>) : <Loading err={err} />) : null}
         {tab === 'contact' ? (msgs ? msgs.items.map((m) => <li key={m.id}><ContactRow m={m} /></li>) : <Loading err={err} />) : null}
       </ul>
+      ) : null}
       {tab === 'premium' || tab === 'contact' ? <p className="mt-3 text-xs text-muted">{tp(tab === 'premium' ? 'admin.lead' : 'messages.lead')}</p> : null}
-      {counts[tab] === 0 ? <p className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center text-muted">{tab === 'premium' ? tp('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty')}</p> : null}
+      {tab !== 'users' && counts[tab] === 0 ? <p className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center text-muted">{tab === 'premium' ? tp('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty')}</p> : null}
     </main>
   );
 }

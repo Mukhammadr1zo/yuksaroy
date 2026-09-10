@@ -675,6 +675,10 @@ model Listing {
   updatedAt      DateTime       @updatedAt @db.Timestamptz(3)
   inquiries      Inquiry[]
   premiumOrders  PremiumOrder[]
+  reviews        ListingReview[]
+  /// Xizmatdan foydalanganlar bahosi (ListingReview dan qayta hisoblanadi)
+  ratingAvg      Float?
+  ratingCount    Int            @default(0)
 
   @@index([status, kind, regionCode])
   @@index([orgId, status])
@@ -756,6 +760,25 @@ model Review {
 }
 
 /// Ko'rsatishlar: kun va yuza bo'yicha yig'ilgan hisob, foydalanuvchi ma'lumoti yo'q.
+
+/// E'lon uchun izoh: xizmatdan foydalangan odam qoldiradi.
+/// Huquq: shu e'longa so'rov yozgan va egasi javob bergan bo'lishi kerak (haqiqiy aloqa izi).
+/// Bir foydalanuvchi bitta e'longa bitta izoh yozadi; egasi bir marta javob bera oladi.
+model ListingReview {
+  id         String    @id @default(cuid())
+  listingId  String
+  listing    Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId     String
+  rating     Int // 1..5
+  text       String? // <= 1000 belgi
+  reply      String?
+  repliedAt  DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([listingId, userId])
+  @@index([listingId, createdAt])
+}
+
 model Impression {
   id       String   @id @default(cuid())
   kind     String // 'listing' | 'terminal' | 'org'

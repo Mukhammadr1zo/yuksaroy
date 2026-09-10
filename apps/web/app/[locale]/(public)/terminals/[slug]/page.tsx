@@ -155,7 +155,7 @@ export default async function TerminalPage({ params }: Params) {
                 })}
               </ul>
             )}
-            <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tr('slots.book')} →</DashLink>
+            <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{tr('slots.book')}</DashLink>
           </section>
           <section className="rounded-card border border-line bg-white p-5">
             <h2 className="text-sm font-bold">{tr('hours.heading')}</h2>

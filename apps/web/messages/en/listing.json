@@ -99,6 +99,17 @@
         "short": "Write at least 5 characters.",
         "openChat": "Open the chat"
       }
+    },
+    "reviews": {
+      "formTitle": "Leave a review",
+      "formHint": "You have exchanged messages with the owner, so you can leave a review.",
+      "placeholder": "How did it go? (optional)",
+      "send": "Send",
+      "sending": "Sending",
+      "failed": "Could not save, try again.",
+      "thanks": "Thank you for the review.",
+      "anonymous": "User",
+      "emptyBody": "No reviews yet. The first one comes from someone who used the service."
     }
   }
 }

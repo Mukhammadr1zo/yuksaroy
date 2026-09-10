@@ -13,6 +13,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ImpressionsModule } from './modules/impressions/impressions.module';
 import { PremiumModule } from './modules/premium/premium.module';
 import { ContactModule } from './modules/contact/contact.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { UrgentModule } from './modules/urgent/urgent.module';
@@ -23,7 +24,7 @@ import { HealthController } from './health.controller';
     CommonModule, IdentityModule, OrganizationsModule, CatalogModule, PricingModule, BookingModule, OrdersModule, DocumentsModule, SearchModule, ListingsModule,
     ReviewsModule, ImpressionsModule, PremiumModule, ContactModule, // 5-bosqich: baho, ko'rsatishlar, premium, murojaat
     UrgentModule, // 6-bosqich: shoshilinch so'rovlar
-    NotificationsModule, ChatModule, // saytdagi bildirishnoma va so'rov yozishmasi
+    NotificationsModule, ChatModule, AdminModule, // saytdagi bildirishnoma va so'rov yozishmasi
   ],
   controllers: [HealthController],
 })

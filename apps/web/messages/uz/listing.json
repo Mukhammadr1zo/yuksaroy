@@ -99,6 +99,17 @@
         "short": "Kamida 5 ta belgi yozing.",
         "openChat": "Yozishmani ochish"
       }
+    },
+    "reviews": {
+      "formTitle": "Izoh qoldirish",
+      "formHint": "Siz shu e'lon egasi bilan yozishgansiz, shuning uchun baho qoldira olasiz.",
+      "placeholder": "Xizmat qanday bo'ldi? (ixtiyoriy)",
+      "send": "Yuborish",
+      "sending": "Yuborilmoqda",
+      "failed": "Saqlab bo'lmadi, qayta urinib ko'ring.",
+      "thanks": "Izohingiz uchun rahmat.",
+      "anonymous": "Foydalanuvchi",
+      "emptyBody": "Hali izoh yo'q. Xizmatdan foydalangan odam birinchi bo'lib yozadi."
     }
   }
 }

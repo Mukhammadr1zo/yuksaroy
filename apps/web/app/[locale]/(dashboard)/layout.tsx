@@ -1,5 +1,4 @@
 import { Header } from '@/components/site/Header';
-import { Footer } from '@/components/site/Footer';
 import { SideNav } from '@/components/kabinet/SideNav';
 import { SessionGuard } from '@/components/kabinet/SessionGuard';
 
@@ -16,7 +15,6 @@ export default function KabinetLayout({ children }: { children: React.ReactNode 
         <main className="min-w-0">{children}</main>
       </div>
       <SessionGuard />
-      <Footer />
     </>
   );
 }

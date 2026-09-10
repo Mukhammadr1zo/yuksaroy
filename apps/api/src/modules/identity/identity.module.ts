@@ -30,6 +30,6 @@ import { PlatformAdmin } from '../organizations/application/platform-admin';
     // ponytail: PlatformAdmin faqat global PrismaService ga bog'liq, shuning uchun OrganizationsModule ni aylanma import qilmasdan shu yerda ham beriladi
     PlatformAdmin,
   ],
-  exports: [TokenService, JwtGuard, USER_REPOSITORY, SESSION_STORE],
+  exports: [TokenService, JwtGuard, USER_REPOSITORY, SESSION_STORE, DeleteAccountUseCase],
 })
 export class IdentityModule {}

@@ -12,6 +12,7 @@ import { PhoneLink } from './PhoneLink';
 import { MiniMap } from './MiniMap';
 import { PremiumBadge } from './PremiumBadge';
 import { Impressions } from './Impressions';
+import { ListingReviews } from '@/components/reviews/ListingReviews';
 
 type Section = 'equipment' | 'carriers';
 
@@ -137,6 +138,10 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
             </section>
           ) : null}
         </aside>
+      </div>
+
+      <div className="mt-10 max-w-3xl">
+        <ListingReviews listingId={l.id} slug={l.slug} />
       </div>
     </div>
   );

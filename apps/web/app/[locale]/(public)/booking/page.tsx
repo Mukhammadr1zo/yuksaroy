@@ -143,7 +143,7 @@ export default async function BookingPage({ params }: Params) {
                 </>
               ) : <p className="mt-2 text-sm text-muted">{t('slots.none')}</p>}
               {/* Mehmon ro'yxatdan o'tish sahifasiga boradi (kabinet manzili ko'rsatilmaydi) */}
-              <DashLink href={`/dashboard/orders/new?terminal=${term.slug}`} className="mt-4 inline-block text-sm font-semibold text-teal-ink underline">{t('slots.book')} →</DashLink>
+              <DashLink href={`/dashboard/orders/new?terminal=${term.slug}`} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{t('slots.book')}</DashLink>
             </aside>
           ) : null}
         </div>

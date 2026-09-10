@@ -10,7 +10,6 @@ const NAV = [
   { href: '/sidings', ns: 'nav', key: 'sidings' },
   { href: '/equipment', ns: 'nav2', key: 'equipment' },
   { href: '/carriers', ns: 'nav2', key: 'carriers' },
-  { href: '/companies', ns: 'nav2', key: 'companies' },
   { href: '/map', ns: 'map', key: 'nav' },
 ] as const;
 
@@ -22,7 +21,7 @@ export async function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6">
         {/* Belgi siqilmaydi: 768 da olti havola sig'magani uchun ular chip qatoriga tushadi (lg dan yuqori gorizontal menyu) */}
         <Link href="/" aria-label={t('aria.home')} className="shrink-0"><Logo compact /></Link>
-        <nav aria-label={t('aria.main')} className="hidden min-w-0 items-center gap-1 xl:flex">
+        <nav aria-label={t('aria.main')} className="hidden min-w-0 items-center gap-1 lg:flex">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-ink/80 hover:bg-white hover:text-navy">
               {label(n)}
@@ -34,7 +33,7 @@ export async function Header() {
           <AuthArea />
         </div>
       </div>
-      <nav aria-label={t('aria.mainMobile')} className="no-scrollbar flex gap-1 overflow-x-auto px-4 pb-2 sm:px-6 xl:hidden">
+      <nav aria-label={t('aria.mainMobile')} className="no-scrollbar flex gap-1 overflow-x-auto px-3 pb-2 sm:px-6 lg:hidden">
         {NAV.map((n) => (
           <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink/80">
             {label(n)}

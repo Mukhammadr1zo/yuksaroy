@@ -48,6 +48,39 @@
       "registryOwner": "Reestrdagi egasi",
       "claimedAt": "Da'vo sanasi",
       "open": "Sahifasi"
+    },
+    "users": {
+      "tab": "Foydalanuvchilar",
+      "search": "Telefon, ism yoki email",
+      "find": "Qidirish",
+      "onlyBlocked": "Faqat bloklanganlar",
+      "total": "{count} ta",
+      "noName": "Ism yozilmagan",
+      "noOrg": "Tashkiloti yo'q",
+      "owner": "egasi",
+      "listings": "{count} ta e'lon",
+      "block": "Bloklash",
+      "unblock": "Blokni ochish",
+      "delete": "O'chirish",
+      "blockedTag": "Bloklangan",
+      "blockReason": "Bloklash sababi (auditga yoziladi):",
+      "blocked": "Bloklandi, sessiyalari bekor qilindi.",
+      "unblocked": "Blok ochildi.",
+      "deleted": "O'chirildi: shaxsiy ma'lumotlar tozalandi, buyurtmalar qoldi.",
+      "confirmDelete": "{name} hisobini o'chirasizmi? Shaxsiy ma'lumotlar tozalanadi, e'lonlari arxivga tushadi.",
+      "empty": "Topilmadi."
+    },
+    "overview": {
+      "users": "Foydalanuvchi",
+      "blocked": "Bloklangan",
+      "orgs": "Tashkilot",
+      "terminals": "Terminal",
+      "sidings": "Shahobcha yo'l",
+      "listings": "Faol e'lon",
+      "orders": "Buyurtma",
+      "inquiries": "So'rov",
+      "messages": "Xabar",
+      "reviews": "Baho"
     }
   }
 }

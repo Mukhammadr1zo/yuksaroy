@@ -48,6 +48,39 @@
       "registryOwner": "Owner per registry",
       "claimedAt": "Claimed",
       "open": "Page"
+    },
+    "users": {
+      "tab": "Users",
+      "search": "Phone, name or email",
+      "find": "Search",
+      "onlyBlocked": "Blocked only",
+      "total": "{count} total",
+      "noName": "No name",
+      "noOrg": "No organization",
+      "owner": "owner",
+      "listings": "{count} listings",
+      "block": "Block",
+      "unblock": "Unblock",
+      "delete": "Delete",
+      "blockedTag": "Blocked",
+      "blockReason": "Reason for blocking (goes to the audit log):",
+      "blocked": "Blocked, sessions revoked.",
+      "unblocked": "Unblocked.",
+      "deleted": "Deleted: personal data cleared, orders kept.",
+      "confirmDelete": "Delete the account of {name}? Personal data is cleared and listings are archived.",
+      "empty": "Nothing found."
+    },
+    "overview": {
+      "users": "Users",
+      "blocked": "Blocked",
+      "orgs": "Organizations",
+      "terminals": "Terminals",
+      "sidings": "Sidings",
+      "listings": "Active listings",
+      "orders": "Orders",
+      "inquiries": "Inquiries",
+      "messages": "Messages",
+      "reviews": "Reviews"
     }
   }
 }
