@@ -101,8 +101,8 @@
       "shipper": {
         "open": "Open orders",
         "openSub": "awaiting confirmation: {n}",
-        "next": "Next spot",
-        "noNext": "No scheduled spot",
+        "next": "Next booking",
+        "noNext": "No scheduled booking",
         "newOrder": "Place an order",
         "invoices": "Awaiting payment",
         "invoicesSub": "total {sum}",

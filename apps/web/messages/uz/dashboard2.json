@@ -101,8 +101,8 @@
       "shipper": {
         "open": "Ochiq buyurtmalar",
         "openSub": "tasdiq kutilmoqda: {n}",
-        "next": "Keyingi joy",
-        "noNext": "Rejalashtirilgan joy yo'q",
+        "next": "Keyingi bron",
+        "noNext": "Rejalashtirilgan bron yo'q",
         "newOrder": "Yangi buyurtma berish",
         "invoices": "To'lov kutilmoqda",
         "invoicesSub": "jami {sum}",
