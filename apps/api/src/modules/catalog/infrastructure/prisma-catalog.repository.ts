@@ -44,7 +44,7 @@ const toSiding = (s: SidingRow): SidingRecord => ({
   id: s.id, registryNo: s.registryNo, stationId: s.stationId, station: s.station, stationNameRaw: s.stationNameRaw, esrCode: s.esrCode, rju: s.rju,
   regionCode: s.regionCode, lat: s.lat, lng: s.lng,
   ownerNameRaw: s.ownerNameRaw, ownerOrgId: s.ownerOrgId, ownerOrgName: s.ownerOrg?.name ?? null, claimStatus: s.claimStatus, claimedAt: s.claimedAt,
-  lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity,
+  lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity, photos: s.photos,
 });
 const json = (v: unknown) => (v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue));
 /** Ochiq e'lon: ACTIVE va muddati o'tmagan. */
@@ -225,6 +225,11 @@ export class PrismaCatalogRepository implements CatalogRepository {
   }
   async decideSidingClaim(id: string, approve: boolean) {
     const r = await this.prisma.siding.updateMany({ where: { id, claimStatus: 'PENDING' }, data: { claimStatus: approve ? 'APPROVED' : 'REJECTED' } });
+    return r.count === 0 ? null : this.findSidingById(id);
+  }
+  async updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }) {
+    // Egalik tekshiruvi shart qatorida: alohida o'qib keyin yozilsa, oradagi vaqtda egasi o'zgarishi mumkin
+    const r = await this.prisma.siding.updateMany({ where: { id, claimStatus: 'APPROVED', ownerOrgId: { in: orgIds } }, data });
     return r.count === 0 ? null : this.findSidingById(id);
   }
 

@@ -58,6 +58,20 @@ export default async function SidingPage({ params }: Params) {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">
+          {s.photos.length ? (
+            <section>
+              <div className="aspect-[16/10] overflow-hidden rounded-card border border-line bg-sand">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s.photos[0]} alt={t('title', { no: s.registryNo })} className="h-full w-full object-cover" />
+              </div>
+              {s.photos.length > 1 ? (
+                <div className="mt-2 flex gap-2 overflow-x-auto">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {s.photos.slice(1).map((p) => <img key={p} src={p} alt="" className="h-16 w-24 shrink-0 rounded-xl border border-line object-cover" />)}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
           <dl className="overflow-hidden rounded-card border border-line bg-white">
             {facts.map(([k, v]) => (
               <div key={k} className="flex items-start justify-between gap-4 border-t border-line/70 px-4 py-2.5 text-sm first:border-t-0">

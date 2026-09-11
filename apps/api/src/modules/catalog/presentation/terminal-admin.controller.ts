@@ -12,7 +12,7 @@ import { PublishTariffUseCase } from '../application/publish-tariff.usecase';
 import { ClaimSidingUseCase } from '../application/claim-siding.usecase';
 import { TerminalAccess } from '../application/terminal-access';
 import { PlatformAdmin } from '../../organizations/application/platform-admin';
-import { ClaimDecideDto, ClaimSidingDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateTerminalDto } from './dto';
+import { ClaimDecideDto, ClaimSidingDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateSidingDto, UpdateTerminalDto } from './dto';
 import { pickIn } from './catalog.controller';
 import { publicSiding } from './mappers';
 
@@ -147,6 +147,20 @@ export class TerminalAdminController {
   async claim(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
     const s = await this.claimSiding.execute(userId, id, dto.orgId);
     await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Siding', entityId: id, meta: { orgId: dto.orgId } });
+    return s;
+  }
+
+  /**
+   * Egasi shahobcha yo'lini tahrir qiladi: hozircha faqat rasmlar.
+   * Reestr ma'lumotiga tegilmaydi va faqat da'vosi TASDIQLANGAN egasi yoza oladi,
+   * aks holda tasdiqlanmagan da'vogar ochiq sahifaga rasm qo'yib qo'yardi.
+   */
+  @Patch('sidings/:id')
+  async updateSiding(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: UpdateSidingDto) {
+    const orgIds = await this.access.orgIdsOf(userId);
+    const s = orgIds.length ? await this.repo.updateSidingByOwner(id, orgIds, { photos: dto.photos }) : null;
+    if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
+    await this.audit.log({ actorId: userId, action: 'siding.update', entity: 'Siding', entityId: id, meta: { fields: Object.keys(dto), photos: dto.photos?.length } });
     return s;
   }
 

@@ -59,7 +59,7 @@ export default function MySidingsPage() {
                   <td className="px-4 py-3 text-muted">{s.regionCode && tr.has(s.regionCode) ? tr(s.regionCode) : '·'}</td>
                   <td className="px-4 py-3 text-right font-mono tabular-nums">{s.lengthM != null ? `${num(s.lengthM, lang)} m` : '·'}</td>
                   <td className="px-4 py-3"><span className={`inline-block whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${TONE[s.claimStatus]}`}>{CLAIM_STATUS_LABELS[lang][s.claimStatus]}</span></td>
-                  <td className="px-4 py-3 text-right"><Link href={`/sidings/${s.id}`} className="text-sm font-semibold text-teal-ink underline">{t('open')}</Link></td>
+                  <td className="px-4 py-3 text-right"><Link href={`/dashboard/sidings/${s.id}`} className="text-sm font-semibold text-teal-ink underline">{tc('edit')}</Link></td>
                 </tr>
               ))}
             </tbody>

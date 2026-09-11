@@ -68,6 +68,8 @@ export interface SidingRecord {
   stationNameRaw: string; esrCode: string | null; rju: Rju | null;
   ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
   claimStatus: ClaimStatus; claimedAt: Date | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
+  /** Egasi yuklagan rasmlar; reestrda rasm yo'q. */
+  photos: string[];
   /** Reestrda koordinata yo'q: tutashgan joy nuqtasi, taqribiy. */
   lat: number | null; lng: number | null;
 }
@@ -118,6 +120,12 @@ export interface CatalogRepository {
   claimSiding(id: string, orgId: string, now: Date): Promise<SidingRecord>;
   /** Faqat PENDING hal qilinadi (APPROVED yoki REJECTED); aks holda null. Rad etilganda egasi saqlanadi, ochiq sahifada ko'rinmaydi. */
   decideSidingClaim(id: string, approve: boolean): Promise<SidingRecord | null>;
+  /**
+   * Egasi tahrir qiladi (hozircha faqat rasmlar): reestr ma'lumotiga tegilmaydi.
+   * Shart qatorida orgId va APPROVED bor, ya'ni begona yoki hali tasdiqlanmagan
+   * da'vogar hech narsa o'zgartira olmaydi. Mos kelmasa null.
+   */
+  updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }): Promise<SidingRecord | null>;
 
   /** Xarita uchun obyektlar: terminal nuqtalari va stansiya bo'yicha to'plangan shahobcha yo'llar. */
   mapObjects(): Promise<{

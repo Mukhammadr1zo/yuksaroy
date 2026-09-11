@@ -32,6 +32,8 @@ export interface Passport {
 export interface Siding {
   id: string; registryNo: number; regionCode: string | null; lat: number | null; lng: number | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null; stationNameRaw: string; esrCode: string | null; rju: Rju | null;
   lengthM: number | null; unloadCapacity: number; loadCapacity: number; claimStatus: ClaimStatus; owner: string | null;
+  /** Egasi yuklagan rasmlar; da'vo tasdiqlanmaguncha bo'sh keladi. */
+  photos: string[];
 }
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number; summary?: ListSummary }

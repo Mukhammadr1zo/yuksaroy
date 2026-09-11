@@ -270,6 +270,9 @@ model Siding {
   lengthM        Int?
   unloadCapacity Int           @default(0) // bir vaqtda tushirish uchun vagon
   loadCapacity   Int           @default(0)
+  // Egasi yuklagan rasmlar: yo'lning o'zi, rampa, kirish yo'li, kran.
+  // Reestrda rasm yo'q, shuning uchun faqat da'vosi tasdiqlangan egasi qo'sha oladi.
+  photos         String[]      @default([])
   createdAt      DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
   listings       Listing[]

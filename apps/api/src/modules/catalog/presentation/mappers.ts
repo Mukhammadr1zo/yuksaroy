@@ -72,6 +72,8 @@ export function publicSiding(s: SidingRecord) {
     id: s.id, registryNo: s.registryNo, station: s.station, stationNameRaw: s.stationNameRaw, esrCode: s.esrCode, rju: s.rju,
     regionCode: s.regionCode, lat: s.lat, lng: s.lng,
     lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity,
+    // Rasm faqat tasdiqlangan egada ko'rinadi: da'vo hal bo'lmaguncha uni hech kim ko'rmaydi
+    photos: s.claimStatus === 'APPROVED' ? s.photos : [],
     claimStatus: s.claimStatus, owner: s.claimStatus === 'APPROVED' ? s.ownerOrgName : null,
   };
 }

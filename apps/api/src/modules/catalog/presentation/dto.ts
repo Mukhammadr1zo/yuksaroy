@@ -1,7 +1,7 @@
 import { OmitType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsNumber, IsObject, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
-import { SERVICE_CODES, TARIFF_UNITS, TERMINAL_KINDS, TERMINAL_STATUSES, type ServiceCode, type TariffUnit, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
+import { ArrayMaxSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsNumber, IsObject, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
+import { LISTING, SERVICE_CODES, TARIFF_UNITS, TERMINAL_KINDS, TERMINAL_STATUSES, type ServiceCode, type TariffUnit, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import type { WeekHours } from '../domain/ports';
 
 export class CreateTerminalDto {
@@ -18,11 +18,21 @@ export class CreateTerminalDto {
   @IsOptional() @IsBoolean() is24h?: boolean;
   @IsOptional() @IsObject() hours?: WeekHours;
   @IsOptional() @IsObject() passport?: Record<string, unknown>;
-  @IsOptional() @IsArray() @IsString({ each: true }) @MaxLength(500, { each: true }) photos?: string[];
+  // ValidateIf, IsOptional emas: IsOptional null ni ham o'tkazib yuboradi va Prisma skalyar
+  // ro'yxatga null yozolmay 500 beradi. Shunda null @IsArray() ga tushib 400 bo'ladi.
+  @ValidateIf((o: { photos?: unknown }) => o.photos !== undefined) @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @IsString({ each: true }) @MaxLength(500, { each: true }) photos?: string[];
 }
 
 export class UpdateTerminalDto extends PartialType(OmitType(CreateTerminalDto, ['orgId'] as const)) {
   @IsOptional() @IsIn(TERMINAL_STATUSES) status?: TerminalStatus;
+}
+
+/**
+ * Shahobcha yo'lni egasi tahrir qiladi. Reestr ma'lumoti (raqam, stansiya, uzunlik,
+ * sig'im) o'zgarmaydi - u rasmiy manbadan keladi. Hozircha faqat rasmlar.
+ */
+export class UpdateSidingDto {
+  @ValidateIf((o: { photos?: unknown }) => o.photos !== undefined) @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @IsString({ each: true }) @MaxLength(500, { each: true }) photos?: string[];
 }
 
 export class ServiceItemDto {

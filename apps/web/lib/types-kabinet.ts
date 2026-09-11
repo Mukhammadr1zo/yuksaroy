@@ -41,6 +41,7 @@ export interface MySiding {
   id: string; registryNo: number; regionCode: string | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null;
   stationNameRaw: string; ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
   claimStatus: ClaimStatus; claimedAt: string | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
+  photos: string[];
 }
 
 /** GET /terminals/mine: repo yozuvi (TerminalRecord, sanalar ISO satr) + bugungi bo'sh slotlar. Tariflar faqat amaldagi. */

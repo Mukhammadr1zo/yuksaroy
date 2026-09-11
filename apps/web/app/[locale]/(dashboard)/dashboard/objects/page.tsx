@@ -61,7 +61,7 @@ export default function ObjectsPage() {
     for (const x of sidings) out.push({
       key: `s:${x.id}`, kind: 'siding', title: `${x.station?.nameUz ?? x.stationNameRaw} No ${x.registryNo}`,
       sub: [region(x.regionCode), x.lengthM != null ? `${num(x.lengthM, locale)} m` : null].filter(Boolean).join(' · '),
-      href: '/dashboard/sidings', publicHref: x.claimStatus === 'APPROVED' ? `/sidings/${x.id}` : null,
+      href: `/dashboard/sidings/${x.id}`, publicHref: x.claimStatus === 'APPROVED' ? `/sidings/${x.id}` : null,
       status: <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${x.claimStatus === 'APPROVED' ? 'bg-teal text-white' : 'bg-amber-soft text-amber-ink'}`}>{CLAIM_STATUS_LABELS[lang][x.claimStatus as ClaimStatus]}</span>,
       fact: x.claimedAt ? t('claimedAt', { date: uzDate(x.claimedAt, locale) }) : null,
     });

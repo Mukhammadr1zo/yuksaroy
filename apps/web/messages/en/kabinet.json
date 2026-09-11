@@ -320,6 +320,20 @@
         "claim": "Attach",
         "claimed": "Request sent, an operator will review it.",
         "none": "Nothing found."
+      },
+      "notFound": "This siding was not found or is not linked to you.",
+      "backToObjects": "My objects",
+      "unload": "Unloading capacity",
+      "load": "Loading capacity",
+      "wagons": "{count, plural, one {# wagon} other {# wagons}}",
+      "one": {
+        "claimedAt": "Claimed on {date}",
+        "needApproval": "Adding photos opens once your claim is approved.",
+        "photosHint": "The track itself, the ramp, the access road and the crane. Clients decide by the photo, not by the numbers.",
+        "photosSection": "Photos",
+        "registryNote": "These rows come from the official registry and cannot be edited. Write to support if something is wrong.",
+        "registrySection": "Registry data",
+        "title": "{station} No {no}"
       }
     },
     "profile": {

@@ -320,6 +320,20 @@
         "claim": "Biriktirish",
         "claimed": "Da'vo yuborildi, operator tekshiradi.",
         "none": "Topilmadi."
+      },
+      "notFound": "Bu shahobcha yo'l topilmadi yoki sizga biriktirilmagan.",
+      "backToObjects": "Obyektlarim",
+      "unload": "Tushirish sig'imi",
+      "load": "Yuklash sig'imi",
+      "wagons": "{count} vagon",
+      "one": {
+        "claimedAt": "{date} da biriktirilgan",
+        "needApproval": "Rasm qo'shish da'vongiz tasdiqlangandan keyin ochiladi.",
+        "photosHint": "Yo'lning o'zi, rampa, kirish yo'li va kran. Mijoz raqamdan ko'ra rasmga qarab qaror qiladi.",
+        "photosSection": "Rasmlar",
+        "registryNote": "Bu qatorlar rasmiy reestrdan keladi va tahrirlanmaydi. Xato bo'lsa qo'llab-quvvatlashga yozing.",
+        "registrySection": "Reestr ma'lumoti",
+        "title": "{station} No {no}"
       }
     },
     "profile": {
