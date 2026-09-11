@@ -21,6 +21,18 @@ function localeOf(pathname: string) {
 
 export function proxy(req: NextRequest) {
   const path = stripLocale(req.nextUrl.pathname);
+
+  // Brauzer tili e'tiborga olinmaydi (routing.ts), lekin odamning o'z tanlovi esda qolsin:
+  // prefiksiz manzilga kelganda cookie ru/en bo'lsa, o'sha tilga o'tkaziladi.
+  if (!localeOf(req.nextUrl.pathname)) {
+    const picked = req.cookies.get('NEXT_LOCALE')?.value;
+    if (picked && picked !== routing.defaultLocale && (routing.locales as readonly string[]).includes(picked)) {
+      const to = new URL(`/${picked}${path === '/' ? '' : path}`, req.url);
+      to.search = req.nextUrl.search;
+      return NextResponse.redirect(to);
+    }
+  }
+
   // /admin - moderatsiya maydoni: mehmonga qobiq ham ko'rinmasin (huquqni sahifa qayta tekshiradi)
   const guarded = path.startsWith('/dashboard') || path.startsWith('/admin');
   if (guarded && !(req.cookies.has('ys_access') || req.cookies.has('ys_refresh'))) {
