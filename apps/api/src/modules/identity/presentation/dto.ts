@@ -40,6 +40,9 @@ export class LoginDto {
 }
 export class SetPasswordDto {
   @IsString() @MinLength(PASSWORD.minLength) @MaxLength(200) password!: string;
+  /** Allaqachon parol o'rnatilgan bo'lsa, uni o'zgartirish uchun joriy parol shart
+   * (o'g'irlangan sessiya jim parolni almashtira olmasin). Birinchi o'rnatishda kerak emas. */
+  @IsOptional() @IsString() @MaxLength(200) currentPassword?: string;
 }
 export class ResetPasswordDto extends VerifyOtpDto {
   @IsString() @MinLength(PASSWORD.minLength) @MaxLength(200) password!: string;

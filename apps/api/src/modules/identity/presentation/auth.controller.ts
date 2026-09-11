@@ -26,8 +26,17 @@ const tgBucket = new IpBucket(30, 60_000); // Mini App kirish: bitta IP daqiqasi
 const otpBucket = new IpBucket(10, 3_600_000); // otp/request: bitta IP soatiga 10 ta
 const loginBucket = new IpBucket(20, 600_000); // login: bitta IP 10 daqiqada 20 ta
 const resetBucket = new IpBucket(5, 3_600_000); // parol tiklash so'rovi: bitta IP soatiga 5 ta
+// Kodni ISTE'MOL qiluvchi yo'llar (verify/reset/phone-change): brute-force to'sig'i. Ilgari bular
+// umuman cheklanmasdi - faqat kod bo'yicha 3 urinish bor edi, lekin ko'p kod olib chetlab o'tilardi.
+const consumeIpBucket = new IpBucket(15, 600_000);   // bitta IP 10 daqiqada 15 tekshiruv
+const consumePhoneBucket = new IpBucket(8, 600_000);  // bitta raqamga 10 daqiqada 8 tekshiruv
+const otpPhoneBucket = new IpBucket(5, 3_600_000);    // bitta raqamga soatiga 5 kod so'rovi (Telegram toshqini)
 /** Chelak oshsa 429; kalit sifatida IP. */
 const limit = (b: IpBucket, req: FastifyRequest) => { if (!b.take(req.ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
+/** Telefon bo'yicha cheklov: bitta IP butun tarmoqni bloklamaydi, bitta raqam nishonlanmaydi. */
+const limitPhone = (b: IpBucket, phone: string | null) => { if (phone && !b.take(phone)) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
+/** Kod iste'mol qiluvchi yo'l: IP va telefon bo'yicha, VerifyOtpUseCase'dan oldin. */
+const limitConsume = (req: FastifyRequest, phone: string | null) => { limit(consumeIpBucket, req); limitPhone(consumePhoneBucket, normalizeUzPhone(phone ?? '')); };
 type Ctx = { userAgent?: string; ip?: string };
 const ctxOf = (req: FastifyRequest): Ctx => ({ userAgent: req.headers['user-agent'], ip: req.ip });
 
@@ -51,12 +60,14 @@ export class AuthController {
   @Post('otp/request') @HttpCode(200)
   async otpRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(otpBucket, req);
+    limitPhone(otpPhoneBucket, normalizeUzPhone(dto.phone));
     return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
   /** Kirgan telefonsiz foydalanuvchi (Google) shu yerda telefonini bog'laydi: yangi user ochilmaydi. */
   @Post('otp/verify') @HttpCode(200)
   async otpVerify(@Body() dto: VerifyOtpDto, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
+    limitConsume(req, dto.phone);
     try {
       const r = await this.verifyOtp.execute(dto.phone, dto.code, ctxOf(req), optionalUserId(req, this.tokens));
       return await this.loggedIn(res, r, req.ip, 'otp');
@@ -104,7 +115,7 @@ export class AuthController {
 
   @Post('password/set') @HttpCode(200) @UseGuards(JwtGuard)
   async passwordSet(@CurrentUserId() userId: string, @Body() dto: SetPasswordDto, @Req() req: FastifyRequest) {
-    const u = await this.password.setPassword(userId, dto.password);
+    const u = await this.password.setPasswordChecked(userId, dto.password, dto.currentPassword);
     await this.audit.log({ actorId: userId, action: 'auth.password.set', ip: req.ip });
     return publicUser(u, await this.admin.isPlatformAdmin(userId));
   }
@@ -112,11 +123,13 @@ export class AuthController {
   @Post('password/reset/request') @HttpCode(200)
   async passwordResetRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(resetBucket, req);
+    limitPhone(otpPhoneBucket, normalizeUzPhone(dto.phone));
     return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
   @Post('password/reset') @HttpCode(200)
   async passwordReset(@Body() dto: ResetPasswordDto, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
+    limitConsume(req, dto.phone);
     try {
       const r = await this.password.reset(dto.phone, dto.code, dto.password, ctxOf(req));
       await this.audit.log({ actorId: r.user.id, action: 'auth.password.reset', ip: req.ip });
@@ -179,6 +192,7 @@ export class AuthController {
 
   @Post('phone/change') @HttpCode(200) @UseGuards(JwtGuard)
   async phoneChange(@CurrentUserId() userId: string, @Body() dto: VerifyOtpDto, @Req() req: FastifyRequest) {
+    limitConsume(req, dto.phone);
     try {
       const phone = await this.verifyOtp.consume(dto.phone, dto.code);
       const u = await this.users.claimPhone(userId, phone);

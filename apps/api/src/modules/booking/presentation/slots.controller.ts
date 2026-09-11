@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { HttpException, Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Matches, Max, Min, ValidateNested } from 'class-validator';
@@ -6,6 +6,7 @@ import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { ManageSlotsUseCase } from '../application/manage-slots.usecase';
 import { HoldSlotUseCase } from '../application/hold-slot.usecase';
+import { IpBucket } from '../../../common/ip-bucket';
 
 class SlotWindowDto {
   @IsInt() @Min(1) @Max(24) window!: number;
@@ -26,6 +27,8 @@ class HoldDto {
   @IsOptional() @IsString() orgId?: string;
 }
 
+// Bir foydalanuvchi 10 daqiqada 20 hold: tez ketma-ket band qilib butun kalendarni muzlatib qo'yolmaydi
+const holdBucket = new IpBucket(20, 600_000);
 /** Slot kalendari: ochiq ko'rish + terminal boshqaruvi + mijoz hold'i. */
 @ApiTags('booking')
 @Controller()
@@ -52,6 +55,7 @@ export class SlotsController {
 
   @Post('slots/:id/hold') @HttpCode(201) @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
   hold(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: HoldDto) {
+    if (!holdBucket.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
     return this.holds.hold(userId, id, dto?.orgId ?? null);
   }
 

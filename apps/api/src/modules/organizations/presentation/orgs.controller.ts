@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, ForbiddenException, Get, Inject,
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { PartialType, PickType } from '@nestjs/swagger';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
+import { PHOTO_URL } from '../../../common/security';
 import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizeUzPhone, type KycStatus, type OrgKind, type RegionCode, type Role } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { CreateOrgUseCase } from '../application/create-org.usecase';
@@ -39,8 +40,8 @@ class KycDecideDto {
 class StorefrontDto implements Storefront {
   @IsOptional() @IsString() @MaxLength(160) tagline?: string;
   @IsOptional() @IsString() @MaxLength(4000) about?: string;
-  @IsOptional() @IsString() @MaxLength(500) @Matches(/^https?:\/\//) logoUrl?: string;
-  @IsOptional() @IsString() @MaxLength(500) @Matches(/^https?:\/\//) coverUrl?: string;
+  @IsOptional() @IsString() @MaxLength(500) @Matches(PHOTO_URL) logoUrl?: string;
+  @IsOptional() @IsString() @MaxLength(500) @Matches(PHOTO_URL) coverUrl?: string;
   @IsOptional() @IsBoolean() showListings?: boolean;
   @IsOptional() @IsBoolean() showTerminals?: boolean;
   @IsOptional() @IsString() @MaxLength(80) contactTelegram?: string;

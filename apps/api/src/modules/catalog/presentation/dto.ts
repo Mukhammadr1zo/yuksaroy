@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsNumber, IsObject, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { LISTING, SERVICE_CODES, TARIFF_UNITS, TERMINAL_KINDS, TERMINAL_STATUSES, type ServiceCode, type TariffUnit, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import type { WeekHours } from '../domain/ports';
+import { PHOTO_URL } from '../../../common/security';
 
 export class CreateTerminalDto {
   @IsString() orgId!: string;
@@ -20,7 +21,7 @@ export class CreateTerminalDto {
   @IsOptional() @IsObject() passport?: Record<string, unknown>;
   // ValidateIf, IsOptional emas: IsOptional null ni ham o'tkazib yuboradi va Prisma skalyar
   // ro'yxatga null yozolmay 500 beradi. Shunda null @IsArray() ga tushib 400 bo'ladi.
-  @ValidateIf((o: { photos?: unknown }) => o.photos !== undefined) @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @IsString({ each: true }) @MaxLength(500, { each: true }) photos?: string[];
+  @ValidateIf((o: { photos?: unknown }) => o.photos !== undefined) @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
 }
 
 export class UpdateTerminalDto extends PartialType(OmitType(CreateTerminalDto, ['orgId'] as const)) {

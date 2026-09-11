@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Length, Max, MaxLength, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, ValidateNested } from 'class-validator';
+import { PHOTO_URL } from '../../../common/security';
 import type { Condition, DealKind, ListingInput, ListingKind, PriceUnit, RegionCode } from '@yuksaroy/domain';
 
 /** Faqat shakl tekshiruvi; lug'at va diapazon qoidalari validateListing'da (bir xil xato kodlari forma uchun). */
@@ -19,7 +20,7 @@ export class ListingBodyDto {
   @IsOptional() @IsString() sidingId?: string | null;
   @IsOptional() @IsInt() @Max(1e13) priceTiyin?: number | null;
   @IsOptional() @IsString() priceUnit?: PriceUnit | null;
-  @IsOptional() @IsArray() @IsString({ each: true }) @MaxLength(500, { each: true }) photos?: string[];
+  @IsOptional() @IsArray() @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
   @IsOptional() @IsInt() year?: number | null;
   @IsOptional() @IsString() condition?: Condition | null;
   @IsOptional() @IsString() @MaxLength(80) model?: string | null;

@@ -14,7 +14,12 @@ import { input, inputMono, primary } from '@/components/auth/styles';
 import { PasswordField, PhoneField } from '@/components/ui/fields';
 
 /** ?next til prefiksi bilan keladi (/ru/dashboard); i18n router o'zi prefiks qo'shadi, shuning uchun olib tashlanadi. */
-export const stripLocale = (p: string) => p.replace(new RegExp(`^/(${routing.locales.join('|')})(?=/|$)`), '') || '/';
+export const stripLocale = (p: string) => {
+  const s = p.replace(new RegExp(`^/(${routing.locales.join('|')})(?=/|$)`), '') || '/';
+  // Faqat ichki yo'l qaytadi: // yoki /\ (protokol-nisbiy) va tashqi URL tashqi saytga
+  // yo'naltirishni ochib qo'yardi (?next=//evil.com) - bunday holda kabinetga tushadi.
+  return s[0] === '/' && s[1] !== '/' && s[1] !== '\\' ? s : '/dashboard';
+};
 
 const MODES = ['password', 'code'] as const;
 const card = 'rounded-card border border-line bg-white p-6 sm:p-8';

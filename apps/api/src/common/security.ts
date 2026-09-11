@@ -26,6 +26,11 @@ export function parseTrustProxy(v: string | undefined): boolean | number | strin
   return /^\d+$/.test(s) ? Number(s) : s;
 }
 
+/** Yuklangan foto URL shakli: uploads controller aynan shunday chiqaradi
+ * (<host>/v1/files/YYYY/MM/<24hex>.<ext>). Boshqa har qanday satr rad etiladi:
+ * begona URL, data: yoki javascript: <img src> ga tushmaydi. */
+export const PHOTO_URL = /^https?:\/\/[^\s/]+\/v1\/files\/\d{4}\/\d{2}\/[0-9a-f]{24}\.(?:jpg|png|webp)$/;
+
 /** Fayl mazmuni bo'yicha tur (magic bytes). Mijoz e'lon qilgan mimetype ga ishonilmaydi. */
 export function detectImageExt(buf: Buffer): 'jpg' | 'png' | 'webp' | null {
   if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg';

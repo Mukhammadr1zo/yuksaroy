@@ -1,7 +1,7 @@
 // Telegram Mini App initData tekshiruvi (Telegram hujjati: secret = HMAC_SHA256('WebAppData', BOT_TOKEN)). Framework va Prisma yo'q.
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-export const INITDATA_MAX_AGE_SEC = 24 * 3600;
+export const INITDATA_MAX_AGE_SEC = 3600; // 24h juda uzun (replay); 1 soat yetarli, Telegram har ochilishda yangilaydi
 
 export interface TgWebAppUser {
   id: number;

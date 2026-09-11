@@ -19,6 +19,14 @@ export class PrismaOtpStore implements OtpStore {
     const r = await this.prisma.otpCode.update({ where: { id }, data: { attempts: { increment: 1 } } });
     return r.attempts;
   }
+  async attemptConsume(id: string, maxAttempts: number) {
+    // Bitta atomik UPDATE: qator qulfi bilan serializatsiya, shuning uchun poyga yo'q.
+    const rows = await this.prisma.$queryRaw<{ attempts: number; codeHash: string }[]>`
+      UPDATE "OtpCode" SET attempts = attempts + 1
+      WHERE id = ${id} AND "consumedAt" IS NULL AND "expiresAt" > now() AND attempts < ${maxAttempts}
+      RETURNING attempts, "codeHash"`;
+    return rows[0] ?? null;
+  }
   async consume(id: string) {
     await this.prisma.otpCode.update({ where: { id }, data: { consumedAt: new Date() } });
   }

@@ -42,6 +42,14 @@ export class PasswordUseCase {
     return this.users.update(userId, { passwordHash: await argon2.hash(password), passwordSetAt: new Date(), failedLogins: 0, lockedUntil: null });
   }
 
+  /** Profilda parolni o'rnatish/almashtirish: parol allaqachon bo'lsa joriyini tekshiradi. */
+  async setPasswordChecked(userId: string, password: string, current?: string) {
+    const u = await this.users.findById(userId);
+    if (!u) throw new BadCredentialsError();
+    if (u.passwordHash && !(current && (await argon2.verify(u.passwordHash, current)))) throw new BadCredentialsError();
+    return this.setPassword(userId, password);
+  }
+
   /** OTP tasdiqlanadi, parol yangilanadi, kirish natijasi qaytadi (cookie controllerda). */
   async reset(rawPhone: string, code: string, password: string, ctx: Ctx) {
     const phone = await this.verifyOtp.consume(rawPhone, code);

@@ -20,8 +20,14 @@ export function alt(locale: string, path = '') {
 }
 
 /** JSON-LD tegi. JSON.stringify undefined maydonlarni tashlaydi, ya'ni yo'q ma'lumot chiqmaydi. */
+/** JSON-LD ni <script> ichiga xavfsiz joylash. JSON.stringify < > & belgilarini qochirmaydi,
+ * shuning uchun e'lon sarlavhasidagi "</script>" tegdan chiqib ketardi (saqlangan XSS).
+ * Bu uchta belgi to'g'ri JSON escape'iga o'giriladi: hujjat buzilmaydi, teg ochilmaydi. */
+const ldSafe = (data: object) =>
+  JSON.stringify(data).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+
 export const Ld = ({ data }: { data: object }) =>
-  createElement('script', { type: 'application/ld+json', dangerouslySetInnerHTML: { __html: JSON.stringify(data) } });
+  createElement('script', { type: 'application/ld+json', dangerouslySetInnerHTML: { __html: ldSafe(data) } });
 
 /** BreadcrumbList: [{ name, path }] ichki sahifa zanjiri (bosh sahifa avtomatik qo'shiladi). */
 export const breadcrumbs = (locale: string, items: { name: string; path: string }[]) => ({

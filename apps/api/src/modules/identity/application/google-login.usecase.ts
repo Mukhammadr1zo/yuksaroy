@@ -8,8 +8,10 @@ export class GoogleDisabledError extends Error { constructor() { super('GOOGLE_D
 export class GoogleInvalidError extends Error { constructor() { super('GOOGLE_INVALID'); } }
 
 /**
- * Google ID token (GSI credential) -> foydalanuvchi. Tartib: googleSub, keyin tasdiqlangan email (bog'lanadi), keyin yangi.
- * Telefon bo'sh qoladi; OTP tasdiqlash bilan keyin bog'lanadi (needsPhone).
+ * Google ID token (GSI credential) -> foydalanuvchi. googleSub bo'yicha topiladi yoki yangi hisob.
+ * DIQQAT: mahalliy 'email' ustuni PATCH /me bilan TASDIQLANMASDAN qo'yiladi, shuning uchun unga
+ * qarab hisobga BOG'LAMAYMIZ - aks holda begona odam qurbon emailini o'ziga yozib, uning Google
+ * kirishini o'g'irlab olardi. Telefon bo'sh qoladi; OTP bilan keyin bog'lanadi (needsPhone).
  */
 @Injectable()
 export class GoogleLoginUseCase {
@@ -32,10 +34,10 @@ export class GoogleLoginUseCase {
 
     let user: UserRecord | null = await this.users.findByGoogleSub(p.sub);
     if (!user) {
-      const byEmail = await this.users.findByEmail(p.email);
-      user = byEmail
-        ? await this.users.update(byEmail.id, { googleSub: p.sub, avatarUrl: byEmail.avatarUrl ?? p.picture, fullName: byEmail.fullName ?? p.name })
-        : await this.users.createByGoogle({ googleSub: p.sub, email: p.email, fullName: p.name, avatarUrl: p.picture });
+      // Email band bo'lsa (boshqa hisobda, tasdiqlanmagan) - uni bu yerda null qoldiramiz:
+      // Google identifikatori googleSub orqali ishlaydi, band email yangi kirishni to'smasin.
+      const taken = await this.users.findByEmail(p.email);
+      user = await this.users.createByGoogle({ googleSub: p.sub, email: taken ? null : p.email, fullName: p.name, avatarUrl: p.picture });
     }
     const pair = await this.tokens.issuePair(user.id, ctx);
     return { user, ...pair };

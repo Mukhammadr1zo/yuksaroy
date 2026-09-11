@@ -40,10 +40,11 @@ export class SearchController {
     let quota: { used: number; limit: number } | null = null;
 
     if (this.yordamchi.enabled && needsLlm(dict)) {
-      // Kalit: foydalanuvchi > bot chat (X-Client-Id) > mehmon IP; limit faqat kirganlar uchun katta
+      // Kalit: kirgan foydalanuvchi id, aks holda mehmon IP. Mijoz sarlavhasi (X-Client-Id)
+      // kalitga QO'SHILMAYDI: aks holda har xil sarlavha bilan cheksiz yangi chelak ochib,
+      // Anthropic kvotasini aylanib o'tish mumkin edi.
       const userId = optionalUserId(req, this.tokens);
-      const clientId = String(req.headers['x-client-id'] ?? '').slice(0, 64);
-      const key = userId ? `u:${userId}` : clientId ? `c:${ip}:${clientId}` : `g:${ip}`;
+      const key = userId ? `u:${userId}` : `g:${ip}`;
       const t = this.yordamchi.take(key, userId ? 'user' : 'guest');
       quota = { used: t.used, limit: t.limit };
       if (t.ok && llmMinute.take(ip ?? '?')) {

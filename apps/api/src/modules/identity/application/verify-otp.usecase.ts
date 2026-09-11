@@ -23,12 +23,12 @@ export class VerifyOtpUseCase {
 
     const challenge = await this.otps.latestActive(phone);
     if (!challenge) throw new OtpInvalidError('NOT_FOUND');
-    if (challenge.expiresAt < new Date()) throw new OtpInvalidError('EXPIRED');
-    if (challenge.attempts >= OTP.maxAttempts) throw new OtpInvalidError('LOCKED');
-
-    if (challenge.codeHash !== hashSecret(code.trim(), env.JWT_SECRET)) {
-      const n = await this.otps.bumpAttempts(challenge.id);
-      throw new OtpInvalidError(n >= OTP.maxAttempts ? 'LOCKED' : 'WRONG');
+    // Atomik: urinishni bir SQL da hisoblab, limitdan oshsa null. Poyga (bir kodga bir vaqtda
+    // ko'p urinish) shu bilan yopiladi; rate-limiter esa umumiy sonini cheklaydi.
+    const row = await this.otps.attemptConsume(challenge.id, OTP.maxAttempts);
+    if (!row) throw new OtpInvalidError('LOCKED');
+    if (row.codeHash !== hashSecret(code.trim(), env.JWT_SECRET)) {
+      throw new OtpInvalidError(row.attempts >= OTP.maxAttempts ? 'LOCKED' : 'WRONG');
     }
     await this.otps.consume(challenge.id);
     return phone;

@@ -33,7 +33,7 @@ export class PrismaUserRepository implements UserRepository {
   async createByPhone(phone: string) {
     return toRecord(await this.prisma.user.create({ data: { phone }, ...withTg }));
   }
-  async createByGoogle(d: { googleSub: string; email: string; fullName: string | null; avatarUrl: string | null }) {
+  async createByGoogle(d: { googleSub: string; email: string | null; fullName: string | null; avatarUrl: string | null }) {
     return toRecord(await this.prisma.user.create({ data: d, ...withTg }));
   }
   async createByTelegram({ chatId, username, ...d }: { chatId: bigint; username: string | null; fullName: string | null; locale: string; avatarUrl: string | null }) {

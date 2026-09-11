@@ -31,7 +31,7 @@ export interface UserRepository {
   findByGoogleSub(sub: string): Promise<UserRecord | null>;
   findByEmail(email: string): Promise<UserRecord | null>;
   createByPhone(phone: string): Promise<UserRecord>;
-  createByGoogle(d: { googleSub: string; email: string; fullName: string | null; avatarUrl: string | null }): Promise<UserRecord>;
+  createByGoogle(d: { googleSub: string; email: string | null; fullName: string | null; avatarUrl: string | null }): Promise<UserRecord>;
   /** Mini App: telefonsiz user + TelegramLink bitta so'rovda. */
   createByTelegram(d: { chatId: bigint; username: string | null; fullName: string | null; locale: string; avatarUrl: string | null }): Promise<UserRecord>;
   update(userId: string, d: UserPatch): Promise<UserRecord>;
@@ -57,6 +57,9 @@ export interface OtpStore {
   latestActive(phone: string): Promise<OtpChallenge | null>;
   findByLinkToken(token: string): Promise<OtpChallenge | null>;
   bumpAttempts(id: string): Promise<number>;
+  /** Atomik: faol va urinishlar limitidan past bo'lsa attempts++ va qatorni qaytaradi, aks holda null.
+   * Tekshir-keyin-oshir poygasini yopadi (bir kod uchun bir vaqtda ko'p urinish). */
+  attemptConsume(id: string, maxAttempts: number): Promise<{ attempts: number; codeHash: string } | null>;
   consume(id: string): Promise<void>;
 }
 
