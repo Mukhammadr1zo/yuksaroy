@@ -21,7 +21,8 @@ export default function Image() {
             <img src={MARK} width={80} height={80} alt="" />
           </div>
           <div style={{ display: 'flex', fontSize: 60, fontWeight: 700 }}>
-            <span>Yuk<span style={{ color: '#05979E' }}>Saroy</span></span>
+            <span>Yuk</span>
+            <span style={{ color: '#05979E', marginLeft: '-0.28em' }}>Saroy</span>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
