@@ -1,8 +1,14 @@
 import Image from 'next/image';
+import mark from '@/public/img/logo-mark.png';
+import word from '@/public/img/logo-word.png';
 
-/** Belgi: olmos ramka ichida yuk. Kichik joylarda (favicon, dumaloq avatar) shu ishlatiladi. */
+// Rasmlar import qilinadi, /img/... manzili bilan emas: Next fayl mazmunidan xesh yasaydi
+// (/_next/static/media/logo-mark.<xesh>.png). Logo almashtirilsa manzil ham o'zgaradi va
+// hech kimda eski nusxa qolib ketmaydi. O'lcham ham importdan keladi, qo'lda yozilmaydi.
+
+/** Belgi: dumaloq avatar va kichik joylar uchun. */
 export function LogoMark({ size = 36, className = '' }: { size?: number; className?: string }) {
-  return <Image src="/img/logo-mark.png" alt="" width={192} height={192} sizes={`${size}px`} style={{ height: size, width: 'auto' }} className={className} loading="eager" />;
+  return <Image src={mark} alt="" sizes={`${size}px`} style={{ height: size, width: 'auto' }} className={className} loading="eager" />;
 }
 
 /**
@@ -14,13 +20,13 @@ export function LogoMark({ size = 36, className = '' }: { size?: number; classNa
 export function Logo({ light = false, compact = false }: { light?: boolean; compact?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2.5">
-      <Image src="/img/logo-mark.png" alt={light ? '' : ''} width={192} height={192} sizes="36px" className="h-9 w-auto" priority />
+      <Image src={mark} alt="" sizes="36px" className="h-9 w-auto" priority />
       {light ? (
         <span className="font-display text-lg font-bold tracking-tight text-white">
           Yuk<span className="text-teal-lit">Saroy</span>
         </span>
       ) : (
-        <Image src="/img/logo-word.png" alt="YukSaroy" width={460} height={96} sizes="91px" className={`h-[19px] w-auto ${compact ? 'max-[399px]:hidden' : ''}`} loading="eager" />
+        <Image src={word} alt="YukSaroy" sizes="91px" className={`h-[19px] w-auto ${compact ? 'max-[399px]:hidden' : ''}`} loading="eager" />
       )}
     </span>
   );
