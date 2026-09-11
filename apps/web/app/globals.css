@@ -129,6 +129,56 @@ h1, h2, h3 { text-wrap: balance; }
   }
 }
 
+/* Belgilash katakchalari va radiolar. `accent-color` faqat rangni almashtiradi, shakl
+   operatsion tizimniki bo'lib qolardi. `appearance: none` bilan ular ham sayt tilida:
+   14 px radiusli dunyoda 5 px kvadrat, teal to'ldirish, oq belgi.
+   :where() - o'ziga xoslik nolga teng, shuning uchun joyidagi h-3.5/h-4 klasslari ustun turadi. */
+:where(input[type="checkbox"], input[type="radio"]) {
+  appearance: none;
+  flex: none;
+  width: 1.0625rem;
+  height: 1.0625rem;
+  border: 1.5px solid var(--color-line);
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 140ms var(--ease-emph), border-color 140ms var(--ease-emph);
+}
+:where(input[type="checkbox"]) { border-radius: 5px; }
+:where(input[type="radio"]) { border-radius: 50%; }
+:where(input[type="checkbox"], input[type="radio"]):hover:not(:disabled) { border-color: var(--color-teal); }
+:where(input[type="checkbox"]):checked {
+  border-color: var(--color-teal);
+  background-color: var(--color-teal);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-6.5'/%3E%3C/svg%3E");
+  background-size: 74%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Radio tanlanganda: teal halqa, markazda oq nuqta (qalin chegara shu ishni qiladi) */
+:where(input[type="radio"]):checked { border-color: var(--color-teal); border-width: 5px; }
+:where(input[type="checkbox"], input[type="radio"]):disabled { background-color: var(--color-sand); cursor: not-allowed; }
+
+/* Raqam maydonidagi kichik strelkalar: sichqoncha kelganda paydo bo'lib, maydon kengligini
+   o'zgartiradi va boshqa inputlardan farq qiladi. Klaviatura yuqori/past strelkalari ishlayveradi. */
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { appearance: none; margin: 0; }
+
+/* Sana va vaqt maydonidagi taqvim belgisi: kulrang emas, matn rangida va bosiladigan */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 140ms var(--ease-emph);
+}
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+input[type="time"]:hover::-webkit-calendar-picker-indicator,
+input[type="month"]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
+
+/* Matn maydoni faqat balandligiga cho'ziladi: eniga tortilsa tartib buziladi */
+textarea { resize: vertical; }
+
 /* Kichik ikonka tugmalari uchun 40x40 bosish maydoni: element o'zi relative yoki absolute bo'lishi kerak */
 .tap-40::after { content: ''; position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; transform: translate(-50%, -50%); }
 
