@@ -121,8 +121,8 @@ async function main() {
   await seedStations();
   await seedCargo();
   await seedSidings();
-  await seedTerminals();
-  await seedSlots();
+  if (process.env.SEED_PILOT === '1') { await seedTerminals(); await seedSlots(); }
+  else console.log("Pilot terminal va slotlar qo'shilmadi (SEED_PILOT=1 bilan qo'shiladi)");
 }
 main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
 

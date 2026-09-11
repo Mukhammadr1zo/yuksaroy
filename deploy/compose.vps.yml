@@ -1,5 +1,6 @@
 # VPS ustki qatlami: 80/443 ni nginx egallagan, shuning uchun Caddy ishlamaydi.
 # Konteynerlar faqat localhost portlarida turadi, nginx ularga proxy qiladi.
+# Portlar 3310/4310: 3200/4200 uzrailmap-prod tomonidan band.
 #
 #   cd /opt/yuksaroy
 #   docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env up -d
@@ -14,13 +15,13 @@ services:
 
   api:
     mem_limit: 420m
-    ports: ["127.0.0.1:4200:4000"]
+    ports: ["127.0.0.1:4310:4000"]
     environment:
       NODE_OPTIONS: --max-old-space-size=320
 
   web:
     mem_limit: 300m
-    ports: ["127.0.0.1:3200:3000"]
+    ports: ["127.0.0.1:3310:3000"]
     environment:
       NODE_OPTIONS: --max-old-space-size=240
 
