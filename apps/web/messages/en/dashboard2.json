@@ -5,7 +5,7 @@
     },
     "board": {
       "title": "Requests",
-      "lead": "Confirm a new request within 30 minutes, otherwise the slot is released.",
+      "lead": "Confirm a new request within 30 minutes, otherwise the spot is released.",
       "view": {
         "board": "Board",
         "list": "List"
@@ -101,8 +101,8 @@
       "shipper": {
         "open": "Open orders",
         "openSub": "awaiting confirmation: {n}",
-        "next": "Next slot",
-        "noNext": "No scheduled slot",
+        "next": "Next spot",
+        "noNext": "No scheduled spot",
         "newOrder": "Place an order",
         "invoices": "Awaiting payment",
         "invoicesSub": "total {sum}",
@@ -111,7 +111,7 @@
       "terminal": {
         "pending": "New requests",
         "pendingSub": "respond within 30 minutes",
-        "free": "Free slots today",
+        "free": "Free spots today",
         "freeSub": "across {n} terminals",
         "noTariff": "Terminals without a tariff",
         "noTariffSub": "Without a tariff a terminal shows no price in the catalog and takes no bookings",
@@ -138,7 +138,7 @@
       "stepsAria": "Steps",
       "step": {
         "cargo": "Cargo",
-        "terminal": "Terminal and slot",
+        "terminal": "Terminal and spot",
         "summary": "Summary"
       },
       "filter": {
@@ -182,15 +182,15 @@
         "yes": "Yes, cancel it",
         "no": "No",
         "start": "Cancel the order",
-        "hint": "Cancellation is not possible less than 12 hours before the slot starts."
+        "hint": "Cancellation is not possible less than 12 hours before the spot starts."
       },
       "statusHint": {
-        "PENDING": "Waiting for terminal confirmation. Without it the slot is released automatically.",
-        "CONFIRMED": "The slot is booked for you. Arrive at the agreed time.",
+        "PENDING": "Waiting for terminal confirmation. Without it the spot is released automatically.",
+        "CONFIRMED": "The spot is booked for you. Arrive at the agreed time.",
         "IN_PROGRESS": "Work is under way at the terminal.",
         "DONE": "The order is completed.",
         "REJECTED": "The terminal rejected it. Choose another terminal or time.",
-        "EXPIRED": "The terminal did not answer in time, the slot was released.",
+        "EXPIRED": "The terminal did not answer in time, the spot was released.",
         "CANCELLED": "The order was cancelled."
       },
       "actor": {
@@ -212,8 +212,8 @@
       "offersLead": "{count} offers for station {station}.",
       "offersLeadNearby": "{count} offers for station {station} (from nearby).",
       "missingTariff": "no tariff: {services}",
-      "holding": "The slot is held for you",
-      "holdingShort": "Slot on hold:",
+      "holding": "The spot is held for you",
+      "holdingShort": "Spot on hold:",
       "extend": "Extend",
       "back": "Back",
       "next": "Continue",
@@ -222,22 +222,22 @@
       "noteOptional": "Note (optional)",
       "sending": "Sending",
       "placeOrder": "Place order",
-      "submitHint": "After sending, the terminal confirms within 30 minutes. Without confirmation the slot is released automatically.",
+      "submitHint": "After sending, the terminal confirms within 30 minutes. Without confirmation the spot is released automatically.",
       "err": {
         "generic": "Something went wrong. Please try again.",
         "noOrg": "Create an organization first.",
         "selectStation": "Select a station.",
         "enterWeight": "Enter the weight.",
         "noOffers": "No terminal at this station or nearby has published a tariff.",
-        "holdExpiredPick": "The slot hold has expired. Pick another window.",
-        "cancelTooLate": "Less than 12 hours before the slot starts, cancellation is not possible. Contact the terminal.",
+        "holdExpiredPick": "The spot hold has expired. Pick another window.",
+        "cancelTooLate": "Less than 12 hours before the spot starts, cancellation is not possible. Contact the terminal.",
         "cancelNotAllowed": "Cancellation is not possible in this status.",
         "cancelFailed": "Not cancelled. Please try again.",
         "SLOT_FULL": "No places left in this window. Choose another one.",
         "SLOT_CLOSED": "This window is closed.",
         "SLOT_PAST": "This window has passed.",
         "HOLD_EXPIRED": "The hold has expired. Pick the window again.",
-        "HOLD_ALREADY_USED": "An order has already been placed for this slot.",
+        "HOLD_ALREADY_USED": "An order has already been placed for this spot.",
         "HOLD_NOT_EXTENDABLE": "The hold can be extended only once.",
         "NOT_SHIPPER": "You may not place orders on behalf of this organization.",
         "NO_TARIFF_FOR_OPERATION": "The terminal has no tariff for this operation.",
@@ -255,7 +255,7 @@
         "services": "services: {sum}"
       },
       "slots": {
-        "empty": "This terminal has no open slots in the coming days.",
+        "empty": "This terminal has no open spots in the coming days.",
         "busy": "taken",
         "free": "{n} places free",
         "legendFree": "free places",

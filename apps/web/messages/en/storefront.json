@@ -5,7 +5,7 @@
       "shop": "Storefront"
     },
     "title": "Storefront page",
-    "lead": "A public mini site: cover, logo, tagline and contacts. Active terminals, sidings and listings appear automatically.",
+    "lead": "A public mini page: cover, logo, tagline and contacts. Active terminals, sidings and listings appear automatically.",
     "address": "Address",
     "noSlug": "The storefront address appears once the organization is saved.",
     "preview": "Open storefront",

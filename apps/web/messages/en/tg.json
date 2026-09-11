@@ -4,7 +4,7 @@
       "title": "Open inside Telegram",
       "body": "This page runs as a Telegram Mini App: you sign in with your Telegram account and link a phone with one tap.",
       "open": "Open in Telegram",
-      "site": "Go to the regular site"
+      "site": "Go to the full platform"
     },
     "boot": {
       "loading": "Signing in",
@@ -17,7 +17,7 @@
       "loadFailed": "Could not load. Reopen the app.",
       "back": "Back",
       "all": "All",
-      "openSite": "Open on the full site",
+      "openSite": "Open on the platform",
       "cancel": "Cancel",
       "none": "none",
       "onRequest": "price on request",
@@ -37,8 +37,8 @@
         "equipment": "Equipment",
         "truck": "Road transport"
       },
-      "bookable": "Terminals with free slots today",
-      "bookableEmpty": "No open slots today. Next days are on the terminal page.",
+      "bookable": "Terminals with free spots today",
+      "bookableEmpty": "No open spots today. Next days are on the terminal page.",
       "orders": "My open orders",
       "ordersAll": "All",
       "urgent": "Urgent request",
@@ -75,22 +75,22 @@
       "notFound": "Terminal not found.",
       "tariffs": "Tariffs",
       "noTariffs": "No tariff published, price on request.",
-      "slotsToday": "Slots today",
-      "noSlots": "No open slots today. Next days are in the booking step.",
+      "slotsToday": "Spots today",
+      "noSlots": "No open spots today. Next days are in the booking step.",
       "free": "{count} free",
       "phone": "Phone",
       "noPhone": "No phone listed",
-      "book": "Book a slot",
+      "book": "Book a spot",
       "map": "On the map",
       "hours": "Working hours",
       "noRating": "No rating",
       "unverified": "Passport not confirmed by the owner"
     },
     "book": {
-      "title": "Book a slot",
+      "title": "Book a spot",
       "steps": {
         "cargo": "Cargo",
-        "slot": "Slot",
+        "slot": "Spot",
         "confirm": "Confirm"
       },
       "org": "Organization",
@@ -107,14 +107,14 @@
       "noOffer": "This terminal has no tariff for this operation. Choose another operation or terminal.",
       "otherOffers": "Other terminals",
       "slot": "Time window",
-      "held": "Slot is held for you",
+      "held": "Spot is held for you",
       "extend": "Extend",
       "next": "Continue",
       "note": "Note (optional)",
       "wagonNumbers": "Wagon numbers (optional, 8 digits, space separated)",
       "submit": "Place order",
       "sending": "Sending",
-      "slaNote": "The terminal confirms within 30 minutes. Otherwise the slot is released automatically.",
+      "slaNote": "The terminal confirms within 30 minutes. Otherwise the spot is released automatically.",
       "summary": {
         "cargo": "Cargo",
         "noCargo": "not specified",
@@ -130,7 +130,7 @@
         "SLOT_CLOSED": "This window is closed.",
         "SLOT_PAST": "This window has passed.",
         "HOLD_EXPIRED": "The hold expired. Choose the window again.",
-        "HOLD_ALREADY_USED": "An order already exists for this slot.",
+        "HOLD_ALREADY_USED": "An order already exists for this spot.",
         "HOLD_NOT_EXTENDABLE": "The hold can be extended only once.",
         "NOT_SHIPPER": "You cannot order on behalf of this organization.",
         "NO_TARIFF_FOR_OPERATION": "The terminal has no tariff for this operation.",
@@ -179,14 +179,14 @@
         "cancelReason": "Reason (optional)",
         "cancelYes": "Yes, cancel",
         "cancelNo": "No",
-        "cancelNote": "Cancellation is unavailable less than 12 hours before the slot starts.",
+        "cancelNote": "Cancellation is unavailable less than 12 hours before the spot starts.",
         "hint": {
-          "PENDING": "Waiting for the terminal to confirm. Otherwise the slot is released automatically.",
-          "CONFIRMED": "The slot is reserved for you. Arrive at the scheduled time.",
+          "PENDING": "Waiting for the terminal to confirm. Otherwise the spot is released automatically.",
+          "CONFIRMED": "The spot is reserved for you. Arrive at the scheduled time.",
           "IN_PROGRESS": "Work is in progress at the terminal.",
           "DONE": "Order completed.",
           "REJECTED": "The terminal declined. Choose another terminal or time.",
-          "EXPIRED": "The terminal did not respond in time, the slot was released.",
+          "EXPIRED": "The terminal did not respond in time, the spot was released.",
           "CANCELLED": "Order cancelled."
         },
         "actor": {
@@ -196,7 +196,7 @@
           "ADMIN": "administrator"
         },
         "err": {
-          "CANCEL_TOO_LATE": "Less than 12 hours before the slot, cancellation is unavailable. Contact the terminal.",
+          "CANCEL_TOO_LATE": "Less than 12 hours before the spot, cancellation is unavailable. Contact the terminal.",
           "TRANSITION_NOT_ALLOWED": "Cannot cancel in this status."
         }
       }
@@ -223,12 +223,12 @@
       "title": "My listings",
       "new": "New listing",
       "empty": "No listings yet. List a truck in a minute.",
-      "openSite": "Edit on the site",
+      "openSite": "Edit on the platform",
       "views": "{count, plural, one {# view} other {# views}}",
       "kindTitle": "What are you listing?",
       "truck": "Truck",
       "truckHint": "Personally, with a phone, in a minute",
-      "railHint": "Locomotives and wagons are listed by an organization on the full site",
+      "railHint": "Locomotives and wagons are listed by an organization on the platform",
       "form": {
         "title": "Title",
         "titlePh": "For example: MAN TGS 20 t, curtainsider",
@@ -263,7 +263,7 @@
       "phone": "Phone",
       "noPhone": "not linked",
       "locale": "Language",
-      "site": "Full site",
+      "site": "Platform",
       "siteLinks": {
         "dashboard": "Dashboard",
         "terminals": "Terminals",

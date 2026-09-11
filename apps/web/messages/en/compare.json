@@ -17,7 +17,7 @@
     "onRequest": "on request",
     "noRating": "no rating",
     "row": {
-      "kind": "Type", "region": "Region", "station": "Station", "hours": "Opening hours", "tariffs": "Rates", "freeToday": "Free slots today",
+      "kind": "Type", "region": "Region", "station": "Station", "hours": "Opening hours", "tariffs": "Rates", "freeToday": "Free spots today",
       "services": "Services", "distance": "Distance", "rating": "Rating", "passport": "Profile",
       "deal": "Rent or sale", "price": "Price", "year": "Year", "condition": "Condition", "model": "Model", "qty": "Quantity", "wagonType": "Wagon type",
       "capacityT": "Capacity", "truckType": "Body", "tonnage": "Tonnage", "fleetSize": "Fleet", "serviceRegions": "Service regions",

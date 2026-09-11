@@ -356,7 +356,7 @@
       "activity": {
         "title": "What I do here",
         "need": "I am looking for a service",
-        "needBody": "You look for a terminal, a slot, equipment or a carrier. An organization is created automatically with your first order.",
+        "needBody": "You look for a terminal, a spot, equipment or a carrier. An organization is created automatically with your first order.",
         "offer": "I provide a service",
         "offerBody": "You post listings as an individual: the listing goes out under your own name.",
         "orgLead": "Want to work under a company name?",
@@ -459,7 +459,7 @@
         "ACTIVE": "Active",
         "HIDDEN": "Hidden"
       },
-      "freeToday": "{count} free slots today",
+      "freeToday": "{count} free spots today",
       "claimedAt": "Claim: {date}",
       "views": "{count} views"
     },

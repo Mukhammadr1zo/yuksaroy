@@ -9,7 +9,7 @@
     },
     "terminals": {
       "title": "Freight terminals in Uzbekistan · YukSaroy",
-      "description": "Looking for a freight terminal or freight yard? Address, working hours, services, tariffs and free slots. Search Tashkent and the regions, contact the owner."
+      "description": "Looking for a freight terminal or freight yard? Address, working hours, services, tariffs and free spots. Search Tashkent and the regions, contact the owner."
     },
     "terminal": {
       "title": "{name} · YukSaroy",
@@ -56,7 +56,7 @@
       "need": "I am looking for a service",
       "terminal": {
         "title": "Terminal or freight yard",
-        "body": "Services, tariffs, hours, slots"
+        "body": "Services, tariffs, hours, spots"
       },
       "siding": {
         "title": "Private siding",
@@ -72,7 +72,7 @@
       },
       "order": {
         "title": "Place an order",
-        "body": "Book a slot at a terminal"
+        "body": "Book a spot at a terminal"
       },
       "urgent": {
         "title": "Urgent request",
@@ -208,7 +208,7 @@
     "empty": {
       "title": "No terminals found for this filter.",
       "reset": "Clear filter",
-      "owner": "If the terminal is yours: only the owner adds it to the catalog, tariffs and slots stay under your control.",
+      "owner": "If the terminal is yours: only the owner adds it to the catalog, tariffs and spots stay under your control.",
       "ownerCta": "Add my terminal",
       "ownerSignup": "Sign up"
     }
@@ -254,11 +254,11 @@
     },
     "cta": {
       "quote": "Calculate price",
-      "bookSlot": "Book a slot"
+      "bookSlot": "Book a spot"
     },
     "claim": {
       "title": "Is this your terminal?",
-      "body": "The facility profile is compiled from public sources, so the rates are indicative. Create a TERMINAL organization in your account: the operator links the profile to you, and you manage rates and slots yourself."
+      "body": "The facility profile is compiled from public sources, so the rates are indicative. Create a TERMINAL organization in your account: the operator links the profile to you, and you manage rates and spots yourself."
     },
     "tariffs": {
       "heading": "Rates",
@@ -283,7 +283,7 @@
       "openArea": "Open storage area",
       "scale": "Weighbridge",
       "svx": "Bonded warehouse",
-      "containerSlots": "Container slots",
+      "containerSlots": "Container spots",
       "customsPost": "Customs post",
       "tracksValue": "{count} · {length} m"
     },
@@ -299,10 +299,10 @@
     },
     "sidingsLink": "{count} private sidings at this station →",
     "slots": {
-      "heading": "Today's slots",
+      "heading": "Today's spots",
       "free": "{count} free",
-      "none": "No open slots today",
-      "book": "Book a slot"
+      "none": "No open spots today",
+      "book": "Book a spot"
     }
   },
   "sidings": {
@@ -453,7 +453,7 @@
     },
     "decision": {
       "terminals": "{count, plural, one {# terminal} other {# terminals}}",
-      "freeToday": "{count} with free slots today",
+      "freeToday": "{count} with free spots today",
       "cheapest": "cheapest {price}",
       "nearest": "nearest {km} km",
       "separator": " · "
@@ -469,8 +469,8 @@
     },
     "unverifiedPassport": "Not confirmed by the passport holder",
     "slots": {
-      "freeToday": "{count} free slots today",
-      "none": "No free slots today"
+      "freeToday": "{count} free spots today",
+      "none": "No free spots today"
     },
     "distance": "{km} km"
   },

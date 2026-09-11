@@ -17,7 +17,7 @@
     "onRequest": "по запросу",
     "noRating": "нет оценок",
     "row": {
-      "kind": "Тип", "region": "Регион", "station": "Станция", "hours": "Режим работы", "tariffs": "Тарифы", "freeToday": "Свободные слоты сегодня",
+      "kind": "Тип", "region": "Регион", "station": "Станция", "hours": "Режим работы", "tariffs": "Тарифы", "freeToday": "Свободные места сегодня",
       "services": "Услуги", "distance": "Расстояние", "rating": "Рейтинг", "passport": "Паспорт",
       "deal": "Аренда или продажа", "price": "Цена", "year": "Год", "condition": "Состояние", "model": "Модель", "qty": "Количество", "wagonType": "Тип вагона",
       "capacityT": "Грузоподъёмность", "truckType": "Кузов", "tonnage": "Тоннаж", "fleetSize": "Парк", "serviceRegions": "Регионы обслуживания",

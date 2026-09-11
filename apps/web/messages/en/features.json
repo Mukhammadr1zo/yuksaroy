@@ -40,7 +40,7 @@
       },
       "compare": {
         "title": "Compare",
-        "body": "Up to four objects in one table: tariff, slot, distance, rating."
+        "body": "Up to four objects in one table: tariff, spot, distance, rating."
       },
       "hubs": {
         "title": "Region pages",
@@ -52,7 +52,7 @@
       },
       "terminal": {
         "title": "Terminal page",
-        "body": "Services, tariffs, hours, slots. The owner runs it from the dashboard."
+        "body": "Services, tariffs, hours, spots. The owner runs it from the dashboard."
       },
       "siding": {
         "title": "Claim a siding",
@@ -71,7 +71,7 @@
         "body": "Tariff × weight + extra services. No login, open formula."
       },
       "booking": {
-        "title": "Slot booking",
+        "title": "Spot booking",
         "body": "Pick a free window today, the order goes to the terminal, answer within the SLA."
       },
       "frozen": {
@@ -100,7 +100,7 @@
       },
       "blog": {
         "title": "Blog",
-        "body": "Terminal vs siding, wagon rent, SVX, free slot: short explainers."
+        "body": "Terminal vs siding, wagon rent, SVX, free spot: short explainers."
       }
     },
     "how": {
@@ -111,7 +111,7 @@
       },
       "s2": {
         "title": "Compare",
-        "body": "Tariffs, today's slots and distance side by side, up to four objects in one table."
+        "body": "Tariffs, today's spots and distance side by side, up to four objects in one table."
       },
       "s3": {
         "title": "Connect",
@@ -119,7 +119,7 @@
       },
       "s4": {
         "title": "Book",
-        "body": "Pick a slot, the tariff freezes, act and invoice at the end."
+        "body": "Pick a spot, the tariff freezes, act and invoice at the end."
       }
     },
     "numbers": {
@@ -128,7 +128,7 @@
       "sidings": "sidings in the registry",
       "listings": "active listings",
       "companies": "companies",
-      "freeSlotsToday": "free slots today"
+      "freeSlotsToday": "free spots today"
     },
     "assistant": {
       "meta": {
@@ -140,7 +140,7 @@
       "lead": "The assistant turns a query into filters: region, service, equipment type, date. It never invents objects, prices or availability; it relies only on catalog data.",
       "example": {
         "heading": "Real example",
-        "query": "Free container slot in Tashkent today",
+        "query": "Free container spot in Tashkent today",
         "chips": "Understood filters",
         "result": "Result",
         "decision": "{terminals, plural, one {# terminal} other {# terminals}} · {free} free today",

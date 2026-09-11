@@ -5,12 +5,12 @@
       "title": "Sign in to the freight services market",
       "bullets": {
         "tariffs": {
-          "title": "Open tariffs and today's slots",
+          "title": "Open tariffs and today's spots",
           "body": "Terminal prices and free windows are visible without an account."
         },
         "booking": {
           "title": "Booking and documents",
-          "body": "Book a slot; the act and invoice are ready in your cabinet."
+          "body": "Book a spot; the act and invoice are ready in your cabinet."
         },
         "listing": {
           "title": "Post a listing",
@@ -97,7 +97,7 @@
           "title": "What do you want to do?",
           "need": {
             "title": "I am looking for a service",
-            "body": "You need a terminal, a slot, equipment or a carrier. We only ask for your name."
+            "body": "You need a terminal, a spot, equipment or a carrier. We only ask for your name."
           },
           "offer": {
             "title": "I provide a service",
@@ -154,14 +154,14 @@
         },
         "terminal": {
           "title": "Add a terminal",
-          "body": "With tariffs and slots"
+          "body": "With tariffs and spots"
         },
         "kycHint": "Listings of a verified organization go live immediately without review. Enter the tax ID and request verification in the cabinet.",
         "kycLink": "Organization page",
         "driverHint": "Individual driver listings go live after review.",
         "findTerminal": {
           "title": "Find a terminal",
-          "body": "Free slots today and tariffs"
+          "body": "Free spots today and tariffs"
         },
         "shipperLead": "Your account is ready. You can start looking for a terminal.",
         "shipperHint": "An organization is created automatically with your first order; the tax ID is asked when documents are issued."

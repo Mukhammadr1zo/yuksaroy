@@ -16,14 +16,14 @@
     "shippers": {
       "meta": {
         "title": "Yuk egalariga · YukSaroy",
-        "description": "Ochiq tariflar, bugungi slotlar, muzlatilgan narx va hujjatlar. Tejam hisoblagichi: kutish kunlari va telefon soatlari qancha turadi."
+        "description": "Ochiq tariflar, bugungi joylar, muzlatilgan narx va hujjatlar. Tejam hisoblagichi: kutish kunlari va telefon soatlari qancha turadi."
       },
       "eyebrow": "Yuk egalari va ekspeditorlarga",
-      "title": "Terminalni tanlang, slotni band qiling, hujjatni oling",
+      "title": "Terminalni tanlang, joyni band qiling, hujjatni oling",
       "lead": "Tarifni qo'ng'iroqsiz solishtirasiz, bo'sh oynani ko'rib band qilasiz, yakunda akt va hisob-faktura kabinetda turadi.",
       "facts": {
         "terminals": "{count} faol terminal",
-        "freeSlots": "bugun {count} bo'sh slot",
+        "freeSlots": "bugun {count} bo'sh joy",
         "sidings": "{count} shahobcha yo'l"
       },
       "cta": {
@@ -36,7 +36,7 @@
           "body": "Terminal tariflari katalogda ochiq: tonna, vagon yoki operatsiya uchun narx va minimal summa. Qo'ng'iroq qilmasdan solishtirasiz."
         },
         "slots": {
-          "title": "Bugungi slotlar",
+          "title": "Bugungi joylar",
           "body": "Har terminalning ish oynalari va bo'sh joylari ko'rinib turadi. Oynani tanlab band qilasiz, navbatda kutmaysiz."
         },
         "frozen": {
@@ -68,11 +68,11 @@
       },
       "faq": {
         "q1": "Bron uchun ro'yxatdan o'tish shartmi?",
-        "a1": "Narx hisobi va katalog login'siz ochiq. Slot band qilish, so'rov yuborish va telefonni ko'rish uchun kabinet kerak: telefon raqami yoki Google orqali bir daqiqa.",
+        "a1": "Narx hisobi va katalog login'siz ochiq. Joy band qilish, so'rov yuborish va telefonni ko'rish uchun kabinet kerak: telefon raqami yoki Google orqali bir daqiqa.",
         "q2": "Narx qanday hisoblanadi?",
         "a2": "Tarif × vazn (yoki vagon soni) + qo'shimcha xizmatlar. Terminal minimal summa qo'ygan bo'lsa, u qo'llanadi. Pilotda platforma komissiyasi 0 %.",
         "q3": "Terminal tasdiqlamasa nima bo'ladi?",
-        "a3": "Buyurtma SLA ichida tasdiqlanmasa muddati o'tadi, slot bo'shaydi va siz boshqa terminalga murojaat qilasiz. Rad etish sababi buyurtma sahifasida ko'rinadi.",
+        "a3": "Buyurtma SLA ichida tasdiqlanmasa muddati o'tadi, joy bo'shaydi va siz boshqa terminalga murojaat qilasiz. Rad etish sababi buyurtma sahifasida ko'rinadi.",
         "q4": "Tariflar qanchalik ishonchli?",
         "a4": "Egasi tasdiqlagan terminal tarifini terminalning o'zi e'lon qiladi. Tasdiqlanmagan pasport tarifi ochiq ma'lumotlardan yig'ilgan va taxminiy deb belgilanadi.",
         "q5": "Hujjatlarni qayerdan olaman?",
@@ -81,7 +81,7 @@
       "band": {
         "title": "Birinchi buyurtmani bugun bering",
         "body": "Katalog ochiq, narx hisobi login'siz. Kabinet bir daqiqada ochiladi.",
-        "primary": "Bugun bo'sh slotli terminallar",
+        "primary": "Bugun bo'sh joyli terminallar",
         "secondary": "Ro'yxatdan o'tish"
       }
     },
@@ -92,7 +92,7 @@
       },
       "eyebrow": "Terminallar, texnika va avtotransport egalariga",
       "title": "E'lon bering, so'rov va buyurtma oling",
-      "lead": "Mijoz sizni viloyat va koridor bo'yicha topadi, tarif va slotlaringizni ko'radi, so'rov yoki buyurtma kabinetingizga tushadi.",
+      "lead": "Mijoz sizni viloyat va koridor bo'yicha topadi, tarif va joylaringizni ko'radi, so'rov yoki buyurtma kabinetingizga tushadi.",
       "facts": {
         "companies": "{count} kompaniya katalogda",
         "listings": "{count} faol e'lon",
@@ -112,7 +112,7 @@
           "body": "Telefon raqamingiz faqat ro'yxatdan o'tgan foydalanuvchiga ko'rinadi. So'rovlar kabinetda, spam yo'q."
         },
         "terminal": {
-          "title": "Terminal: tarif, slot, buyurtma taxtasi",
+          "title": "Terminal: tarif, joy, buyurtma taxtasi",
           "body": "Tarifni e'lon qilasiz, kunlik sig'imni ochasiz, buyurtmalar taxtada keladi: tasdiqlash, holat belgilash, yakunlash."
         },
         "documents": {
@@ -154,7 +154,7 @@
         "q4": "Terminal buyurtmalarni qanday oladi?",
         "a4": "Kabinetdagi taxtada: yangi buyurtma SLA taymeri bilan keladi, tasdiqlaysiz yoki rad etasiz, keyin holatlarni belgilaysiz. Har qadam mijozga ko'rinadi.",
         "q5": "Mening obyektim reestrda allaqachon bor",
-        "a5": "Obyekt sahifasida da'vo tugmasi bor. Operator tasdiqlagach pasport, tarif va slotlarni siz boshqarasiz."
+        "a5": "Obyekt sahifasida da'vo tugmasi bor. Operator tasdiqlagach pasport, tarif va joylarni siz boshqarasiz."
       },
       "band": {
         "title": "E'loningiz bugun katalogda tursin",

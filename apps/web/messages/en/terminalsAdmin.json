@@ -10,14 +10,14 @@
     "tabs": {
       "info": "Details",
       "tariffs": "Tariffs",
-      "slots": "Slots"
+      "slots": "Spots"
     },
     "list": {
       "title": "My terminals",
-      "lead": "Passport, tariffs and slots are managed here. An active terminal is listed in the catalog and can be booked.",
+      "lead": "Passport, tariffs and spots are managed here. An active terminal is listed in the catalog and can be booked.",
       "new": "Add terminal",
       "empty": "No terminals yet.",
-      "emptyHint": "Only the owner adds a terminal to the catalog: passport, tariffs and slots stay under your control.",
+      "emptyHint": "Only the owner adds a terminal to the catalog: passport, tariffs and spots stay under your control.",
       "emptyCta": "Add a terminal",
       "col": {
         "name": "Name",
@@ -32,7 +32,7 @@
       "hide": "Hide",
       "open": "Page",
       "noTariffs": "no tariffs",
-      "noSlots": "no slots",
+      "noSlots": "no spots",
       "changed": "{name}: status updated."
     },
     "form": {
@@ -40,7 +40,7 @@
       "titleEdit": "Terminal",
       "backToList": "Back to terminals",
       "notFound": "Terminal not found.",
-      "unsavedTabs": "Tariffs and slots open once the terminal is saved. Save the Details section first.",
+      "unsavedTabs": "Tariffs and spots open once the terminal is saved. Save the Details section first.",
       "section": {
         "main": "Main",
         "place": "Location",
@@ -70,7 +70,7 @@
         "hasSvx": "Bonded warehouse",
         "hasScale": "Weighbridge",
         "scaleT": "Weighbridge limit, t",
-        "containerSlots": "Container slots",
+        "containerSlots": "Container spots",
         "customsPost": "Customs post",
         "leadTime": "lead time, min"
       },
@@ -162,7 +162,7 @@
       }
     },
     "slots": {
-      "lead": "Capacity per window: how many wagon batches each window accepts. Clients book free slots.",
+      "lead": "Capacity per window: how many wagon batches each window accepts. Clients book free spots.",
       "capacity": {
         "title": "Open capacity",
         "from": "From",
@@ -174,20 +174,20 @@
         "end": "End",
         "cap": "Capacity",
         "addWindow": "Add window",
-        "apply": "Open slots",
-        "applied": "{days} days x {windows} windows: {slots} slots opened.",
-        "hint": "Existing slots get the new capacity; it cannot go below what is already booked."
+        "apply": "Open spots",
+        "applied": "{days} days x {windows} windows: {slots} spots opened.",
+        "hint": "Existing spots get the new capacity; it cannot go below what is already booked."
       },
       "grid": {
         "title": "Next 14 days",
-        "empty": "No slots opened for this period. Open capacity above.",
+        "empty": "No spots opened for this period. Open capacity above.",
         "free": "free",
         "booked": "booked",
         "held": "held",
         "closed": "closed",
         "close": "Close",
         "open": "Open",
-        "legend": "Cell: free places, small number booked + held. Click to close or reopen a slot.",
+        "legend": "Cell: free places, small number booked + held. Click to close or reopen a spot.",
         "cell": "{day} {time}: {free} free, {booked} booked, {held} held"
       },
       "err": {
@@ -199,7 +199,7 @@
         "DUPLICATE_WINDOW": "Duplicate window number.",
         "INVALID_WINDOW_TIME": "Invalid window time: end must be after start.",
         "INVALID_CAPACITY": "Capacity must be 0 to 100.",
-        "SLOT_NOT_FOUND": "Slot not found.",
+        "SLOT_NOT_FOUND": "Spot not found.",
         "TERMINAL_UNCLAIMED": "The terminal is not attached to an organization yet.",
         "NOT_TERMINAL_ADMIN": "No access: owner or terminal admin required."
       }

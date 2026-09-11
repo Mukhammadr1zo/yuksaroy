@@ -10,14 +10,14 @@
     "tabs": {
       "info": "Ma'lumot",
       "tariffs": "Tariflar",
-      "slots": "Slotlar"
+      "slots": "Joylar"
     },
     "list": {
       "title": "Terminallarim",
-      "lead": "Pasport, tariflar va slotlar shu yerdan boshqariladi. Faol terminal katalogda ko'rinadi va bron qilinadi.",
+      "lead": "Pasport, tariflar va joylar shu yerdan boshqariladi. Faol terminal katalogda ko'rinadi va bron qilinadi.",
       "new": "Terminal qo'shish",
       "empty": "Hali terminal yo'q.",
-      "emptyHint": "Terminalni katalogga faqat egasi qo'shadi: pasport, tariflar va slotlar sizning nazoratingizda bo'ladi.",
+      "emptyHint": "Terminalni katalogga faqat egasi qo'shadi: pasport, tariflar va joylar sizning nazoratingizda bo'ladi.",
       "emptyCta": "Terminal qo'shing",
       "col": {
         "name": "Nomi",
@@ -32,7 +32,7 @@
       "hide": "Yashirish",
       "open": "Sahifasi",
       "noTariffs": "tarif yo'q",
-      "noSlots": "slot yo'q",
+      "noSlots": "joy yo'q",
       "changed": "{name}: holat yangilandi."
     },
     "form": {
@@ -40,7 +40,7 @@
       "titleEdit": "Terminal",
       "backToList": "Terminallarga qaytish",
       "notFound": "Terminal topilmadi.",
-      "unsavedTabs": "Tariflar va slotlar terminal saqlangandan keyin ochiladi. Avval Ma'lumot bo'limini saqlang.",
+      "unsavedTabs": "Tariflar va joylar terminal saqlangandan keyin ochiladi. Avval Ma'lumot bo'limini saqlang.",
       "section": {
         "main": "Asosiy",
         "place": "Joylashuv",
@@ -162,7 +162,7 @@
       }
     },
     "slots": {
-      "lead": "Oyna bo'yicha sig'im: har oynada nechta vagon partiyasi qabul qilinadi. Mijoz bo'sh slotni band qiladi.",
+      "lead": "Oyna bo'yicha sig'im: har oynada nechta vagon partiyasi qabul qilinadi. Mijoz bo'sh joyni band qiladi.",
       "capacity": {
         "title": "Sig'im ochish",
         "from": "Boshlanish",
@@ -174,13 +174,13 @@
         "end": "Oxiri",
         "cap": "Sig'im",
         "addWindow": "Oyna qo'shish",
-        "apply": "Slotlarni ochish",
-        "applied": "{days} kun x {windows} oyna: {slots} ta slot ochildi.",
-        "hint": "Mavjud slotlarning sig'imi yangilanadi; band qilinganidan pastga tushirib bo'lmaydi."
+        "apply": "Joylarni ochish",
+        "applied": "{days} kun x {windows} oyna: {slots} ta joy ochildi.",
+        "hint": "Mavjud joylarning sig'imi yangilanadi; band qilinganidan pastga tushirib bo'lmaydi."
       },
       "grid": {
         "title": "Keyingi 14 kun",
-        "empty": "Bu davrda slot ochilmagan. Yuqorida sig'im oching.",
+        "empty": "Bu davrda joy ochilmagan. Yuqorida sig'im oching.",
         "free": "bo'sh",
         "booked": "band",
         "held": "ushlangan",
@@ -199,7 +199,7 @@
         "DUPLICATE_WINDOW": "Oyna raqami takrorlangan.",
         "INVALID_WINDOW_TIME": "Oyna vaqti noto'g'ri: oxiri boshidan keyin bo'lsin.",
         "INVALID_CAPACITY": "Sig'im 0 dan 100 gacha.",
-        "SLOT_NOT_FOUND": "Slot topilmadi.",
+        "SLOT_NOT_FOUND": "Joy topilmadi.",
         "TERMINAL_UNCLAIMED": "Terminal hali tashkilotga biriktirilmagan.",
         "NOT_TERMINAL_ADMIN": "Ruxsat yo'q: egasi yoki terminal rahbari kerak."
       }

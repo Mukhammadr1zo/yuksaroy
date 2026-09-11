@@ -16,14 +16,14 @@
     "shippers": {
       "meta": {
         "title": "For shippers · YukSaroy",
-        "description": "Open tariffs, today's slots, a frozen price and documents. Savings calculator: what waiting days and phone hours cost you."
+        "description": "Open tariffs, today's spots, a frozen price and documents. Savings calculator: what waiting days and phone hours cost you."
       },
       "eyebrow": "For shippers and forwarders",
-      "title": "Pick a terminal, book a slot, get the documents",
+      "title": "Pick a terminal, book a spot, get the documents",
       "lead": "Compare tariffs without calling, see a free window and book it, and find the act and invoice waiting in your cabinet at the end.",
       "facts": {
         "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
-        "freeSlots": "{count, plural, one {# free slot today} other {# free slots today}}",
+        "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}",
         "sidings": "{count, plural, one {# siding} other {# sidings}}"
       },
       "cta": {
@@ -36,7 +36,7 @@
           "body": "Terminal tariffs are public in the catalog: price per ton, wagon or operation plus the minimum amount. Compare without a single call."
         },
         "slots": {
-          "title": "Today's slots",
+          "title": "Today's spots",
           "body": "Every terminal's working windows and free places are visible. Pick a window and book it, no waiting in line."
         },
         "frozen": {
@@ -68,11 +68,11 @@
       },
       "faq": {
         "q1": "Do I need to register to book?",
-        "a1": "The price calculator and the catalog are open without login. Booking a slot, sending a request and seeing a phone number need a cabinet: one minute via phone number or Google.",
+        "a1": "The price calculator and the catalog are open without login. Booking a spot, sending a request and seeing a phone number need a cabinet: one minute via phone number or Google.",
         "q2": "How is the price calculated?",
         "a2": "Tariff × weight (or wagon count) + extra services. If the terminal set a minimum amount, it applies. Platform commission is 0 % in the pilot.",
         "q3": "What if the terminal does not confirm?",
-        "a3": "If the order is not confirmed within the SLA it expires, the slot is released and you turn to another terminal. A rejection reason is shown on the order page.",
+        "a3": "If the order is not confirmed within the SLA it expires, the spot is released and you turn to another terminal. A rejection reason is shown on the order page.",
         "q4": "How reliable are the tariffs?",
         "a4": "A tariff of an owner-confirmed terminal is published by the terminal itself. A tariff from an unconfirmed passport is compiled from open data and marked as an estimate.",
         "q5": "Where do I get the documents?",
@@ -81,7 +81,7 @@
       "band": {
         "title": "Place your first order today",
         "body": "The catalog is open, the price calculator needs no login. A cabinet opens in a minute.",
-        "primary": "Terminals with free slots today",
+        "primary": "Terminals with free spots today",
         "secondary": "Sign up"
       }
     },
@@ -92,7 +92,7 @@
       },
       "eyebrow": "For terminals, equipment and truck owners",
       "title": "Publish a listing, receive requests and orders",
-      "lead": "Clients find you by region and corridor, see your tariffs and slots, and their request or order lands in your cabinet.",
+      "lead": "Clients find you by region and corridor, see your tariffs and spots, and their request or order lands in your cabinet.",
       "facts": {
         "companies": "{count} companies in the catalog",
         "listings": "{count, plural, one {# active listing} other {# active listings}}",
@@ -112,7 +112,7 @@
           "body": "Your phone number is visible only to registered users. Requests arrive in the cabinet, no spam."
         },
         "terminal": {
-          "title": "Terminal: tariff, slots, order board",
+          "title": "Terminal: tariff, spots, order board",
           "body": "Publish a tariff, open daily capacity, orders arrive on the board: confirm, mark states, complete."
         },
         "documents": {
@@ -154,7 +154,7 @@
         "q4": "How does a terminal receive orders?",
         "a4": "On the board in the cabinet: a new order arrives with an SLA timer, you confirm or reject, then mark the states. Every step is visible to the client.",
         "q5": "My object is already in the registry",
-        "a5": "The object page has a claim button. Once the operator approves, you manage the passport, tariffs and slots."
+        "a5": "The object page has a claim button. Once the operator approves, you manage the passport, tariffs and spots."
       },
       "band": {
         "title": "Get your listing into the catalog today",

@@ -96,7 +96,7 @@ const QTY: Record<Lang, Record<string, string[]>> = {
   uz: { wagons: ['vagon'], tonnes: ['tonna'], containers: ['konteyner'] },
   ru: {
     wagons: ['вагон', 'вагона', 'вагонов'], tonnes: ['тонна', 'тонны', 'тонн'], containers: ['контейнер', 'контейнера', 'контейнеров'],
-    terminals: ['терминал', 'терминала', 'терминалов'], slots: ['слот', 'слота', 'слотов'],
+    terminals: ['терминал', 'терминала', 'терминалов'], slots: ['место', 'места', 'мест'],
   },
   en: { wagons: ['wagon', 'wagons'], tonnes: ['tonne', 'tonnes'], containers: ['container', 'containers'] },
 };
@@ -130,8 +130,8 @@ const T: Record<Lang, {
     none: "Hech narsa topilmadi. Filtrni kengaytirib ko'ring.",
     down: "Server javob bermadi. Bir daqiqadan keyin qayta urinib ko'ring.",
     hint: "Nima kerakligini oddiy so'zlar bilan yozing, masalan:\n• Andijonda tushirish\n• Toshkentga 50 km ichida tarozisi bor yuk saroyi\n• Qo'qonda vagon ijaraga",
-    terminals: (n) => `${n} terminal`, free: (n) => `${n} tasida bugun bo'sh slot`, cheapest: (p) => `eng arzon ${p}`, nearest: (km) => `eng yaqini ${km} km`,
-    slots: (n) => (n > 0 ? `Bugun ${n} ta bo'sh slot` : "Bugun bo'sh slot yo'q"),
+    terminals: (n) => `${n} terminal`, free: (n) => `${n} tasida bugun bo'sh joy`, cheapest: (p) => `eng arzon ${p}`, nearest: (km) => `eng yaqini ${km} km`,
+    slots: (n) => (n > 0 ? `Bugun ${n} ta bo'sh joy` : "Bugun bo'sh joy yo'q"),
   },
   ru: {
     som: 'сум', filter: 'Фильтр', open: 'Открыть', inApp: 'В приложении', app: 'Открыть приложение', map: 'На карте',
@@ -140,7 +140,7 @@ const T: Record<Lang, {
     down: 'Сервер не ответил. Повторите через минуту.',
     hint: 'Напишите, что нужно, простыми словами, например:\n• Выгрузка в Андижане\n• Грузовой двор с весами в радиусе 50 км от Ташкента\n• Вагон в аренду в Коканде',
     terminals: (n) => `${n} ${qtyWord('ru', 'terminals', n)}`, free: (n) => `${n} со свободными слотами сегодня`, cheapest: (p) => `дешевле всего ${p}`, nearest: (km) => `ближайший ${km} км`,
-    slots: (n) => (n > 0 ? `Сегодня свободно: ${n} ${qtyWord('ru', 'slots', n)}` : 'Сегодня свободных слотов нет'),
+    slots: (n) => (n > 0 ? `Сегодня свободно: ${n} ${qtyWord('ru', 'slots', n)}` : 'Сегодня свободных мест нет'),
   },
   en: {
     som: 'UZS', filter: 'Filter', open: 'Open', inApp: 'In the app', app: 'Open the app', map: 'On map',
@@ -148,8 +148,8 @@ const T: Record<Lang, {
     none: 'Nothing found. Try widening the filter.',
     down: 'Server did not respond. Try again in a minute.',
     hint: 'Describe what you need in plain words, for example:\n• Unloading in Andijan\n• Freight yard with a scale within 50 km of Tashkent\n• Wagon for rent in Kokand',
-    terminals: (n) => `${n} terminal${n === 1 ? '' : 's'}`, free: (n) => `${n} with free slots today`, cheapest: (p) => `cheapest ${p}`, nearest: (km) => `nearest ${km} km`,
-    slots: (n) => (n > 0 ? `${n} free slot${n === 1 ? '' : 's'} today` : 'No free slots today'),
+    terminals: (n) => `${n} terminal${n === 1 ? '' : 's'}`, free: (n) => `${n} with free spots today`, cheapest: (p) => `cheapest ${p}`, nearest: (km) => `nearest ${km} km`,
+    slots: (n) => (n > 0 ? `${n} free spot${n === 1 ? '' : 's'} today` : 'No free spots today'),
   },
 };
 
@@ -223,7 +223,7 @@ const CONTACT_BTN = "📱 Telefon raqamimni yuborish";
 const HELP =
   "YukSaroy: yuk logistikasi bozori.\n\n" +
   "Qidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". " +
-  "Bot terminallar sonini, bugungi bo'sh slotlarni va eng arzon tarifni ko'rsatadi.\n\n" +
+  "Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\n" +
   "Kirish: /start yuboring va telefon raqamingizni tasdiqlang. Saytda raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.";
 
 // Biz kontakt so'ragan chatlar; ro'yxatda yo'q kontakt = Mini App requestContact

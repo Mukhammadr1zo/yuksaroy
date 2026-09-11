@@ -5,12 +5,12 @@
       "title": "Yuk xizmatlari bozoriga kirish",
       "bullets": {
         "tariffs": {
-          "title": "Ochiq tariflar va bugungi slotlar",
+          "title": "Ochiq tariflar va bugungi joylar",
           "body": "Terminal narxlari va bo'sh oynalar ro'yxatdan o'tmasdan ham ko'rinadi."
         },
         "booking": {
           "title": "Bron va hujjatlar",
-          "body": "Slot band qiling, dalolatnoma va hisob-faktura kabinetda tayyor bo'ladi."
+          "body": "Joy band qiling, dalolatnoma va hisob-faktura kabinetda tayyor bo'ladi."
         },
         "listing": {
           "title": "E'lon berish",
@@ -97,7 +97,7 @@
           "title": "Nima qilmoqchisiz?",
           "need": {
             "title": "Xizmat izlayapman",
-            "body": "Terminal, slot, texnika yoki tashuvchi kerak. Faqat ismingiz so'raladi."
+            "body": "Terminal, joy, texnika yoki tashuvchi kerak. Faqat ismingiz so'raladi."
           },
           "offer": {
             "title": "Xizmat ko'rsataman",
@@ -154,14 +154,14 @@
         },
         "terminal": {
           "title": "Terminal qo'shish",
-          "body": "Tariflar va slotlar bilan"
+          "body": "Tariflar va joylar bilan"
         },
         "kycHint": "Tasdiqlangan tashkilot e'lonlari tekshiruvsiz darhol chiqadi. STIR kiritib, kabinetda tasdiqlashga yuboring.",
         "kycLink": "Tashkilot sahifasi",
         "driverHint": "Yakka haydovchi e'loni tekshiruvdan o'tgach faol bo'ladi.",
         "findTerminal": {
           "title": "Terminal topish",
-          "body": "Bugungi bo'sh slotlar va tariflar"
+          "body": "Bugungi bo'sh joylar va tariflar"
         },
         "shipperLead": "Hisobingiz tayyor. Terminal qidirishni boshlashingiz mumkin.",
         "shipperHint": "Tashkilot birinchi buyurtmada avtomatik ochiladi, STIR esa hujjat kerak bo'lganda so'raladi."

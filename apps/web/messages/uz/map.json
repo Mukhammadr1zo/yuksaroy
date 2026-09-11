@@ -39,8 +39,8 @@
     "approxRegion": "viloyat markazi, taxminiy joylashuv",
     "popup": {
       "open": "Batafsil",
-      "freeToday": "bugun {count} bo'sh slot",
-      "noSlots": "bugun bo'sh slot yo'q",
+      "freeToday": "bugun {count} bo'sh joy",
+      "noSlots": "bugun bo'sh joy yo'q",
       "onRequest": "narx so'rov bo'yicha",
       "from": "{price} dan"
     },

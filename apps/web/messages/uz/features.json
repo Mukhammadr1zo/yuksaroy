@@ -40,7 +40,7 @@
       },
       "compare": {
         "title": "Solishtirish",
-        "body": "To'rttagacha obyekt bitta jadvalda: tarif, slot, masofa, reyting."
+        "body": "To'rttagacha obyekt bitta jadvalda: tarif, joy, masofa, reyting."
       },
       "hubs": {
         "title": "Viloyat sahifalari",
@@ -52,7 +52,7 @@
       },
       "terminal": {
         "title": "Terminal sahifasi",
-        "body": "Xizmatlar, tariflar, ish vaqti, slotlar. Egasi kabinetda yuritadi."
+        "body": "Xizmatlar, tariflar, ish vaqti, joylar. Egasi kabinetda yuritadi."
       },
       "siding": {
         "title": "Shahobcha yo'lga da'vo",
@@ -71,7 +71,7 @@
         "body": "Tarif × vazn + qo'shimcha xizmatlar. Login'siz, formula ochiq."
       },
       "booking": {
-        "title": "Slot bron",
+        "title": "Joy bron",
         "body": "Bugungi bo'sh oynani tanlaysiz, buyurtma terminalga boradi, SLA ichida javob."
       },
       "frozen": {
@@ -100,7 +100,7 @@
       },
       "blog": {
         "title": "Blog",
-        "body": "Terminal va shahobcha yo'l farqi, vagon ijarasi, SVX, bo'sh slot: qisqa tushuntirishlar."
+        "body": "Terminal va shahobcha yo'l farqi, vagon ijarasi, SVX, bo'sh joy: qisqa tushuntirishlar."
       }
     },
     "how": {
@@ -111,7 +111,7 @@
       },
       "s2": {
         "title": "Solishtiring",
-        "body": "Tariflar, bugungi slotlar va masofa yonma-yon, to'rttagacha obyekt bitta jadvalda."
+        "body": "Tariflar, bugungi joylar va masofa yonma-yon, to'rttagacha obyekt bitta jadvalda."
       },
       "s3": {
         "title": "Bog'laning",
@@ -119,7 +119,7 @@
       },
       "s4": {
         "title": "Bron qiling",
-        "body": "Slotni tanlaysiz, tarif muzlatiladi, yakunda akt va hisob-faktura."
+        "body": "Joyni tanlaysiz, tarif muzlatiladi, yakunda akt va hisob-faktura."
       }
     },
     "numbers": {
@@ -128,7 +128,7 @@
       "sidings": "shahobcha yo'l reestrda",
       "listings": "faol e'lon",
       "companies": "kompaniya",
-      "freeSlotsToday": "bugun bo'sh slot"
+      "freeSlotsToday": "bugun bo'sh joy"
     },
     "assistant": {
       "meta": {
@@ -140,7 +140,7 @@
       "lead": "Yordamchi so'rovni filtrlarga aylantiradi: viloyat, xizmat, texnika turi, sana. U obyekt, narx yoki bo'sh joy o'ylab topmaydi, faqat katalogdagi ma'lumotga tayanadi.",
       "example": {
         "heading": "Real misol",
-        "query": "Toshkentda bugun bo'sh slot konteyner",
+        "query": "Toshkentda bugun bo'sh joy konteyner",
         "chips": "Tushunilgan filtrlar",
         "result": "Natija",
         "decision": "{terminals} terminal · bugun {free} bo'sh",

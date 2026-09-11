@@ -17,9 +17,9 @@
     },
     "terminals": {
       "h1": "Freight terminals in {region}: {count, plural, one {# terminal} other {# terminals}}",
-      "lead": "Freight yards, container terminals, logistics centres and bonded warehouses: with published rates and free slots today.",
+      "lead": "Freight yards, container terminals, logistics centres and bonded warehouses: with published rates and free spots today.",
       "title": "Freight terminals in {region} · YukSaroy",
-      "description": "{count} freight terminals in {region}: rates, services, opening hours and slots today.",
+      "description": "{count} freight terminals in {region}: rates, services, opening hours and spots today.",
       "empty": "No active terminals in {region} yet. If you own one, add its profile in the dashboard.",
       "cta": "Add a terminal"
     },

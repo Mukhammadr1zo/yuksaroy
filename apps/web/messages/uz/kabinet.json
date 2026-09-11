@@ -356,7 +356,7 @@
       "activity": {
         "title": "Platformada nima qilaman",
         "need": "Xizmat izlayapman",
-        "needBody": "Terminal, slot, texnika yoki tashuvchi qidirasiz. Tashkilot birinchi buyurtmada avtomatik ochiladi.",
+        "needBody": "Terminal, joy, texnika yoki tashuvchi qidirasiz. Tashkilot birinchi buyurtmada avtomatik ochiladi.",
         "offer": "Xizmat ko'rsataman",
         "offerBody": "Yakka tartibda e'lon berasiz: e'lon o'z nomingizdan chiqadi.",
         "orgLead": "Tashkilot nomidan ishlamoqchimisiz?",
@@ -459,7 +459,7 @@
         "ACTIVE": "Faol",
         "HIDDEN": "Yashirin"
       },
-      "freeToday": "Bugun {count} ta bo'sh slot",
+      "freeToday": "Bugun {count} ta bo'sh joy",
       "claimedAt": "Da'vo: {date}",
       "views": "{count} ko'rish"
     },

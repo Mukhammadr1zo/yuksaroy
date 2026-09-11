@@ -17,9 +17,9 @@
     },
     "terminals": {
       "h1": "{region}da yuk terminallari: {count} ta",
-      "lead": "Yuk saroylari, konteyner terminallari, logistika markazlari va SVX: ochiq tarif va bugungi bo'sh slotlar bilan.",
+      "lead": "Yuk saroylari, konteyner terminallari, logistika markazlari va SVX: ochiq tarif va bugungi bo'sh joylar bilan.",
       "title": "{region} yuk terminallari · YukSaroy",
-      "description": "{region}dagi {count} ta yuk terminali: tariflar, xizmatlar, ish vaqti va bugungi slotlar.",
+      "description": "{region}dagi {count} ta yuk terminali: tariflar, xizmatlar, ish vaqti va bugungi joylar.",
       "empty": "{region}da hali faol terminal yo'q. Terminal egasi bo'lsangiz, pasportni kabinetda qo'shing.",
       "cta": "Terminal qo'shish"
     },

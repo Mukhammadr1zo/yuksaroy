@@ -110,7 +110,7 @@ d.text((PAD + d.textlength('Yuk', font=f), y), 'Saroy', font=f, fill=TEAL)
 y += 196
 d.line([(PAD, y), (PAD + 150, y)], fill=TEAL, width=8)
 y += 48
-y = block(d, PAD, y, u"O'zbekistondagi yuk xizmatlari bozori. Terminal, shahobcha yo'l, temir yo'l texnikasi va avtotransport bitta saytda.", F('400', 46), BODY, W - 2 * PAD - 20, 1.36, 44)
+y = block(d, PAD, y, u"O'zbekistondagi yuk xizmatlari bozori. Terminal, shahobcha yo'l, temir yo'l texnikasi va avtotransport bitta platformada.", F('400', 46), BODY, W - 2 * PAD - 20, 1.36, 44)
 block(d, PAD, y, u"\u041c\u0430\u0440\u043a\u0435\u0442\u043f\u043b\u0435\u0439\u0441 \u0433\u0440\u0443\u0437\u043e\u0432\u044b\u0445 \u0443\u0441\u043b\u0443\u0433 \u0423\u0437\u0431\u0435\u043a\u0438\u0441\u0442\u0430\u043d\u0430: \u0442\u0435\u0440\u043c\u0438\u043d\u0430\u043b\u044b, \u043f\u043e\u0434\u044a\u0435\u0437\u0434\u043d\u044b\u0435 \u043f\u0443\u0442\u0438, \u0436\u0435\u043b\u0435\u0437\u043d\u043e\u0434\u043e\u0440\u043e\u0436\u043d\u0430\u044f \u0442\u0435\u0445\u043d\u0438\u043a\u0430 \u0438 \u0430\u0432\u0442\u043e\u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442.", F('400', 42), TEAL, W - 2 * PAD - 20, 1.34)
 footer(d)
 im.save(os.path.join(OUT, '2.jpg'), quality=92)
@@ -118,9 +118,9 @@ im.save(os.path.join(OUT, '2.jpg'), quality=92)
 # ---------- 3-6. To'rt yo'nalish, qidiruvchi ko'zi bilan ----------
 CATS = [
     ('01', u"Terminal xizmatlari", u"\u0422\u0435\u0440\u043c\u0438\u043d\u0430\u043b\u044c\u043d\u044b\u0435 \u0443\u0441\u043b\u0443\u0433\u0438",
-     [u"Yuklash, tushirish, saqlash", u"Bojxona ombori va SVX", u"Tarif va bugungi bo'sh slotlar"], None, None),
+     [u"Yuklash, tushirish, saqlash", u"Bojxona ombori va SVX", u"Tarif va bugungi bo'sh joylar"], None, None),
     ('02', u"Shahobcha yo'llar", u"\u041f\u043e\u0434\u044a\u0435\u0437\u0434\u043d\u044b\u0435 \u043f\u0443\u0442\u0438",
-     [u"Stansiya, uzunlik, sig'im", u"Xaritada joylashuvi", u"Egasi bilan bevosita aloqa"], '1382', u"reestrdagi xususiy yo'l"),
+     [u"Stansiya, uzunlik, sig'im", u"Xaritada joylashuvi", u"Egasi bilan bevosita aloqa"], None, None),
     ('03', u"Temir yo'l texnikasi", u"\u0416\u0435\u043b\u0435\u0437\u043d\u043e\u0434\u043e\u0440\u043e\u0436\u043d\u0430\u044f \u0442\u0435\u0445\u043d\u0438\u043a\u0430",
      [u"Manevr teplovozi, elektrovoz", u"Yarim vagon, platforma, sisterna", u"Ijara va sotuv, narxi bilan"], None, None),
     ('04', u"Avtotransport", u"\u0410\u0432\u0442\u043e\u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442",

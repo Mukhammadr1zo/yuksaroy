@@ -5,7 +5,7 @@
     },
     "board": {
       "title": "Talabnomalar",
-      "lead": "Yangi talabnomani 30 daqiqa ichida tasdiqlang, aks holda slot bo'shaydi.",
+      "lead": "Yangi talabnomani 30 daqiqa ichida tasdiqlang, aks holda joy bo'shaydi.",
       "view": {
         "board": "Taxta",
         "list": "Ro'yxat"
@@ -101,8 +101,8 @@
       "shipper": {
         "open": "Ochiq buyurtmalar",
         "openSub": "tasdiq kutilmoqda: {n}",
-        "next": "Keyingi slot",
-        "noNext": "Rejalashtirilgan slot yo'q",
+        "next": "Keyingi joy",
+        "noNext": "Rejalashtirilgan joy yo'q",
         "newOrder": "Yangi buyurtma berish",
         "invoices": "To'lov kutilmoqda",
         "invoicesSub": "jami {sum}",
@@ -111,7 +111,7 @@
       "terminal": {
         "pending": "Yangi talabnomalar",
         "pendingSub": "30 daqiqa ichida javob bering",
-        "free": "Bugun bo'sh slotlar",
+        "free": "Bugun bo'sh joylar",
         "freeSub": "{n} ta terminal bo'yicha",
         "noTariff": "Tarifsiz terminallar",
         "noTariffSub": "Tarifsiz terminal katalogda narx ko'rsatmaydi va bron qabul qilmaydi",
@@ -138,7 +138,7 @@
       "stepsAria": "Qadamlar",
       "step": {
         "cargo": "Yuk",
-        "terminal": "Terminal va slot",
+        "terminal": "Terminal va joy",
         "summary": "Xulosa"
       },
       "filter": {
@@ -182,15 +182,15 @@
         "yes": "Ha, bekor qilinsin",
         "no": "Yo'q",
         "start": "Buyurtmani bekor qilish",
-        "hint": "Slot boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi."
+        "hint": "Joy boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi."
       },
       "statusHint": {
-        "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa slot avtomatik bo'shaydi.",
-        "CONFIRMED": "Slot siz uchun band. Belgilangan vaqtda yetib boring.",
+        "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa joy avtomatik bo'shaydi.",
+        "CONFIRMED": "Joy siz uchun band. Belgilangan vaqtda yetib boring.",
         "IN_PROGRESS": "Terminalda ish davom etmoqda.",
         "DONE": "Buyurtma yakunlandi.",
         "REJECTED": "Terminal rad etdi. Boshqa terminal yoki vaqtni tanlang.",
-        "EXPIRED": "Terminal vaqtida javob bermadi, slot bo'shatildi.",
+        "EXPIRED": "Terminal vaqtida javob bermadi, joy bo'shatildi.",
         "CANCELLED": "Buyurtma bekor qilindi."
       },
       "actor": {
@@ -212,8 +212,8 @@
       "offersLead": "{station} stansiyasi bo'yicha {count} taklif.",
       "offersLeadNearby": "{station} stansiyasi bo'yicha {count} taklif (yaqin atrofdan).",
       "missingTariff": "tarifi yo'q: {services}",
-      "holding": "Slot siz uchun ushlab turilibdi",
-      "holdingShort": "Slot ushlab turilmoqda:",
+      "holding": "Joy siz uchun ushlab turilibdi",
+      "holdingShort": "Joy ushlab turilmoqda:",
       "extend": "Uzaytirish",
       "back": "Orqaga",
       "next": "Davom etish",
@@ -222,22 +222,22 @@
       "noteOptional": "Izoh (ixtiyoriy)",
       "sending": "Yuborilmoqda",
       "placeOrder": "Buyurtma berish",
-      "submitHint": "Buyurtma yuborilgach terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa slot avtomatik bo'shaydi.",
+      "submitHint": "Buyurtma yuborilgach terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa joy avtomatik bo'shaydi.",
       "err": {
         "generic": "Xatolik yuz berdi. Qayta urinib ko'ring.",
         "noOrg": "Avval tashkilot yarating.",
         "selectStation": "Stansiyani tanlang.",
         "enterWeight": "Vaznni kiriting.",
         "noOffers": "Bu stansiya va yaqin atrofda tarif e'lon qilgan terminal topilmadi.",
-        "holdExpiredPick": "Slot ushlab turish muddati tugadi. Boshqa oynani tanlang.",
-        "cancelTooLate": "Slot boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
+        "holdExpiredPick": "Joy ushlab turish muddati tugadi. Boshqa oynani tanlang.",
+        "cancelTooLate": "Joy boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
         "cancelNotAllowed": "Bu holatda bekor qilib bo'lmaydi.",
         "cancelFailed": "Bekor qilinmadi. Qayta urinib ko'ring.",
         "SLOT_FULL": "Bu oynada joy qolmadi. Boshqasini tanlang.",
         "SLOT_CLOSED": "Bu oyna yopiq.",
         "SLOT_PAST": "Bu oyna o'tib ketdi.",
         "HOLD_EXPIRED": "Ushlab turish muddati tugadi. Oynani qaytadan tanlang.",
-        "HOLD_ALREADY_USED": "Bu slot bo'yicha buyurtma allaqachon berilgan.",
+        "HOLD_ALREADY_USED": "Bu joy bo'yicha buyurtma allaqachon berilgan.",
         "HOLD_NOT_EXTENDABLE": "Muddat faqat bir marta uzaytiriladi.",
         "NOT_SHIPPER": "Bu tashkilot nomidan buyurtma berish huquqingiz yo'q.",
         "NO_TARIFF_FOR_OPERATION": "Terminalda bu operatsiya uchun tarif yo'q.",
@@ -255,7 +255,7 @@
         "services": "xizmatlar: {sum}"
       },
       "slots": {
-        "empty": "Bu terminalda yaqin kunlarga ochiq slot yo'q.",
+        "empty": "Bu terminalda yaqin kunlarga ochiq joy yo'q.",
         "busy": "band",
         "free": "{n} joy bo'sh",
         "legendFree": "bo'sh joy soni",

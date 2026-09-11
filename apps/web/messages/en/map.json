@@ -39,8 +39,8 @@
     "approxRegion": "region centre, approximate location",
     "popup": {
       "open": "Details",
-      "freeToday": "{count} free slots today",
-      "noSlots": "no free slots today",
+      "freeToday": "{count} free spots today",
+      "noSlots": "no free spots today",
       "onRequest": "price on request",
       "from": "from {price}"
     },

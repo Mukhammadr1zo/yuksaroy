@@ -9,7 +9,7 @@
     },
     "terminals": {
       "title": "O'zbekiston yuk terminallari katalogi · YukSaroy",
-      "description": "Yuk terminali va yuk saroyi qidiryapsizmi? Manzil, ish vaqti, xizmatlar, tarif va bo'sh slotlar. Toshkent va viloyatlar bo'yicha qidiring, egasiga yozing."
+      "description": "Yuk terminali va yuk saroyi qidiryapsizmi? Manzil, ish vaqti, xizmatlar, tarif va bo'sh joylar. Toshkent va viloyatlar bo'yicha qidiring, egasiga yozing."
     },
     "terminal": {
       "title": "{name} · YukSaroy",
@@ -56,7 +56,7 @@
       "need": "Xizmat izlayapman",
       "terminal": {
         "title": "Terminal yoki yuk saroyi",
-        "body": "Xizmatlar, tariflar, ish vaqti, slotlar"
+        "body": "Xizmatlar, tariflar, ish vaqti, joylar"
       },
       "siding": {
         "title": "Shahobcha yo'l",
@@ -72,7 +72,7 @@
       },
       "order": {
         "title": "Buyurtma berish",
-        "body": "Terminalda slot band qilish"
+        "body": "Terminalda joy band qilish"
       },
       "urgent": {
         "title": "Shoshilinch so'rov",
@@ -208,7 +208,7 @@
     "empty": {
       "title": "Bu filtr bo'yicha terminal topilmadi.",
       "reset": "Filtrni tozalash",
-      "owner": "Terminal sizniki bo'lsa: obyektni katalogga faqat egasi qo'shadi, tarif va slotlar sizning nazoratingizda.",
+      "owner": "Terminal sizniki bo'lsa: obyektni katalogga faqat egasi qo'shadi, tarif va joylar sizning nazoratingizda.",
       "ownerCta": "Terminalimni qo'shish",
       "ownerSignup": "Ro'yxatdan o'tish"
     }
@@ -254,11 +254,11 @@
     },
     "cta": {
       "quote": "Narxni hisoblash",
-      "bookSlot": "Slot band qilish"
+      "bookSlot": "Joy band qilish"
     },
     "claim": {
       "title": "Bu sizning terminalingizmi?",
-      "body": "Pasport ochiq ma'lumotlardan tuzilgan, tariflar taxminiy. Kabinetda TERMINAL tashkiloti yarating: operator pasportni sizga biriktiradi va siz tarif hamda slotlarni o'zingiz boshqarasiz."
+      "body": "Pasport ochiq ma'lumotlardan tuzilgan, tariflar taxminiy. Kabinetda TERMINAL tashkiloti yarating: operator pasportni sizga biriktiradi va siz tarif hamda joylarni o'zingiz boshqarasiz."
     },
     "tariffs": {
       "heading": "Tariflar",
@@ -299,10 +299,10 @@
     },
     "sidingsLink": "Shu stansiyada {count} ta shahobcha yo'l →",
     "slots": {
-      "heading": "Bugungi slotlar",
+      "heading": "Bugungi joylar",
       "free": "{count} ta bo'sh",
-      "none": "Bugun ochiq slot yo'q",
-      "book": "Slot band qilish"
+      "none": "Bugun ochiq joy yo'q",
+      "book": "Joy band qilish"
     }
   },
   "sidings": {
@@ -453,7 +453,7 @@
     },
     "decision": {
       "terminals": "{count} terminal",
-      "freeToday": "{count} tasida bugun bo'sh slot",
+      "freeToday": "{count} tasida bugun bo'sh joy",
       "cheapest": "eng arzon {price}",
       "nearest": "eng yaqini {km} km",
       "separator": " · "
@@ -469,8 +469,8 @@
     },
     "unverifiedPassport": "Pasport egasi tomonidan tasdiqlanmagan",
     "slots": {
-      "freeToday": "Bugun {count} ta bo'sh slot",
-      "none": "Bugun bo'sh slot yo'q"
+      "freeToday": "Bugun {count} ta bo'sh joy",
+      "none": "Bugun bo'sh joy yo'q"
     },
     "distance": "{km} km"
   },

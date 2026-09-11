@@ -2,18 +2,18 @@
   "booking": {
     "meta": {
       "title": "Booking, quotes and price requests · YukSaroy",
-      "description": "Book a terminal slot, get a price from an open formula, send a request to an equipment owner: three paths, one cabinet. Live tariff example and today's free slots."
+      "description": "Book a terminal spot, get a price from an open formula, send a request to an equipment owner: three paths, one cabinet. Live tariff example and today's free spots."
     },
     "eyebrow": "How it works",
     "title": "Book. Quote. Ask a price.",
-    "lead": "A terminal service gets a booked slot, the price comes from an open formula, equipment and truck listings take a request to the owner. All three live in one cabinet.",
+    "lead": "A terminal service gets a booked spot, the price comes from an open formula, equipment and truck listings take a request to the owner. All three live in one cabinet.",
     "facts": {
       "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
-      "freeSlots": "{count, plural, one {# free slot today} other {# free slots today}}",
+      "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}",
       "sidings": "{count, plural, one {# siding} other {# sidings}} in the registry"
     },
     "cta": {
-      "bookable": "Terminals with free slots today",
+      "bookable": "Terminals with free spots today",
       "signup": "Sign up",
       "quote": "Calculate a price",
       "terminal": "Terminal page"
@@ -21,7 +21,7 @@
     "cols": {
       "book": {
         "title": "Book",
-        "body": "Pick a terminal window for today or the coming days. The slot is held for 10 minutes, the tariff is frozen once the order is sent. The terminal confirms or rejects within the SLA.",
+        "body": "Pick a terminal window for today or the coming days. The spot is held for 10 minutes, the tariff is frozen once the order is sent. The terminal confirms or rejects within the SLA.",
         "link": "Terminals"
       },
       "quote": {
@@ -51,12 +51,12 @@
       "empty": "No active terminal has published a tariff yet. The example appears here once a terminal owner adds one."
     },
     "slots": {
-      "heading": "Free slots: {terminal}",
+      "heading": "Free spots: {terminal}",
       "today": "Today",
       "free": "{count} free",
-      "none": "No open slots in the next 14 days. The terminal opens slots from its cabinet.",
-      "notToday": "No slots opened for today, the nearest open day is shown.",
-      "book": "Book a slot"
+      "none": "No open spots in the next 14 days. The terminal opens spots from its cabinet.",
+      "notToday": "No spots opened for today, the nearest open day is shown.",
+      "book": "Book a spot"
     },
     "chain": {
       "heading": "Order state chain",
@@ -66,7 +66,7 @@
       "steps": {
         "ARRIVED": {
           "title": "Arrived",
-          "body": "Wagon at the terminal, slot time started"
+          "body": "Wagon at the terminal, spot time started"
         },
         "WEIGHED": {
           "title": "Weighed",
@@ -83,10 +83,10 @@
       }
     },
     "band": {
-      "title": "Start with terminals that have a free slot today",
+      "title": "Start with terminals that have a free spot today",
       "body": "The catalog shows only terminals with an open window today. Booking needs a cabinet, the price calculator does not."
     },
-    "chip": "Free slot today",
+    "chip": "Free spot today",
     "quick": {
       "submit": "Show price",
       "passport": "Passport"

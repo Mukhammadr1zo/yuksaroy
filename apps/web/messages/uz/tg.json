@@ -4,7 +4,7 @@
       "title": "Telegram ichida oching",
       "body": "Bu sahifa Telegram Mini App sifatida ishlaydi: kirish Telegram hisobingiz orqali, telefon bir tugma bilan bog'lanadi.",
       "open": "Telegramda ochish",
-      "site": "Oddiy saytga o'tish"
+      "site": "Oddiy platformaga o'tish"
     },
     "boot": {
       "loading": "Kirilmoqda",
@@ -17,7 +17,7 @@
       "loadFailed": "Yuklab bo'lmadi. Ilovani qayta oching.",
       "back": "Orqaga",
       "all": "Hammasi",
-      "openSite": "To'liq saytda ochish",
+      "openSite": "Platformada ochish",
       "cancel": "Bekor",
       "none": "yo'q",
       "onRequest": "narx so'rov bo'yicha",
@@ -37,8 +37,8 @@
         "equipment": "Texnika",
         "truck": "Avtotransport"
       },
-      "bookable": "Bugun bo'sh slotli terminallar",
-      "bookableEmpty": "Bugun ochiq slot yo'q. Ertangi kunlar terminal sahifasida.",
+      "bookable": "Bugun bo'sh joyli terminallar",
+      "bookableEmpty": "Bugun ochiq joy yo'q. Ertangi kunlar terminal sahifasida.",
       "orders": "Ochiq buyurtmalarim",
       "ordersAll": "Barchasi",
       "urgent": "Shoshilinch so'rov",
@@ -75,22 +75,22 @@
       "notFound": "Terminal topilmadi.",
       "tariffs": "Tariflar",
       "noTariffs": "Tarif e'lon qilinmagan, narx so'rov bo'yicha.",
-      "slotsToday": "Bugungi slotlar",
-      "noSlots": "Bugun ochiq slot yo'q. Keyingi kunlar bron qadamida.",
+      "slotsToday": "Bugungi joylar",
+      "noSlots": "Bugun ochiq joy yo'q. Keyingi kunlar bron qadamida.",
       "free": "{count} bo'sh",
       "phone": "Telefon",
       "noPhone": "Telefon ko'rsatilmagan",
-      "book": "Slot band qilish",
+      "book": "Joy band qilish",
       "map": "Xaritada",
       "hours": "Ish vaqti",
       "noRating": "Baho yo'q",
       "unverified": "Pasport egasi tomonidan tasdiqlanmagan"
     },
     "book": {
-      "title": "Slot band qilish",
+      "title": "Joy band qilish",
       "steps": {
         "cargo": "Yuk",
-        "slot": "Slot",
+        "slot": "Joy",
         "confirm": "Tasdiq"
       },
       "org": "Tashkilot",
@@ -107,14 +107,14 @@
       "noOffer": "Bu terminal bu operatsiya uchun tarif e'lon qilmagan. Boshqa operatsiya yoki terminalni tanlang.",
       "otherOffers": "Boshqa terminallar",
       "slot": "Vaqt oynasi",
-      "held": "Slot siz uchun ushlab turilibdi",
+      "held": "Joy siz uchun ushlab turilibdi",
       "extend": "Uzaytirish",
       "next": "Davom etish",
       "note": "Izoh (ixtiyoriy)",
       "wagonNumbers": "Vagon raqamlari (ixtiyoriy, 8 xonali, probel bilan)",
       "submit": "Buyurtma berish",
       "sending": "Yuborilmoqda",
-      "slaNote": "Terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa slot avtomatik bo'shaydi.",
+      "slaNote": "Terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa joy avtomatik bo'shaydi.",
       "summary": {
         "cargo": "Yuk",
         "noCargo": "ko'rsatilmagan",
@@ -130,7 +130,7 @@
         "SLOT_CLOSED": "Bu oyna yopiq.",
         "SLOT_PAST": "Bu oyna o'tib ketdi.",
         "HOLD_EXPIRED": "Ushlab turish muddati tugadi. Oynani qaytadan tanlang.",
-        "HOLD_ALREADY_USED": "Bu slot bo'yicha buyurtma allaqachon berilgan.",
+        "HOLD_ALREADY_USED": "Bu joy bo'yicha buyurtma allaqachon berilgan.",
         "HOLD_NOT_EXTENDABLE": "Muddat faqat bir marta uzaytiriladi.",
         "NOT_SHIPPER": "Bu tashkilot nomidan buyurtma berish huquqingiz yo'q.",
         "NO_TARIFF_FOR_OPERATION": "Terminalda bu operatsiya uchun tarif yo'q.",
@@ -179,14 +179,14 @@
         "cancelReason": "Sabab (ixtiyoriy)",
         "cancelYes": "Ha, bekor qilinsin",
         "cancelNo": "Yo'q",
-        "cancelNote": "Slot boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi.",
+        "cancelNote": "Joy boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi.",
         "hint": {
-          "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa slot avtomatik bo'shaydi.",
-          "CONFIRMED": "Slot siz uchun band. Belgilangan vaqtda yetib boring.",
+          "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa joy avtomatik bo'shaydi.",
+          "CONFIRMED": "Joy siz uchun band. Belgilangan vaqtda yetib boring.",
           "IN_PROGRESS": "Terminalda ish davom etmoqda.",
           "DONE": "Buyurtma yakunlandi.",
           "REJECTED": "Terminal rad etdi. Boshqa terminal yoki vaqtni tanlang.",
-          "EXPIRED": "Terminal vaqtida javob bermadi, slot bo'shatildi.",
+          "EXPIRED": "Terminal vaqtida javob bermadi, joy bo'shatildi.",
           "CANCELLED": "Buyurtma bekor qilindi."
         },
         "actor": {
@@ -196,7 +196,7 @@
           "ADMIN": "administrator"
         },
         "err": {
-          "CANCEL_TOO_LATE": "Slot boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
+          "CANCEL_TOO_LATE": "Joy boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
           "TRANSITION_NOT_ALLOWED": "Bu holatda bekor qilib bo'lmaydi."
         }
       }
@@ -223,12 +223,12 @@
       "title": "E'lonlarim",
       "new": "Yangi e'lon",
       "empty": "Hali e'lon yo'q. Yuk mashinasini bir daqiqada e'lon qiling.",
-      "openSite": "Saytda tahrirlash",
+      "openSite": "Platformada tahrirlash",
       "views": "{count} ko'rildi",
       "kindTitle": "Nima e'lon qilasiz?",
       "truck": "Yuk mashinasi",
       "truckHint": "Shaxsan, telefon bilan, bir daqiqada",
-      "railHint": "Teplovoz, elektrovoz va vagon tashkilot nomidan, to'liq saytda",
+      "railHint": "Teplovoz, elektrovoz va vagon tashkilot nomidan, platformada",
       "form": {
         "title": "Sarlavha",
         "titlePh": "Masalan: MAN TGS 20 t, tentli",
@@ -263,7 +263,7 @@
       "phone": "Telefon",
       "noPhone": "bog'lanmagan",
       "locale": "Til",
-      "site": "To'liq sayt",
+      "site": "Platforma",
       "siteLinks": {
         "dashboard": "Kabinet",
         "terminals": "Terminallar",
