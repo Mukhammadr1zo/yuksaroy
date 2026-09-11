@@ -4,12 +4,12 @@
   },
   "meta": {
     "site": {
-      "title": "YukSaroy",
-      "description": "Yuk logistikasi bozori: terminal xizmatlari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport bir joyda. Egalar o'z xizmat va texnikasini e'lon qiladi, siz keraklisini topasiz."
+      "title": "O'zbekiston yuk terminallari va avtotransport · YukSaroy",
+      "description": "Yuk terminallari, shahobcha yo'llar, teplovoz, vagon va yuk mashinalari bir joyda. Narx va shartlarni ko'ring, egasiga to'g'ridan-to'g'ri yozing. Qidirish bepul."
     },
     "terminals": {
-      "title": "Terminallar · YukSaroy",
-      "description": "Yuk terminallari va yuk saroylari katalogi: pasport, ish vaqti, xizmatlar va shartlar."
+      "title": "O'zbekiston yuk terminallari katalogi · YukSaroy",
+      "description": "Yuk terminali va yuk saroyi qidiryapsizmi? Manzil, ish vaqti, xizmatlar, tarif va bo'sh slotlar. Toshkent va viloyatlar bo'yicha qidiring, egasiga yozing."
     },
     "terminal": {
       "title": "{name} · YukSaroy",
@@ -17,16 +17,16 @@
       "notFound": "Terminal topilmadi"
     },
     "sidings": {
-      "title": "Shahobcha yo'llar reestri · YukSaroy",
-      "description": "1 300+ xususiy shahobcha yo'l reestri: joylashuv, uzunlik, sig'im. Egasi tasdiqlagach, bog'lanish."
+      "title": "O'zbekiston shahobcha yo'llari reestri · YukSaroy",
+      "description": "1300 dan ortiq xususiy shahobcha yo'l: stansiya, uzunlik, yuklash va tushirish sig'imi. O'z yo'lingizni toping va kabinetda biriktiring."
     },
     "texnika": {
-      "title": "Temir yo'l texnikasi · YukSaroy",
-      "description": "Teplovoz, elektrovoz va vagonlar: sotib olish yoki arendaga olish e'lonlari."
+      "title": "Teplovoz, elektrovoz va vagon: ijara va sotuv · YukSaroy",
+      "description": "Manevr teplovozi, elektrovoz va vagon e'lonlari. Narx, ishlab chiqarilgan yil, holati va egasining telefoni bitta sahifada. Vositachisiz."
     },
     "avtotransport": {
-      "title": "Avtotransport · YukSaroy",
-      "description": "Yuk mashinalari va avtotashuvchilar: yaqin atrofdan mashina toping yoki o'z mashinangizni e'lon qiling."
+      "title": "Yuk mashinalari va avtotashuvchilar · YukSaroy",
+      "description": "O'zbekiston bo'ylab yuk tashish uchun mashina toping: tent, refrijerator, samosval, tral. Viloyat bo'yicha qidiring, haydovchiga to'g'ridan-to'g'ri yozing."
     },
     "quote": {
       "title": "Narx hisobi · YukSaroy",

@@ -14,8 +14,13 @@ export default function Image() {
           <div style={{ width: 56, height: 56, borderRadius: 16, background: '#077F84' }} />
           <div style={{ fontSize: 56, fontWeight: 700 }}>YukSaroy</div>
         </div>
-        <div style={{ display: 'flex', fontSize: 44, lineHeight: 1.25, color: '#DCE6F2' }}>
-          Yuk xizmatlari tizimi: terminal, shahobcha yo'l, texnika, avtotransport
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', fontSize: 52, fontWeight: 700, lineHeight: 1.15 }}>
+            Yuk terminallari, shahobcha yo'llar, texnika va avtotransport
+          </div>
+          <div style={{ display: 'flex', fontSize: 30, color: '#8FB3D9' }}>
+            Egasini toping, to'g'ridan-to'g'ri bog'laning
+          </div>
         </div>
         <div style={{ display: 'flex', fontSize: 28, color: '#8FB3D9' }}>yuksaroy.uz</div>
       </div>

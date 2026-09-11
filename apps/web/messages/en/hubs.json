@@ -9,11 +9,16 @@
     "also": "Also in this region",
     "more": "View all with filters: {count}",
     "mapNote": "Region boundary and objects. Siding points are placed by station, approximate.",
-    "cat": { "terminals": "Terminals", "sidings": "Private sidings", "equipment": "Equipment", "carriers": "Road carriers" },
+    "cat": {
+      "terminals": "Terminals",
+      "sidings": "Private sidings",
+      "equipment": "Equipment",
+      "carriers": "Road carriers"
+    },
     "terminals": {
-      "h1": "Terminals in {region}: {count, plural, one {# terminal} other {# terminals}}",
+      "h1": "Freight terminals in {region}: {count, plural, one {# terminal} other {# terminals}}",
       "lead": "Freight yards, container terminals, logistics centres and bonded warehouses: with published rates and free slots today.",
-      "title": "{region}: terminals · YukSaroy",
+      "title": "Freight terminals in {region} · YukSaroy",
       "description": "{count} freight terminals in {region}: rates, services, opening hours and slots today.",
       "empty": "No active terminals in {region} yet. If you own one, add its profile in the dashboard.",
       "cta": "Add a terminal"
@@ -21,7 +26,7 @@
     "sidings": {
       "h1": "Private sidings in {region}: {count, plural, one {# siding} other {# sidings}}",
       "lead": "Registry of private railway sidings: station, length, unloading and loading capacity. Contact opens after the owner is verified.",
-      "title": "{region}: private sidings · YukSaroy",
+      "title": "Private sidings in {region} · YukSaroy",
       "description": "{count} private sidings in {region}: location, length and capacity.",
       "empty": "No sidings in the registry for {region}.",
       "cta": "Open the registry"
@@ -29,16 +34,16 @@
     "equipment": {
       "h1": "Rail equipment in {region}: {count, plural, one {# listing} other {# listings}}",
       "lead": "Shunting locomotives, electric locomotives and wagons: rent or sale. Prices are public, contacting the owner requires login.",
-      "title": "{region}: rail equipment · YukSaroy",
+      "title": "Locomotives and wagons in {region} · YukSaroy",
       "description": "{count} equipment listings in {region}: locomotives and wagons, rent and sale prices.",
       "empty": "No equipment listings in {region} yet. Post first and you will be found first.",
       "cta": "Post a listing"
     },
     "carriers": {
-      "h1": "Road carriers in {region}: {count, plural, one {# listing} other {# listings}}",
+      "h1": "Trucks and carriers in {region}: {count, plural, one {# listing} other {# listings}}",
       "lead": "Trucks based in or serving this region: body type, tonnage, routes.",
-      "title": "{region}: road carriers · YukSaroy",
-      "description": "{count} carrier listings serving {region}: body type, tonnage, price.",
+      "title": "Trucks and carriers in {region} · YukSaroy",
+      "description": "{count} truck and carrier listings serving {region}: body type, tonnage, price and phone.",
       "empty": "No carrier listings in {region} yet. Post first and you will be found first.",
       "cta": "Post a listing"
     }

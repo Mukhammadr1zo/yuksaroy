@@ -29,6 +29,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     description: t('description'),
     openGraph: { type: 'website', siteName: ts('siteName'), title: t('title'), description: t('description'), url: url(locale), locale: OG_LOCALE[locale] },
     twitter: { card: 'summary_large_image', title: t('title'), description: t('description') },
+    // Search Console va Yandex Webmaster egalikni shu teg bilan tasdiqlaydi.
+    // Kod o'zgartirmasdan .env ga qo'yiladi; bo'sh bo'lsa teg umuman chiqmaydi.
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      yandex: process.env.YANDEX_VERIFICATION || undefined,
+    },
   };
 }
 

@@ -9,11 +9,16 @@
     "also": "Shu viloyatda yana",
     "more": "Barchasini filtr bilan ko'rish: {count} ta",
     "mapNote": "Viloyat chegarasi va obyektlar. Shahobcha yo'l nuqtalari stansiya bo'yicha, taxminiy.",
-    "cat": { "terminals": "Terminallar", "sidings": "Shahobcha yo'llar", "equipment": "Texnika", "carriers": "Avtotransport" },
+    "cat": {
+      "terminals": "Terminallar",
+      "sidings": "Shahobcha yo'llar",
+      "equipment": "Texnika",
+      "carriers": "Avtotransport"
+    },
     "terminals": {
-      "h1": "{region}da terminallar: {count} ta",
+      "h1": "{region}da yuk terminallari: {count} ta",
       "lead": "Yuk saroylari, konteyner terminallari, logistika markazlari va SVX: ochiq tarif va bugungi bo'sh slotlar bilan.",
-      "title": "{region}: terminallar · YukSaroy",
+      "title": "{region} yuk terminallari · YukSaroy",
       "description": "{region}dagi {count} ta yuk terminali: tariflar, xizmatlar, ish vaqti va bugungi slotlar.",
       "empty": "{region}da hali faol terminal yo'q. Terminal egasi bo'lsangiz, pasportni kabinetda qo'shing.",
       "cta": "Terminal qo'shish"
@@ -21,7 +26,7 @@
     "sidings": {
       "h1": "{region}da shahobcha yo'llar: {count} ta",
       "lead": "Xususiy shahobcha yo'llar reestri: stansiya, uzunlik, tushirish va yuklash sig'imi. Egasi tasdiqlagach, bog'lanish ochiladi.",
-      "title": "{region}: shahobcha yo'llar · YukSaroy",
+      "title": "{region} shahobcha yo'llari · YukSaroy",
       "description": "{region}dagi {count} ta xususiy shahobcha yo'l: joylashuv, uzunlik va sig'im.",
       "empty": "{region} bo'yicha reestrda shahobcha yo'l yo'q.",
       "cta": "Reestrga o'tish"
@@ -29,16 +34,16 @@
     "equipment": {
       "h1": "{region}da temir yo'l texnikasi: {count} e'lon",
       "lead": "Manevr teplovozi, elektrovoz va vagonlar: ijara yoki sotuv. Narx hammaga ochiq, bog'lanish uchun kirish kerak.",
-      "title": "{region}: temir yo'l texnikasi · YukSaroy",
+      "title": "{region}da teplovoz, vagon va texnika · YukSaroy",
       "description": "{region}dagi {count} ta texnika e'loni: teplovoz, elektrovoz, vagon; ijara va sotuv narxlari.",
       "empty": "{region}da hali texnika e'loni yo'q. Birinchi bo'lib joylasangiz, sizni birinchi topishadi.",
       "cta": "E'lon berish"
     },
     "carriers": {
-      "h1": "{region}da avtotransport: {count} e'lon",
+      "h1": "{region}da yuk mashinalari: {count} e'lon",
       "lead": "Shu viloyatda turgan yoki shu viloyatga xizmat ko'rsatadigan yuk mashinalari: kuzov, tonnaj, yo'nalishlar.",
-      "title": "{region}: avtotransport · YukSaroy",
-      "description": "{region}da xizmat ko'rsatadigan {count} ta avtotashuvchi e'loni: kuzov turi, tonnaj, narx.",
+      "title": "{region} yuk mashinalari va tashuvchilar · YukSaroy",
+      "description": "{region}da yuk tashish uchun {count} ta mashina e'loni: kuzov turi, tonnaj, narx va haydovchi telefoni.",
       "empty": "{region}da hali avtotransport e'loni yo'q. Birinchi bo'lib joylasangiz, sizni birinchi topishadi.",
       "cta": "E'lon berish"
     }

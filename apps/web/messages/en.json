@@ -4,12 +4,12 @@
   },
   "meta": {
     "site": {
-      "title": "YukSaroy",
-      "description": "Freight logistics marketplace: terminal services, private sidings, rail equipment and road transport in one place. Owners list their services and equipment, you find what you need."
+      "title": "Freight terminals and trucking in Uzbekistan · YukSaroy",
+      "description": "Freight terminals, private sidings, locomotives, wagons and trucks in one place. See prices and terms, contact the owner directly. Search is free."
     },
     "terminals": {
-      "title": "Terminals · YukSaroy",
-      "description": "Catalog of freight terminals and freight yards: site profile, working hours, services and terms."
+      "title": "Freight terminals in Uzbekistan · YukSaroy",
+      "description": "Looking for a freight terminal or freight yard? Address, working hours, services, tariffs and free slots. Search Tashkent and the regions, contact the owner."
     },
     "terminal": {
       "title": "{name} · YukSaroy",
@@ -17,16 +17,16 @@
       "notFound": "Terminal not found"
     },
     "sidings": {
-      "title": "Private sidings registry · YukSaroy",
-      "description": "Registry of 1,300+ private sidings: location, length, capacity. Contact the owner once they confirm."
+      "title": "Private sidings registry in Uzbekistan · YukSaroy",
+      "description": "Over 1,300 private railway sidings: station, length, loading and unloading capacity. Find your siding and claim it in your cabinet."
     },
     "texnika": {
-      "title": "Rail equipment · YukSaroy",
-      "description": "Shunting locomotives, electric locomotives and wagons: listings for sale or rent."
+      "title": "Locomotives and wagons for rent or sale · YukSaroy",
+      "description": "Listings for shunting locomotives, electric locomotives and wagons. Price, year, condition and the owner's phone on one page. No middlemen."
     },
     "avtotransport": {
-      "title": "Road transport · YukSaroy",
-      "description": "Trucks and road carriers: find a truck nearby or list your own."
+      "title": "Trucks and road carriers in Uzbekistan · YukSaroy",
+      "description": "Find a truck for your cargo: curtainside, refrigerated, tipper, lowboy. Search by region and contact the carrier directly, with no middleman."
     },
     "quote": {
       "title": "Price calculator · YukSaroy",
