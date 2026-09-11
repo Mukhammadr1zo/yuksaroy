@@ -1,7 +1,7 @@
 'use client';
 // Telefon -> kod qadamlari. Kirish, ro'yxat, telefon bog'lash (attach) va parol tiklash rejimlarida bir xil: cookie bo'lsa API o'zi bog'laydi.
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { TelegramLogoIcon } from '@phosphor-icons/react';
 import { ApiError, post } from '@/lib/api';
 import type { LoginResponse, OtpRequestResponse } from '@/lib/types-auth';
@@ -29,6 +29,7 @@ const ERR: Record<string, string> = {
 const verifyOtp = (phone: string, code: string) => post<LoginResponse>('/auth/otp/verify', { phone, code });
 
 export function PhoneOtp({ submitLabel, onDone, requestPath = '/auth/otp/request', verify = verifyOtp, extra, extraReady = true, initialPhone = '' }: Props) {
+  const locale = useLocale();
   const t = useTranslations('auth');
   const root = useTranslations();
   const [phone, setPhone] = useState(initialPhone);
@@ -42,7 +43,8 @@ export function PhoneOtp({ submitLabel, onDone, requestPath = '/auth/otp/request
   async function requestCode() {
     setBusy(true); setErr(null);
     try {
-      const r = await post<OtpRequestResponse>(requestPath, { phone });
+      // Til ham ketadi: hisobi yo'q odam ham Telegramdagi kodni o'z tilida oladi
+      const r = await post<OtpRequestResponse>(requestPath, { phone, locale });
       setCode('');
       setStep({ kind: 'code', botUrl: r.status === 'LINK_REQUIRED' ? r.botUrl : undefined });
     } catch (e) { fail(e); } finally { setBusy(false); }

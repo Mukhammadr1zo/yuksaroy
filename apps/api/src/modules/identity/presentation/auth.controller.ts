@@ -51,7 +51,7 @@ export class AuthController {
   @Post('otp/request') @HttpCode(200)
   async otpRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(otpBucket, req);
-    return this.otpRequestOrThrow(dto.phone);
+    return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
   /** Kirgan telefonsiz foydalanuvchi (Google) shu yerda telefonini bog'laydi: yangi user ochilmaydi. */
@@ -112,7 +112,7 @@ export class AuthController {
   @Post('password/reset/request') @HttpCode(200)
   async passwordResetRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(resetBucket, req);
-    return this.otpRequestOrThrow(dto.phone);
+    return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
   @Post('password/reset') @HttpCode(200)
@@ -174,7 +174,7 @@ export class AuthController {
     const phone = normalizeUzPhone(dto.phone);
     const me = await this.users.findById(userId);
     if (phone && me?.phone === phone) throw new HttpException({ code: 'SAME_PHONE' }, 400);
-    return this.otpRequestOrThrow(dto.phone);
+    return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
   @Post('phone/change') @HttpCode(200) @UseGuards(JwtGuard)
@@ -207,9 +207,9 @@ export class AuthController {
     return this.linkTelegram.execute({ chatId: BigInt(dto.chatId), username: dto.username ?? null, phone: dto.phone, linkToken: dto.linkToken });
   }
 
-  private async otpRequestOrThrow(phone: string) {
+  private async otpRequestOrThrow(phone: string, locale?: string | null) {
     try {
-      return await this.requestOtp.execute(phone);
+      return await this.requestOtp.execute(phone, locale ?? null);
     } catch (e) {
       if (e instanceof InvalidPhoneError) throw new HttpException({ code: 'INVALID_PHONE' }, 400);
       if (e instanceof TooManyRequestsError) throw new HttpException({ code: 'TOO_MANY_REQUESTS', retryAfter: e.retryAfter }, 429);

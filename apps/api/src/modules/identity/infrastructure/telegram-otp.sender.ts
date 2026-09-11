@@ -18,8 +18,12 @@ The code is valid for 5 minutes. Do not share it.`,
 /** Telegram Bot API ga to'g'ridan-to'g'ri (Telegraf kerak emas). Bot jarayoni bilan bir xil token. */
 @Injectable()
 export class TelegramOtpSender implements OtpSender {
-  async sendCode(chatId: bigint, code: string): Promise<void> {
-    const text = `🔐 YukSaroy kirish kodi: <code>${code}</code>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang.`;
+  async sendCode(chatId: bigint, code: string, locale?: string | null): Promise<void> {
+    // Til foydalanuvchi profilidan keladi (request-otp uni uzatadi), bo'lmasa o'zbekcha.
+    // Ilgari bu yerda o'zbekcha matn qattiq yozilgan edi: TEXT jadvali yozilgan-u ishlatilmasdi,
+    // ya'ni ruscha va inglizcha foydalanuvchi ham o'zbekcha kod xabarini olardi.
+    const lang = locale === 'ru' || locale === 'en' ? locale : 'uz';
+    const text = `🔐 ${TEXT[lang](code)}`;
     const res = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

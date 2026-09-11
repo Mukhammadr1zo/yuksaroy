@@ -20,7 +20,7 @@ export class RequestOtpUseCase {
     @Inject(OTP_SENDER) private readonly sender: OtpSender,
   ) {}
 
-  async execute(rawPhone: string): Promise<RequestOtpResult> {
+  async execute(rawPhone: string, locale?: string | null): Promise<RequestOtpResult> {
     const phone = normalizeUzPhone(rawPhone);
     if (!phone) throw new InvalidPhoneError();
 
@@ -37,7 +37,8 @@ export class RequestOtpUseCase {
     await this.otps.create({ phone, codeHash: hashSecret(code, env.JWT_SECRET), expiresAt: otpExpiry(), linkToken });
 
     if (linked) {
-      await this.sender.sendCode(linked, code, user?.locale ?? null);
+      // Profil tili ustun: odam platformada tilni tanlagan bo'lsa, kod ham shu tilda
+      await this.sender.sendCode(linked, code, user?.locale ?? locale ?? null);
       return { status: 'SENT', resendAfter: OTP.resendAfterSeconds };
     }
     return {

@@ -5,6 +5,8 @@ const PHONE = /^[+\d\s()-]{9,17}$/;
 
 export class RequestOtpDto {
   @IsString() @Matches(PHONE) phone!: string;
+  /** Brauzerdagi til: hisobi yo'q foydalanuvchi ham kodni o'z tilida oladi. */
+  @IsOptional() @IsIn(['uz', 'ru', 'en']) locale?: 'uz' | 'ru' | 'en';
 }
 export class VerifyOtpDto {
   @IsString() @Matches(PHONE) phone!: string;

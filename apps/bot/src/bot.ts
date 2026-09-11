@@ -123,6 +123,9 @@ function chipLabel(c: Chip, lang: Lang): string {
 const T: Record<Lang, {
   som: string; filter: string; open: string; inApp: string; app: string; appHint: string; map: string; none: string; down: string; hint: string;
   terminals: (n: number) => string; free: (n: number) => string; cheapest: (p: string) => string; nearest: (km: number) => string; slots: (n: number) => string;
+  // Kirish oqimi: /start dan kod kelguncha
+  contactBtn: string; welcome: string; askPhone: string; askPhoneLogin: string; ownContactOnly: string;
+  linkFailed: string; linkedApp: string; linkedCode: string; linkedNoCode: string; help: string;
 }> = {
   uz: {
     som: "so'm", filter: 'Filtr', open: 'Ochish', inApp: 'Ilovada ochish', app: 'Ilovani ochish', map: 'Xaritada',
@@ -132,6 +135,16 @@ const T: Record<Lang, {
     hint: "Nima kerakligini oddiy so'zlar bilan yozing, masalan:\n• Andijonda tushirish\n• Toshkentga 50 km ichida tarozisi bor yuk saroyi\n• Qo'qonda vagon ijaraga",
     terminals: (n) => `${n} terminal`, free: (n) => `${n} tasida bugun bo'sh joy`, cheapest: (p) => `eng arzon ${p}`, nearest: (km) => `eng yaqini ${km} km`,
     slots: (n) => (n > 0 ? `Bugun ${n} ta bo'sh joy` : "Bugun bo'sh joy yo'q"),
+    contactBtn: "📱 Telefon raqamimni yuborish",
+    welcome: 'YukSaroy ga xush kelibsiz.',
+    askPhone: "Platformaga kirish kodini shu yerda olasiz. Avval telefon raqamingizni tasdiqlang:",
+    askPhoneLogin: 'Kirish uchun telefon raqamingizni tasdiqlang.',
+    ownContactOnly: "Iltimos, faqat o'z raqamingizni yuboring. Buning uchun pastdagi tugmadan foydalaning.",
+    linkFailed: "Xatolik yuz berdi. Birozdan keyin qayta urinib ko'ring.",
+    linkedApp: "Telefon bog'landi, ilovaga qayting.",
+    linkedCode: "Raqam bog'landi. Kirish kodi keyingi xabarda keladi.",
+    linkedNoCode: "Raqam bog'landi. Endi platformada telefon raqamingizni kiriting, kod shu yerga keladi.",
+    help: "YukSaroy: yuk logistikasi bozori.\n\nQidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\nKirish: /start yuboring va telefon raqamingizni tasdiqlang. Platformada raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.",
   },
   ru: {
     som: 'сум', filter: 'Фильтр', open: 'Открыть', inApp: 'В приложении', app: 'Открыть приложение', map: 'На карте',
@@ -139,8 +152,18 @@ const T: Record<Lang, {
     none: 'Ничего не найдено. Попробуйте расширить фильтр.',
     down: 'Сервер не ответил. Повторите через минуту.',
     hint: 'Напишите, что нужно, простыми словами, например:\n• Выгрузка в Андижане\n• Грузовой двор с весами в радиусе 50 км от Ташкента\n• Вагон в аренду в Коканде',
-    terminals: (n) => `${n} ${qtyWord('ru', 'terminals', n)}`, free: (n) => `${n} со свободными слотами сегодня`, cheapest: (p) => `дешевле всего ${p}`, nearest: (km) => `ближайший ${km} км`,
+    terminals: (n) => `${n} ${qtyWord('ru', 'terminals', n)}`, free: (n) => `${n} со свободными местами сегодня`, cheapest: (p) => `дешевле всего ${p}`, nearest: (km) => `ближайший ${km} км`,
     slots: (n) => (n > 0 ? `Сегодня свободно: ${n} ${qtyWord('ru', 'slots', n)}` : 'Сегодня свободных мест нет'),
+    contactBtn: "📱 Отправить мой номер",
+    welcome: 'Добро пожаловать в YukSaroy.',
+    askPhone: 'Код для входа на платформу придёт сюда. Сначала подтвердите номер телефона:',
+    askPhoneLogin: 'Для входа подтвердите номер телефона.',
+    ownContactOnly: 'Отправьте, пожалуйста, только свой номер. Воспользуйтесь кнопкой ниже.',
+    linkFailed: 'Произошла ошибка. Попробуйте чуть позже.',
+    linkedApp: 'Номер привязан, вернитесь в приложение.',
+    linkedCode: 'Номер привязан. Код для входа придёт следующим сообщением.',
+    linkedNoCode: 'Номер привязан. Теперь введите его на платформе, код придёт сюда.',
+    help: 'YukSaroy: маркетплейс грузовой логистики.\n\nПоиск: напишите простыми словами, что нужно, или используйте /qidir. Бот покажет число терминалов, свободные места на сегодня и самый дешёвый тариф.\n\nВход: отправьте /start и подтвердите номер. Когда введёте его на платформе, код придёт сюда и будет действовать 5 минут.',
   },
   en: {
     som: 'UZS', filter: 'Filter', open: 'Open', inApp: 'In the app', app: 'Open the app', map: 'On map',
@@ -150,6 +173,16 @@ const T: Record<Lang, {
     hint: 'Describe what you need in plain words, for example:\n• Unloading in Andijan\n• Freight yard with a scale within 50 km of Tashkent\n• Wagon for rent in Kokand',
     terminals: (n) => `${n} terminal${n === 1 ? '' : 's'}`, free: (n) => `${n} with free spots today`, cheapest: (p) => `cheapest ${p}`, nearest: (km) => `nearest ${km} km`,
     slots: (n) => (n > 0 ? `${n} free spot${n === 1 ? '' : 's'} today` : 'No free spots today'),
+    contactBtn: "📱 Send my phone number",
+    welcome: 'Welcome to YukSaroy.',
+    askPhone: 'Your sign-in code will arrive here. First confirm your phone number:',
+    askPhoneLogin: 'Confirm your phone number to sign in.',
+    ownContactOnly: 'Please send only your own number. Use the button below.',
+    linkFailed: 'Something went wrong. Try again shortly.',
+    linkedApp: 'Phone linked, go back to the app.',
+    linkedCode: 'Phone linked. The sign-in code arrives in the next message.',
+    linkedNoCode: 'Phone linked. Enter the number on the platform and the code will arrive here.',
+    help: 'YukSaroy: a freight logistics marketplace.\n\nSearch: describe what you need in plain words or use /qidir. The bot shows the number of terminals, free spots today and the cheapest tariff.\n\nSign in: send /start and confirm your phone number. When you enter it on the platform, the code arrives here and is valid for 5 minutes.',
   },
 };
 
@@ -219,34 +252,28 @@ async function search(ctx: Context, q: string, lang: Lang) {
 
 // ── Kirish oqimi ──
 
-const CONTACT_BTN = "📱 Telefon raqamimni yuborish";
-const HELP =
-  "YukSaroy: yuk logistikasi bozori.\n\n" +
-  "Qidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". " +
-  "Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\n" +
-  "Kirish: /start yuboring va telefon raqamingizni tasdiqlang. Saytda raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.";
-
 // Biz kontakt so'ragan chatlar; ro'yxatda yo'q kontakt = Mini App requestContact
 // ponytail: xotirada, bot qayta ishga tushsa eski keyboard kontakt ham "ilova" deb qabul qilinadi
 const asked = new Set<number>();
-const askContact = (ctx: Context, text: string) => {
+const askContact = (ctx: Context, lang: Lang, text: string) => {
   if (ctx.chat) asked.add(ctx.chat.id);
-  return ctx.reply(text, Markup.keyboard([Markup.button.contactRequest(CONTACT_BTN)]).oneTime().resize());
+  return ctx.reply(text, Markup.keyboard([Markup.button.contactRequest(T[lang].contactBtn)]).oneTime().resize());
 };
 
 bot.start(async (ctx) => {
   const payload = ctx.payload?.trim();
   if (payload?.startsWith('login_')) pendingToken.set(ctx.chat.id, payload.slice('login_'.length));
-  const kb = appKeyboard(langOf(ctx.from.language_code));
-  await ctx.reply('YukSaroy ga xush kelibsiz.', kb);
-  await askContact(ctx, 'Saytga kirish kodini shu yerda olasiz. Avval telefon raqamingizni tasdiqlang:');
+  const lang = langOf(ctx.from.language_code);
+  await ctx.reply(T[lang].welcome, appKeyboard(lang));
+  await askContact(ctx, lang, T[lang].askPhone);
 });
 
 bot.on('contact', async (ctx) => {
   const c = ctx.message.contact;
+  const lang = langOf(ctx.from.language_code);
   // Boshqa odamning kontaktini yuborib bo'lmaydi: raqam egasi shu foydalanuvchi bo'lishi shart
   if (c.user_id !== ctx.from.id) {
-    return ctx.reply("Iltimos, faqat o'z raqamingizni yuboring. Buning uchun pastdagi tugmadan foydalaning.");
+    return ctx.reply(T[lang].ownContactOnly);
   }
   const linkToken = pendingToken.get(ctx.chat.id);
   const fromApp = !asked.has(ctx.chat.id);
@@ -259,23 +286,21 @@ bot.on('contact', async (ctx) => {
     });
   } catch {
     // Tarmoq yoki API tushib qolgan: foydalanuvchi aybdor emas, tugma qoladi
-    return ctx.reply("Server javob bermadi. Bir daqiqadan keyin qayta urinib ko'ring.");
+    return ctx.reply(T[lang].down);
   }
   pendingToken.delete(ctx.chat.id);
   asked.delete(ctx.chat.id);
-  if (!res.ok) return ctx.reply("Xatolik yuz berdi. Birozdan keyin qayta urinib ko'ring.", Markup.removeKeyboard());
-  if (fromApp) return ctx.reply("Telefon bog'landi, ilovaga qayting.");
+  if (!res.ok) return ctx.reply(T[lang].linkFailed, Markup.removeKeyboard());
+  if (fromApp) return ctx.reply(T[lang].linkedApp);
 
   const r = (await res.json().catch(() => ({ codeSent: false }))) as { codeSent: boolean };
   await ctx.reply(
-    r.codeSent
-      ? "Raqam bog'landi. Kirish kodi keyingi xabarda keladi."
-      : "Raqam bog'landi. Endi saytda telefon raqamingizni kiriting, kod shu yerga keladi.",
+    r.codeSent ? T[lang].linkedCode : T[lang].linkedNoCode,
     Markup.removeKeyboard(),
   );
 });
 
-bot.command('help', (ctx) => ctx.reply(HELP));
+bot.command('help', (ctx) => ctx.reply(T[langOf(ctx.from.language_code)].help));
 bot.command('app', (ctx) => { const lang = langOf(ctx.from.language_code); return ctx.reply(T[lang].appHint, appKeyboard(lang)); });
 
 // /qidir matn: 'text' dan oldin ro'yxatga olinadi, aks holda umumiy matn ushlab qoladi
@@ -289,10 +314,11 @@ bot.command('qidir', (ctx) => {
 bot.on('text', (ctx) => {
   // Bir marta so'raladi va qulf bo'shatiladi: tashlab ketilgan kirish havolasi
   // shu chat uchun erkin qidiruvni butunlay o'chirib qo'yardi
-  if (pendingToken.has(ctx.chat.id)) { pendingToken.delete(ctx.chat.id); return askContact(ctx, 'Kirish uchun telefon raqamingizni tasdiqlang.'); }
+  const lang = langOf(ctx.from.language_code);
+  if (pendingToken.has(ctx.chat.id)) { pendingToken.delete(ctx.chat.id); return askContact(ctx, lang, T[lang].askPhoneLogin); }
   const q = ctx.message.text.trim();
-  if (q.startsWith('/')) return ctx.reply(HELP);
-  return search(ctx, q, langOf(ctx.from.language_code));
+  if (q.startsWith('/')) return ctx.reply(T[lang].help);
+  return search(ctx, q, lang);
 });
 
 bot.catch((err, ctx) => {
