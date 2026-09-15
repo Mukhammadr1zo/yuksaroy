@@ -3,10 +3,10 @@
     "nav": "Xarita",
     "open": "Xaritada ochish",
     "meta": {
-      "title": "Xarita: terminallar, shahobcha yo'llar, texnika va avtotransport",
-      "description": "O'zbekiston bo'ylab yuk terminallari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport e'lonlari bitta xaritada. Koridor, viloyat yoki yoningizdagi radius bo'yicha toping."
+      "title": "Xarita: terminallar, texnika va avtotransport",
+      "description": "O'zbekiston bo'ylab yuk terminallari (shahobcha yo'llar ham), temir yo'l texnikasi va avtotransport e'lonlari bitta xaritada. Koridor, viloyat yoki yoningizdagi radius bo'yicha toping."
     },
-    "aria": "Interaktiv xarita: terminallar, shahobcha yo'llar, texnika va avtotransport",
+    "aria": "Interaktiv xarita: terminallar, texnika va avtotransport",
     "zoomIn": "Yaqinlashtirish",
     "zoomOut": "Uzoqlashtirish",
     "search": {
@@ -16,7 +16,6 @@
     },
     "cat": {
       "terminal": "Terminal",
-      "siding": "Shahobcha yo'l",
       "equipment": "Texnika",
       "truck": "Avtotransport"
     },

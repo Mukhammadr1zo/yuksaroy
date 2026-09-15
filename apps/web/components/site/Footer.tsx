@@ -27,8 +27,8 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
           <h3 className="text-sm font-bold">{t('catalog.heading')}</h3>
           <ul className={`mt-3 space-y-2 text-sm ${muted}`}>
             <li><Link className={hover} href="/terminals">{nav('terminals')}</Link></li>
-            <li><Link className={hover} href="/sidings">{t('catalog.sidingsRegistry')}</Link></li>
-            <li><Link className={hover} href="/terminals?kind=SVX">{t('catalog.customsWarehouses')}</Link></li>
+            {/* SVX endi tur emas, xizmat: eski ?kind=SVX filtri jimgina e'tiborsiz qolardi */}
+            <li><Link className={hover} href="/terminals?service=SVX">{t('catalog.customsWarehouses')}</Link></li>
           </ul>
         </div>
         <div>

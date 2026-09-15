@@ -2,7 +2,7 @@
   "listing": {
     "rail": {
       "title": "Rail equipment",
-      "lead": "Shunting locomotives, electric locomotives and wagons: rent or sale. Prices are public, contacting the owner requires login."
+      "lead": "Shunting locomotives and wagons: rent or sale. Prices are public, contacting the owner requires login."
     },
     "road": {
       "title": "Road carriers",
@@ -11,7 +11,6 @@
     "tab": {
       "all": "All",
       "SHUNTING_LOCO": "Shunting loco",
-      "ELECTRIC_LOCO": "Electric loco",
       "WAGON": "Wagon"
     },
     "deal": {

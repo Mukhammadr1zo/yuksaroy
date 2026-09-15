@@ -45,10 +45,9 @@ export default async function ShopPage({ params }: Params) {
   // Xarita: MapView compact, /v1/map-objects.geojson mijozda tashkilot obyektlari kalitlari (kind:id) bo'yicha filtrlanadi
   const mapKeys = [
     ...terminals.filter((x) => x.lat != null && x.lng != null).map((x) => `terminal:${x.id}`),
-    ...o.sidings.filter((x) => x.lat != null && x.lng != null).map((x) => `siding:${x.id}`),
     ...listings.filter((x) => x.lat != null && x.lng != null).map((x) => `${x.kind === 'TRUCK' ? 'truck' : 'equipment'}:${x.id}`),
   ];
-  const empty = !about && !terminals.length && !listings.length && !o.sidings.length;
+  const empty = !about && !terminals.length && !listings.length;
 
   return (
     <>
@@ -87,27 +86,6 @@ export default async function ShopPage({ params }: Params) {
               <section>
                 <h2 className="text-lg font-bold">{t('listings')}</h2>
                 <div className="mt-3 grid gap-4 md:grid-cols-2">{listings.map((x) => <ListingCard key={x.id} l={x} />)}</div>
-              </section>
-            ) : null}
-            {o.sidings.length ? (
-              <section>
-                <h2 className="text-lg font-bold">{t('sidings')}</h2>
-                <div className="mt-3 overflow-x-auto rounded-card border border-line bg-white">
-                  <table className="w-full text-sm">
-                    <thead className="bg-sand text-left font-mono text-xs text-muted">
-                      <tr><th className="px-4 py-2">{t('sidingCols.no')}</th><th className="px-4 py-2">{t('sidingCols.station')}</th><th className="px-4 py-2 text-right">{t('sidingCols.length')}</th></tr>
-                    </thead>
-                    <tbody>
-                      {o.sidings.map((s) => (
-                        <tr key={s.id} className="border-t border-line/70">
-                          <td className="px-4 py-2 font-mono text-xs"><Link href={`/sidings/${s.id}`} className="text-navy underline decoration-dotted hover:text-teal-ink">{s.registryNo}</Link></td>
-                          <td className="px-4 py-2 font-semibold">{s.station?.nameUz ?? s.stationNameRaw}</td>
-                          <td className="px-4 py-2 text-right font-mono tabular-nums">{s.lengthM ? `${num(s.lengthM, lang)} m` : '·'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </section>
             ) : null}
             {empty ? <p className="text-muted">{t('none')}</p> : null}

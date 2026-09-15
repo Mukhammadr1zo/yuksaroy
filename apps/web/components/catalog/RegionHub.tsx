@@ -8,10 +8,10 @@ import { RegionChips } from '@/components/catalog/RegionChips';
 import { AuthOnly } from '@/components/site/AuthOnly';
 import { DashLink } from '@/components/site/DashLink';
 
-export type HubCat = 'terminals' | 'sidings' | 'equipment' | 'carriers';
-const CATS: HubCat[] = ['terminals', 'sidings', 'equipment', 'carriers'];
+export type HubCat = 'terminals' | 'equipment' | 'carriers';
+const CATS: HubCat[] = ['terminals', 'equipment', 'carriers'];
 /** /map sahifasidagi kategoriya kodi */
-export const MAP_CAT: Record<HubCat, string> = { terminals: 'terminal', sidings: 'siding', equipment: 'equipment', carriers: 'truck' };
+export const MAP_CAT: Record<HubCat, string> = { terminals: 'terminal', equipment: 'equipment', carriers: 'truck' };
 export const isRegion = (s: string): s is RegionCode => (REGIONS as readonly string[]).includes(s);
 export const HUB_PARAMS = () => REGIONS.map((code) => ({ code }));
 
@@ -23,7 +23,7 @@ export async function regionPolygon(code: RegionCode) {
 }
 
 /** Bo'sh holatdagi harakat: terminal egasi kabinetga, e'lon beruvchi formaga, reestr o'ziga. */
-const CTA: Record<HubCat, string> = { terminals: '/dashboard/terminals/new', sidings: '/sidings', equipment: '/dashboard/listings/new', carriers: '/dashboard/listings/new' };
+const CTA: Record<HubCat, string> = { terminals: '/dashboard/terminals/new', equipment: '/dashboard/listings/new', carriers: '/dashboard/listings/new' };
 
 /** Viloyat hubi: h1, lead, xarita, qo'shni viloyatlar, boshqa kategoriyalar, xaritada ochish, ro'yxat (children), pastda viloyat chiplari.
  *  count: jami, shown: ko'rsatilgani (50 dan ko'p bo'lsa filtrli katalogga havola). */

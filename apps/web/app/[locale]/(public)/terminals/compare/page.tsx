@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { REVIEW, distanceKm, type ServiceCode } from '@yuksaroy/domain';
 import { sapiOrNull } from '@/lib/server-api';
-import { hoursSummary, pricePer } from '@/lib/format';
+import { hoursSummary, pricePer, stationName} from '@/lib/format';
 import type { TerminalDetail } from '@/lib/types';
 import { parseIds } from '@/lib/compare';
 import { CompareTable, type CompareRow } from '@/components/compare/CompareTable';
@@ -37,7 +37,7 @@ export default async function TerminalsComparePage({ params, searchParams }: Pro
   const rows: CompareRow[] = [
     { label: t('row.kind'), values: v((x) => <span className="font-body">{tk(x.kind)}</span>) },
     { label: t('row.region'), values: v((x) => <span className="font-body">{x.regionCode && tr.has(x.regionCode) ? tr(x.regionCode) : none}</span>) },
-    { label: t('row.station'), values: v((x) => <span className="font-body">{x.station.nameUz}</span>) },
+    { label: t('row.station'), values: v((x) => <span className="font-body">{stationName(x)}</span>) },
     { label: t('row.hours'), values: v((x) => hoursSummary(x.hours, x.is24h, locale)) },
     ...(services.length ? [{ label: t('row.tariffs'), values: [], head: true } as CompareRow] : []),
     ...services.map((s) => ({ label: ts(s), values: v((x) => { const y = tariff(x, s); return y ? pricePer(y.priceTiyin, y.unit, locale) : none; }) })),

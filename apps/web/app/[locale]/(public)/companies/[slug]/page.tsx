@@ -28,15 +28,14 @@ export default async function CompanyPage({ params }: Params) {
   const lang = locale as SearchLang;
   const o = await sapiOrNull<CompanyDetail>(`/companies/${slug}`, 60);
   if (!o) notFound();
-  const [t, tk, tc] = await Promise.all([getTranslations('companies'), getTranslations('orgKind'), getTranslations('claim')]);
+  const [t, tk] = await Promise.all([getTranslations('companies'), getTranslations('orgKind')]);
   const tg = o.telegram ? o.telegram.replace(/^@|^https?:\/\/t\.me\//, '') : null;
   const site = o.website ? (o.website.startsWith('http') ? o.website : `https://${o.website}`) : null;
   const pins: Pin[] = [
     ...o.terminals.filter((x) => x.lat != null && x.lng != null).map((x) => ({ lat: x.lat!, lng: x.lng!, color: '#002352' })),
-    ...o.sidings.filter((x) => x.lat != null && x.lng != null).map((x) => ({ lat: x.lat!, lng: x.lng!, color: '#077F84' })),
     ...o.listings.filter((x) => x.lat != null && x.lng != null).map((x) => ({ lat: x.lat!, lng: x.lng!, color: '#FD7B03' })),
   ];
-  const tiles = (['terminals', 'sidings', 'listings'] as const).map((k) => [k, o.counts[k]] as const);
+  const tiles = (['terminals', 'listings'] as const).map((k) => [k, o.counts[k]] as const);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -67,26 +66,6 @@ export default async function CompanyPage({ params }: Params) {
           <section id="terminals">
             <h2 className="text-lg font-bold">{t('detail.terminals')}</h2>
             {o.terminals.length ? <div className="mt-3 grid gap-4">{o.terminals.map((x) => <TerminalCard key={x.id} t={x} />)}</div> : <p className="mt-2 text-sm text-muted">{t('detail.none')}</p>}
-          </section>
-          <section id="sidings">
-            <h2 className="text-lg font-bold">{t('detail.sidings')}</h2>
-            {o.sidings.length ? (
-              <div className="mt-3 overflow-x-auto rounded-card border border-line bg-white">
-                <table className="w-full text-sm">
-                  <thead className="bg-sand text-left font-mono text-xs text-muted"><tr><th className="px-4 py-2">{t('detail.sidingCols.no')}</th><th className="px-4 py-2">{t('detail.sidingCols.station')}</th><th className="px-4 py-2 text-right">{t('detail.sidingCols.length')}</th><th className="px-4 py-2 text-right">{t('detail.sidingCols.capacity')}</th></tr></thead>
-                  <tbody>
-                    {o.sidings.map((s) => (
-                      <tr key={s.id} className="border-t border-line/70">
-                        <td className="px-4 py-2 font-mono text-xs"><Link href={`/sidings/${s.id}`} className="text-navy underline decoration-dotted hover:text-teal-ink">{s.registryNo}</Link></td>
-                        <td className="px-4 py-2 font-semibold">{s.station?.nameUz ?? s.stationNameRaw}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{s.lengthM ? `${num(s.lengthM, lang)} m` : '·'}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{tc('wagons', { count: `${s.unloadCapacity} / ${s.loadCapacity}` })}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : <p className="mt-2 text-sm text-muted">{t('detail.none')}</p>}
           </section>
           <section id="listings">
             <h2 className="text-lg font-bold">{t('detail.listings')}</h2>

@@ -7,9 +7,32 @@ export type WeekHours = Partial<Record<WeekDay, [string, string][]>>;
 export interface Station { id: string; esrCode: string | null; nameUz: string; nameRu: string | null; rju: Rju; stationType: string | null; classRank: string | null; lat: number | null; lng: number | null }
 export interface CargoType { id: string; code: string; codeTo: string; name: string; nameUz: string | null; groupCode: string; groupName: string }
 
+/**
+ * Kartadagi temir yo'l qatori: shahobcha ham terminal, reestr raqamlari shu yerda.
+ * Faqat kind === 'RAIL' da to'ladi, avto terminalda null.
+ */
+export interface RailCard {
+  registryNo: number | null; lengthM: number | null; trackCount: number | null; capacityWagons: number | null;
+  loadCapacity: number; unloadCapacity: number; ownerNameRaw: string | null;
+  /** Mas'ul shaxs: ismi ochiq, raqami faqat kirgandan keyin (hasPhone taklif ko'rsatadi). */
+  contactName: string | null; hasPhone: boolean;
+}
+export interface RailPassport extends RailCard {
+  stationNameRaw: string | null; esrCode: string | null; rju: Rju | null; registryRef: string | null;
+  occupiedWagons: number | null; deadEndDistanceM: number | null; junctionSwitch: string | null; brakeShoes: number | null;
+  nogabarit: string | null; equipment: string | null;
+  loadNorm: string | null; unloadNorm: string | null; loadFront: string | null; unloadFront: string | null;
+  locoType: string | null; locoNote: string | null; processingHours: number | null;
+  contractNo: string | null; contractStart: string | null; contractEnd: string | null; contractState: string | null;
+  category: string | null; usageType: string | null; operStatus: string | null; note: string | null;
+  contactPhone: string | null;
+}
+
 export interface TerminalCard {
   id: string; slug: string; name: string; kind: TerminalKind; status: string; regionCode: string | null;
-  station: { esrCode: string | null; nameUz: string; rju: Rju };
+  /** Reestr shahobchasida stansiya bog'lanmagan bo'lishi mumkin: shunda stationNameRaw ishlatiladi. */
+  station: { esrCode: string | null; nameUz: string; rju: Rju } | null;
+  stationNameRaw: string | null; rail: RailCard | null;
   address: string | null; lat: number | null; lng: number | null; is24h: boolean; hours: WeekHours | null; photos: string[];
   /** O'rtacha baho: 3 tadan kam baho bo'lsa null (ratingCount qoladi). */
   ratingAvg: number | null; ratingCount: number; claimed: boolean; orgName: string | null; services: ServiceCode[]; fromPriceTiyin: number | null;
@@ -20,8 +43,9 @@ export interface TerminalCard {
 }
 export interface CardTariff { serviceCode: ServiceCode; priceTiyin: number; unit: TariffUnit; minTiyin: number | null }
 export interface Tariff { id: string; serviceCode: ServiceCode; cargoGroupCode: string | null; priceTiyin: number; unit: TariffUnit; minTiyin: number | null; validFrom: string; validTo: string | null; version: number; note: string | null }
-export interface TerminalDetail extends Omit<TerminalCard, 'station' | 'tariffs'> {
-  station: Station; description: string | null; phone: string | null; passport: Passport | null;
+export interface TerminalDetail extends Omit<TerminalCard, 'station' | 'tariffs' | 'rail'> {
+  station: Station | null; rail: RailPassport | null;
+  description: string | null; phone: string | null; passport: Passport | null;
   serviceDetails: { serviceCode: ServiceCode; leadTimeMin: number }[]; tariffs: Tariff[];
 }
 export interface Passport {
@@ -30,10 +54,24 @@ export interface Passport {
 }
 
 export interface Siding {
-  id: string; registryNo: number; regionCode: string | null; lat: number | null; lng: number | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null; stationNameRaw: string; esrCode: string | null; rju: Rju | null;
+  /** Terminal sahifasining manzili: shahobcha ham terminal. */
+  slug: string;
+  id: string; registryNo: number | null; regionCode: string | null; lat: number | null; lng: number | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null; stationNameRaw: string; esrCode: string | null; rju: Rju | null;
   lengthM: number | null; unloadCapacity: number; loadCapacity: number; claimStatus: ClaimStatus; owner: string | null;
   /** Egasi yuklagan rasmlar; da'vo tasdiqlanmaguncha bo'sh keladi. */
   photos: string[];
+  /**
+   * Texnik pasport (Taminot reestri). Mas'ul shaxs ismi va telefoni bu yerda yo'q:
+   * aloqa platforma orqali ketadi.
+   */
+  name: string | null; registryRef: string | null;
+  trackCount: number | null; capacityWagons: number | null; occupiedWagons: number | null;
+  deadEndDistanceM: number | null; junctionSwitch: string | null; brakeShoes: number | null;
+  nogabarit: string | null; equipment: string | null;
+  loadNorm: string | null; unloadNorm: string | null; loadFront: string | null; unloadFront: string | null;
+  locoType: string | null; locoNote: string | null; processingHours: number | null;
+  contractNo: string | null; contractStart: string | null; contractEnd: string | null; contractState: string | null;
+  category: string | null; usageType: string | null; status: string | null;
 }
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number; summary?: ListSummary }

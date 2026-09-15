@@ -23,8 +23,7 @@
       "lead": "Compare tariffs without calling, see a free window and book it, and find the act and invoice waiting in your cabinet at the end.",
       "facts": {
         "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
-        "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}",
-        "sidings": "{count, plural, one {# siding} other {# sidings}}"
+        "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}"
       },
       "cta": {
         "primary": "Browse terminals",
@@ -49,7 +48,7 @@
         },
         "registry": {
           "title": "One place: registry, equipment, trucks",
-          "body": "The sidings registry, shunting locomotive and wagon rental, road carriers for the last mile. Each with its owner's page."
+          "body": "The terminal and siding registry, shunting locomotive and wagon rental, road carriers from the terminal to the warehouse. Each with its owner's page."
         }
       },
       "roi": {

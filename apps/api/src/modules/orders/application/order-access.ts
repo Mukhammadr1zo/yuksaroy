@@ -2,6 +2,7 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../../catalog/domain/ports';
 import { ORG_REPOSITORY, type OrganizationRepository } from '../../organizations/domain/ports';
 import { CreateOrgUseCase } from '../../organizations/application/create-org.usecase';
+import { PlatformAdmin } from '../../organizations/application/platform-admin';
 import { PrismaService } from '../../../common/prisma.service';
 
 /** Buyurtmani kim ko'radi va kim o'zgartiradi: mijoz (o'z tashkiloti) va terminal (o'z obyekti). */
@@ -12,6 +13,7 @@ export class OrderAccess {
     @Inject(CATALOG_REPOSITORY) private readonly catalog: CatalogRepository,
     private readonly createOrg: CreateOrgUseCase,
     private readonly prisma: PrismaService,
+    private readonly admin: PlatformAdmin,
   ) {}
 
   /**
@@ -59,8 +61,12 @@ export class OrderAccess {
     if (!ids.includes(terminalId)) throw new ForbiddenException({ code: 'NOT_TERMINAL_STAFF' });
   }
 
-  async isAdmin(userId: string): Promise<boolean> {
-    const ms = await this.orgs.listForUser(userId);
-    return ms.some((m) => m.roles.includes('PLATFORM_ADMIN') || m.roles.includes('PLATFORM_OPERATOR'));
+  /**
+   * Platforma admini: bitta manba, PlatformAdmin. Ilgari bu yerda o'z tekshiruvi bor edi va u
+   * PLATFORM_ADMIN_PHONES ro'yxatini bilmasdi: telefon orqali admin bo'lgan odam hamma joyda
+   * admin edi, faqat buyurtma va hisob-faktura yo'llarida emas.
+   */
+  isAdmin(userId: string): Promise<boolean> {
+    return this.admin.isPlatformAdmin(userId);
   }
 }

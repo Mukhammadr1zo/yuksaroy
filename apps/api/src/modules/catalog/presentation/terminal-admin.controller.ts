@@ -11,10 +11,10 @@ import { UpsertTerminalUseCase } from '../application/upsert-terminal.usecase';
 import { PublishTariffUseCase } from '../application/publish-tariff.usecase';
 import { ClaimSidingUseCase } from '../application/claim-siding.usecase';
 import { TerminalAccess } from '../application/terminal-access';
-import { PlatformAdmin } from '../../organizations/application/platform-admin';
 import { ClaimDecideDto, ClaimSidingDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateSidingDto, UpdateTerminalDto } from './dto';
 import { pickIn } from './catalog.controller';
 import { publicSiding } from './mappers';
+import { PlatformAdminGuard } from '../../organizations/presentation/platform-admin.guard';
 
 /** Terminal kabineti va shahobcha claim: faqat kirgan foydalanuvchi; ruxsat use-case ichida (TerminalAccess), moderatsiya PlatformAdmin. */
 @ApiTags('catalog-admin')
@@ -29,7 +29,6 @@ export class TerminalAdminController {
     private readonly publishTariff: PublishTariffUseCase,
     private readonly claimSiding: ClaimSidingUseCase,
     private readonly access: TerminalAccess,
-    private readonly admin: PlatformAdmin,
     private readonly audit: AuditService,
     private readonly prisma: PrismaService,
   ) {}
@@ -61,8 +60,8 @@ export class TerminalAdminController {
   }
 
   @Post('terminals/:id/claim/decide')
+  @UseGuards(PlatformAdminGuard)
   async claimTerminalDecide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDecideDto) {
-    await this.admin.assertPlatformAdmin(userId);
     const t = await this.repo.decideTerminalClaim(id, dto.approve, new Date());
     if (!t) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
     await this.audit.log({ actorId: userId, action: 'terminal.claim.decide', entity: 'Terminal', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: t.claimOrgId } });
@@ -75,8 +74,8 @@ export class TerminalAdminController {
    * `pool=1`: ochiq ma'lumotdan yig'ilgan egasiz terminallar reestri (katalogda ko'rinmaydi, murojaat uchun).
    */
   @Get('admin/terminals')
+  @UseGuards(PlatformAdminGuard)
   async adminTerminals(@CurrentUserId() userId: string, @Query('claim') claim?: string, @Query('pool') pool?: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const filter = pool === '1'
       ? { owned: false as const, status: 'ANY' as const }
       : { claimStatus: pickIn(claim, CLAIM_STATUSES) ?? ('PENDING' as const), status: 'ANY' as const };
@@ -129,18 +128,21 @@ export class TerminalAdminController {
   }
 
   /**
-   * Reestr qidiruvi (faqat kirganlar uchun): egasiz shahobcha yo'l ochiq katalogda ko'rinmaydi,
-   * lekin egasi o'zinikini topib biriktira olishi kerak. Reestrdagi egasi nomi berilmaydi.
+   * Reestr qidiruvi (faqat kirganlar uchun): egasi o'zinikini topib biriktira olishi uchun.
+   * Da'vo qilish mumkin bo'lgan holatlar bo'yicha filtr: NONE va REJECTED.
+   * Ilgari bu yerda owned:false turardi, ya'ni ownerOrgId IS NULL. Da'vo rad etilganda
+   * ownerOrgId tozalanmaydi, shuning uchun rad etilgan yo'l qidiruvdan butunlay yo'qolardi
+   * va haqiqiy egasi uni boshqa hech qachon topa olmasdi. Reestrdagi egasi nomi berilmaydi.
    */
   @Get('sidings/registry')
   async registry(@Query('q') q?: string, @Query('region') region?: string, @Query('station') station?: string) {
     const text = q?.trim();
     if (!text && !region && !station) return { items: [], total: 0, page: 1, limit: 20 };
     const r = await this.repo.listSidings(
-      { q: text || undefined, region: pickIn(region, REGIONS), stationId: station || undefined, owned: false },
+      { q: text || undefined, region: pickIn(region, REGIONS), stationId: station || undefined, claimStatus: ['NONE', 'REJECTED'] },
       1, 20,
     );
-    return { ...r, items: r.items.map(publicSiding) };
+    return { ...r, items: r.items.map((x) => publicSiding(x)) };
   }
 
   @Post('sidings/:id/claim')
@@ -166,12 +168,12 @@ export class TerminalAdminController {
 
   /** Moderatsiya: da'vo tasdiqlanadi yoki rad etiladi (sabab faqat auditda). */
   @Post('sidings/:id/claim/decide')
+  @UseGuards(PlatformAdminGuard)
   async claimDecide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDecideDto) {
-    await this.admin.assertPlatformAdmin(userId);
     const s = await this.repo.decideSidingClaim(id, dto.approve);
     if (!s) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
     await this.audit.log({ actorId: userId, action: 'siding.claim.decide', entity: 'Siding', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: s.ownerOrgId } });
-    this.notifyClaim(s.ownerOrgId, `#${s.registryNo} · ${s.stationNameRaw}`, dto.approve, '/dashboard/sidings');
+    this.notifyClaim(s.ownerOrgId, `#${s.registryNo} · ${s.stationNameRaw}`, dto.approve, '/dashboard/objects');
     return s;
   }
 
@@ -182,8 +184,8 @@ export class TerminalAdminController {
 
   /** Moderatsiya navbati: default PENDING; egasi nomi (ownerOrgName) admin uchun ochiq. */
   @Get('admin/sidings')
+  @UseGuards(PlatformAdminGuard)
   async adminSidings(@CurrentUserId() userId: string, @Query('claim') claim?: string) {
-    await this.admin.assertPlatformAdmin(userId);
     return this.repo.listSidings({ claimStatus: pickIn(claim, CLAIM_STATUSES) ?? 'PENDING' }, 1, 200);
   }
 }

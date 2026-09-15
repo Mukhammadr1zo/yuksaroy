@@ -9,20 +9,16 @@
     },
     "terminals": {
       "title": "Freight terminals in Uzbekistan · YukSaroy",
-      "description": "Looking for a freight terminal or freight yard? Address, working hours, services, tariffs and free spots. Search Tashkent and the regions, contact the owner."
+      "description": "Looking for a freight terminal, a yard or a rail siding? Address, working hours, services, tariffs and free spots. Search Tashkent and the regions, contact the owner."
     },
     "terminal": {
       "title": "{name} · YukSaroy",
       "description": "{kind}, {station} station. {hours}.",
       "notFound": "Terminal not found"
     },
-    "sidings": {
-      "title": "Private sidings registry in Uzbekistan · YukSaroy",
-      "description": "Over 1,300 private railway sidings: station, length, loading and unloading capacity. Find your siding and claim it in your cabinet."
-    },
     "texnika": {
       "title": "Locomotives and wagons for rent or sale · YukSaroy",
-      "description": "Listings for shunting locomotives, electric locomotives and wagons. Price, year, condition and the owner's phone on one page. No middlemen."
+      "description": "Listings for shunting locomotives and wagons. Price, year, condition and the owner's phone on one page. No middlemen."
     },
     "avtotransport": {
       "title": "Trucks and road carriers in Uzbekistan · YukSaroy",
@@ -35,7 +31,6 @@
   },
   "nav": {
     "terminals": "Terminals",
-    "sidings": "Private sidings",
     "cabinet": "Dashboard",
     "login": "Log in",
     "aria": {
@@ -47,7 +42,7 @@
       "workspace": "Workspace",
       "profile": "Profile",
       "org": "Organization",
-      "admin": "Moderation",
+      "admin": "Admin panel",
       "logout": "Log out"
     },
     "add": {
@@ -59,8 +54,8 @@
         "body": "Services, tariffs, hours, spots"
       },
       "siding": {
-        "title": "Private siding",
-        "body": "Find yours in the registry and attach it"
+        "title": "Attach my siding",
+        "body": "Find it in the registry and manage it as your terminal"
       },
       "equipment": {
         "title": "Equipment listing",
@@ -90,7 +85,6 @@
     "tagline": "Freight logistics marketplace: terminal services, private sidings, rail equipment and road transport.",
     "catalog": {
       "heading": "Catalog",
-      "sidingsRegistry": "Private sidings registry",
       "customsWarehouses": "Bonded warehouses"
     },
     "platform": {
@@ -119,17 +113,14 @@
     "browse": {
       "heading": "Or browse by service",
       "terminalServices": "Terminal services",
-      "siding": "Private siding",
       "railEquipment": "Locomotives and wagons",
       "truck": "Truck"
     },
     "door": {
       "shipper": "I am shipping cargo",
-      "owner": "I have a facility or equipment",
-      "registry": "Open registry"
+      "owner": "I have a facility or equipment"
     },
     "stat": {
-      "sidings": "private sidings",
       "terminals": "terminals",
       "serviceTypes": "service types"
     },
@@ -139,7 +130,8 @@
         "aria": "Map legend",
         "rail": "Railway",
         "road": "Road",
-        "terminal": "Terminal"
+        "terminal": "Terminal",
+        "siding": "Siding"
       }
     }
   },
@@ -148,19 +140,15 @@
     "lead": "Every facility belongs to its owner. The owner lists it and writes the services and terms themselves.",
     "terminals": {
       "label": "Terminal and freight yard services",
-      "note": "Loading, unloading, weighbridge, storage, bonded warehouse, containers"
-    },
-    "sidings": {
-      "note": "Private sidings: loading, lease, sale",
-      "label": "Private sidings"
+      "note": "Loading, unloading, weighbridge, storage, containers. Rail sidings are here too."
     },
     "rail": {
       "label": "Rail equipment",
-      "note": "Shunting locomotives, electric locomotives, wagons: purchase or lease"
+      "note": "Shunting locomotives and wagons: purchase or lease"
     },
     "road": {
       "label": "Road transport",
-      "note": "Trucks and carriers, last mile"
+      "note": "Trucks and carriers: delivery from the terminal to the warehouse"
     },
     "container": {
       "label": "Container yards",
@@ -168,9 +156,6 @@
     },
     "services": {
       "heading": "Search by service"
-    },
-    "siding": {
-      "note": "Private sidings: loading, rent, sale"
     }
   },
   "how": {
@@ -203,7 +188,7 @@
     }
   },
   "terminals": {
-    "lead": "Freight yards, container terminals, logistics centres and bonded warehouses: with a facility profile and published rates.",
+    "lead": "Freight terminals, container and cargo yards, rail sidings: with a facility profile and published rates.",
     "count": "{count} facilities",
     "empty": {
       "title": "No terminals found for this filter.",
@@ -297,7 +282,6 @@
       "typeClass": "Type / class",
       "coords": "Coordinates"
     },
-    "sidingsLink": "{count} private sidings at this station →",
     "slots": {
       "heading": "Today's spots",
       "free": "{count} free",
@@ -305,43 +289,22 @@
       "book": "Book a spot"
     }
   },
-  "sidings": {
-    "lead": "Private sidings added by their owners: location, length, loading and unloading capacity. If a siding is yours, attach it from your dashboard.",
-    "count": "{count, number} sidings",
-    "search": {
-      "placeholder": "Location name or code"
-    },
-    "col": {
-      "no": "№",
-      "location": "Location",
-      "length": "Length",
-      "capacity": "Unloading / loading",
-      "owner": "Owner"
-    },
-    "owner": {
-      "pending": "pending verification",
-      "unclaimed": "owner not confirmed, this is mine"
-    },
-    "empty": "Nothing found.",
-    "emptyOwner": "No owner has added a siding yet.",
-    "emptyOwnerCta": "Attach a siding"
-  },
   "texnika": {
-    "lead": "Shunting locomotives, electric locomotives and wagons. The owner posts the listing for sale or rent and sets the terms himself.",
+    "lead": "Shunting locomotives and wagons. The owner lists equipment for sale or rent and sets the terms.",
     "example": {
       "1": "Shunting locomotive: sale, or hourly and daily rent",
-      "2": "Electric locomotive: rent for shunting work",
+      "2": "Wagon fleet: for long-term rent",
       "3": "Covered wagon, gondola, flat wagon, tank wagon",
       "4": "Servicing and repair offers"
     }
   },
   "avtotransport": {
-    "lead": "Trucks and road carriers. Last mile from the terminal to the warehouse, or haulage over the full route.",
+    "lead": "Trucks and road carriers. Delivery from the terminal to the warehouse, or haulage over the full route.",
     "example": {
       "1": "Tilt, reefer, tipper, container truck",
       "2": "Available trucks nearby",
       "3": "Carriers on regular routes",
-      "4": "Last mile: terminal to warehouse"
+      "4": "Delivery from the terminal to the warehouse"
     }
   },
   "empty": {
@@ -413,7 +376,7 @@
     "requestCode": "Get code",
     "link": {
       "title": "This number is not linked to the bot yet.",
-      "body": "Open the bot, tap “Send my phone number”, the code arrives there.",
+      "body": "Open the bot, tap 'Send my phone number', the code arrives there.",
       "openBot": "Open the bot"
     },
     "code": {
@@ -474,15 +437,6 @@
     },
     "distance": "{km} km"
   },
-  "sidingMap": {
-    "aria": "Private siding layout at {station} station: {count} tracks",
-    "mainTrack": "{station}, main track",
-    "legend": {
-      "approved": "owner confirmed",
-      "registry": "registry (owner hidden)"
-    },
-    "more": "… {count} more in the list"
-  },
   "common": {
     "price": "Price",
     "station": "Station",
@@ -533,14 +487,13 @@
     "STORAGE": "Warehouse storage",
     "SVX": "Bonded warehouse",
     "CONTAINER": "Container handling",
-    "LAST_MILE": "Last mile (truck)",
+    "LAST_MILE": "Truck delivery",
     "SHUNTING": "Shunting (locomotive)"
   },
   "kind": {
-    "YARD": "Freight yard",
-    "CONTAINER": "Container terminal",
-    "LC": "Logistics center",
-    "SVX": "Bonded warehouse"
+    "RAIL": "Rail freight terminal",
+    "ROAD": "Road freight terminal",
+    "MULTI": "Road and rail terminal"
   },
   "rju": {
     "TAS": "Tashkent",

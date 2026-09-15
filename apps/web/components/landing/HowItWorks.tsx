@@ -35,7 +35,8 @@ export async function Steps() {
   );
 }
 
-const COUNTS = ['terminals', 'sidings', 'listings', 'companies', 'freeSlotsToday'] as const;
+// terminals ichida shahobcha yo'llar ham bor: alohida "shahobcha" raqami ko'rsatilmaydi
+const COUNTS = ['terminals', 'listings', 'companies', 'freeSlotsToday'] as const;
 
 /** Platforma raqamlari: faqat /stats dagi real sanoqlar, nol bo'lganlari chizilmaydi. Hammasi nol bo'lsa bo'lim yo'q. */
 export async function Numbers({ stats }: { stats: Stats | null }) {

@@ -23,8 +23,9 @@ const terminalInclude = (now: Date) => ({
   tariffs: { where: currentTariff(now), orderBy: [{ serviceCode: 'asc' as const }, { cargoGroupCode: 'asc' as const }] },
 });
 type TerminalRow = Prisma.TerminalGetPayload<{ include: ReturnType<typeof terminalInclude> }>;
-const sidingInclude = { station: { select: { id: true, esrCode: true, nameUz: true, rju: true } }, ownerOrg: { select: { name: true } } } as const;
-type SidingRow = Prisma.SidingGetPayload<{ include: typeof sidingInclude }>;
+// Shahobcha yo'l = temir yo'l terminali (kind RAIL); pasport ustunlari Terminal ichida.
+const railInclude = { station: { select: { id: true, esrCode: true, nameUz: true, rju: true } }, org: { select: { name: true } } } as const;
+type RailRow = Prisma.TerminalGetPayload<{ include: typeof railInclude }>;
 
 const toTariff = (t: Prisma.TariffGetPayload<object>): TariffRecord => ({
   id: t.id, terminalId: t.terminalId, serviceCode: t.serviceCode, cargoGroupCode: t.cargoGroupCode, version: t.version,
@@ -39,12 +40,50 @@ const toTerminal = (t: TerminalRow): TerminalRecord => ({
   claimStatus: t.claimStatus, claimOrgId: t.claimOrgId,
   services: t.services.map((s) => ({ serviceCode: s.serviceCode, isEnabled: s.isEnabled, leadTimeMin: s.leadTimeMin })),
   tariffs: t.tariffs.map(toTariff),
+  // Temir yo'l pasporti faqat RAIL turida to'ladi; avto terminalda null
+  rail: t.kind === 'RAIL' ? {
+    registryNo: t.registryNo, stationNameRaw: t.stationNameRaw, esrCode: t.esrCode, rju: t.rju,
+    ownerNameRaw: t.ownerNameRaw, lengthM: t.lengthM, loadCapacity: t.loadCapacity, unloadCapacity: t.unloadCapacity,
+    ...passportOf(t),
+  } : null,
 });
-const toSiding = (s: SidingRow): SidingRecord => ({
-  id: s.id, registryNo: s.registryNo, stationId: s.stationId, station: s.station, stationNameRaw: s.stationNameRaw, esrCode: s.esrCode, rju: s.rju,
-  regionCode: s.regionCode, lat: s.lat, lng: s.lng,
-  ownerNameRaw: s.ownerNameRaw, ownerOrgId: s.ownerOrgId, ownerOrgName: s.ownerOrg?.name ?? null, claimStatus: s.claimStatus, claimedAt: s.claimedAt,
+
+/** Terminal qatoridan texnik pasport maydonlari (temir yo'lda to'la, avtoda bo'sh). */
+const passportOf = (t: {
+  name: string | null; registryRef: string | null; trackCount: number | null; capacityWagons: number | null;
+  occupiedWagons: number | null; deadEndDistanceM: number | null; junctionSwitch: string | null; brakeShoes: number | null;
+  nogabarit: string | null; equipment: string | null; loadNorm: string | null; unloadNorm: string | null;
+  loadFront: string | null; unloadFront: string | null; locoType: string | null; locoNote: string | null;
+  processingHours: number | null; contractNo: string | null; contractStart: Date | null; contractEnd: Date | null;
+  contractState: string | null; category: string | null; usageType: string | null; operStatus: string | null;
+  note: string | null; contactName: string | null; contactPhone: string | null;
+}) => ({
+  name: t.name, registryRef: t.registryRef, trackCount: t.trackCount, capacityWagons: t.capacityWagons,
+  occupiedWagons: t.occupiedWagons, deadEndDistanceM: t.deadEndDistanceM, junctionSwitch: t.junctionSwitch,
+  brakeShoes: t.brakeShoes, nogabarit: t.nogabarit, equipment: t.equipment,
+  loadNorm: t.loadNorm, unloadNorm: t.unloadNorm, loadFront: t.loadFront, unloadFront: t.unloadFront,
+  locoType: t.locoType, locoNote: t.locoNote, processingHours: t.processingHours,
+  contractNo: t.contractNo, contractStart: t.contractStart, contractEnd: t.contractEnd,
+  contractState: t.contractState, category: t.category, usageType: t.usageType,
+  status: t.operStatus, note: t.note, contactName: t.contactName, contactPhone: t.contactPhone,
+});
+const toSiding = (s: RailRow): SidingRecord => ({
+  id: s.id, registryNo: s.registryNo, stationId: s.stationId, station: s.station, stationNameRaw: s.stationNameRaw ?? '', esrCode: s.esrCode, rju: s.rju,
+  regionCode: s.regionCode, lat: s.lat, lng: s.lng, slug: s.slug,
+  ownerNameRaw: s.ownerNameRaw ?? '', ownerOrgId: s.orgId, ownerOrgName: s.org?.name ?? null, claimStatus: s.claimStatus, claimedAt: s.claimedAt,
   lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity, photos: s.photos,
+  // Texnik pasport (Taminot reestridan), mas'ul shaxs bilan birga.
+  // Telefonni ochiq javobga chiqarish/chiqarmaslikni mapper hal qiladi (publicSiding/publicTerminal).
+  name: s.name, registryRef: s.registryRef, trackCount: s.trackCount,
+  capacityWagons: s.capacityWagons, occupiedWagons: s.occupiedWagons,
+  deadEndDistanceM: s.deadEndDistanceM, junctionSwitch: s.junctionSwitch, brakeShoes: s.brakeShoes,
+  nogabarit: s.nogabarit, equipment: s.equipment,
+  loadNorm: s.loadNorm, unloadNorm: s.unloadNorm, loadFront: s.loadFront, unloadFront: s.unloadFront,
+  locoType: s.locoType, locoNote: s.locoNote, processingHours: s.processingHours,
+  contractNo: s.contractNo, contractStart: s.contractStart, contractEnd: s.contractEnd,
+  contractState: s.contractState, category: s.category, usageType: s.usageType,
+  status: s.operStatus, note: s.note,
+  contactName: s.contactName, contactPhone: s.contactPhone,
 });
 const json = (v: unknown) => (v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue));
 /** Ochiq e'lon: ACTIVE va muddati o'tmagan. */
@@ -52,7 +91,8 @@ export const activeListing = (now: Date): Prisma.ListingWhereInput => ({ status:
 /** Ochiq kompaniya: tasdiqlangan yoki platformada kamida bitta faol obyekti bor. */
 export const visibleCompany = (now: Date): Prisma.OrganizationWhereInput => ({
   kind: { not: 'PLATFORM' },
-  OR: [{ kycStatus: 'VERIFIED' }, { terminals: { some: { status: 'ACTIVE' } } }, { listings: { some: activeListing(now) } }, { sidings: { some: { claimStatus: 'APPROVED' } } }],
+  // Shahobcha ham terminal bo'lgani uchun alohida shart kerak emas: da'vosi tasdiqlangani ham shu yerga kiradi
+  OR: [{ kycStatus: 'VERIFIED' }, { terminals: { some: { OR: [{ status: 'ACTIVE' }, { claimStatus: 'APPROVED' }] } } }, { listings: { some: activeListing(now) } }],
 });
 
 @Injectable()
@@ -78,29 +118,60 @@ export class PrismaCatalogRepository implements CatalogRepository {
   findCargoTypeByCode(code: string) { return this.prisma.cargoType.findUnique({ where: { code } }); }
 
   // ── terminal ──
-  async listTerminals(f: TerminalFilter, now: Date) {
+  /** Filtr shartlari: ro'yxat ham, sanoq ham shu bitta manbadan quriladi. */
+  private terminalWhere(f: TerminalFilter): Prisma.TerminalWhereInput {
     const q = f.q ? apos(f.q) : undefined;
     // Bo'sh ro'yxat = filtr yo'q
     const regions = f.region === undefined ? [] : ([] as string[]).concat(f.region);
     const services = f.service === undefined ? [] : ([] as ServiceCode[]).concat(f.service);
-    const rows = await this.prisma.terminal.findMany({
-      where: {
-        status: f.status === 'ANY' ? undefined : (f.status ?? 'ACTIVE'),
-        stationId: f.stationId,
-        station: f.stationEsr ? { esrCode: f.stationEsr } : f.rju ? { rju: f.rju } : undefined,
-        kind: f.kind,
-        orgId: f.orgIds ? { in: f.orgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
-        claimStatus: f.claimStatus,
+    return {
+      status: f.status === 'ANY' ? undefined : (f.status ?? 'ACTIVE'),
+      stationId: f.stationId,
+      station: f.stationEsr ? { esrCode: f.stationEsr } : f.rju ? { rju: f.rju } : undefined,
+      kind: f.kind,
+      orgId: f.orgIds ? { in: f.orgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
+      claimStatus: f.claimStatus,
+      regionCode: regions.length ? { in: regions } : undefined,
+      // Radius bo'yicha qidiruvda avval to'rtburchak bilan qisqartiramiz, aniq masofa keyin
+      ...(f.near ? bbox(f.near) : {}),
+      // Hamma OR shartlari AND ichida: bitta obyektda ikkita OR kaliti bo'lsa biri ikkinchisini yeb qo'yadi
+      AND: [
         // Har bir so'ralgan xizmat yoqilgan bo'lishi shart
-        AND: services.map((s) => ({ services: { some: { serviceCode: s, isEnabled: true } } })),
-        regionCode: regions.length ? { in: regions } : undefined,
-        // Radius bo'yicha qidiruvda avval to'rtburchak bilan qisqartiramiz, aniq masofa keyin
-        ...(f.near ? bbox(f.near) : {}),
-        OR: q ? [{ name: ci(q) }, { address: ci(q) }, { station: { nameUz: ci(q) } }] : undefined,
-      },
+        ...services.map((s) => ({ services: { some: { serviceCode: s, isEnabled: true } } })),
+        // Ochiq katalog: egasi bor obyekt yoki reestrdan kelgan temir yo'l terminali
+        ...(f.publicCatalog ? [{ OR: [{ orgId: { not: null } }, { kind: 'RAIL' as const }] }] : []),
+        ...(q ? [{ OR: [{ name: ci(q) }, { address: ci(q) }, { station: { nameUz: ci(q) } }, { stationNameRaw: ci(q) }] }] : []),
+      ],
+    };
+  }
+
+  countTerminals(f: TerminalFilter) {
+    return this.prisma.terminal.count({ where: this.terminalWhere(f) });
+  }
+
+  async listTerminals(f: TerminalFilter, now: Date) {
+    // Sukut tartib: egasi bor obyektlar oldinda (reestr qatori ulardan keyin), keyin baho va nom.
+    // Ilgari bu saralash xotirada qilinardi va faqat birinchi 200 qatorga ta'sir qilardi.
+    const orderBy: Prisma.TerminalOrderByWithRelationInput[] =
+      f.sort === 'name' ? [{ name: 'asc' }, { id: 'asc' }]
+      : f.sort === 'rating' ? [{ ratingAvg: 'desc' }, { name: 'asc' }, { id: 'asc' }]
+      : f.sort === 'default' ? [{ orgId: { sort: 'desc', nulls: 'last' } }, { ratingAvg: 'desc' }, { name: 'asc' }, { id: 'asc' }]
+      : [{ ratingAvg: 'desc' }, { name: 'asc' }, { id: 'asc' }];
+    // Oxirgi kalit `id`: reestr qatorlarining ko'pi bir xil baho va egasiz, ya'ni tartib noaniq bo'lardi
+    // va OFFSET bilan sahifalaganda bitta obyekt ikki sahifada yoki umuman ko'rinmay qolardi.
+    // `take` berilsa baza bo'ladi; berilmasa chaqiruvchi kichik to'plam so'ragan (egasi bo'yicha, xarita, hisob-kitob).
+    // ponytail: sahifasiz chaqiruvlarda 500 chegara; ular hammasi `owned`/`orgIds` bilan keladi va
+    // bitta tashkilotda yuzlab obyekt bo'lmaydi. Ochiq katalog esa har doim `take` bilan so'raydi.
+    // Radius berilganda chegara yo'q: to'rtburchak to'plamni allaqachon cheklaydi va
+    // geoNear radiusni 300 km bilan kesadi, 500 chegarasi esa katta radiusda qatorlarni yo'qotardi.
+    const take = f.take ?? (f.near ? undefined : 500);
+    const skip = f.skip ?? 0;
+    const rows = await this.prisma.terminal.findMany({
+      where: this.terminalWhere(f),
       include: terminalInclude(now),
-      orderBy: [{ ratingAvg: 'desc' }, { name: 'asc' }],
-      take: 200, // ponytail: F1 da ≤ 50 obyekt; kursor pagination 20+ terminal bo'lganda
+      orderBy,
+      skip,
+      take,
     });
     const near = f.near;
     return rows
@@ -192,44 +263,69 @@ export class PrismaCatalogRepository implements CatalogRepository {
     }
   }
 
-  // ── shahobcha ──
+  // ── shahobcha (temir yo'l terminali) ──
+  // Shahobcha yo'l endi alohida jadval emas: u Terminal, turi RAIL. Eski /sidings
+  // manzillari ishlashda davom etadi, shunchaki manba Terminal jadvali.
   async listSidings(f: SidingFilter, page: number, limit: number): Promise<Page<SidingRecord>> {
     const q = f.q ? apos(f.q) : undefined;
-    const where: Prisma.SidingWhereInput = {
+    const where: Prisma.TerminalWhereInput = {
+      kind: 'RAIL',
+      // Ochiq ro'yxat faqat ACTIVE: admin yashirgan (HIDDEN) yo'l ilgari ham ro'yxatda, ham sahifasida ochiq qolardi.
+      // Egasi o'z kabinetida ko'radi, u yerda ownerOrgIds bilan alohida so'rov ketadi.
+      status: f.ownerOrgIds ? { not: 'DRAFT' } : 'ACTIVE',
       stationId: f.stationId,
       esrCode: f.stationEsr,
       rju: f.rju,
-      ownerOrgId: f.ownerOrgIds ? { in: f.ownerOrgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
-      claimStatus: f.claimStatus,
+      orgId: f.ownerOrgIds ? undefined : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
+      claimStatus: Array.isArray(f.claimStatus) ? { in: f.claimStatus } : f.claimStatus,
       regionCode: f.region,
       ...(f.near ? bbox(f.near) : {}),
-      OR: q ? [{ stationNameRaw: ci(q) }, { station: { nameUz: ci(q) } }, { esrCode: { startsWith: q } }] : undefined,
+      // Kabinet ro'yxati: egalik tasdiqlanganlar (orgId) ham, hali hal bo'lmagan da'vo (claimOrgId) ham.
+      // Faqat orgId ga qaralsa, da'vo yuborgan odam o'z kabinetida hech narsa ko'rmasdi.
+      AND: f.ownerOrgIds ? [{ OR: [{ orgId: { in: f.ownerOrgIds } }, { claimOrgId: { in: f.ownerOrgIds } }] }] : undefined,
+      OR: q ? [{ name: ci(q) }, { stationNameRaw: ci(q) }, { station: { nameUz: ci(q) } }, { esrCode: { startsWith: q } }] : undefined,
     };
     const [total, rows] = await this.prisma.$transaction([
-      this.prisma.siding.count({ where }),
-      this.prisma.siding.findMany({ where, include: sidingInclude, orderBy: [{ rju: 'asc' }, { stationNameRaw: 'asc' }, { registryNo: 'asc' }], skip: (page - 1) * limit, take: limit }),
+      this.prisma.terminal.count({ where }),
+      this.prisma.terminal.findMany({
+        where, include: railInclude,
+        orderBy: [{ rju: 'asc' }, { stationNameRaw: 'asc' }, { name: 'asc' }],
+        skip: (page - 1) * limit, take: limit,
+      }),
     ]);
     return { items: rows.map(toSiding), total, page, limit };
   }
-  async findSidingById(id: string) {
-    const s = await this.prisma.siding.findUnique({ where: { id }, include: sidingInclude });
+  /** Ochiq tafsilot: ro'yxat kabi faqat ACTIVE (admin yashirgan yo'l pasporti ochiq qolmasin). */
+  async findSidingById(id: string, publicOnly = false) {
+    const s = await this.prisma.terminal.findFirst({ where: { id, kind: 'RAIL', ...(publicOnly ? { status: 'ACTIVE' as const } : {}) }, include: railInclude });
     return s ? toSiding(s) : null;
   }
-  async claimSiding(id: string, orgId: string, now: Date) {
-    const r = await this.prisma.siding.updateMany({
-      where: { id, claimStatus: { in: ['NONE', 'REJECTED'] } },
-      data: { ownerOrgId: orgId, claimStatus: 'PENDING', claimedAt: now },
+  // claimedAt faqat TASDIQLANGANDA qo'yiladi: u "egasi bor" degani va ochiq sahifa shunga qarab
+  // pasport, tarif va bron bo'limlarini chizadi. Ilgari u PENDING da qo'yilib, rad etilganda ham qolib ketardi.
+  async claimSiding(id: string, orgId: string, _now: Date) {
+    const r = await this.prisma.terminal.updateMany({
+      where: { id, kind: 'RAIL', orgId: null, claimStatus: { in: ['NONE', 'REJECTED'] } },
+      data: { claimOrgId: orgId, claimStatus: 'PENDING' },
     });
     if (r.count === 0) throw new SidingClaimedError();
     return (await this.findSidingById(id))!;
   }
   async decideSidingClaim(id: string, approve: boolean) {
-    const r = await this.prisma.siding.updateMany({ where: { id, claimStatus: 'PENDING' }, data: { claimStatus: approve ? 'APPROVED' : 'REJECTED' } });
-    return r.count === 0 ? null : this.findSidingById(id);
+    // Tasdiqlansa da'vo qilgan tashkilot haqiqiy egaga aylanadi
+    const row = await this.prisma.terminal.findFirst({ where: { id, kind: 'RAIL', claimStatus: 'PENDING' }, select: { claimOrgId: true } });
+    if (!row) return null;
+    await this.prisma.terminal.update({
+      where: { id },
+      data: approve
+        ? { claimStatus: 'APPROVED', orgId: row.claimOrgId, claimedAt: new Date() }
+        // claimOrgId saqlanadi: xabar shu tashkilotga ketadi va keyin qayta da'vo qilsa tarixi ko'rinadi
+        : { claimStatus: 'REJECTED', claimedAt: null },
+    });
+    return this.findSidingById(id);
   }
   async updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }) {
     // Egalik tekshiruvi shart qatorida: alohida o'qib keyin yozilsa, oradagi vaqtda egasi o'zgarishi mumkin
-    const r = await this.prisma.siding.updateMany({ where: { id, claimStatus: 'APPROVED', ownerOrgId: { in: orgIds } }, data });
+    const r = await this.prisma.terminal.updateMany({ where: { id, kind: 'RAIL', claimStatus: 'APPROVED', orgId: { in: orgIds } }, data });
     return r.count === 0 ? null : this.findSidingById(id);
   }
 
@@ -240,10 +336,19 @@ export class PrismaCatalogRepository implements CatalogRepository {
   async mapObjects() {
     const [terminals, sidingGroups] = await Promise.all([
       this.prisma.terminal.findMany({
+        // Egasi bor hamma terminal o'z nuqtasi bilan (temir yo'l ham): egasi qo'shgan obyekt aniq joyda turadi
         where: { status: 'ACTIVE', orgId: { not: null }, lat: { not: null }, lng: { not: null } },
         select: { id: true, slug: true, name: true, kind: true, lat: true, lng: true },
       }),
-      this.prisma.siding.groupBy({ by: ['stationId', 'regionCode'], where: { stationId: { not: null }, ownerOrgId: { not: null } }, _count: { _all: true } }),
+      // Temir yo'l terminallari (shahobchalar) stansiya nuqtasida to'planadi; egasiz reestr qatorlari ham
+      // Stansiya bo'yicha to'planadiganlar: yuqorida o'z nuqtasini OLMAGANLAR, ya'ni egasiz
+      // yoki koordinatasi yo'q qatorlar. Ikkala shart ham kerak: faqat "egasiz" desak,
+      // tasdiqlangan lekin koordinatasiz shahobcha xaritadan butunlay yo'qolardi.
+      this.prisma.terminal.groupBy({
+        by: ['stationId', 'regionCode'],
+        where: { kind: 'RAIL', stationId: { not: null }, status: 'ACTIVE', OR: [{ orgId: null }, { lat: null }, { lng: null }] },
+        _count: { _all: true },
+      }),
     ]);
     // Stansiya bo'yicha yig'indi; viloyat kodi birinchi bo'sh bo'lmagani (bir stansiya odatda bitta viloyatda).
     const byStation = new Map<string, { count: number; regionCode: string | null }>();
@@ -268,10 +373,31 @@ export class PrismaCatalogRepository implements CatalogRepository {
     return { terminals, sidings };
   }
 
+  /** Xaritadagi stansiya qatlami: faqat rasmiy ro'yxatdagi va koordinatasi bor qatorlar. */
+  async listedStations() {
+    const rows = await this.prisma.station.findMany({
+      where: { isListed: true, lat: { not: null }, lng: { not: null } },
+      select: {
+        id: true, esrCode: true, nameUz: true, nameRu: true, nameEn: true, rju: true,
+        lat: true, lng: true, _count: { select: { terminals: { where: { kind: 'RAIL' } } } },
+      },
+      orderBy: { nameUz: 'asc' },
+    });
+    return rows.map((s) => ({
+      id: s.id, esrCode: s.esrCode, nameUz: s.nameUz, nameRu: s.nameRu, nameEn: s.nameEn,
+      rju: s.rju, lat: s.lat!, lng: s.lng!, sidings: s._count.terminals,
+    }));
+  }
+
   async publicStats() {
     const now = new Date();
     const [terminals, sidings, stations, listings, companies, free] = await Promise.all([
-      this.prisma.terminal.count({ where: { status: 'ACTIVE', orgId: { not: null } } }), this.prisma.siding.count({ where: { ownerOrgId: { not: null } } }), this.prisma.station.count(),
+      // terminals: ochiq katalog bilan bir xil son (egasi bor avto/aralash + butun temir yo'l reestri),
+      // aks holda bosh sahifa "2 terminal" deb turib katalog 1 700 ta ko'rsatardi.
+      // sidings: faqat temir yo'l turi, admin panel uchun; ochiq sahifalar alohida ko'rsatmaydi.
+      this.prisma.terminal.count({ where: { status: 'ACTIVE', OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] } }),
+      this.prisma.terminal.count({ where: { status: 'ACTIVE', kind: 'RAIL' } }),
+      this.prisma.station.count(),
       this.prisma.listing.count({ where: activeListing(now) }), this.prisma.organization.count({ where: visibleCompany(now) }),
       this.freeToday({ terminal: { status: 'ACTIVE', orgId: { not: null } } }, now),
     ]);

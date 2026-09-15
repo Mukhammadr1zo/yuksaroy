@@ -44,6 +44,10 @@ async function seedCargo() {
   console.log(`CargoType: ${rows.length}`);
 }
 
+/**
+ * Shahobcha yo'llar endi Terminal jadvalida, kind = RAIL. Siding jadvali yo'q,
+ * shuning uchun seed ham to'g'ridan-to'g'ri terminal yozadi (registryNo bo'yicha upsert).
+ */
 async function seedSidings() {
   const rows = data<SidingJson[]>('sidings.json');
   const stations = await prisma.station.findMany({ select: { id: true, esrCode: true } });
@@ -52,11 +56,17 @@ async function seedSidings() {
   for (const r of rows) {
     const stationId = (r.esrCode && byEsr.get(r.esrCode)) || null;
     if (stationId) linked++;
-    const d = { ...r, stationId };
-    // claim maydonlari (ownerOrgId, claimStatus) qayta seed'da tegilmaydi
-    await prisma.siding.upsert({ where: { registryNo: r.registryNo }, create: d, update: d });
+    const { ownerNameRaw, stationNameRaw } = r;
+    const name = (r.name?.trim() || ownerNameRaw?.trim() || stationNameRaw || 'Shahobcha');
+    // Egalik va da'vo maydonlariga tegilmaydi: ular platformada beriladi, reestrda emas
+    const d = { ...r, name, stationId, kind: 'RAIL' as const };
+    await prisma.terminal.upsert({
+      where: { registryNo: r.registryNo },
+      create: { ...d, slug: `shahobcha-${r.registryNo}`, status: 'ACTIVE' as const },
+      update: d,
+    });
   }
-  console.log(`Siding: ${rows.length} (stansiyaga bog'langan ${linked})`);
+  console.log(`Shahobcha terminallari: ${rows.length} (stansiyaga bog'langan ${linked})`);
 }
 
 // Ochiq ma'lumotdan yig'ilgan terminal reestri: orgId yo'q, ya'ni ochiq katalogda ko'rinmaydi.
@@ -73,22 +83,22 @@ const containerTariffs: T[] = [
   { serviceCode: 'CONTAINER', unit: 'PER_OPERATION', priceSom: 450_000 }, { serviceCode: 'STORAGE', unit: 'PER_DAY', priceSom: 280_000 }, { serviceCode: 'WEIGH', unit: 'PER_OPERATION', priceSom: 150_000 },
 ];
 const PILOT: Array<{ name: string; stationRu: string; kind: TerminalKind; is24h: boolean; address: string; description: string; services: ServiceCode[]; passport: Record<string, unknown>; tariffs: T[] }> = [
-  { name: 'Toshkent-tovar yuk saroyi', stationRu: 'Ташкент-Товарный', kind: 'YARD', is24h: true, address: "Toshkent sh., Yashnobod tumani, Temiryo'lchilar ko'chasi",
+  { name: 'Toshkent-tovar yuk saroyi', stationRu: 'Ташкент-Товарный', kind: 'MULTI', is24h: true, address: "Toshkent sh., Yashnobod tumani, Temiryo'lchilar ko'chasi",
     description: "O'TY tizimidagi eng yirik yuk saroyi: ochiq maydon, yopiq ombor, SVX, avtotarozi, konteyner maydoni.",
     services: ['LOAD', 'UNLOAD', 'WEIGH', 'STORAGE', 'SVX', 'CONTAINER', 'SHUNTING'], passport: { tracks: 6, tracksLengthM: 3200, cranes: [{ type: 'ko\'prikli kran', capacityT: 32 }, { type: 'kozlovoy kran', capacityT: 20 }], warehouseM2: 8500, openAreaM2: 42000, hasSvx: true, hasScale: true, scaleT: 150 }, tariffs: yardTariffs },
-  { name: "Chuqursoy konteyner terminali", stationRu: 'Чукурсай', kind: 'CONTAINER', is24h: true, address: "Toshkent sh., Olmazor tumani",
+  { name: "Chuqursoy konteyner terminali", stationRu: 'Чукурсай', kind: 'MULTI', is24h: true, address: "Toshkent sh., Olmazor tumani",
     description: "O'ztemiryo'lkonteyner tarkibidagi konteyner terminali: 20/40 ft konteynerlar, richstaker, bojxona posti yaqin.",
     services: ['LOAD', 'UNLOAD', 'CONTAINER', 'STORAGE', 'WEIGH', 'SVX'], passport: { tracks: 4, tracksLengthM: 2100, cranes: [{ type: 'richstaker', capacityT: 45 }, { type: 'kozlovoy kran', capacityT: 40 }], openAreaM2: 30000, containerSlots: 1200, hasSvx: true, hasScale: true }, tariffs: containerTariffs },
-  { name: 'Sergeli yuk terminali', stationRu: 'Сергели', kind: 'YARD', is24h: false, address: 'Toshkent sh., Sergeli tumani, Sanoat zonasi',
-    description: "Sergeli sanoat zonasi uchun yuk saroyi: qurilish materiallari, metall, oziq-ovqat. Ish vaqti 8:00–18:00, shanba yarim kun.",
+  { name: 'Sergeli yuk terminali', stationRu: 'Сергели', kind: 'MULTI', is24h: false, address: 'Toshkent sh., Sergeli tumani, Sanoat zonasi',
+    description: "Sergeli sanoat zonasi uchun yuk saroyi: qurilish materiallari, metall, oziq-ovqat. Ish vaqti 8:00-18:00, shanba yarim kun.",
     services: ['LOAD', 'UNLOAD', 'WEIGH', 'STORAGE'], passport: { tracks: 3, tracksLengthM: 1400, cranes: [{ type: 'kozlovoy kran', capacityT: 16 }], warehouseM2: 3000, openAreaM2: 12000, hasSvx: false, hasScale: true, scaleT: 100 }, tariffs: yardTariffs.map((t) => ({ ...t, priceSom: Math.round(t.priceSom * 0.9) })) },
-  { name: "To'ytepa konteyner maydoni", stationRu: 'Тойтепа', kind: 'CONTAINER', is24h: false, address: "Toshkent viloyati, O'rta Chirchiq tumani, To'ytepa",
+  { name: "To'ytepa konteyner maydoni", stationRu: 'Тойтепа', kind: 'MULTI', is24h: false, address: "Toshkent viloyati, O'rta Chirchiq tumani, To'ytepa",
     description: 'Toshkent viloyati janubi uchun konteyner maydoni; avtomobil yo\'li M-39 yonida.',
     services: ['LOAD', 'UNLOAD', 'CONTAINER', 'STORAGE'], passport: { tracks: 2, tracksLengthM: 900, cranes: [{ type: 'richstaker', capacityT: 45 }], openAreaM2: 15000, containerSlots: 500, hasSvx: false, hasScale: false }, tariffs: containerTariffs.map((t) => ({ ...t, priceSom: Math.round(t.priceSom * 0.85) })) },
-  { name: 'Angren logistika markazi (quruq port)', stationRu: 'Ангрен', kind: 'LC', is24h: true, address: 'Toshkent viloyati, Angren sh., Angren-Pop yo\'nalishi',
+  { name: 'Angren logistika markazi (quruq port)', stationRu: 'Ангрен', kind: 'MULTI', is24h: true, address: 'Toshkent viloyati, Angren sh., Angren-Pop yo\'nalishi',
     description: "Farg'ona vodiysi yo'nalishidagi quruq port: SVX, bojxona posti, konteyner va vagon-avto qayta yuklash, 24/7.",
     services: ['LOAD', 'UNLOAD', 'CONTAINER', 'STORAGE', 'SVX', 'WEIGH', 'LAST_MILE'], passport: { tracks: 8, tracksLengthM: 5600, cranes: [{ type: 'kozlovoy kran', capacityT: 41 }, { type: 'richstaker', capacityT: 45 }], warehouseM2: 12000, openAreaM2: 60000, hasSvx: true, hasScale: true, scaleT: 150, customsPost: true }, tariffs: containerTariffs },
-  { name: 'Ohangaron yuk maydoni', stationRu: 'Ахангаран', kind: 'YARD', is24h: false, address: 'Toshkent viloyati, Ohangaron sh.',
+  { name: 'Ohangaron yuk maydoni', stationRu: 'Ахангаран', kind: 'MULTI', is24h: false, address: 'Toshkent viloyati, Ohangaron sh.',
     description: 'Sement va qurilish materiallari uchun yuk maydoni; Ohangaron sement zavodi yonida.',
     services: ['LOAD', 'UNLOAD', 'WEIGH'], passport: { tracks: 2, tracksLengthM: 1100, cranes: [], openAreaM2: 9000, hasSvx: false, hasScale: true, scaleT: 80 }, tariffs: yardTariffs.filter((t) => t.serviceCode !== 'STORAGE').map((t) => ({ ...t, priceSom: Math.round(t.priceSom * 0.8) })) },
 ];

@@ -10,7 +10,7 @@
     "groups": {
       "find": {
         "title": "Find",
-        "lead": "Terminals, private sidings, equipment and road carriers in one place."
+        "lead": "Terminals, equipment and road transport in one place."
       },
       "list": {
         "title": "List",
@@ -28,7 +28,7 @@
     "items": {
       "catalog": {
         "title": "Catalog and filters",
-        "body": "Terminals, sidings, equipment, road carriers: by region, service, type and price."
+        "body": "Terminals (rail sidings included), equipment, road transport: by region, service, type and price."
       },
       "map": {
         "title": "Map",
@@ -87,8 +87,8 @@
         "body": "Locomotive call, wagon repair, crane: providers in the region send offers."
       },
       "registry": {
-        "title": "Private sidings registry",
-        "body": "Sidings across the country by station and node. Coordinates approximate, node level."
+        "title": "Rail terminal registry",
+        "body": "Sidings across the country by station and junction, each with a terminal page. Coordinates are approximate, junction level."
       },
       "standards": {
         "title": "Listing standard",
@@ -100,7 +100,7 @@
       },
       "blog": {
         "title": "Blog",
-        "body": "Terminal vs siding, wagon rent, SVX, free spot: short explainers."
+        "body": "A siding as a terminal, wagon rental, bonded warehouse, free slots: short explainers."
       }
     },
     "how": {
@@ -125,7 +125,6 @@
     "numbers": {
       "heading": "Platform numbers",
       "terminals": "active terminals",
-      "sidings": "sidings in the registry",
       "listings": "active listings",
       "companies": "companies",
       "freeSlotsToday": "free spots today"

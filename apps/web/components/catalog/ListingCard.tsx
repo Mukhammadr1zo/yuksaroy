@@ -12,7 +12,7 @@ export const regionName = (code: string | null, lang: SearchLang) => (code ? SEA
 /** "18 500 000 so'm oyiga"; SALE (TOTAL) da birlik yozilmaydi. */
 export const listingPrice = (tiyin: number, unit: PriceUnit | null, lang: SearchLang) =>
   unit && unit !== 'TOTAL' ? `${formatSom(tiyin)} ${LISTING_LABELS[lang].priceUnit[unit]}` : formatSom(tiyin);
-export const KIND_ICON: Record<ListingKind, typeof TrainIcon> = { SHUNTING_LOCO: TrainIcon, ELECTRIC_LOCO: TrainRegionalIcon, WAGON: TrainIcon, TRUCK: TruckIcon };
+export const KIND_ICON: Record<ListingKind, typeof TrainIcon> = { SHUNTING_LOCO: TrainIcon, WAGON: TrainIcon, TRUCK: TruckIcon };
 
 /** E'lon kartasi: rasm yoki tur ikonkasi, sarlavha, tur + yil + holat, viloyat, narx, egasi (tashkilot KYC yoki haydovchi telefoni), obyekt qatori. */
 export async function ListingCard({ l }: { l: L }) {

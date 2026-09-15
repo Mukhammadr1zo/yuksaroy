@@ -2,14 +2,14 @@
   "about": {
     "meta": {
       "title": "Biz haqimizda · YukSaroy",
-      "description": "YukSaroy mustaqil xususiy platforma: davlat temir yo'liga aloqasi yo'q. Egalar e'lon beradi, mijozlar topadi va to'g'ridan-to'g'ri bog'lanadi."
+      "description": "YukSaroy - O'zbekistondagi yuk terminallari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport katalogi. Narxni ko'ring, egasiga to'g'ridan-to'g'ri yozing."
     },
     "eyebrow": "Biz haqimizda",
-    "title": "Mustaqil xususiy platforma",
-    "lead": "YukSaroy xususiy kompaniya. Davlat temir yo'liga aloqasi yo'q: biz na tashuvchi, na terminal egasimiz. Biz bozor: egalar e'lon beradi, mijozlar topadi va egasi bilan to'g'ridan-to'g'ri gaplashadi.",
+    "title": "Yuk xizmatlarini bir joyga jamladik",
+    "lead": "Terminal, shahobcha yo'l, vagon yoki yuk mashinasi kerak bo'lganda odam hali ham tanish orqali qidiradi. Biz shu qidiruvni bitta ochiq joyga yig'dik: narxini ko'rasiz, egasiga o'zingiz yozasiz.",
     "who": {
-      "heading": "Kim biz",
-      "body": "Yuk logistikasi bilan yillar davomida shug'ullangan jamoa. Terminal qidirish, tarif so'rash va bo'sh vagon topish hali ham telefon orqali bo'ladi; biz shuni bitta ochiq katalogga aylantirdik. Platforma O'zbekiston uchun, uch tilda, xususiy mablag' bilan."
+      "heading": "Kimlarmiz",
+      "body": "Yillar davomida yuk logistikasida ishlagan jamoamiz. Terminal qidirish, tarif so'rash, bo'sh vagon topish hali ham qo'ng'iroqlar bilan bo'ladi. Biz shuni bitta ochiq katalogga aylantirdik: O'zbekiston bo'ylab, uch tilda."
     },
     "what": {
       "heading": "Platforma nima qiladi",
@@ -22,7 +22,7 @@
       "heading": "Tamoyillar",
       "open": {
         "title": "Ochiq narx",
-        "body": "Tariflar va e'lon narxlari login'siz ko'rinadi. Narx yashirilgan joyda solishtirish yo'q, solishtirish yo'q joyda bozor yo'q."
+        "body": "Tarif va e'lon narxlari ro'yxatdan o'tmasdan ko'rinadi. Yashirin narx yo'q: ochiq ko'rasiz, solishtirasiz va o'zingizga mosini tanlaysiz."
       },
       "fair": {
         "title": "Halol joylashuv",
@@ -30,12 +30,8 @@
       },
       "owners": {
         "title": "Egalar e'loni",
-        "body": "Har obyekt o'z egasiga tegishli. Shartlarni egasi yozadi, so'rovga egasi javob beradi. Platforma vositachi emas, ma'lumotni buzmaydi."
+        "body": "Har bir obyekt o'z egasiniki. Shartlarni egasi yozadi, so'rovga egasi javob beradi. Biz o'rtada turmaymiz va ma'lumotni o'zgartirmaymiz."
       }
-    },
-    "notRailway": {
-      "heading": "Nima emasmiz",
-      "body": "Biz davlat temir yo'li emasmiz, uning bo'linmasi yoki agenti ham emasmiz. Vagon buyurtmasi, tarif siyosati va harakat jadvali bo'yicha temir yo'l idoralariga murojaat qiling. Biz faqat xususiy egalar bozorini ko'rsatamiz."
     },
     "contact": {
       "heading": "Bog'lanish",

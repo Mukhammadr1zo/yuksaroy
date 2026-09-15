@@ -47,7 +47,7 @@ export const SYSTEM_PROMPT = [
   'Regions:', legend(L.map((x) => x.region), REGIONS),
   'Services:', legend(L.map((x) => x.service), SERVICE_CODES),
   'Terminal kinds:', legend(L.map((x) => x.kind), TERMINAL_KINDS),
-  'Equipment:', legend(L.map((x) => x.equipment), ['SHUNTING_LOCO', 'ELECTRIC_LOCO', 'WAGON']) + '\nTRUCK: yuk mashinasi, fura / фура, грузовик / truck',
+  'Equipment:', legend(L.map((x) => x.equipment), ['SHUNTING_LOCO', 'WAGON']) + '\nTRUCK: yuk mashinasi, fura / фура, грузовик / truck',
 ].join('\n');
 
 /** LLM ishlatiladimi: lug'at ishonchi past yoki tushunilmagan so'z qolgan. */

@@ -6,9 +6,9 @@ import { env } from '../../common/env';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
-import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { parseAdminPhones } from '../organizations/domain/rules';
 import { clampInt } from '../catalog/presentation/catalog.controller';
+import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 
 class ContactDto {
   @IsString() @Length(2, 100) name!: string;
@@ -29,7 +29,7 @@ const adminPhones = [...parseAdminPhones(env.PLATFORM_ADMIN_PHONES)];
 @ApiTags('contact')
 @Controller()
 export class ContactController {
-  constructor(private readonly prisma: PrismaService, private readonly admin: PlatformAdmin, private readonly audit: AuditService) {}
+  constructor(private readonly prisma: PrismaService, private readonly audit: AuditService) {}
 
   @Post('contact') @HttpCode(200)
   async create(@Ip() ip: string, @Body() dto: ContactDto) {
@@ -41,9 +41,8 @@ export class ContactController {
     return { ok: true, id: m.id };
   }
 
-  @Get('admin/contact') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
+  @Get('admin/contact') @UseGuards(JwtGuard, PlatformAdminGuard) @ApiCookieAuth('ys_access')
   async list(@CurrentUserId() userId: string, @Query('page') page?: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const p = clampInt(page, 1, 1, 10_000), limit = 30;
     const [items, total] = await Promise.all([
       this.prisma.contactMessage.findMany({ orderBy: { createdAt: 'desc' }, skip: (p - 1) * limit, take: limit }),

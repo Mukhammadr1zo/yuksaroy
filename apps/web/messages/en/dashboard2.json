@@ -122,13 +122,6 @@
         "activeSub": "under review: {n}",
         "inquiries": "Open inquiries",
         "inquiriesSub": "price inquiries on your listings"
-      },
-      "admin": {
-        "title": "Moderation queue",
-        "listings": "Listings",
-        "kyc": "Organizations (KYC)",
-        "sidings": "Siding claims",
-        "terminals": "Terminal claims"
       }
     },
     "order": {

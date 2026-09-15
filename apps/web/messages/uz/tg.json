@@ -33,7 +33,6 @@
       "search": "Qidirish",
       "cats": {
         "terminal": "Terminallar",
-        "siding": "Shahobcha yo'l",
         "equipment": "Texnika",
         "truck": "Avtotransport"
       },
@@ -67,8 +66,6 @@
       "empty": "Hech narsa topilmadi. Boshqa so'z yoki viloyat bilan urinib ko'ring.",
       "unresolved": "tushunilmadi: {words}",
       "map": "Xaritada",
-      "sidings": "{count} shahobcha yo'l",
-      "sidingApprox": "koordinata taxminiy, uzel darajasida",
       "more": "{shown} / {total} ko'rsatildi"
     },
     "terminal": {
@@ -228,7 +225,7 @@
       "kindTitle": "Nima e'lon qilasiz?",
       "truck": "Yuk mashinasi",
       "truckHint": "Shaxsan, telefon bilan, bir daqiqada",
-      "railHint": "Teplovoz, elektrovoz va vagon tashkilot nomidan, platformada",
+      "railHint": "Manevr teplovozi va vagon tashkilot nomidan, platformada",
       "form": {
         "title": "Sarlavha",
         "titlePh": "Masalan: MAN TGS 20 t, tentli",

@@ -4,7 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { useState } from 'react';
 import { OPERATIONS, type Operation, type ServiceCode } from '@yuksaroy/domain';
 import { ApiError, post } from '@/lib/api';
-import { pricePer, som } from '@/lib/format';
+import { pricePer, som, stationName} from '@/lib/format';
 import type { QuoteOffer, QuoteResponse } from '@/lib/types';
 import { CargoSearch, type CargoPick } from './CargoSearch';
 import { StationSearch, type StationPick } from './StationSearch';
@@ -129,7 +129,7 @@ function Offer({ o, full, dark }: { o: QuoteOffer; full: boolean; dark: boolean 
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <Link href={`/terminals/${o.terminal.slug}`} className="font-bold hover:text-teal-ink">{o.terminal.name}</Link>
-          <p className={`text-xs ${muted}`}>{tk(o.terminal.kind)}, {o.terminal.station.nameUz}{o.terminal.is24h ? ', 24/7' : ''}{!o.terminal.claimed ? t('offer.approxTariff') : ''}</p>
+          <p className={`text-xs ${muted}`}>{tk(o.terminal.kind)}, {stationName(o.terminal)}{o.terminal.is24h ? ', 24/7' : ''}{!o.terminal.claimed ? t('offer.approxTariff') : ''}</p>
         </div>
         <p className={`font-display text-xl font-bold tabular-nums ${dark ? 'text-white' : 'text-navy'}`}>{som(o.totalTiyin, locale)}</p>
       </div>

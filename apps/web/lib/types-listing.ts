@@ -28,11 +28,11 @@ export interface ListingPage { items: ListingCard[]; total: number; page: number
 
 export interface CompanyCard {
   id: string; slug: string | null; name: string; kinds: OrgKind[]; kyc: KycStatus; regionCode: string | null;
-  counts: { terminals: number; sidings: number; listings: number };
+  counts: { terminals: number; listings: number };
 }
 export interface CompanyDetail extends CompanyCard {
   description: string | null; telegram: string | null; website: string | null; phone: string | null;
-  terminals: TerminalCard[]; sidings: Siding[]; listings: ListingCard[];
+  terminals: TerminalCard[]; listings: ListingCard[];
 }
 
 export type SidingDetail = Siding;

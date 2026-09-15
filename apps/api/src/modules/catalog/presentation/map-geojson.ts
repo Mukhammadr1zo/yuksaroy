@@ -4,7 +4,8 @@ import { corridorMatch, listingOwner, type ListingRecord } from '../../listings/
 import type { TerminalRecord } from '../domain/ports';
 import { fromPriceTiyin } from './mappers';
 
-export type MapKind = SearchCategory;
+/** Xaritadagi belgi turi: kategoriyalar + 'siding' (stansiya bo'yicha to'plangan temir yo'l terminallari guruhi; terminal kategoriyasi ichida). */
+export type MapKind = SearchCategory | 'siding';
 /** [W, S, E, N] darajalarda. */
 export type Bbox = [number, number, number, number];
 export interface SidingGroup { id: string; name: string; lat: number; lng: number; count: number; regionCode: string | null }
@@ -39,7 +40,7 @@ export const sidingFeature = (g: SidingGroup): MapFeature =>
 
 /** E'lon: obyektga bog'langan bo'lsa aniq nuqta, aks holda viloyat markazi. */
 export function listingFeature(l: ListingRecord): MapFeature | null {
-  const linked = (l.terminalId !== null || l.sidingId !== null) && l.lat != null && l.lng != null;
+  const linked = l.terminalId !== null && l.lat != null && l.lng != null;
   const c = linked ? { lat: l.lat!, lng: l.lng! } : REGION_CENTERS[l.regionCode as RegionCode];
   if (!c) return null;
   const owner = listingOwner(l);
@@ -55,15 +56,16 @@ export const inBbox = (f: MapFeature, b: Bbox) => {
 };
 
 export interface MapSource { terminals: TerminalRecord[]; free: Record<string, number>; sidings: SidingGroup[]; listings: ListingRecord[] }
-export interface MapFilter { cats: MapKind[]; bbox?: Bbox; corridor?: readonly string[] }
+export interface MapFilter { cats: SearchCategory[]; bbox?: Bbox; corridor?: readonly string[] }
 
 /** Koridor: terminal va shahobcha viloyat bo'yicha, e'lon yo'nalish/xizmat hududi bo'yicha (corridorMatch). */
 export function mapFeatures(src: MapSource, f: MapFilter) {
   const inCorridor = (code: string | null) => !f.corridor || (code !== null && f.corridor.includes(code));
-  const has = (k: MapKind) => f.cats.includes(k);
+  const has = (k: SearchCategory) => f.cats.includes(k);
   const features: MapFeature[] = [];
   if (has('terminal')) for (const t of src.terminals) { const x = inCorridor(t.regionCode) && terminalFeature(t, src.free[t.id] ?? 0); if (x) features.push(x); }
-  if (has('siding')) for (const g of src.sidings) if (inCorridor(g.regionCode)) features.push(sidingFeature(g));
+  // Shahobcha guruhlari terminal kategoriyasida: alohida toifa emas, faqat boshqacha chiziladi (sanoq bilan)
+  if (has('terminal')) for (const g of src.sidings) if (inCorridor(g.regionCode)) features.push(sidingFeature(g));
   for (const l of src.listings) {
     if (!has(l.kind === 'TRUCK' ? 'truck' : 'equipment') || (f.corridor && !corridorMatch(l, f.corridor))) continue;
     const x = listingFeature(l);

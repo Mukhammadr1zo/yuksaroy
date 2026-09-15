@@ -9,16 +9,17 @@ import type { Storefront } from '../../organizations/domain/ports';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
 import { activeListing, visibleCompany as visible } from '../infrastructure/prisma-catalog.repository';
 import { clampInt, pickIn } from './catalog.controller';
-import { publicSiding, publicTerminalCard } from './mappers';
+import { publicTerminalCard } from './mappers';
 
 const cardSelect = (now: Date) => ({
   id: true, slug: true, name: true, kind: true, kinds: true, kycStatus: true, regionCode: true,
-  _count: { select: { terminals: { where: { status: 'ACTIVE' as const } }, sidings: { where: { claimStatus: 'APPROVED' as const } }, listings: { where: activeListing(now) } } },
+  // Shahobcha ham terminal: da'vosi tasdiqlangani orgId bilan terminals ichida sanaladi, alohida sanoq yo'q
+  _count: { select: { terminals: { where: { status: 'ACTIVE' as const } }, listings: { where: activeListing(now) } } },
 });
 type CardRow = Prisma.OrganizationGetPayload<{ select: ReturnType<typeof cardSelect> }>;
 const companyCard = (o: CardRow) => ({
   id: o.id, slug: o.slug, name: o.name, kinds: o.kinds.length ? o.kinds : [o.kind], kyc: o.kycStatus, regionCode: o.regionCode,
-  counts: { terminals: o._count.terminals, sidings: o._count.sidings, listings: o._count.listings },
+  counts: { terminals: o._count.terminals, listings: o._count.listings },
 });
 
 @ApiTags('companies')
@@ -54,9 +55,8 @@ export class CompaniesController {
       select: { ...cardSelect(now), description: true, telegram: true, website: true, phone: true, storefront: true },
     });
     if (!o) throw new NotFoundException({ code: 'COMPANY_NOT_FOUND' });
-    const [terminals, sidings, listings] = await Promise.all([
+    const [terminals, listings] = await Promise.all([
       this.repo.listTerminals({ orgIds: [o.id], status: 'ACTIVE' }, now),
-      this.repo.listSidings({ ownerOrgIds: [o.id], claimStatus: 'APPROVED' }, 1, 100),
       this.prisma.listing.findMany({ where: { orgId: o.id, ...activeListing(now) }, include: listingInclude, orderBy: [{ publishedAt: 'desc' }], take: 100 }),
     ]);
     const free = await this.repo.freeTodayByTerminal(terminals.map((t) => t.id), now);
@@ -66,7 +66,6 @@ export class CompaniesController {
       ...companyCard(o),
       description: o.description, telegram: o.telegram, website: o.website, phone: o.phone, storefront,
       terminals: terminals.map((t) => publicTerminalCard(t, free[t.id] ?? 0)),
-      sidings: sidings.items.map(publicSiding),
       listings: listings.map((l) => listingCard(toListingRecord(l), undefined, now)),
     };
   }

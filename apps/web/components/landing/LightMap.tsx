@@ -13,11 +13,17 @@ import { FALLBACK, MAX_BOUNDS, PIN, STYLE, WORKER_URL, addBaseLayers, localize, 
 
 setWorkerUrl(WORKER_URL);
 
-/** /map-objects.geojson javobi: hero uchun faqat nuqta koordinatasi kerak (qolgan xossalar klasterda ishlatilmaydi). */
-interface Terminals {
+/** /map-objects.geojson javobi: hero uchun nuqta koordinatasi va toifa kerak (qolgan xossalar klasterda ishlatilmaydi). */
+interface MapObjects {
   type: 'FeatureCollection';
-  features: { type: 'Feature'; geometry: { type: 'Point'; coordinates: [number, number] }; properties: Record<string, unknown> }[];
+  features: { type: 'Feature'; geometry: { type: 'Point'; coordinates: [number, number] }; properties: { kind?: string } & Record<string, unknown> }[];
 }
+
+/** Hero qatlamlari: shahobcha oldin qo'shiladi, terminal ustida chiziladi. */
+const LAYERS = [
+  { id: 'sidings', kind: 'siding', opts: { color: PIN.siding, hollow: true, label: true } },
+  { id: 'terminals', kind: 'terminal', opts: { color: PIN.terminal, halo: true } },
+];
 
 export default function LightMap() {
   const el = useRef<HTMLDivElement>(null);
@@ -72,9 +78,12 @@ export default function LightMap() {
     };
 
     const ctl = new AbortController();
-    // Faqat terminal nuqtalari (~2 KB); to'liq /map-objects da 167 ta shahobcha ham bor, ular hero da ishlatilmaydi
+    // Terminal va shahobcha nuqtalari. Ilgari faqat terminal so'ralardi: katalogda bitta terminal
+    // bo'lgani uchun hero xaritasi bo'm-bo'sh ko'rinardi, reestrdagi shahobcha stansiyalari esa
+    // mamlakat bo'ylab haqiqiy qamrovni ko'rsatadi.
+    // cat=terminal: shahobcha guruhlari ham terminal toifasida keladi (alohida toifa yo'q)
     const load = fetch('/api/v1/map-objects.geojson?cat=terminal', { signal: ctl.signal })
-      .then((r) => r.json() as Promise<Terminals>)
+      .then((r) => r.json() as Promise<MapObjects>)
       .then((d) => {
         if (!d.features?.length) return;
         const b = new LngLatBounds();
@@ -89,25 +98,29 @@ export default function LightMap() {
       addBaseLayers(map, { far: false }); // hero kadri z8+ : uzoq masshtab GeoJSON kerak emas
 
       const data = await load;
-      // Uzoqlashganda yaqin nuqtalar bitta doiraga yig'iladi, ichida soni (standardrail.com kabi)
-      map.addSource('terminals', {
-        type: 'geojson',
-        cluster: true,
-        clusterRadius: 44,
-        clusterMaxZoom: 12,
-        data: data ?? { type: 'FeatureCollection', features: [] },
-      });
-      for (const l of pinLayers('terminals', 'terminals', { color: PIN.terminal, halo: true })) map.addLayer(l);
-      // Doirani bosish: o'sha joyga nuqtalar ajraladigan darajagacha yaqinlashadi
-      map.on('click', 'terminals-cluster', async (e) => {
-        const f = e.features?.[0];
-        if (!f || f.geometry.type !== 'Point') return;
-        const zoom = await (map.getSource('terminals') as GeoJSONSource).getClusterExpansionZoom(f.properties.cluster_id as number);
-        moved = true;
-        map.easeTo({ center: f.geometry.coordinates as [number, number], zoom, duration: 500 });
-      });
-      map.on('mouseenter', 'terminals-cluster', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'terminals-cluster', () => { map.getCanvas().style.cursor = ''; });
+      const feats = data?.features ?? [];
+      // Uzoqlashganda yaqin nuqtalar bitta doiraga yig'iladi, ichida soni (standardrail.com kabi).
+      // Har toifa alohida manbada: klaster soni toifa ichida sanaladi va ranglar aralashmaydi.
+      for (const { id, kind, opts } of LAYERS) {
+        map.addSource(id, {
+          type: 'geojson',
+          cluster: true,
+          clusterRadius: 44,
+          clusterMaxZoom: 12,
+          data: { type: 'FeatureCollection', features: feats.filter((f) => f.properties.kind === kind) },
+        });
+        for (const l of pinLayers(id, id, opts)) map.addLayer(l);
+        // Doirani bosish: o'sha joyga nuqtalar ajraladigan darajagacha yaqinlashadi
+        map.on('click', `${id}-cluster`, async (e) => {
+          const f = e.features?.[0];
+          if (!f || f.geometry.type !== 'Point') return;
+          const zoom = await (map.getSource(id) as GeoJSONSource).getClusterExpansionZoom(f.properties.cluster_id as number);
+          moved = true;
+          map.easeTo({ center: f.geometry.coordinates as [number, number], zoom, duration: 500 });
+        });
+        map.on('mouseenter', `${id}-cluster`, () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', `${id}-cluster`, () => { map.getCanvas().style.cursor = ''; });
+      }
       frame();
       ready.current = true;
       setLoaded(true);

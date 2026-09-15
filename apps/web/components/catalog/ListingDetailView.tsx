@@ -125,7 +125,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
             {l.object ? (
               <p className="mt-3 border-t border-line/70 pt-3 text-sm">
                 <span className="text-xs text-muted">{t('object')}</span><br />
-                <Link href={l.object.type === 'terminal' ? `/terminals/${l.object.slug}` : `/sidings/${l.object.id}`} className="font-semibold text-navy hover:text-teal-ink">{l.object.name} →</Link>
+                <Link href={`/terminals/${l.object.slug}`} className="font-semibold text-navy hover:text-teal-ink">{l.object.name} →</Link>
               </p>
             ) : null}
           </section>

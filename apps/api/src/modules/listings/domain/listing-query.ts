@@ -5,7 +5,7 @@ export interface Route { from: RegionCode; to: RegionCode }
 
 export interface ListingRecord {
   id: string; slug: string; orgId: string | null; ownerUserId: string | null; createdById: string; kind: ListingKind; deal: DealKind | null; status: ListingStatus;
-  title: string; description: string | null; regionCode: string; terminalId: string | null; sidingId: string | null;
+  title: string; description: string | null; regionCode: string; terminalId: string | null;
   lat: number | null; lng: number | null; priceTiyin: number | null; priceUnit: PriceUnit | null; photos: string[];
   year: number | null; condition: Condition | null; model: string | null; qty: number; wagonType: string | null; capacityT: number | null;
   truckType: string | null; tonnage: number | null; fleetSize: number | null; serviceRegions: string[]; routes: Route[];
@@ -14,8 +14,11 @@ export interface ListingRecord {
   createdAt: Date; updatedAt: Date;
   org: { name: string; slug: string | null; kycStatus: KycStatus } | null;
   ownerUser: { fullName: string | null; phone: string | null } | null; // yakka haydovchi (orgId null)
-  terminal: { id: string; name: string; slug: string; orgId: string | null } | null;
-  siding: { id: string; registryNo: number; stationNameRaw: string; ownerOrgId: string | null; station?: { nameUz: string } | null } | null;
+  /** Bog'langan obyekt. Shahobcha ham shu yerda: u temir yo'l terminali (kind RAIL). */
+  terminal: {
+    id: string; name: string; slug: string; orgId: string | null;
+    kind?: string; registryNo?: number | null; stationNameRaw?: string | null; station?: { nameUz: string } | null;
+  } | null;
 }
 
 /** Ochiq egasi bloki: tashkilot (KYC) yoki yakka shaxs (telefon OTP orqali biriktirilgan = tasdiqlangan). */

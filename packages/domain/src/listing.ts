@@ -3,7 +3,7 @@ import { REGIONS, normalizeUzPhone, type RegionCode, type SearchLang } from './i
 import { TransitionError } from './transition';
 import { DEAL_KINDS, type DealKind } from './search';
 
-export const LISTING_KINDS = ['SHUNTING_LOCO', 'ELECTRIC_LOCO', 'WAGON', 'TRUCK'] as const;
+export const LISTING_KINDS = ['SHUNTING_LOCO', 'WAGON', 'TRUCK'] as const;
 export type ListingKind = (typeof LISTING_KINDS)[number];
 export const LISTING_STATUSES = ['DRAFT', 'PENDING_REVIEW', 'ACTIVE', 'REJECTED', 'ARCHIVED', 'EXPIRED'] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
@@ -63,8 +63,8 @@ export interface ListingInput {
   title: string;
   description: string | null;
   regionCode: RegionCode;
+  /** Bog'langan obyekt: terminal. Shahobcha ham terminal (turi RAIL). */
   terminalId: string | null;
-  sidingId: string | null;
   priceTiyin: number | null;
   priceUnit: PriceUnit | null;
   photos: string[];
@@ -86,14 +86,10 @@ export interface ListingInput {
 /**
  * Standart: must = e'lon berish uchun shart, should = tavsiya (ogohlantirish). terminalId = terminal yoki shahobcha (ikkisidan biri).
  * Egasi qoidasi: TRUCK ni tashkilot ham, yakka haydovchi (ownerType 'person') ham beradi;
- * SHUNTING_LOCO, ELECTRIC_LOCO, WAGON faqat tashkilotdan, aks holda ownerType:ORG_REQUIRED.
+ * SHUNTING_LOCO va WAGON faqat tashkilotdan, aks holda ownerType:ORG_REQUIRED.
  */
 export const LISTING_RULES: Record<ListingKind, { must: (keyof ListingInput)[]; should: (keyof ListingInput)[] }> = {
   SHUNTING_LOCO: {
-    must: ['title', 'deal', 'year', 'condition', 'regionCode', 'photos'],
-    should: ['model', 'capacityT', 'priceTiyin', 'terminalId', 'responseHours'],
-  },
-  ELECTRIC_LOCO: {
     must: ['title', 'deal', 'year', 'condition', 'regionCode', 'photos'],
     should: ['model', 'capacityT', 'priceTiyin', 'terminalId', 'responseHours'],
   },
@@ -109,7 +105,7 @@ export const LISTING_RULES: Record<ListingKind, { must: (keyof ListingInput)[]; 
 
 /** Maydon to'ldirilganmi (must/should uchun bitta qoida). Forma ham shu bilan belgilaydi. */
 export function listingFieldPresent(input: ListingInput, field: keyof ListingInput): boolean {
-  if (field === 'terminalId') return !!(input.terminalId || input.sidingId);
+  if (field === 'terminalId') return !!input.terminalId;
   const v = input[field];
   if (v == null) return false;
   if (typeof v === 'string') return v.trim().length > 0;
@@ -170,9 +166,6 @@ export function validateListing(input: ListingInput): { errors: ListingIssue[]; 
     if (allowed && !allowed.includes(input.priceUnit)) err('priceUnit', 'UNIT_NOT_FOR_DEAL');
   }
 
-  // Obyekt: terminal yoki shahobcha, ikkalasi emas
-  if (input.terminalId && input.sidingId) err('terminalId', 'ONE_OBJECT_ONLY');
-
   // Xizmat hududlari va yo'nalishlar (avto)
   if (input.serviceRegions.some((r) => !isRegion(r))) err('serviceRegions', 'INVALID');
   else if (truck && has('serviceRegions') && has('regionCode') && !input.serviceRegions.includes(input.regionCode)) {
@@ -201,7 +194,7 @@ export const LISTING_LABELS: Record<SearchLang, {
   wagonType: Record<WagonType, string>; truckType: Record<TruckType, string>; priceUnit: Record<PriceUnit, string>;
 }> = {
   uz: {
-    kind: { SHUNTING_LOCO: 'Manevr teplovozi', ELECTRIC_LOCO: 'Elektrovoz', WAGON: 'Vagon', TRUCK: 'Yuk mashinasi' },
+    kind: { SHUNTING_LOCO: 'Manevr teplovozi', WAGON: 'Vagon', TRUCK: 'Yuk mashinasi' },
     status: { DRAFT: 'Qoralama', PENDING_REVIEW: 'Tekshiruvda', ACTIVE: 'Faol', REJECTED: 'Rad etilgan', ARCHIVED: 'Arxiv', EXPIRED: "Muddati o'tgan" },
     condition: { NEW: 'Yangi', GOOD: 'Yaxshi', NEEDS_REPAIR: "Ta'mir talab" },
     wagonType: { COVERED: 'Yopiq vagon', GONDOLA: 'Yarim vagon', PLATFORM: 'Platforma', TANK: 'Sisterna', HOPPER: 'Xopper', REFRIGERATOR: 'Refrijerator' },
@@ -209,7 +202,7 @@ export const LISTING_LABELS: Record<SearchLang, {
     priceUnit: { TOTAL: 'jami', PER_MONTH: 'oyiga', PER_DAY: 'kuniga', PER_HOUR: 'soatiga', PER_KM: 'km uchun', PER_TON: 'tonna uchun', PER_TRIP: 'reys uchun' },
   },
   ru: {
-    kind: { SHUNTING_LOCO: 'Маневровый тепловоз', ELECTRIC_LOCO: 'Электровоз', WAGON: 'Вагон', TRUCK: 'Грузовик' },
+    kind: { SHUNTING_LOCO: 'Маневровый тепловоз', WAGON: 'Вагон', TRUCK: 'Грузовик' },
     status: { DRAFT: 'Черновик', PENDING_REVIEW: 'На проверке', ACTIVE: 'Активно', REJECTED: 'Отклонено', ARCHIVED: 'Архив', EXPIRED: 'Истекло' },
     condition: { NEW: 'Новый', GOOD: 'Хорошее', NEEDS_REPAIR: 'Требует ремонта' },
     wagonType: { COVERED: 'Крытый вагон', GONDOLA: 'Полувагон', PLATFORM: 'Платформа', TANK: 'Цистерна', HOPPER: 'Хоппер', REFRIGERATOR: 'Рефрижератор' },
@@ -217,7 +210,7 @@ export const LISTING_LABELS: Record<SearchLang, {
     priceUnit: { TOTAL: 'всего', PER_MONTH: 'в месяц', PER_DAY: 'в сутки', PER_HOUR: 'в час', PER_KM: 'за км', PER_TON: 'за тонну', PER_TRIP: 'за рейс' },
   },
   en: {
-    kind: { SHUNTING_LOCO: 'Shunting locomotive', ELECTRIC_LOCO: 'Electric locomotive', WAGON: 'Wagon', TRUCK: 'Truck' },
+    kind: { SHUNTING_LOCO: 'Shunting locomotive', WAGON: 'Wagon', TRUCK: 'Truck' },
     status: { DRAFT: 'Draft', PENDING_REVIEW: 'Under review', ACTIVE: 'Active', REJECTED: 'Rejected', ARCHIVED: 'Archived', EXPIRED: 'Expired' },
     condition: { NEW: 'New', GOOD: 'Good', NEEDS_REPAIR: 'Needs repair' },
     wagonType: { COVERED: 'Covered wagon', GONDOLA: 'Gondola', PLATFORM: 'Flat wagon', TANK: 'Tank wagon', HOPPER: 'Hopper', REFRIGERATOR: 'Refrigerator wagon' },

@@ -31,7 +31,7 @@ const GROUPS: { key: 'find' | 'list' | 'book' | 'data'; items: Item[] }[] = [
   { key: 'list', items: [
     { key: 'listing', href: '/dashboard/listings/new', Icon: TrainIcon },
     { key: 'terminal', href: '/dashboard/terminals/new', Icon: WarehouseIcon },
-    { key: 'siding', href: '/sidings', Icon: PathIcon },
+    { key: 'siding', href: '/dashboard/sidings', Icon: PathIcon },
     { key: 'premium', href: '/pricing', Icon: TagIcon },
     { key: 'analytics', href: '/dashboard/listings', Icon: ChartBarIcon },
   ] },
@@ -43,7 +43,7 @@ const GROUPS: { key: 'find' | 'list' | 'book' | 'data'; items: Item[] }[] = [
     { key: 'urgent', href: '/urgent', Icon: SirenIcon },
   ] },
   { key: 'data', items: [
-    { key: 'registry', href: '/sidings', Icon: PathIcon },
+    { key: 'registry', href: '/terminals?kind=RAIL', Icon: PathIcon },
     { key: 'standards', href: '/standards', Icon: ListChecksIcon },
     { key: 'companies', href: '/companies', Icon: BuildingsIcon },
     { key: 'blog', href: '/blog', Icon: ArticleIcon },

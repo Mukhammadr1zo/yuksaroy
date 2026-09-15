@@ -96,7 +96,6 @@
       "pickKind": "Nima e'lon qilasiz?",
       "kindHint": {
         "SHUNTING_LOCO": "Ijara yoki sotuv, terminal yoki shahobcha yo'lda",
-        "ELECTRIC_LOCO": "Ijara yoki sotuv",
         "WAGON": "Tur, soni, yuk ko'tarish, ijara yoki sotuv",
         "TRUCK": "Avtotashuvchi: mashina turi, tonnaj, xizmat hududlari"
       },
@@ -443,7 +442,7 @@
     },
     "objects": {
       "title": "Mening obyektlarim",
-      "lead": "Terminal, shahobcha yo'l, texnika va avtotransport e'lonlari bitta ro'yxatda.",
+      "lead": "Terminallar (shahobcha yo'llar ham), texnika va avtotransport e'lonlari bitta ro'yxatda.",
       "add": "Qo'shish",
       "open": "Ochiq sahifa",
       "empty": "Hali obyekt qo'shilmagan.",

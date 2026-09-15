@@ -1,16 +1,16 @@
 'use client';
 // 404 sahifasining mazmuni. global-not-found [locale] segmentidan tashqarida bo'lgani uchun next-intl yo'q:
 // til URL prefiksidan aniqlanadi (/ru, /en, aks holda uz), matnlar shu yerda.
-import { MagnifyingGlassIcon, PathIcon, ShippingContainerIcon, TrainIcon, TruckIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, ShippingContainerIcon, TrainIcon, TruckIcon } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { Logo } from './Logo';
 
 type Lang = 'uz' | 'ru' | 'en';
 
 // ponytail: marshrutlar inglizchaga ko'chganda faqat shu jadval yangilanadi
-const ROUTES = { home: '/', terminals: '/terminals', sidings: '/sidings', equipment: '/equipment', carriers: '/carriers' } as const;
+const ROUTES = { home: '/', terminals: '/terminals', equipment: '/equipment', carriers: '/carriers' } as const;
 
-const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: string; search: string; submit: string; browse: string; home: string; terminals: string; sidings: string; equipment: string; carriers: string }> = {
+const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: string; search: string; submit: string; browse: string; home: string; terminals: string; equipment: string; carriers: string }> = {
   uz: {
     code: 'Xato 404',
     tabTitle: 'Sahifa topilmadi · YukSaroy',
@@ -21,7 +21,6 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
     browse: 'Kategoriyalar',
     home: 'Bosh sahifaga',
     terminals: 'Terminallar',
-    sidings: "Shahobcha yo'llar",
     equipment: 'Teplovoz va vagon',
     carriers: 'Yuk mashinalari',
   },
@@ -35,7 +34,6 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
     browse: 'Категории',
     home: 'На главную',
     terminals: 'Терминалы',
-    sidings: 'Подъездные пути',
     equipment: 'Тепловозы и вагоны',
     carriers: 'Грузовики',
   },
@@ -49,7 +47,6 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
     browse: 'Categories',
     home: 'Back to home',
     terminals: 'Terminals',
-    sidings: 'Private sidings',
     equipment: 'Locomotives and wagons',
     carriers: 'Trucks',
   },
@@ -57,7 +54,6 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
 
 const CATS = [
   { key: 'terminals', route: ROUTES.terminals, Icon: ShippingContainerIcon },
-  { key: 'sidings', route: ROUTES.sidings, Icon: PathIcon },
   { key: 'equipment', route: ROUTES.equipment, Icon: TrainIcon },
   { key: 'carriers', route: ROUTES.carriers, Icon: TruckIcon },
 ] as const;

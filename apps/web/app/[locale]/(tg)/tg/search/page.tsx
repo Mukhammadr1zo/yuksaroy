@@ -3,17 +3,17 @@ import { EQUIPMENT_KINDS, REGIONS, chipLabel, corridorRegions, parseQuery, type 
 import { Link } from '@/i18n/navigation';
 import { qs, sapi } from '@/lib/server-api';
 import { pricePer } from '@/lib/format';
-import type { Page, Siding, TerminalCard } from '@/lib/types';
+import type { Page, TerminalCard } from '@/lib/types';
 import type { ListingPage } from '@/lib/types-listing';
 import { ListingRow, TerminalRow } from '@/components/tg/bits';
 import { listingPrice, regionName } from '@/components/tg/labels';
 import { SearchBox } from '@/components/tg/SearchBox';
 
-// /tg/search: /terminals bilan bir xil server mantiq (q -> parseQuery -> filtrlar), toifa bo'yicha terminal, texnika, avto yoki shahobcha ro'yxati. Ixcham qatorlar.
+// /tg/search: /terminals bilan bir xil server mantiq (q -> parseQuery -> filtrlar), toifa bo'yicha terminal, texnika yoki avto ro'yxati. Ixcham qatorlar.
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v.filter(Boolean).at(-1) : v) ?? '';
 const isRegion = (s: string): s is RegionCode => (REGIONS as readonly string[]).includes(s);
-const CATS: SearchCategory[] = ['terminal', 'equipment', 'truck', 'siding'];
+const CATS: SearchCategory[] = ['terminal', 'equipment', 'truck'];
 const chip = (type: SearchChip['type'], value: string): SearchChip => ({ type, key: `${type}:${value}`, value });
 
 export default async function TgSearchPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SP> }) {
@@ -56,17 +56,6 @@ export default async function TgSearchPage({ params, searchParams }: { params: P
       s?.nearestKm != null ? tc('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
     ].filter(Boolean).join(tc('decision.separator'));
     list = d.items.map((x) => <TerminalRow key={x.id} t={x} lang={lang} />);
-  } else if (cat === 'siding') {
-    const d = await sapi<Page<Siding>>(`/sidings${qs({ region: region.split(',')[0], near, radius, limit: 30 })}`, 60);
-    total = d.total; shown = d.items.length;
-    decision = t('sidings', { count: d.total });
-    list = d.items.map((s) => (
-      <div key={s.id} className="rounded-card border border-line bg-white p-3">
-        <div className="flex items-baseline justify-between gap-3"><p className="font-bold">No {s.registryNo}</p><span className="font-mono text-xs text-muted">{s.lengthM ? `${s.lengthM} m` : ''}</span></div>
-        <p className="mt-0.5 text-xs text-muted">{s.station?.nameUz ?? s.stationNameRaw} · {regionName(s.regionCode, lang)}</p>
-        <p className="mt-1 text-[11px] text-amber-ink">{t('sidingApprox')}</p>
-      </div>
-    ));
   } else {
     const kind = cat === 'truck' ? 'TRUCK' : p?.equipment ?? EQUIPMENT_KINDS.join(',');
     const d = await sapi<ListingPage>(`/listings${qs({ kind, deal: p?.deal, region, near, radius, corridor: cFrom && cTo ? `${cFrom}>${cTo}` : '', sort: near ? 'nearest' : 'new', limit: 20 })}`, 60);

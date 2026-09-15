@@ -6,10 +6,10 @@ import { PHOTO_URL } from '../../../common/security';
 import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizeUzPhone, type KycStatus, type OrgKind, type RegionCode, type Role } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { CreateOrgUseCase } from '../application/create-org.usecase';
-import { PlatformAdmin } from '../application/platform-admin';
 import { ORG_REPOSITORY, type OrganizationRepository, type Storefront } from '../domain/ports';
 import { filterRoles, rolesForKinds } from '../domain/rules';
 import { AuditService } from '../../../common/audit.service';
+import { PlatformAdminGuard } from './platform-admin.guard';
 
 class CreateOrgDto {
   /** Eski maydon: `kinds` bo'lmasa shu olinadi. */
@@ -56,7 +56,6 @@ export class OrgsController {
   constructor(
     private readonly createOrg: CreateOrgUseCase,
     @Inject(ORG_REPOSITORY) private readonly orgs: OrganizationRepository,
-    private readonly admin: PlatformAdmin,
     private readonly audit: AuditService,
   ) {}
 
@@ -119,8 +118,8 @@ export class OrgsController {
   }
 
   @Post('orgs/:id/kyc/decide')
+  @UseGuards(PlatformAdminGuard)
   async kycDecide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: KycDecideDto) {
-    await this.admin.assertPlatformAdmin(userId);
     const org = await this.orgs.findById(id);
     if (!org) throw new NotFoundException({ code: 'ORG_NOT_FOUND' });
     if (org.kycStatus !== 'PENDING') throw new BadRequestException({ code: 'KYC_NOT_PENDING', status: org.kycStatus });
@@ -131,8 +130,8 @@ export class OrgsController {
 
   /** Moderatsiya navbati: default PENDING. */
   @Get('admin/orgs')
+  @UseGuards(PlatformAdminGuard)
   async adminOrgs(@CurrentUserId() userId: string, @Query('kyc') kyc?: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const status = (KYC_STATUSES as readonly string[]).includes(kyc ?? '') ? (kyc as KycStatus) : 'PENDING';
     return this.orgs.listByKyc(status);
   }

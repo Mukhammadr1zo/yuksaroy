@@ -37,7 +37,7 @@
       "owner": "Tashkilot (turi: Terminal): pasportni operator biriktiradi"
     },
     "siding": {
-      "title": "Shahobcha yo'l",
+      "title": "Temir yo'l terminali (shahobcha yo'l)",
       "must": "Reestr raqami, stansiya, viloyat (davlat reestridan)",
       "should": "Uzunlik, tushirish va yuklash sig'imi, egasi",
       "note": "Egasi nomi faqat da'vo operator tomonidan tasdiqlangach ko'rinadi. Koordinata taxminiy, uzel darajasida.",
@@ -53,7 +53,7 @@
       "saleUnits": "Sotuv narxi: jami summa",
       "truckUnits": "Avtotransport narxi: km, tonna yoki reys uchun",
       "priceUnit": "Narx ko'rsatilsa birligi ham ko'rsatiladi",
-      "oneObject": "Terminal yoki shahobcha yo'l: faqat bittasi bog'lanadi",
+      "oneObject": "E'lon bitta obyektga bog'lanadi",
       "serviceRegions": "Avtotransport: xizmat hududlariga bazaviy viloyat kiradi",
       "routes": "Yo'nalishning boshi va oxiri har xil viloyat",
       "photos": "Rasm ko'pi bilan {max} ta",

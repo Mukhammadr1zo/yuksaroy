@@ -21,7 +21,7 @@ export function CompareTray() {
       {cats.map((c) => (
         <div key={c} className="flex flex-wrap items-center gap-2 py-1">
           <span className="font-mono text-[11px] font-semibold text-muted">{t(`cat.${c}`)} · {t('tray.count', { count: s[c].length })}</span>
-          <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+          <div className="flex min-w-0 flex-1 basis-full flex-wrap gap-1 sm:basis-auto">
             {s[c].map((x) => (
               <span key={x.slug} className="inline-flex max-w-[16rem] items-center gap-1 rounded-full bg-sand py-0.5 pl-2.5 pr-1 text-xs text-ink">
                 <span className="truncate">{x.name}</span>
@@ -29,7 +29,8 @@ export function CompareTray() {
               </span>
             ))}
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          {/* shrink-0: tor ekranda bu ikki tugma nom chipi ustiga tushib, matnlar ustma-ust chiqardi */}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             <button type="button" onClick={() => clearCompare(c)} className="text-xs font-semibold text-muted underline decoration-dotted hover:text-navy">{t('tray.clear')}</button>
             {s[c].length < 2
               ? <span aria-disabled="true" className="rounded-full bg-line px-4 py-1.5 text-sm font-semibold text-muted">{t('tray.go')}</span>

@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { sapiOrNull } from '@/lib/server-api';
 import type { TerminalDetail } from '@/lib/types';
+import { stationName } from '@/lib/format';
 
 // Terminal og:image: brend rangi + terminal nomi va stansiyasi (lotin). Terminal topilmasa umumiy rasm ishlaydi.
 export const size = { width: 1200, height: 630 };
@@ -18,7 +19,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           <div style={{ fontSize: 36, fontWeight: 700 }}>YukSaroy</div>
         </div>
         <div style={{ display: 'flex', fontSize: 64, fontWeight: 700, lineHeight: 1.15 }}>{t?.name ?? 'Terminal'}</div>
-        <div style={{ display: 'flex', fontSize: 30, color: '#8FB3D9' }}>{t ? `${t.station.nameUz} · ${t.address ?? 'yuksaroy.uz'}` : 'yuksaroy.uz'}</div>
+        <div style={{ display: 'flex', fontSize: 30, color: '#8FB3D9' }}>{t ? `${stationName(t)} · ${t.address ?? 'yuksaroy.uz'}` : 'yuksaroy.uz'}</div>
       </div>
     ),
     size,

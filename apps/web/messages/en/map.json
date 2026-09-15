@@ -3,10 +3,10 @@
     "nav": "Map",
     "open": "Open the map",
     "meta": {
-      "title": "Map: terminals, private sidings, equipment and road carriers",
-      "description": "Freight terminals, private sidings, rail equipment and road carrier listings across Uzbekistan on one map. Search by corridor, region or a radius around you."
+      "title": "Map: terminals, equipment and road transport",
+      "description": "Uzbekistan's freight terminals (rail sidings included), rail equipment and road transport on one map. Search by corridor, region or a radius around you."
     },
-    "aria": "Interactive map: terminals, private sidings, equipment and road carriers",
+    "aria": "Interactive map: terminals, equipment and road transport",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "search": {
@@ -16,7 +16,6 @@
     },
     "cat": {
       "terminal": "Terminal",
-      "siding": "Private siding",
       "equipment": "Equipment",
       "truck": "Road transport"
     },

@@ -5,10 +5,15 @@ import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { DeleteAccountUseCase } from '../identity/application/delete-account.usecase';
-import { PlatformAdmin } from '../organizations/application/platform-admin';
+import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 
 class BlockDto {
   @IsBoolean() block!: boolean;
+  @IsOptional() @IsString() @MaxLength(300) reason?: string;
+}
+
+/** O'chirishda faqat sabab keladi: BlockDto ishlatilsa majburiy `block` yo'qligi uchun 400 bo'lardi. */
+class ReasonDto {
   @IsOptional() @IsString() @MaxLength(300) reason?: string;
 }
 
@@ -18,12 +23,11 @@ class BlockDto {
  */
 @ApiTags('admin')
 @Controller('admin')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, PlatformAdminGuard)
 @ApiCookieAuth('ys_access')
 export class AdminUsersController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly admin: PlatformAdmin,
     private readonly audit: AuditService,
     private readonly del: DeleteAccountUseCase,
   ) {}
@@ -31,13 +35,14 @@ export class AdminUsersController {
   /** Platformaning umumiy raqamlari: nima bor va nima o'syapti. */
   @Get('overview')
   async overview(@CurrentUserId() userId: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const [users, blocked, orgs, terminals, sidings, listings, orders, inquiries, messages, reviews] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({ where: { isActive: false } }),
       this.prisma.organization.count(),
-      this.prisma.terminal.count({ where: { orgId: { not: null } } }),
-      this.prisma.siding.count({ where: { ownerOrgId: { not: null } } }),
+      // Ikki plitka bir-birini qoplamasligi kerak edi: egali temir yo'l terminali ikkalasida ham
+      // sanalardi va yig'indi umumiy sondan katta chiqardi. Endi: egali avto/aralash va butun temir yo'l reestri.
+      this.prisma.terminal.count({ where: { orgId: { not: null }, kind: { in: ['ROAD', 'MULTI'] } } }),
+      this.prisma.terminal.count({ where: { kind: 'RAIL' } }),
       this.prisma.listing.count({ where: { status: 'ACTIVE' } }),
       this.prisma.order.count(),
       this.prisma.inquiry.count(),
@@ -50,7 +55,6 @@ export class AdminUsersController {
   /** Ro'yxat: telefon, ism yoki email bo'yicha qidiruv. */
   @Get('users')
   async users(@CurrentUserId() userId: string, @Query('q') q?: string, @Query('page') page?: string, @Query('blocked') blocked?: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const p = Math.max(1, Number(page) || 1);
     const take = 30;
     const text = q?.trim();
@@ -96,7 +100,6 @@ export class AdminUsersController {
    */
   @Post('users/:id/block')
   async block(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: BlockDto) {
-    await this.admin.assertPlatformAdmin(userId);
     await this.prisma.user.update({ where: { id }, data: { isActive: !dto.block } });
     if (dto.block) await this.prisma.session.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() } });
     await this.audit.log({ actorId: userId, action: dto.block ? 'admin.user.block' : 'admin.user.unblock', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null } });
@@ -105,10 +108,9 @@ export class AdminUsersController {
 
   /** O'chirish: foydalanuvchining o'zi bosgandagi bilan bir xil (soft delete va anonimlash). */
   @Post('users/:id/delete')
-  async remove(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: BlockDto) {
-    await this.admin.assertPlatformAdmin(userId);
+  async remove(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ReasonDto) {
     const report = await this.del.execute(id);
-    await this.audit.log({ actorId: userId, action: 'admin.user.delete', entity: 'User', entityId: id, meta: { reason: dto?.reason ?? null, ...report } });
+    await this.audit.log({ actorId: userId, action: 'admin.user.delete', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null, ...report } });
     return { id, deleted: true };
   }
 }

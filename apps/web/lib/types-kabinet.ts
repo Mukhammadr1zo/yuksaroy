@@ -23,6 +23,8 @@ export interface OwnerListing {
   truckType: string | null; tonnage: number | null; fleetSize: number | null; serviceRegions: RegionCode[]; routes: { from: RegionCode; to: RegionCode }[] | null;
   priceTiyin: number | null; priceUnit: PriceUnit | null; photo: string | null; photos: string[]; lat: number | null; lng: number | null;
   owner: ListingOwner;
+  /** Premium muddati (admin ro'yxati uchun); premium bayrog'i shundan hisoblanadi. */
+  premiumUntil?: string | null;
   /** Eski nom, shaxsiy e'londa null. */
   org: { name: string; slug: string | null; kyc: KycStatus } | null;
   object: { type: 'terminal' | 'siding'; id: string; name: string; slug?: string } | null;
@@ -38,7 +40,11 @@ export interface Inquiry {
 
 /** GET /sidings/mine va /admin/sidings (repo yozuvi, xaritalanmagan). */
 export interface MySiding {
-  id: string; registryNo: number; regionCode: string | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null;
+  /** Ochiq sahifasining manzili: shahobcha ham terminal. */
+  slug: string;
+  id: string; registryNo: number | null; regionCode: string | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null;
+  /** Shahobchaning o'z nomi (reestrdan); eski qatorlarda bo'lmasligi mumkin. */
+  name?: string | null;
   stationNameRaw: string; ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
   claimStatus: ClaimStatus; claimedAt: string | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
   photos: string[];
@@ -47,7 +53,13 @@ export interface MySiding {
 /** GET /terminals/mine: repo yozuvi (TerminalRecord, sanalar ISO satr) + bugungi bo'sh slotlar. Tariflar faqat amaldagi. */
 export interface MyTerminal {
   id: string; name: string; slug: string; status: TerminalStatus; kind: TerminalKind; orgId: string | null; orgName: string | null;
-  regionCode: string | null; stationId: string; station: Station; description: string | null; address: string | null; phone: string | null;
+  /** Reestrdan kelgan shahobchada stansiya bog'lanmagan bo'lishi mumkin. */
+  regionCode: string | null; stationId: string | null; station: Station | null;
+  /**
+   * Temir yo'l pasporti (kind RAIL da). Bu xaritalanmagan repo yozuvi, ya'ni egasining
+   * o'z obyekti: mas'ul shaxs raqami ham shu yerda (ochiq katalogdan farqli).
+   */
+  rail?: { stationNameRaw: string | null; registryNo: number | null; lengthM: number | null; contactName: string | null } | null; description: string | null; address: string | null; phone: string | null;
   lat: number | null; lng: number | null; is24h: boolean; hours: WeekHours | null; passport: Passport | null; photos: string[];
   claimedAt: string | null; claimStatus: ClaimStatus; claimOrgId: string | null;
   services: { serviceCode: ServiceCode; isEnabled: boolean; leadTimeMin: number }[]; tariffs: Tariff[]; freeToday?: number;

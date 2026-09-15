@@ -1,23 +1,21 @@
 'use client';
-// Mening obyektlarim: terminal, shahobcha yo'l, texnika va avtotransport e'lonlari BITTA ro'yxatda.
+// Mening obyektlarim: terminal (shahobcha yo'l ham terminal), texnika va avtotransport e'lonlari BITTA ro'yxatda.
 // Ilgari uch xil sahifa edi (E'lonlarim, Terminallar, Shahobchalarim) va qaysi biri qaerdaligini topish qiyin edi.
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { PathIcon, ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
-import { CLAIM_STATUS_LABELS, type ClaimStatus } from '@yuksaroy/domain';
+import { ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { num, uzDate } from '@/lib/format';
-import type { MySiding, MyTerminal, OwnerListing } from '@/lib/types-kabinet';
-import { BTN_PRIMARY, CHIP, ListingStatusPill, useLang } from '@/components/kabinet/bits';
+import type { MyTerminal, OwnerListing } from '@/lib/types-kabinet';
+import { BTN_PRIMARY, CHIP, ListingStatusPill } from '@/components/kabinet/bits';
 
-type Kind = 'terminal' | 'siding' | 'equipment' | 'truck';
-const ICON: Record<Kind, Icon> = { terminal: ShippingContainerIcon, siding: PathIcon, equipment: TrainIcon, truck: TruckIcon };
+type Kind = 'terminal' | 'equipment' | 'truck';
+const ICON: Record<Kind, Icon> = { terminal: ShippingContainerIcon, equipment: TrainIcon, truck: TruckIcon };
 const TONE: Record<Kind, string> = {
-  terminal: 'bg-[#FD7B03] text-white', siding: 'border-2 border-teal bg-white text-teal',
+  terminal: 'bg-[#FD7B03] text-white',
   equipment: 'bg-navy text-white', truck: 'border-2 border-[#FD7B03] bg-white text-[#FD7B03]',
 };
-const FILTERS: (Kind | 'all')[] = ['all', 'terminal', 'siding', 'equipment', 'truck'];
+const FILTERS: (Kind | 'all')[] = ['all', 'terminal', 'equipment', 'truck'];
 
 type Row = {
   key: string; kind: Kind; title: string; sub: string; href: string; publicHref: string | null;
@@ -30,9 +28,7 @@ export default function ObjectsPage() {
   const tr = useTranslations('region');
   const tk = useTranslations('kind');
   const locale = useLocale();
-  const lang = useLang();
   const [terminals, setTerminals] = useState<MyTerminal[] | null>(null);
-  const [sidings, setSidings] = useState<MySiding[] | null>(null);
   const [listings, setListings] = useState<OwnerListing[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [only, setOnly] = useState<Kind | 'all'>('all');
@@ -41,7 +37,6 @@ export default function ObjectsPage() {
     let alive = true;
     const fail = () => { if (alive) setFailed(true); };
     api<MyTerminal[]>('/terminals/mine').then((r) => alive && setTerminals(r)).catch(() => { setTerminals([]); fail(); });
-    api<{ items: MySiding[] }>('/sidings/mine').then((r) => alive && setSidings(r.items)).catch(() => { setSidings([]); fail(); });
     api<OwnerListing[]>('/listings/mine').then((r) => alive && setListings(r)).catch(() => { setListings([]); fail(); });
     return () => { alive = false; };
   }, []);
@@ -49,7 +44,7 @@ export default function ObjectsPage() {
   const region = (code: string | null) => (code && tr.has(code) ? tr(code) : null);
 
   const rows: Row[] | null = useMemo(() => {
-    if (!terminals || !sidings || !listings) return null;
+    if (!terminals || !listings) return null;
     const out: Row[] = [];
     for (const x of terminals) out.push({
       key: `t:${x.id}`, kind: 'terminal', title: x.name,
@@ -57,13 +52,6 @@ export default function ObjectsPage() {
       href: `/dashboard/terminals/${x.id}`, publicHref: x.status === 'ACTIVE' ? `/terminals/${x.slug}` : null,
       status: <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${x.status === 'ACTIVE' ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{t(`terminalStatus.${x.status}`)}</span>,
       fact: x.freeToday !== undefined ? t('freeToday', { count: x.freeToday }) : null,
-    });
-    for (const x of sidings) out.push({
-      key: `s:${x.id}`, kind: 'siding', title: `${x.station?.nameUz ?? x.stationNameRaw} No ${x.registryNo}`,
-      sub: [region(x.regionCode), x.lengthM != null ? `${num(x.lengthM, locale)} m` : null].filter(Boolean).join(' · '),
-      href: `/dashboard/sidings/${x.id}`, publicHref: x.claimStatus === 'APPROVED' ? `/sidings/${x.id}` : null,
-      status: <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${x.claimStatus === 'APPROVED' ? 'bg-teal text-white' : 'bg-amber-soft text-amber-ink'}`}>{CLAIM_STATUS_LABELS[lang][x.claimStatus as ClaimStatus]}</span>,
-      fact: x.claimedAt ? t('claimedAt', { date: uzDate(x.claimedAt, locale) }) : null,
     });
     for (const x of listings) out.push({
       key: `l:${x.id}`, kind: x.kind === 'TRUCK' ? 'truck' : 'equipment', title: x.title,
@@ -73,7 +61,7 @@ export default function ObjectsPage() {
       fact: x.status === 'ACTIVE' ? t('views', { count: x.views }) : null,
     });
     return out;
-  }, [terminals, sidings, listings]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [terminals, listings]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const shown = rows?.filter((r) => only === 'all' || r.kind === only) ?? null;
   const count = (k: Kind | 'all') => (k === 'all' ? rows?.length ?? 0 : rows?.filter((r) => r.kind === k).length ?? 0);

@@ -1,8 +1,11 @@
-import { Controller, Get, Header, Inject, NotFoundException, Param, Query } from '@nestjs/common';
+import { Controller, Get, Header, Inject, NotFoundException, Param, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { EQUIPMENT_KINDS, REGIONS, RJUS, SEARCH_CATEGORIES, SERVICE_CODES, TERMINAL_KINDS, distanceKm, type ListingKind, type Rju, type ServiceCode, type TerminalKind } from '@yuksaroy/domain';
+import { TokenService } from '../../identity/application/token.service';
+import { optionalUserId } from '../../identity/presentation/jwt.guard';
 import { parseCorridor } from '../../listings/domain/listing-query';
 import { PrismaListingRepository } from '../../listings/infrastructure/prisma-listing.repository';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
@@ -29,7 +32,11 @@ let regionsGeo: unknown; // ponytail: fayl ~160 KB (1 MB dan kichik), Douglas-Pe
 @ApiTags('catalog')
 @Controller()
 export class CatalogController {
-  constructor(@Inject(CATALOG_REPOSITORY) private readonly repo: CatalogRepository, private readonly listings: PrismaListingRepository) {}
+  constructor(
+    @Inject(CATALOG_REPOSITORY) private readonly repo: CatalogRepository,
+    private readonly listings: PrismaListingRepository,
+    private readonly tokens: TokenService,
+  ) {}
 
   @Get('stations')
   stations(@Query('q') q = '', @Query('rju') rju?: string, @Query('limit') limit?: string) {
@@ -57,40 +64,94 @@ export class CatalogController {
   ) {
     const now = new Date(), geo = geoNear(near, radius);
     const services = listIn(service, SERVICE_CODES), regions = listIn(region, REGIONS);
-    const found = await this.repo.listTerminals(
-      {
-        ...stationParam(station), rju: pickIn(rju, RJUS), kind: pickIn(kind, TERMINAL_KINDS),
-        service: services.length ? services : undefined, q: q?.trim() || undefined,
-        region: regions.length ? regions : undefined, near: geo,
-        owned: true, // terminalni faqat egasi qo'shadi: egasiz obyekt ochiq katalogda yo'q
-      },
-      now,
-    );
-    const free = await this.repo.freeTodayByTerminal(found.map((t) => t.id), now);
-    // bookable=1: faqat bugun bo'sh sloti borlar (bron sahifasi CTA)
-    const all = bookable === '1' ? found.filter((t) => (free[t.id] ?? 0) > 0) : found;
     const s = pickIn(sort, SORTS) ?? 'default';
-    // Sukut: egasi bor obyektlar oldinda; 'rating' repository tartibida (ratingAvg desc) qoladi
-    if (s === 'default') all.sort(byDefault(geo));
-    if (s === 'price') all.sort((a, b) => (fromPriceTiyin(a) ?? Infinity) - (fromPriceTiyin(b) ?? Infinity));
-    if (s === 'name') all.sort((a, b) => a.name.localeCompare(b.name));
-    // near berilganda koordinatasizlar repository'da allaqachon chiqarib tashlangan
-    if (s === 'nearest' && geo) all.sort((a, b) => distanceKm(geo.lat, geo.lng, a.lat!, a.lng!) - distanceKm(geo.lat, geo.lng, b.lat!, b.lng!));
     const p = clampInt(page, 1, 1, 1000), l = clampInt(limit, 20, 1, 50);
+    const base = {
+      ...stationParam(station), rju: pickIn(rju, RJUS), kind: pickIn(kind, TERMINAL_KINDS),
+      service: services.length ? services : undefined, q: q?.trim() || undefined,
+      region: regions.length ? regions : undefined, near: geo,
+      // Ochiq katalog: egasi qo'shgan terminallar + reestrdan kelgan shahobchalar (temir yo'l terminali)
+      publicCatalog: true,
+    };
+
+    /**
+     * Ikki yo'l. "narx", "eng yaqin" va "bugun bo'sh joy" hisoblangan qiymatga tayanadi
+     * (tarif, masofa, slot) va ularni baza tartiblay olmaydi. Lekin bunday qiymat faqat
+     * egasi bor terminalda bo'ladi yoki radius bilan cheklangan, ya'ni to'plam kichik:
+     * xotirada saralash xavfsiz. Qolgan tartiblar (sukut, baho, nom) butun katalog bo'ylab
+     * ketadi, u yerda 1700+ obyekt bor, shuning uchun saralash ham, bo'lish ham bazada.
+     */
+    // `near` ham shu yo'ldan: baza to'rtburchakni sanaydi, radius esa doirani, ya'ni
+    // bazadagi sanoq burchaklarga tushgan obyektlar hisobiga sal kattaroq chiqardi.
+    // To'rtburchak to'plamni allaqachon kichraytirgani uchun aniq masofani shu yerda hisoblaymiz.
+    const computed = s === 'nearest' || bookable === '1' || geo !== undefined;
+    if (computed) {
+      // Radius berilgan bo'lsa hamma tur (reestr ham) kiradi; aks holda faqat egali obyekt
+      const pool = await this.repo.listTerminals(geo ? base : { ...base, publicCatalog: undefined, owned: true }, now);
+      const free = await this.repo.freeTodayByTerminal(pool.map((t) => t.id), now);
+      const all = bookable === '1' ? pool.filter((t) => (free[t.id] ?? 0) > 0) : pool;
+      if (s === 'price') all.sort((a, b) => (fromPriceTiyin(a) ?? Infinity) - (fromPriceTiyin(b) ?? Infinity));
+      // near berilganda koordinatasizlar repository'da allaqachon chiqarib tashlangan
+      else if (s === 'nearest' && geo) all.sort((a, b) => distanceKm(geo.lat, geo.lng, a.lat!, a.lng!) - distanceKm(geo.lat, geo.lng, b.lat!, b.lng!));
+      else all.sort(byDefault(geo));
+      return {
+        items: all.slice((p - 1) * l, p * l).map((t) => publicTerminalCard(t, free[t.id] ?? 0, geo)),
+        total: all.length, page: p, limit: l,
+        summary: summarize(all, free, geo, services),
+      };
+    }
+
+    const off = (p - 1) * l;
+    const [total, rich] = await Promise.all([
+      this.repo.countTerminals(base),
+      // Qaror satri (eng arzon, bugun bo'sh joy, baho) faqat egali obyektlarga tegishli:
+      // reestr qatorida tarif ham, slot ham, baho ham yo'q, shuning uchun kichik to'plam yetarli
+      this.repo.listTerminals({ ...base, publicCatalog: undefined, owned: true }, now),
+    ]);
+
+    /**
+     * Narx bo'yicha saralash alohida yig'iladi. Tarif faqat egasi bor terminalda bo'ladi,
+     * ya'ni narxlanganlar to'plami kichik (`rich`): ularni arzonidan tartiblab boshiga qo'yamiz,
+     * qolganini (egasiz reestr) baza tartibida davom ettiramiz. Shunda ro'yxat ham, jami son ham
+     * boshqa tartiblardagidek qoladi: ilgari bu saralash reestrni butunlay chiqarib yuborardi.
+     */
+    let pageRows: typeof rich;
+    if (s === 'price') {
+      const head = [...rich].sort((a, b) => (fromPriceTiyin(a) ?? Infinity) - (fromPriceTiyin(b) ?? Infinity));
+      const fromHead = head.slice(off, off + l);
+      const need = l - fromHead.length;
+      const tail = need > 0
+        // publicCatalog saqlanadi: u bilan birga `owned: false` aynan reestr quyrug'ini beradi
+        // (egasiz VA temir yo'l). Olib tashlansa egasiz avto terminal ham kirib, boshqa
+        // tartiblarda ko'rinmaydigan qator shu sahifada paydo bo'lardi.
+        ? await this.repo.listTerminals({ ...base, owned: false, sort: 'default', skip: Math.max(0, off - head.length), take: need }, now)
+        : [];
+      pageRows = [...fromHead, ...tail];
+    } else {
+      pageRows = await this.repo.listTerminals(
+        { ...base, sort: s === 'rating' ? 'rating' : s === 'name' ? 'name' : 'default', skip: off, take: l },
+        now,
+      );
+    }
+    const free = await this.repo.freeTodayByTerminal([...pageRows, ...rich].map((t) => t.id), now);
     return {
-      items: all.slice((p - 1) * l, p * l).map((t) => publicTerminalCard(t, free[t.id] ?? 0, geo)),
-      total: all.length, page: p, limit: l,
-      summary: summarize(all, free, geo, services),
+      items: pageRows.map((t) => publicTerminalCard(t, free[t.id] ?? 0, geo)),
+      total, page: p, limit: l,
+      summary: summarize(rich, free, geo, services),
     };
   }
 
   @Get('terminals/:slug')
-  async terminal(@Param('slug') slug: string) {
+  async terminal(@Param('slug') slug: string, @Req() req: FastifyRequest) {
     const now = new Date();
     const t = await this.repo.findTerminalBySlug(slug, now);
-    if (!t || t.status !== 'ACTIVE' || t.orgId === null) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    // Shahobcha reestrdan keladi va egasi yo'q: uni ham ochiq ko'rsatamiz, egasi keyin da'vo qiladi
+    const open = t !== null && t.status === 'ACTIVE' && (t.orgId !== null || t.kind === 'RAIL');
+    if (!open) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     const free = await this.repo.freeTodayByTerminal([t.id], now);
-    return publicTerminal(t, free[t.id] ?? 0);
+    // Mas'ul shaxs telefoni faqat kirgan foydalanuvchiga. Token TEKSHIRILADI: ilgari shunchaki
+    // `ys_access` nomli cookie bor-yo'qligiga qaralardi, ya'ni istalgan odam uni o'zi qo'yib raqamni olardi.
+    return publicTerminal(t, free[t.id] ?? 0, optionalUserId(req, this.tokens) !== null);
   }
 
   @Get('sidings')
@@ -100,24 +161,48 @@ export class CatalogController {
     @Query('region') region?: string, @Query('near') near?: string, @Query('radius') radius?: string,
   ) {
     const r = await this.repo.listSidings(
-      { ...stationParam(station), rju: pickIn(rju, RJUS), q: q?.trim() || undefined, region: pickIn(region, REGIONS), near: geoNear(near, radius), owned: true },
+      // hozircha egasiz reestr shahobchalari ham ochiq katalogda: egalar o'z yo'lini topib da'vo qilsin
+      { ...stationParam(station), rju: pickIn(rju, RJUS), q: q?.trim() || undefined, region: pickIn(region, REGIONS), near: geoNear(near, radius) },
       clampInt(page, 1, 1, 10000), clampInt(limit, 30, 1, 100),
     );
-    return { ...r, items: r.items.map(publicSiding) };
+    return { ...r, items: r.items.map((x) => publicSiding(x)) };
   }
 
   @Get('sidings/:id')
-  async siding(@Param('id') id: string) {
-    const s = await this.repo.findSidingById(id);
-    // Egasiz shahobcha yo'l ochiq mahsulotda yo'q (reestr faqat admin uchun)
-    if (!s || s.ownerOrgId === null) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
-    return publicSiding(s);
+  async siding(@Param('id') id: string, @Req() req: FastifyRequest) {
+    const s = await this.repo.findSidingById(id, true);
+    // hozircha egasiz reestr shahobchalari ham ochiq: egasi/rasm faqat da'vo tasdiqlanganda ko'rinadi (publicSiding)
+    if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
+    // Telefon uchun token tekshiriladi (cookie nomi yetarli emas), Bearer bilan kelgan bot/mobil ham ishlaydi
+    return publicSiding(s, optionalUserId(req, this.tokens) !== null);
   }
 
   /** Xarita: platformadagi obyektlar (temir yo'l tarmog'i emas). */
   @Get('map-objects')
   mapObjects() {
     return this.repo.mapObjects();
+  }
+
+  /**
+   * Xaritadagi stansiya qatlami: nomi uch tilda, shahobcha soni bilan.
+   * Faqat rasmiy ro'yxatdagi ("2026 yil stansiyalar" hujjati) va koordinatasi bor stansiyalar.
+   * Obyekt qatlamlaridan alohida: stansiya bu katalog birligi emas, orientir.
+   */
+  @Get('stations.geojson')
+  @Header('Cache-Control', 'public, max-age=300, s-maxage=300')
+  async stationsGeojson() {
+    const rows = await this.repo.listedStations();
+    return {
+      type: 'FeatureCollection',
+      features: rows.map((s) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
+        properties: {
+          id: s.id, esrCode: s.esrCode, rju: s.rju, sidings: s.sidings,
+          name: s.nameUz, nameRu: s.nameRu, nameEn: s.nameEn,
+        },
+      })),
+    };
   }
 
   /**
@@ -132,7 +217,7 @@ export class CatalogController {
     const kinds: ListingKind[] = [...(cats.includes('equipment') ? EQUIPMENT_KINDS : []), ...(cats.includes('truck') ? (['TRUCK'] as const) : [])];
     const [terminals, objects, listings] = await Promise.all([
       cats.includes('terminal') ? this.repo.listTerminals({ region: regions.length ? regions : undefined, owned: true }, now) : [],
-      cats.includes('siding') ? this.repo.mapObjects() : null,
+      cats.includes('terminal') ? this.repo.mapObjects() : null,
       kinds.length ? this.listings.listPublic({ kinds, regions }, now) : [],
     ]);
     const free = terminals.length ? await this.repo.freeTodayByTerminal(terminals.map((t) => t.id), now) : {};

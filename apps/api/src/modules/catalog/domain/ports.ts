@@ -21,9 +21,34 @@ export type WeekDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 /** { mon: [["08:00","18:00"]], sat: [] }: bo'sh massiv = dam olish kuni. */
 export type WeekHours = Partial<Record<WeekDay, [string, string][]>>;
 
+/**
+ * Shahobcha texnik pasporti (Taminot reestridan). Mas'ul shaxs telefoni bu yerda bor,
+ * lekin ochiq javobga chiqmaydi: mapper uni faqat ro'yxatdan o'tgan foydalanuvchiga beradi.
+ */
+export interface SidingPassport {
+  name: string | null; registryRef: string | null;
+  trackCount: number | null; capacityWagons: number | null; occupiedWagons: number | null;
+  deadEndDistanceM: number | null; junctionSwitch: string | null; brakeShoes: number | null;
+  nogabarit: string | null; equipment: string | null;
+  loadNorm: string | null; unloadNorm: string | null; loadFront: string | null; unloadFront: string | null;
+  locoType: string | null; locoNote: string | null; processingHours: number | null;
+  contractNo: string | null; contractStart: Date | null; contractEnd: Date | null; contractState: string | null;
+  category: string | null; usageType: string | null; status: string | null; note: string | null;
+  /** Mas'ul shaxs. Telefon ochiq javobda berilmaydi: faqat ro'yxatdan o'tgan foydalanuvchiga. */
+  contactName: string | null; contactPhone: string | null;
+}
+
 export interface TerminalRecord {
   regionCode: string | null;
-  id: string; orgId: string | null; orgName: string | null; stationId: string; station: StationRecord;
+  /**
+   * Temir yo'l pasporti: shahobcha ham terminal, reestr ma'lumoti shu yerda.
+   * Avto terminalda null. Ichma-ich, chunki `name` va `status` terminalnikiga to'qnashadi.
+   */
+  rail: (SidingPassport & {
+    registryNo: number | null; stationNameRaw: string | null; esrCode: string | null; rju: Rju | null;
+    ownerNameRaw: string | null; lengthM: number | null; loadCapacity: number; unloadCapacity: number;
+  }) | null;
+  id: string; orgId: string | null; orgName: string | null; stationId: string | null; station: StationRecord | null;
   kind: TerminalKind; slug: string; name: string; description: string | null; address: string | null; phone: string | null;
   lat: number | null; lng: number | null; is24h: boolean; hours: WeekHours | null; passport: Record<string, unknown> | null;
   photos: string[]; status: TerminalStatus; claimedAt: Date | null; ratingAvg: number; ratingCount: number;
@@ -35,7 +60,7 @@ export interface TerminalRecord {
 }
 
 export interface TerminalWrite {
-  orgId: string | null; stationId: string; kind: TerminalKind; slug: string; name: string;
+  orgId: string | null; stationId: string | null; kind: TerminalKind; slug: string; name: string;
   description?: string | null; address?: string | null; phone?: string | null; lat?: number | null; lng?: number | null;
   is24h?: boolean; hours?: WeekHours | null; passport?: Record<string, unknown> | null; photos?: string[];
   status?: TerminalStatus; claimedAt?: Date | null;
@@ -60,12 +85,29 @@ export interface TerminalFilter {
    * true = faqat egali, false = faqat egasiz (admin reestri), undefined = hammasi.
    */
   owned?: boolean;
+  /**
+   * Ochiq katalog qamrovi: egasi bor obyektlar YOKI temir yo'l terminallari (shahobcha reestri).
+   * Shahobchani egasi qo'shmaydi, u reestrdan keladi, shuning uchun `owned` bilan chiqarib
+   * tashlanmasligi kerak. `owned` bilan birga ishlatilmaydi.
+   */
+  publicCatalog?: boolean;
+  /**
+   * Ochiq katalog sahifasi: saralash va bo'lish BAZADA bajariladi.
+   * Reestr qo'shilgach katalogda 1700+ obyekt bor, hammasini xotiraga olib bo'lmaydi.
+   * Faqat baza o'zi qila oladigan tartiblar; narx va masofa hisoblangan qiymat (pastga qarang).
+   */
+  sort?: 'default' | 'rating' | 'name';
+  /** Aniq siljish va soni. Narx bo'yicha saralashda sahifa chegarasi sahifa raqamiga tushmaydi. */
+  skip?: number;
+  take?: number;
 }
 
-export interface SidingRecord {
-  id: string; registryNo: number; stationId: string | null; regionCode: string | null;
+export interface SidingRecord extends SidingPassport {
+  id: string; registryNo: number | null; stationId: string | null; regionCode: string | null;
   station: Pick<StationRecord, 'id' | 'esrCode' | 'nameUz' | 'rju'> | null;
   stationNameRaw: string; esrCode: string | null; rju: Rju | null;
+  /** Terminal sahifasining manzili: shahobcha ham terminal. */
+  slug: string;
   ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
   claimStatus: ClaimStatus; claimedAt: Date | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
   /** Egasi yuklagan rasmlar; reestrda rasm yo'q. */
@@ -75,10 +117,12 @@ export interface SidingRecord {
 }
 
 export interface SidingFilter {
-  stationEsr?: string; stationId?: string; rju?: Rju; q?: string; ownerOrgIds?: string[]; region?: string; near?: GeoNear; claimStatus?: ClaimStatus;
+  stationEsr?: string; stationId?: string; rju?: Rju; q?: string; ownerOrgIds?: string[]; region?: string; near?: GeoNear;
+  /** Bitta holat yoki holatlar ro'yxati (masalan da'vo qilish mumkin bo'lganlar: NONE va REJECTED). */
+  claimStatus?: ClaimStatus | ClaimStatus[];
   /**
-   * Shahobcha yo'lni ham faqat egasi qo'shadi: ochiq katalogda egasiz obyekt ko'rinmaydi.
-   * true = faqat egali, false = faqat egasiz (admin reestri), undefined = hammasi.
+   * Shahobcha reestri ochiq: egasiz yo'llar ham katalogda turadi (egasi topib da'vo qiladi).
+   * true = faqat egali, false = faqat egasiz, undefined = hammasi (ochiq katalog shuni ishlatadi).
    */
   owned?: boolean;
 }
@@ -98,6 +142,8 @@ export interface CatalogRepository {
   findCargoTypeByCode(code: string): Promise<CargoTypeRecord | null>;
 
   listTerminals(f: TerminalFilter, now: Date): Promise<TerminalRecord[]>;
+  /** Filtrga tushgan obyektlarning haqiqiy soni (sahifadagi emas). */
+  countTerminals(f: TerminalFilter): Promise<number>;
   /** Bugungi (Toshkent kuni) ochiq slotlardagi bo'sh joylar yig'indisi, terminal id bo'yicha. Yo'q id = 0. */
   freeTodayByTerminal(terminalIds: string[], now: Date): Promise<Record<string, number>>;
   findTerminalBySlug(slug: string, now: Date): Promise<TerminalRecord | null>;
@@ -115,7 +161,8 @@ export interface CatalogRepository {
   decideTerminalClaim(id: string, approve: boolean, now: Date): Promise<TerminalRecord | null>;
 
   listSidings(f: SidingFilter, page: number, limit: number): Promise<Page<SidingRecord>>;
-  findSidingById(id: string): Promise<SidingRecord | null>;
+  /** `publicOnly`: ochiq yo'l uchun faqat ACTIVE. */
+  findSidingById(id: string, publicOnly?: boolean): Promise<SidingRecord | null>;
   /** claimStatus NONE/REJECTED bo'lsa PENDING ga o'tkazadi; aks holda SidingClaimedError. */
   claimSiding(id: string, orgId: string, now: Date): Promise<SidingRecord>;
   /** Faqat PENDING hal qilinadi (APPROVED yoki REJECTED); aks holda null. Rad etilganda egasi saqlanadi, ochiq sahifada ko'rinmaydi. */
@@ -134,6 +181,11 @@ export interface CatalogRepository {
   }>;
   /** Landing va ROI raqamlari: faol obyektlar, ochiq kompaniyalar, bugungi bo'sh slotlar yig'indisi. */
   publicStats(): Promise<{ terminals: number; sidings: number; stations: number; listings: number; companies: number; freeSlotsToday: number }>;
+  /** Xarita uchun rasmiy ro'yxatdagi, koordinatasi bor stansiyalar (nomi uch tilda). */
+  listedStations(): Promise<{
+    id: string; esrCode: string | null; nameUz: string; nameRu: string | null; nameEn: string | null;
+    rju: Rju; lat: number; lng: number; sidings: number;
+  }[]>;
 }
 
 export const CATALOG_REPOSITORY = Symbol('CatalogRepository');

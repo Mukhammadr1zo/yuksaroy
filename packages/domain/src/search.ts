@@ -1,9 +1,9 @@
 // Yordamchi qidiruv: lug'at asosidagi tabiiy til tahlili (LLM yo'q). Framework'siz.
 import type { RegionCode, ServiceCode, TerminalKind } from './index';
 
-export const SEARCH_CATEGORIES = ['terminal', 'siding', 'equipment', 'truck'] as const;
+export const SEARCH_CATEGORIES = ['terminal', 'equipment', 'truck'] as const;
 export type SearchCategory = (typeof SEARCH_CATEGORIES)[number];
-export const EQUIPMENT_KINDS = ['SHUNTING_LOCO', 'ELECTRIC_LOCO', 'WAGON'] as const;
+export const EQUIPMENT_KINDS = ['SHUNTING_LOCO', 'WAGON'] as const;
 export type EquipmentKind = (typeof EQUIPMENT_KINDS)[number];
 export const DEAL_KINDS = ['RENT', 'SALE'] as const;
 export type DealKind = (typeof DEAL_KINDS)[number];
@@ -168,7 +168,7 @@ const SERVICES: [ServiceCode, string, string, string][] = [
   ['STORAGE', 'ombor|saqlash', 'склад|хранен', 'storage|warehouse'],
   ['SVX', 'svx|bojxona', 'свх|таможен', 'bonded|customs'],
   ['CONTAINER', 'konteyner', 'контейнер', 'container|teu'],
-  ['LAST_MILE', 'avtovyvoz|avto|oxirgi milya', 'автовывоз', 'last mile|truck delivery'],
+  ['LAST_MILE', 'avtovyvoz|avto|oxirgi milya|yetkazib berish|avtoda yetkazish', 'автовывоз|доставка до склада|последняя миля', 'last mile|truck delivery|delivery to warehouse'],
   ['SHUNTING', 'manevr', 'маневр', 'shunting'],
 ];
 for (const [code, uz, ru, en] of SERVICES) {
@@ -176,20 +176,37 @@ for (const [code, uz, ru, en] of SERVICES) {
   add('uz', uz, e); add('ru', ru, e); add('en', en, e);
 }
 
+// Terminal turi transport bo'yicha: temir yo'l, avto, ikkisi ham.
 const KINDS: [TerminalKind, string, string, string][] = [
-  ['YARD', 'yuk saroyi', 'грузовой двор', 'freight yard'],
-  ['CONTAINER', 'konteyner terminali', 'контейнерный терминал', 'container terminal'],
-  ['LC', 'logistika markazi', 'логистический центр', 'logistics center|logistics centre'],
-  ['SVX', 'svx ombori', 'склад временного хранения', 'bonded warehouse'],
+  ['RAIL', "temir yo'l terminali|temir yo'l yuk terminali|temir yo'l yuk saroyi", 'железнодорожный терминал|жд терминал|ж/д терминал', 'rail terminal|railway terminal'],
+  ['ROAD', 'avto terminal|avtoterminal|avto yuk terminali', 'автотерминал|авто терминал|автомобильный терминал', 'road terminal|truck terminal'],
+  ['MULTI', 'multimodal terminal|aralash terminal', 'мультимодальный терминал|смешанный терминал', 'multimodal terminal|intermodal terminal'],
 ];
 for (const [code, uz, ru, en] of KINDS) {
   const es: Entry[] = [{ k: 'kind', code }, { k: 'category', code: 'terminal' }];
   add('uz', uz, ...es); add('ru', ru, ...es); add('en', en, ...es);
 }
 
+// Eski inshoot turlari (yuk saroyi, konteyner, SVX) endi tur emas, lekin odamlar shu so'zlar
+// bilan qidiradi: ularni xizmat va kategoriyaga yo'naltiramiz, shunda qidiruv bo'sh qolmaydi.
+add('uz', 'konteyner terminali', { k: 'service', code: 'CONTAINER' }, { k: 'category', code: 'terminal' });
+add('ru', 'контейнерный терминал', { k: 'service', code: 'CONTAINER' }, { k: 'category', code: 'terminal' });
+add('en', 'container terminal', { k: 'service', code: 'CONTAINER' }, { k: 'category', code: 'terminal' });
+add('uz', 'svx ombori', { k: 'service', code: 'SVX' }, { k: 'category', code: 'terminal' });
+add('ru', 'склад временного хранения', { k: 'service', code: 'SVX' }, { k: 'category', code: 'terminal' });
+add('en', 'bonded warehouse', { k: 'service', code: 'SVX' }, { k: 'category', code: 'terminal' });
+add('uz', 'yuk saroyi|logistika markazi', { k: 'category', code: 'terminal' });
+add('ru', 'грузовой двор|логистический центр', { k: 'category', code: 'terminal' });
+add('en', 'freight yard|logistics center|logistics centre', { k: 'category', code: 'terminal' });
+
+// Shahobcha alohida kategoriya emas: u temir yo'l turidagi terminal. So'z terminal katalogiga
+// RAIL filtri bilan olib boradi, shunda "shahobcha" deb qidirgan odam bo'sh sahifa ko'rmaydi.
+add('uz', "shahobcha|shaxobcha|shahobcha yo'l|shaxobcha yo'l", { k: 'kind', code: 'RAIL' }, { k: 'category', code: 'terminal' });
+add('ru', 'подъездн|ветка', { k: 'kind', code: 'RAIL' }, { k: 'category', code: 'terminal' });
+add('en', 'siding', { k: 'kind', code: 'RAIL' }, { k: 'category', code: 'terminal' });
+
 const CATEGORIES: [SearchCategory, string, string, string][] = [
   ['terminal', 'terminal', 'терминал', 'terminal'],
-  ['siding', "shahobcha|shaxobcha|shahobcha yo'l|shaxobcha yo'l", 'подъездн|ветка', 'siding'],
   ['truck', 'fura|yuk mashinasi|avtotashuvchi|tashuvchi', 'грузовик|фура|перевозчик', 'truck|carrier'],
   ['equipment', 'lokomotiv', 'локомотив', 'locomotive'],
 ];
@@ -201,7 +218,6 @@ for (const [code, uz, ru, en] of CATEGORIES) {
 // Texnika so'zi yakka kelsa: kategoriya equipment + tur. "manevr teplovozi" esa terminal xizmati (SHUNTING).
 const EQUIPMENT: [EquipmentKind, string, string, string][] = [
   ['SHUNTING_LOCO', 'teplovoz', 'тепловоз', 'shunting locomotive'],
-  ['ELECTRIC_LOCO', 'elektrovoz', 'электровоз', 'electric locomotive'],
   ['WAGON', 'vagon|vagonlar', 'вагон', 'wagon'],
 ];
 for (const [code, uz, ru, en] of EQUIPMENT) {
@@ -398,7 +414,7 @@ export function parseQuery(q: string, opts: { lang?: SearchLang; near?: { lat: n
     ? corridorRegions(corridor.from, corridor.to)
     : [...new Set(regionHits.filter((h) => !(near && h === point)).map((h) => h.code))];
 
-  // Kategoriya: aniq so'z (siding/truck/terminal) yutadi; texnika + terminal xizmati birga kelsa null.
+  // Kategoriya: aniq so'z (truck/terminal) yutadi; texnika + terminal xizmati birga kelsa null.
   const explicit = cats.find((c) => c !== 'equipment');
   const category: SearchCategory | null = explicit ?? (cats.includes('equipment') ? (services.length ? null : 'equipment') : null);
 
@@ -447,10 +463,10 @@ export const SEARCH_LABELS: Record<SearchLang, {
       'UZ-BU': 'Buxoro', 'UZ-NW': 'Navoiy', 'UZ-QA': 'Qashqadaryo', 'UZ-SU': 'Surxondaryo', 'UZ-XO': 'Xorazm',
       'UZ-QR': "Qoraqalpog'iston", 'UZ-AN': 'Andijon', 'UZ-NG': 'Namangan', 'UZ-FA': "Farg'ona",
     },
-    service: { LOAD: 'Yuklash', UNLOAD: 'Tushirish', WEIGH: 'Tarozi', STORAGE: 'Saqlash', SVX: 'SVX', CONTAINER: 'Konteyner', LAST_MILE: 'Avtovyvoz', SHUNTING: 'Manevr' },
-    kind: { YARD: 'Yuk saroyi', CONTAINER: 'Konteyner terminali', LC: 'Logistika markazi', SVX: 'SVX ombori' },
-    category: { terminal: 'Terminal', siding: "Shahobcha yo'l", equipment: "Temir yo'l texnikasi", truck: 'Avtotransport' },
-    equipment: { SHUNTING_LOCO: 'Manevr teplovozi', ELECTRIC_LOCO: 'Elektrovoz', WAGON: 'Vagon' },
+    service: { LOAD: 'Yuklash', UNLOAD: 'Tushirish', WEIGH: 'Tarozi', STORAGE: 'Saqlash', SVX: 'SVX', CONTAINER: 'Konteyner', LAST_MILE: 'Avtoda yetkazish', SHUNTING: 'Manevr' },
+    kind: { RAIL: "Temir yo'l yuk terminali", ROAD: 'Avto yuk terminali', MULTI: "Avto va temir yo'l" },
+    category: { terminal: 'Terminal', equipment: "Temir yo'l texnikasi", truck: 'Avtotransport' },
+    equipment: { SHUNTING_LOCO: 'Manevr teplovozi', WAGON: 'Vagon' },
     deal: { RENT: 'Ijara', SALE: 'Sotuv' },
   },
   ru: {
@@ -459,10 +475,10 @@ export const SEARCH_LABELS: Record<SearchLang, {
       'UZ-BU': 'Бухара', 'UZ-NW': 'Навои', 'UZ-QA': 'Кашкадарья', 'UZ-SU': 'Сурхандарья', 'UZ-XO': 'Хорезм',
       'UZ-QR': 'Каракалпакстан', 'UZ-AN': 'Андижан', 'UZ-NG': 'Наманган', 'UZ-FA': 'Фергана',
     },
-    service: { LOAD: 'Погрузка', UNLOAD: 'Выгрузка', WEIGH: 'Весы', STORAGE: 'Хранение', SVX: 'СВХ', CONTAINER: 'Контейнер', LAST_MILE: 'Автовывоз', SHUNTING: 'Маневры' },
-    kind: { YARD: 'Грузовой двор', CONTAINER: 'Контейнерный терминал', LC: 'Логистический центр', SVX: 'Склад СВХ' },
-    category: { terminal: 'Терминал', siding: 'Подъездной путь', equipment: 'Ж/д техника', truck: 'Автотранспорт' },
-    equipment: { SHUNTING_LOCO: 'Маневровый тепловоз', ELECTRIC_LOCO: 'Электровоз', WAGON: 'Вагон' },
+    service: { LOAD: 'Погрузка', UNLOAD: 'Выгрузка', WEIGH: 'Весы', STORAGE: 'Хранение', SVX: 'СВХ', CONTAINER: 'Контейнер', LAST_MILE: 'Автодоставка', SHUNTING: 'Маневры' },
+    kind: { RAIL: 'Железнодорожный терминал', ROAD: 'Автомобильный терминал', MULTI: 'Авто и ж/д' },
+    category: { terminal: 'Терминал', equipment: 'Ж/д техника', truck: 'Автотранспорт' },
+    equipment: { SHUNTING_LOCO: 'Маневровый тепловоз', WAGON: 'Вагон' },
     deal: { RENT: 'Аренда', SALE: 'Продажа' },
   },
   en: {
@@ -471,10 +487,10 @@ export const SEARCH_LABELS: Record<SearchLang, {
       'UZ-BU': 'Bukhara', 'UZ-NW': 'Navoi', 'UZ-QA': 'Kashkadarya', 'UZ-SU': 'Surkhandarya', 'UZ-XO': 'Khorezm',
       'UZ-QR': 'Karakalpakstan', 'UZ-AN': 'Andijan', 'UZ-NG': 'Namangan', 'UZ-FA': 'Fergana',
     },
-    service: { LOAD: 'Loading', UNLOAD: 'Unloading', WEIGH: 'Weighing', STORAGE: 'Storage', SVX: 'Bonded (SVX)', CONTAINER: 'Container', LAST_MILE: 'Last mile', SHUNTING: 'Shunting' },
-    kind: { YARD: 'Freight yard', CONTAINER: 'Container terminal', LC: 'Logistics center', SVX: 'Bonded warehouse' },
-    category: { terminal: 'Terminal', siding: 'Private siding', equipment: 'Rail equipment', truck: 'Road transport' },
-    equipment: { SHUNTING_LOCO: 'Shunting locomotive', ELECTRIC_LOCO: 'Electric locomotive', WAGON: 'Wagon' },
+    service: { LOAD: 'Loading', UNLOAD: 'Unloading', WEIGH: 'Weighing', STORAGE: 'Storage', SVX: 'Bonded (SVX)', CONTAINER: 'Container', LAST_MILE: 'Truck delivery', SHUNTING: 'Shunting' },
+    kind: { RAIL: 'Rail freight terminal', ROAD: 'Road freight terminal', MULTI: 'Road and rail' },
+    category: { terminal: 'Terminal', equipment: 'Rail equipment', truck: 'Road transport' },
+    equipment: { SHUNTING_LOCO: 'Shunting locomotive', WAGON: 'Wagon' },
     deal: { RENT: 'Rent', SALE: 'Sale' },
   },
 };

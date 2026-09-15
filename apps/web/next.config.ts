@@ -21,7 +21,6 @@ const OLD_ROUTES: [string, string][] = [
   ['/kirish', '/login'],
   ['/royxat', '/signup'],
   ['/terminallar', '/terminals'],
-  ['/shahobchalar', '/sidings'],
   ['/texnika', '/equipment'],
   ['/avtotransport', '/carriers'],
   ['/kompaniyalar', '/companies'],
@@ -31,6 +30,17 @@ const OLD_ROUTES: [string, string][] = [
 
 // Ko'chgan sahifalar: aniq yo'lning o'zi yo'naltiriladi, ichki yo'llari tegilmaydi
 // (/dashboard/urgent -> band, lekin /dashboard/urgent/:id o'z sahifasida qoladi).
+/**
+ * Shahobcha yo'l endi alohida bo'lim emas: u temir yo'l yuk terminali va katalogda
+ * `kind=RAIL` filtri ostida turadi. Faqat ro'yxat sahifalari yo'naltiriladi;
+ * `/sidings/:id` o'z sahifasida qoladi, chunki u id bo'yicha slugni topib o'tkazadi.
+ */
+const SIDINGS: [string, string][] = [
+  ['/sidings/region/:code', '/terminals?kind=RAIL&region=:code'],
+  ['/sidings', '/terminals?kind=RAIL'],
+  ['/shahobchalar', '/terminals?kind=RAIL'],
+];
+
 const MOVED: [string, string][] = [
   ['/dashboard/terminal', '/dashboard/orders?tab=incoming'],
   ['/dashboard/urgent', '/dashboard/orders?tab=urgent'],
@@ -54,7 +64,9 @@ const config: NextConfig = {
     // Har bir eski yo'l: prefiksiz (uz) va /:locale bilan, oddiy va ichki (:path*)
     const prefixes = ['', '/:locale(uz|ru|en)'];
     return [
-      // MOVED birinchi: aniq yo'llar OLD_ROUTES dagi umumiy /kabinet/:path* dan oldin tekshirilsin.
+      // SIDINGS birinchi: /sidings/region/:code umumiy /sidings qoidasidan oldin tushsin
+      ...SIDINGS.flatMap(([from, to]) => prefixes.map((p) => ({ source: `${p}${from}`, destination: `${p}${to}`, permanent: true }))),
+      // MOVED: aniq yo'llar OLD_ROUTES dagi umumiy /kabinet/:path* dan oldin tekshirilsin.
       // Vaqtinchalik (307): kabinet ichki tuzilishi hali o'zgarishi mumkin, brauzer keshlab qolmasin.
       ...MOVED.flatMap(([from, to]) => prefixes.map((p) => ({ source: `${p}${from}`, destination: `${p}${to}`, permanent: false }))),
       ...OLD_ROUTES.flatMap(([from, to]) =>

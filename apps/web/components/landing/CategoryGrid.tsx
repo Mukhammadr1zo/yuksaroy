@@ -1,18 +1,19 @@
 import { getTranslations } from 'next-intl/server';
-import { PathIcon, ShippingContainerIcon, TrainIcon, TruckIcon, WarehouseIcon } from '@phosphor-icons/react/dist/ssr';
+import { ShippingContainerIcon, TrainIcon, TruckIcon, WarehouseIcon } from '@phosphor-icons/react/dist/ssr';
 import { SERVICE_CODES } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 
 /**
- * Platformaning to'rt kategoriyasi. Har bir obyekt o'z egasiga tegishli, narx va shartlar egasining sahifasida.
+ * Platformaning uch kategoriyasi: terminal (shahobcha yo'llar ham shu ichida), texnika, avtotransport.
+ * Har bir obyekt o'z egasiga tegishli, narx va shartlar egasining sahifasida.
  * Texnika va avtotransport bo'limlari hozircha bo'sh: e'lonlar egalari qo'shgach paydo bo'ladi.
  */
 const CATS = [
   { href: '/terminals', key: 'terminals', Icon: WarehouseIcon, wide: true },
-  { href: '/sidings', key: 'sidings', Icon: PathIcon, wide: false },
   { href: '/equipment', key: 'rail', Icon: TrainIcon, wide: false },
   { href: '/carriers', key: 'road', Icon: TruckIcon, wide: false },
-  { href: '/terminals?kind=CONTAINER', key: 'container', Icon: ShippingContainerIcon, wide: false },
+  // Konteyner endi tur emas, xizmat: eski ?kind=CONTAINER filtri hech narsani filtrlamasdi
+  { href: '/terminals?service=CONTAINER', key: 'container', Icon: ShippingContainerIcon, wide: false },
 ] as const;
 
 export async function CategoryGrid() {

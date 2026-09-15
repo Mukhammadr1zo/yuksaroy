@@ -12,6 +12,7 @@ import { RegionChips } from '@/components/catalog/RegionChips';
 import { Impressions } from '@/components/catalog/Impressions';
 import { alt } from '@/lib/seo';
 import { MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
+import { Pagination } from '@/components/catalog/Pagination';
 
 export const revalidate = 60;
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -31,7 +32,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
   const { locale } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [sp, t, tf, tt, tn, tk, ts, tp, th, tb, tl] = await Promise.all([searchParams, getTranslations('catalog'), getTranslations('filter'), getTranslations('terminals'), getTranslations('nav'), getTranslations('kind'), getTranslations('service'), getTranslations('pagination'), getTranslations('hubs'), getTranslations('booking'), getTranslations('listing')]);
+  const [sp, t, tf, tt, tn, tk, ts, th, tb, tl] = await Promise.all([searchParams, getTranslations('catalog'), getTranslations('filter'), getTranslations('terminals'), getTranslations('nav'), getTranslations('kind'), getTranslations('service'), getTranslations('hubs'), getTranslations('booking'), getTranslations('listing')]);
   const raw = { region: one(sp.region), kind: one(sp.kind), service: one(sp.service), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), corridor: one(sp.corridor), sort: one(sp.sort), bookable: one(sp.bookable) === '1' ? '1' : '' };
 
   // Yordamchi: q lug'at orqali filtrlarga aylanadi; aniq URL parametrlari parse natijasidan ustun
@@ -49,7 +50,6 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
   const chips: SearchChip[] = [
     ...(corridor ? [chip('corridor', corridor)] : region.split(',').filter(Boolean).map((v) => chip('region', v))),
     ...service.split(',').filter(Boolean).map((v) => chip('service', v)),
-    ...(kind ? [chip('kind', kind)] : []),
     ...(near ? [chip('near', radius || '25')] : []),
   ];
   // Chiplar bor bo'lsa q tashlanadi: filtrlar aniq paramlarga aylangan, olib tashlash deterministik
@@ -61,7 +61,6 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
     c.type === 'corridor' ? href({ corridor: '' })
     : c.type === 'region' ? href({ region: without(region, c.value) })
     : c.type === 'service' ? href({ service: without(service, c.value) })
-    : c.type === 'kind' ? href({ kind: '' })
     : href({ near: '', radius: '' });
 
   const page = Number(one(sp.page)) || 1;
@@ -82,10 +81,11 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
         <p className="mt-2 text-muted">{tt('lead')}</p>
       </div>
 
-      <form className="mt-6 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-[1.2fr_1fr_1fr_auto]" action="/terminals">
+      {/* Tur bu yerda yo'q: u quyidagi chiplar bilan tanlanadi. Ikkala boshqaruv qolsa
+          ular bir-biriga zid ko'rinardi (chip "temir yo'l", ro'yxat esa "barcha turlar"). */}
+      <form className="mt-6 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-[1.4fr_1.4fr_auto]" action="/terminals">
         {Object.entries({ region: base.region, service, kind, near, radius, corridor, bookable: raw.bookable }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
         <RegionFilter value={region} />
-        <Sel name="kind" value={kind} label={tf('kind.all')} options={TERMINAL_KINDS.map((k) => [k, tk(k)])} />
         <Sel name="service" value={service} label={tf('service.all')} options={SERVICE_CODES.map((x) => [x, ts(x)])} />
         <div className="flex gap-2">
           {/* Reyting varianti faqat baholangan obyekt bo'lsa: aks holda ro'yxat aslida alifbo bo'yicha chiqadi */}
@@ -93,6 +93,21 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
           <button className="rounded-xl bg-navy px-5 py-3 font-semibold text-white hover:bg-navy-2">{tf('apply')}</button>
         </div>
       </form>
+
+      {/* Tur bo'yicha tez o'tish. Shahobcha yo'l alohida bo'lim emas, temir yo'l terminali:
+          menyuda o'z bandi yo'q, shuning uchun bu yerda bir bosishda ochilishi kerak. */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Link href={href({ kind: '' })} aria-current={kind ? undefined : 'true'}
+          className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors duration-150 ${kind ? 'border border-line bg-white text-muted hover:border-teal hover:text-teal-ink' : 'bg-navy text-white'}`}>
+          {tf('kind.all')}
+        </Link>
+        {TERMINAL_KINDS.map((k) => (
+          <Link key={k} href={href({ kind: k })} aria-current={kind === k ? 'true' : undefined}
+            className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors duration-150 ${kind === k ? 'bg-navy text-white' : 'border border-line bg-white text-muted hover:border-teal hover:text-teal-ink'}`}>
+            {tk(k)}
+          </Link>
+        ))}
+      </div>
 
       <div className="mt-3"><NearMeButton path="/terminals" /></div>
 
@@ -122,7 +137,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
         <Link href={mapHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink"><MapTrifoldIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewOnMap')}</Link>
       </div>
 
-      {data.items.length === 0 ? (
+      {data.items.length === 0 && data.total === 0 ? (
         <div className="mt-6 rounded-card border border-dashed border-line p-10 text-center text-muted">
           <p>{tt('empty.title')}</p>
           <Link href="/terminals" className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tt('empty.reset')}</Link>
@@ -138,13 +153,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
         </div>
       )}
 
-      {pages > 1 && (
-        <nav aria-label={tp('aria')} className="mt-8 flex justify-center gap-2 font-mono text-sm">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-            <Link key={n} href={href({ page: n })} aria-current={n === data.page ? 'page' : undefined} className={`rounded-full px-3 py-1 ${n === data.page ? 'bg-navy text-white' : 'border border-line bg-white hover:bg-sand'}`}>{n}</Link>
-          ))}
-        </nav>
-      )}
+      <Pagination page={data.page} pages={pages} href={(n) => href({ page: n })} />
       <RegionChips base="/terminals" />
     </div>
   );

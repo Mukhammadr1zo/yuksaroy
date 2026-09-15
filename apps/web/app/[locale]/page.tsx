@@ -22,7 +22,8 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
   setRequestLocale(locale);
   const [t, stats] = await Promise.all([
     getTranslations('landing'),
-    sapi<Stats>('/stats', 60).catch(() => ({ terminals: 0, sidings: 0, stations: 0 })),
+    // API javob bermasa nol emas, null: "0 shaxsiy yo'l" mahsulot bo'sh degan taassurot qoldirardi
+    sapi<Stats>('/stats', 60).catch(() => null),
   ]);
 
   return (
@@ -37,7 +38,7 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
       }} />
       <Header />
       <main className="bg-sand">
-        <MapHero sidings={stats.sidings} terminals={stats.terminals} />
+        <MapHero terminals={stats?.terminals ?? null} />
 
         <div className="border-t border-line bg-white">
           <CategoryGrid />

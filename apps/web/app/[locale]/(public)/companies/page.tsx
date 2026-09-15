@@ -10,6 +10,7 @@ import { KycBadge } from '@/components/catalog/KycBadge';
 import { RegionFilter } from '@/components/catalog/RegionFilter';
 import { Sel } from '@/components/catalog/Sel';
 import { alt } from '@/lib/seo';
+import { Pagination } from '@/components/catalog/Pagination';
 
 export const revalidate = 60;
 type Params = { params: Promise<{ locale: string }> };
@@ -28,7 +29,7 @@ export default async function CompaniesPage({ params, searchParams }: Params & {
   const { locale } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [sp, t, tk, tf, tp] = await Promise.all([searchParams, getTranslations('companies'), getTranslations('orgKind'), getTranslations('filter'), getTranslations('pagination')]);
+  const [sp, t, tk, tf] = await Promise.all([searchParams, getTranslations('companies'), getTranslations('orgKind'), getTranslations('filter')]);
   const f = { kind: one(sp.kind), region: one(sp.region), q: one(sp.q) };
   const page = Number(one(sp.page)) || 1;
   const data = await sapi<Page<CompanyCard>>(`/companies${qs({ ...f, page, limit: 20 })}`, 60);
@@ -67,7 +68,7 @@ export default async function CompaniesPage({ params, searchParams }: Params & {
                 {o.kinds.map((k) => <span key={k} className="rounded-full border border-line px-2 py-0.5 text-[11px] text-ink/80">{tk(k as OrgKind)}</span>)}
               </div>
               <dl className="mt-3 flex gap-5 font-mono text-xs tabular-nums">
-                {(['terminals', 'sidings', 'listings'] as const).map((c) => (
+                {(['terminals', 'listings'] as const).map((c) => (
                   <div key={c} className="flex items-baseline gap-1"><dd className={`text-base font-semibold ${o.counts[c] ? 'text-navy' : 'text-muted'}`}>{o.counts[c]}</dd><dt className="text-muted">{t(`counts.${c}`)}</dt></div>
                 ))}
               </dl>
@@ -76,13 +77,7 @@ export default async function CompaniesPage({ params, searchParams }: Params & {
         </div>
       )}
 
-      {pages > 1 && (
-        <nav aria-label={tp('aria')} className="mt-8 flex justify-center gap-2 font-mono text-sm">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-            <Link key={n} href={href(n)} aria-current={n === data.page ? 'page' : undefined} className={`rounded-full px-3 py-1 ${n === data.page ? 'bg-navy text-white' : 'border border-line bg-white hover:bg-sand'}`}>{n}</Link>
-          ))}
-        </nav>
-      )}
+      <Pagination page={data.page} pages={pages} href={href} />
     </div>
   );
 }

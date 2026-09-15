@@ -11,7 +11,7 @@ import { ListingAccess } from './listing-access';
 export function inputOf(l: ListingRecord): ListingInput {
   return {
     kind: l.kind, ownerType: l.orgId ? 'org' : 'person', deal: l.deal, title: l.title, description: l.description, regionCode: l.regionCode as RegionCode,
-    terminalId: l.terminalId, sidingId: l.sidingId, priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, photos: l.photos,
+    terminalId: l.terminalId, priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, photos: l.photos,
     year: l.year, condition: l.condition, model: l.model, qty: l.qty, wagonType: l.wagonType, capacityT: l.capacityT,
     truckType: l.truckType, tonnage: l.tonnage, fleetSize: l.fleetSize, serviceRegions: l.serviceRegions as RegionCode[], routes: l.routes,
     contactPhone: l.contactPhone, responseHours: l.responseHours,
@@ -76,12 +76,14 @@ export class ListingsUseCase {
   async decide(id: string, approve: boolean, reason: string | null) {
     const l = await this.repo.findById(id);
     if (!l) throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
-    const to: ListingStatus = approve ? 'ACTIVE' : 'REJECTED';
+    // Rad etish maqsadi holatga qarab boshqacha: navbatdagi e'lon REJECTED bo'ladi, allaqachon
+    // chiqib turgan e'lonni admin qaytarib olsa ARCHIVED (REJECTED ga o'tish qoidada yo'q edi va 500 berardi).
+    const to: ListingStatus = approve ? 'ACTIVE' : l.status === 'ACTIVE' ? 'ARCHIVED' : 'REJECTED';
     this.transition(l, to, 'ADMIN');
     const now = new Date();
     return approve
       ? this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null })
-      : this.repo.setStatus(id, { status: 'REJECTED', rejectReason: reason });
+      : this.repo.setStatus(id, { status: to, rejectReason: reason });
   }
 
   async inquire(userId: string, listingId: string, message: string, orgId: string | null) {
@@ -131,7 +133,7 @@ export class ListingsUseCase {
 
   /** Nuqta: bog'langan terminal/shahobcha, bo'lmasa viloyat markazi. Obyekt topilmasa 400. */
   private async point(input: ListingInput): Promise<{ lat: number | null; lng: number | null }> {
-    const link = input.terminalId ? (['terminal', input.terminalId] as const) : input.sidingId ? (['siding', input.sidingId] as const) : null;
+    const link = input.terminalId ? (['terminal', input.terminalId] as const) : null;
     if (link) {
       const p = await this.repo.objectPoint(link[0], link[1]);
       if (!p) throw new BadRequestException({ code: 'OBJECT_NOT_FOUND', field: link[0] === 'terminal' ? 'terminalId' : 'sidingId' });

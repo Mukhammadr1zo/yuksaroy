@@ -66,23 +66,25 @@ async function main() {
     }
   }
 
-  // 2. Shahobcha yo'llar: koordinata tutashgan joydan, viloyat shundan
+  // 2. Temir yo'l terminallari (shahobcha yo'llar): koordinata tutashgan stansiyadan, viloyat shundan
   const stations = await prisma.station.findMany({
     where: { lat: { not: null }, lng: { not: null } },
     select: { id: true, lat: true, lng: true },
   });
   const byStation = new Map(stations.map((s) => [s.id, s]));
-  const sidings = await prisma.siding.findMany({ where: { stationId: { not: null } }, select: { id: true, stationId: true } });
+  // Faqat egasiz reestr qatorlari: egasi bor terminalning koordinatasini u o'zi kiritgan,
+  // uni stansiya nuqtasiga surib yuborish aniq joyni yo'qotardi.
+  const sidings = await prisma.terminal.findMany({ where: { kind: 'RAIL', orgId: null, stationId: { not: null } }, select: { id: true, stationId: true } });
   let sOk = 0;
   for (const sd of sidings) {
     const st = byStation.get(sd.stationId!);
     if (!st) continue;
     const code = regionOf(st.lat!, st.lng!);
-    await prisma.siding.update({ where: { id: sd.id }, data: { lat: st.lat, lng: st.lng, regionCode: code } });
+    await prisma.terminal.update({ where: { id: sd.id }, data: { lat: st.lat, lng: st.lng, regionCode: code } });
     if (code) sOk++;
   }
 
-  const counts = await prisma.siding.groupBy({ by: ['regionCode'], _count: { _all: true }, orderBy: { _count: { regionCode: 'desc' } } });
+  const counts = await prisma.terminal.groupBy({ by: ['regionCode'], where: { kind: 'RAIL' }, _count: { _all: true }, orderBy: { _count: { regionCode: 'desc' } } });
   console.log(`terminal: ${tOk}/${terminals.length}, shahobcha yo'l: ${sOk}/${sidings.length}`);
   for (const c of counts) console.log(`  ${c.regionCode ?? '(viloyat yo\'q)'}: ${c._count._all}`);
 }

@@ -77,7 +77,7 @@ export default function TgNewListingPage() {
           </button>
           <button type="button" onClick={openSite} className={`${CARD} flex w-full items-center gap-3 p-4 text-left active:bg-sand`}>
             <TrainIcon size={28} weight="duotone" className="shrink-0 text-navy" aria-hidden="true" />
-            <span><span className="block font-bold">{L.kind.SHUNTING_LOCO} · {L.kind.ELECTRIC_LOCO} · {L.kind.WAGON}</span><span className="block text-xs text-muted">{t('railHint')}</span></span>
+            <span><span className="block font-bold">{L.kind.SHUNTING_LOCO} · {L.kind.WAGON}</span><span className="block text-xs text-muted">{t('railHint')}</span></span>
           </button>
         </div>
       ) : (

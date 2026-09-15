@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import type { MyTerminal } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, Notice, errText } from '@/components/kabinet/bits';
 import { TerminalStatusPill } from '@/components/terminal/TerminalForm';
+import { stationName } from '@/lib/format';
 
 export default function MyTerminalsPage() {
   const t = useTranslations('terminalsAdmin.list');
@@ -75,7 +76,7 @@ export default function MyTerminalsPage() {
                   <td className="px-4 py-3"><Link href={`/dashboard/terminals/${x.id}`} className="font-semibold hover:underline">{x.name}</Link>{x.orgName ? <p className="mt-0.5 text-xs text-muted">{x.orgName}</p> : null}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{tk(x.kind)}</td>
                   <td className="px-4 py-3"><TerminalStatusPill status={x.status} /></td>
-                  <td className="px-4 py-3 whitespace-nowrap">{x.station.nameUz}{x.station.esrCode ? <span className="ml-1 font-mono text-xs text-muted">{x.station.esrCode}</span> : null}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{stationName(x)}{x.station?.esrCode ? <span className="ml-1 font-mono text-xs text-muted">{x.station.esrCode}</span> : null}</td>
                   <td className="px-4 py-3 text-muted">{x.regionCode && tr.has(x.regionCode) ? tr(x.regionCode) : '·'}</td>
                   <td className={`px-4 py-3 text-right font-mono tabular-nums ${(x.freeToday ?? 0) > 0 ? 'text-teal-ink' : 'text-muted'}`}>{x.freeToday ?? 0}</td>
                   <td className="px-4 py-3 text-right font-mono tabular-nums">{x.tariffs.length ? x.tariffs.length : <span className="font-body text-xs text-amber-ink">{t('noTariffs')}</span>}</td>

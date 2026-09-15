@@ -34,15 +34,9 @@
       "about": "About us",
       "terminals": "Terminals",
       "listings": "Equipment and transport",
-      "sidings": "Sidings",
       "map": "Objects on the map",
       "mapNote": "Coordinates are approximate.",
       "none": "none yet",
-      "sidingCols": {
-        "no": "Registry No",
-        "station": "Station",
-        "length": "Length"
-      },
       "with": "With YukSaroy",
       "fullProfile": "Full profile"
     }

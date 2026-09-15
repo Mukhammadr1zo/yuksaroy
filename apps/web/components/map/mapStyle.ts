@@ -36,7 +36,8 @@ export function localize(map: MLMap, locale: string) {
 export const RAIL = '#002352';
 export const ROAD = '#F39C1F'; // MapHero legendasida ham shu rang
 const T = { source: 'carto', 'source-layer': 'transportation' } as const;
-const z = (...stops: (number | ExpressionSpecification)[]): ExpressionSpecification => ['interpolate', ['linear'], ['zoom'], ...stops];
+/** Masshtab bo'yicha chiziqli o'zgarish: z(zoom1, qiymat1, zoom2, qiymat2, ...). */
+export const z = (...stops: (number | ExpressionSpecification)[]): ExpressionSpecification => ['interpolate', ['linear'], ['zoom'], ...stops];
 const major: ExpressionSpecification = ['match', ['get', 'class'], ['motorway', 'trunk'], true, false];
 /** Magistral va tarmoq temir yo'li: stansiya parki va shoxobchalar (`service`) alohida, yupqa chiziladi. */
 const mainRail: ExpressionSpecification = ['all', ['==', ['get', 'class'], 'rail'], ['!', ['has', 'service']]];

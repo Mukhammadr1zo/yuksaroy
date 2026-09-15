@@ -7,8 +7,8 @@ import type { ListingRecord, Route } from '../domain/listing-query';
 export const listingInclude = {
   org: { select: { name: true, slug: true, kycStatus: true } },
   ownerUser: { select: { fullName: true, phone: true } },
-  terminal: { select: { id: true, name: true, slug: true, orgId: true } },
-  siding: { select: { id: true, registryNo: true, stationNameRaw: true, ownerOrgId: true, station: { select: { nameUz: true } } } },
+  // Shahobcha ham terminal (kind RAIL), shuning uchun bitta bog'lanish yetarli
+  terminal: { select: { id: true, name: true, slug: true, orgId: true, kind: true, registryNo: true, stationNameRaw: true, station: { select: { nameUz: true } } } },
 } as const;
 const include = listingInclude;
 type Row = Prisma.ListingGetPayload<{ include: typeof include }>;
@@ -81,8 +81,9 @@ export class PrismaListingRepository {
   async objectPoint(type: 'terminal' | 'siding', id: string): Promise<{ lat: number | null; lng: number | null } | null> {
     const select = { lat: true, lng: true };
     if (type === 'siding') {
-      const sd = await this.prisma.siding.findUnique({ where: { id }, select: { ...select, ownerOrgId: true } });
-      return sd && sd.ownerOrgId !== null ? { lat: sd.lat, lng: sd.lng } : null;
+      // Shahobcha ham terminal (kind RAIL); e'lon faqat egasi tasdiqlangan obyektga bog'lanadi
+      const sd = await this.prisma.terminal.findFirst({ where: { id, kind: 'RAIL' }, select: { ...select, orgId: true } });
+      return sd && sd.orgId !== null ? { lat: sd.lat, lng: sd.lng } : null;
     }
     // Egasiz terminal ochiq mahsulotda yo'q: unga e'lon ham bog'lanmaydi
     const t = await this.prisma.terminal.findUnique({ where: { id }, select: { ...select, orgId: true } });

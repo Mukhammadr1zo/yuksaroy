@@ -33,7 +33,6 @@
       "search": "Search",
       "cats": {
         "terminal": "Terminals",
-        "siding": "Private sidings",
         "equipment": "Equipment",
         "truck": "Road transport"
       },
@@ -67,8 +66,6 @@
       "empty": "Nothing found. Try another word or region.",
       "unresolved": "not understood: {words}",
       "map": "On the map",
-      "sidings": "{count} private sidings",
-      "sidingApprox": "approximate coordinates, node level",
       "more": "{shown} / {total} shown"
     },
     "terminal": {

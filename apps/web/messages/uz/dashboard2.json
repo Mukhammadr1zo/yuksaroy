@@ -122,13 +122,6 @@
         "activeSub": "tekshiruvda: {n}",
         "inquiries": "Ochiq so'rovlar",
         "inquiriesSub": "e'lonlaringizga kelgan narx so'rovlari"
-      },
-      "admin": {
-        "title": "Moderatsiya navbati",
-        "listings": "E'lonlar",
-        "kyc": "Tashkilotlar (KYC)",
-        "sidings": "Shahobcha da'volari",
-        "terminals": "Terminal da'volari"
       }
     },
     "order": {

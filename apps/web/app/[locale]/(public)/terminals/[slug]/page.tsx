@@ -1,15 +1,19 @@
 import { Link } from '@/i18n/navigation';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { REVIEW } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
 import { DAYS, hoursSummary, isOpenNow, num, pricePer, som, uzTime, uzToday } from '@/lib/format';
-import type { Page, Siding, Slot, TerminalDetail } from '@/lib/types';
+import type { Slot, TerminalDetail } from '@/lib/types';
 import { TerminalReviews } from '@/components/reviews/TerminalReviews';
 import { Impressions } from '@/components/catalog/Impressions';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
 import { PhoneLink } from '@/components/catalog/PhoneLink';
+import { CardPhoto } from '@/components/catalog/CardPhoto';
+import { ClaimSiding } from '@/components/catalog/ClaimSiding';
+import { RailPassportCard } from '@/components/catalog/RailPassport';
 
 export const revalidate = 300;
 
@@ -22,7 +26,7 @@ export async function generateMetadata({ params }: Params) {
   const { locale, slug } = await params;
   const [t, tm, tk] = await Promise.all([sapiOrNull<TerminalDetail>(`/terminals/${slug}`), getTranslations({ locale, namespace: 'meta.terminal' }), getTranslations({ locale, namespace: 'kind' })]);
   return t
-    ? { title: tm('title', { name: t.name }), description: tm('description', { kind: tk(t.kind), station: t.station.nameUz, hours: hoursSummary(t.hours, t.is24h, locale) }), ...alt(locale, `/terminals/${slug}`) }
+    ? { title: tm('title', { name: t.name }), description: tm('description', { kind: tk(t.kind), station: t.station?.nameUz ?? t.stationNameRaw ?? '', hours: hoursSummary(t.hours, t.is24h, locale) }), ...alt(locale, `/terminals/${slug}`) }
     : { title: tm('notFound') };
 }
 
@@ -32,12 +36,18 @@ export default async function TerminalPage({ params }: Params) {
   if (!t) notFound();
   const today = uzToday();
   // tr: terminal nomfazosi; tn nav, tc common, tk kind, ts service, trj rju, td hafta kunlari
-  const [sidings, slots, tr, tn, tc, tk, ts, trj, td] = await Promise.all([
-    sapi<Page<Siding>>(`/sidings?station=${t.station.id}&limit=1`, 300).catch(() => null),
+  const [slots, c, tr, tn, tc, tk, ts, trj, td] = await Promise.all([
     sapi<Slot[]>(`/terminals/${t.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]),
+    cookies(),
     getTranslations('terminal'), getTranslations('nav'), getTranslations('common'), getTranslations('kind'), getTranslations('service'), getTranslations('rju'), getTranslations('format.day'),
   ]);
-  const trv = await getTranslations('reviews');
+  const [trv, tcl] = await Promise.all([getTranslations('reviews'), getTranslations('claim')]);
+  const station = t.station?.nameUz ?? t.stationNameRaw ?? '';
+  // Reestrdan kelgan, hali egasi tasdiqlanmagan shahobcha: tarif, slot va baho yo'q, bo'lishi ham mumkin emas.
+  // Ularni chizish "to'ldirilmagan terminal" taassurotini berardi, holbuki bu reestr yozuvi.
+  const registryOnly = t.rail !== null && !t.claimed;
+  const claimable = registryOnly && t.claimStatus !== 'PENDING';
+  const authed = c.has('ys_access') || c.has('ys_refresh');
   const open = isOpenNow(t.hours, t.is24h);
   const p = t.passport ?? {};
   const yes = tc('yes');
@@ -71,29 +81,38 @@ export default async function TerminalPage({ params }: Params) {
         aggregateRating: t.ratingAvg != null ? { '@type': 'AggregateRating', ratingValue: t.ratingAvg, reviewCount: t.ratingCount } : undefined,
       }} />
       <Ld data={breadcrumbs(locale, [{ name: tn('terminals'), path: '/terminals' }, { name: t.name, path: `/terminals/${t.slug}` }])} />
-      <nav aria-label={tr('breadcrumb.aria')} className="font-mono text-xs text-muted"><Link href="/terminals" className="hover:text-navy">{tn('terminals')}</Link> / {t.station.nameUz}</nav>
+      <nav aria-label={tr('breadcrumb.aria')} className="font-mono text-xs text-muted"><Link href="/terminals" className="hover:text-navy">{tn('terminals')}</Link>{station ? ` / ${station}` : ''}</nav>
       <header className="mt-3 flex flex-wrap items-start justify-between gap-6">
         <div className="max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(t.kind)}</span>
-            <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>
-            {!t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber">{tr('badge.unverifiedPassport')}</span> : null}
-            <a href="#reviews" className={`rounded-full border border-line bg-white px-3 py-1 font-mono text-xs font-semibold tabular-nums ${t.ratingAvg != null ? 'text-navy' : 'text-muted'}`}>{t.ratingAvg != null ? `★ ${t.ratingAvg.toFixed(1)} (${t.ratingCount})` : t.ratingCount ? trv('hidden', { count: t.ratingCount, min: REVIEW.minToShow }) : trv('none')}</a>
+            {registryOnly ? null : <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>}
+            {registryOnly ? <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">{t.claimStatus === 'PENDING' ? tcl('pendingBadge') : tcl('registryBadge')}</span>
+              : !t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber">{tr('badge.unverifiedPassport')}</span> : null}
+            {registryOnly ? null : <a href="#reviews" className={`rounded-full border border-line bg-white px-3 py-1 font-mono text-xs font-semibold tabular-nums ${t.ratingAvg != null ? 'text-navy' : 'text-muted'}`}>{t.ratingAvg != null ? `★ ${t.ratingAvg.toFixed(1)} (${t.ratingCount})` : t.ratingCount ? trv('hidden', { count: t.ratingCount, min: REVIEW.minToShow }) : trv('none')}</a>}
           </div>
           <h1 className="font-display mt-3 text-3xl font-bold md:text-4xl">{t.name}</h1>
-          <p className="mt-2 text-muted">{t.station.nameUz} {tr('station.suffix')} {t.station.esrCode ? <span className="font-mono">({t.station.esrCode})</span> : null} · {trj(t.station.rju)} {tr('rju.suffix')}{t.address ? ` · ${t.address}` : ''}</p>
+          <p className="mt-2 text-muted">{station ? <>{station} {tr('station.suffix')} </> : null}{t.station?.esrCode ?? t.rail?.esrCode ? <span className="font-mono">({t.station?.esrCode ?? t.rail?.esrCode})</span> : null}{t.station?.rju ?? t.rail?.rju ? <> · {trj((t.station?.rju ?? t.rail?.rju)!)} {tr('rju.suffix')}</> : null}{t.address ? ` · ${t.address}` : ''}</p>
           {t.description ? <p className="mt-4 text-ink/85">{t.description}</p> : null}
         </div>
-        <div className="flex flex-col gap-2">
-          <Link href={`/quote?terminal=${t.id}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>
-          <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>
+        <div className="flex w-full flex-col gap-2 sm:w-64">
+          <div className="aspect-[16/10] overflow-hidden rounded-card border border-line bg-navy">
+            <CardPhoto kind={t.kind} slug={t.slug} photo={t.photos[0]} alt={t.name} />
+          </div>
+          {registryOnly ? null : (
+            <>
+              <Link href={`/quote?terminal=${t.id}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>
+              <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>
+            </>
+          )}
           {t.phone ? <span className="text-center"><PhoneLink phone={t.phone} kind="terminal" targetId={t.id} /></span> : null}
         </div>
       </header>
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">
-          <section>
+          {t.rail ? <RailPassportCard rail={t.rail} slug={t.slug} /> : null}
+          <section hidden={registryOnly}>
             <h2 className="text-lg font-bold">{tr('tariffs.heading')}</h2>
             {t.tariffs.length === 0 ? <p className="mt-2 text-sm text-muted">{tr('tariffs.empty')}</p> : (
               <div className="mt-3 overflow-x-auto rounded-card border border-line bg-white">
@@ -115,7 +134,7 @@ export default async function TerminalPage({ params }: Params) {
             )}
           </section>
 
-          <section>
+          <section hidden={registryOnly || t.serviceDetails.length === 0}>
             <h2 className="text-lg font-bold">{tr('services.heading')}</h2>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2">
               {t.serviceDetails.map((s) => (
@@ -136,11 +155,20 @@ export default async function TerminalPage({ params }: Params) {
             </dl>
           </section>
 
-          <div id="reviews" className="scroll-mt-24"><TerminalReviews slug={t.slug} /></div>
+          {registryOnly ? null : <div id="reviews" className="scroll-mt-24"><TerminalReviews slug={t.slug} /></div>}
         </div>
 
         <aside className="space-y-6">
-          <section className="rounded-card border border-line bg-white p-5">
+          {claimable ? (
+            <section className="rounded-card border border-line bg-white p-5">
+              <h2 className="font-bold">{tcl('cta')}</h2>
+              <div className="mt-3">
+                {authed ? <ClaimSiding sidingId={t.id} /> : <Link href={`/login?next=/terminals/${t.slug}`} className="block rounded-full bg-navy px-6 py-3 text-center font-semibold text-white transition hover:bg-navy-2 active:scale-[0.98]">{tcl('ctaLogin')}</Link>}
+              </div>
+              <p className="mt-4 border-t border-line/70 pt-3 text-xs text-muted"><b className="text-ink">{tcl('how')}.</b> {tcl('howBody')}</p>
+            </section>
+          ) : null}
+          <section hidden={registryOnly} className="rounded-card border border-line bg-white p-5">
             <h2 className="text-sm font-bold">{tr('slots.heading')}</h2>
             {slots.length === 0 ? <p className="mt-2 text-sm text-muted">{tr('slots.none')}</p> : (
               <ul className="mt-3 grid grid-cols-3 gap-2">
@@ -157,7 +185,7 @@ export default async function TerminalPage({ params }: Params) {
             )}
             <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{tr('slots.book')}</DashLink>
           </section>
-          <section className="rounded-card border border-line bg-white p-5">
+          <section hidden={registryOnly} className="rounded-card border border-line bg-white p-5">
             <h2 className="text-sm font-bold">{tr('hours.heading')}</h2>
             {t.is24h ? <p className="mt-2 font-display text-2xl font-bold text-teal-ink">24/7</p> : (
               <table className="mt-2 w-full text-sm">
@@ -170,17 +198,22 @@ export default async function TerminalPage({ params }: Params) {
               </table>
             )}
           </section>
-          <section className="rounded-card border border-line bg-white p-5">
-            <h2 className="text-sm font-bold">{tc('station')}</h2>
-            <p className="mt-2 font-semibold">{t.station.nameUz} <span className="font-normal text-muted">{t.station.nameRu}</span></p>
-            <dl className="mt-2 space-y-1 font-mono text-xs text-muted">
-              <div className="flex justify-between"><dt>{tr('stationCard.esr')}</dt><dd>{t.station.esrCode ?? '·'}</dd></div>
-              <div className="flex justify-between"><dt>{tr('stationCard.rju')}</dt><dd>{trj(t.station.rju)}</dd></div>
-              <div className="flex justify-between"><dt>{tr('stationCard.typeClass')}</dt><dd>{t.station.stationType ?? '·'} / {t.station.classRank ?? '·'}</dd></div>
-              {t.lat && t.lng ? <div className="flex justify-between"><dt>{tr('stationCard.coords')}</dt><dd><a className="underline" href={`https://www.openstreetmap.org/?mlat=${t.lat}&mlon=${t.lng}#map=15/${t.lat}/${t.lng}`} target="_blank" rel="noreferrer">{t.lat}, {t.lng}</a></dd></div> : null}
-            </dl>
-            {sidings ? <Link href={`/sidings?station=${t.station.id}`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tr('sidingsLink', { count: sidings.total })}</Link> : null}
-          </section>
+          {/* Reestrdan kelgan shahobchada stansiya bog'lanmagan bo'lishi mumkin: shunda xom nom bilan chiqadi */}
+          {station ? (
+            <section className="rounded-card border border-line bg-white p-5">
+              <h2 className="text-sm font-bold">{tc('station')}</h2>
+              <p className="mt-2 font-semibold">{station} {t.station?.nameRu ? <span className="font-normal text-muted">{t.station.nameRu}</span> : null}</p>
+              <dl className="mt-2 space-y-1 font-mono text-xs text-muted">
+                <div className="flex justify-between"><dt>{tr('stationCard.esr')}</dt><dd>{t.station?.esrCode ?? t.rail?.esrCode ?? '·'}</dd></div>
+                <div className="flex justify-between"><dt>{tr('stationCard.rju')}</dt><dd>{t.station?.rju ?? t.rail?.rju ? trj((t.station?.rju ?? t.rail?.rju)!) : '·'}</dd></div>
+                {t.station ? <div className="flex justify-between"><dt>{tr('stationCard.typeClass')}</dt><dd>{t.station.stationType ?? '·'} / {t.station.classRank ?? '·'}</dd></div> : null}
+                {t.lat && t.lng ? <div className="flex justify-between"><dt>{tr('stationCard.coords')}</dt><dd><a className="underline" href={`https://www.openstreetmap.org/?mlat=${t.lat}&mlon=${t.lng}#map=15/${t.lat}/${t.lng}`} target="_blank" rel="noreferrer">{t.lat}, {t.lng}</a></dd></div> : null}
+              </dl>
+              {/* station parametri ESR yoki stansiya id ni qabul qiladi: ESR bo'lmasa id bilan ketamiz,
+                  aks holda bo'sh qiymat filtr hisoblanmay, hamma temir yo'l terminali chiqib ketardi */}
+              {t.station ? <Link href={`/terminals?station=${t.station.esrCode ?? t.station.id}&kind=RAIL`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tcl('sameStation')}</Link> : null}
+            </section>
+          ) : null}
         </aside>
       </div>
     </div>

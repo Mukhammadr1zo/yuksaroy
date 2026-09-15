@@ -24,7 +24,7 @@ export default async function ForShippersPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const [t, stats] = await Promise.all([getTranslations('marketing.shippers'), sapi<Stats>('/stats', 60).catch(() => null)]);
-  const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 }), t('facts.sidings', { count: stats.sidings })] : [];
+  const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 })] : [];
   return (
     <>
       <Hero side="shippers" facts={facts} primary="/terminals" secondary="/quote" />

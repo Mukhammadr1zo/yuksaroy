@@ -10,7 +10,7 @@
     "groups": {
       "find": {
         "title": "Topish",
-        "lead": "Terminal, shahobcha yo'l, texnika va avtotransport bir joyda."
+        "lead": "Terminal, texnika va avtotransport bir joyda."
       },
       "list": {
         "title": "E'lon berish",
@@ -28,7 +28,7 @@
     "items": {
       "catalog": {
         "title": "Katalog va filtrlar",
-        "body": "Terminallar, shahobcha yo'llar, texnika, avtotransport: viloyat, xizmat, tur va narx bo'yicha."
+        "body": "Terminallar (shahobcha yo'llar ham), texnika, avtotransport: viloyat, xizmat, tur va narx bo'yicha."
       },
       "map": {
         "title": "Xarita",
@@ -87,8 +87,8 @@
         "body": "Teplovoz chaqiruv, vagon ta'miri, kran: viloyatdagi xizmatchilar taklif yuboradi."
       },
       "registry": {
-        "title": "Shahobcha yo'llar reestri",
-        "body": "Respublika bo'ylab yo'llar stansiya va uzel bo'yicha. Koordinata taxminiy, uzel darajasida."
+        "title": "Temir yo'l terminallari reestri",
+        "body": "Respublikadagi shahobcha yo'llar stansiya va uzel bo'yicha, har biri terminal sahifasi bilan. Koordinata taxminiy, uzel darajasida."
       },
       "standards": {
         "title": "E'lon standarti",
@@ -100,7 +100,7 @@
       },
       "blog": {
         "title": "Blog",
-        "body": "Terminal va shahobcha yo'l farqi, vagon ijarasi, SVX, bo'sh joy: qisqa tushuntirishlar."
+        "body": "Shahobcha yo'l qanday terminal, vagon ijarasi, SVX, bo'sh joy: qisqa tushuntirishlar."
       }
     },
     "how": {
@@ -125,7 +125,6 @@
     "numbers": {
       "heading": "Platforma raqamlari",
       "terminals": "faol terminal",
-      "sidings": "shahobcha yo'l reestrda",
       "listings": "faol e'lon",
       "companies": "kompaniya",
       "freeSlotsToday": "bugun bo'sh joy"

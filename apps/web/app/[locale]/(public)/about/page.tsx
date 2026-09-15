@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { InfoIcon, ScalesIcon, TagIcon, UserCircleIcon } from '@phosphor-icons/react/dist/ssr';
+import { ScalesIcon, TagIcon, UserCircleIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
 import { BTN } from '@/components/marketing/bits';
 import { alt } from '@/lib/seo';
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { ...{ title: t('title'), description: t('description') }, ...alt(locale, '/about') };
 }
 
-/** Biz haqimizda: xususiy kompaniya, davlat temir yo'liga aloqasi yo'q; platforma nima qiladi; uch tamoyil; bog'lanish. Statik. */
+/** Biz haqimizda: kimlarmiz, platforma nima qiladi, uch tamoyil, bog'lanish. Statik. */
 export default async function AboutPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -58,13 +58,6 @@ export default async function AboutPage({ params }: Params) {
               </li>
             ))}
           </ul>
-          <div className="mt-6 flex max-w-[80ch] items-start gap-3 rounded-card border border-amber/40 bg-amber-soft px-5 py-4">
-            <InfoIcon size={20} className="mt-0.5 shrink-0 text-amber-ink" aria-hidden="true" />
-            <div>
-              <h3 className="font-semibold text-ink">{t('notRailway.heading')}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-ink/85">{t('notRailway.body')}</p>
-            </div>
-          </div>
         </div>
       </section>
 

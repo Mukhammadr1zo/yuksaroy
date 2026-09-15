@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { OPERATIONS, SERVICE_CODES, type Operation, type ServiceCode } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
-import { num, som } from '@/lib/format';
+import { num, som, stationName} from '@/lib/format';
 import type { Hold, Order, QuoteOffer, QuoteResponse, Slot, TerminalDetail } from '@/lib/types';
 import { CargoSearch, type CargoPick } from '@/components/catalog/CargoSearch';
 import { StationSearch, type StationPick } from '@/components/catalog/StationSearch';
@@ -267,7 +267,7 @@ function Wizard() {
                   >
                     <span>
                       <span className="font-semibold">{o.terminal.name}</span>
-                      <span className="block text-xs text-muted">{o.terminal.station.nameUz}{o.terminal.is24h ? ' · 24/7' : ''}{o.missing.length ? ` · ${t('missingTariff', { services: o.missing.map((m) => ts(m)).join(', ') })}` : ''}</span>
+                      <span className="block text-xs text-muted">{stationName(o.terminal)}{o.terminal.is24h ? ' · 24/7' : ''}{o.missing.length ? ` · ${t('missingTariff', { services: o.missing.map((m) => ts(m)).join(', ') })}` : ''}</span>
                     </span>
                     <span className="shrink-0 font-mono font-semibold tabular-nums">{som(o.totalTiyin, locale)}</span>
                   </button>

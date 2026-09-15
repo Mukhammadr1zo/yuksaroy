@@ -34,15 +34,9 @@
       "about": "Biz haqimizda",
       "terminals": "Terminallar",
       "listings": "Texnika va transport",
-      "sidings": "Shahobcha yo'llar",
       "map": "Obyektlar xaritada",
       "mapNote": "Koordinatalar taxminiy.",
       "none": "hali yo'q",
-      "sidingCols": {
-        "no": "Reestr No",
-        "station": "Stansiya",
-        "length": "Uzunlik"
-      },
       "with": "YukSaroy bilan",
       "fullProfile": "To'liq profil"
     }

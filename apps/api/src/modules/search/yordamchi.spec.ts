@@ -16,8 +16,8 @@ describe('needsLlm', () => {
 
 describe('sanitize', () => {
   it('faqat enumdagi qiymatlar; TRUCK -> kategoriya', () => {
-    const s = sanitize({ category: 'nope', regions: ['UZ-AN', 'UZ-ZZ', 'UZ-AN'], corridor: { from: 'UZ-SU', to: 'UZ-SU' }, services: ['LOAD', 'X'], kind: 'YARD', qty: { wagons: 20, tonnes: -1, containers: 2.5 }, equipment: 'TRUCK', deal: 'RENT', bookable: 'yes' });
-    expect(s).toEqual({ regions: ['UZ-AN'], services: ['LOAD'], kind: 'YARD', qty: { wagons: 20 }, category: 'truck', deal: 'RENT' });
+    const s = sanitize({ category: 'nope', regions: ['UZ-AN', 'UZ-ZZ', 'UZ-AN'], corridor: { from: 'UZ-SU', to: 'UZ-SU' }, services: ['LOAD', 'X'], kind: 'RAIL', qty: { wagons: 20, tonnes: -1, containers: 2.5 }, equipment: 'TRUCK', deal: 'RENT', bookable: 'yes' });
+    expect(s).toEqual({ regions: ['UZ-AN'], services: ['LOAD'], kind: 'RAIL', qty: { wagons: 20 }, category: 'truck', deal: 'RENT' });
     expect(sanitize(null)).toEqual({});
     expect(sanitize({ equipment: 'WAGON', bookable: true, corridor: { from: 'UZ-SU', to: 'UZ-TK' } })).toEqual({ equipment: 'WAGON', bookable: true, corridor: { from: 'UZ-SU', to: 'UZ-TK' } });
   });
@@ -26,14 +26,14 @@ describe('sanitize', () => {
 describe('mergeFilters', () => {
   it('LLM faqat bo\'sh maydonlarni to\'ldiradi, ishonch max(lug\'at, 0.8), chiplar qayta quriladi', () => {
     const dict = parseQuery("Andijonda 20 vagonga shahobcha yo'l va manevr teplovozi"); // regions, qty, category, services bor
-    const m = mergeFilters(dict, { regions: ['UZ-TK'], qty: { wagons: 5 }, category: 'terminal', kind: 'YARD', deal: 'RENT' });
+    const m = mergeFilters(dict, { regions: ['UZ-TK'], qty: { wagons: 5 }, category: 'terminal', kind: 'RAIL', deal: 'RENT' });
     expect(m.regions).toEqual(['UZ-AN']);
     expect(m.qty).toEqual({ wagons: 20 });
-    expect(m.category).toBe('siding');
-    expect(m.kind).toBe('YARD');
+    expect(m.category).toBe('terminal');
+    expect(m.kind).toBe('RAIL');
     expect(m.deal).toBe('RENT');
     expect(m.confidence).toBe(1);
-    expect(m.chips.map((c) => c.key)).toEqual(expect.arrayContaining(['region:UZ-AN', 'kind:YARD', 'deal:RENT']));
+    expect(m.chips.map((c) => c.key)).toEqual(expect.arrayContaining(['region:UZ-AN', 'kind:RAIL', 'deal:RENT']));
   });
 
   it('bo\'sh lug\'at natijasi: koridor viloyatlarni beradi, ishonch 0.8', () => {

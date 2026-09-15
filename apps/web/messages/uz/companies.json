@@ -9,7 +9,6 @@
     "count": "{count} tashkilot",
     "counts": {
       "terminals": "terminal",
-      "sidings": "shahobcha yo'l",
       "listings": "e'lon"
     },
     "empty": {
@@ -25,17 +24,10 @@
       "noPhone": "ko'rsatilmagan",
       "noContact": "Ochiq kontakt ko'rsatilmagan, obyekt sahifasidan so'rov yuboring.",
       "terminals": "Terminallar",
-      "sidings": "Shahobcha yo'llar",
       "listings": "E'lonlar",
       "map": "Obyektlar xaritada",
       "mapNote": "Koordinatalar taxminiy.",
-      "none": "hali yo'q",
-      "sidingCols": {
-        "no": "Reestr No",
-        "station": "Stansiya",
-        "length": "Uzunlik",
-        "capacity": "Tushirish / yuklash"
-      }
+      "none": "hali yo'q"
     }
   }
 }

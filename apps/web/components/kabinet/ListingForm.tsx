@@ -11,22 +11,23 @@ import {
 } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
-import type { Membership, MySiding, MyTerminal, OwnerListing } from '@/lib/types-kabinet';
+import type { Membership, MyTerminal, OwnerListing } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_PRIMARY, CHIP, Field, INPUT, ListingStatusPill, Notice, useListingLabels } from './bits';
 import { PhotoUpload } from './PhotoUpload';
 import { PhoneField } from '@/components/ui/fields';
 
-const KIND_ICON = { SHUNTING_LOCO: Train, ELECTRIC_LOCO: TrainRegional, WAGON: TrainSimple, TRUCK: Truck } as const;
+const KIND_ICON = { SHUNTING_LOCO: Train, WAGON: TrainSimple, TRUCK: Truck } as const;
 
 const EMPTY: Omit<ListingInput, 'kind'> = {
-  deal: null, title: '', description: null, regionCode: 'UZ-TK', terminalId: null, sidingId: null, priceTiyin: null, priceUnit: null, photos: [],
+  deal: null, title: '', description: null, regionCode: 'UZ-TK', terminalId: null, priceTiyin: null, priceUnit: null, photos: [],
   year: null, condition: null, model: null, qty: 1, wagonType: null, capacityT: null, truckType: null, tonnage: null, fleetSize: null,
   serviceRegions: [], routes: [], contactPhone: null, responseHours: null,
 };
 
 const fromListing = (l: OwnerListing): ListingInput => ({
-  kind: l.kind, deal: l.deal, title: l.title, description: l.description, regionCode: l.regionCode, terminalId: l.object?.type === 'terminal' ? l.object.id : null,
-  sidingId: l.object?.type === 'siding' ? l.object.id : null, priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, photos: l.photos, year: l.year,
+  // Shahobcha ham terminal: obyekt turidan qat'i nazar bitta maydon
+  kind: l.kind, deal: l.deal, title: l.title, description: l.description, regionCode: l.regionCode, terminalId: l.object?.id ?? null,
+  priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, photos: l.photos, year: l.year,
   condition: l.condition, model: l.model, qty: l.qty, wagonType: l.wagonType, capacityT: l.capacityT, truckType: l.truckType, tonnage: l.tonnage,
   fleetSize: l.fleetSize, serviceRegions: l.serviceRegions, routes: l.routes ?? [], contactPhone: l.contactPhone, responseHours: l.responseHours,
 });
@@ -48,7 +49,6 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
   const [orgId, setOrgId] = useState(initial?.orgId ?? '');
   const [orgs, setOrgs] = useState<Membership[] | null>(null);
   const [terminals, setTerminals] = useState<MyTerminal[]>([]);
-  const [sidings, setSidings] = useState<MySiding[]>([]);
   const [tried, setTried] = useState(false);
   const [serverErrors, setServerErrors] = useState<{ field: string; code: string }[]>([]);
   const [busy, setBusy] = useState<'save' | 'publish' | null>(null);
@@ -57,8 +57,11 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
   useEffect(() => {
     api<Membership[]>('/orgs/mine').then((ms) => { setOrgs(ms); if (!initial) setOrgId((v) => v || ms[0]?.orgId || ''); }).catch(() => setOrgs([]));
     api<MyTerminal[]>('/terminals/mine').then(setTerminals).catch(() => {});
-    api<{ items: MySiding[] }>('/sidings/mine').then((p) => setSidings(p.items)).catch(() => {});
   }, []);
+
+  // Shahobcha /terminals/mine ichida keladi: ilgari /sidings/mine ham so'ralib, har biri ikki marta chiqardi
+  const road = terminals.filter((x) => x.kind !== 'RAIL');
+  const rail = terminals.filter((x) => x.kind === 'RAIL');
 
   // Egasi: tahrirda yozuvdan, yangi e'londa tanlovdan ('' = shaxsan)
   const person = initial ? initial.owner.type === 'person' : !orgId;
@@ -144,7 +147,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
 
   const Icon = KIND_ICON[kind];
   const canPublish = !status || ['DRAFT', 'REJECTED', 'ARCHIVED', 'EXPIRED'].includes(status);
-  const objectValue = input.terminalId ? `t:${input.terminalId}` : input.sidingId ? `s:${input.sidingId}` : '';
+  const objectValue = input.terminalId ?? '';
 
   return (
     <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); void onSave(); }}>
@@ -287,14 +290,13 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
             </select>
           </Field>
           {!truck ? (
-            <Field label={t('field.terminalId')} recommended={rec('terminalId')} hint={t('hint.terminalId')} error={fieldErr('terminalId') ?? fieldErr('sidingId')}>
-              <select
-                className={INPUT} value={objectValue}
-                onChange={(e) => { const [ty, oid] = e.target.value.split(':'); set({ terminalId: ty === 't' ? oid : null, sidingId: ty === 's' ? oid : null }); }}
-              >
+            <Field label={t('field.terminalId')} recommended={rec('terminalId')} hint={t('hint.terminalId')} error={fieldErr('terminalId')}>
+              {/* Shahobcha ham terminal, shuning uchun bitta qiymat; guruhlar faqat tanlashni osonlashtiradi */}
+              <select className={INPUT} value={objectValue} onChange={(e) => set({ terminalId: e.target.value || null })}>
                 <option value="">{t('objectNone')}</option>
-                {terminals.length ? <optgroup label={t('objectTerminals')}>{terminals.map((x) => <option key={x.id} value={`t:${x.id}`}>{x.name}</option>)}</optgroup> : null}
-                {sidings.length ? <optgroup label={t('objectSidings')}>{sidings.map((s) => <option key={s.id} value={`s:${s.id}`}>{s.station?.nameUz ?? s.stationNameRaw} No {s.registryNo}</option>)}</optgroup> : null}
+                {/* Avto va temir yo'l alohida guruh: bitta ro'yxatda ular aralashib ketardi */}
+                {road.length ? <optgroup label={t('objectTerminals')}>{road.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup> : null}
+                {rail.length ? <optgroup label={t('objectSidings')}>{rail.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup> : null}
               </select>
             </Field>
           ) : null}

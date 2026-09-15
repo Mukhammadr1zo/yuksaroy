@@ -9,8 +9,7 @@
     "lead": "Terminal xizmati uchun joy band qilinadi, narx ochiq formula bilan hisoblanadi, texnika va avtotransport bo'yicha egasiga so'rov yuboriladi. Uchala yo'l ham bir kabinetda.",
     "facts": {
       "terminals": "{count} faol terminal",
-      "freeSlots": "bugun {count} bo'sh joy",
-      "sidings": "{count} shahobcha yo'l reestrda"
+      "freeSlots": "bugun {count} bo'sh joy"
     },
     "cta": {
       "bookable": "Bugun bo'sh joyli terminallar",
@@ -38,7 +37,11 @@
     "example": {
       "heading": "Jonli misol: tarif qanday yig'iladi",
       "lead": "{terminal} joriy tariflari bo'yicha: {weight} t yuk, 1 vagon, yuklash va tarozi.",
-      "col": { "line": "Xizmat", "formula": "Hisob", "amount": "Summa" },
+      "col": {
+        "line": "Xizmat",
+        "formula": "Hisob",
+        "amount": "Summa"
+      },
       "min": "minimal summa qo'llandi",
       "subtotal": "Xizmatlar",
       "commission": "Platforma komissiyasi {pct} %",
@@ -60,10 +63,22 @@
       "before": "Tasdiq kutilmoqda → Tasdiqlandi",
       "after": "Yakunlandi: akt va hisob-faktura",
       "steps": {
-        "ARRIVED": { "title": "Yetib keldi", "body": "Vagon terminalda, joy vaqti boshlandi" },
-        "WEIGHED": { "title": "Tortildi", "body": "Tarozi natijasi buyurtmaga yoziladi" },
-        "HANDLED": { "title": "Yuklandi / Tushirildi", "body": "Asosiy operatsiya bajarildi" },
-        "DEPARTED": { "title": "Jo'nadi", "body": "Buyurtma yakunlanadi, hujjatlar tayyor" }
+        "ARRIVED": {
+          "title": "Yetib keldi",
+          "body": "Vagon terminalda, joy vaqti boshlandi"
+        },
+        "WEIGHED": {
+          "title": "Tortildi",
+          "body": "Tarozi natijasi buyurtmaga yoziladi"
+        },
+        "HANDLED": {
+          "title": "Yuklandi / Tushirildi",
+          "body": "Asosiy operatsiya bajarildi"
+        },
+        "DEPARTED": {
+          "title": "Jo'nadi",
+          "body": "Buyurtma yakunlanadi, hujjatlar tayyor"
+        }
       }
     },
     "band": {

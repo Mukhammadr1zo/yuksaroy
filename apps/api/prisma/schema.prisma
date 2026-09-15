@@ -125,7 +125,6 @@ model Organization {
   updatedAt      DateTime     @updatedAt @db.Timestamptz(3)
   members        Membership[]
   terminals      Terminal[]
-  sidings        Siding[]
   orders         Order[]      @relation("OrderShipper")
   documents      Document[]
   invoices       Invoice[]    @relation("InvoicePayer")
@@ -176,11 +175,11 @@ enum Rju {
   TER
 }
 
+/// Terminal turi transport bo'yicha. Shahobcha yo'l ham temir yo'l yuk terminali (RAIL).
 enum TerminalKind {
-  YARD
-  CONTAINER
-  LC
-  SVX
+  RAIL
+  ROAD
+  MULTI
 }
 
 enum TerminalStatus {
@@ -220,19 +219,24 @@ model Station {
   esrCode     String?    @unique
   nameUz      String
   nameRu      String?
+  nameEn      String?
   rju         Rju
   stationType String? // passenger/freight/mixed/junction/yard/terminal/border/halt
   classRank   String? // 1..5, extra
   isTariff    Boolean    @default(true)
+  /// Rasmiy ro'yxatda ("2026 yil stansiyalar") bormi. Xarita va katalogda faqat shular ko'rinadi;
+  /// ro'yxatdan tashqari qatorlar o'chirilmaydi, chunki ularga obyekt bog'langan bo'lishi mumkin.
+  /** Xaritada ko'rsatiladimi (rasmiy 2026 ro'yxati). Indeks migratsiyada yaratilgan. */
+  isListed    Boolean    @default(true)
   lat         Float?
   lng         Float?
   createdAt   DateTime   @default(now()) @db.Timestamptz(3)
   terminals   Terminal[]
-  sidings     Siding[]
   orders      Order[]
 
   @@index([nameUz])
   @@index([rju])
+  @@index([isListed])
 }
 
 /// ETSNG yuk pozitsiyalari (407): code..codeTo oralig'idagi yuk kodlari shu pozitsiyaga kiradi.
@@ -250,45 +254,19 @@ model CargoType {
   @@index([groupCode])
 }
 
-/// Shahobcha yo'llar milliy reestri (1 393). Egasi claim qilib tasdiqlanmaguncha ownerNameRaw ommaga ko'rsatilmaydi.
-model Siding {
-  id             String        @id @default(cuid())
-  registryNo     Int           @unique // reestrdagi № (idempotent import kaliti)
-  stationId      String?
-  station        Station?      @relation(fields: [stationId], references: [id], onDelete: SetNull)
-  stationNameRaw String
-  esrCode        String?
-  rju            Rju?
-  ownerNameRaw   String // reestrdagi vetvevladelets nomi (yashirin)
-  ownerOrgId     String?
-  ownerOrg       Organization? @relation(fields: [ownerOrgId], references: [id], onDelete: SetNull)
-  claimStatus    ClaimStatus   @default(NONE)
-  claimedAt      DateTime?     @db.Timestamptz(3)
-  regionCode     String? // viloyat, joylashuvdan hisoblanadi
-  lat            Float? // reestrda koordinata yo'q: tutashgan joy nuqtasi, taqribiy
-  lng            Float?
-  lengthM        Int?
-  unloadCapacity Int           @default(0) // bir vaqtda tushirish uchun vagon
-  loadCapacity   Int           @default(0)
-  // Egasi yuklagan rasmlar: yo'lning o'zi, rampa, kirish yo'li, kran.
-  // Reestrda rasm yo'q, shuning uchun faqat da'vosi tasdiqlangan egasi qo'sha oladi.
-  photos         String[]      @default([])
-  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
-  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
-  listings       Listing[]
-
-  @@index([stationId])
-  @@index([esrCode])
-  @@index([ownerOrgId])
-}
-
 /// Terminal pasporti. orgId bo'sh: jamoa ochiq ma'lumotdan kiritgan («claim your terminal»).
+/// Shahobcha yo'l ham shu jadvalda: u temir yo'l yuk terminali (kind = RAIL), reestr
+/// ma'lumoti pasport ustunlarida. Egasi da'vo qilib tasdiqlanmaguncha ownerNameRaw
+/// va mas'ul shaxs telefoni ommaga ko'rsatilmaydi.
 model Terminal {
   id          String            @id @default(cuid())
   orgId       String?
   org         Organization?     @relation(fields: [orgId], references: [id], onDelete: SetNull)
-  stationId   String
-  station     Station           @relation(fields: [stationId], references: [id])
+  /// Stansiya: reestrdan kelgan shahobchada stansiya topilmagan bo'lishi mumkin,
+  /// o'shanda stationNameRaw qoladi va keyin bog'lanadi.
+  stationId   String?
+  // Restrict: stansiya o'chsa terminal pasportidan stansiya jimgina yo'qolmasin (migratsiyadagi FK ham shunday)
+  station     Station?          @relation(fields: [stationId], references: [id], onDelete: Restrict)
   kind        TerminalKind
   slug        String            @unique
   name        String
@@ -311,6 +289,47 @@ model Terminal {
   createdAt   DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
   slotConfig  Json? // { windows: [{ window, start, end, capacity }] }: slot generatsiyasi uchun
+
+  // ─── Temir yo'l pasporti ───────────────────────────────────────────────
+  // Shahobcha yo'l ham temir yo'l yuk terminali: reestr ma'lumoti shu yerda turadi.
+  // Manba: Taminot reestri (taminot.d-railway.uz). RAIL va MULTI turlarida to'ladi.
+  taminotId        Int?      @unique // import kaliti: qayta import qatorni takrorlamaydi
+  registryNo       Int?      @unique // eski reestrdagi №
+  registryRef      String? // reestr belgisi, masalan TASHKENT#3
+  stationNameRaw   String? // reestrdagi stansiya nomi (bizning stansiyaga bog'lanmagan bo'lsa ham)
+  esrCode          String?
+  rju              Rju?
+  ownerNameRaw     String? // reestrdagi yo'l egasi nomi
+  lengthM          Int? // foydali uzunlik
+  trackCount       Int? // yo'llar soni
+  loadCapacity     Int       @default(0) // bir vaqtda yuklash, vagon
+  unloadCapacity   Int       @default(0)
+  capacityWagons   Int? // bir vaqtda sig'adigan vagon
+  occupiedWagons   Int?
+  deadEndDistanceM Int? // tupikkacha masofa
+  junctionSwitch   String? // ulanish strelkasi raqami
+  brakeShoes       Int? // tormoz boshmoqlari soni
+  nogabarit        String? // negabarit yuk qabul qiladimi
+  equipment        String? // uskunalar: ko'tarma yo'l, kran
+  loadNorm         String?
+  unloadNorm       String?
+  loadFront        String?
+  unloadFront      String?
+  locoType         String? // RAILWAY (temir yo'l lokomotivi) yoki PRIVATE (o'ziniki)
+  locoNote         String?
+  processingHours  Float? // qayta ishlash vaqti, soat
+  contractNo       String? // guvohnoma raqami
+  contractStart    DateTime? @db.Date
+  contractEnd      DateTime? @db.Date
+  contractState    String? // SHARTNOMALI | SHARTNOMASIZ | BEKOR
+  category         String? // GENERAL | METAL
+  usageType        String? // PUBLIC | PRIVATE
+  operStatus       String? // reestrdagi holat: FAOL | TAMIRDA | YOPIQ
+  note             String?
+  // Mas'ul shaxs: telefon faqat ro'yxatdan o'tgan foydalanuvchiga beriladi (e'lonlardagi qoida).
+  contactName      String?
+  contactPhone     String?
+
   services    TerminalService[]
   tariffs     Tariff[]
   slots       TimeSlot[]
@@ -321,6 +340,7 @@ model Terminal {
   @@index([stationId])
   @@index([status, kind])
   @@index([claimStatus])
+  @@index([esrCode])
 }
 
 model TerminalService {
@@ -595,7 +615,6 @@ model Invoice {
 
 enum ListingKind {
   SHUNTING_LOCO
-  ELECTRIC_LOCO
   WAGON
   TRUCK
 }
@@ -631,7 +650,7 @@ enum PriceUnit {
 }
 
 /// E'lon: teplovoz / elektrovoz / vagon (ijara yoki sotuv) yoki avtotashuvchi. Qoidalar: packages/domain LISTING_RULES.
-/// Migratsiyada CHECK: terminalId yoki sidingId (ikkalasi emas); priceTiyin bo'lsa priceUnit shart;
+/// Migratsiyada CHECK: priceTiyin bo'lsa priceUnit shart;
 /// listing_owner: orgId yoki ownerUserId (yakka haydovchi, faqat TRUCK) bo'lishi shart.
 model Listing {
   id             String         @id @default(cuid())
@@ -649,8 +668,6 @@ model Listing {
   regionCode     String
   terminalId     String?
   terminal       Terminal?      @relation(fields: [terminalId], references: [id], onDelete: SetNull)
-  sidingId       String?
-  siding         Siding?        @relation(fields: [sidingId], references: [id], onDelete: SetNull)
   lat            Float?
   lng            Float?
   priceTiyin     BigInt?
@@ -687,7 +704,6 @@ model Listing {
   @@index([orgId, status])
   @@index([ownerUserId, status])
   @@index([terminalId])
-  @@index([sidingId])
   @@index([status, expiresAt])
 }
 

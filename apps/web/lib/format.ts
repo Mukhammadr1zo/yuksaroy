@@ -17,9 +17,25 @@ const UNIT_SHORT: Record<Lang, Record<TariffUnit, string>> = {
 export const kindLabel = (k: TerminalKind) => TERMINAL_KIND_LABELS[k] ?? k;
 export const serviceLabel = (s: ServiceCode) => SERVICE_LABELS[s] ?? s;
 export const rjuLabel = (r: Rju) => RJU_LABELS[r] ?? r;
+
+/**
+ * Terminal stansiyasining ko'rsatiladigan nomi. Reestrdan kelgan shahobchada stansiya
+ * bog'lanmagan bo'lishi mumkin: shunda reestrdagi xom nom ishlatiladi.
+ */
+export const stationName = (t: { station: { nameUz: string } | null; stationNameRaw?: string | null }) =>
+  t.station?.nameUz ?? t.stationNameRaw ?? '';
 export const unitLabel = (u: TariffUnit) => TARIFF_UNIT_LABELS[u] ?? u;
-/** "1 382" (uz, ru) yoki "1,382" (en) */
-export const num = (n: number, locale = 'uz') => new Intl.NumberFormat(lang(locale)).format(n).replace(/[  ]/g, ' ');
+const GROUP: Record<Lang, string> = { uz: " ", ru: " ", en: "," };
+/**
+ * "1 382" (uz, ru) yoki "1,382" (en). Intl.NumberFormat ishlatilmaydi: Node va brauzerdagi ICU
+ * malumoti uz uchun har xil ajratgich berardi (server "1 382", brauzer "1,382"), shuning uchun
+ * tort xonali sondan boshlab React gidratsiya nomuvofiqligi (#418) chiqardi. Guruhlash qolda.
+ */
+export const num = (n: number, locale = "uz") => {
+  const [i, f] = String(n).split(".");
+  const g = i.replace(/\B(?=(\d{3})+(?!\d))/g, GROUP[lang(locale)]);
+  return f ? `${g}.${f}` : g;
+};
 /** "12 670 so'm" */
 export const som = (tiyin: number, locale = 'uz') => `${num(Math.round(tiyin / 100), locale)} ${CURRENCY[lang(locale)]}`;
 /** "18 500 so'm / t" */

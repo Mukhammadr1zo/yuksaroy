@@ -14,6 +14,7 @@ import { Impressions } from '@/components/catalog/Impressions';
 import { alt } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
 import { MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
+import { Pagination } from '@/components/catalog/Pagination';
 
 export const revalidate = 60;
 type Params = { params: Promise<{ locale: string }> };
@@ -42,7 +43,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
   const { locale } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [sp, t, tc, tf, tp, th] = await Promise.all([searchParams, getTranslations('listing'), getTranslations('catalog'), getTranslations('filter'), getTranslations('pagination'), getTranslations('hubs')]);
+  const [sp, t, tc, tf, th] = await Promise.all([searchParams, getTranslations('listing'), getTranslations('catalog'), getTranslations('filter'), getTranslations('hubs')]);
   const tg = await getTranslations('marketing.common');
   const raw = { region: one(sp.region), truckType: one(sp.truckType), tonnage: one(sp.tonnage), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), corridor: one(sp.corridor), sort: one(sp.sort) };
 
@@ -144,13 +145,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
         </div>
       )}
 
-      {pages > 1 && (
-        <nav aria-label={tp('aria')} className="mt-8 flex justify-center gap-2 font-mono text-sm">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-            <Link key={n} href={href({ page: n })} aria-current={n === raw$.page ? 'page' : undefined} className={`rounded-full px-3 py-1 ${n === raw$.page ? 'bg-navy text-white' : 'border border-line bg-white hover:bg-sand'}`}>{n}</Link>
-          ))}
-        </nav>
-      )}
+      <Pagination page={raw$.page} pages={pages} href={(n) => href({ page: n })} />
       <RegionChips base="/carriers" />
     </div>
   );

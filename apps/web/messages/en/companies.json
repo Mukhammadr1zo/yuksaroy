@@ -9,7 +9,6 @@
     "count": "{count, plural, one {# organization} other {# organizations}}",
     "counts": {
       "terminals": "terminals",
-      "sidings": "sidings",
       "listings": "listings"
     },
     "empty": {
@@ -25,17 +24,10 @@
       "noPhone": "not listed",
       "noContact": "No public contact, send an inquiry from an object page.",
       "terminals": "Terminals",
-      "sidings": "Sidings",
       "listings": "Listings",
       "map": "Objects on the map",
       "mapNote": "Coordinates are approximate.",
-      "none": "none yet",
-      "sidingCols": {
-        "no": "Registry No",
-        "station": "Station",
-        "length": "Length",
-        "capacity": "Unloading / loading"
-      }
+      "none": "none yet"
     }
   }
 }

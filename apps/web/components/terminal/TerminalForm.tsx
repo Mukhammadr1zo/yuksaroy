@@ -73,7 +73,7 @@ type Draft = {
 };
 const WORK: [string, string][] = [['08:00', '18:00']];
 const EMPTY: Draft = {
-  orgId: '', station: null, kind: 'YARD', name: '', description: '', address: '', phone: '', lat: null, lng: null, is24h: false,
+  orgId: '', station: null, kind: 'MULTI', name: '', description: '', address: '', phone: '', lat: null, lng: null, is24h: false,
   hours: { mon: WORK, tue: WORK, wed: WORK, thu: WORK, fri: WORK, sat: WORK, sun: [] }, photos: [],
   tracks: null, tracksLengthM: null, cranes: [], warehouseM2: null, openAreaM2: null, hasSvx: false, hasScale: false, scaleT: null, containerSlots: null, customsPost: false,
   services: Object.fromEntries(SERVICE_CODES.map((c) => [c, { on: c === 'LOAD' || c === 'UNLOAD', lead: 0 }])) as Draft['services'],

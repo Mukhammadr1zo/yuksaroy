@@ -11,7 +11,7 @@ import { CrosshairIcon, MagnifyingGlassIcon, PathIcon, PolygonIcon, ShippingCont
 import { LISTING_LABELS, REGIONS, REGION_CENTERS, SEARCH_LABELS, chipLabel, distanceKm, formatSom, type PriceUnit, type RegionCode, type SearchLang, type TerminalKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { pricePer } from '@/lib/format';
-import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers } from './mapStyle';
+import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers, z } from './mapStyle';
 import { addPinIcons } from './pinIcons';
 import { KINDS, effective, inArea, materialize, parseState, toParams, withoutChip, type Area, type Kind, type MapState } from './state';
 
@@ -19,7 +19,7 @@ setWorkerUrl(WORKER_URL);
 
 /** /v1/map-objects.geojson xususiyatlari (3-bosqich shartnomasi). */
 interface Props {
-  id: string; kind: Kind; accuracy: 'exact' | 'station' | 'region'; name: string; slug?: string; terminalKind?: string; regionCode: string;
+  id: string; kind: FeatKind; accuracy: 'exact' | 'station' | 'region'; name: string; slug?: string; terminalKind?: string; regionCode: string;
   count?: number; listingKind?: string; deal?: 'RENT' | 'SALE'; priceTiyin?: number; priceUnit?: string; freeToday?: number; fromPriceTiyin?: number;
 }
 interface Obj { key: string; p: Props; lng: number; lat: number }
@@ -30,11 +30,21 @@ type FC = { type: 'FeatureCollection'; features: Feat[] };
 type Filter = NonNullable<Parameters<MLMap['setFilter']>[1]>;
 
 const EMPTY: FC = { type: 'FeatureCollection', features: [] };
+/**
+ * Xaritadagi belgi turlari: uch toifa + 'siding'. Shahobcha alohida toifa emas (u temir yo'l
+ * terminali), lekin stansiya bo'yicha guruh bo'lib chiziladi (halqa ichida soni), shuning uchun
+ * o'z qatlami bor. Filtr va sanoqda u terminal toifasiga qo'shiladi.
+ */
+const FEAT_KINDS = [...KINDS, 'siding'] as const;
+type FeatKind = (typeof FEAT_KINDS)[number];
+const catOf = (k: FeatKind): Kind => (k === 'siding' ? 'terminal' : k);
+/** Stansiya yozuvi sayt tiliga ergashadi; nomi yo'q bo'lsa o'zbekchasi qoladi. */
+const STATION_NAME: Record<string, string> = { uz: 'name', ru: 'nameRu', en: 'nameEn' };
 const SNAP = { peek: '96px', half: '45%', full: '85%' } as const;
 const SNAP_K = { peek: 0, half: 0.45, full: 0.85 } as const;
 const ORDER = ['peek', 'half', 'full'] as const;
 type Snap = (typeof ORDER)[number];
-const PIN_STYLE: Record<Kind, Parameters<typeof pinLayers>[2]> = {
+const PIN_STYLE: Record<FeatKind, Parameters<typeof pinLayers>[2]> = {
   terminal: { color: PIN.terminal, halo: true, icon: 'ys-pin-terminal' },
   // Shahobcha pinida stansiyadagi yo'llar soni turadi, shuning uchun belgi qo'yilmaydi
   siding: { color: PIN.siding, hollow: true, label: true },
@@ -42,15 +52,15 @@ const PIN_STYLE: Record<Kind, Parameters<typeof pinLayers>[2]> = {
   truck: { color: PIN.truck, hollow: true, icon: 'ys-pin-truck' },
 };
 /** Legenda va toifa tugmalaridagi kichik belgi: pin bilan bir xil rang va shakl (halqa = taxminiy joylashuv). */
-const SWATCH: Record<Kind, string> = {
+const SWATCH: Record<FeatKind, string> = {
   terminal: 'bg-[#FD7B03] ring-1 ring-white', siding: 'border-2 border-teal bg-white', equipment: 'bg-navy ring-1 ring-white', truck: 'border-2 border-[#FD7B03] bg-white',
 };
 // Xaritadagi pin ichidagi belgi bilan bir xil ikonka: rang yolg'iz yetarli emas edi
-const KIND_ICON: Record<Kind, Icon> = { terminal: ShippingContainerIcon, siding: PathIcon, equipment: TrainIcon, truck: TruckIcon };
-const ICON_TONE: Record<Kind, string> = { terminal: 'text-white', siding: 'text-teal', equipment: 'text-white', truck: 'text-[#FD7B03]' };
+const KIND_ICON: Record<FeatKind, Icon> = { terminal: ShippingContainerIcon, siding: PathIcon, equipment: TrainIcon, truck: TruckIcon };
+const ICON_TONE: Record<FeatKind, string> = { terminal: 'text-white', siding: 'text-teal', equipment: 'text-white', truck: 'text-[#FD7B03]' };
 
 /** Toifa belgisi: rangli doira va ichida ikonka (legenda, chiplar, ro'yxat uchun bir xil). */
-function KindBadge({ kind, className = '' }: { kind: Kind; className?: string }) {
+function KindBadge({ kind, className = '' }: { kind: FeatKind; className?: string }) {
   const I = KIND_ICON[kind];
   return (
     <span aria-hidden="true" className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${SWATCH[kind]} ${className}`}>
@@ -68,7 +78,7 @@ function circle([lng, lat]: [number, number], km: number, n = 64): [number, numb
 }
 const point = (lng: number, lat: number, properties: Record<string, unknown> = {}): Feat => ({ type: 'Feature', properties, geometry: { type: 'Point', coordinates: [lng, lat] } });
 const href = (o: Obj) =>
-  o.p.kind === 'terminal' ? `/terminals/${o.p.slug}` : o.p.kind === 'equipment' ? `/equipment/${o.p.slug}` : o.p.kind === 'truck' ? `/carriers/${o.p.slug}` : `/sidings?q=${encodeURIComponent(o.p.name)}`;
+  o.p.kind === 'terminal' ? `/terminals/${o.p.slug}` : o.p.kind === 'equipment' ? `/equipment/${o.p.slug}` : o.p.kind === 'truck' ? `/carriers/${o.p.slug}` : `/terminals?kind=RAIL&q=${encodeURIComponent(o.p.name)}`;
 const keyOf = (e: MapLayerMouseEvent) => { const p = e.features?.[0]?.properties; return p ? `${p.kind}:${p.id}` : null; };
 const inRegion = (o: Obj, regions: RegionCode[]) => !regions.length || regions.includes(o.p.regionCode as RegionCode);
 
@@ -155,9 +165,38 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
       map.addLayer({ id: 'ys-area-line', type: 'line', source: 'area', filter: ['!=', ['geometry-type'], 'Point'], layout: { 'line-join': 'round' }, paint: { 'line-color': PIN.siding, 'line-width': 2 } }, sym);
       map.addSource('sel', { type: 'geojson', data: EMPTY });
       map.addLayer({ id: 'ys-sel', type: 'circle', source: 'sel', paint: { 'circle-radius': 15, 'circle-color': 'transparent', 'circle-stroke-width': 3, 'circle-stroke-color': PIN.siding } });
+      // Stansiya qatlami: katalog birligi emas, orientir. Shuning uchun klastersiz, bosilmaydi
+      // va obyekt pinlari ostida turadi. Faqat rasmiy ro'yxatdagi stansiyalar keladi.
+      map.addSource('stations', { type: 'geojson', data: EMPTY });
+      map.addLayer({
+        id: 'ys-station', type: 'circle', source: 'stations', minzoom: 5.5,
+        paint: {
+          'circle-radius': z(6, 2, 12, 4), 'circle-color': '#FFFFFF',
+          'circle-stroke-width': 1.4, 'circle-stroke-color': '#7C8698', 'circle-opacity': 0.9,
+        },
+      }, sym);
+      map.addLayer({
+        id: 'ys-station-label', type: 'symbol', source: 'stations', minzoom: 7.5,
+        layout: {
+          'text-field': ['coalesce', ['get', STATION_NAME[localeRef.current] ?? 'name'], ['get', 'name']],
+          'text-font': ['Montserrat Medium'], 'text-size': z(8, 9, 13, 12),
+          'text-offset': [0, 0.85], 'text-anchor': 'top', 'text-padding': 3,
+        },
+        paint: { 'text-color': '#5A6373', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.3 },
+      }, sym);
+
+      // Stansiyalar alohida so'raladi: kamdan-kam o'zgaradi, obyektlardan uzoqroq keshlanadi
+      fetch('/api/v1/stations.geojson', { signal: ctl.signal })
+        .then((r) => (r.ok ? r.json() : EMPTY))
+        .catch(() => EMPTY)
+        .then((d: FC) => {
+          if (ctl.signal.aborted) return;
+          (map.getSource('stations') as GeoJSONSource | undefined)?.setData(d);
+        });
+
       await addPinIcons(map);
       // Qatlam tartibi: terminal eng ustida (shahobcha klasterlari ko'p, terminalni yopmasin)
-      for (const k of ['siding', 'truck', 'equipment', 'terminal'] as const) {
+      for (const k of ['siding', 'truck', 'equipment', 'terminal'] as const satisfies readonly FeatKind[]) {
         // lit: klasterda kamida bitta yorug' nuqta bo'lsa klaster ham yorug' (mapStyle CLUSTER_DIM)
         map.addSource(k, { type: 'geojson', data: EMPTY, cluster: true, clusterRadius: 44, clusterMaxZoom: 12, clusterProperties: { lit: ['+', ['case', ['to-boolean', ['get', 'dim']], 0, 1]] } });
         for (const l of pinLayers(k, k, PIN_STYLE[k])) map.addLayer(l);
@@ -186,7 +225,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
       if (!compact) {
         map.on('click', (e) => {
           if (draftRef.current) return setDraft([...draftRef.current, [e.lngLat.lng, e.lngLat.lat]]);
-          if (!map.queryRenderedFeatures(e.point, { layers: [...KINDS] }).length) setSel(null);
+          if (!map.queryRenderedFeatures(e.point, { layers: [...FEAT_KINDS] }).length) setSel(null);
         });
         map.on('dblclick', (e) => { if (draftRef.current) { e.preventDefault(); finishRef.current(); } });
       }
@@ -247,15 +286,15 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
     const map = mapRef.current;
     if (!map || !ready || !objs) return;
     const focus: Obj[] = [];
-    const per: Record<Kind, Feat[]> = { terminal: [], siding: [], equipment: [], truck: [] };
+    const per: Record<FeatKind, Feat[]> = { terminal: [], siding: [], equipment: [], truck: [] };
     for (const o of objs) {
-      if (!eff.cat.includes(o.p.kind) || !inRegion(o, eff.regions)) continue;
+      if (!eff.cat.includes(catOf(o.p.kind)) || !inRegion(o, eff.regions)) continue;
       const dim = (eff.corridor.length > 0 && !inRegion(o, eff.corridor)) || (eff.near != null && distanceKm(eff.near[1], eff.near[0], o.lat, o.lng) > eff.radius) || (eff.area.length > 0 && !inArea([o.lng, o.lat], eff.area));
       if (!dim) focus.push(o);
       per[o.p.kind].push(point(o.lng, o.lat, { id: o.p.id, kind: o.p.kind, count: o.p.count, dim }));
     }
     focusRef.current = focus;
-    for (const k of KINDS) (map.getSource(k) as GeoJSONSource).setData({ type: 'FeatureCollection', features: per[k] });
+    for (const k of FEAT_KINDS) (map.getSource(k) as GeoJSONSource).setData({ type: 'FeatureCollection', features: per[k] });
     const filter: Filter = ['in', ['get', 'code'], ['literal', eff.corridor.length ? eff.corridor : eff.regions]];
     map.setFilter('ys-region-fill', filter);
     map.setFilter('ys-region-line', filter);
@@ -303,15 +342,15 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
 
   // 3) Ko'rinishdagi obyektlar, toifa sanoqlari, qaror satri
   const { listed, counts } = useMemo(() => {
-    const counts: Record<Kind, number> = { terminal: 0, siding: 0, equipment: 0, truck: 0 };
+    const counts: Record<Kind, number> = { terminal: 0, equipment: 0, truck: 0 };
     const listed: Listed[] = [];
     if (!objs || !bounds) return { listed, counts };
     for (const o of objs) {
       if (!inRegion(o, eff.regions) || !bounds.contains([o.lng, o.lat])) continue;
       const km = eff.near ? distanceKm(eff.near[1], eff.near[0], o.lat, o.lng) : null;
       if ((eff.corridor.length && !inRegion(o, eff.corridor)) || (km != null && km > eff.radius) || (eff.area.length && !inArea([o.lng, o.lat], eff.area))) continue;
-      counts[o.p.kind]++;
-      if (eff.cat.includes(o.p.kind)) listed.push({ ...o, km });
+      counts[catOf(o.p.kind)]++;
+      if (eff.cat.includes(catOf(o.p.kind))) listed.push({ ...o, km });
     }
     if (eff.near) listed.sort((a, b) => a.km! - b.km!);
     return { listed, counts };
@@ -519,7 +558,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
 
         {/* Legenda: 4 pin uslubi + attributsiya (ODbL, CARTO) */}
         <ul aria-label={t('legend.aria')} className="pointer-events-none absolute bottom-[calc(var(--sheet)+12px)] left-3 z-10 flex max-w-[calc(100%-80px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-line bg-white/90 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.08em] text-muted transition-[bottom] duration-300">
-          {KINDS.map((k) => <li key={k} className="flex items-center gap-1.5"><KindBadge kind={k} />{t(`legend.${k}`)}</li>)}
+          {FEAT_KINDS.map((k) => <li key={k} className="flex items-center gap-1.5"><KindBadge kind={k} />{t(`legend.${k}`)}</li>)}
           <li className="normal-case tracking-normal text-muted/70">
             <a className="pointer-events-auto hover:text-navy" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a>
             {', '}

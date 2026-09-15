@@ -9,8 +9,7 @@
     "lead": "A terminal service gets a booked spot, the price comes from an open formula, equipment and truck listings take a request to the owner. All three live in one cabinet.",
     "facts": {
       "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
-      "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}",
-      "sidings": "{count, plural, one {# siding} other {# sidings}} in the registry"
+      "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}"
     },
     "cta": {
       "bookable": "Terminals with free spots today",

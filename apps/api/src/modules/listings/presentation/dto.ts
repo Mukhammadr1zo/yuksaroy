@@ -17,7 +17,6 @@ export class ListingBodyDto {
   @IsOptional() @IsString() @MaxLength(4000) description?: string | null;
   @IsString() regionCode!: RegionCode;
   @IsOptional() @IsString() terminalId?: string | null;
-  @IsOptional() @IsString() sidingId?: string | null;
   @IsOptional() @IsInt() @Max(1e13) priceTiyin?: number | null;
   @IsOptional() @IsString() priceUnit?: PriceUnit | null;
   @IsOptional() @IsArray() @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
@@ -52,7 +51,7 @@ export class DecideDto {
 }
 
 const EMPTY: Omit<ListingInput, 'kind' | 'title' | 'regionCode'> = {
-  deal: null, description: null, terminalId: null, sidingId: null, priceTiyin: null, priceUnit: null, photos: [], year: null, condition: null,
+  deal: null, description: null, terminalId: null, priceTiyin: null, priceUnit: null, photos: [], year: null, condition: null,
   model: null, qty: 1, wagonType: null, capacityT: null, truckType: null, tonnage: null, fleetSize: null, serviceRegions: [], routes: [],
   contactPhone: null, responseHours: null,
 };

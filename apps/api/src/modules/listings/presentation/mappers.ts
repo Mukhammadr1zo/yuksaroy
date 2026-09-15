@@ -5,6 +5,16 @@ import { listingOwner, type ListingRecord } from '../domain/listing-query';
 
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
+/**
+ * Shahobcha yorlig'i: Taminotdan kelgan qatorda o'z nomi bor, eski reestr qatorida esa
+ * faqat raqami. Ikkalasi ham bo'lmasa stansiya nomi qoladi.
+ */
+const sidingLabel = (s: NonNullable<ListingRecord['terminal']>) => {
+  const station = s.station?.nameUz ?? s.stationNameRaw ?? s.name;
+  if (s.name) return `${station} · ${s.name}`;
+  return s.registryNo === null ? station : `${station} No ${s.registryNo}`;
+};
+
 export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) {
   return {
     id: l.id, slug: l.slug, kind: l.kind, deal: l.deal, title: l.title, regionCode: l.regionCode,
@@ -15,8 +25,11 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
     owner: listingOwner(l),
     org: l.org ? { name: l.org.name, slug: l.org.slug, kyc: l.org.kycStatus } : null, // eski mijozlar uchun taxallus; shaxsiy e'londa null
     object: l.terminal && l.terminal.orgId !== null
-      ? { type: 'terminal' as const, id: l.terminal.id, name: l.terminal.name, slug: l.terminal.slug }
-      : l.siding && l.siding.ownerOrgId !== null ? { type: 'siding' as const, id: l.siding.id, name: `${l.siding.station?.nameUz ?? l.siding.stationNameRaw} No ${l.siding.registryNo}` } : null,
+      // Shahobcha ham terminal: turini kind ajratadi, shunda UI eski shakl bilan ishlayveradi
+      ? l.terminal.kind === 'RAIL'
+        ? { type: 'siding' as const, id: l.terminal.id, name: sidingLabel(l.terminal), slug: l.terminal.slug }
+        : { type: 'terminal' as const, id: l.terminal.id, name: l.terminal.name, slug: l.terminal.slug }
+      : null,
     premium: l.premiumUntil !== null && l.premiumUntil > now,
     publishedAt: l.publishedAt,
   };
@@ -35,5 +48,6 @@ export function listingDetail(l: ListingRecord) {
 
 /** Kabinet va admin: tafsilot + orgId, ko'rishlar, rad sababi, muddat. */
 export function ownerListing(l: ListingRecord) {
-  return { ...listingDetail(l), orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt };
+  // premiumUntil: admin ro'yxatida "qachongacha" ko'rinishi kerak, faqat ha/yo'q emas
+  return { ...listingDetail(l), orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt, premiumUntil: l.premiumUntil };
 }

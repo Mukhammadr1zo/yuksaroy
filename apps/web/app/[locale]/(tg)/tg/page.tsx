@@ -2,7 +2,7 @@
 // Mini App bosh sahifasi: salom va telefon holati, qidiruv, to'rt toifa sanoq bilan, bugun bo'sh slotli terminallar, ochiq buyurtmalar, shoshilinch so'rov.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRightIcon, LightningIcon, MagnifyingGlassIcon, MapTrifoldIcon, TrainIcon, TruckIcon, UserIcon, WarehouseIcon, PathIcon, ClipboardTextIcon, MegaphoneIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, LightningIcon, MagnifyingGlassIcon, MapTrifoldIcon, TrainIcon, TruckIcon, UserIcon, WarehouseIcon, ClipboardTextIcon, MegaphoneIcon } from '@phosphor-icons/react';
 import { EQUIPMENT_KINDS } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -13,10 +13,9 @@ import { StatusPill } from '@/components/order/bits';
 import { haptic, useTg } from '@/components/tg/TgProvider';
 import { CARD, PhoneCard, Skeleton, TerminalRow, useLang } from '@/components/tg/bits';
 
-type Counts = { terminal: number; siding: number; equipment: number; truck: number };
+type Counts = { terminal: number; equipment: number; truck: number };
 const TILES = [
   { key: 'terminal', href: '/tg/search?cat=terminal', Icon: WarehouseIcon },
-  { key: 'siding', href: '/tg/map?cat=siding', Icon: PathIcon },
   { key: 'equipment', href: '/tg/search?cat=equipment', Icon: TrainIcon },
   { key: 'truck', href: '/tg/search?cat=truck', Icon: TruckIcon },
 ] as const;
@@ -39,12 +38,12 @@ export default function TgHome() {
   const [orders, setOrders] = useState<OrderCard[] | null>(null);
 
   useEffect(() => {
-    // Sanoqlar: /stats (terminal, shahobcha) + e'lonlar turi bo'yicha ikki qisqa so'rov
+    // Sanoqlar: /stats (terminal, shahobcha ham shu ichida) + e'lonlar turi bo'yicha ikki qisqa so'rov
     Promise.all([
       api<Stats>('/stats').catch(() => null),
       api<ListingPage>(`/listings?kind=${EQUIPMENT_KINDS.join(',')}&limit=1`).catch(() => null),
       api<ListingPage>('/listings?kind=TRUCK&limit=1').catch(() => null),
-    ]).then(([s, eq, tr]) => setCounts({ terminal: s?.terminals ?? 0, siding: s?.sidings ?? 0, equipment: eq?.total ?? 0, truck: tr?.total ?? 0 }));
+    ]).then(([s, eq, tr]) => setCounts({ terminal: s?.terminals ?? 0, equipment: eq?.total ?? 0, truck: tr?.total ?? 0 }));
     api<Page<TerminalCard>>('/terminals?bookable=1&limit=6').then((r) => setBookable(r.items)).catch(() => setBookable([]));
     api<Page<OrderCard>>('/orders?scope=client&status=PENDING,CONFIRMED,IN_PROGRESS&limit=3').then((r) => setOrders(r.items)).catch(() => setOrders([]));
   }, []);

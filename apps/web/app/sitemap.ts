@@ -7,7 +7,7 @@ import { POSTS } from '@/components/marketing/posts';
 
 // /sitemap.xml: statik yo'llar, obyekti bor viloyat hublari, tafsilot sahifalari (terminal, e'lon, kompaniya), uch til (uz prefiksiz).
 // Shahobcha yo'l tafsilotlari (1382 ta cuid) bu yerda yo'q: faqat viloyat hublari; sahifalarning o'zi indekslanaveradi.
-const STATIC = ['', '/terminals', '/sidings', '/equipment', '/carriers', '/companies', '/standards', '/quote', '/map', '/booking', '/for-shippers', '/for-providers', '/urgent', '/pricing', '/features', '/features/assistant', '/about', '/contact', '/blog', ...POSTS.map((p) => `/blog/${p.slug}`)];
+const STATIC = ['', '/terminals', '/equipment', '/carriers', '/companies', '/standards', '/quote', '/map', '/booking', '/for-shippers', '/for-providers', '/urgent', '/pricing', '/features', '/features/assistant', '/about', '/contact', '/blog', ...POSTS.map((p) => `/blog/${p.slug}`)];
 /** Viloyat hublari: obyekti bor viloyatlar; ro'yxat bo'sh bo'lsa (API yo'q) hammasi qoladi. */
 const hubs = (cat: string, rows: { regionCode: string | null; serviceRegions?: string[] }[]) => {
   const has = new Set(rows.flatMap((r) => [r.regionCode, ...(r.serviceRegions ?? [])]).filter((x): x is string => x !== null));
@@ -40,12 +40,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return p;
   });
   // Bo'sh hublar sitemapda yo'q; sonlar yuqoridagi ro'yxatlardan olinadi, qo'shimcha so'rov yo'q.
-  // ponytail: shahobcha yo'l hublari hammasi qoladi (reestrni varaqlash 28 so'rov); bo'shi chiqsa /sidings ni ham varaqlaymiz
+  // Shahobcha hublari yo'q: ular endi /terminals?kind=RAIL filtri, alohida sahifa emas.
   const HUBS = [
     ...hubs('terminals', terminals),
     ...hubs('equipment', listings.filter((l) => l.kind !== 'TRUCK')),
     ...hubs('carriers', listings.filter((l) => l.kind === 'TRUCK')),
-    ...hubs('sidings', []),
   ];
   // /k/<slug> do'koni sitemap'da yo'q: u /companies/<slug> ga canonical qilingan
   const paths = [...STATIC, ...HUBS, ...terminals.map((t) => `/terminals/${t.slug}`), ...listingPaths, ...companies.map((c) => `/companies/${c.slug ?? c.id}`)];

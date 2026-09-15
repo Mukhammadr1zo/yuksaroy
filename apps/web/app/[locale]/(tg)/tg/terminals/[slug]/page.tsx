@@ -1,8 +1,9 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SEARCH_LABELS, type SearchLang } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
-import { hoursSummary, pricePer, som, uzTime, uzToday } from '@/lib/format';
+import { hoursSummary, pricePer, som, stationName, uzTime, uzToday } from '@/lib/format';
 import type { Slot, TerminalDetail } from '@/lib/types';
+import { Link } from '@/i18n/navigation';
 import { regionName } from '@/components/tg/labels';
 import { TerminalCta } from '@/components/tg/TerminalCta';
 
@@ -14,12 +15,15 @@ export default async function TgTerminalPage({ params }: Params) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [t, ts] = await Promise.all([getTranslations('tg.terminal'), getTranslations('service')]);
+  const [t, ts, tcl] = await Promise.all([getTranslations('tg.terminal'), getTranslations('service'), getTranslations('claim')]);
   const x = await sapiOrNull<TerminalDetail>(`/terminals/${slug}`, 60);
   if (!x) return <main className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{t('notFound')}</main>;
   const today = uzToday();
-  const slots = await sapi<Slot[]>(`/terminals/${x.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]);
+  const slots = x.rail !== null && !x.claimed ? [] : await sapi<Slot[]>(`/terminals/${x.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]);
   const L = SEARCH_LABELS[lang];
+  // Reestrdan kelgan, egasi tasdiqlanmagan temir yo'l terminali: tarif, slot va bron bo'lishi mumkin emas.
+  // Ularni chizish "bo'sh terminal" taassurotini berardi, holbuki bu reestr yozuvi (veb sahifada ham shunday).
+  const registryOnly = x.rail !== null && !x.claimed;
 
   return (
     <main className="mx-auto max-w-md px-4 pb-28 pt-4">
@@ -29,9 +33,25 @@ export default async function TgTerminalPage({ params }: Params) {
         <span className="font-mono text-xs text-muted">{x.ratingAvg != null ? `★ ${x.ratingAvg.toFixed(1)} (${x.ratingCount})` : t('noRating')}</span>
       </div>
       <h1 className="font-display mt-2 text-xl font-bold">{x.name}</h1>
-      <p className="mt-1 text-sm text-muted">{x.station.nameUz} · {regionName(x.regionCode, lang)}</p>
-      {!x.claimed ? <p className="mt-2 text-xs text-amber-ink">{t('unverified')}</p> : null}
+      <p className="mt-1 text-sm text-muted">{stationName(x)} · {regionName(x.regionCode, lang)}</p>
+      {registryOnly ? <p className="mt-2 text-xs text-muted">{tcl('registryBadge')}</p>
+        : !x.claimed ? <p className="mt-2 text-xs text-amber-ink">{t('unverified')}</p> : null}
 
+      {registryOnly ? (
+        <section className="mt-4 rounded-card border border-line bg-white p-4">
+          <h2 className="text-sm font-bold">{tcl('passport')}</h2>
+          <dl className="mt-2 text-sm">
+            {([[tcl('registryNo'), x.rail?.registryNo], [tcl('length'), x.rail?.lengthM ? `${x.rail.lengthM} m` : null],
+               [tcl('tracks'), x.rail?.trackCount], [tcl('capacity'), x.rail?.capacityWagons]] as [string, unknown][])
+              .filter(([, v]) => v !== null && v !== undefined && v !== '')
+              .map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 py-1"><dt className="text-muted">{k}</dt><dd className="text-right font-mono tabular-nums">{String(v)}</dd></div>
+              ))}
+          </dl>
+          {x.rail?.contactName ? <p className="mt-2 text-sm">{tcl('contactHeading')}: <span className="font-semibold">{x.rail.contactName}</span></p> : null}
+          <Link href={`/terminals/${x.slug}`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tcl('openFull')}</Link>
+        </section>
+      ) : (
       <section className="mt-4 rounded-card border border-line bg-white p-4">
         <h2 className="text-sm font-bold">{t('tariffs')}</h2>
         {x.tariffs.length === 0 ? <p className="mt-1 text-sm text-muted">{t('noTariffs')}</p> : (
@@ -45,7 +65,9 @@ export default async function TgTerminalPage({ params }: Params) {
           </ul>
         )}
       </section>
+      )}
 
+      {registryOnly ? null : (
       <section className="mt-3 rounded-card border border-line bg-white p-4">
         <h2 className="text-sm font-bold">{t('slotsToday')}</h2>
         {slots.length === 0 ? <p className="mt-1 text-sm text-muted">{t('noSlots')}</p> : (
@@ -62,15 +84,18 @@ export default async function TgTerminalPage({ params }: Params) {
           </div>
         )}
       </section>
+      )}
 
+      {registryOnly ? null : (
       <section className="mt-3 rounded-card border border-line bg-white p-4">
         <dl className="text-sm">
           <div className="flex justify-between gap-4 py-1"><dt className="text-muted">{t('hours')}</dt><dd className="text-right font-mono tabular-nums">{hoursSummary(x.hours, x.is24h, lang)}</dd></div>
           {x.address ? <div className="flex justify-between gap-4 py-1"><dt className="text-muted">·</dt><dd className="text-right">{x.address}</dd></div> : null}
         </dl>
       </section>
+      )}
 
-      <TerminalCta slug={x.slug} lat={x.lat} lng={x.lng} />
+      {registryOnly ? null : <TerminalCta slug={x.slug} lat={x.lat} lng={x.lng} />}
     </main>
   );
 }

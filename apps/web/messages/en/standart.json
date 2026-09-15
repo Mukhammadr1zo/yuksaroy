@@ -37,7 +37,7 @@
       "owner": "Organization (type: Terminal): the operator links the profile"
     },
     "siding": {
-      "title": "Siding",
+      "title": "Rail terminal (private siding)",
       "must": "Registry number, station, region (from the state registry)",
       "should": "Length, unloading and loading capacity, owner",
       "note": "The owner name appears only after the operator approves the claim. Coordinates are approximate, at node level.",
@@ -53,7 +53,7 @@
       "saleUnits": "Sale price: total amount",
       "truckUnits": "Road carrier price: per km, per ton or per trip",
       "priceUnit": "A price always comes with a unit",
-      "oneObject": "Terminal or siding: only one is linked",
+      "oneObject": "A listing is linked to one object",
       "serviceRegions": "Road carriers: the base region is among the service regions",
       "routes": "A route starts and ends in different regions",
       "photos": "At most {max} photos",

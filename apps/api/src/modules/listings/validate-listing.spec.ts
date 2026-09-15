@@ -7,7 +7,7 @@ import {
 
 const base: ListingInput = {
   kind: 'SHUNTING_LOCO', deal: 'RENT', title: 'TEM2 manevr teplovozi', description: null, regionCode: 'UZ-TK',
-  terminalId: null, sidingId: null, priceTiyin: 150_000_000, priceUnit: 'PER_MONTH', photos: ['/v1/files/a.jpg'],
+  terminalId: null, priceTiyin: 150_000_000, priceUnit: 'PER_MONTH', photos: ['/v1/files/a.jpg'],
   year: 2005, condition: 'GOOD', model: 'TEM2', qty: 1, wagonType: null, capacityT: 1200, truckType: null, tonnage: null,
   fleetSize: null, serviceRegions: [], routes: [], contactPhone: null, responseHours: 4,
 };
@@ -39,9 +39,8 @@ describe('validateListing', () => {
   });
 
   it('terminal va shahobcha birga bo\'lmaydi: ONE_OBJECT_ONLY', () => {
-    expect(codes(validateListing({ ...base, terminalId: 't1', sidingId: 's1' }))).toEqual(['terminalId:ONE_OBJECT_ONLY']);
     expect(validateListing({ ...base, terminalId: 't1' }).warnings).toEqual([]);
-    expect(validateListing({ ...base, sidingId: 's1' }).warnings).toEqual([]);
+    expect(validateListing({ ...base, terminalId: 't1' }).warnings).toEqual([]);
   });
 
   it('narx birligi bitimga mos: UNIT_NOT_FOR_DEAL, PRICE_UNIT_REQUIRED', () => {

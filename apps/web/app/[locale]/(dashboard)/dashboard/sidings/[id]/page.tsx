@@ -71,10 +71,11 @@ export default function MySidingPage({ params }: { params: Promise<{ id: string 
       </nav>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold">{t('one.title', { station, no: s.registryNo })}</h1>
+          {/* Reestrdan kelgan yangi qatorlarda raqam yo'q, o'z nomi bor */}
+          <h1 className="font-display text-2xl font-bold">{s.name ?? t('one.title', { station, no: s.registryNo ?? '-' })}</h1>
           {s.claimedAt ? <p className="mt-1 text-sm text-muted">{t('one.claimedAt', { date: uzDate(s.claimedAt, locale) })}</p> : null}
         </div>
-        {approved ? <Link href={`/sidings/${s.id}`} className={BTN_GHOST}>{t('open')}</Link> : null}
+        {approved ? <Link href={`/terminals/${s.slug}`} className={BTN_GHOST}>{t('open')}</Link> : null}
       </div>
 
       <section className="mt-6 overflow-hidden rounded-card border border-line bg-white">

@@ -50,7 +50,7 @@ export default async function BookingPage({ params }: Params) {
   for (const s of slots) byDay.set(s.localDate, [...(byDay.get(s.localDate) ?? []), s]);
   const day = byDay.has(today) ? today : [...byDay.keys()].sort().find((d) => byDay.get(d)!.some((s) => s.status === 'OPEN' && s.free > 0)) ?? null;
   const strip = day ? byDay.get(day)! : [];
-  const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 }), t('facts.sidings', { count: stats.sidings })] : [];
+  const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 })] : [];
   const commission = t('example.commission', { pct: (offer?.commissionPct ?? 0) / 100 });
 
   return (

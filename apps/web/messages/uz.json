@@ -9,20 +9,16 @@
     },
     "terminals": {
       "title": "O'zbekiston yuk terminallari katalogi · YukSaroy",
-      "description": "Yuk terminali va yuk saroyi qidiryapsizmi? Manzil, ish vaqti, xizmatlar, tarif va bo'sh joylar. Toshkent va viloyatlar bo'yicha qidiring, egasiga yozing."
+      "description": "Yuk terminali, yuk maydoni yoki shahobcha yo'l qidiryapsizmi? Manzil, ish vaqti, xizmatlar, tarif va bo'sh joylar. Toshkent va viloyatlar bo'yicha qidiring, egasiga yozing."
     },
     "terminal": {
       "title": "{name} · YukSaroy",
       "description": "{kind}, {station} stansiyasi. {hours}.",
       "notFound": "Terminal topilmadi"
     },
-    "sidings": {
-      "title": "O'zbekiston shahobcha yo'llari reestri · YukSaroy",
-      "description": "1300 dan ortiq xususiy shahobcha yo'l: stansiya, uzunlik, yuklash va tushirish sig'imi. O'z yo'lingizni toping va kabinetda biriktiring."
-    },
     "texnika": {
-      "title": "Teplovoz, elektrovoz va vagon: ijara va sotuv · YukSaroy",
-      "description": "Manevr teplovozi, elektrovoz va vagon e'lonlari. Narx, ishlab chiqarilgan yil, holati va egasining telefoni bitta sahifada. Vositachisiz."
+      "title": "Manevr teplovozi va vagon: ijara va sotuv · YukSaroy",
+      "description": "Manevr teplovozi va vagon e'lonlari. Narx, ishlab chiqarilgan yil, holati va egasining telefoni bitta sahifada. Vositachisiz."
     },
     "avtotransport": {
       "title": "Yuk mashinalari va avtotashuvchilar · YukSaroy",
@@ -35,7 +31,6 @@
   },
   "nav": {
     "terminals": "Terminallar",
-    "sidings": "Shahobcha yo'llar",
     "cabinet": "Kabinet",
     "login": "Kirish",
     "aria": {
@@ -47,7 +42,7 @@
       "workspace": "Ish maydoni",
       "profile": "Profil",
       "org": "Tashkilot",
-      "admin": "Moderatsiya",
+      "admin": "Admin panel",
       "logout": "Chiqish"
     },
     "add": {
@@ -59,8 +54,8 @@
         "body": "Xizmatlar, tariflar, ish vaqti, joylar"
       },
       "siding": {
-        "title": "Shahobcha yo'l",
-        "body": "Reestrdan o'zingiznikini topib biriktirasiz"
+        "title": "Shahobcha yo'limni biriktirish",
+        "body": "Reestrdan topib, o'z terminalingiz sifatida boshqarasiz"
       },
       "equipment": {
         "title": "Texnika e'loni",
@@ -90,7 +85,6 @@
     "tagline": "Yuk logistikasi bozori: terminal xizmatlari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport.",
     "catalog": {
       "heading": "Katalog",
-      "sidingsRegistry": "Shahobcha yo'llar reestri",
       "customsWarehouses": "Bojxona omborlari"
     },
     "platform": {
@@ -119,17 +113,14 @@
     "browse": {
       "heading": "Yoki xizmat bo'yicha",
       "terminalServices": "Terminal xizmatlari",
-      "siding": "Shahobcha yo'l",
       "railEquipment": "Teplovoz va vagon",
       "truck": "Yuk mashinasi"
     },
     "door": {
       "shipper": "Men yuk jo'natyapman",
-      "owner": "Menda obyekt yoki texnika bor",
-      "registry": "Reestrni ochish"
+      "owner": "Menda obyekt yoki texnika bor"
     },
     "stat": {
-      "sidings": "shaxsiy yo'l",
       "terminals": "terminal",
       "serviceTypes": "xizmat turi"
     },
@@ -139,7 +130,8 @@
         "aria": "Xarita legendasi",
         "rail": "Temir yo'l",
         "road": "Avtomobil yo'li",
-        "terminal": "Terminal"
+        "terminal": "Terminal",
+        "siding": "Shahobcha yo'l"
       }
     }
   },
@@ -148,19 +140,15 @@
     "lead": "Har bir obyekt o'z egasiga tegishli. Egasi uni ro'yxatga oladi, xizmat va shartlarini o'zi yozadi.",
     "terminals": {
       "label": "Terminal va yuk saroyi xizmatlari",
-      "note": "Yuklash, tushirish, tarozi, saqlash, SVX, konteyner"
-    },
-    "sidings": {
-      "note": "Xususiy shahobcha yo'llar: yuk ortish, arenda, sotish",
-      "label": "Shahobcha yo'llar"
+      "note": "Yuklash, tushirish, tarozi, saqlash, konteyner. Shahobcha yo'llar ham shu yerda."
     },
     "rail": {
       "label": "Temir yo'l texnikasi",
-      "note": "Teplovoz, elektrovoz, vagon: sotib olish yoki arenda"
+      "note": "Manevr teplovozi va vagon: sotib olish yoki arenda"
     },
     "road": {
       "label": "Avtotransport",
-      "note": "Yuk mashinalari va avtotashuvchilar, oxirgi milya"
+      "note": "Yuk mashinalari va tashuvchilar: terminaldan omborgacha yetkazib berish"
     },
     "container": {
       "label": "Konteyner maydonlari",
@@ -168,9 +156,6 @@
     },
     "services": {
       "heading": "Xizmat bo'yicha qidirish"
-    },
-    "siding": {
-      "note": "Xususiy shahobcha yo'llar: yuk ortish, arenda, sotish"
     }
   },
   "how": {
@@ -203,7 +188,7 @@
     }
   },
   "terminals": {
-    "lead": "Yuk saroylari, konteyner terminallari, logistika markazlari va SVX: pasport va ochiq tarif bilan.",
+    "lead": "Yuk terminallari, konteyner va yuk maydonlari, shahobcha yo'llar: pasport va ochiq tarif bilan.",
     "count": "{count} ta obyekt",
     "empty": {
       "title": "Bu filtr bo'yicha terminal topilmadi.",
@@ -297,7 +282,6 @@
       "typeClass": "Tur / klass",
       "coords": "Koordinata"
     },
-    "sidingsLink": "Shu stansiyada {count} ta shahobcha yo'l →",
     "slots": {
       "heading": "Bugungi joylar",
       "free": "{count} ta bo'sh",
@@ -305,43 +289,22 @@
       "book": "Joy band qilish"
     }
   },
-  "sidings": {
-    "lead": "Egalari o'zlari qo'shgan xususiy shahobcha yo'llar: joylashuv, uzunlik, yuklash va tushirish sig'imi. Yo'l sizniki bo'lsa, kabinetdan biriktiring.",
-    "count": "{count, number} ta yo'l",
-    "search": {
-      "placeholder": "Joy nomi yoki kod"
-    },
-    "col": {
-      "no": "№",
-      "location": "Joylashuv",
-      "length": "Uzunlik",
-      "capacity": "Tushirish / yuklash",
-      "owner": "Egasi"
-    },
-    "owner": {
-      "pending": "tasdiq kutilmoqda",
-      "unclaimed": "egasi tasdiqlamagan, meniki"
-    },
-    "empty": "Topilmadi.",
-    "emptyOwner": "Hozircha egasi qo'shgan shahobcha yo'l yo'q.",
-    "emptyOwnerCta": "Shahobcha yo'lni biriktirish"
-  },
   "texnika": {
-    "lead": "Teplovoz, elektrovoz va vagonlar. Egasi texnikasini sotish yoki arendaga berish uchun e'lon qo'yadi, shartlarni o'zi belgilaydi.",
+    "lead": "Manevr teplovozlari va vagonlar. Egasi texnikasini sotish yoki arendaga berish uchun e'lon qo'yadi, shartlarni o'zi belgilaydi.",
     "example": {
       "1": "Teplovoz: sotuv yoki soatlik hamda kunlik arenda",
-      "2": "Elektrovoz: arenda, manevr ishlari uchun",
+      "2": "Vagon parki: uzoq muddatli ijaraga",
       "3": "Yopiq vagon, yarim vagon, platforma, sisterna",
       "4": "Texnikaga xizmat va ta'mirlash takliflari"
     }
   },
   "avtotransport": {
-    "lead": "Yuk mashinalari va avtotashuvchilar. Terminaldan omborgacha bo'lgan oxirgi milya yoki to'liq yo'nalish bo'yicha tashish.",
+    "lead": "Yuk mashinalari va avtotashuvchilar. Terminaldan omborgacha yetkazib berish yoki butun yo'nalish bo'yicha tashish.",
     "example": {
       "1": "Tent, refrijerator, samosval, konteyner tashuvchi",
       "2": "Yaqin atrofdagi bo'sh mashinalar",
       "3": "Doimiy yo'nalish bo'yicha tashuvchilar",
-      "4": "Oxirgi milya: terminaldan omborgacha"
+      "4": "Terminaldan omborgacha yetkazib berish"
     }
   },
   "empty": {
@@ -474,15 +437,6 @@
     },
     "distance": "{km} km"
   },
-  "sidingMap": {
-    "aria": "{station} stansiyasi shahobcha yo'llari sxemasi: {count} ta yo'l",
-    "mainTrack": "{station}, asosiy yo'l",
-    "legend": {
-      "approved": "egasi tasdiqlangan",
-      "registry": "reestr (egasi yashirin)"
-    },
-    "more": "… yana {count} ta ro'yxatda"
-  },
   "common": {
     "price": "Narx",
     "station": "Stansiya",
@@ -533,14 +487,13 @@
     "STORAGE": "Omborda saqlash",
     "SVX": "SVX (bojxona ombori)",
     "CONTAINER": "Konteyner bilan ishlash",
-    "LAST_MILE": "Oxirgi milya (avto)",
+    "LAST_MILE": "Avtoda yetkazib berish",
     "SHUNTING": "Manevr (teplovoz)"
   },
   "kind": {
-    "YARD": "Yuk saroyi",
-    "CONTAINER": "Konteyner terminali",
-    "LC": "Logistika markazi",
-    "SVX": "Vaqtinchalik saqlash ombori"
+    "RAIL": "Temir yo'l yuk terminali",
+    "ROAD": "Avto yuk terminali",
+    "MULTI": "Avto va temir yo'l terminali"
   },
   "rju": {
     "TAS": "Toshkent",

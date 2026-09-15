@@ -96,7 +96,6 @@
       "pickKind": "What are you offering?",
       "kindHint": {
         "SHUNTING_LOCO": "Rent or sale, at a terminal or siding",
-        "ELECTRIC_LOCO": "Rent or sale",
         "WAGON": "Type, quantity, capacity, rent or sale",
         "TRUCK": "Road carrier: truck type, tonnage, service regions"
       },
@@ -443,7 +442,7 @@
     },
     "objects": {
       "title": "My objects",
-      "lead": "Terminals, sidings, equipment and road transport in one list.",
+      "lead": "Terminals (rail sidings included), equipment and road transport in one list.",
       "add": "Add",
       "open": "Public page",
       "empty": "No objects yet.",

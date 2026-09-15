@@ -42,19 +42,20 @@ describe('parseQuery', () => {
     const f = parseQuery("Andijonda 20 vagonga shahobcha yo'l va manevr teplovozi");
     expect(f.regions).toEqual(['UZ-AN']);
     expect(f.qty).toEqual({ wagons: 20 });
-    expect(f.category).toBe('siding');
+    expect(f.category).toBe('terminal');
+    expect(f.kind).toBe('RAIL');
     expect(f.services).toContain('SHUNTING');
     expect(f.confidence).toBeGreaterThanOrEqual(0.6);
-    expect(f.chips.map((c) => c.key)).toEqual(expect.arrayContaining(['region:UZ-AN', 'qty:wagons=20', 'category:siding', 'service:SHUNTING']));
+    expect(f.chips.map((c) => c.key)).toEqual(expect.arrayContaining(['region:UZ-AN', 'qty:wagons=20', 'category:terminal', 'kind:RAIL', 'service:SHUNTING']));
   });
 
   it('yaqinlik: shahar koordinatasi + radius', () => {
-    const f = parseQuery('Toshkentga 50 km ichida tarozisi bor yuk saroyi');
+    const f = parseQuery("Toshkentga 50 km ichida tarozisi bor temir yo'l terminali");
     expect(f.near?.lat).toBeCloseTo(41.31, 1);
     expect(f.near?.lng).toBeCloseTo(69.28, 1);
     expect(f.near?.radiusKm).toBe(50);
     expect(f.services).toEqual(['WEIGH']);
-    expect(f.kind).toBe('YARD');
+    expect(f.kind).toBe('RAIL');
     expect(f.chips.map((c) => c.key)).toContain('near:50');
   });
 

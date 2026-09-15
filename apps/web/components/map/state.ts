@@ -2,7 +2,8 @@
 // Qoida katalog sahifalaridagi kabi: q lug'at orqali filtrga aylanadi, aniq URL paramlari parse natijasidan ustun.
 import { REGIONS, corridorRegions, parseQuery, type RegionCode, type SearchChip, type SearchLang } from '@yuksaroy/domain';
 
-export const KINDS = ['terminal', 'siding', 'equipment', 'truck'] as const;
+// Toifalar uchta: shahobcha guruhlari terminal ichida (belgi turi 'siding' MapView da faqat chizish uchun)
+export const KINDS = ['terminal', 'equipment', 'truck'] as const;
 export type Kind = (typeof KINDS)[number];
 /** Chizilgan hudud: [lng, lat] uchlari (kamida 3), bo'sh = yo'q. */
 export type Area = [number, number][];

@@ -29,7 +29,6 @@ function useWide() {
 
 const BROWSE = [
   { href: '/terminals', key: 'terminalServices' },
-  { href: '/sidings', key: 'siding' },
   { href: '/equipment', key: 'railEquipment' },
   { href: '/carriers', key: 'truck' },
 ] as const;
@@ -37,11 +36,11 @@ const BROWSE = [
 const DOORS = [
   { href: '/terminals', key: 'shipper', muted: false },
   { href: '/login?next=/dashboard', key: 'owner', muted: false },
-  { href: '/sidings', key: 'registry', muted: true },
   { href: '/map', key: 'map', muted: true },
 ] as const;
 
-export function MapHero({ sidings, terminals }: { sidings: number; terminals: number }) {
+/** terminals: ochiq katalogdagi hamma terminal (shahobcha yo'llar ham shu ichida). */
+export function MapHero({ terminals }: { terminals: number | null }) {
   const t = useTranslations('hero');
   const tm = useTranslations('map');
   const locale = useLocale();
@@ -65,6 +64,7 @@ export function MapHero({ sidings, terminals }: { sidings: number; terminals: nu
         <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-0 w-4 border-t-2 border-dashed border-navy" />{t('map.legend.rail')}</li>
         <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-[2px] w-4 rounded bg-[#F39C1F]" />{t('map.legend.road')}</li>
         <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#FD7B03] ring-1 ring-white" />{t('map.legend.terminal')}</li>
+        <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-2 w-2 rounded-full border-2 border-teal bg-white" />{t('map.legend.siding')}</li>
       </ul>
 
       {/* Plitka litsenziyasi (ODbL, CARTO) attributsiyani talab qiladi: tugma o'rniga mayda matn qatori */}
@@ -127,18 +127,20 @@ export function MapHero({ sidings, terminals }: { sidings: number; terminals: nu
             ))}
           </div>
 
-          <dl className="mt-9 flex flex-wrap gap-x-8 gap-y-3 border-t border-line/80 pt-5">
-            {[
-              [num(sidings, locale), t('stat.sidings')],
-              [String(terminals), t('stat.terminals')],
-              ['8', t('stat.serviceTypes')],
-            ].map(([v, l]) => (
-              <div key={l} className="flex items-baseline gap-2">
-                <dd className="font-mono text-lg font-semibold tabular-nums text-navy">{v}</dd>
-                <dt className="text-sm text-muted">{l}</dt>
-              </div>
-            ))}
-          </dl>
+          {/* Sanoqlar kelmasa (API javob bermadi) qator butunlay chizilmaydi: nol ko'rsatishdan yaxshiroq */}
+          {terminals !== null ? (
+            <dl className="mt-9 flex flex-wrap gap-x-8 gap-y-3 border-t border-line/80 pt-5">
+              {[
+                [num(terminals, locale), t('stat.terminals')],
+                ['8', t('stat.serviceTypes')],
+              ].map(([v, l]) => (
+                <div key={l} className="flex items-baseline gap-2">
+                  <dd className="font-mono text-lg font-semibold tabular-nums text-navy">{v}</dd>
+                  <dt className="text-sm text-muted">{l}</dt>
+                </div>
+              ))}
+            </dl>
+          ) : null}
         </div>
       </div>
     </section>

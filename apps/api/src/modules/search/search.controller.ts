@@ -57,7 +57,14 @@ export class SearchController {
     const near = filters.near ?? undefined;
     // Hech narsa tanilmasa matn nom/manzil bo'yicha qidiruvga tushadi, aks holda q ro'yxatni bo'shatib qo'yadi
     const q = filters.chips.length ? undefined : dto.q.trim();
-    const all = await this.repo.listTerminals({ region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near, q, owned: true }, now);
+    const scope = { region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near, q };
+    // Son ochiq katalog qamrovi bo'yicha (reestr ham kiradi): yordamchi aytgan raqam
+    // u tuzgan havoladagi raqam bilan bir xil bo'lishi kerak. Qaror satri esa egali obyektlardan:
+    // tarif, slot va baho faqat ularda bo'ladi.
+    const [all, total] = await Promise.all([
+      this.repo.listTerminals({ ...scope, owned: true }, now),
+      this.repo.countTerminals({ ...scope, publicCatalog: true }),
+    ]);
     const free = await this.repo.freeTodayByTerminal(all.map((t) => t.id), now);
 
     // /terminals va GET /v1/terminals uchun URL parametrlari
@@ -68,6 +75,6 @@ export class SearchController {
     if (near) { query.near = `${near.lng},${near.lat}`; query.radius = String(near.radiusKm); }
     if (q) query.q = q;
 
-    return { filters, chips: filters.chips, query, decision: { terminals: all.length, ...summarize(all, free, near, filters.services) }, source, quota };
+    return { filters, chips: filters.chips, query, decision: { terminals: total, ...summarize(all, free, near, filters.services) }, source, quota };
   }
 }

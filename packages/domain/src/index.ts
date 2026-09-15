@@ -72,10 +72,15 @@ export const RJU_LABELS: Record<Rju, string> = {
   TAS: 'Toshkent', KOK: "Qo'qon", BUX: 'Buxoro', KUN: "Qo'ng'irot", KAR: 'Qarshi', TER: 'Termiz',
 };
 
-export const TERMINAL_KINDS = ['YARD', 'CONTAINER', 'LC', 'SVX'] as const;
+/**
+ * Terminal turi transport bo'yicha: temir yo'l, avto yoki ikkisi ham.
+ * Shahobcha yo'l ham temir yo'l yuk terminali, shuning uchun RAIL ga kiradi.
+ * Inshoot turi (yuk saroyi, konteyner maydoni, SVX) endi alohida tur emas, xizmat orqali beriladi.
+ */
+export const TERMINAL_KINDS = ['RAIL', 'ROAD', 'MULTI'] as const;
 export type TerminalKind = (typeof TERMINAL_KINDS)[number];
 export const TERMINAL_KIND_LABELS: Record<TerminalKind, string> = {
-  YARD: 'Yuk saroyi', CONTAINER: 'Konteyner terminali', LC: 'Logistika markazi', SVX: 'Vaqtinchalik saqlash ombori',
+  RAIL: "Temir yo'l yuk terminali", ROAD: 'Avto yuk terminali', MULTI: "Avto va temir yo'l terminali",
 };
 
 export const TERMINAL_STATUSES = ['DRAFT', 'ACTIVE', 'HIDDEN'] as const;
@@ -86,7 +91,7 @@ export const SERVICE_CODES = ['LOAD', 'UNLOAD', 'WEIGH', 'STORAGE', 'SVX', 'CONT
 export type ServiceCode = (typeof SERVICE_CODES)[number];
 export const SERVICE_LABELS: Record<ServiceCode, string> = {
   LOAD: 'Yuklash', UNLOAD: 'Tushirish', WEIGH: 'Tarozi', STORAGE: 'Omborda saqlash', SVX: 'SVX (bojxona ombori)',
-  CONTAINER: 'Konteyner bilan ishlash', LAST_MILE: 'Oxirgi milya (avto)', SHUNTING: 'Manevr (teplovoz)',
+  CONTAINER: 'Konteyner bilan ishlash', LAST_MILE: 'Avtoda yetkazib berish', SHUNTING: 'Manevr (teplovoz)',
 };
 export const OPERATIONS = ['LOAD', 'UNLOAD'] as const;
 export type Operation = (typeof OPERATIONS)[number];

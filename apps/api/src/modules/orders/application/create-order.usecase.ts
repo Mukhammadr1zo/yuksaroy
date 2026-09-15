@@ -75,6 +75,10 @@ export class CreateOrderUseCase {
     );
     if (!quote.lines.some((l) => l.serviceCode === input.operation)) throw new ConflictException({ code: 'NO_TARIFF_FOR_OPERATION' });
 
+    // Reestrdan kelgan shahobchaning stansiyasi bog'lanmagan bo'lishi mumkin, Order.stationId esa majburiy.
+    // Ilgari bu `!` bilan yashirilgan edi va Prisma so'nggi bosqichda 500 berib, band qilingan joyni yeb ketardi.
+    if (terminal.stationId === null) throw new ConflictException({ code: 'TERMINAL_NO_STATION' });
+
     // Tashkilot eng oxirida ochiladi: yuqoridagi tekshiruvlardan biri rad etsa bo'sh tashkilot qolib ketmasin
     shipperOrgId ??= await this.access.createShipperOrg(userId);
 

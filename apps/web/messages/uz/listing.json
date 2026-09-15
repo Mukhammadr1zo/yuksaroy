@@ -2,7 +2,7 @@
   "listing": {
     "rail": {
       "title": "Temir yo'l texnikasi",
-      "lead": "Manevr teplovozi, elektrovoz va vagonlar: ijara yoki sotuv. Narx hammaga ochiq, egasi bilan bog'lanish uchun kirish kerak."
+      "lead": "Manevr teplovozi va vagonlar: ijara yoki sotuv. Narx hammaga ochiq, egasi bilan bog'lanish uchun kirish kerak."
     },
     "road": {
       "title": "Avtotransport",
@@ -11,7 +11,6 @@
     "tab": {
       "all": "Barchasi",
       "SHUNTING_LOCO": "Teplovoz",
-      "ELECTRIC_LOCO": "Elektrovoz",
       "WAGON": "Vagon"
     },
     "deal": {

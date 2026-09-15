@@ -7,7 +7,6 @@ import { AuthArea } from './AuthArea';
 // nav: asosiy JSON'dagi kalitlar; nav2: katalog qo'shimchalari (messages/<locale>/nav2.json); map: xarita nomfazosi (map.json)
 const NAV = [
   { href: '/terminals', ns: 'nav', key: 'terminals' },
-  { href: '/sidings', ns: 'nav', key: 'sidings' },
   { href: '/equipment', ns: 'nav2', key: 'equipment' },
   { href: '/carriers', ns: 'nav2', key: 'carriers' },
   { href: '/map', ns: 'map', key: 'nav' },

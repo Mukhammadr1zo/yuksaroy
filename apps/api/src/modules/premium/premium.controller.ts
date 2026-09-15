@@ -7,9 +7,9 @@ import { env } from '../../common/env';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
-import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { pickIn } from '../catalog/presentation/catalog.controller';
 import { extendPremium } from './extend-premium';
+import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 
 class PremiumDto {
   @IsInt() @Min(1) @Max(12) months!: number;
@@ -32,7 +32,6 @@ export class PremiumController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly listings: ListingsUseCase,
-    private readonly admin: PlatformAdmin,
     private readonly audit: AuditService,
   ) {}
 
@@ -52,8 +51,8 @@ export class PremiumController {
 
   /** Admin navbati: `status` (default PENDING), eski birinchi. */
   @Get('admin/premium')
+  @UseGuards(PlatformAdminGuard)
   async list(@CurrentUserId() userId: string, @Query('status') status?: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const rows = await this.prisma.premiumOrder.findMany({
       where: { status: pickIn(status, STATUSES) ?? 'PENDING' },
       include: { listing: { select: { slug: true, title: true, premiumUntil: true, org: { select: { name: true } } } } },
@@ -64,8 +63,8 @@ export class PremiumController {
 
   /** To'lov qo'lda tasdiqlandi: PAID + listing.premiumUntil = max(hozir, joriy) + oylar. */
   @Post('admin/premium/:id/confirm') @HttpCode(200)
+  @UseGuards(PlatformAdminGuard)
   async confirm(@CurrentUserId() userId: string, @Param('id') id: string) {
-    await this.admin.assertPlatformAdmin(userId);
     const now = new Date();
     const r = await this.prisma.$transaction(async (tx) => {
       const o = await tx.premiumOrder.findUnique({ where: { id }, include: { listing: { select: { premiumUntil: true } } } });

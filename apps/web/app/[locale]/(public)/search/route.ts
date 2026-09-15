@@ -22,8 +22,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ locale: 
   const dest =
     p?.category === 'equipment' ? `/equipment${qs({ ...common, kind: p.equipment, deal: p.deal })}`
     : p?.category === 'truck' ? `/carriers${qs(common)}`
-    // Shahobchalar sahifasi bitta viloyat kutadi, koridorni bilmaydi
-    : p?.category === 'siding' ? `/sidings${qs({ region: (region || p.regions.join(',')).split(',')[0], near, radius, q })}`
     : `/terminals${qs({ ...common, service: p?.services.join(','), kind: p?.kind, bookable: p?.bookable ? '1' : '' })}`;
 
   return NextResponse.redirect(new URL(getPathname({ locale: locale as Locale, href: dest }), req.url), 307);
