@@ -118,8 +118,20 @@ export class AdminOrgsController {
     // `kind` = kinds[0]: eski kod shu maydonni o'qiydi, shuning uchun birga yangilanadi
     if (dto.kinds?.length) data.kind = dto.kinds[0];
     if (!Object.keys(data).length) throw new BadRequestException({ code: 'NOTHING_TO_UPDATE' });
+    // Eski qiymatlar yozuvdan OLDIN olinadi: audit "nima edi, nima bo'ldi" ni ko'rsatishi kerak.
+    // Ilgari faqat maydon NOMLARI yozilardi, ya'ni "kim bu kompaniyani tasdiqlagan va
+    // ilgari holati qanday edi" degan savolga jurnal javob bera olmasdi.
+    const before = await this.prisma.organization.findUnique({
+      where: { id },
+      select: { name: true, slug: true, stir: true, kycStatus: true, kind: true },
+    });
     const org = await this.prisma.organization.update({ where: { id }, data });
-    await this.audit.log({ actorId: userId, action: 'admin.org.update', entity: 'Organization', entityId: id, meta: { fields: Object.keys(dto) } });
+    const changed = Object.fromEntries(
+      Object.keys(dto)
+        .filter((k) => k in (before ?? {}))
+        .map((k) => [k, { from: (before as Record<string, unknown> | null)?.[k] ?? null, to: (dto as Record<string, unknown>)[k] ?? null }]),
+    );
+    await this.audit.log({ actorId: userId, action: 'admin.org.update', entity: 'Organization', entityId: id, meta: { fields: Object.keys(dto), changed } });
     return org;
   }
 
@@ -175,7 +187,7 @@ export class AdminOrgsController {
   @Patch('orgs/:id/members/:userId')
   async updateMember(@CurrentUserId() actorId: string, @Param('id') id: string, @Param('userId') memberId: string, @Body() dto: UpdateMemberDto) {
     const roles = dto.roles ? this.checkRoles(dto.roles) : undefined;
-    const cur = await this.prisma.membership.findUnique({ where: { userId_orgId: { userId: memberId, orgId: id } }, select: { isOwner: true } });
+    const cur = await this.prisma.membership.findUnique({ where: { userId_orgId: { userId: memberId, orgId: id } }, select: { isOwner: true, roles: true } });
     if (!cur) throw new NotFoundException({ code: 'MEMBER_NOT_FOUND' });
     // Egalikni olib tashlash ham a'zoni o'chirish kabi: oxirgi ega ketsa tashkilotni hech kim boshqara olmaydi
     if (cur.isOwner && dto.isOwner === false && (await this.prisma.membership.count({ where: { orgId: id, isOwner: true } })) === 1) {
@@ -186,7 +198,16 @@ export class AdminOrgsController {
       data: { ...(roles ? { roles } : {}), ...(dto.isOwner === undefined ? {} : { isOwner: dto.isOwner }) },
       select: { id: true, userId: true, orgId: true, roles: true, isOwner: true },
     });
-    await this.audit.log({ actorId, action: 'admin.org.member.update', entity: 'Organization', entityId: id, meta: { userId: memberId, fields: Object.keys(dto) } });
+    // Rol berish platformadagi eng sezilarli amal: kim, kimga va nimadan nimaga
+    // o'zgartirgani jurnalda qolishi shart.
+    await this.audit.log({
+      actorId, action: 'admin.org.member.update', entity: 'Organization', entityId: id,
+      meta: {
+        userId: memberId, fields: Object.keys(dto),
+        ...(roles ? { roles: { from: cur.roles, to: m.roles } } : {}),
+        ...(dto.isOwner === undefined ? {} : { isOwner: { from: cur.isOwner, to: m.isOwner } }),
+      },
+    });
     return m;
   }
 

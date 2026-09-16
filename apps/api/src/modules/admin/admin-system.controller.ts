@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsObject } from 'class-validator';
-import { PLATFORM_DEFAULTS, type PlatformConfigKey } from '@yuksaroy/domain';
+import { PLATFORM_DEFAULTS, type PlatformConfigKey, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
@@ -25,13 +25,24 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   docSlaHours: posInt,
 };
 
-/** ISO sana. `to` da faqat kun berilsa (YYYY-MM-DD) kunning oxirigacha olamiz, aks holda o'sha kun tushib qolardi. */
+/**
+ * Audit filtridagi sana. Faqat kun berilsa (YYYY-MM-DD) u TOSHKENT kuni deb olinadi.
+ *
+ * Ilgari `new Date('2026-09-16')` ishlatilardi va JS uni UTC yarim tuni deb o'qirdi.
+ * Sahifadagi vaqtlar esa Toshkent bo'yicha chiziladi, ya'ni "16-kun" so'ralganda
+ * mahalliy 00:00 dan 05:00 gacha bo'lgan amallar tushib qolar, o'rniga 17-kunning
+ * birinchi besh soati qo'shilib ketardi. Farq besh soat, jimgina.
+ */
 function parseDate(s: string | undefined, endOfDay = false): Date | undefined {
   if (!s) return undefined;
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return undefined;
-  if (endOfDay && /^\d{4}-\d{2}-\d{2}$/.test(s.trim())) d.setUTCDate(d.getUTCDate() + 1);
-  return d;
+  const day = s.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    const at = uzLocalToUtc(day, '00:00');
+    // `to` uchun kunning oxiri: keyingi kun boshigacha, aks holda o'sha kun tushib qolardi
+    return endOfDay ? new Date(at.getTime() + 24 * 60 * 60_000) : at;
+  }
+  const d = new Date(day);
+  return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
 /**
@@ -67,8 +78,26 @@ export class AdminSystemController {
     const take = Math.min(200, Math.max(1, Number(limit) || 50));
     const gte = parseDate(from);
     const lte = parseDate(to, true);
+    /*
+     * "Kim" maydoni. Ilgari bu faqat aniq User.id ga tenglik edi, lekin id ni panelning
+     * hech bir ekrani ko'rsatmaydi: operator uni yozib qo'ya olmasdi va filtr amalda
+     * ishlamasdi. Endi id ga o'xshamagan matn telefon, ism va pochta bo'yicha
+     * qidiriladi. Hech kim topilmasa ataylab bo'sh natija qaytadi, aks holda filtr
+     * e'tiborsiz qolib, butun jurnal ko'rsatilardi.
+     */
+    const actorText = actor?.trim();
+    let actorIds: string[] | null = null;
+    if (actorText && !/^c[a-z0-9]{20,}$/.test(actorText)) {
+      const like = { contains: actorText, mode: 'insensitive' as const };
+      const found = await this.prisma.user.findMany({
+        where: { OR: [{ phone: like }, { fullName: like }, { email: like }] },
+        select: { id: true },
+        take: 50,
+      });
+      actorIds = found.map((u) => u.id);
+    }
     const where = {
-      ...(actor ? { actorId: actor } : {}),
+      ...(actorIds ? { actorId: { in: actorIds } } : actorText ? { actorId: actorText } : {}),
       ...(entity ? { entity } : {}),
       ...(entityId ? { entityId } : {}),
       ...(action ? { action: { startsWith: action } } : {}),

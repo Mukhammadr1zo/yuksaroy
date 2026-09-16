@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { usePathname } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import type { Me } from '@/lib/types-auth';
 import { AdminNav } from '@/components/admin/AdminNav';
@@ -17,10 +18,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const tc = useTranslations('kabinet.common');
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const path = usePathname();
 
   useEffect(() => { api<Me>('/auth/me').then(setMe).catch(() => setMe(null)); }, []);
 
-  // Menyudagi "kutilmoqda" soni: bir so'rov, faqat admin tasdiqlangandan keyin
+  /*
+   * Menyudagi "kutilmoqda" soni. Qobiq admin maketida bir marta yaratiladi va sahifalar
+   * almashganda qayta yaratilmaydi, shuning uchun ilgari bu so'rov butun sessiyada
+   * bir marta ketardi: sakkizta e'lon tasdiqlangach ham yon menyuda "8" turaverardi,
+   * bosh sahifadagi navbat esa "0" ko'rsatardi. Ikki xil raqam, bitta ekranda.
+   * Endi har admin sahifasiga o'tganda yangilanadi. Yorliq almashganda emas:
+   * u faqat ?tab= ni o'zgartiradi, usePathname esa so'rov qismini olib tashlaydi.
+   */
   useEffect(() => {
     if (!me?.isPlatformAdmin) return;
     api<{ counts: Record<string, number> }>('/admin/health')
@@ -29,7 +38,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         setCounts({ pending: (c.listingsPendingReview ?? 0) + (c.orgsPendingKyc ?? 0) + (c.terminalClaimsPending ?? 0) + (c.premiumPending ?? 0) });
       })
       .catch(() => {});
-  }, [me?.isPlatformAdmin]);
+  }, [me?.isPlatformAdmin, path]);
 
   if (me === undefined) return <p className="py-10 text-sm text-muted">{tc('loading')}</p>;
   if (!me?.isPlatformAdmin) return <p role="alert" className="py-10 text-sm text-muted">{t('forbidden')}</p>;
