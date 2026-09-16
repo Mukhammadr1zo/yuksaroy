@@ -1,0 +1,93 @@
+# Har push va PR da: tiplar, testlar, qurilish. Sir kerak emas, hech qayerga chiqmaydi.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # Bir shoxga ketma-ket push bo'lsa eskisi bekor qilinadi: navbat kutib turmasin
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    # Testlar Prisma bilan bazaga tegadi (hold-capacity.spec): shuning uchun servis Postgres
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_USER: yuksaroy
+          POSTGRES_PASSWORD: yuksaroy
+          POSTGRES_DB: yuksaroy
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U yuksaroy -d yuksaroy"
+          --health-interval 10s --health-timeout 3s --health-retries 15
+
+    env:
+      DATABASE_URL: postgresql://yuksaroy:yuksaroy@localhost:5432/yuksaroy
+      # Soxta qiymatlar: env.ts (zod) shularni majburiy deb talab qiladi.
+      # Hech biri tashqi xizmatga ulanmaydi, testlar Telegram ga chiqmaydi.
+      JWT_SECRET: ci-jwt-secret-at-least-32-characters-long
+      INTERNAL_SECRET: ci-internal-secret-shared-value
+      BOT_TOKEN: '000000:ci-fake-telegram-bot-token'
+      BOT_USERNAME: ci_fake_bot
+      NEXT_PUBLIC_SITE_URL: https://yuksaroy.uz
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # domain dist sifatida iste'mol qilinadi: qolgan hamma narsa shunga bog'liq
+      - name: domain paketini qurish
+        run: pnpm --filter @yuksaroy/domain build
+
+      - name: Prisma klienti
+        run: pnpm --filter @yuksaroy/api exec prisma generate
+
+      - name: Migratsiyalar (bo'sh bazaga)
+        run: pnpm --filter @yuksaroy/api exec prisma migrate deploy
+
+      - name: Tiplar (api)
+        run: pnpm --filter @yuksaroy/api typecheck
+
+      - name: Tiplar (web)
+        run: pnpm --filter @yuksaroy/web typecheck
+
+      - name: Testlar
+        run: pnpm --filter @yuksaroy/api test
+
+      - name: Web qurilishi
+        run: pnpm --filter @yuksaroy/web build
+
+      # Loyiha qoidasi: em/en tire va tipografik apostrof bo'lmasin.
+      # Istisno: shu belgilarni tozalaydigan regexlar (ular belgining o'zini saqlashi shart).
+      - name: Tire va apostrof tekshiruvi
+        run: |
+          FOUND=$(grep -rnP '[\x{2013}\x{2014}\x{2018}\x{2019}\x{201C}\x{201D}]' \
+            --include='*.ts' --include='*.tsx' --include='*.json' --include='*.sql' --include='*.prisma' \
+            apps packages 2>/dev/null \
+            | grep -v 'node_modules\|\.next/\|/dist/' \
+            | grep -vP 'replace\(/\[|normalize|apos = ' || true)
+          if [ -n "$FOUND" ]; then echo "$FOUND"; echo "Taqiqlangan belgi topildi"; exit 1; fi
+          echo "toza"
+
+      # Uch til bir xil kalitlarga ega bo'lishi shart: bittasida yo'q kalit ishlash paytida yiqiladi
+      - name: Uch til kalit pariteti
+        run: node .github/scripts/i18n-parity.mjs

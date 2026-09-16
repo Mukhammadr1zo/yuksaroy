@@ -1,0 +1,178 @@
+# Prodga chiqarish: obrazlar GHCR da quriladi, VPS faqat tortib oladi.
+#
+# Nega VPS da qurilmaydi: serverda 24 ta boshqa konteyner ishlayapti (uzrailmap, taminot, smm, uty)
+# va Next qurilishi xotirani yeb, ularni yiqitishi mumkin. Shuning uchun qurish runner da.
+#
+# QO'LDA ishga tushiriladi (Actions > Deploy > Run workflow). Avtomatik emas: prodga
+# har push bilan chiqish bu loyihada xohlanmaydi.
+#
+# Kerakli sirlar (Settings > Secrets and variables > Actions):
+#   VPS_HOST        server IP yoki domen
+#   VPS_USER        ssh foydalanuvchi (masalan root)
+#   VPS_SSH_KEY     private kalit (butun matn, -----BEGIN ... bilan)
+#   VPS_PORT        ixtiyoriy, sukut 22
+# Kerakli o'zgaruvchilar (Variables):
+#   SITE_URL        https://yuksaroy.uz
+#   BOT_USERNAME    ixtiyoriy
+#   GOOGLE_CLIENT_ID ixtiyoriy
+#   VPS_PATH        ixtiyoriy, sukut /opt/yuksaroy
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_backup:
+        description: "Baza zaxirasini o'tkazib yuborish (tavsiya etilmaydi)"
+        type: boolean
+        default: false
+
+concurrency:
+  # Ikkita deploy bir vaqtda ketmasin
+  group: deploy-prod
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Obraz nomi kichik harfda bo'lishi shart: GHCR katta harfni qabul qilmaydi
+      - name: Obraz prefiksi
+        id: p
+        run: echo "repo=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: API obrazi
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-api:latest
+            ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-api:${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Web obrazi
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.web
+          push: true
+          # NEXT_PUBLIC_* qurilish paytida obrazga kiradi: ishga tushganda o'zgartirib bo'lmaydi
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ vars.SITE_URL || 'https://yuksaroy.uz' }}
+            NEXT_PUBLIC_BOT_USERNAME=${{ vars.BOT_USERNAME }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-web:latest
+            ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-web:${{ github.sha }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+      - name: Bot obrazi
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.bot
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-bot:latest
+            ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-bot:${{ github.sha }}
+          cache-from: type=gha,scope=bot
+          cache-to: type=gha,mode=max,scope=bot
+
+  ship:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Muhitga tasdiq qo'yish mumkin: Settings > Environments > production > required reviewers
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SSH kaliti
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id
+          chmod 600 ~/.ssh/id
+          ssh-keyscan -p "${{ secrets.VPS_PORT || 22 }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          P: ${{ secrets.VPS_PORT || 22 }}
+          DIR: ${{ vars.VPS_PATH || '/opt/yuksaroy' }}
+          SHA: ${{ github.sha }}
+          SKIP_BACKUP: ${{ inputs.skip_backup }}
+        run: |
+          ssh -i ~/.ssh/id -p "$P" "$U@$H" bash -s <<EOF
+          set -euo pipefail
+          cd "$DIR"
+
+          echo "== joriy obrazlar (qaytarish uchun) =="
+          docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env images | tee /tmp/ys-images-before.txt
+
+          if [ "$SKIP_BACKUP" != "true" ]; then
+            echo "== baza zaxirasi =="
+            docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env exec -T db \
+              pg_dump -U yuksaroy yuksaroy | gzip > "/root/ys-backup-\$(date +%Y%m%d-%H%M%S).sql.gz"
+            ls -lh /root/ys-backup-*.sql.gz | tail -3
+          fi
+
+          echo "== kod yangilanishi (compose fayllari va migratsiyalar uchun) =="
+          git fetch --all --prune
+          git checkout -f "$SHA"
+
+          echo "== obrazlarni tortib olish =="
+          docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env pull
+
+          echo "== ko'tarish (api ishga tushganda migratsiyalarni o'zi qo'llaydi) =="
+          docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env up -d --no-build
+
+          echo "== sog'liq tekshiruvi =="
+          ok=0
+          for i in \$(seq 1 30); do
+            if curl -fsS --max-time 5 http://127.0.0.1:4310/v1/health >/dev/null 2>&1 \
+               && curl -fsS --max-time 5 -o /dev/null http://127.0.0.1:3310/ 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          if [ "\$ok" != "1" ]; then
+            echo "SOG'LIQ TEKSHIRUVI O'TMADI, loglar:"
+            docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env logs --tail=60 api web
+            exit 1
+          fi
+          echo "sog'lom"
+          docker image prune -f >/dev/null 2>&1 || true
+          EOF
+
+      - name: Tashqaridan tekshirish
+        run: |
+          SITE="${{ vars.SITE_URL || 'https://yuksaroy.uz' }}"
+          for i in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$SITE/") || code=000
+            api=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$SITE/api/v1/stats") || api=000
+            echo "urinish $i: sayt=$code api=$api"
+            if [ "$code" = "200" ] && [ "$api" = "200" ]; then echo "prod tirik"; exit 0; fi
+            sleep 6
+          done
+          echo "prod javob bermayapti"
+          exit 1
