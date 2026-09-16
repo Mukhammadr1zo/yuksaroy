@@ -7,10 +7,13 @@
 import { useCallback, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { CLAIM_STATUSES, REGIONS, TERMINAL_KINDS, TERMINAL_STATUSES, type ClaimStatus, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
-import { api, post } from '@/lib/api';
+import { ApiError, api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import { BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, errText, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, useAdminList, type Col } from '@/components/admin/kit';
 import { diffBody, fromRow, TerminalForm, type Draft, type TerminalFull } from '@/components/admin/TerminalForm';
+
+/** O'chirishda yo'qoladigan bog'liq qatorlar soni. */
+type Impact = { tariffs: number; reviews: number; services: number; slots: number };
 
 /** GET /admin/catalog/terminals ro'yxat proyeksiyasi. */
 type Row = {
@@ -80,14 +83,27 @@ export default function TerminalsPage() {
     } catch (e) { fail(e, tc('saveFailed')); } finally { setBusy(false); }
   }
 
-  async function remove() {
+  /*
+   * Terminal o'chirilganda tarif tarixi, baholar, xizmatlar va slot kalendari birga
+   * ketadi. Server bo'sh bo'lmagan terminalni birinchi urinishda rad etadi va nima
+   * yo'qolishini sanab beradi; operator shuni ko'rib, ataylab ikkinchi marta tasdiqlaydi.
+   * Ilgari ikki bosishlik oddiy tasdiq bilan hammasi jimgina yo'qolardi.
+   */
+  const [impact, setImpact] = useState<Impact | null>(null);
+
+  async function remove(force = false) {
     if (!sheet?.id) return;
     try {
-      await api(`${PATH}/${sheet.id}`, { method: 'DELETE' });
+      await api(`${PATH}/${sheet.id}${force ? '?force=1' : ''}`, { method: 'DELETE' });
       setSheet(null);
+      setImpact(null);
       setNotice({ tone: 'ok', text: tc('deleted') });
       void reload();
-    } catch (e) { fail(e, tc('saveFailed')); }
+    } catch (e) {
+      const body = e instanceof ApiError ? (e.body as (Impact & { code?: string }) | undefined) : undefined;
+      if (body?.code === 'TERMINAL_HAS_DATA') { setImpact(body); return; }
+      fail(e, tc('saveFailed'));
+    }
   }
 
   const cols: Col<Row>[] = [
@@ -161,7 +177,16 @@ export default function TerminalsPage() {
             {sheet.id ? (
               <div className="mr-auto flex flex-col items-start gap-1">
                 <span className="text-xs text-muted">{tt('deleteWarn')}</span>
-                <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={remove} />
+                {impact ? (
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-xl bg-red-50 px-3 py-1.5 text-xs text-red-700">
+                      {tt('deleteImpact', { tariffs: impact.tariffs, reviews: impact.reviews, services: impact.services, slots: impact.slots })}
+                    </span>
+                    <ConfirmButton label={tt('deleteAnyway')} confirm={tc('confirm')} onRun={() => remove(true)} />
+                  </span>
+                ) : (
+                  <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => remove()} />
+                )}
               </div>
             ) : null}
             <button type="button" className={BTN_GHOST} onClick={close}>{tc('cancel')}</button>

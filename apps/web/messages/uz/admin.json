@@ -150,7 +150,8 @@
       "MEMBER_NOT_FOUND": "A'zo topilmadi.",
       "REASON_REQUIRED": "Buyurtmani yopish uchun sabab yozing.",
       "SELF_ACTION": "O'zingizga nisbatan bu amalni bajarib bo'lmaydi.",
-      "NOTHING_TO_UPDATE": "O'zgartiradigan narsa yo'q."
+      "NOTHING_TO_UPDATE": "O'zgartiradigan narsa yo'q.",
+      "TERMINAL_HAS_DATA": "Terminalda bog'liq ma'lumot bor. Nima yo'qolishini ko'rib, tasdiqlang."
     },
     "home": {
       "lead": "Bugun nima kutilmoqda va tizim qanday ishlayapti.",
@@ -209,7 +210,9 @@
         "contactName": "Mas'ul shaxs ismi",
         "contactPhone": "Mas'ul shaxs telefoni",
         "registryNo": "Reestr No"
-      }
+      },
+      "deleteImpact": "Birga o'chadi: {tariffs} tarif, {reviews} baho, {services} xizmat, {slots} vaqt oynasi.",
+      "deleteAnyway": "Baribir o'chirish"
     },
     "stations": {
       "lead": "Rasmiy stansiya reestri. Koordinata shu yerda tuzatiladi va xaritaga darrov tushadi.",

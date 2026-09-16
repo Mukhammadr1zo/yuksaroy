@@ -211,14 +211,34 @@ export class AdminCatalogController {
   // Qaytarib bo'lmaydi: tarif tarixi, baholar va joylar birga ketadi
   @Delete('catalog/terminals/:id')
   @UseGuards(PlatformOwnerGuard)
-  async deleteTerminal(@CurrentUserId() userId: string, @Param('id') id: string) {
+  async deleteTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Query('force') force?: string) {
     const t = await this.prisma.terminal.findUnique({ where: { id }, select: { name: true } });
     if (!t) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     const orders = await this.prisma.order.count({ where: { terminalId: id } });
     if (orders) throw new ConflictException({ code: 'TERMINAL_HAS_ORDERS', orders, hint: 'status: HIDDEN' });
+
+    /*
+     * Terminal o'chirilganda FK bo'yicha yana bir nechta jadval birga ketadi: tarif
+     * tarixi, baholar, xizmatlar va slot kalendari. Ilgari bular haqida hech narsa
+     * aytilmasdi va ikki bosishlik tasdiq bilan hammasi yo'qolardi.
+     * Endi nima yo'qolishi sanab beriladi va o'chirish faqat ataylab tasdiqlangandan
+     * keyin (force) bajariladi. Bo'sh terminalda hech narsa o'zgarmaydi: sanoq nol.
+     */
+    const [tariffs, reviews, services, slots] = await Promise.all([
+      this.prisma.tariff.count({ where: { terminalId: id } }),
+      this.prisma.review.count({ where: { terminalId: id } }),
+      this.prisma.terminalService.count({ where: { terminalId: id } }),
+      this.prisma.timeSlot.count({ where: { terminalId: id } }),
+    ]);
+    const impact = { tariffs, reviews, services, slots };
+    const loses = tariffs + reviews + services + slots;
+    if (loses > 0 && force !== '1') {
+      throw new ConflictException({ code: 'TERMINAL_HAS_DATA', ...impact, hint: 'force=1' });
+    }
+
     await this.prisma.terminal.delete({ where: { id } });
-    await this.audit.log({ actorId: userId, action: 'admin.terminal.delete', entity: 'Terminal', entityId: id, meta: { name: t.name } });
-    return { id, deleted: true };
+    await this.audit.log({ actorId: userId, action: 'admin.terminal.delete', entity: 'Terminal', entityId: id, meta: { name: t.name, ...impact } });
+    return { id, deleted: true, ...impact };
   }
 
   /** Slug band bo'lsa -2, -3 ...: reestrda bir xil nomli yo'llar ko'p. */

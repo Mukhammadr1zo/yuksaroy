@@ -150,7 +150,8 @@
       "MEMBER_NOT_FOUND": "Member not found.",
       "REASON_REQUIRED": "Give a reason before closing the order.",
       "SELF_ACTION": "You cannot apply this action to your own account.",
-      "NOTHING_TO_UPDATE": "Nothing to update."
+      "NOTHING_TO_UPDATE": "Nothing to update.",
+      "TERMINAL_HAS_DATA": "The terminal has related data. Review what will be lost, then confirm."
     },
     "home": {
       "lead": "What needs a decision today and how the system is doing.",
@@ -209,7 +210,9 @@
         "contactName": "Contact name",
         "contactPhone": "Contact phone",
         "registryNo": "Registry No"
-      }
+      },
+      "deleteImpact": "Also deleted: {tariffs} tariffs, {reviews} reviews, {services} services, {slots} time windows.",
+      "deleteAnyway": "Delete anyway"
     },
     "stations": {
       "lead": "The official station registry. Fix coordinates here and the map picks them up.",
