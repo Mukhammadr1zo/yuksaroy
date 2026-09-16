@@ -7,6 +7,7 @@ import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 
 class SettingsDto {
   // { commissionPct: 300, commissionPayer: 'CLIENT' } - faqat o'zgartiriladigan kalitlar
@@ -150,7 +151,9 @@ export class AdminSystemController {
   }
 
   /** Sozlamani yangilash: noma'lum kalit yoki noto'g'ri qiymat 400. Audit ga faqat haqiqatan o'zgargani tushadi. */
+  // Komissiya foizi va muddatlar: platformaning pul qoidasi, faqat ega o'zgartiradi
   @Put('settings')
+  @UseGuards(PlatformOwnerGuard)
   async updateSettings(@CurrentUserId() userId: string, @Body() dto: SettingsDto) {
     const entries = Object.entries(dto.values ?? {});
     for (const [key, value] of entries) {

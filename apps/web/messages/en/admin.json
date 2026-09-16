@@ -142,6 +142,7 @@
       "BAD_STATUS": "Invalid status.",
       "UNKNOWN_KEY": "Unknown setting key.",
       "BAD_VALUE": "Invalid value.",
+      "NOT_PLATFORM_OWNER": "Only the platform owner can do this.",
       "NOT_PLATFORM_ADMIN": "Not allowed.",
       "SLUG_TAKEN": "That address is taken.",
       "USER_NOT_FOUND": "User not found.",

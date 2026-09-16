@@ -6,6 +6,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { DeleteAccountUseCase } from '../identity/application/delete-account.usecase';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 
 class BlockDto {
   @IsBoolean() block!: boolean;
@@ -110,7 +111,9 @@ export class AdminUsersController {
   }
 
   /** O'chirish: foydalanuvchining o'zi bosgandagi bilan bir xil (soft delete va anonimlash). */
+  // Qaytarib bo'lmaydi: hisob anonimlashadi. Bloklash operatorda qoladi.
   @Post('users/:id/delete')
+  @UseGuards(PlatformOwnerGuard)
   async remove(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ReasonDto) {
     // O'z hisobini o'chirish qaytarib bo'lmaydigan amal: admin o'zini anonimlashtirib qo'yardi.
     if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });

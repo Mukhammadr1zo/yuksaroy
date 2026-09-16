@@ -117,7 +117,7 @@ export class AuthController {
   async passwordSet(@CurrentUserId() userId: string, @Body() dto: SetPasswordDto, @Req() req: FastifyRequest) {
     const u = await this.password.setPasswordChecked(userId, dto.password, dto.currentPassword);
     await this.audit.log({ actorId: userId, action: 'auth.password.set', ip: req.ip });
-    return publicUser(u, await this.admin.isPlatformAdmin(userId));
+    return publicUser(u, await perms(this.admin, userId));
   }
 
   @Post('password/reset/request') @HttpCode(200)
@@ -158,7 +158,7 @@ export class AuthController {
   async me(@CurrentUserId() userId: string) {
     const u = await this.users.findById(userId);
     if (!u) throw new HttpException({ code: 'USER_NOT_FOUND' }, HttpStatus.UNAUTHORIZED);
-    return publicUser(u, await this.admin.isPlatformAdmin(u.id));
+    return publicUser(u, await perms(this.admin, u.id));
   }
 
   /** Email yagona (EMAIL_TAKEN) va Google bog'langanda o'zgarmaydi (EMAIL_LOCKED); personalRoles faqat PERSONAL_ROLES. */
@@ -178,7 +178,7 @@ export class AuthController {
     if (dto.avatarUrl !== undefined) patch.avatarUrl = dto.avatarUrl || null;
     if (dto.personalRoles) patch.personalRoles = dto.personalRoles.filter((r): r is Role => PERSONAL_ROLES.includes(r as Role));
     const u = await this.users.update(userId, patch);
-    return publicUser(u, await this.admin.isPlatformAdmin(u.id));
+    return publicUser(u, await perms(this.admin, u.id));
   }
 
   /** Telefon almashtirish: kod YANGI raqamga (o'sha OTP oqimi), keyin /phone/change kod bilan. */
@@ -197,7 +197,7 @@ export class AuthController {
       const phone = await this.verifyOtp.consume(dto.phone, dto.code);
       const u = await this.users.claimPhone(userId, phone);
       await this.audit.log({ actorId: userId, action: 'auth.phone.change', ip: req.ip });
-      return publicUser(u, await this.admin.isPlatformAdmin(userId));
+      return publicUser(u, await perms(this.admin, userId));
     } catch (e) {
       throw this.authError(e);
     }
@@ -245,7 +245,7 @@ export class AuthController {
   private async loggedIn(res: FastifyReply, r: { user: UserRecord; accessToken: string; refreshToken: string }, ip: string, via: string, action = 'auth.login') {
     this.setCookies(res, r.accessToken, r.refreshToken);
     await this.audit.log({ actorId: r.user.id, action, ip, meta: { via } });
-    return { user: publicUser(r.user, await this.admin.isPlatformAdmin(r.user.id)), accessToken: r.accessToken, refreshToken: r.refreshToken, needsPhone: r.user.phone === null };
+    return { user: publicUser(r.user, await perms(this.admin, r.user.id)), accessToken: r.accessToken, refreshToken: r.refreshToken, needsPhone: r.user.phone === null };
   }
 
   private setCookies(res: FastifyReply, access: string, refresh: string) {
@@ -261,10 +261,22 @@ export class AuthController {
   }
 }
 
-export function publicUser(u: UserRecord, isPlatformAdmin: boolean) {
+/**
+ * Ikki bayroq: admin panelga kirish va platformani o'zgartirish huquqi.
+ *
+ * Ikkinchisi UI uchun: operator komissiya sozlamasini yoki o'chirish tugmasini
+ * ko'rmasligi kerak. Haqiqiy himoya baribir serverda, PlatformOwnerGuard da.
+ */
+export function publicUser(u: UserRecord, perms: { isPlatformAdmin: boolean; isPlatformOwner: boolean }) {
   return {
     id: u.id, phone: u.phone, email: u.email, avatarUrl: u.avatarUrl, fullName: u.fullName, locale: u.locale, personalRoles: u.personalRoles,
     telegramLinked: u.telegramChatId !== null, googleLinked: u.googleSub !== null, hasPassword: u.passwordHash !== null,
-    isPlatformAdmin, createdAt: u.createdAt.toISOString(),
+    isPlatformAdmin: perms.isPlatformAdmin, isPlatformOwner: perms.isPlatformOwner, createdAt: u.createdAt.toISOString(),
   };
+}
+
+/** Ikkala tekshiruv birga: chaqiruv joylari ko'p, har birida takrorlanmasin. */
+export async function perms(admin: { isPlatformAdmin(id: string): Promise<boolean>; isPlatformOwner(id: string): Promise<boolean> }, userId: string) {
+  const [isPlatformAdmin, isPlatformOwner] = await Promise.all([admin.isPlatformAdmin(userId), admin.isPlatformOwner(userId)]);
+  return { isPlatformAdmin, isPlatformOwner };
 }

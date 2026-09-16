@@ -3,6 +3,7 @@ import { BookingModule } from '../booking/booking.module';
 import { IdentityModule } from '../identity/identity.module';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { AdminUsersController } from './admin-users.controller';
 import { AdminCatalogController } from './admin-catalog.controller';
 import { AdminOrgsController } from './admin-orgs.controller';
@@ -20,6 +21,6 @@ import { AdminSystemController } from './admin-system.controller';
   // BookingModule: admin buyurtmani majburan bekor qilganda band qilingan joy bo'shatiladi
   imports: [IdentityModule, OrganizationsModule, BookingModule],
   controllers: [AdminUsersController, AdminCatalogController, AdminOrgsController, AdminOpsController, AdminSystemController],
-  providers: [PlatformAdminGuard],
+  providers: [PlatformAdminGuard, PlatformOwnerGuard],
 })
 export class AdminModule {}

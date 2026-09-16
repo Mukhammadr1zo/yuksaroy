@@ -46,7 +46,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-8">
       {/* min-w-0: aks holda grid elementi menyu kengligiga cho'zilib, mobilda sahifa yon tomonga surilardi */}
-      <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start"><AdminNav counts={counts} /></aside>
+      <aside className="min-w-0 lg:sticky lg:top-6 lg:self-start"><AdminNav counts={counts} isOwner={!!me.isPlatformOwner} /></aside>
       <div className="min-w-0">{children}</div>
     </div>
   );

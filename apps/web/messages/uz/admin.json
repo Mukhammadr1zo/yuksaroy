@@ -142,6 +142,7 @@
       "BAD_STATUS": "Noto'g'ri holat.",
       "UNKNOWN_KEY": "Noma'lum sozlama kaliti.",
       "BAD_VALUE": "Qiymat noto'g'ri.",
+      "NOT_PLATFORM_OWNER": "Bu amal faqat platforma egasi uchun.",
       "NOT_PLATFORM_ADMIN": "Huquq yo'q.",
       "SLUG_TAKEN": "Bu manzil band.",
       "USER_NOT_FOUND": "Foydalanuvchi topilmadi.",

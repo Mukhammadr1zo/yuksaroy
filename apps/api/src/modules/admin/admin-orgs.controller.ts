@@ -7,6 +7,7 @@ import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 
 class AdminUpdateOrgDto {
   @IsOptional() @IsString() @Length(2, 120) name?: string;
@@ -136,7 +137,9 @@ export class AdminOrgsController {
   }
 
   /** O'chirish faqat bo'sh tashkilot uchun: terminal/e'lon/buyurtma bo'lsa tarix yo'qoladi. */
+  // Qaytarib bo'lmaydi
   @Delete('orgs/:id')
+  @UseGuards(PlatformOwnerGuard)
   async remove(@CurrentUserId() userId: string, @Param('id') id: string) {
     const org = await this.prisma.organization.findUnique({
       where: { id },
@@ -160,7 +163,9 @@ export class AdminOrgsController {
   }
 
   /** Yangi platforma admini shu yerdan: roles = ['PLATFORM_ADMIN']. Upsert - bir odamga bitta qator. */
+  // Rol berish: PLATFORM_ADMIN ham shu yerdan beriladi, ya'ni huquqni ko'paytirish yo'li
   @Post('orgs/:id/members')
+  @UseGuards(PlatformOwnerGuard)
   async addMember(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: AddMemberDto) {
     const roles = this.checkRoles(dto.roles);
     const [org, user] = await Promise.all([
@@ -184,7 +189,9 @@ export class AdminOrgsController {
     return m;
   }
 
+  // Rolni o'zgartirish ham huquq berish yo'li
   @Patch('orgs/:id/members/:userId')
+  @UseGuards(PlatformOwnerGuard)
   async updateMember(@CurrentUserId() actorId: string, @Param('id') id: string, @Param('userId') memberId: string, @Body() dto: UpdateMemberDto) {
     const roles = dto.roles ? this.checkRoles(dto.roles) : undefined;
     const cur = await this.prisma.membership.findUnique({ where: { userId_orgId: { userId: memberId, orgId: id } }, select: { isOwner: true, roles: true } });

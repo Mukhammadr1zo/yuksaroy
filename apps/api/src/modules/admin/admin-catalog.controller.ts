@@ -11,6 +11,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 
 /** Terminal (shahobcha yo'l ham shu jadvalda): nom va tur majburiy, qolgani pasport ustunlari. */
 class TerminalCreateDto {
@@ -207,7 +208,9 @@ export class AdminCatalogController {
    * (Order.terminalId majburiy bog'lanish). Bunday holatda status HIDDEN qilinadi:
    * terminal katalogdan yo'qoladi, ma'lumoti esa joyida qoladi.
    */
+  // Qaytarib bo'lmaydi: tarif tarixi, baholar va joylar birga ketadi
   @Delete('catalog/terminals/:id')
+  @UseGuards(PlatformOwnerGuard)
   async deleteTerminal(@CurrentUserId() userId: string, @Param('id') id: string) {
     const t = await this.prisma.terminal.findUnique({ where: { id }, select: { name: true } });
     if (!t) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
@@ -279,7 +282,9 @@ export class AdminCatalogController {
    * stansiyani o'chirib terminallardagi stationId ni jimgina null qilib qo'yardi va
    * pasportdan stansiya yo'qolardi. Buyurtma ham tekshiriladi: u majburiy bog'lanish.
    */
+  // Qaytarib bo'lmaydi
   @Delete('catalog/stations/:id')
+  @UseGuards(PlatformOwnerGuard)
   async deleteStation(@CurrentUserId() userId: string, @Param('id') id: string) {
     const s = await this.prisma.station.findUnique({ where: { id }, select: { nameUz: true } });
     if (!s) throw new NotFoundException({ code: 'STATION_NOT_FOUND' });

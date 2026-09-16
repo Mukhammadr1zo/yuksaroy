@@ -9,7 +9,7 @@
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
-type Item = { href: string; key: string; exact?: boolean; badge?: string };
+type Item = { href: string; key: string; exact?: boolean; badge?: string; owner?: true };
 const GROUPS: { key: string; items: Item[] }[] = [
   { key: 'work', items: [
     { href: '/admin', key: 'home', exact: true },
@@ -29,11 +29,12 @@ const GROUPS: { key: string; items: Item[] }[] = [
   ] },
   { key: 'system', items: [
     { href: '/admin/audit', key: 'audit' },
-    { href: '/admin/settings', key: 'settings' },
+    // Komissiya foizi va muddatlar: operatorga ko'rinmaydi, server ham ruxsat bermaydi
+    { href: '/admin/settings', key: 'settings', owner: true },
   ] },
 ];
 
-export function AdminNav({ counts }: { counts?: Partial<Record<string, number>> }) {
+export function AdminNav({ counts, isOwner = false }: { counts?: Partial<Record<string, number>>; isOwner?: boolean }) {
   const t = useTranslations('admin.nav');
   const path = usePathname();
   return (
@@ -42,7 +43,7 @@ export function AdminNav({ counts }: { counts?: Partial<Record<string, number>> 
         <div key={g.key} className="flex shrink-0 gap-1 lg:flex-col lg:gap-0.5">
           {/* Guruh sarlavhasi faqat keng ekranda: mobil menyu bitta gorizontal qator */}
           <span className="hidden px-3 pb-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted lg:block">{t(`group.${g.key}`)}</span>
-          {g.items.map(({ href, key, exact, badge }) => {
+          {g.items.filter((it) => !it.owner || isOwner).map(({ href, key, exact, badge }) => {
             const on = exact ? path === href : path === href || path.startsWith(`${href}/`);
             const n = badge ? counts?.[badge] : undefined;
             return (
