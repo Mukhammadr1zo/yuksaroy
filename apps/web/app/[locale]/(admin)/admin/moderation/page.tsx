@@ -166,7 +166,7 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
       </div>
       <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></p>
       <Link href={`/terminals/${x.slug}`} className="mt-1 inline-block text-sm text-teal-ink underline">{t('open')}</Link>
-      <Decide path={`/terminals/${x.id}/claim/decide`} reasonKey="reason" requireReason={false} onDone={onDone} />
+      <Decide path={`/terminals/${x.id}/claim/decide`} reasonKey="reason" requireReason onDone={onDone} />
     </li>
   );
 }

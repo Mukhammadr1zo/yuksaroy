@@ -1,4 +1,4 @@
-import { Body, ConflictException, Controller, Get, Inject, NotFoundException, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, Inject, NotFoundException, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { CLAIM_STATUSES, REGIONS } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
@@ -62,6 +62,9 @@ export class TerminalAdminController {
   @Post('terminals/:id/claim/decide')
   @UseGuards(PlatformAdminGuard)
   async claimTerminalDecide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDecideDto) {
+    // Rad etish sababi egasiga yetib boradi va auditda qoladi: sababsiz rad etilsa
+    // tashkilot nima qilishini bilmaydi va qo'llab-quvvatlashga qo'ng'iroq qiladi.
+    if (!dto.approve && !dto.reason?.trim()) throw new BadRequestException({ code: 'REASON_REQUIRED' });
     const t = await this.repo.decideTerminalClaim(id, dto.approve, new Date());
     if (!t) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
     await this.audit.log({ actorId: userId, action: 'terminal.claim.decide', entity: 'Terminal', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: t.claimOrgId } });
@@ -170,6 +173,9 @@ export class TerminalAdminController {
   @Post('sidings/:id/claim/decide')
   @UseGuards(PlatformAdminGuard)
   async claimDecide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDecideDto) {
+    // Rad etish sababi egasiga yetib boradi va auditda qoladi: sababsiz rad etilsa
+    // tashkilot nima qilishini bilmaydi va qo'llab-quvvatlashga qo'ng'iroq qiladi.
+    if (!dto.approve && !dto.reason?.trim()) throw new BadRequestException({ code: 'REASON_REQUIRED' });
     const s = await this.repo.decideSidingClaim(id, dto.approve);
     if (!s) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
     await this.audit.log({ actorId: userId, action: 'siding.claim.decide', entity: 'Siding', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: s.ownerOrgId } });

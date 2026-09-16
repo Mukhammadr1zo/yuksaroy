@@ -1,8 +1,9 @@
 'use client';
 /**
  * Moderatsiya qarori: tasdiqlash darhol, rad etish sabab bilan.
- * `path` ga { approve, [reasonKey]: text } yuboriladi. E'lon va KYC da sabab majburiy
- * (egasi nimani tuzatishni bilishi kerak), da'volarda ixtiyoriy.
+ * `path` ga { approve, [reasonKey]: text } yuboriladi. Rad etishda sabab har doim
+ * majburiy: u auditga yoziladi va egasi nimani tuzatishni bilishi kerak. Ilgari
+ * da'volarda ixtiyoriy edi va rad etilgan tashkilot sababsiz qolardi.
  */
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
