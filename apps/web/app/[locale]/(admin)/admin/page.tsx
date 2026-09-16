@@ -8,13 +8,15 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { num, uzDateTime } from '@/lib/format';
-import { CARD, Notice, PageHead } from '@/components/admin/kit';
+import { CARD, Notice, PageHead, errText } from '@/components/admin/kit';
 
 type Health = {
   db: { ok: boolean; ms?: number; error?: string };
   counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; ordersPending: number };
   recent: { users: number; orders: number; listings: number };
   oldestPending: string | null;
+  /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
+  failed?: string[];
 };
 type Overview = { users: number; blocked: number; orgs: number; terminals: number; sidings: number; listings: number; orders: number; inquiries: number; messages: number; reviews: number };
 
@@ -37,10 +39,10 @@ export default function AdminHomePage() {
   const locale = useLocale();
   const [health, setHealth] = useState<Health | null>(null);
   const [overview, setOverview] = useState<Overview | null>(null);
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState<unknown>(null);
 
   useEffect(() => {
-    api<Health>('/admin/health').then(setHealth).catch(() => setErr(true));
+    api<Health>('/admin/health').then(setHealth).catch(setErr);
     // Umumiy raqamlar yiqilsa sahifa buzilmasin: navbat va salomatlik muhimroq
     api<Overview>('/admin/overview').then(setOverview).catch(() => {});
   }, []);
@@ -50,8 +52,10 @@ export default function AdminHomePage() {
   return (
     <>
       <PageHead title={t('title')} lead={th('lead')} />
-      {err ? <Notice tone="err">{tc('loadFailed')}</Notice> : null}
+      {err ? <Notice tone="err">{errText(err, t, t.has, tc('loadFailed'))}</Notice> : null}
       {!health && !err ? <p className="mt-5 text-sm text-muted">{tc('loading')}</p> : null}
+      {/* Bir qism yiqilsa qolgani baribir ko'rsatiladi, lekin qaysi biri ekani aytiladi */}
+      {health?.failed?.length ? <Notice tone="err">{tc('loadFailed')} ({health.failed.join(', ')})</Notice> : null}
 
       {health ? (
         <div className="mt-5 grid gap-4 lg:grid-cols-2">

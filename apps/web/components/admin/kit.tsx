@@ -189,11 +189,19 @@ export function Drawer({ open, title, onClose, children, footer }: {
   );
 }
 
-/** Xato kodini o'qiladigan matnga aylantiradi; tarjimasi bo'lmasa kodning o'zi qoladi. */
+/**
+ * Xato kodini o'qiladigan matnga aylantiradi.
+ *
+ * Tarjimasi bo'lmasa kod va HTTP holati ko'rsatiladi. Ilgari bunday holatda faqat
+ * "Ma'lumot yuklanmadi" chiqardi va serverga kirmasdan sababini bilib bo'lmasdi:
+ * panelni ishlatadigan odam esa odatda serverga kira olmaydi.
+ */
 // `t` faqat kalit bilan chaqiriladi: tor imzo next-intl tarjimoniga strukturaviy mos keladi
 export function errText(e: unknown, t: (k: string) => string, has: (k: string) => boolean, fallback: string) {
-  const code = e instanceof ApiError ? (e.body as { code?: string } | undefined)?.code : undefined;
-  return code && has(`err.${code}`) ? t(`err.${code}`) : code ?? fallback;
+  if (!(e instanceof ApiError)) return fallback;
+  const code = (e.body as { code?: string } | undefined)?.code;
+  if (code && has(`err.${code}`)) return t(`err.${code}`);
+  return `${fallback} (${code ?? 'HTTP'} ${e.status})`;
 }
 
 export type Paged<T> = { items: T[]; total: number; page: number; limit: number };

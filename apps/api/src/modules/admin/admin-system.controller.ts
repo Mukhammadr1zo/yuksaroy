@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Logger, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsObject } from 'class-validator';
 import { PLATFORM_DEFAULTS, type PlatformConfigKey, uzLocalToUtc } from '@yuksaroy/domain';
@@ -180,29 +180,57 @@ export class AdminSystemController {
   }
 
   /** Bitta ekran: baza tirikmi, qancha ish odam kutyapti, sutkada nima bo'ldi. */
+  /**
+   * Bosh sahifa uchun: navbatlar, oxirgi sutka va baza holati.
+   *
+   * Har so'rov ALOHIDA bajariladi. Ilgari hammasi bitta Promise.all da edi va bittasi
+   * yiqilsa butun javob 500 bo'lardi: panelda "Ma'lumot yuklanmadi" chiqar, qaysi qismi
+   * ishlamayotgani esa umuman ko'rinmasdi. Endi ishlaganlari ko'rsatiladi, yiqilganlari
+   * null bo'lib qoladi va `failed` ro'yxatida nomi bilan qaytadi.
+   */
   @Get('health')
   async health() {
     const since = new Date(Date.now() - 86400000);
+    const failed: string[] = [];
+    const safe = async <T>(name: string, fn: () => Promise<T>): Promise<T | null> => {
+      try {
+        return await fn();
+      } catch (e) {
+        failed.push(name);
+        this.log.error(`admin/health: ${name} yiqildi: ${(e as Error).message.split(String.fromCharCode(10)).pop()}`);
+        return null;
+      }
+    };
+
     const [db, listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, ordersPending, users, orders, listings, oldest] =
       await Promise.all([
         this.pingDb(),
-        this.prisma.listing.count({ where: { status: 'PENDING_REVIEW' } }),
-        this.prisma.organization.count({ where: { kycStatus: 'PENDING' } }),
-        this.prisma.terminal.count({ where: { claimStatus: 'PENDING' } }),
-        this.prisma.premiumOrder.count({ where: { status: 'PENDING' } }), // PremiumOrder.status - String
-        this.prisma.order.count({ where: { status: 'PENDING' } }),
-        this.prisma.user.count({ where: { createdAt: { gte: since } } }),
-        this.prisma.order.count({ where: { createdAt: { gte: since } } }),
-        this.prisma.listing.count({ where: { createdAt: { gte: since } } }),
-        this.prisma.listing.findFirst({ where: { status: 'PENDING_REVIEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }),
+        safe('listingsPendingReview', () => this.prisma.listing.count({ where: { status: 'PENDING_REVIEW' } })),
+        safe('orgsPendingKyc', () => this.prisma.organization.count({ where: { kycStatus: 'PENDING' } })),
+        safe('terminalClaimsPending', () => this.prisma.terminal.count({ where: { claimStatus: 'PENDING' } })),
+        safe('premiumPending', () => this.prisma.premiumOrder.count({ where: { status: 'PENDING' } })), // PremiumOrder.status - String
+        safe('ordersPending', () => this.prisma.order.count({ where: { status: 'PENDING' } })),
+        safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
+        safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
+        safe('recentListings', () => this.prisma.listing.count({ where: { createdAt: { gte: since } } })),
+        safe('oldestPending', () => this.prisma.listing.findFirst({ where: { status: 'PENDING_REVIEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } })),
       ]);
     return {
       db,
-      counts: { listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, ordersPending },
-      recent: { users, orders, listings },
+      counts: {
+        listingsPendingReview: listingsPendingReview ?? 0,
+        orgsPendingKyc: orgsPendingKyc ?? 0,
+        terminalClaimsPending: terminalClaimsPending ?? 0,
+        premiumPending: premiumPending ?? 0,
+        ordersPending: ordersPending ?? 0,
+      },
+      recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },
       oldestPending: oldest?.createdAt ?? null, // SLA signali: eng uzoq kutayotgan e'lon
+      failed, // bo'sh bo'lsa hammasi joyida
     };
   }
+
+  private readonly log = new Logger('AdminHealth');
 
   private async pingDb(): Promise<{ ok: boolean; ms?: number; error?: string }> {
     const t = Date.now();

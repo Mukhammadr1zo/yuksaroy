@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaExceptionFilter } from './common/prisma-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import fastifyCookie from '@fastify/cookie';
 import fastifyMultipart from '@fastify/multipart';
@@ -39,6 +40,9 @@ async function bootstrap() {
   app.setGlobalPrefix('v1');
   app.enableCors({ origin: env.WEB_ORIGIN, credentials: true });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  // Prisma xatolari o'qiladigan kodga aylanadi va kutilmaganlari loglanadi:
+  // ilgari ular 500 bo'lib ketardi va panelda faqat "Saqlanmadi" ko'rinardi.
+  app.useGlobalFilters(new PrismaExceptionFilter());
 
   if (docsOn) {
     const doc = new DocumentBuilder().setTitle('YukSaroy API').setVersion('0.1').addCookieAuth('ys_access').build();
