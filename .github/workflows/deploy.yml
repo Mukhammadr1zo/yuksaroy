@@ -6,16 +6,18 @@
 # QO'LDA ishga tushiriladi (Actions > Deploy > Run workflow). Avtomatik emas: prodga
 # har push bilan chiqish bu loyihada xohlanmaydi.
 #
-# Kerakli sirlar (Settings > Secrets and variables > Actions):
-#   VPS_HOST        server IP yoki domen
-#   VPS_USER        ssh foydalanuvchi (masalan root)
-#   VPS_SSH_KEY     private kalit (butun matn, -----BEGIN ... bilan)
-#   VPS_PORT        ixtiyoriy, sukut 22
-# Kerakli o'zgaruvchilar (Variables):
-#   SITE_URL        https://yuksaroy.uz
-#   BOT_USERNAME    ixtiyoriy
-#   GOOGLE_CLIENT_ID ixtiyoriy
-#   VPS_PATH        ixtiyoriy, sukut /opt/yuksaroy
+# Sirlar (Settings > Secrets and variables > Actions > Secrets):
+#   VPS_HOST         MAJBURIY, server IP yoki domen
+#   VPS_USER         MAJBURIY, ssh foydalanuvchi (masalan root)
+#   VPS_SSH_KEY      MAJBURIY, private kalit (butun matn, -----BEGIN ... bilan)
+#   VPS_PORT         ixtiyoriy, sukut 22
+# O'zgaruvchilar (Variables tabi):
+#   BOT_USERNAME     MAJBURIY, bo'sh qolsa Telegram bilan kirish tugmasi ishlamaydi
+#   GOOGLE_CLIENT_ID MAJBURIY, bo'sh qolsa Google bilan kirish ishlamaydi
+#   SITE_URL         ixtiyoriy, sukut https://yuksaroy.uz
+#   VPS_PATH         ixtiyoriy, sukut /opt/yuksaroy
+#
+# Majburiylari yo'q bo'lsa ish boshida to'xtaydi va qaysi biri yo'qligini aytadi.
 name: Deploy
 
 on:
@@ -85,6 +87,11 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-api:latest
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-api:${{ github.sha }}
+          # Paketni repo bilan bog'laydi. Yopiq repo uchun shart: bog'lanmagan paketga
+          # ish jarayonining GITHUB_TOKEN i o'qish huquqiga ega bo'lmaydi.
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
 
@@ -102,6 +109,11 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-web:latest
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-web:${{ github.sha }}
+          # Paketni repo bilan bog'laydi. Yopiq repo uchun shart: bog'lanmagan paketga
+          # ish jarayonining GITHUB_TOKEN i o'qish huquqiga ega bo'lmaydi.
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 
@@ -114,6 +126,11 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-bot:latest
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-bot:${{ github.sha }}
+          # Paketni repo bilan bog'laydi. Yopiq repo uchun shart: bog'lanmagan paketga
+          # ish jarayonining GITHUB_TOKEN i o'qish huquqiga ega bo'lmaydi.
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha,scope=bot
           cache-to: type=gha,mode=max,scope=bot
 
