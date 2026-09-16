@@ -17,7 +17,7 @@ export function CompareTray() {
   // Solishtirish sahifasining o'zida savat ko'rinmaydi: jadval allaqachon ochiq
   if (!cats.length || path.includes('/compare')) return null;
   return (
-    <aside aria-label={t('tray.aria')} className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-3xl rounded-card border border-navy/20 bg-white p-3 sm:inset-x-6">
+    <aside aria-label={t('tray.aria')} className="sticky bottom-3 z-40 mx-auto mt-6 w-[calc(100%-1.5rem)] max-w-3xl rounded-card border border-navy/20 bg-white p-3 shadow-lg sm:w-[calc(100%-3rem)]">
       {cats.map((c) => (
         <div key={c} className="flex flex-wrap items-center gap-2 py-1">
           <span className="font-mono text-[11px] font-semibold text-muted">{t(`cat.${c}`)} · {t('tray.count', { count: s[c].length })}</span>

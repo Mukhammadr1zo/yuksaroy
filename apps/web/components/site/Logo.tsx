@@ -26,7 +26,7 @@ export function Logo({ light = false, compact = false }: { light?: boolean; comp
           Yuk<span className="text-teal-lit">Saroy</span>
         </span>
       ) : (
-        <Image src={word} alt="YukSaroy" sizes="91px" className={`h-[19px] w-auto ${compact ? 'max-[399px]:hidden' : ''}`} loading="eager" />
+        <Image src={word} alt="YukSaroy" sizes="91px" className={`h-[19px] w-auto ${compact ? 'max-sm:hidden' : ''}`} loading="eager" />
       )}
     </span>
   );

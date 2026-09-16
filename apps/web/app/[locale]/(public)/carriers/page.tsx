@@ -97,7 +97,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
         <Link href="/standards" className="text-sm font-semibold text-teal-ink underline decoration-dotted hover:text-navy">{t('empty.standard')}</Link>
       </div>
 
-      <form className="mt-6 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-[1fr_1fr_0.7fr_1.2fr_auto]" action="/carriers">
+      <form className="mt-6 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-2 lg:grid-cols-[1fr_1fr_0.7fr_1.2fr_auto]" action="/carriers">
         {Object.entries({ near, radius, corridor }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
         <RegionFilter value={region} />
         <Sel name="truckType" value={truckType} label={t('filter.truckType')} options={TRUCK_TYPES.map((x) => [x, LISTING_LABELS[lang].truckType[x]])} />

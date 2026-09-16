@@ -83,7 +83,7 @@ export default async function TerminalPage({ params }: Params) {
       <Ld data={breadcrumbs(locale, [{ name: tn('terminals'), path: '/terminals' }, { name: t.name, path: `/terminals/${t.slug}` }])} />
       <nav aria-label={tr('breadcrumb.aria')} className="font-mono text-xs text-muted"><Link href="/terminals" className="hover:text-navy">{tn('terminals')}</Link>{station ? ` / ${station}` : ''}</nav>
       <header className="mt-3 flex flex-wrap items-start justify-between gap-6">
-        <div className="max-w-2xl">
+        <div className="max-w-2xl break-words">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(t.kind)}</span>
             {registryOnly ? null : <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>}

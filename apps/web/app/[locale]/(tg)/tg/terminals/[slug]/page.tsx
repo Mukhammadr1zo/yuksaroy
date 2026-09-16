@@ -32,7 +32,7 @@ export default async function TgTerminalPage({ params }: Params) {
         {x.is24h ? <span className="rounded-full bg-teal px-3 py-1 font-mono text-xs font-semibold text-white">24/7</span> : null}
         <span className="font-mono text-xs text-muted">{x.ratingAvg != null ? `★ ${x.ratingAvg.toFixed(1)} (${x.ratingCount})` : t('noRating')}</span>
       </div>
-      <h1 className="font-display mt-2 text-xl font-bold">{x.name}</h1>
+      <h1 className="font-display mt-2 break-words text-xl font-bold">{x.name}</h1>
       <p className="mt-1 text-sm text-muted">{stationName(x)} · {regionName(x.regionCode, lang)}</p>
       {registryOnly ? <p className="mt-2 text-xs text-muted">{tcl('registryBadge')}</p>
         : !x.claimed ? <p className="mt-2 text-xs text-amber-ink">{t('unverified')}</p> : null}

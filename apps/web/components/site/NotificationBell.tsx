@@ -57,7 +57,7 @@ export function NotificationBell() {
         {unread ? <span className="absolute -right-1 -top-1 rounded-full bg-orange px-1.5 font-mono text-[10px] font-bold text-white">{unread > 9 ? '9+' : unread}</span> : null}
       </button>
       {open ? (
-        <div className="absolute right-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line bg-white shadow-lg">
+        <div className="absolute right-0 z-40 mt-2 w-80 max-w-[calc(100vw-5rem)] overflow-hidden rounded-2xl border border-line bg-white shadow-lg">
           <p className="border-b border-line px-4 py-2.5 text-sm font-bold">{t('title')}</p>
           {items === null ? <p className="px-4 py-6 text-center text-sm text-muted">{t('loading')}</p> : null}
           {items && items.length === 0 ? <p className="px-4 py-6 text-center text-sm text-muted">{t('empty')}</p> : null}

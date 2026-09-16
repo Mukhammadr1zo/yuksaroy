@@ -107,14 +107,14 @@ function ListingRow({ l, onDone }: { l: OwnerListing; onDone: (d: Decision) => v
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{L.kind[l.kind]}</Pill>
-        <span className="font-semibold">{l.title}</span>
+        <span className="min-w-0 break-words font-semibold">{l.title}</span>
         <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(l.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
         {l.owner.type === 'org' ? t('org') : LISTING_OWNER_LABELS[lang].person}: {l.owner.name} · {t('region')}: {tr.has(l.regionCode) ? tr(l.regionCode) : l.regionCode} · {t('price')}: <span className="font-mono">{l.priceTiyin != null ? `${som(l.priceTiyin, lang)}${l.priceUnit ? ` / ${L.priceUnit[l.priceUnit]}` : ''}` : t('onRequest')}</span> · <span className="font-mono">{l.photos.length}</span> {t('photos')}
         {l.year ? <> · <span className="font-mono">{l.year}</span></> : null}{l.condition ? ` · ${L.condition[l.condition]}` : ''}{l.model ? ` · ${l.model}` : ''}
       </p>
-      {l.description ? <p className="mt-2 whitespace-pre-line text-sm">{l.description}</p> : null}
+      {l.description ? <p className="mt-2 whitespace-pre-line break-words text-sm">{l.description}</p> : null}
       {l.photos.length ? (
         <div className="mt-2 flex gap-2 overflow-x-auto">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -136,14 +136,14 @@ function OrgRow({ o, onDone }: { o: OrgRecord; onDone: (d: Decision) => void }) 
   return (
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-semibold">{o.name}</span>
+        <span className="min-w-0 break-words font-semibold">{o.name}</span>
         {kinds.map((k) => <Pill key={k} tone="ok">{ORG_KIND_LABELS[lang][k]}</Pill>)}
         {o.kycRequestedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('requestedAt')} {uzDateTime(o.kycRequestedAt, lang)}</span> : null}
       </div>
       <p className="mt-1 font-mono text-sm">
         {t('stir')}: {o.stir ?? t('noStir')}{o.regionCode && tr.has(o.regionCode) ? <span className="text-muted"> · {t('region')}: {tr(o.regionCode)}</span> : null}
       </p>
-      <p className="mt-1 text-sm text-muted">{[o.phone, o.telegram, o.website, o.address].filter(Boolean).join(' · ') || '·'}</p>
+      <p className="mt-1 break-words text-sm text-muted">{[o.phone, o.telegram, o.website, o.address].filter(Boolean).join(' · ') || '·'}</p>
       {o.description ? <p className="mt-2 text-sm">{o.description}</p> : null}
       <Decide path={`/orgs/${o.id}/kyc/decide`} reasonKey="note" requireReason onDone={onDone} />
     </li>
@@ -159,7 +159,7 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{tk(x.kind)}</Pill>
-        <span className="font-semibold">{x.name}</span>
+        <span className="min-w-0 break-words font-semibold">{x.name}</span>
         <span className="text-sm text-muted">{t('station')}: {stationName({ station: x.station, stationNameRaw: x.rail?.stationNameRaw ?? null })}{x.regionCode && tr.has(x.regionCode) ? ` · ${tr(x.regionCode)}` : ''}</span>
       </div>
       <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></p>
@@ -208,10 +208,10 @@ function ContactRow({ m }: { m: ContactPage['items'][number] }) {
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{t.has(`topic.${m.topic}`) ? t(`topic.${m.topic}`) : m.topic}</Pill>
         <span className="font-semibold">{m.name}</span>
-        <span className="font-mono text-sm">{m.contact}</span>
+        <span className="min-w-0 break-all font-mono text-sm">{m.contact}</span>
         <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(m.createdAt, lang)}</span>
       </div>
-      <p className="mt-2 whitespace-pre-line text-sm">{m.message}</p>
+      <p className="mt-2 whitespace-pre-line break-words text-sm">{m.message}</p>
     </li>
   );
 }

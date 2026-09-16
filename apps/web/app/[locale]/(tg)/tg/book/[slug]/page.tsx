@@ -171,11 +171,11 @@ export default function TgBookPage() {
       {step === 1 && offer ? (
         <div className="mt-4 space-y-3">
           <div className={`${CARD} p-4`}>
-            <div className="flex items-baseline justify-between gap-3"><p className="font-bold">{offer.terminal.name}</p><span className="font-mono font-semibold tabular-nums">{som(offer.totalTiyin, locale)}</span></div>
+            <div className="flex items-baseline justify-between gap-3"><p className="min-w-0 truncate font-bold">{offer.terminal.name}</p><span className="font-mono font-semibold tabular-nums">{som(offer.totalTiyin, locale)}</span></div>
             {offers.length > 1 ? (
               <details className="mt-2 text-sm">
                 <summary className="cursor-pointer text-teal-ink">{t('otherOffers')} ({offers.length - 1})</summary>
-                <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between rounded-xl border border-line px-3 text-left"><span>{o.terminal.name}</span><span className="font-mono tabular-nums">{som(o.totalTiyin, locale)}</span></button></li>)}</ul>
+                <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between rounded-xl border border-line px-3 text-left"><span className="min-w-0 truncate">{o.terminal.name}</span><span className="font-mono tabular-nums">{som(o.totalTiyin, locale)}</span></button></li>)}</ul>
               </details>
             ) : null}
           </div>

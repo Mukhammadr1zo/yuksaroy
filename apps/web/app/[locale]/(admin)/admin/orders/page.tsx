@@ -112,7 +112,7 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
     <Drawer open title={no} onClose={onClose}>
       {!d ? <p className="text-sm text-muted">{tc('loading')}</p> : (
         <div className="space-y-5 text-sm">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 wrap-anywhere">
             <dt className="text-muted">{tc('status')}</dt><dd><StatusPill status={d.status} /></dd>
             <dt className="text-muted">{to('terminal')}</dt><dd><Link href={`/terminals/${d.terminal.slug}`} target="_blank" className="text-teal-ink underline">{d.terminal.name}</Link></dd>
             <dt className="text-muted">{to('shipper')}</dt><dd>{d.shipperOrg.name}</dd>

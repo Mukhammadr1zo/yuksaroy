@@ -37,7 +37,7 @@ export function Section({ title, aside, children }: { title: string; aside?: Rea
   );
 }
 export function Row({ k, v, mono }: { k: string; v: ReactNode; mono?: boolean }) {
-  return <div className="flex justify-between gap-4 py-1 text-sm"><dt className="text-muted">{k}</dt><dd className={`text-right ${mono ? 'font-mono tabular-nums' : ''}`}>{v}</dd></div>;
+  return <div className="flex justify-between gap-4 py-1 text-sm"><dt className="text-muted">{k}</dt><dd className={`min-w-0 break-words text-right ${mono ? 'font-mono tabular-nums' : ''}`}>{v}</dd></div>;
 }
 export function Err({ children }: { children: ReactNode }) {
   return <p role="alert" className="rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{children}</p>;

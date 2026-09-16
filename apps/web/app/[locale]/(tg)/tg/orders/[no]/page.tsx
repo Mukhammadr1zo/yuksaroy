@@ -69,7 +69,7 @@ export default function TgOrderPage() {
       {err ? <div className="mt-3"><Err>{err}</Err></div> : null}
 
       <section className={`${CARD} mt-4 p-4`}>
-        <h2 className="font-bold">{o.terminal.name}</h2>
+        <h2 className="break-words font-bold">{o.terminal.name}</h2>
         <dl className="mt-2">
           <Row k={td('station')} v={o.station.name} />
           <Row k={td('operation')} v={tb(o.operation)} />

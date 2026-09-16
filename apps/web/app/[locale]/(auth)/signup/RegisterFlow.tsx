@@ -249,7 +249,7 @@ export function RegisterFlow({ next }: { next: string | null }) {
             <CheckCircleIcon size={36} weight="fill" className="shrink-0 text-teal" aria-hidden="true" />
             <div>
               <h2 className="font-display text-xl font-bold text-navy">{t('done.title')}</h2>
-              <p className="text-sm text-muted">{org ? t('done.lead', { org: org.name }) : who === 'shipper' ? t('done.shipperLead') : t('done.driverLead')}</p>
+              <p className="wrap-anywhere text-sm text-muted">{org ? t('done.lead', { org: org.name }) : who === 'shipper' ? t('done.shipperLead') : t('done.driverLead')}</p>
             </div>
           </div>
           <ul className="mt-6 space-y-2">

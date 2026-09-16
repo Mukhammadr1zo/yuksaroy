@@ -280,8 +280,8 @@ function Password({ me, onChange }: Props) {
       <p className="text-sm text-muted">{me.hasPassword ? t('has') : t('none')}</p>
       <div className="grid gap-4 sm:grid-cols-2">
         {needCurrent ? (
-          <Field label={t('current')} className="sm:col-span-2">
-            <PasswordField className={`${INPUT} sm:max-w-sm`} autoComplete="current-password" value={cur} required onChange={(e) => setCur(e.target.value)} />
+          <Field label={t('current')} className="sm:col-span-2 sm:max-w-sm">
+            <PasswordField className={INPUT} autoComplete="current-password" value={cur} required onChange={(e) => setCur(e.target.value)} />
           </Field>
         ) : null}
         <Field label={t('new')} hint={t('hint', { min: PASSWORD.minLength })}>

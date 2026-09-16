@@ -210,7 +210,7 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
             </div>
           </div>
         ) : (
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" disabled={busy === 'confirm'} onClick={() => act('confirm', {}, 'confirm')} className="rounded-full bg-teal px-6 py-2 text-sm font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98] disabled:opacity-60">
               {busy === 'confirm' ? t('confirming') : t('confirm')}
             </button>

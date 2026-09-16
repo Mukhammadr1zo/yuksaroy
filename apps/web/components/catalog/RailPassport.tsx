@@ -67,7 +67,7 @@ export async function RailPassportCard({ rail, slug }: { rail: RailPassport; slu
       ) : null}
 
       {rail.ownerNameRaw ? (
-        <p className="mt-3 text-sm text-muted">{t('registryOwner')}: <span className="font-semibold text-ink">{rail.ownerNameRaw}</span></p>
+        <p className="mt-3 break-words text-sm text-muted">{t('registryOwner')}: <span className="font-semibold text-ink">{rail.ownerNameRaw}</span></p>
       ) : null}
       {rail.note ? <p className="mt-2 text-sm text-muted">{t('note')}: {rail.note}</p> : null}
     </section>

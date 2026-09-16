@@ -270,7 +270,7 @@ function Wizard() {
                     type="button" onClick={() => pickOffer(o)} aria-pressed={offer?.terminal.id === o.terminal.id}
                     className={`flex w-full items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${offer?.terminal.id === o.terminal.id ? 'border-teal bg-teal-soft' : 'border-line hover:bg-sand'}`}
                   >
-                    <span>
+                    <span className="min-w-0 wrap-anywhere">
                       <span className="font-semibold">{o.terminal.name}</span>
                       <span className="block text-xs text-muted">{stationName(o.terminal)}{o.terminal.is24h ? ' · 24/7' : ''}{o.missing.length ? ` · ${t('missingTariff', { services: o.missing.map((m) => ts(m)).join(', ') })}` : ''}</span>
                     </span>

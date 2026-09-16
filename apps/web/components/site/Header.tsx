@@ -27,7 +27,7 @@ export async function Header() {
             </Link>
           ))}
         </nav>
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <div className="relative flex shrink-0 items-center gap-1.5 sm:gap-2">
           <LocaleSwitcher />
           <AuthArea />
         </div>

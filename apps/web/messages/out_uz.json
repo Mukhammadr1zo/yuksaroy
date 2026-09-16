@@ -1,0 +1,19 @@
+{
+ "service": {
+  "LOAD": "Yuklash",
+  "UNLOAD": "Tushirish",
+  "WEIGH": "Tarozi",
+  "STORAGE": "Omborda saqlash",
+  "SVX": "Bojxona ombori",
+  "CONTAINER": "Konteyner bilan ishlash",
+  "LAST_MILE": "Avtoda yetkazib berish",
+  "SHUNTING": "Manevr (teplovoz)"
+ },
+ "unit": {
+  "PER_TON": "tonna",
+  "PER_WAGON": "vagon",
+  "PER_OPERATION": "operatsiya",
+  "PER_DAY": "kun"
+ },
+ "price": null
+}

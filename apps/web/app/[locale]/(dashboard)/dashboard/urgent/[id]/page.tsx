@@ -70,7 +70,7 @@ export default function UrgentDetailPage() {
       {r.status === 'AWARDED' ? <div className="mt-4"><Notice tone="ok">{t('awardedNote')}</Notice></div> : null}
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {facts.map(([k, v]) => <div key={k} className="rounded-card border border-line bg-white px-4 py-3"><dt className="text-xs text-muted">{k}</dt><dd className="mt-1 font-mono text-sm font-semibold">{v}</dd></div>)}
+        {facts.map(([k, v]) => <div key={k} className="rounded-card border border-line bg-white px-4 py-3"><dt className="text-xs text-muted">{k}</dt><dd className="mt-1 break-words font-mono text-sm font-semibold">{v}</dd></div>)}
       </dl>
       <section className="mt-4 rounded-card border border-line bg-white p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('description')}</h2>

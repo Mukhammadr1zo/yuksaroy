@@ -1,0 +1,7 @@
+{
+ "min": "(min)",
+ "commission": "Platforma komissiyasi {pct} %",
+ "total": "Jami",
+ "paidByTerminal": "komissiyani terminal to'laydi",
+ "services": "xizmatlar: {sum}"
+}

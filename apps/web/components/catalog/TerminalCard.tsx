@@ -29,7 +29,7 @@ export async function TerminalCard({ t }: { t: T }) {
   // Solishtirish belgisi Link tashqarisida (a ichida input bo'lmasin): karta pastida 36px joy, belgi o'ng burchakda
   return (
     <div className="relative min-w-0">
-    <Link href={`/terminals/${t.slug}`} className="group flex min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:-translate-y-0.5 hover:shadow-md">
+    <Link href={`/terminals/${t.slug}`} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative h-[72px] w-20 shrink-0 overflow-hidden rounded-t-[48px] rounded-b-md bg-navy sm:w-[96px]">
         <CardPhoto kind={t.kind} slug={t.slug} photo={t.photos[0]} />
       </div>

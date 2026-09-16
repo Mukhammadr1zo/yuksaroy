@@ -59,7 +59,7 @@ export function QuickQuote({ compact = false, terminalId, terminalName, tone = '
     <div>
       <form onSubmit={calc} className={compact ? 'grid gap-3 md:grid-cols-[1.2fr_1.2fr_.7fr_auto]' : 'grid gap-4'}>
         {terminalId ? (
-          <p className={`rounded-xl px-4 py-3 text-sm md:col-span-2 ${dark ? 'bg-white/10' : 'bg-teal-soft'}`}>{t('terminalPrefix')} <b>{terminalName}</b></p>
+          <p className={`rounded-xl px-4 py-3 text-sm ${compact ? 'md:col-span-2' : ''} ${dark ? 'bg-white/10' : 'bg-teal-soft'}`}>{t('terminalPrefix')} <b>{terminalName}</b></p>
         ) : (
           <StationSearch value={station} onChange={setStation} placeholder={t('station.placeholder')} inputClassName={INPUT[tone]} />
         )}
@@ -133,7 +133,7 @@ function Offer({ o, full, dark }: { o: QuoteOffer; full: boolean; dark: boolean 
   return (
     <div className={`rounded-xl border p-4 ${dark ? 'border-white/15 bg-white/5' : 'border-line bg-white'}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
+        <div className="min-w-0 wrap-anywhere">
           <Link href={`/terminals/${o.terminal.slug}`} className="font-bold hover:text-teal-ink">{o.terminal.name}</Link>
           <p className={`text-xs ${muted}`}>{tk(o.terminal.kind)}, {stationName(o.terminal)}{o.terminal.is24h ? ', 24/7' : ''}{!o.terminal.claimed ? t('offer.approxTariff') : ''}</p>
         </div>

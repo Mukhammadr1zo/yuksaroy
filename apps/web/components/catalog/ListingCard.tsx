@@ -27,7 +27,7 @@ export async function ListingCard({ l }: { l: L }) {
   // Solishtirish belgisi Link tashqarisida (a ichida input bo'lmasin): karta pastida joy, belgi o'ng burchakda
   return (
     <div className="relative min-w-0">
-    <Link href={listingHref(l)} className="group flex min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:border-teal">
+    <Link href={listingHref(l)} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:border-teal">
       <div className="relative h-[84px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-sand">
         {l.photo ? <img src={l.photo} alt="" className="h-full w-full object-cover" /> : (
           <div className="flex h-full w-full items-center justify-center text-navy/40" aria-label={t('noPhoto')}><Icon size={36} weight="duotone" /></div>
@@ -36,12 +36,11 @@ export async function ListingCard({ l }: { l: L }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="truncate font-bold group-hover:text-teal-ink">{l.title}</h3>
+          <h3 className="min-w-0 truncate font-bold group-hover:text-teal-ink">{l.title}</h3>
           {l.premium ? <PremiumBadge className="shrink-0" /> : null}
-          {l.distanceKm != null ? <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{Math.round(l.distanceKm)} km</span> : null}
         </div>
         <p className="mt-0.5 text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
-        <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}</p>
+        <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}</p>
         {truck ? (
           <div className="mt-2 flex flex-wrap items-center gap-1">
             {regions.map((r) => <span key={r} className="rounded-full bg-teal-soft px-2 py-0.5 text-[11px] font-semibold text-teal-ink">{regionName(r, lang)}</span>)}

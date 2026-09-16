@@ -41,7 +41,7 @@ export function CargoSearch({ value, onChange, placeholder = 'Yuk turi (ETSNG): 
       <input
         role="combobox" aria-expanded={open} aria-controls={`${id}-list`} aria-autocomplete="list" aria-label={ariaLabel ?? placeholder}
         aria-activedescendant={active >= 0 ? `${id}-${active}` : undefined}
-        className={inputClassName}
+        className={`${inputClassName ?? ''}${value ? ' pr-16' : ''}`}
         placeholder={placeholder} value={text} autoComplete="off"
         onChange={(e) => { setText(e.target.value); setOpen(true); if (value) onChange(null); }}
         onFocus={() => setOpen(true)}
