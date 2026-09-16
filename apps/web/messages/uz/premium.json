@@ -41,7 +41,9 @@
       "confirming": "Tasdiqlanmoqda",
       "confirmed": "Tasdiqlandi, Premium {until} gacha",
       "failed": "Tasdiqlanmadi. Sahifani yangilang.",
-      "empty": "Navbat bo'sh."
+      "empty": "Navbat bo'sh.",
+      "cancel": "Bekor qilish",
+      "cancelled": "Buyurtma bekor qilindi."
     },
     "messages": {
       "tab": "Xabarlar",

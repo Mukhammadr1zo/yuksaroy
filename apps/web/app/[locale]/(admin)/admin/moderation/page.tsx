@@ -15,7 +15,7 @@ import { som, stationName, uzDateTime } from '@/lib/format';
 import { listingHref, type AdminTerminal, type OrgRecord, type OwnerListing } from '@/lib/types-kabinet';
 import type { AdminPremiumOrder, ContactPage } from '@/lib/types-trust';
 import { useLang, useListingLabels } from '@/components/kabinet/bits';
-import { BTN, BTN_DANGER, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
+import { BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
 import { Decide, type Decision } from '@/components/admin/Decide';
 
 type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'contact';
@@ -171,15 +171,29 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
   );
 }
 
-/** Premium to'lovi (qo'lda): e'lon, tashkilot, oylar, summa; tasdiq POST /admin/premium/:id/confirm -> PAID va premiumUntil uzayadi. */
+/**
+ * Premium to'lovi (qo'lda): e'lon, tashkilot, oylar, summa.
+ * Tasdiq -> PAID va premiumUntil uzayadi. Bekor qilish -> CANCELLED, e'lon o'zgarmaydi.
+ *
+ * Bekor qilish ilgari umuman yo'q edi: to'lamagan odamning buyurtmasi navbatda abadiy
+ * qolib ketardi va operatorda ikki yo'l bo'lardi, pulsiz Premium berish yoki qatorni
+ * umrbod ko'rib yurish. Sabab majburiy, chunki u auditga yoziladi.
+ */
 function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string) => void }) {
   const lang = useLang();
   const t = useTranslations('premium.admin');
+  const ta = useTranslations('admin');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(false);
+  const [reason, setReason] = useState<string | null>(null); // null = sabab maydoni yopiq
   async function confirm() {
     setBusy(true); setErr(false);
     try { const r = await post<{ premiumUntil: string }>(`/admin/premium/${o.id}/confirm`, {}); onDone(t('confirmed', { until: uzDateTime(r.premiumUntil, lang) })); }
+    catch { setErr(true); setBusy(false); }
+  }
+  async function cancel() {
+    setBusy(true); setErr(false);
+    try { await post(`/admin/premium/${o.id}/cancel`, { reason: reason?.trim() }); onDone(t('cancelled')); }
     catch { setErr(true); setBusy(false); }
   }
   return (
@@ -194,7 +208,19 @@ function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string
       </p>
       <p className="mt-1 font-mono text-xs text-muted">{o.id}</p>
       <div className="mt-3">
-        <button type="button" disabled={busy} onClick={confirm} className={BTN}>{busy ? t('confirming') : t('confirm')}</button>
+        {reason === null ? (
+          <div className="flex flex-wrap gap-2">
+            <button type="button" disabled={busy} onClick={confirm} className={BTN}>{busy ? t('confirming') : t('confirm')}</button>
+            <button type="button" disabled={busy} onClick={() => setReason('')} className={BTN_DANGER}>{t('cancel')}</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300}
+              placeholder={ta('reason')} className={`${INPUT} w-full sm:w-72`} />
+            <ConfirmButton label={t('cancel')} confirm={ta('confirmReject')} onRun={cancel} disabled={busy || !reason.trim()} />
+            <button type="button" onClick={() => setReason(null)} className={BTN_GHOST}>{ta('cancel')}</button>
+          </div>
+        )}
         {err ? <p role="alert" className="mt-2 text-sm text-red-700">{t('failed')}</p> : null}
       </div>
     </li>

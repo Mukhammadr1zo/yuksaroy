@@ -1,6 +1,7 @@
 import { Body, Controller, ConflictException, Get, HttpCode, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { IsInt, Max, Min } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { PRICING, premiumAmountTiyin } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { env } from '../../common/env';
@@ -13,6 +14,11 @@ import { PlatformAdminGuard } from '../organizations/presentation/platform-admin
 
 class PremiumDto {
   @IsInt() @Min(1) @Max(12) months!: number;
+}
+
+/** Bekor qilish sababi majburiy: u auditga yoziladi va egasiga aytiladi. */
+class CancelDto {
+  @IsOptional() @IsString() @MaxLength(300) reason?: string;
 }
 
 const STATUSES = ['PENDING', 'PAID', 'CANCELLED'] as const;
@@ -77,5 +83,26 @@ export class PremiumController {
     });
     await this.audit.log({ actorId: userId, action: 'premium.confirm', entity: 'PremiumOrder', entityId: id, meta: { listingId: r.order.listingId, months: r.order.months, premiumUntil: r.premiumUntil } });
     return r;
+  }
+
+  /**
+   * To'lov kelmadi yoki buyurtma noto'g'ri: navbatdan chiqariladi.
+   *
+   * Ilgari faqat tasdiqlash bor edi. To'lamagan odamning buyurtmasi navbatda abadiy
+   * qolib ketardi va operatorda ikki yo'l bo'lardi: pulsiz Premium berish yoki qatorni
+   * umrbod ko'rib yurish. Premium muddati bu yerda uzaytirilmaydi, ya'ni e'lon
+   * o'zgarishsiz qoladi.
+   */
+  @Post('admin/premium/:id/cancel') @HttpCode(200)
+  @UseGuards(PlatformAdminGuard)
+  async cancel(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: CancelDto) {
+    const reason = dto?.reason?.trim();
+    if (!reason) throw new BadRequestException({ code: 'REASON_REQUIRED' });
+    const o = await this.prisma.premiumOrder.findUnique({ where: { id }, select: { status: true, listingId: true, months: true } });
+    if (!o) throw new NotFoundException({ code: 'PREMIUM_ORDER_NOT_FOUND' });
+    if (o.status !== 'PENDING') throw new ConflictException({ code: 'PREMIUM_NOT_PENDING', status: o.status });
+    const row = await this.prisma.premiumOrder.update({ where: { id }, data: { status: 'CANCELLED' } });
+    await this.audit.log({ actorId: userId, action: 'premium.cancel', entity: 'PremiumOrder', entityId: id, meta: { listingId: o.listingId, months: o.months, reason } });
+    return orderView(row);
   }
 }
