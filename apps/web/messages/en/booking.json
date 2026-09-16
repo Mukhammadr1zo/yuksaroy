@@ -20,7 +20,7 @@
     "cols": {
       "book": {
         "title": "Book",
-        "body": "Pick a terminal window for today or the coming days. The spot is held for 10 minutes, the tariff is frozen once the order is sent. The terminal confirms or rejects within the SLA.",
+        "body": "Pick a terminal window for today or the coming days. The spot is held for 10 minutes, the tariff is frozen once the order is sent. The terminal confirms or rejects within 30 minutes.",
         "link": "Terminals"
       },
       "quote": {
@@ -46,7 +46,7 @@
       "subtotal": "Services",
       "commission": "Platform commission {pct} %",
       "total": "Total",
-      "note": "When you place an order this tariff is frozen and shown on the act. A tariff from a passport not confirmed by the owner is an estimate.",
+      "note": "When you place an order this tariff is frozen and shown on the act. A tariff the terminal's owner has not confirmed is an estimate.",
       "empty": "No active terminal has published a tariff yet. The example appears here once a terminal owner adds one."
     },
     "slots": {

@@ -235,7 +235,7 @@
       "suffix": "station"
     },
     "rju": {
-      "suffix": "junction"
+      "suffix": "direction"
     },
     "cta": {
       "quote": "Calculate price",
@@ -277,9 +277,9 @@
       "dayOffShort": "off"
     },
     "stationCard": {
-      "esr": "ESR",
+      "esr": "Station code",
       "rju": "Junction",
-      "typeClass": "Type / class",
+      "typeClass": "Station type",
       "coords": "Coordinates"
     },
     "slots": {
@@ -320,10 +320,10 @@
       "formula": "tariff × weight (or number of wagons) + extra services",
       "suffix": ". During the pilot the platform commission is 0 %: the price is the terminal tariff itself."
     },
-    "disclaimer": "The calculation is for reference; when an order is placed the tariff is locked and the same price goes into the act. The «Estimated» mark means the tariff has not been confirmed by the passport owner yet.",
+    "disclaimer": "The calculation is for reference; when an order is placed the tariff is locked and the same price goes into the completion certificate. The «Estimated» mark means the tariff has not been confirmed by the terminal's owner yet.",
     "terminalPrefix": "Terminal:",
     "station": {
-      "placeholder": "Station (ESR)"
+      "placeholder": "Station name or code"
     },
     "cargo": {
       "placeholderCompact": "Cargo type"
@@ -355,7 +355,7 @@
     },
     "result": {
       "empty": "No terminal at this station or nearby has published a {operation} tariff yet.",
-      "nearbyNote": "No terminal at the station. Cheapest offers in the same rail node (RJU):",
+      "nearbyNote": "No terminal at this station itself. Cheapest offers nearby:",
       "detailLink": "Detailed calculation (extra services, days)"
     },
     "offer": {
@@ -396,7 +396,7 @@
   },
   "catalog": {
     "station": {
-      "placeholder": "Station name or ESR code"
+      "placeholder": "Station name or code"
     },
     "cargo": {
       "placeholder": "Cargo type (ETSNG): cement, wheat, 281000…"
@@ -430,7 +430,7 @@
       "from": "from {price}",
       "onRequest": "Price on request"
     },
-    "unverifiedPassport": "Not confirmed by the passport holder",
+    "unverifiedPassport": "Details not confirmed by the terminal's owner",
     "slots": {
       "freeToday": "{count} free spots today",
       "none": "No free spots today"

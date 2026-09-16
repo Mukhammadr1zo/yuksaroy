@@ -239,7 +239,7 @@
         "wagonNumbers": "Vagon raqami 8 ta raqamdan iborat bo'lishi kerak: {list}"
       },
       "price": {
-        "min": "(min)",
+        "min": "(eng kam summa)",
         "commission": "Platforma komissiyasi {pct} %",
         "total": "Jami",
         "paidByTerminal": "komissiyani terminal to'laydi",

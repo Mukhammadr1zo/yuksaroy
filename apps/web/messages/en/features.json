@@ -32,7 +32,7 @@
       },
       "map": {
         "title": "Map",
-        "body": "Every object on one map, in sync with the list. Near me and by corridor."
+        "body": "Every object on one map, in sync with the list. Near me and by route."
       },
       "assistant": {
         "title": "Assistant search",
@@ -72,7 +72,7 @@
       },
       "booking": {
         "title": "Spot booking",
-        "body": "Pick a free window today, the order goes to the terminal, answer within the SLA."
+        "body": "Pick a free window today, the order goes to the terminal, an answer within 30 minutes."
       },
       "frozen": {
         "title": "Frozen tariff and documents",
@@ -88,14 +88,14 @@
       },
       "registry": {
         "title": "Rail terminal registry",
-        "body": "Sidings across the country by station and junction, each with a terminal page. Coordinates are approximate, junction level."
+        "body": "Sidings across the country grouped by station, each with its own terminal page. The map pin sits at the station, not at an exact address."
       },
       "standards": {
         "title": "Listing standard",
         "body": "Required and recommended fields per type. Not a certificate, a completeness measure."
       },
       "companies": {
-        "title": "Companies and KYC",
+        "title": "Companies and the verified badge",
         "body": "Organization page, object counts, verified tax ID badge."
       },
       "blog": {
@@ -154,7 +154,7 @@
       "rule": {
         "heading": "The rule",
         "r1": "Dictionary first: regions, stations, services and equipment names come from the dictionary. Free and unlimited.",
-        "r2": "AI is called only when confidence is below {threshold} or unresolved words remain; the answer takes at most 8 seconds.",
+        "r2": "AI is called in only when the dictionary cannot understand the query or unknown words remain; the answer takes at most 8 seconds.",
         "r3": "AI returns filters only: it never invents objects, prices or availability. Regions come only from the code list.",
         "r4": "If AI is unavailable or the quota is spent, the dictionary result is shown. Search never stops."
       },

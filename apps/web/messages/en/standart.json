@@ -40,7 +40,7 @@
       "title": "Rail terminal (private siding)",
       "must": "Registry number, station, region (from the state registry)",
       "should": "Length, unloading and loading capacity, owner",
-      "note": "The owner name appears only after the operator approves the claim. Coordinates are approximate, at node level.",
+      "note": "The owner name appears only after the operator approves the claim. The map pin sits at the station, not at an exact address.",
       "owner": "Organization: after the operator approves the claim"
     },
     "rules": {

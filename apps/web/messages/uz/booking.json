@@ -20,7 +20,7 @@
     "cols": {
       "book": {
         "title": "Bron",
-        "body": "Terminalning bugungi yoki keyingi kunlardagi oynasini tanlaysiz. Joy 10 daqiqa ushlab turiladi, buyurtma yuborilgach tarif muzlatiladi. Terminal SLA ichida tasdiqlaydi yoki rad etadi.",
+        "body": "Terminalning bugungi yoki keyingi kunlardagi oynasini tanlaysiz. Joy 10 daqiqa ushlab turiladi, buyurtma yuborilgach tarif muzlatiladi. Terminal 30 daqiqa ichida tasdiqlaydi yoki rad etadi.",
         "link": "Terminallar"
       },
       "quote": {
@@ -46,7 +46,7 @@
       "subtotal": "Xizmatlar",
       "commission": "Platforma komissiyasi {pct} %",
       "total": "Jami",
-      "note": "Buyurtma berilganda shu tarif muzlatiladi va aktda ko'rsatiladi. Egasi tasdiqlamagan pasport tarifi taxminiy.",
+      "note": "Buyurtma berilganda shu tarif muzlatiladi va aktda ko'rsatiladi. Terminal egasi tasdiqlamagan tarif taxminiy.",
       "empty": "Hozircha tarif e'lon qilgan faol terminal yo'q. Terminal egasi tarif qo'shganda misol shu yerda paydo bo'ladi."
     },
     "slots": {

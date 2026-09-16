@@ -235,7 +235,7 @@
       "suffix": "stansiyasi"
     },
     "rju": {
-      "suffix": "uzeli"
+      "suffix": "yo'nalishi"
     },
     "cta": {
       "quote": "Narxni hisoblash",
@@ -277,9 +277,9 @@
       "dayOffShort": "dam"
     },
     "stationCard": {
-      "esr": "ESR",
+      "esr": "Stansiya kodi",
       "rju": "Uzel",
-      "typeClass": "Tur / klass",
+      "typeClass": "Stansiya turi",
       "coords": "Koordinata"
     },
     "slots": {
@@ -320,10 +320,10 @@
       "formula": "tarif × vazn (yoki vagon soni) + qo'shimcha xizmatlar",
       "suffix": ". Pilotda platforma komissiyasi 0 %: narx terminal tarifining o'zi."
     },
-    "disclaimer": "Hisob ma'lumot uchun; buyurtma berilganda tarif muzlatiladi va aktda shu narx ko'rsatiladi. «Taxminiy» belgisi: pasport egasi tomonidan hali tasdiqlanmagan tarif.",
+    "disclaimer": "Hisob ma'lumot uchun; buyurtma berilganda tarif muzlatiladi va dalolatnomada shu narx ko'rsatiladi. «Taxminiy» belgisi: terminal egasi hali tasdiqlamagan tarif.",
     "terminalPrefix": "Terminal:",
     "station": {
-      "placeholder": "Stansiya (ESR)"
+      "placeholder": "Stansiya nomi yoki kodi"
     },
     "cargo": {
       "placeholderCompact": "Yuk turi"
@@ -355,7 +355,7 @@
     },
     "result": {
       "empty": "Bu stansiya va yaqin atrofda hali {operation} tarifi e'lon qilgan terminal yo'q.",
-      "nearbyNote": "Stansiyada terminal yo'q. Shu uzeldagi (RJU) eng arzon takliflar:",
+      "nearbyNote": "Bu stansiyaning o'zida terminal yo'q. Yaqin atrofdagi eng arzon takliflar:",
       "detailLink": "Batafsil hisob (qo'shimcha xizmatlar, kunlar)"
     },
     "offer": {
@@ -396,7 +396,7 @@
   },
   "catalog": {
     "station": {
-      "placeholder": "Stansiya nomi yoki ESR kodi"
+      "placeholder": "Stansiya nomi yoki kodi"
     },
     "cargo": {
       "placeholder": "Yuk turi (ETSNG): sement, bug'doy, 281000…"
@@ -430,7 +430,7 @@
       "from": "{price} dan",
       "onRequest": "Narx so'rov bo'yicha"
     },
-    "unverifiedPassport": "Pasport egasi tomonidan tasdiqlanmagan",
+    "unverifiedPassport": "Ma'lumotni terminal egasi tasdiqlamagan",
     "slots": {
       "freeToday": "Bugun {count} ta bo'sh joy",
       "none": "Bugun bo'sh joy yo'q"

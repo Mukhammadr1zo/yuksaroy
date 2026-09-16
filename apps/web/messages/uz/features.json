@@ -72,7 +72,7 @@
       },
       "booking": {
         "title": "Joy bron",
-        "body": "Bugungi bo'sh oynani tanlaysiz, buyurtma terminalga boradi, SLA ichida javob."
+        "body": "Bugungi bo'sh oynani tanlaysiz, buyurtma terminalga boradi, javob 30 daqiqa ichida."
       },
       "frozen": {
         "title": "Muzlatilgan tarif va hujjatlar",
@@ -88,14 +88,14 @@
       },
       "registry": {
         "title": "Temir yo'l terminallari reestri",
-        "body": "Respublikadagi shahobcha yo'llar stansiya va uzel bo'yicha, har biri terminal sahifasi bilan. Koordinata taxminiy, uzel darajasida."
+        "body": "Respublikadagi shahobcha yo'llar stansiyalar bo'yicha, har birining terminal sahifasi bor. Xaritadagi nuqta stansiya joyida turadi, aniq manzil emas."
       },
       "standards": {
         "title": "E'lon standarti",
         "body": "Har tur uchun shart va tavsiya maydonlari. Bu sertifikat emas, to'liqlik o'lchovi."
       },
       "companies": {
-        "title": "Kompaniyalar va KYC",
+        "title": "Kompaniyalar va tasdiq belgisi",
         "body": "Tashkilot sahifasi, obyektlari soni, tasdiqlangan STIR belgisi."
       },
       "blog": {
@@ -154,7 +154,7 @@
       "rule": {
         "heading": "Qoida",
         "r1": "Avval lug'at: viloyat, stansiya, xizmat, texnika nomlari lug'atdan olinadi. Bu bepul va cheksiz.",
-        "r2": "AI faqat ishonch {threshold} dan past bo'lganda yoki tushunilmagan so'z qolganda chaqiriladi, javob 8 soniyadan oshmaydi.",
+        "r2": "AI faqat lug'at so'rovni tushunmaganda yoki noma'lum so'z qolganda chaqiriladi, javob 8 soniyadan oshmaydi.",
         "r3": "AI faqat filtr qaytaradi: obyekt, narx yoki bo'sh joy o'ylab topmaydi. Viloyat faqat ro'yxatdagi kodlardan bo'ladi.",
         "r4": "AI ishlamasa yoki kvota tugasa lug'at natijasi ko'rsatiladi. Qidiruv hech qachon to'xtamaydi."
       },

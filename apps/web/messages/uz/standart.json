@@ -40,7 +40,7 @@
       "title": "Temir yo'l terminali (shahobcha yo'l)",
       "must": "Reestr raqami, stansiya, viloyat (davlat reestridan)",
       "should": "Uzunlik, tushirish va yuklash sig'imi, egasi",
-      "note": "Egasi nomi faqat da'vo operator tomonidan tasdiqlangach ko'rinadi. Koordinata taxminiy, uzel darajasida.",
+      "note": "Egasi nomi faqat da'vo operator tomonidan tasdiqlangach ko'rinadi. Xaritadagi nuqta stansiya joyida turadi, aniq manzil emas.",
       "owner": "Tashkilot: da'vo operator tomonidan tasdiqlangach"
     },
     "rules": {

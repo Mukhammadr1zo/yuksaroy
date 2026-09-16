@@ -71,7 +71,7 @@
         "q2": "How is the price calculated?",
         "a2": "Tariff × weight (or wagon count) + extra services. If the terminal set a minimum amount, it applies. Platform commission is 0 % in the pilot.",
         "q3": "What if the terminal does not confirm?",
-        "a3": "If the order is not confirmed within the SLA it expires, the spot is released and you turn to another terminal. A rejection reason is shown on the order page.",
+        "a3": "If the order is not confirmed within 30 minutes it expires, the spot is released and you turn to another terminal. A rejection reason is shown on the order page.",
         "q4": "How reliable are the tariffs?",
         "a4": "A tariff of an owner-confirmed terminal is published by the terminal itself. A tariff from an unconfirmed passport is compiled from open data and marked as an estimate.",
         "q5": "Where do I get the documents?",
@@ -91,7 +91,7 @@
       },
       "eyebrow": "For terminals, equipment and truck owners",
       "title": "Publish a listing, receive requests and orders",
-      "lead": "Clients find you by region and corridor, see your tariffs and spots, and their request or order lands in your cabinet.",
+      "lead": "Clients find you by region and route, see your tariffs and spots, and their request or order lands in your cabinet.",
       "facts": {
         "companies": "{count} companies in the catalog",
         "listings": "{count, plural, one {# active listing} other {# active listings}}",
@@ -104,7 +104,7 @@
       "values": {
         "catalog": {
           "title": "A listing by the standard",
-          "body": "Every listing has the same fields, so clients can compare and find you. You show up in searches by region and corridor."
+          "body": "Every listing has the same fields, so clients can compare and find you. You show up in searches by region and route."
         },
         "inquiries": {
           "title": "Requests only from logged-in users",
@@ -149,15 +149,15 @@
         "q2": "Who can publish a listing?",
         "a2": "An organization: terminal, equipment or siding owner, locomotive service, road carrier. A truck listing can also be published by an individual driver.",
         "q3": "How long does review take?",
-        "a3": "A listing from a KYC-verified organization goes live immediately. Others pass moderation; if rejected, the reason is shown and the listing can be resubmitted.",
+        "a3": "A listing from an organization with verified documents goes live immediately. Others pass moderation; if rejected, the reason is shown and the listing can be resubmitted.",
         "q4": "How does a terminal receive orders?",
-        "a4": "On the board in the cabinet: a new order arrives with an SLA timer, you confirm or reject, then mark the states. Every step is visible to the client.",
+        "a4": "On the board in the cabinet: a new order arrives with a timer to respond, you confirm or reject, then mark the states. Every step is visible to the client.",
         "q5": "My object is already in the registry",
         "a5": "The object page has a claim button. Once the operator approves, you manage the passport, tariffs and spots."
       },
       "band": {
         "title": "Get your listing into the catalog today",
-        "body": "The standard form takes 10 minutes. A listing from a KYC-verified organization goes live immediately.",
+        "body": "The standard form takes 10 minutes. A listing from an organization with verified documents goes live immediately.",
         "primary": "Publish a listing",
         "secondary": "Sign up"
       }

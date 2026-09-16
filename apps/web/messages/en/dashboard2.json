@@ -239,7 +239,7 @@
         "wagonNumbers": "A wagon number must be 8 digits: {list}"
       },
       "price": {
-        "min": "(min)",
+        "min": "(minimum charge)",
         "commission": "Platform commission {pct} %",
         "total": "Total",
         "paidByTerminal": "the terminal pays the commission",

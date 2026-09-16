@@ -4,7 +4,7 @@
     "open": "Open the map",
     "meta": {
       "title": "Map: terminals, equipment and road transport",
-      "description": "Uzbekistan's freight terminals (rail sidings included), rail equipment and road transport on one map. Search by corridor, region or a radius around you."
+      "description": "Uzbekistan's freight terminals (rail sidings included), rail equipment and road transport on one map. Search by route, region or a radius around you."
     },
     "aria": "Interactive map: terminals, equipment and road transport",
     "zoomIn": "Zoom in",

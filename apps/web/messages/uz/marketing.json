@@ -71,7 +71,7 @@
         "q2": "Narx qanday hisoblanadi?",
         "a2": "Tarif × vazn (yoki vagon soni) + qo'shimcha xizmatlar. Terminal minimal summa qo'ygan bo'lsa, u qo'llanadi. Pilotda platforma komissiyasi 0 %.",
         "q3": "Terminal tasdiqlamasa nima bo'ladi?",
-        "a3": "Buyurtma SLA ichida tasdiqlanmasa muddati o'tadi, joy bo'shaydi va siz boshqa terminalga murojaat qilasiz. Rad etish sababi buyurtma sahifasida ko'rinadi.",
+        "a3": "Buyurtma 30 daqiqa ichida tasdiqlanmasa muddati o'tadi, joy bo'shaydi va siz boshqa terminalga murojaat qilasiz. Rad etish sababi buyurtma sahifasida ko'rinadi.",
         "q4": "Tariflar qanchalik ishonchli?",
         "a4": "Egasi tasdiqlagan terminal tarifini terminalning o'zi e'lon qiladi. Tasdiqlanmagan pasport tarifi ochiq ma'lumotlardan yig'ilgan va taxminiy deb belgilanadi.",
         "q5": "Hujjatlarni qayerdan olaman?",
@@ -91,7 +91,7 @@
       },
       "eyebrow": "Terminallar, texnika va avtotransport egalariga",
       "title": "E'lon bering, so'rov va buyurtma oling",
-      "lead": "Mijoz sizni viloyat va koridor bo'yicha topadi, tarif va joylaringizni ko'radi, so'rov yoki buyurtma kabinetingizga tushadi.",
+      "lead": "Mijoz sizni viloyat va yo'nalish bo'yicha topadi, tarif va joylaringizni ko'radi, so'rov yoki buyurtma kabinetingizga tushadi.",
       "facts": {
         "companies": "{count} kompaniya katalogda",
         "listings": "{count} faol e'lon",
@@ -104,7 +104,7 @@
       "values": {
         "catalog": {
           "title": "Standart bo'yicha e'lon",
-          "body": "Har e'lon bir xil maydonlar bilan to'ldiriladi, shuning uchun mijoz sizni solishtira oladi va topadi. Viloyat va koridor bo'yicha qidiruvda chiqasiz."
+          "body": "Har e'lon bir xil maydonlar bilan to'ldiriladi, shuning uchun mijoz sizni solishtira oladi va topadi. Viloyat va yo'nalish bo'yicha qidiruvda chiqasiz."
         },
         "inquiries": {
           "title": "So'rovlar faqat kirganlardan",
@@ -149,15 +149,15 @@
         "q2": "Kim e'lon bera oladi?",
         "a2": "Tashkilot: terminal, texnika yoki shahobcha yo'l egasi, lokomotiv xizmati, avtotashuvchi. Avtotransport e'lonini shaxsiy haydovchi ham bera oladi.",
         "q3": "Tekshiruv qancha vaqt oladi?",
-        "a3": "KYC tasdiqlangan tashkilot e'loni darhol chiqadi. Qolganlari moderatsiyadan o'tadi; rad etilsa sabab ko'rsatiladi va qayta yuboriladi.",
+        "a3": "Hujjatlari tasdiqlangan tashkilot e'loni darhol chiqadi. Qolganlari moderatsiyadan o'tadi; rad etilsa sabab ko'rsatiladi va qayta yuboriladi.",
         "q4": "Terminal buyurtmalarni qanday oladi?",
-        "a4": "Kabinetdagi taxtada: yangi buyurtma SLA taymeri bilan keladi, tasdiqlaysiz yoki rad etasiz, keyin holatlarni belgilaysiz. Har qadam mijozga ko'rinadi.",
+        "a4": "Kabinetdagi taxtada: yangi buyurtma javob berish taymeri bilan keladi, tasdiqlaysiz yoki rad etasiz, keyin holatlarni belgilaysiz. Har qadam mijozga ko'rinadi.",
         "q5": "Mening obyektim reestrda allaqachon bor",
         "a5": "Obyekt sahifasida da'vo tugmasi bor. Operator tasdiqlagach pasport, tarif va joylarni siz boshqarasiz."
       },
       "band": {
         "title": "E'loningiz bugun katalogda tursin",
-        "body": "Standart forma 10 daqiqa oladi. KYC tasdiqlangan tashkilot e'loni darhol chiqadi.",
+        "body": "Standart forma 10 daqiqa oladi. Hujjatlari tasdiqlangan tashkilot e'loni darhol chiqadi.",
         "primary": "E'lon berish",
         "secondary": "Ro'yxatdan o'tish"
       }

@@ -81,7 +81,7 @@
       "map": "On the map",
       "hours": "Working hours",
       "noRating": "No rating",
-      "unverified": "Passport not confirmed by the owner"
+      "unverified": "Details not confirmed by the terminal's owner"
     },
     "book": {
       "title": "Book a spot",
