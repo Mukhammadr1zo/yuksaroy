@@ -11,6 +11,20 @@ type Resp = { items: Item[] };
 
 const LABEL = 'font-mono text-[11px] text-muted';
 
+/**
+ * Har bir kalitning chegarasi serverdagi tekshiruv bilan bir xil
+ * (admin-system.controller.ts, CHECK). Ilgari hamma maydonda min=0 turardi va
+ * muddatga 0 yozib bo'lardi: server esa musbat son talab qiladi. Natijada faqat
+ * "Qiymat noto'g'ri" chiqar, qaysi maydon ekani va nega ekani aytilmasdi.
+ * Komissiya bazis punktda saqlanadi: 10000 = 100 %.
+ */
+const BOUNDS: Record<string, { min: number; max?: number }> = {
+  commissionPct: { min: 0, max: 10000 },
+  slotHoldTtlMin: { min: 1 },
+  terminalConfirmMin: { min: 1 },
+  docSlaHours: { min: 1 },
+};
+
 export default function SettingsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
@@ -70,7 +84,8 @@ export default function SettingsPage() {
                   <option value="CLIENT">CLIENT</option>
                 </select>
               ) : (
-                <input type="number" min={0} step={1} className={`${INPUT} font-mono tabular-nums`} value={vals[it.key] ?? ''}
+                <input type="number" min={BOUNDS[it.key]?.min ?? 1} max={BOUNDS[it.key]?.max} step={1}
+                  className={`${INPUT} font-mono tabular-nums`} value={vals[it.key] ?? ''}
                   onChange={(e) => setVals((v) => ({ ...v, [it.key]: e.target.value }))} />
               )}
               {/* Bazis punkt saqlanadi (300 = 3,00 %): odam "3" yozib 3 % deb o'ylamasin, foizni jonli ko'rsatamiz */}

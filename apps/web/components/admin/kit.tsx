@@ -199,9 +199,14 @@ export function Drawer({ open, title, onClose, children, footer }: {
 // `t` faqat kalit bilan chaqiriladi: tor imzo next-intl tarjimoniga strukturaviy mos keladi
 export function errText(e: unknown, t: (k: string) => string, has: (k: string) => boolean, fallback: string) {
   if (!(e instanceof ApiError)) return fallback;
-  const code = (e.body as { code?: string } | undefined)?.code;
-  if (code && has(`err.${code}`)) return t(`err.${code}`);
-  return `${fallback} (${code ?? 'HTTP'} ${e.status})`;
+  const body = e.body as { code?: string; key?: string; field?: string } | undefined;
+  const code = body?.code;
+  // Server qaysi maydon aybdor ekanini aytsa, u ham ko'rsatiladi: uchta sozlamani
+  // birga saqlaganda "Qiymat noto'g'ri" qaysi biri haqida ekani ma'lum bo'lmasdi.
+  const where = body?.key ?? body?.field;
+  const tail = where ? `: ${where}` : '';
+  if (code && has(`err.${code}`)) return `${t(`err.${code}`)}${tail}`;
+  return `${fallback} (${code ?? 'HTTP'} ${e.status})${tail}`;
 }
 
 export type Paged<T> = { items: T[]; total: number; page: number; limit: number };
