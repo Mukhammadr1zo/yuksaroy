@@ -77,16 +77,9 @@ jobs:
         run: pnpm --filter @yuksaroy/web build
 
       # Loyiha qoidasi: em/en tire va tipografik apostrof bo'lmasin.
-      # Istisno: shu belgilarni tozalaydigan regexlar (ular belgining o'zini saqlashi shart).
+      # Istisnolar skript ichida fayl nomi va aniq soni bilan yozilgan.
       - name: Tire va apostrof tekshiruvi
-        run: |
-          FOUND=$(grep -rnP '[\x{2013}\x{2014}\x{2018}\x{2019}\x{201C}\x{201D}]' \
-            --include='*.ts' --include='*.tsx' --include='*.json' --include='*.sql' --include='*.prisma' \
-            apps packages 2>/dev/null \
-            | grep -v 'node_modules\|\.next/\|/dist/' \
-            | grep -vP 'replace\(/\[|normalize|apos = ' || true)
-          if [ -n "$FOUND" ]; then echo "$FOUND"; echo "Taqiqlangan belgi topildi"; exit 1; fi
-          echo "toza"
+        run: node .github/scripts/no-fancy-chars.mjs
 
       # Uch til bir xil kalitlarga ega bo'lishi shart: bittasida yo'q kalit ishlash paytida yiqiladi
       - name: Uch til kalit pariteti

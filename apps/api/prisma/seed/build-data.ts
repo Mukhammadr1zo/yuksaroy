@@ -41,6 +41,13 @@ const CYR: Record<string, string> = {
 /** Ruscha/kirill nomdan lotin nom (faqat 2026 reestrida bo'lmagan stansiyalar uchun). */
 const translit = (s: string) => s.split('').map((c) => { const l = c.toLowerCase(); const t = CYR[l]; if (t === undefined) return c; return c === l ? t : t.charAt(0).toUpperCase() + t.slice(1); }).join('');
 const apos = (s: string) => s.replace(/[ʻ’`]/g, "'");
+/**
+ * Excel reestridan keladigan tipografik belgilar ASCII ga.
+ * Egri qo'shtirnoq backtick ga: shu reestrning o'zida backtick allaqachon ustun (667 qator),
+ * ya'ni yangi uslub emas, mavjudiga moslash. Bu nomlar saytda ko'rinadi.
+ */
+const FANCY: Array<[number, string]> = [[0x201c, '`'], [0x201d, '`'], [0x2018, "'"], [0x2019, "'"], [0x2013, '-'], [0x2014, '-']];
+const noFancy = (s: string) => FANCY.reduce((acc, [code, to]) => acc.split(String.fromCharCode(code)).join(to), s);
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
@@ -71,7 +78,7 @@ async function main() {
     const esr = m?.[1] ?? null, name = (m?.[2] ?? st).trim();
     const len = Number(String(r[4] ?? '').replace(',', '.').replace(/\s/g, ''));
     sidings.push({
-      registryNo: no, rju: RJU_BY_RU[String(r[1] ?? '').trim().toLowerCase()] ?? null, ownerNameRaw: owner, esrCode: esr, stationNameRaw: name,
+      registryNo: no, rju: RJU_BY_RU[String(r[1] ?? '').trim().toLowerCase()] ?? null, ownerNameRaw: noFancy(owner), esrCode: esr, stationNameRaw: noFancy(name),
       lengthM: Number.isFinite(len) && len > 0 ? Math.round(len) : null, unloadCapacity: Number(r[5]) || 0, loadCapacity: Number(r[6]) || 0,
     });
     if (esr && !esrName.has(esr)) esrName.set(esr, name);

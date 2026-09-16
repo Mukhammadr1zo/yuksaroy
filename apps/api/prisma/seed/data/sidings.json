@@ -1232,7 +1232,7 @@
  {
   "registryNo": 124,
   "rju": "TAS",
-  "ownerNameRaw": "“TEMIRYO’LKARGO” AJ Nazarbek yuk terminali",
+  "ownerNameRaw": "`TEMIRYO'LKARGO` AJ Nazarbek yuk terminali",
   "esrCode": "722203",
   "stationNameRaw": "Назарбек",
   "lengthM": 838,
@@ -3382,7 +3382,7 @@
  {
   "registryNo": 339,
   "rju": "TAS",
-  "ownerNameRaw": "ООО  ИП “Global Komsco Daewoo”",
+  "ownerNameRaw": "ООО  ИП `Global Komsco Daewoo`",
   "esrCode": "724001",
   "stationNameRaw": "Янгиюль",
   "lengthM": 375,
@@ -3392,7 +3392,7 @@
  {
   "registryNo": 340,
   "rju": "TAS",
-  "ownerNameRaw": "АО “Биокиме”",
+  "ownerNameRaw": "АО `Биокиме`",
   "esrCode": "724001",
   "stationNameRaw": "Янгиюль",
   "lengthM": 1281,
@@ -3442,7 +3442,7 @@
  {
   "registryNo": 345,
   "rju": "TAS",
-  "ownerNameRaw": "СП “Электроизолит”",
+  "ownerNameRaw": "СП `Электроизолит`",
   "esrCode": "721100",
   "stationNameRaw": "Ялангач",
   "lengthM": 80,
@@ -3452,7 +3452,7 @@
  {
   "registryNo": 346,
   "rju": "TAS",
-  "ownerNameRaw": "ДП “Таш. ТЭС”",
+  "ownerNameRaw": "ДП `Таш. ТЭС`",
   "esrCode": "721100",
   "stationNameRaw": "Ялангач",
   "lengthM": null,
@@ -3652,7 +3652,7 @@
  {
   "registryNo": 366,
   "rju": "TAS",
-  "ownerNameRaw": "АО “RAUPXON”",
+  "ownerNameRaw": "АО `RAUPXON`",
   "esrCode": "720000",
   "stationNameRaw": "Чукурсай",
   "lengthM": 285,
@@ -3672,7 +3672,7 @@
  {
   "registryNo": 368,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Тайерловсавдо”",
+  "ownerNameRaw": "ООО `Тайерловсавдо`",
   "esrCode": "720000",
   "stationNameRaw": "Чукурсай",
   "lengthM": 296,
@@ -3702,7 +3702,7 @@
  {
   "registryNo": 371,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Iron-Caravan”",
+  "ownerNameRaw": "ООО `Iron-Caravan`",
   "esrCode": "720000",
   "stationNameRaw": "Чукурсай",
   "lengthM": 152,
@@ -3712,7 +3712,7 @@
  {
   "registryNo": 372,
   "rju": "TAS",
-  "ownerNameRaw": "ДП “Шинконтрактторг”",
+  "ownerNameRaw": "ДП `Шинконтрактторг`",
   "esrCode": "720000",
   "stationNameRaw": "Чукурсай",
   "lengthM": 135,
@@ -3782,7 +3782,7 @@
  {
   "registryNo": 379,
   "rju": "TAS",
-  "ownerNameRaw": "СП  “Реготмас-Азия”",
+  "ownerNameRaw": "СП  `Реготмас-Азия`",
   "esrCode": "724406",
   "stationNameRaw": "Чиназ",
   "lengthM": 171,
@@ -4002,7 +4002,7 @@
  {
   "registryNo": 401,
   "rju": "TAS",
-  "ownerNameRaw": "ИП ООО “Albion”",
+  "ownerNameRaw": "ИП ООО `Albion`",
   "esrCode": "722504",
   "stationNameRaw": "Хамза",
   "lengthM": 408,
@@ -4072,7 +4072,7 @@
  {
   "registryNo": 408,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Маданий моллари”",
+  "ownerNameRaw": "ООО `Маданий моллари`",
   "esrCode": "722504",
   "stationNameRaw": "Хамза",
   "lengthM": 968,
@@ -4092,7 +4092,7 @@
  {
   "registryNo": 410,
   "rju": "TAS",
-  "ownerNameRaw": "ЧПКП “Зафар-И”",
+  "ownerNameRaw": "ЧПКП `Зафар-И`",
   "esrCode": "722504",
   "stationNameRaw": "Хамза",
   "lengthM": 469,
@@ -4222,7 +4222,7 @@
  {
   "registryNo": 423,
   "rju": "TAS",
-  "ownerNameRaw": "СП “Peng SHeng”",
+  "ownerNameRaw": "СП `Peng SHeng`",
   "esrCode": "724707",
   "stationNameRaw": "Сырдарая",
   "lengthM": 3666,
@@ -4312,7 +4312,7 @@
  {
   "registryNo": 432,
   "rju": "TAS",
-  "ownerNameRaw": "OOOLIYNE’MATMAHSULOTLARI",
+  "ownerNameRaw": "OOOLIYNE'MATMAHSULOTLARI",
   "esrCode": "723507",
   "stationNameRaw": "Сергели",
   "lengthM": 286,
@@ -4482,7 +4482,7 @@
  {
   "registryNo": 449,
   "rju": "TAS",
-  "ownerNameRaw": "ООО  «O’zenergohimmetall»",
+  "ownerNameRaw": "ООО  «O'zenergohimmetall»",
   "esrCode": "720903",
   "stationNameRaw": "Салар",
   "lengthM": 316,
@@ -4522,7 +4522,7 @@
  {
   "registryNo": 453,
   "rju": "TAS",
-  "ownerNameRaw": "ООО «Melek – Appo»(3)",
+  "ownerNameRaw": "ООО «Melek - Appo»(3)",
   "esrCode": "723704",
   "stationNameRaw": "Рахимова",
   "lengthM": 122,
@@ -4562,7 +4562,7 @@
  {
   "registryNo": 457,
   "rju": "TAS",
-  "ownerNameRaw": "ООО «Ilg’orTegirmonchi»",
+  "ownerNameRaw": "ООО «Ilg'orTegirmonchi»",
   "esrCode": "723704",
   "stationNameRaw": "Рахимова",
   "lengthM": 195,
@@ -4642,7 +4642,7 @@
  {
   "registryNo": 465,
   "rju": "TAS",
-  "ownerNameRaw": "АК “Транстуркистон”",
+  "ownerNameRaw": "АК `Транстуркистон`",
   "esrCode": "723704",
   "stationNameRaw": "Рахимова",
   "lengthM": 423,
@@ -4682,7 +4682,7 @@
  {
   "registryNo": 469,
   "rju": "TAS",
-  "ownerNameRaw": "СП ООО «PaxtakorSifatYog’»",
+  "ownerNameRaw": "СП ООО «PaxtakorSifatYog'»",
   "esrCode": "725798",
   "stationNameRaw": "Пахтакор",
   "lengthM": 76,
@@ -4692,7 +4692,7 @@
  {
   "registryNo": 470,
   "rju": "TAS",
-  "ownerNameRaw": "АО Таъминотчи –пахта",
+  "ownerNameRaw": "АО Таъминотчи -пахта",
   "esrCode": "724209",
   "stationNameRaw": "Пахта",
   "lengthM": 1365,
@@ -4722,7 +4722,7 @@
  {
   "registryNo": 473,
   "rju": "TAS",
-  "ownerNameRaw": "АО “ Эйвалекмахсустемирбетон”",
+  "ownerNameRaw": "АО ` Эйвалекмахсустемирбетон`",
   "esrCode": "723102",
   "stationNameRaw": "Озодлик",
   "lengthM": 3869,
@@ -4782,7 +4782,7 @@
  {
   "registryNo": 479,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Agroprom Terminal”",
+  "ownerNameRaw": "ООО `Agroprom Terminal`",
   "esrCode": "722203",
   "stationNameRaw": "Назарбек",
   "lengthM": 784,
@@ -4792,7 +4792,7 @@
  {
   "registryNo": 480,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Biolol Business Group”",
+  "ownerNameRaw": "ООО `Biolol Business Group`",
   "esrCode": "722203",
   "stationNameRaw": "Назарбек",
   "lengthM": 423,
@@ -4822,7 +4822,7 @@
  {
   "registryNo": 483,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Orion Mega Servis”",
+  "ownerNameRaw": "ООО `Orion Mega Servis`",
   "esrCode": "722203",
   "stationNameRaw": "Назарбек",
   "lengthM": 625,
@@ -4832,7 +4832,7 @@
  {
   "registryNo": 484,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Мirvali”",
+  "ownerNameRaw": "ООО `Мirvali`",
   "esrCode": "722203",
   "stationNameRaw": "Назарбек",
   "lengthM": 624,
@@ -4842,7 +4842,7 @@
  {
   "registryNo": 485,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Qaldirg’och-Lastochka”",
+  "ownerNameRaw": "ООО `Qaldirg'och-Lastochka`",
   "esrCode": "722203",
   "stationNameRaw": "Назарбек",
   "lengthM": 532,
@@ -4892,7 +4892,7 @@
  {
   "registryNo": 490,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “BAYER GROUP”",
+  "ownerNameRaw": "ООО `BAYER GROUP`",
   "esrCode": "723600",
   "stationNameRaw": "Тукимачи",
   "lengthM": 158,
@@ -4902,7 +4902,7 @@
  {
   "registryNo": 491,
   "rju": "TAS",
-  "ownerNameRaw": "ООО “Мagastroy Рlyus»",
+  "ownerNameRaw": "ООО `Мagastroy Рlyus»",
   "esrCode": "723600",
   "stationNameRaw": "Тукимачи",
   "lengthM": 184,
@@ -4962,7 +4962,7 @@
  {
   "registryNo": 497,
   "rju": "TAS",
-  "ownerNameRaw": "АО “Зарбдор элеватори”",
+  "ownerNameRaw": "АО `Зарбдор элеватори`",
   "esrCode": "726702",
   "stationNameRaw": "Зарбдор",
   "lengthM": 2072,
@@ -4972,7 +4972,7 @@
  {
   "registryNo": 498,
   "rju": "TAS",
-  "ownerNameRaw": "АО“Дустлик-Дон”",
+  "ownerNameRaw": "АО`Дустлик-Дон`",
   "esrCode": "725606",
   "stationNameRaw": "Дустлик",
   "lengthM": 3773,
@@ -5072,7 +5072,7 @@
  {
   "registryNo": 508,
   "rju": "TAS",
-  "ownerNameRaw": "АО  “Бекабадцемент”",
+  "ownerNameRaw": "АО  `Бекабадцемент`",
   "esrCode": "726100",
   "stationNameRaw": "Бекабад",
   "lengthM": 11387,
@@ -5182,7 +5182,7 @@
  {
   "registryNo": 519,
   "rju": "TAS",
-  "ownerNameRaw": "OOO Ilg’or Invest",
+  "ownerNameRaw": "OOO Ilg'or Invest",
   "esrCode": "723009",
   "stationNameRaw": "Ахангаран",
   "lengthM": 1460,
@@ -5232,7 +5232,7 @@
  {
   "registryNo": 524,
   "rju": "TAS",
-  "ownerNameRaw": "АО “Акалтындон махсулотлари”",
+  "ownerNameRaw": "АО `Акалтындон махсулотлари`",
   "esrCode": "724904",
   "stationNameRaw": "Акалтын",
   "lengthM": 2937,
@@ -5242,7 +5242,7 @@
  {
   "registryNo": 525,
   "rju": "TAS",
-  "ownerNameRaw": "“AKALTIN LOGISTICS CENTER” МЧЖ",
+  "ownerNameRaw": "`AKALTIN LOGISTICS CENTER` МЧЖ",
   "esrCode": "724904",
   "stationNameRaw": "Акалтын",
   "lengthM": 2383,
@@ -5402,7 +5402,7 @@
  {
   "registryNo": 541,
   "rju": "KOK",
-  "ownerNameRaw": "“QO’RG’ONTEPA DON MAXSULOTLARI” АЖ Қўрғонтепа ДҚҚШ",
+  "ownerNameRaw": "`QO'RG'ONTEPA DON MAXSULOTLARI` АЖ Қўрғонтепа ДҚҚШ",
   "esrCode": "743905",
   "stationNameRaw": "Савай",
   "lengthM": 387,
@@ -5412,7 +5412,7 @@
  {
   "registryNo": 542,
   "rju": "KOK",
-  "ownerNameRaw": "“NAMANGAN ISTIQLOL BOG’I” МЧЖ",
+  "ownerNameRaw": "`NAMANGAN ISTIQLOL BOG'I` МЧЖ",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": null,
@@ -5462,7 +5462,7 @@
  {
   "registryNo": 547,
   "rju": "KOK",
-  "ownerNameRaw": "“FAR TIP GARANT MONTAJ” МЧЖ",
+  "ownerNameRaw": "`FAR TIP GARANT MONTAJ` МЧЖ",
   "esrCode": "742705",
   "stationNameRaw": "Киргили",
   "lengthM": 183,
@@ -5492,7 +5492,7 @@
  {
   "registryNo": 550,
   "rju": "KOK",
-  "ownerNameRaw": "“FIRST IMPEX GROUP” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`FIRST IMPEX GROUP` масъулияти чекланган жамияти",
   "esrCode": "742705",
   "stationNameRaw": "Киргили",
   "lengthM": 208,
@@ -5502,7 +5502,7 @@
  {
   "registryNo": 551,
   "rju": "KOK",
-  "ownerNameRaw": "“SUPER UNIVERSAL BIZNES SERVIS” МЧЖ",
+  "ownerNameRaw": "`SUPER UNIVERSAL BIZNES SERVIS` МЧЖ",
   "esrCode": "740004",
   "stationNameRaw": "Коканд I",
   "lengthM": 259,
@@ -5512,7 +5512,7 @@
  {
   "registryNo": 552,
   "rju": "KOK",
-  "ownerNameRaw": "“TAI CHANG SPECIAL STEEL” МЧЖ хорижий корхонаси",
+  "ownerNameRaw": "`TAI CHANG SPECIAL STEEL` МЧЖ хорижий корхонаси",
   "esrCode": "740803",
   "stationNameRaw": "Чуст",
   "lengthM": 159,
@@ -5532,7 +5532,7 @@
  {
   "registryNo": 554,
   "rju": "KOK",
-  "ownerNameRaw": "“ENERGY PLUS” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`ENERGY PLUS` масъулияти чекланган жамияти",
   "esrCode": "741806",
   "stationNameRaw": "Хаккулабад",
   "lengthM": 98,
@@ -5542,7 +5542,7 @@
  {
   "registryNo": 555,
   "rju": "KOK",
-  "ownerNameRaw": "“SHERZODBEK FAYZLI TERAKLARI” хусусий корхонаси",
+  "ownerNameRaw": "`SHERZODBEK FAYZLI TERAKLARI` хусусий корхонаси",
   "esrCode": "741806",
   "stationNameRaw": "Хаккулабад",
   "lengthM": 85,
@@ -5552,7 +5552,7 @@
  {
   "registryNo": 556,
   "rju": "KOK",
-  "ownerNameRaw": "“MAX OIL GROUP” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`MAX OIL GROUP` масъулияти чекланган жамияти",
   "esrCode": "743209",
   "stationNameRaw": "Ахунбабаева",
   "lengthM": 130,
@@ -5562,7 +5562,7 @@
  {
   "registryNo": 557,
   "rju": "KOK",
-  "ownerNameRaw": "“TАХТА PUL” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`TАХТА PUL` масъулияти чекланган жамияти",
   "esrCode": "743708",
   "stationNameRaw": "Ахтачи",
   "lengthM": 456,
@@ -5572,7 +5572,7 @@
  {
   "registryNo": 558,
   "rju": "KOK",
-  "ownerNameRaw": "“KO’MIR TA’MINOT” МЧЖ Наманган вилояти филиали",
+  "ownerNameRaw": "`KO'MIR TA'MINOT` МЧЖ Наманган вилояти филиали",
   "esrCode": "740803",
   "stationNameRaw": "Чуст",
   "lengthM": 117,
@@ -5582,7 +5582,7 @@
  {
   "registryNo": 559,
   "rju": "KOK",
-  "ownerNameRaw": "“MARMARA HOTELS” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`MARMARA HOTELS` масъулияти чекланган жамияти",
   "esrCode": "742705",
   "stationNameRaw": "Киргили",
   "lengthM": 154,
@@ -5592,7 +5592,7 @@
  {
   "registryNo": 560,
   "rju": "KOK",
-  "ownerNameRaw": "“MUSTAFO TEMIR-BETON INVEST” МЧЖ",
+  "ownerNameRaw": "`MUSTAFO TEMIR-BETON INVEST` МЧЖ",
   "esrCode": "743708",
   "stationNameRaw": "Ахтачи",
   "lengthM": 1839,
@@ -5602,7 +5602,7 @@
  {
   "registryNo": 561,
   "rju": "KOK",
-  "ownerNameRaw": "“INTER FAKTORIYA” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`INTER FAKTORIYA` масъулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 877,
@@ -5612,7 +5612,7 @@
  {
   "registryNo": 562,
   "rju": "KOK",
-  "ownerNameRaw": "“SARA MEVA SHARBATI” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`SARA MEVA SHARBATI` масъулияти чекланган жамияти",
   "esrCode": "742404",
   "stationNameRaw": "Алтыарык",
   "lengthM": 456,
@@ -5622,7 +5622,7 @@
  {
   "registryNo": 563,
   "rju": "KOK",
-  "ownerNameRaw": "“KEDR” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`KEDR` масъулияти чекланган жамияти",
   "esrCode": "742809",
   "stationNameRaw": "Фергана II",
   "lengthM": 775,
@@ -5632,7 +5632,7 @@
  {
   "registryNo": 564,
   "rju": "KOK",
-  "ownerNameRaw": "“FORALL TEXTILE” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`FORALL TEXTILE` масъулияти чекланган жамияти",
   "esrCode": "743708",
   "stationNameRaw": "Ахтачи",
   "lengthM": 263,
@@ -5642,7 +5642,7 @@
  {
   "registryNo": 565,
   "rju": "KOK",
-  "ownerNameRaw": "“Попдонмахсулотлари” акциядорлик жамияти",
+  "ownerNameRaw": "`Попдонмахсулотлари` акциядорлик жамияти",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": 452,
@@ -5652,7 +5652,7 @@
  {
   "registryNo": 566,
   "rju": "KOK",
-  "ownerNameRaw": "“TURON COMPANY” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`TURON COMPANY` масъулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 91,
@@ -5662,7 +5662,7 @@
  {
   "registryNo": 567,
   "rju": "KOK",
-  "ownerNameRaw": "“BEK-KON TA’MINOT” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`BEK-KON TA'MINOT` маъсулияти чекланган жамияти",
   "esrCode": "741308",
   "stationNameRaw": "Уйчи",
   "lengthM": 268,
@@ -5682,7 +5682,7 @@
  {
   "registryNo": 569,
   "rju": "KOK",
-  "ownerNameRaw": "“BOG’DOD QISHLOQ XO’JALIK TEXNIKA MTP” МЧЖ",
+  "ownerNameRaw": "`BOG'DOD QISHLOQ XO'JALIK TEXNIKA MTP` МЧЖ",
   "esrCode": "742300",
   "stationNameRaw": "Фуркат",
   "lengthM": 457,
@@ -5692,7 +5692,7 @@
  {
   "registryNo": 570,
   "rju": "KOK",
-  "ownerNameRaw": "“KO’MIR TA’MINOT” МЧЖ Наманган вилояти филиали",
+  "ownerNameRaw": "`KO'MIR TA'MINOT` МЧЖ Наманган вилояти филиали",
   "esrCode": "741806",
   "stationNameRaw": "Хаккулабад",
   "lengthM": 478,
@@ -5732,7 +5732,7 @@
  {
   "registryNo": 574,
   "rju": "KOK",
-  "ownerNameRaw": "“IFODA AGRO KIMYO HIMOYA” МЧЖ қўшма корхона",
+  "ownerNameRaw": "`IFODA AGRO KIMYO HIMOYA` МЧЖ қўшма корхона",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 1245,
@@ -5742,7 +5742,7 @@
  {
   "registryNo": 575,
   "rju": "KOK",
-  "ownerNameRaw": "“HAMKOR KELAJAK SAVDO” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`HAMKOR KELAJAK SAVDO` масъулияти чекланган жамияти",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 314,
@@ -5752,7 +5752,7 @@
  {
   "registryNo": 576,
   "rju": "KOK",
-  "ownerNameRaw": "“MO`YNOQ MINERAL TUZI” МЧЖ",
+  "ownerNameRaw": "`MO`YNOQ MINERAL TUZI` МЧЖ",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 140,
@@ -5762,7 +5762,7 @@
  {
   "registryNo": 577,
   "rju": "KOK",
-  "ownerNameRaw": "“ROVUSTON MEBELLARI” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`ROVUSTON MEBELLARI` маъсулияти чекланган жамияти",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 155,
@@ -5772,7 +5772,7 @@
  {
   "registryNo": 578,
   "rju": "KOK",
-  "ownerNameRaw": "“Попдонмахсулотлари” АЖ",
+  "ownerNameRaw": "`Попдонмахсулотлари` АЖ",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": 514,
@@ -5782,7 +5782,7 @@
  {
   "registryNo": 579,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON UN” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`ANDIJON UN` масъулияти чекланган жамияти",
   "esrCode": "743604",
   "stationNameRaw": "Андижан I",
   "lengthM": 685,
@@ -5792,7 +5792,7 @@
  {
   "registryNo": 580,
   "rju": "KOK",
-  "ownerNameRaw": "”NOZIM-DIYOR AS QURILISH” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`NOZIM-DIYOR AS QURILISH` маъсулияти чекланган жамияти",
   "esrCode": "742705",
   "stationNameRaw": "Киргили",
   "lengthM": 95,
@@ -5802,7 +5802,7 @@
  {
   "registryNo": 581,
   "rju": "KOK",
-  "ownerNameRaw": "“TEXTILE FINANCE NAMANGAN” МЧЖ хорижий корхонаси",
+  "ownerNameRaw": "`TEXTILE FINANCE NAMANGAN` МЧЖ хорижий корхонаси",
   "esrCode": "741401",
   "stationNameRaw": "Учкурган",
   "lengthM": 417,
@@ -5812,7 +5812,7 @@
  {
   "registryNo": 582,
   "rju": "KOK",
-  "ownerNameRaw": "“TASHKENT TRADE CENTER” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`TASHKENT TRADE CENTER` масъулияти чекланган жамияти",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": 861,
@@ -5822,7 +5822,7 @@
  {
   "registryNo": 583,
   "rju": "KOK",
-  "ownerNameRaw": "“OSIYO HOME TEX” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`OSIYO HOME TEX` маъсулияти чекланган жамияти",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 290,
@@ -5832,7 +5832,7 @@
  {
   "registryNo": 584,
   "rju": "KOK",
-  "ownerNameRaw": "“КUVASAY SHIFER INVEST” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`КUVASAY SHIFER INVEST` масъулияти чекланган жамияти",
   "esrCode": "742902",
   "stationNameRaw": "Кувасай",
   "lengthM": 130,
@@ -5862,7 +5862,7 @@
  {
   "registryNo": 587,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON SAXOVATI” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`ANDIJON SAXOVATI` масъулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 543,
@@ -5882,7 +5882,7 @@
  {
   "registryNo": 589,
   "rju": "KOK",
-  "ownerNameRaw": "“NT – CHUST G’ALLA KLASTER” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`NT - CHUST G'ALLA KLASTER` масъулияти чекланган жамияти",
   "esrCode": "740803",
   "stationNameRaw": "Чуст",
   "lengthM": 439,
@@ -5892,7 +5892,7 @@
  {
   "registryNo": 590,
   "rju": "KOK",
-  "ownerNameRaw": "“MUYAN DILOBAR NOZLI NIXOLI” фермер хўжалиги",
+  "ownerNameRaw": "`MUYAN DILOBAR NOZLI NIXOLI` фермер хўжалиги",
   "esrCode": "742902",
   "stationNameRaw": "Кувасай",
   "lengthM": 282,
@@ -5912,7 +5912,7 @@
  {
   "registryNo": 592,
   "rju": "KOK",
-  "ownerNameRaw": "“M.S.S – 2001”  Оилавий корхонаси",
+  "ownerNameRaw": "`M.S.S - 2001`  Оилавий корхонаси",
   "esrCode": "742809",
   "stationNameRaw": "Фергана II",
   "lengthM": 556,
@@ -5922,7 +5922,7 @@
  {
   "registryNo": 593,
   "rju": "KOK",
-  "ownerNameRaw": "“TRANS QUALITY OIL” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`TRANS QUALITY OIL` масъулияти чекланган жамияти",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 428,
@@ -5952,7 +5952,7 @@
  {
   "registryNo": 596,
   "rju": "KOK",
-  "ownerNameRaw": "“MASTONA BUSTONI” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`MASTONA BUSTONI` масъулияти чекланган жамияти",
   "esrCode": "744306",
   "stationNameRaw": "Яйпан",
   "lengthM": 409,
@@ -5982,7 +5982,7 @@
  {
   "registryNo": 599,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON NEFT BAZASI” МЧЖ Асака филиали",
+  "ownerNameRaw": "`ANDIJON NEFT BAZASI` МЧЖ Асака филиали",
   "esrCode": "743407",
   "stationNameRaw": "Ассаке",
   "lengthM": 955,
@@ -5992,7 +5992,7 @@
  {
   "registryNo": 600,
   "rju": "KOK",
-  "ownerNameRaw": "“GNT CARE” маъсулияти чекланган жамияти шаклидаги қўшма корхонаси",
+  "ownerNameRaw": "`GNT CARE` маъсулияти чекланган жамияти шаклидаги қўшма корхонаси",
   "esrCode": "742300",
   "stationNameRaw": "Фуркат",
   "lengthM": 535,
@@ -6002,7 +6002,7 @@
  {
   "registryNo": 601,
   "rju": "KOK",
-  "ownerNameRaw": "“CANCORD KERAMIN SAVDO” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`CANCORD KERAMIN SAVDO` масъулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 231,
@@ -6012,7 +6012,7 @@
  {
   "registryNo": 602,
   "rju": "KOK",
-  "ownerNameRaw": "“NURMUHAMAD” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`NURMUHAMAD` маъсулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 60,
@@ -6022,7 +6022,7 @@
  {
   "registryNo": 603,
   "rju": "KOK",
-  "ownerNameRaw": "“QO’QON NEFTGAZ PARMALASH ISHLARI” АЖ",
+  "ownerNameRaw": "`QO'QON NEFTGAZ PARMALASH ISHLARI` АЖ",
   "esrCode": "740004",
   "stationNameRaw": "Коканд I",
   "lengthM": 125,
@@ -6032,7 +6032,7 @@
  {
   "registryNo": 604,
   "rju": "KOK",
-  "ownerNameRaw": "“TURON CHIROQ FAYZ” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`TURON CHIROQ FAYZ` маъсулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 261,
@@ -6042,7 +6042,7 @@
  {
   "registryNo": 605,
   "rju": "KOK",
-  "ownerNameRaw": "“AZIA STIL MERIDIAN” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`AZIA STIL MERIDIAN` маъсулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 1105,
@@ -6052,7 +6052,7 @@
  {
   "registryNo": 606,
   "rju": "KOK",
-  "ownerNameRaw": "“BO’STON KO’RKI” хусусий корхонаси",
+  "ownerNameRaw": "`BO'STON KO'RKI` хусусий корхонаси",
   "esrCode": "743407",
   "stationNameRaw": "Ассаке",
   "lengthM": 132,
@@ -6062,7 +6062,7 @@
  {
   "registryNo": 607,
   "rju": "KOK",
-  "ownerNameRaw": "“PAYTUG GAZ TO’LDIRISH KORXONASI” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`PAYTUG GAZ TO'LDIRISH KORXONASI` маъсулияти чекланган жамияти",
   "esrCode": "741908",
   "stationNameRaw": "Пайтуг",
   "lengthM": 1111,
@@ -6092,7 +6092,7 @@
  {
   "registryNo": 610,
   "rju": "KOK",
-  "ownerNameRaw": "“BEST STROY-2020” МЧЖ",
+  "ownerNameRaw": "`BEST STROY-2020` МЧЖ",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 247,
@@ -6102,7 +6102,7 @@
  {
   "registryNo": 611,
   "rju": "KOK",
-  "ownerNameRaw": "“ZUHRIDDIN NE’MATLARI” хусусий корхонаси",
+  "ownerNameRaw": "`ZUHRIDDIN NE'MATLARI` хусусий корхонаси",
   "esrCode": "743209",
   "stationNameRaw": "Ахунбабаева",
   "lengthM": 141,
@@ -6122,7 +6122,7 @@
  {
   "registryNo": 613,
   "rju": "KOK",
-  "ownerNameRaw": "“OLMALIQ KON-METALLURGIYA KOMBINATI” АЖ Чодак кон бошқармаси",
+  "ownerNameRaw": "`OLMALIQ KON-METALLURGIYA KOMBINATI` АЖ Чодак кон бошқармаси",
   "esrCode": "741702",
   "stationNameRaw": "Темирйулобод",
   "lengthM": 254,
@@ -6132,7 +6132,7 @@
  {
   "registryNo": 614,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA NEFT MAXSULOTLARI” МЧЖ",
+  "ownerNameRaw": "`FARG'ONA NEFT MAXSULOTLARI` МЧЖ",
   "esrCode": "742705",
   "stationNameRaw": "Киргили",
   "lengthM": 248,
@@ -6142,7 +6142,7 @@
  {
   "registryNo": 615,
   "rju": "KOK",
-  "ownerNameRaw": "“SADAF GAZ AVTO INVEST” МЧЖ",
+  "ownerNameRaw": "`SADAF GAZ AVTO INVEST` МЧЖ",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 566,
@@ -6152,7 +6152,7 @@
  {
   "registryNo": 616,
   "rju": "KOK",
-  "ownerNameRaw": "“2-KO’PRIK QURILISН OTRYADI” МЧЖ",
+  "ownerNameRaw": "`2-KO'PRIK QURILISН OTRYADI` МЧЖ",
   "esrCode": "741908",
   "stationNameRaw": "Пайтуг",
   "lengthM": 521,
@@ -6362,7 +6362,7 @@
  {
   "registryNo": 637,
   "rju": "KOK",
-  "ownerNameRaw": "“BARAKA QUVA UN” МЧЖ",
+  "ownerNameRaw": "`BARAKA QUVA UN` МЧЖ",
   "esrCode": "743303",
   "stationNameRaw": "Кува",
   "lengthM": 580,
@@ -6382,7 +6382,7 @@
  {
   "registryNo": 639,
   "rju": "KOK",
-  "ownerNameRaw": "“ASIA FRUIT MEGA” МЧЖ  хорижий корхонаси",
+  "ownerNameRaw": "`ASIA FRUIT MEGA` МЧЖ  хорижий корхонаси",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 867,
@@ -6422,7 +6422,7 @@
  {
   "registryNo": 643,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJONKABEL” АЖ Ўзбекистон-Россия қўшма корхонаси",
+  "ownerNameRaw": "`ANDIJONKABEL` АЖ Ўзбекистон-Россия қўшма корхонаси",
   "esrCode": "744109",
   "stationNameRaw": "Ханабад",
   "lengthM": 3574,
@@ -6492,7 +6492,7 @@
  {
   "registryNo": 650,
   "rju": "KOK",
-  "ownerNameRaw": "“MUXAMMADYOR” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`MUXAMMADYOR` масъулияти чекланган жамияти",
   "esrCode": "743407",
   "stationNameRaw": "Ассаке",
   "lengthM": 165,
@@ -6532,7 +6532,7 @@
  {
   "registryNo": 654,
   "rju": "KOK",
-  "ownerNameRaw": "“O’ZMETKOMBINAT” АЖ “NAMANGAN IQM” филиали Поп участкаси",
+  "ownerNameRaw": "`O'ZMETKOMBINAT` АЖ `NAMANGAN IQM` филиали Поп участкаси",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": 1284,
@@ -6562,7 +6562,7 @@
  {
   "registryNo": 657,
   "rju": "KOK",
-  "ownerNameRaw": "“O’ZMETKOMBINAT” АЖ “NAMANGAN IQM” филиали",
+  "ownerNameRaw": "`O'ZMETKOMBINAT` АЖ `NAMANGAN IQM` филиали",
   "esrCode": "741100",
   "stationNameRaw": "Наманган",
   "lengthM": 291,
@@ -6632,7 +6632,7 @@
  {
   "registryNo": 664,
   "rju": "KOK",
-  "ownerNameRaw": "“ISTIQLOL DIZAYN QURILISH SAVDO” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`ISTIQLOL DIZAYN QURILISH SAVDO` масъулияти чекланган жамияти",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 228,
@@ -6652,7 +6652,7 @@
  {
   "registryNo": 666,
   "rju": "KOK",
-  "ownerNameRaw": "“ZAURAK AGROKIMYOTA’MINOT” хусусий корхонаси",
+  "ownerNameRaw": "`ZAURAK AGROKIMYOTA'MINOT` хусусий корхонаси",
   "esrCode": "743801",
   "stationNameRaw": "Жалакудук",
   "lengthM": 150,
@@ -6662,7 +6662,7 @@
  {
   "registryNo": 667,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON NEFT BAZASI” МЧЖ Грунчмозор филиали",
+  "ownerNameRaw": "`ANDIJON NEFT BAZASI` МЧЖ Грунчмозор филиали",
   "esrCode": "743801",
   "stationNameRaw": "Жалакудук",
   "lengthM": 620,
@@ -6672,7 +6672,7 @@
  {
   "registryNo": 668,
   "rju": "KOK",
-  "ownerNameRaw": "“BEBAHO BIZNES HAMROH” МЧЖ",
+  "ownerNameRaw": "`BEBAHO BIZNES HAMROH` МЧЖ",
   "esrCode": "743801",
   "stationNameRaw": "Жалакудук",
   "lengthM": 242,
@@ -6682,7 +6682,7 @@
  {
   "registryNo": 669,
   "rju": "KOK",
-  "ownerNameRaw": "“Farg’onaazot” акциядорлик жамияти",
+  "ownerNameRaw": "`Farg'onaazot` акциядорлик жамияти",
   "esrCode": "743801",
   "stationNameRaw": "Жалакудук",
   "lengthM": 953,
@@ -6692,7 +6692,7 @@
  {
   "registryNo": 670,
   "rju": "KOK",
-  "ownerNameRaw": "“SPRING SUCCESS” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`SPRING SUCCESS` маъсулияти чекланган жамияти",
   "esrCode": "743604",
   "stationNameRaw": "Андижан I",
   "lengthM": 376,
@@ -6712,7 +6712,7 @@
  {
   "registryNo": 672,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDBURSERVIS” маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`ANDBURSERVIS` маъсулияти чекланган жамияти",
   "esrCode": "743604",
   "stationNameRaw": "Андижан I",
   "lengthM": 330,
@@ -6732,7 +6732,7 @@
  {
   "registryNo": 674,
   "rju": "KOK",
-  "ownerNameRaw": "“Aндижондонмахсулот” акциядорлик жамияти",
+  "ownerNameRaw": "`Aндижондонмахсулот` акциядорлик жамияти",
   "esrCode": "743604",
   "stationNameRaw": "Андижан I",
   "lengthM": 2237,
@@ -6742,7 +6742,7 @@
  {
   "registryNo": 675,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON BIOKIMYO ZAVODI” акциядорлик  жамияти",
+  "ownerNameRaw": "`ANDIJON BIOKIMYO ZAVODI` акциядорлик  жамияти",
   "esrCode": "743604",
   "stationNameRaw": "Андижан I",
   "lengthM": 1475,
@@ -6792,7 +6792,7 @@
  {
   "registryNo": 680,
   "rju": "KOK",
-  "ownerNameRaw": "“AND-CHIN INVEST”  масъулияти чекланган жамияти",
+  "ownerNameRaw": "`AND-CHIN INVEST`  масъулияти чекланган жамияти",
   "esrCode": "743500",
   "stationNameRaw": "Шахрихан",
   "lengthM": 255,
@@ -6802,7 +6802,7 @@
  {
   "registryNo": 681,
   "rju": "KOK",
-  "ownerNameRaw": "“EDELWEYS” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`EDELWEYS` масъулияти чекланган жамияти",
   "esrCode": "743500",
   "stationNameRaw": "Шахрихан",
   "lengthM": 229,
@@ -6812,7 +6812,7 @@
  {
   "registryNo": 682,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON NEFT BAZASI” МЧЖ Асака филиали",
+  "ownerNameRaw": "`ANDIJON NEFT BAZASI` МЧЖ Асака филиали",
   "esrCode": "743407",
   "stationNameRaw": "Ассаке",
   "lengthM": 161,
@@ -6842,7 +6842,7 @@
  {
   "registryNo": 685,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON MEXANIKA ZAVODI” акциядорлик жамияти",
+  "ownerNameRaw": "`ANDIJON MEXANIKA ZAVODI` акциядорлик жамияти",
   "esrCode": "742103",
   "stationNameRaw": "Пахтаобод",
   "lengthM": 6764,
@@ -6872,7 +6872,7 @@
  {
   "registryNo": 688,
   "rju": "KOK",
-  "ownerNameRaw": "“ORION SARFIR RAVON” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`ORION SARFIR RAVON` масъулияти чекланган жамияти",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 645,
@@ -6892,7 +6892,7 @@
  {
   "registryNo": 690,
   "rju": "KOK",
-  "ownerNameRaw": "“Uz-SaeMyung Ko.” акциядорлик жамияти қўшма корхонаси",
+  "ownerNameRaw": "`Uz-SaeMyung Ko.` акциядорлик жамияти қўшма корхонаси",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 996,
@@ -6912,7 +6912,7 @@
  {
   "registryNo": 692,
   "rju": "KOK",
-  "ownerNameRaw": "“BARAKA ZILOL ELEGANT” МЧЖ",
+  "ownerNameRaw": "`BARAKA ZILOL ELEGANT` МЧЖ",
   "esrCode": "742003",
   "stationNameRaw": "Андижан II",
   "lengthM": 1686,
@@ -6922,7 +6922,7 @@
  {
   "registryNo": 693,
   "rju": "KOK",
-  "ownerNameRaw": "“ANDIJON NEFT BAZASI” МЧЖ Пайтуг филиали",
+  "ownerNameRaw": "`ANDIJON NEFT BAZASI` МЧЖ Пайтуг филиали",
   "esrCode": "741908",
   "stationNameRaw": "Пайтуг",
   "lengthM": 496,
@@ -6942,7 +6942,7 @@
  {
   "registryNo": 695,
   "rju": "KOK",
-  "ownerNameRaw": "“TO’RAQO’RG’ON NEFT BAZASI” МЧЖ Учқўрғон филиали",
+  "ownerNameRaw": "`TO'RAQO'RG'ON NEFT BAZASI` МЧЖ Учқўрғон филиали",
   "esrCode": "741401",
   "stationNameRaw": "Учкурган",
   "lengthM": 251,
@@ -6962,7 +6962,7 @@
  {
   "registryNo": 697,
   "rju": "KOK",
-  "ownerNameRaw": "“UCHQO’G’ON DON MAHSULOTLARI” МЧЖ",
+  "ownerNameRaw": "`UCHQO'G'ON DON MAHSULOTLARI` МЧЖ",
   "esrCode": "741401",
   "stationNameRaw": "Учкурган",
   "lengthM": 4056,
@@ -6972,7 +6972,7 @@
  {
   "registryNo": 698,
   "rju": "KOK",
-  "ownerNameRaw": "“TO’RAQO’RG’ON NEFT BAZASI” маъсулияти чекланган жамияти Уйчи филиали",
+  "ownerNameRaw": "`TO'RAQO'RG'ON NEFT BAZASI` маъсулияти чекланган жамияти Уйчи филиали",
   "esrCode": "741308",
   "stationNameRaw": "Уйчи",
   "lengthM": 461,
@@ -6992,7 +6992,7 @@
  {
   "registryNo": 700,
   "rju": "KOK",
-  "ownerNameRaw": "“Farg’onaazot” акциядорлик жамияти",
+  "ownerNameRaw": "`Farg'onaazot` акциядорлик жамияти",
   "esrCode": "741204",
   "stationNameRaw": "Чартак",
   "lengthM": 469,
@@ -7002,7 +7002,7 @@
  {
   "registryNo": 701,
   "rju": "KOK",
-  "ownerNameRaw": "“TO’RAQO’RG’ON NEFT BAZASI” МЧЖ Поп филиали",
+  "ownerNameRaw": "`TO'RAQO'RG'ON NEFT BAZASI` МЧЖ Поп филиали",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": 257,
@@ -7012,7 +7012,7 @@
  {
   "registryNo": 702,
   "rju": "KOK",
-  "ownerNameRaw": "“TENNIS SPORT SERVIS” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`TENNIS SPORT SERVIS` масъулияти чекланган жамияти",
   "esrCode": "740702",
   "stationNameRaw": "Пап",
   "lengthM": 174,
@@ -7022,7 +7022,7 @@
  {
   "registryNo": 703,
   "rju": "KOK",
-  "ownerNameRaw": "“To’raqo’rg’on tumanlararo ulgurji chakana savdo ishlab chiqarish” МЧЖ",
+  "ownerNameRaw": "`To'raqo'rg'on tumanlararo ulgurji chakana savdo ishlab chiqarish` МЧЖ",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 587,
@@ -7032,7 +7032,7 @@
  {
   "registryNo": 704,
   "rju": "KOK",
-  "ownerNameRaw": "“TO’RAQO’RG’ON NEFT BAZASI”  масъулияти чекланган жамияти",
+  "ownerNameRaw": "`TO'RAQO'RG'ON NEFT BAZASI`  масъулияти чекланган жамияти",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 421,
@@ -7042,7 +7042,7 @@
  {
   "registryNo": 705,
   "rju": "KOK",
-  "ownerNameRaw": "“BOG’ISHAMOL HAYOT” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`BOG'ISHAMOL HAYOT` масъулияти чекланган жамияти",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 684,
@@ -7052,7 +7052,7 @@
  {
   "registryNo": 706,
   "rju": "KOK",
-  "ownerNameRaw": "“Farg’onaazot” акциядорлик жамияти",
+  "ownerNameRaw": "`Farg'onaazot` акциядорлик жамияти",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 853,
@@ -7062,7 +7062,7 @@
  {
   "registryNo": 707,
   "rju": "KOK",
-  "ownerNameRaw": "“MUBORAK-GAZ INVEST” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`MUBORAK-GAZ INVEST` масъулияти чекланган жамияти",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 1236,
@@ -7072,7 +7072,7 @@
  {
   "registryNo": 708,
   "rju": "KOK",
-  "ownerNameRaw": "“Namangan kar’er”масъулияти чекланган жамияти",
+  "ownerNameRaw": "`Namangan kar'er`масъулияти чекланган жамияти",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 803,
@@ -7082,7 +7082,7 @@
  {
   "registryNo": 709,
   "rju": "KOK",
-  "ownerNameRaw": "“AZIZBEK TEMIR YO’L TA’MIR QURILISH” МЧЖ",
+  "ownerNameRaw": "`AZIZBEK TEMIR YO'L TA'MIR QURILISH` МЧЖ",
   "esrCode": "740907",
   "stationNameRaw": "Туракурган",
   "lengthM": 347,
@@ -7102,7 +7102,7 @@
  {
   "registryNo": 711,
   "rju": "KOK",
-  "ownerNameRaw": "“Namangan xalqaro aeroporti” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`Namangan xalqaro aeroporti` масъулияти чекланган жамияти",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 149,
@@ -7122,7 +7122,7 @@
  {
   "registryNo": 713,
   "rju": "KOK",
-  "ownerNameRaw": "“NAMANGAN PAXTA TEKS”  маъсулияти чекланган жамияти",
+  "ownerNameRaw": "`NAMANGAN PAXTA TEKS`  маъсулияти чекланган жамияти",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 2874,
@@ -7132,7 +7132,7 @@
  {
   "registryNo": 714,
   "rju": "KOK",
-  "ownerNameRaw": "“NEW METAL WORLD” МЧЖ",
+  "ownerNameRaw": "`NEW METAL WORLD` МЧЖ",
   "esrCode": "741007",
   "stationNameRaw": "Раустан",
   "lengthM": 588,
@@ -7142,7 +7142,7 @@
  {
   "registryNo": 715,
   "rju": "KOK",
-  "ownerNameRaw": "“SOSNA EKSPORT IMPORT” хусусий корхонаси",
+  "ownerNameRaw": "`SOSNA EKSPORT IMPORT` хусусий корхонаси",
   "esrCode": "741100",
   "stationNameRaw": "Наманган",
   "lengthM": 269,
@@ -7152,7 +7152,7 @@
  {
   "registryNo": 716,
   "rju": "KOK",
-  "ownerNameRaw": "“NAMANGANDONMAHSULOTLARI” акциядорлик жамияти",
+  "ownerNameRaw": "`NAMANGANDONMAHSULOTLARI` акциядорлик жамияти",
   "esrCode": "741100",
   "stationNameRaw": "Наманган",
   "lengthM": 1735,
@@ -7172,7 +7172,7 @@
  {
   "registryNo": 718,
   "rju": "KOK",
-  "ownerNameRaw": "“Farg’onaazot” акциядорлик жамияти",
+  "ownerNameRaw": "`Farg'onaazot` акциядорлик жамияти",
   "esrCode": "743303",
   "stationNameRaw": "Кува",
   "lengthM": 827,
@@ -7182,7 +7182,7 @@
  {
   "registryNo": 719,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA NEFT BAZASI” МЧЖ Қува филиали",
+  "ownerNameRaw": "`FARG'ONA NEFT BAZASI` МЧЖ Қува филиали",
   "esrCode": "743303",
   "stationNameRaw": "Кува",
   "lengthM": 249,
@@ -7212,7 +7212,7 @@
  {
   "registryNo": 722,
   "rju": "KOK",
-  "ownerNameRaw": "“Farg’onaazot” акциядорлик жамияти",
+  "ownerNameRaw": "`Farg'onaazot` акциядорлик жамияти",
   "esrCode": "742705",
   "stationNameRaw": "Киргили",
   "lengthM": 20988,
@@ -7232,7 +7232,7 @@
  {
   "registryNo": 724,
   "rju": "KOK",
-  "ownerNameRaw": "“Issiqlik elektr stansiyalari” АЖ  “Farg’ona IEM” филиали",
+  "ownerNameRaw": "`Issiqlik elektr stansiyalari` АЖ  `Farg'ona IEM` филиали",
   "esrCode": "743209",
   "stationNameRaw": "Ахунбабаева",
   "lengthM": 4819,
@@ -7242,7 +7242,7 @@
  {
   "registryNo": 725,
   "rju": "KOK",
-  "ownerNameRaw": "“MIG IMPEKS” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`MIG IMPEKS` масъулияти чекланган жамияти",
   "esrCode": "743209",
   "stationNameRaw": "Ахунбабаева",
   "lengthM": 612,
@@ -7252,7 +7252,7 @@
  {
   "registryNo": 726,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA NEFTNI QAYTA ISHLASH ZAVODI” МЧЖ",
+  "ownerNameRaw": "`FARG'ONA NEFTNI QAYTA ISHLASH ZAVODI` МЧЖ",
   "esrCode": "743209",
   "stationNameRaw": "Ахунбабаева",
   "lengthM": 23542,
@@ -7262,7 +7262,7 @@
  {
   "registryNo": 727,
   "rju": "KOK",
-  "ownerNameRaw": "“KVARTS” акциядорлик жамияти",
+  "ownerNameRaw": "`KVARTS` акциядорлик жамияти",
   "esrCode": "742902",
   "stationNameRaw": "Кувасай",
   "lengthM": 2938,
@@ -7272,7 +7272,7 @@
  {
   "registryNo": 728,
   "rju": "KOK",
-  "ownerNameRaw": "“Электрқишлоққурилиш” АЖ Қувасой темирбетон махсулотлари кўмакчи ишлаб чиқариш корхонаси",
+  "ownerNameRaw": "`Электрқишлоққурилиш` АЖ Қувасой темирбетон махсулотлари кўмакчи ишлаб чиқариш корхонаси",
   "esrCode": "742902",
   "stationNameRaw": "Кувасай",
   "lengthM": 1370,
@@ -7312,7 +7312,7 @@
  {
   "registryNo": 732,
   "rju": "KOK",
-  "ownerNameRaw": "“QUVASOYCEMENT” Акциядорлик жамияти",
+  "ownerNameRaw": "`QUVASOYCEMENT` Акциядорлик жамияти",
   "esrCode": "742902",
   "stationNameRaw": "Кувасай",
   "lengthM": 4695,
@@ -7322,7 +7322,7 @@
  {
   "registryNo": 733,
   "rju": "KOK",
-  "ownerNameRaw": "“MODERNA CERAMIC INDUSTRIES FERGANA”  МЧЖ шаклидаги қўшма корхона",
+  "ownerNameRaw": "`MODERNA CERAMIC INDUSTRIES FERGANA`  МЧЖ шаклидаги қўшма корхона",
   "esrCode": "742809",
   "stationNameRaw": "Фергана II",
   "lengthM": 146,
@@ -7332,7 +7332,7 @@
  {
   "registryNo": 734,
   "rju": "KOK",
-  "ownerNameRaw": "`FARG’ONAULGURJISAVDO` МЧЖ",
+  "ownerNameRaw": "`FARG'ONAULGURJISAVDO` МЧЖ",
   "esrCode": "742809",
   "stationNameRaw": "Фергана II",
   "lengthM": 2106,
@@ -7352,7 +7352,7 @@
  {
   "registryNo": 736,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA NEFT BAZASI” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`FARG'ONA NEFT BAZASI` масъулияти чекланган жамияти",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 193,
@@ -7362,7 +7362,7 @@
  {
   "registryNo": 737,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONADONMAHSULOTLARI” акциядорлик  жамияти",
+  "ownerNameRaw": "`FARG'ONADONMAHSULOTLARI` акциядорлик  жамияти",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 1250,
@@ -7372,7 +7372,7 @@
  {
   "registryNo": 738,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA TOLA BAZASI” МЧЖ шаклидаги минтақавий пахта терминали",
+  "ownerNameRaw": "`FARG'ONA TOLA BAZASI` МЧЖ шаклидаги минтақавий пахта терминали",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 1089,
@@ -7392,7 +7392,7 @@
  {
   "registryNo": 740,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA SAIDAXMAD” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`FARG'ONA SAIDAXMAD` масъулияти чекланган жамияти",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 194,
@@ -7442,7 +7442,7 @@
  {
   "registryNo": 745,
   "rju": "KOK",
-  "ownerNameRaw": "“RICH WOOD” Хусусий корхонаси",
+  "ownerNameRaw": "`RICH WOOD` Хусусий корхонаси",
   "esrCode": "742508",
   "stationNameRaw": "Маргилан",
   "lengthM": 171,
@@ -7472,7 +7472,7 @@
  {
   "registryNo": 748,
   "rju": "KOK",
-  "ownerNameRaw": "“BOG’DODDONMAHSULOTLARI” АЖ Олтиариқ дон қабул қилиш шахобчаси",
+  "ownerNameRaw": "`BOG'DODDONMAHSULOTLARI` АЖ Олтиариқ дон қабул қилиш шахобчаси",
   "esrCode": "742404",
   "stationNameRaw": "Алтыарык",
   "lengthM": 304,
@@ -7482,7 +7482,7 @@
  {
   "registryNo": 749,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA NEFTNI QAYTA ISHLASH ZAVODI” МЧЖ Олтиариқ ёқилғи ишлаб чиқариш",
+  "ownerNameRaw": "`FARG'ONA NEFTNI QAYTA ISHLASH ZAVODI` МЧЖ Олтиариқ ёқилғи ишлаб чиқариш",
   "esrCode": "742404",
   "stationNameRaw": "Алтыарык",
   "lengthM": 3822,
@@ -7492,7 +7492,7 @@
  {
   "registryNo": 750,
   "rju": "KOK",
-  "ownerNameRaw": "“Farg’onaazot” акциядорлик жамияти",
+  "ownerNameRaw": "`Farg'onaazot` акциядорлик жамияти",
   "esrCode": "742300",
   "stationNameRaw": "Фуркат",
   "lengthM": 155,
@@ -7502,7 +7502,7 @@
  {
   "registryNo": 751,
   "rju": "KOK",
-  "ownerNameRaw": "“SARDOR ELEGANT STROY” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`SARDOR ELEGANT STROY` масъулияти чекланган жамияти",
   "esrCode": "742300",
   "stationNameRaw": "Фуркат",
   "lengthM": 361,
@@ -7512,7 +7512,7 @@
  {
   "registryNo": 752,
   "rju": "KOK",
-  "ownerNameRaw": "“MADAD” Давлат муассасаси",
+  "ownerNameRaw": "`MADAD` Давлат муассасаси",
   "esrCode": "742300",
   "stationNameRaw": "Фуркат",
   "lengthM": 1400,
@@ -7582,7 +7582,7 @@
  {
   "registryNo": 759,
   "rju": "KOK",
-  "ownerNameRaw": "“BAG’DODDONMAHSULOTLARI” акциядорлик жамияти",
+  "ownerNameRaw": "`BAG'DODDONMAHSULOTLARI` акциядорлик жамияти",
   "esrCode": "742207",
   "stationNameRaw": "Какир",
   "lengthM": 9751,
@@ -7592,7 +7592,7 @@
  {
   "registryNo": 760,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA TEXNIK TA’MINLASH VA BUTLASH” шўба корхонаси",
+  "ownerNameRaw": "`FARG'ONA TEXNIK TA'MINLASH VA BUTLASH` шўба корхонаси",
   "esrCode": "742207",
   "stationNameRaw": "Какир",
   "lengthM": 1954,
@@ -7602,7 +7602,7 @@
  {
   "registryNo": 761,
   "rju": "KOK",
-  "ownerNameRaw": "`МUXAMMADZIYO RANGLI BO’YOQ` МЧЖ",
+  "ownerNameRaw": "`МUXAMMADZIYO RANGLI BO'YOQ` МЧЖ",
   "esrCode": "742207",
   "stationNameRaw": "Какир",
   "lengthM": 187,
@@ -7642,7 +7642,7 @@
  {
   "registryNo": 765,
   "rju": "KOK",
-  "ownerNameRaw": "“XADRA” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`XADRA` масъулияти чекланган жамияти",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 183,
@@ -7652,7 +7652,7 @@
  {
   "registryNo": 766,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA NEFT BAZASI” МЧЖ Қўқон филиали",
+  "ownerNameRaw": "`FARG'ONA NEFT BAZASI` МЧЖ Қўқон филиали",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 2579,
@@ -7672,7 +7672,7 @@
  {
   "registryNo": 768,
   "rju": "KOK",
-  "ownerNameRaw": "“QO’QON DON MAHSULOTLARI” акциядорлик жамияти",
+  "ownerNameRaw": "`QO'QON DON MAHSULOTLARI` акциядорлик жамияти",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 3663,
@@ -7682,7 +7682,7 @@
  {
   "registryNo": 769,
   "rju": "KOK",
-  "ownerNameRaw": "“O’ZMETKOMBINAT” АЖ “FARG’ONA IQM” филиали Қўқон бўлими",
+  "ownerNameRaw": "`O'ZMETKOMBINAT` АЖ `FARG'ONA IQM` филиали Қўқон бўлими",
   "esrCode": "740004",
   "stationNameRaw": "Коканд I",
   "lengthM": 229,
@@ -7692,7 +7692,7 @@
  {
   "registryNo": 770,
   "rju": "KOK",
-  "ownerNameRaw": "“VODIY TERMINAL TRADE” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`VODIY TERMINAL TRADE` масъулияти чекланган жамияти",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 149,
@@ -7712,7 +7712,7 @@
  {
   "registryNo": 772,
   "rju": "KOK",
-  "ownerNameRaw": "“QO’QON DON MAHSULOTLARI” акциядорлик жамияти Қўқон филиали",
+  "ownerNameRaw": "`QO'QON DON MAHSULOTLARI` акциядорлик жамияти Қўқон филиали",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 703,
@@ -7732,7 +7732,7 @@
  {
   "registryNo": 774,
   "rju": "KOK",
-  "ownerNameRaw": "“EFFEKTIV OIL” МЧЖ қўшма корхонаси",
+  "ownerNameRaw": "`EFFEKTIV OIL` МЧЖ қўшма корхонаси",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 639,
@@ -7742,7 +7742,7 @@
  {
   "registryNo": 775,
   "rju": "KOK",
-  "ownerNameRaw": "“AL ME’MOR-A”масъулияти чекланган жамияти",
+  "ownerNameRaw": "`AL ME'MOR-A`масъулияти чекланган жамияти",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 483,
@@ -7752,7 +7752,7 @@
  {
   "registryNo": 776,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA TEMIR YO’L TA’MINOT” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`FARG'ONA TEMIR YO'L TA'MINOT` масъулияти чекланган жамияти",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 602,
@@ -7762,7 +7762,7 @@
  {
   "registryNo": 777,
   "rju": "KOK",
-  "ownerNameRaw": "“AZIA KRAFT KOKAND” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`AZIA KRAFT KOKAND` масъулияти чекланган жамияти",
   "esrCode": "740004",
   "stationNameRaw": "Коканд",
   "lengthM": 380,
@@ -7772,7 +7772,7 @@
  {
   "registryNo": 778,
   "rju": "KOK",
-  "ownerNameRaw": "“QO’QON DON MAHSULOTLARI” АЖ Навбахор дон қабул қилиш шахобчаси",
+  "ownerNameRaw": "`QO'QON DON MAHSULOTLARI` АЖ Навбахор дон қабул қилиш шахобчаси",
   "esrCode": "744306",
   "stationNameRaw": "Яйпан",
   "lengthM": 1267,
@@ -7792,7 +7792,7 @@
  {
   "registryNo": 780,
   "rju": "KOK",
-  "ownerNameRaw": "“FARG’ONA SAIDAXMAD” масъулияти чекланган жамияти",
+  "ownerNameRaw": "`FARG'ONA SAIDAXMAD` масъулияти чекланган жамияти",
   "esrCode": "740305",
   "stationNameRaw": "Рапкан",
   "lengthM": 201,
@@ -7812,7 +7812,7 @@
  {
   "registryNo": 782,
   "rju": "KOK",
-  "ownerNameRaw": "“QO’QON DON MAHSULOTLARI” АЖ Ропқон дон қабул қилиш шахобчаси",
+  "ownerNameRaw": "`QO'QON DON MAHSULOTLARI` АЖ Ропқон дон қабул қилиш шахобчаси",
   "esrCode": "740305",
   "stationNameRaw": "Рапкан",
   "lengthM": 553,
@@ -7902,7 +7902,7 @@
  {
   "registryNo": 791,
   "rju": "BUX",
-  "ownerNameRaw": "“QUVUR TA`MIR” MCHJ",
+  "ownerNameRaw": "`QUVUR TA`MIR` MCHJ",
   "esrCode": "730106",
   "stationNameRaw": "Бухара II",
   "lengthM": 347,
@@ -7932,7 +7932,7 @@
  {
   "registryNo": 794,
   "rju": "BUX",
-  "ownerNameRaw": "“SAMARQAND-KONSERVA” AЖ",
+  "ownerNameRaw": "`SAMARQAND-KONSERVA` AЖ",
   "esrCode": "727809",
   "stationNameRaw": "Самарканд",
   "lengthM": 798,
@@ -8192,7 +8192,7 @@
  {
   "registryNo": 820,
   "rju": "BUX",
-  "ownerNameRaw": "“Самарқанд ИҚМ” филиали Зирабулоқ бўлими",
+  "ownerNameRaw": "`Самарқанд ИҚМ` филиали Зирабулоқ бўлими",
   "esrCode": "728604",
   "stationNameRaw": "Зирабулак",
   "lengthM": 177,
@@ -8202,7 +8202,7 @@
  {
   "registryNo": 821,
   "rju": "BUX",
-  "ownerNameRaw": "“DYNAMIC ELECTRONICS” МЧЖ",
+  "ownerNameRaw": "`DYNAMIC ELECTRONICS` МЧЖ",
   "esrCode": "728604",
   "stationNameRaw": "Зирабулак",
   "lengthM": 202,
@@ -10442,7 +10442,7 @@
  {
   "registryNo": 1045,
   "rju": "KUN",
-  "ownerNameRaw": "“SHOVOT TUMAN YO‘LLARDAN FOYDALANISH KORXONASI”",
+  "ownerNameRaw": "`SHOVOT TUMAN YO'LLARDAN FOYDALANISH KORXONASI`",
   "esrCode": "738108",
   "stationNameRaw": "Шават",
   "lengthM": 1097,
@@ -10492,7 +10492,7 @@
  {
   "registryNo": 1050,
   "rju": "KUN",
-  "ownerNameRaw": "“To`rtko`l don maxsuloti” МЧЖ",
+  "ownerNameRaw": "`To`rtko`l don maxsuloti` МЧЖ",
   "esrCode": "739609",
   "stationNameRaw": "Туртгул",
   "lengthM": 1430,
@@ -10542,7 +10542,7 @@
  {
   "registryNo": 1055,
   "rju": "KUN",
-  "ownerNameRaw": "“KO‘MIR TA’MINOT” MCHJ Хоразм вилояти филиали",
+  "ownerNameRaw": "`KO'MIR TA'MINOT` MCHJ Хоразм вилояти филиали",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 230,
@@ -10562,7 +10562,7 @@
  {
   "registryNo": 1057,
   "rju": "KUN",
-  "ownerNameRaw": "“HUDUDGAZ XORAZM” GAZ TA’MINOTI FILIALI",
+  "ownerNameRaw": "`HUDUDGAZ XORAZM` GAZ TA'MINOTI FILIALI",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 386,
@@ -10572,7 +10572,7 @@
  {
   "registryNo": 1058,
   "rju": "KUN",
-  "ownerNameRaw": "“MAGNIT URGANCH” MCHJ",
+  "ownerNameRaw": "`MAGNIT URGANCH` MCHJ",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 321,
@@ -10632,7 +10632,7 @@
  {
   "registryNo": 1064,
   "rju": "KUN",
-  "ownerNameRaw": "“QARRIBOY SAVDO IMPEKS” XK",
+  "ownerNameRaw": "`QARRIBOY SAVDO IMPEKS` XK",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 380,
@@ -10772,7 +10772,7 @@
  {
   "registryNo": 1078,
   "rju": "KUN",
-  "ownerNameRaw": "“AFSONA URGANCH”  MCHJ",
+  "ownerNameRaw": "`AFSONA URGANCH`  MCHJ",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 2265,
@@ -10782,7 +10782,7 @@
  {
   "registryNo": 1079,
   "rju": "KUN",
-  "ownerNameRaw": "“URGENCH FOOD SALES”  МЧЖ",
+  "ownerNameRaw": "`URGENCH FOOD SALES`  МЧЖ",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 306,
@@ -10822,7 +10822,7 @@
  {
   "registryNo": 1083,
   "rju": "KUN",
-  "ownerNameRaw": "«XORAZM  BAXT  TA’MINOT» МЧЖ",
+  "ownerNameRaw": "«XORAZM  BAXT  TA'MINOT» МЧЖ",
   "esrCode": "738305",
   "stationNameRaw": "Ургенч",
   "lengthM": 572,
@@ -10882,7 +10882,7 @@
  {
   "registryNo": 1089,
   "rju": "KUN",
-  "ownerNameRaw": "`“XONQA CHORVA KAPITAL” MChJ`",
+  "ownerNameRaw": "``XONQA CHORVA KAPITAL` MChJ`",
   "esrCode": "738409",
   "stationNameRaw": "Ханки",
   "lengthM": 390,
@@ -11582,7 +11582,7 @@
  {
   "registryNo": 1159,
   "rju": "KUN",
-  "ownerNameRaw": "Чимбайский филиал ООО “Т-таш Нефтебаза”",
+  "ownerNameRaw": "Чимбайский филиал ООО `Т-таш Нефтебаза`",
   "esrCode": "739308",
   "stationNameRaw": "Чимбай",
   "lengthM": 480,
@@ -11592,7 +11592,7 @@
  {
   "registryNo": 1160,
   "rju": "KUN",
-  "ownerNameRaw": "ООО  “Чимбай дан”",
+  "ownerNameRaw": "ООО  `Чимбай дан`",
   "esrCode": "739308",
   "stationNameRaw": "Чимбай",
   "lengthM": 3823,
@@ -11692,7 +11692,7 @@
  {
   "registryNo": 1170,
   "rju": "KUN",
-  "ownerNameRaw": "ООО “Тахиаташская нефтебаза”",
+  "ownerNameRaw": "ООО `Тахиаташская нефтебаза`",
   "esrCode": "738907",
   "stationNameRaw": "Пристань",
   "lengthM": 570,
@@ -11702,7 +11702,7 @@
  {
   "registryNo": 1171,
   "rju": "KUN",
-  "ownerNameRaw": "АО “Тахиаташ Дан Махсулотлари”",
+  "ownerNameRaw": "АО `Тахиаташ Дан Махсулотлари`",
   "esrCode": "738907",
   "stationNameRaw": "Пристань",
   "lengthM": 3808,
@@ -11722,7 +11722,7 @@
  {
   "registryNo": 1173,
   "rju": "KUN",
-  "ownerNameRaw": "Мостоотряд №14  УП “Куприк курилиш”  трест",
+  "ownerNameRaw": "Мостоотряд №14  УП `Куприк курилиш`  трест",
   "esrCode": "738907",
   "stationNameRaw": "Пристань",
   "lengthM": 2315,
@@ -11732,7 +11732,7 @@
  {
   "registryNo": 1174,
   "rju": "KUN",
-  "ownerNameRaw": "ДП “Тахиаташгидроэнергострой”",
+  "ownerNameRaw": "ДП `Тахиаташгидроэнергострой`",
   "esrCode": "738907",
   "stationNameRaw": "Пристань",
   "lengthM": 1632,
@@ -11742,7 +11742,7 @@
  {
   "registryNo": 1175,
   "rju": "KUN",
-  "ownerNameRaw": "ООО “Тахиаташ Управление строительство",
+  "ownerNameRaw": "ООО `Тахиаташ Управление строительство",
   "esrCode": "738907",
   "stationNameRaw": "Пристань",
   "lengthM": 2255,
@@ -11842,7 +11842,7 @@
  {
   "registryNo": 1185,
   "rju": "KUN",
-  "ownerNameRaw": "ТОБ ОАО “КК Гош-сут сауда”",
+  "ownerNameRaw": "ТОБ ОАО `КК Гош-сут сауда`",
   "esrCode": "739007",
   "stationNameRaw": "Нукус",
   "lengthM": 515,
@@ -11852,7 +11852,7 @@
  {
   "registryNo": 1186,
   "rju": "KUN",
-  "ownerNameRaw": "АО “Тахиаташский ТЭС”",
+  "ownerNameRaw": "АО `Тахиаташский ТЭС`",
   "esrCode": "737707",
   "stationNameRaw": "Найманкуль",
   "lengthM": 3650,
@@ -11912,7 +11912,7 @@
  {
   "registryNo": 1192,
   "rju": "KUN",
-  "ownerNameRaw": "ООО “Устюртское УРБ”",
+  "ownerNameRaw": "ООО `Устюртское УРБ`",
   "esrCode": "737209",
   "stationNameRaw": "Кунград",
   "lengthM": 965,
@@ -11922,7 +11922,7 @@
  {
   "registryNo": 1193,
   "rju": "KUN",
-  "ownerNameRaw": "1 / 522-АО “Кунград Ун заводы”",
+  "ownerNameRaw": "1 / 522-АО `Кунград Ун заводы`",
   "esrCode": "737209",
   "stationNameRaw": "Кунград",
   "lengthM": 3584,
@@ -11942,7 +11942,7 @@
  {
   "registryNo": 1195,
   "rju": "KUN",
-  "ownerNameRaw": "Кунград филиал ООО “Тахиаташская нефтебаза”",
+  "ownerNameRaw": "Кунград филиал ООО `Тахиаташская нефтебаза`",
   "esrCode": "737209",
   "stationNameRaw": "Кунград",
   "lengthM": 341,
@@ -12042,7 +12042,7 @@
  {
   "registryNo": 1205,
   "rju": "KAR",
-  "ownerNameRaw": "“Gʻuzor don mahsulot” MCHJ",
+  "ownerNameRaw": "`Gʻuzor don mahsulot` MCHJ",
   "esrCode": "733706",
   "stationNameRaw": "Гузар",
   "lengthM": 1218,
@@ -12052,7 +12052,7 @@
  {
   "registryNo": 1206,
   "rju": "KAR",
-  "ownerNameRaw": "“Qarshi neft bazasi” MChJ",
+  "ownerNameRaw": "`Qarshi neft bazasi` MChJ",
   "esrCode": "734107",
   "stationNameRaw": "Китаб",
   "lengthM": 650,
@@ -12062,7 +12062,7 @@
  {
   "registryNo": 1207,
   "rju": "KAR",
-  "ownerNameRaw": "“Bunyodkor industrial texnopark” MCHJ",
+  "ownerNameRaw": "`Bunyodkor industrial texnopark` MCHJ",
   "esrCode": "733000",
   "stationNameRaw": "Касан",
   "lengthM": 4863,
@@ -12072,7 +12072,7 @@
  {
   "registryNo": 1208,
   "rju": "KAR",
-  "ownerNameRaw": "“Kifti-ob baraka chorva” MChJ",
+  "ownerNameRaw": "`Kifti-ob baraka chorva` MChJ",
   "esrCode": "734107",
   "stationNameRaw": "Китаб",
   "lengthM": null,
@@ -12082,7 +12082,7 @@
  {
   "registryNo": 1209,
   "rju": "KAR",
-  "ownerNameRaw": "Kengsoy vagonlarni bug‘lash va yuvish bo‘limi",
+  "ownerNameRaw": "Kengsoy vagonlarni bug'lash va yuvish bo'limi",
   "esrCode": "732602",
   "stationNameRaw": "Кенгсой",
   "lengthM": 260,
@@ -12102,7 +12102,7 @@
  {
   "registryNo": 1211,
   "rju": "KAR",
-  "ownerNameRaw": "“Qarshi neft bazasi” MChJ",
+  "ownerNameRaw": "`Qarshi neft bazasi` MChJ",
   "esrCode": "733808",
   "stationNameRaw": "Камаши",
   "lengthM": 280,
@@ -12122,7 +12122,7 @@
  {
   "registryNo": 1213,
   "rju": "KAR",
-  "ownerNameRaw": "“Koinotgazplyus” MChJ",
+  "ownerNameRaw": "`Koinotgazplyus` MChJ",
   "esrCode": "733104",
   "stationNameRaw": "Карши",
   "lengthM": 75,
@@ -12132,7 +12132,7 @@
  {
   "registryNo": 1214,
   "rju": "KAR",
-  "ownerNameRaw": "“Qashqadaryo YMF” UK",
+  "ownerNameRaw": "`Qashqadaryo YMF` UK",
   "esrCode": "734003",
   "stationNameRaw": "Танхоз",
   "lengthM": 522,
@@ -12142,7 +12142,7 @@
  {
   "registryNo": 1215,
   "rju": "KAR",
-  "ownerNameRaw": "“Texnik ta’minlash va butlash” MChJ",
+  "ownerNameRaw": "`Texnik ta'minlash va butlash` MChJ",
   "esrCode": "733104",
   "stationNameRaw": "Карши",
   "lengthM": 1360,
@@ -12152,7 +12152,7 @@
  {
   "registryNo": 1216,
   "rju": "KAR",
-  "ownerNameRaw": "“Don-xalq rizqi” AJ",
+  "ownerNameRaw": "`Don-xalq rizqi` AJ",
   "esrCode": "734107",
   "stationNameRaw": "Китаб",
   "lengthM": 2213,
@@ -12162,7 +12162,7 @@
  {
   "registryNo": 1217,
   "rju": "KAR",
-  "ownerNameRaw": "“Qashqadaryo don mahsulotlari” AJ",
+  "ownerNameRaw": "`Qashqadaryo don mahsulotlari` AJ",
   "esrCode": "733104",
   "stationNameRaw": "Карши",
   "lengthM": 541,
@@ -12172,7 +12172,7 @@
  {
   "registryNo": 1218,
   "rju": "KAR",
-  "ownerNameRaw": "“Navoiyazot” AJ",
+  "ownerNameRaw": "`Navoiyazot` AJ",
   "esrCode": "733000",
   "stationNameRaw": "Касан",
   "lengthM": 666,
@@ -12192,7 +12192,7 @@
  {
   "registryNo": 1220,
   "rju": "KAR",
-  "ownerNameRaw": "“Popular golden valley” MChJ",
+  "ownerNameRaw": "`Popular golden valley` MChJ",
   "esrCode": "733208",
   "stationNameRaw": "Кашкадарья",
   "lengthM": 155,
@@ -12222,7 +12222,7 @@
  {
   "registryNo": 1223,
   "rju": "KAR",
-  "ownerNameRaw": "“Nasaf oltingugurt kimyo” MChJ",
+  "ownerNameRaw": "`Nasaf oltingugurt kimyo` MChJ",
   "esrCode": "732807",
   "stationNameRaw": "Машъал",
   "lengthM": 313,
@@ -12482,7 +12482,7 @@
  {
   "registryNo": 1249,
   "rju": "KAR",
-  "ownerNameRaw": "“Minora qurish ekspeditsiyasi” AJ",
+  "ownerNameRaw": "`Minora qurish ekspeditsiyasi` AJ",
   "esrCode": "733208",
   "stationNameRaw": "Кашкадарья",
   "lengthM": 1252,
@@ -12622,7 +12622,7 @@
  {
   "registryNo": 1263,
   "rju": "KAR",
-  "ownerNameRaw": "`Дунё–М` АЖ",
+  "ownerNameRaw": "`Дунё-М` АЖ",
   "esrCode": "734107",
   "stationNameRaw": "Китаб",
   "lengthM": 488,
@@ -12732,7 +12732,7 @@
  {
   "registryNo": 1274,
   "rju": "KAR",
-  "ownerNameRaw": "“VENKO OIL” MChJ",
+  "ownerNameRaw": "`VENKO OIL` MChJ",
   "esrCode": "733405",
   "stationNameRaw": "Айрытам",
   "lengthM": 137,
@@ -13072,7 +13072,7 @@
  {
   "registryNo": 1308,
   "rju": "KAR",
-  "ownerNameRaw": "“Qashqadaryo g‘isht sanoati” MChJ",
+  "ownerNameRaw": "`Qashqadaryo g'isht sanoati` MChJ",
   "esrCode": "733208",
   "stationNameRaw": "Кашкадарья",
   "lengthM": 626,
