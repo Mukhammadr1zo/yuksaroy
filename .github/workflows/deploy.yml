@@ -43,6 +43,24 @@ jobs:
       contents: read
       packages: write
     steps:
+      # NEXT_PUBLIC_* qurilish paytida obrazga kiradi. Bo'sh qoldirilsa xato bermaydi,
+      # shunchaki bo'sh bo'lib ketadi va prodda Telegram hamda Google bilan kirish
+      # tugmasi ishlamay qoladi. Buni deploydan keyin topish qiyin, shuning uchun
+      # oldindan to'xtatamiz.
+      - name: O'zgaruvchilar to'liqmi
+        env:
+          BOT_USERNAME: ${{ vars.BOT_USERNAME }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: |
+          miss=""
+          [ -n "$BOT_USERNAME" ] || miss="$miss BOT_USERNAME"
+          [ -n "$GOOGLE_CLIENT_ID" ] || miss="$miss GOOGLE_CLIENT_ID"
+          if [ -n "$miss" ]; then
+            echo "Settings > Secrets and variables > Actions > Variables da yo'q:$miss"
+            exit 1
+          fi
+          echo "o'zgaruvchilar joyida"
+
       - uses: actions/checkout@v4
 
       - uses: docker/setup-buildx-action@v3
@@ -106,6 +124,24 @@ jobs:
     # Muhitga tasdiq qo'yish mumkin: Settings > Environments > production > required reviewers
     environment: production
     steps:
+      # Sirsiz ssh baribir yiqiladi, lekin xatosi tushunarsiz bo'ladi.
+      # Bu yerda tekshiramiz: qaysi sir yo'qligi darrov ko'rinsin.
+      - name: Sirlar to'liqmi
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          K: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          miss=""
+          [ -n "$H" ] || miss="$miss VPS_HOST"
+          [ -n "$U" ] || miss="$miss VPS_USER"
+          [ -n "$K" ] || miss="$miss VPS_SSH_KEY"
+          if [ -n "$miss" ]; then
+            echo "Settings > Secrets and variables > Actions > Secrets da yo'q:$miss"
+            exit 1
+          fi
+          echo "sirlar joyida"
+
       - uses: actions/checkout@v4
 
       - name: SSH kaliti
