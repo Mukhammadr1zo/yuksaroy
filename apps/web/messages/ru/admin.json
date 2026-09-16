@@ -169,7 +169,10 @@
       "pendingKyc": "Проверка KYC",
       "pendingClaims": "Заявки на объекты",
       "pendingPremium": "Платежи премиум",
-      "pendingOrders": "Заказы без подтверждения"
+      "pendingOrders": "Заказы без подтверждения",
+      "activity": "Последние действия",
+      "activityEmpty": "Действий пока нет.",
+      "waitingDays": "самое старое ждёт {days} дн."
     },
     "terminals": {
       "lead": "Терминалы и подъездные пути: записи реестра тоже здесь.",

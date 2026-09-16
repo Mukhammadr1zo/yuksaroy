@@ -1,14 +1,20 @@
 'use client';
 /**
- * Admin bosh sahifasi: bugun nima kutmoqda va tizim tirikmi.
- * Har navbat o'z bo'limiga havola, chunki bu yerda ish qilinmaydi, faqat qayerga borish hal qilinadi.
+ * Admin bosh sahifasi: ish kuni shu yerdan boshlanadi.
+ *
+ * Ilgari bu yerda uchta raqamlar to'plami turardi va ulardan hech narsa qilib bo'lmasdi.
+ * Endi uch savolga javob beradi: hozir nima kutmoqda, eng uzog'i qancha kutdi, va
+ * oxirgi paytda nima bo'ldi.
+ *
+ * "Eng uzoq kutgan" alohida ko'rsatiladi, chunki navbatdagi son o'zi hech narsa demaydi:
+ * ikkita e'lon uch kundan beri turgani beshta e'lon bugun kelganidan yomonroq.
  */
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { num, uzDateTime } from '@/lib/format';
-import { CARD, Notice, PageHead, errText } from '@/components/admin/kit';
+import { CARD, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
 
 type Health = {
   db: { ok: boolean; ms?: number; error?: string };
@@ -19,6 +25,8 @@ type Health = {
   failed?: string[];
 };
 type Overview = { users: number; blocked: number; orgs: number; terminals: number; sidings: number; listings: number; orders: number; inquiries: number; messages: number; reviews: number };
+type Actor = { id: string; phone: string; fullName: string | null };
+type AuditRow = { id: string; action: string; entity: string | null; createdAt: string; actor: Actor | null };
 
 const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   { key: 'listingsPendingReview', label: 'pendingListings', href: '/admin/moderation?tab=listings' },
@@ -28,86 +36,130 @@ const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   { key: 'ordersPending', label: 'pendingOrders', href: '/admin/orders?status=PENDING' },
 ];
 const OVERVIEW: (keyof Overview)[] = ['users', 'blocked', 'orgs', 'terminals', 'sidings', 'listings', 'orders', 'inquiries', 'messages', 'reviews'];
-const RECENT: (keyof Health['recent'])[] = ['users', 'orders', 'listings'];
-const RECENT_LABEL: Record<keyof Health['recent'], string> = { users: 'newUsers', orders: 'newOrders', listings: 'newListings' };
+const RECENT: { key: keyof Health['recent']; label: string }[] = [
+  { key: 'users', label: 'newUsers' }, { key: 'orders', label: 'newOrders' }, { key: 'listings', label: 'newListings' },
+];
+
+/** Kunlarda kutish: navbatdagi son emas, yosh muhim. */
+const daysWaiting = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 
 export default function AdminHomePage() {
   const t = useTranslations('admin');
   const th = useTranslations('admin.home');
   const to = useTranslations('admin.overview');
   const tc = useTranslations('admin.common');
+  const ta = useTranslations('admin.audit');
   const locale = useLocale();
   const [health, setHealth] = useState<Health | null>(null);
   const [overview, setOverview] = useState<Overview | null>(null);
+  const [feed, setFeed] = useState<AuditRow[] | null>(null);
   const [err, setErr] = useState<unknown>(null);
 
   useEffect(() => {
     api<Health>('/admin/health').then(setHealth).catch(setErr);
-    // Umumiy raqamlar yiqilsa sahifa buzilmasin: navbat va salomatlik muhimroq
+    // Umumiy raqamlar va tasma yiqilsa sahifa buzilmasin: navbat muhimroq
     api<Overview>('/admin/overview').then(setOverview).catch(() => {});
+    api<{ items: AuditRow[] }>('/admin/audit?limit=8').then((r) => setFeed(r.items)).catch(() => setFeed([]));
   }, []);
 
   const total = health ? Object.values(health.counts).reduce((a, b) => a + b, 0) : 0;
+  const waited = health?.oldestPending ? daysWaiting(health.oldestPending) : null;
 
   return (
     <>
       <PageHead title={t('title')} lead={th('lead')} />
       {err ? <Notice tone="err">{errText(err, t, t.has, tc('loadFailed'))}</Notice> : null}
-      {!health && !err ? <p className="mt-5 text-sm text-muted">{tc('loading')}</p> : null}
       {/* Bir qism yiqilsa qolgani baribir ko'rsatiladi, lekin qaysi biri ekani aytiladi */}
       {health?.failed?.length ? <Notice tone="err">{tc('loadFailed')} ({health.failed.join(', ')})</Notice> : null}
+      {!health && !err ? <p className="mt-5 text-sm text-muted">{tc('loading')}</p> : null}
 
       {health ? (
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          <section className={`${CARD} p-4`}>
-            <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('queue')}</h2>
-            {total === 0 ? <p className="mt-3 text-sm text-muted">{th('queueEmpty')}</p> : (
-              <ul className="mt-2 divide-y divide-line/70">
+        <>
+          {/* Navbat: har biri bosiladigan kartochka, bo'shi xira turadi */}
+          <section className="mt-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('queue')}</h2>
+              {waited != null && waited >= 1 ? (
+                <Pill tone={waited >= 3 ? 'bad' : 'warn'}>{th('waitingDays', { days: waited })}</Pill>
+              ) : null}
+            </div>
+
+            {total === 0 ? (
+              <p className={`${CARD} mt-2 border-dashed px-6 py-10 text-center text-sm text-muted`}>{th('queueEmpty')}</p>
+            ) : (
+              <ul className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {QUEUE.map(({ key, label, href }) => {
                   const n = health.counts[key];
-                  const inner = (
+                  const body = (
                     <>
-                      <span className={`w-12 shrink-0 font-display text-2xl font-bold tabular-nums ${n ? 'text-navy' : 'text-muted'}`}>{num(n, locale)}</span>
-                      <span className={`text-sm ${n ? 'text-ink' : 'text-muted'}`}>{th(label)}</span>
+                      <span className={`font-display text-3xl font-bold tabular-nums ${n ? 'text-navy' : 'text-muted/50'}`}>{num(n, locale)}</span>
+                      <span className={`mt-0.5 block text-sm ${n ? 'text-ink' : 'text-muted'}`}>{th(label)}</span>
                     </>
                   );
                   return (
                     <li key={key}>
                       {/* Bo'sh navbatga havola kerak emas: bosib borsa bo'sh ro'yxat ko'radi */}
-                      {n ? <Link href={href} className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors duration-150 hover:bg-sand">{inner}</Link>
-                        : <div className="flex items-center gap-3 px-2 py-1.5">{inner}</div>}
+                      {n ? (
+                        <Link href={href} className={`${CARD} block p-4 transition duration-150 hover:-translate-y-0.5 hover:border-teal hover:shadow-md`}>{body}</Link>
+                      ) : (
+                        <div className={`${CARD} p-4`}>{body}</div>
+                      )}
                     </li>
                   );
                 })}
               </ul>
             )}
-            {health.oldestPending ? <p className="mt-3 text-xs text-muted">{th('oldestPending')}: <span className="font-mono">{uzDateTime(health.oldestPending, locale)}</span></p> : null}
+            {health.oldestPending ? (
+              <p className="mt-2 text-xs text-muted">{th('oldestPending')}: <span className="font-mono">{uzDateTime(health.oldestPending, locale)}</span></p>
+            ) : null}
           </section>
 
-          <section className={`${CARD} p-4`}>
-            <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('health')}</h2>
-            <p className="mt-3 text-sm">
-              {th('db')}: {health.db.ok
-                ? <span className="font-mono text-teal-ink">{th('dbOk', { ms: health.db.ms ?? 0 })}</span>
-                : <span className="font-mono font-semibold text-red-700">{th('dbFail')}</span>}
-            </p>
-            <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('last24h')}</p>
-            <dl className="mt-1 grid grid-cols-3 gap-2">
-              {RECENT.map((k) => (
-                <div key={k}>
-                  <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(health.recent[k], locale)}</dd>
-                  <dt className="text-xs text-muted">{th(RECENT_LABEL[k])}</dt>
-                </div>
-              ))}
-            </dl>
-          </section>
-        </div>
+          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_minmax(0,320px)]">
+            {/* Oxirgi amallar: panelda kim nima qilgani ko'rinib tursin */}
+            <section className={`${CARD} min-w-0 p-4`}>
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('activity')}</h2>
+                <Link href="/admin/audit" className="text-xs font-semibold text-teal-ink underline">{t('nav.audit')}</Link>
+              </div>
+              {feed === null ? <p className="mt-3 text-sm text-muted">{tc('loading')}</p>
+                : !feed.length ? <p className="mt-3 text-sm text-muted">{th('activityEmpty')}</p> : (
+                  <ul className="mt-2 divide-y divide-line/70">
+                    {feed.map((r) => (
+                      <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 py-1.5 text-sm">
+                        <span className="min-w-0 font-semibold wrap-anywhere">{ta.has(`action.${r.action}`) ? ta(`action.${r.action}`) : r.action}</span>
+                        <span className="min-w-0 text-muted wrap-anywhere">{r.actor ? r.actor.fullName || r.actor.phone : ta('system')}</span>
+                        <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">{uzDateTime(r.createdAt, locale)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </section>
+
+            <section className={`${CARD} min-w-0 p-4`}>
+              <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('health')}</h2>
+              <p className="mt-2 text-sm">
+                {th('db')}: {health.db.ok
+                  ? <span className="font-mono text-teal-ink">{th('dbOk', { ms: health.db.ms ?? 0 })}</span>
+                  : <span className="font-mono font-semibold text-red-700">{th('dbFail')}</span>}
+              </p>
+              <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('last24h')}</p>
+              <dl className="mt-1 grid grid-cols-3 gap-2">
+                {RECENT.map(({ key, label }) => (
+                  <div key={key}>
+                    <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(health.recent[key], locale)}</dd>
+                    <dt className="text-xs text-muted">{th(label)}</dt>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </div>
+        </>
       ) : null}
 
       {overview ? (
         <dl className={`${CARD} mt-4 grid grid-cols-2 gap-x-3 gap-y-3 p-4 sm:grid-cols-5`}>
           {OVERVIEW.map((k) => (
-            <div key={k}>
+            <div key={k} className="min-w-0">
               <dd className={`font-display text-lg font-bold tabular-nums ${k === 'blocked' && overview[k] ? 'text-red-700' : 'text-navy'}`}>{num(overview[k], locale)}</dd>
               <dt className="font-mono text-[11px] uppercase tracking-wide text-muted">{to(k)}</dt>
             </div>

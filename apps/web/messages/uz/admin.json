@@ -169,7 +169,10 @@
       "pendingKyc": "KYC tekshiruvi",
       "pendingClaims": "Obyekt da'volari",
       "pendingPremium": "Premium to'lovlari",
-      "pendingOrders": "Tasdiq kutayotgan buyurtma"
+      "pendingOrders": "Tasdiq kutayotgan buyurtma",
+      "activity": "Oxirgi amallar",
+      "activityEmpty": "Hali amal qilinmagan.",
+      "waitingDays": "eng uzog'i {days} kundan beri kutmoqda"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",
