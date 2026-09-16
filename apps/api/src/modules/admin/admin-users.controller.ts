@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
@@ -100,6 +100,9 @@ export class AdminUsersController {
    */
   @Post('users/:id/block')
   async block(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: BlockDto) {
+    // O'zini bloklash panelga kirishni butunlay yopadi va qaytish yo'li faqat serverdagi
+    // .env orqali bo'ladi. Jadvalda qatorlar bir xil ko'rinadi, ya'ni bitta noto'g'ri bosish yetadi.
+    if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });
     await this.prisma.user.update({ where: { id }, data: { isActive: !dto.block } });
     if (dto.block) await this.prisma.session.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() } });
     await this.audit.log({ actorId: userId, action: dto.block ? 'admin.user.block' : 'admin.user.unblock', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null } });
@@ -109,6 +112,8 @@ export class AdminUsersController {
   /** O'chirish: foydalanuvchining o'zi bosgandagi bilan bir xil (soft delete va anonimlash). */
   @Post('users/:id/delete')
   async remove(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ReasonDto) {
+    // O'z hisobini o'chirish qaytarib bo'lmaydigan amal: admin o'zini anonimlashtirib qo'yardi.
+    if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });
     const report = await this.del.execute(id);
     await this.audit.log({ actorId: userId, action: 'admin.user.delete', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null, ...report } });
     return { id, deleted: true };

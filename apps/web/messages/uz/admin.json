@@ -145,6 +145,8 @@
       "USER_NOT_FOUND": "Foydalanuvchi topilmadi.",
       "ORG_NOT_FOUND": "Tashkilot topilmadi.",
       "MEMBER_NOT_FOUND": "A'zo topilmadi.",
+      "REASON_REQUIRED": "Buyurtmani yopish uchun sabab yozing.",
+      "SELF_ACTION": "O'zingizga nisbatan bu amalni bajarib bo'lmaydi.",
       "NOTHING_TO_UPDATE": "O'zgartiradigan narsa yo'q."
     },
     "home": {

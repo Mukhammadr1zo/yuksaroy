@@ -97,6 +97,11 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
   const load = useCallback(() => api<Detail>(`/admin/orders/${no}`).then((x) => { setD(x); setStatus(x.status); }).catch((e) => setMsg({ tone: 'err', text: errText(e, t, t.has, tc('loadFailed')) })), [no, t, tc]);
   useEffect(() => { void load(); }, [load]);
 
+  // Yopuvchi holatlar uchun sabab majburiy: server ham shuni talab qiladi, lekin
+  // operator tugmani bosmasdan oldin bilib tursin (aks holda faqat xato banneri chiqardi).
+  const closing = status === 'CANCELLED' || status === 'REJECTED' || status === 'EXPIRED';
+  const needReason = closing && !reason.trim();
+
   async function force() {
     setMsg(null);
     try {
@@ -160,13 +165,13 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
                   {ORDER_STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS_LABELS[lang][s]}</option>)}
                 </select>
               </Labeled>
-              <Labeled label={to('reason')}>
-                <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} className={INPUT} />
+              <Labeled label={closing ? `${to('reason')} *` : to('reason')}>
+                <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} required={closing} className={INPUT} />
               </Labeled>
             </div>
             <p className="mt-2 text-xs text-amber-ink">{to('forceNote')}</p>
             <div className="mt-3">
-              <ConfirmButton label={to('force')} confirm={tc('confirm')} onRun={force} className={BTN} />
+              <ConfirmButton label={to('force')} confirm={tc('confirm')} onRun={force} className={BTN} disabled={needReason} />
             </div>
             {msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null}
           </section>

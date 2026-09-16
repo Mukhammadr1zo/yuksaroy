@@ -75,15 +75,29 @@ export default function AdminOrgsPage() {
   /** A'zo o'zgargach hisob va rollar yangilansin: yon varaq ham, orqadagi ro'yxat ham. */
   const refresh = async () => { if (sel) await loadDetail(sel); void reload(); };
 
-  async function save() {
-    if (!detail || !form) return;
-    const base = toForm(detail);
+  /** Rollar tartibi muhim emas: faqat to'plam o'zgarganini bilmoqchimiz. */
+  const sameRoles = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
+  /** Yon varaqda qo'lda o'zgartirilgan a'zolar. */
+  const dirtyMembers = detail
+    ? detail.members.filter((m) => { const e = mem[m.id]; return e && (e.isOwner !== m.isOwner || !sameRoles(e.roles, m.roles)); })
+    : [];
+  const formDiff = detail && form
     // ponytail: bo'sh STIR yuborilmaydi (DTO 9 raqam talab qiladi); STIR ni o'chirish bazadan
-    const diff = Object.fromEntries((Object.keys(form) as (keyof Form)[]).filter((k) => form[k] !== base[k] && !(k === 'stir' && !form[k])).map((k) => [k, form[k]]));
-    if (!Object.keys(diff).length) return;
+    ? Object.fromEntries((Object.keys(form) as (keyof Form)[]).filter((k) => form[k] !== toForm(detail)[k] && !(k === 'stir' && !form[k])).map((k) => [k, form[k]]))
+    : {};
+  const dirty = Object.keys(formDiff).length > 0 || dirtyMembers.length > 0;
+
+  async function save() {
+    if (!detail || !form || !dirty) return;
     setBusy(true); setNote(null);
     try {
-      await api(`/admin/orgs/${detail.id}`, { method: 'PATCH', body: JSON.stringify(diff) });
+      if (Object.keys(formDiff).length) await api(`/admin/orgs/${detail.id}`, { method: 'PATCH', body: JSON.stringify(formDiff) });
+      // A'zo rollari ham shu tugma bilan saqlanadi. Ilgari pastdagi katta "Saqlash"
+      // faqat tashkilot maydonlarini yuborardi va belgilangan rollar jimgina yo'qolardi,
+      // ustiga "Saqlandi" deb yozilardi. Ketma-ket yuboriladi: birinchi xato to'xtatadi.
+      for (const m of dirtyMembers) {
+        await api(`/admin/orgs/${detail.id}/members/${m.id}`, { method: 'PATCH', body: JSON.stringify(mem[m.id]) });
+      }
       setNote({ tone: 'ok', text: tc('saved') });
       await refresh();
     } catch (e) { fail(e); } finally { setBusy(false); }
@@ -183,7 +197,9 @@ export default function AdminOrgsPage() {
             <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={removeOrg} />
             <span className="grow" />
             <button type="button" onClick={close} className={BTN_GHOST}>{tc('cancel')}</button>
-            <button type="button" disabled={busy} onClick={() => void save()} className={BTN}>{tc('save')}</button>
+            {/* O'zgarish bo'lmasa o'chiq turadi: ilgari bosilardi-yu hech narsa bo'lmasdi,
+                operator esa tugma ishlamayapti deb o'ylardi. */}
+            <button type="button" disabled={busy || !dirty} onClick={() => void save()} className={BTN}>{tc('save')}</button>
           </>
         ) : undefined}>
         {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}

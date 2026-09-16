@@ -128,15 +128,18 @@ export function Notice({ tone, children }: { tone: 'ok' | 'err'; children: React
  * Ikki bosqichli xavfli amal. Modal emas: bitta bosishda o'chib ketmasin degan maqsad uchun
  * modal ortiqcha, tugmaning o'zi "ishonchingiz komilmi" holatiga o'tadi va 4 soniyada qaytadi.
  */
-export function ConfirmButton({ label, confirm, onRun, className = BTN_DANGER }: {
-  label: string; confirm: string; onRun: () => Promise<void> | void; className?: string;
+export function ConfirmButton({ label, confirm, onRun, className = BTN_DANGER, disabled = false }: {
+  label: string; confirm: string; onRun: () => Promise<void> | void; className?: string; disabled?: boolean;
 }) {
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  // Shart bajarilmagan bo'lsa (masalan sabab yozilmagan) tugma o'chiq turadi va
+  // tayyorlangan holat ham bekor qilinadi, aks holda "tasdiqlang" holatida qotib qolardi.
+  useEffect(() => { if (disabled) setArmed(false); }, [disabled]);
   return (
-    <button type="button" disabled={busy}
+    <button type="button" disabled={busy || disabled}
       className={armed ? `${className} border-red-400 bg-red-600 text-white hover:bg-red-700` : className}
       onClick={async () => {
         if (!armed) {

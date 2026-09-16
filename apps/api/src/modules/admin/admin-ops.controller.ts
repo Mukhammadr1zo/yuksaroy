@@ -118,6 +118,10 @@ export class AdminOpsController {
     // Holat va tarix bitta tranzaksiyada: tarixsiz o'zgargan holat kuzatib bo'lmaydigan bo'lib qolardi
     // Yopiluvchi holatlar: buyurtma yakunlanadi va band qilingan joy bo'shashi kerak
     const closing = to === 'CANCELLED' || to === 'REJECTED' || to === 'EXPIRED';
+    // Buyurtmani yopish mijoz uchun sezilarli va qaytarib bo'lmaydigan amal. Sababsiz yopilsa
+    // oylar o'tib nizo chiqqanda tarixda "reason: null" turadi va hech kim nega yopilganini
+    // ayta olmaydi. Qoidani chetlab o'tishning yagona izi shu sabab.
+    if (closing && !reason) throw new BadRequestException({ code: 'REASON_REQUIRED' });
     await this.prisma.$transaction([
       this.prisma.order.update({ where: { id: o.id }, data: { status: to, ...(closing || to === 'DONE' ? { closedAt: new Date() } : {}), ...(to === 'CONFIRMED' ? { confirmedAt: new Date() } : {}) } }),
       this.prisma.orderStatusHistory.create({
