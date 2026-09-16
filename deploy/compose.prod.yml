@@ -19,7 +19,7 @@ services:
     # Port tashqariga ochilmaydi: faqat ichki tarmoq
 
   api:
-    image: ghcr.io/mukhammadr1zo/yuksaroy-api:latest
+    image: ghcr.io/mukhammadr1zo/yuksaroy-api:${IMAGE_TAG:-latest}
     build:
       context: ..
       dockerfile: deploy/Dockerfile.api
@@ -40,7 +40,7 @@ services:
       start_period: 40s
 
   web:
-    image: ghcr.io/mukhammadr1zo/yuksaroy-web:latest
+    image: ghcr.io/mukhammadr1zo/yuksaroy-web:${IMAGE_TAG:-latest}
     build:
       context: ..
       dockerfile: deploy/Dockerfile.web
@@ -58,7 +58,7 @@ services:
       api: { condition: service_started }
 
   bot:
-    image: ghcr.io/mukhammadr1zo/yuksaroy-bot:latest
+    image: ghcr.io/mukhammadr1zo/yuksaroy-bot:${IMAGE_TAG:-latest}
     build:
       context: ..
       dockerfile: deploy/Dockerfile.bot

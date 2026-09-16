@@ -49,9 +49,19 @@ docker compose -f deploy/compose.prod.yml exec bot node ../../apps/bot/scripts/s
 
 ## Yangilanish
 
+Odatdagi yo'l: GitHub da **Actions > Deploy > Run workflow**. Obrazlar runnerda
+quriladi va GHCR ga qo'yiladi, server faqat tortib oladi. Serverda qurilmasligining
+sababi: bu yerda yana 24 ta begona konteyner ishlaydi va Next qurilishi xotirani
+yeb, ularni yiqitishi mumkin.
+
+Workflow serverda `prod` shoxiga o'tadi va aynan o'sha commit obrazini ko'taradi
+(`IMAGE_TAG`), ya'ni kod va obraz hech qachon ajralib qolmaydi.
+
+Qo'lda qurish faqat zaxira yo'l sifatida qoladi:
+
 ```bash
-cd /opt/yuksaroy && git pull
-docker compose -f deploy/compose.prod.yml --env-file .env up -d --build
+cd /opt/yuksaroy && git fetch && git checkout -B prod origin/master
+IMAGE_TAG=latest docker compose -f deploy/compose.prod.yml --env-file .env up -d --build
 docker image prune -f
 ```
 

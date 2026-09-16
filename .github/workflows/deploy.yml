@@ -175,7 +175,8 @@ jobs:
       # Repo yopiq, shuning uchun GHCR dagi obrazlar ham yopiq: server ularni
       # parolsiz torta olmaydi va "docker compose pull" unauthorized beradi.
       # Token quvur orqali uzatiladi: na runner diskida, na buyruq qatorida qolmaydi.
-      # Bu token ish tugashi bilan o'lik bo'ladi, oxirida logout ham qilinadi.
+      # Alohida DOCKER_CONFIG papkasi: serverdagi boshqa 24 ta konteynerning
+      # umumiy ~/.docker/config.json fayliga tegmaymiz, ularning kaliti o'chmasin.
       - name: Server GHCR ga kirsin
         env:
           H: ${{ secrets.VPS_HOST }}
@@ -184,7 +185,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           printf '%s' "$GH_TOKEN" | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
-            "docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
+            "mkdir -p \$HOME/.docker-yuksaroy && DOCKER_CONFIG=\$HOME/.docker-yuksaroy docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
 
       - name: Deploy
         env:
@@ -199,19 +200,39 @@ jobs:
           set -euo pipefail
           cd "$DIR"
 
+          # DIQQAT: bu skript serverga stdin orqali beriladi (bash -s). Shuning uchun
+          # bu yerda stdin ni o'qiydigan buyruq ishlatib bo'lmaydi. Masalan
+          # "docker compose exec -T" stdin ni konteynerga ulaydi va skriptning
+          # qolganini yutib yuboradi: bash EOF ga yetadi, 0 qaytaradi va deploy hech
+          # narsa qilmay yashil bo'lib tugaydi. Yangi buyruq qo'shsangiz shuni eslang.
+
+          # Boshqa loyihalarning docker hisob fayliga tegmaslik uchun alohida papka:
+          # serverda yana 24 ta konteyner bor va ularning ghcr kaliti o'chib ketmasin.
+          export DOCKER_CONFIG=\$HOME/.docker-yuksaroy
+          # Aynan shu commit obrazini ko'taramiz: latest bilan kod va obraz ajralib qolardi
+          export IMAGE_TAG="$SHA"
+
+          echo "== kod yangilanishi (compose fayllari va migratsiyalar uchun) =="
+          git fetch --all --prune
+          # Serverda qo'lda qilingan tuzatish bo'lsa yo'qolmasin (.env e'tiborsiz, u gitignore da)
+          git stash push -u -m "deploy oldidan $SHA" || true
+          # -B: ajralgan HEAD qolmasin, aks holda qo'lda git pull ishlamaydi
+          git checkout -B prod "$SHA"
+
+          echo "== compose sozlamasi to'g'rimi =="
+          # .env da majburiy o'zgaruvchi yetishmasa shu yerda to'xtaymiz,
+          # konteynerlarga tegmasdan oldin
+          docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env config -q
+
           echo "== joriy obrazlar (qaytarish uchun) =="
           docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env images | tee /tmp/ys-images-before.txt
 
           if [ "$SKIP_BACKUP" != "true" ]; then
-            echo "== baza zaxirasi =="
-            docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env exec -T db \
-              pg_dump -U yuksaroy yuksaroy | gzip > "/root/ys-backup-\$(date +%Y%m%d-%H%M%S).sql.gz"
-            ls -lh /root/ys-backup-*.sql.gz | tail -3
+            echo "== zaxira =="
+            # Tayyor skript: pg_restore uchun qulay format, yuklangan fayllar ham,
+            # eskilarini o'zi tozalaydi. Stdin ni o'qimaydi.
+            bash deploy/backup.sh
           fi
-
-          echo "== kod yangilanishi (compose fayllari va migratsiyalar uchun) =="
-          git fetch --all --prune
-          git checkout -f "$SHA"
 
           echo "== obrazlarni tortib olish =="
           docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env pull
@@ -221,7 +242,7 @@ jobs:
 
           # Obrazlar tortib bo'lindi: GHCR tokeni serverda qolib ketmasin.
           # Sog'liq tekshiruvidan oldin turibdi, chunki u yiqilsa ham tozalash bo'lsin.
-          docker logout ghcr.io >/dev/null 2>&1 || true
+          rm -rf \$HOME/.docker-yuksaroy
 
           echo "== sog'liq tekshiruvi =="
           ok=0
