@@ -98,7 +98,9 @@
         "catalog": "Katalog",
         "people": "Odamlar",
         "system": "Tizim"
-      }
+      },
+      "urgent": "Shoshilinch",
+      "reviews": "Baholar"
     },
     "common": {
       "search": "Qidiruv",
@@ -298,6 +300,48 @@
     },
     "moderation": {
       "lead": "Tasdiq kutayotgan e'lonlar, KYC so'rovlari, obyekt da'volari va to'lovlar."
+    },
+    "reviews": {
+      "lead": "Terminal baholari va e'lon izohlari. Soxta yoki haqoratli bahoni shu yerdan o'chirasiz.",
+      "tabTerminal": "Terminal baholari",
+      "tabListing": "E'lon izohlari",
+      "rating": "Baho",
+      "terminal": "Terminal",
+      "listing": "E'lon",
+      "text": "Matn",
+      "noText": "matnsiz",
+      "reply": "Javob",
+      "author": "Kim yozgan",
+      "noAuthor": "noma'lum",
+      "orderNo": "Buyurtma",
+      "flags": "Belgi",
+      "excluded": "Reytingga kirmaydi",
+      "searchHint": "Matn yoki buyurtma raqami",
+      "deleted": "Baho o'chirildi, reyting qayta hisoblandi."
+    },
+    "urgent": {
+      "lead": "Teplovoz, vagon ta'miri va kran so'rovlari. Qotib qolgan so'rovni shu yerdan yopasiz.",
+      "no": "Raqam",
+      "kind": "Tur",
+      "station": "Stansiya",
+      "wagons": "Vagon",
+      "offers": "Takliflar",
+      "phone": "Telefon",
+      "description": "Tavsif",
+      "noOffers": "Hali taklif kelmagan.",
+      "noPrice": "narx aytilmagan",
+      "eta": "{min} daqiqada",
+      "awarded": "Tanlangan",
+      "close": "So'rovni yopish",
+      "closed": "So'rov yopildi.",
+      "reason": "Sabab",
+      "closeNote": "Sabab so'rov egasiga ko'rinadi, shuning uchun majburiy.",
+      "kinds": {
+        "LOCO_CALL": "Teplovoz chaqirish",
+        "WAGON_REPAIR": "Vagon ta'miri",
+        "CRANE": "Kran",
+        "OTHER": "Boshqa"
+      }
     }
   }
 }

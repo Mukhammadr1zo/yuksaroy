@@ -98,7 +98,9 @@
         "catalog": "Catalog",
         "people": "People",
         "system": "System"
-      }
+      },
+      "urgent": "Urgent",
+      "reviews": "Reviews"
     },
     "common": {
       "search": "Search",
@@ -298,6 +300,48 @@
     },
     "moderation": {
       "lead": "Listings, KYC requests, object claims and payments awaiting a decision."
+    },
+    "reviews": {
+      "lead": "Terminal ratings and listing comments. Remove fake or abusive ones here.",
+      "tabTerminal": "Terminal ratings",
+      "tabListing": "Listing comments",
+      "rating": "Rating",
+      "terminal": "Terminal",
+      "listing": "Listing",
+      "text": "Text",
+      "noText": "no text",
+      "reply": "Reply",
+      "author": "Author",
+      "noAuthor": "unknown",
+      "orderNo": "Order",
+      "flags": "Flag",
+      "excluded": "Not counted in rating",
+      "searchHint": "Text or order number",
+      "deleted": "Review deleted, rating recalculated."
+    },
+    "urgent": {
+      "lead": "Requests for a shunting locomotive, wagon repair or a crane. Close a stalled one here.",
+      "no": "Number",
+      "kind": "Type",
+      "station": "Station",
+      "wagons": "Wagons",
+      "offers": "Offers",
+      "phone": "Phone",
+      "description": "Description",
+      "noOffers": "No offers yet.",
+      "noPrice": "no price given",
+      "eta": "in {min} min",
+      "awarded": "Chosen",
+      "close": "Close request",
+      "closed": "Request closed.",
+      "reason": "Reason",
+      "closeNote": "The requester sees this reason, so it is required.",
+      "kinds": {
+        "LOCO_CALL": "Shunting locomotive",
+        "WAGON_REPAIR": "Wagon repair",
+        "CRANE": "Crane",
+        "OTHER": "Other"
+      }
     }
   }
 }

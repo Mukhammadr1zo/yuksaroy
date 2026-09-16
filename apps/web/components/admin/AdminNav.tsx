@@ -15,11 +15,13 @@ const GROUPS: { key: string; items: Item[] }[] = [
     { href: '/admin', key: 'home', exact: true },
     { href: '/admin/moderation', key: 'moderation', badge: 'pending' },
     { href: '/admin/orders', key: 'orders' },
+    { href: '/admin/urgent', key: 'urgent' },
   ] },
   { key: 'catalog', items: [
     { href: '/admin/terminals', key: 'terminals' },
     { href: '/admin/stations', key: 'stations' },
     { href: '/admin/listings', key: 'listings' },
+    { href: '/admin/reviews', key: 'reviews' },
   ] },
   { key: 'people', items: [
     { href: '/admin/orgs', key: 'orgs' },
