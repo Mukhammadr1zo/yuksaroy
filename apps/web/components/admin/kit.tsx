@@ -199,12 +199,18 @@ export function Drawer({ open, title, onClose, children, footer }: {
 // `t` faqat kalit bilan chaqiriladi: tor imzo next-intl tarjimoniga strukturaviy mos keladi
 export function errText(e: unknown, t: (k: string) => string, has: (k: string) => boolean, fallback: string) {
   if (!(e instanceof ApiError)) return fallback;
-  const body = e.body as { code?: string; key?: string; field?: string } | undefined;
-  const code = body?.code;
+  const body = e.body as Record<string, unknown> | undefined;
+  const code = typeof body?.code === 'string' ? body.code : undefined;
   // Server qaysi maydon aybdor ekanini aytsa, u ham ko'rsatiladi: uchta sozlamani
   // birga saqlaganda "Qiymat noto'g'ri" qaysi biri haqida ekani ma'lum bo'lmasdi.
-  const where = body?.key ?? body?.field;
-  const tail = where ? `: ${where}` : '';
+  const where = typeof body?.key === 'string' ? body.key : typeof body?.field === 'string' ? body.field : undefined;
+  // Server to'sayotgan sabablarni sanoq bilan qaytaradi (masalan tashkilotda nechta
+  // terminal va buyurtma borligi). Ilgari bular tashlanardi va operator "tashkilotda
+  // obyekt bor" degan xabarni ko'rib, qaysi ekanini topa olmasdi.
+  const counts = Object.entries(body ?? {})
+    .filter(([k, v]) => typeof v === 'number' && v > 0 && k !== 'statusCode')
+    .map(([k, v]) => `${k}: ${v}`);
+  const tail = where ? `: ${where}` : counts.length ? ` (${counts.join(', ')})` : '';
   if (code && has(`err.${code}`)) return `${t(`err.${code}`)}${tail}`;
   return `${fallback} (${code ?? 'HTTP'} ${e.status})${tail}`;
 }
