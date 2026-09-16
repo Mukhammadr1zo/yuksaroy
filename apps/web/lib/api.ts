@@ -37,13 +37,33 @@ async function raw(path: string, init: RequestInit = {}) {
   return fetch(`/api/v1${path}`, { ...init, headers: { 'content-type': 'application/json', ...authHeaders(), ...(init.headers ?? {}) }, credentials: 'include' });
 }
 
-/** Yangilash: Mini App'da refresh token tanadan, saytda cookie'dan. Muvaffaqiyat = true. */
-async function refresh(): Promise<boolean> {
-  const t = tgTokens();
-  const r = await raw('/auth/refresh', { method: 'POST', body: JSON.stringify(t ? { refreshToken: t.refresh } : {}) });
-  if (!r.ok) return false;
-  if (t) { const b = await r.json().catch(() => null); if (b?.accessToken) setTgTokens({ access: b.accessToken, refresh: b.refreshToken ?? t.refresh }); }
-  return true;
+/**
+ * Yangilash: Mini App'da refresh token tanadan, saytda cookie'dan. Muvaffaqiyat = true.
+ *
+ * Bir vaqtda faqat BITTA yangilash ketadi va qolganlari o'shani kutadi.
+ *
+ * Nega: sahifa odatda bir nechta so'rovni barobar yuboradi. Kirish tokeni eskirgan
+ * bo'lsa hammasi 401 oladi va har biri yangilashni boshlardi. Birinchisi refresh
+ * tokenni almashtiradi, ikkinchisi esa endi bekor qilingan tokenni yuboradi va server
+ * buni o'g'irlangan token deb bilib foydalanuvchining BARCHA sessiyalarini bekor
+ * qiladi. Natijada sahifaning bir qismi yuklanadi, bir qismi "yuklanmadi" deb qoladi
+ * va odam butunlay tizimdan chiqib ketadi.
+ */
+let refreshing: Promise<boolean> | null = null;
+function refresh(): Promise<boolean> {
+  refreshing ??= (async () => {
+    try {
+      const t = tgTokens();
+      const r = await raw('/auth/refresh', { method: 'POST', body: JSON.stringify(t ? { refreshToken: t.refresh } : {}) });
+      if (!r.ok) return false;
+      if (t) { const b = await r.json().catch(() => null); if (b?.accessToken) setTgTokens({ access: b.accessToken, refresh: b.refreshToken ?? t.refresh }); }
+      return true;
+    } finally {
+      // Keyingi eskirishda qaytadan yangilash kerak bo'ladi
+      refreshing = null;
+    }
+  })();
+  return refreshing;
 }
 
 export async function api<T = unknown>(path: string, init: RequestInit = {}, retry = true): Promise<T> {

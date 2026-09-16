@@ -13,7 +13,10 @@ export class PrismaSessionStore implements SessionStore {
     return this.prisma.session.findUnique({ where: { id }, select: { revokedAt: true } });
   }
   findByRefreshHash(refreshHash: string) {
-    return this.prisma.session.findUnique({ where: { refreshHash }, select: { id: true, userId: true, expiresAt: true, revokedAt: true } });
+    return this.prisma.session.findUnique({ where: { refreshHash }, select: { id: true, userId: true, expiresAt: true, revokedAt: true, replacedById: true } });
+  }
+  findLive(id: string) {
+    return this.prisma.session.findUnique({ where: { id }, select: { id: true, userId: true, expiresAt: true, revokedAt: true } });
   }
   async rotate(oldId: string, next: { refreshHash: string; expiresAt: Date }) {
     return this.prisma.$transaction(async (tx) => {

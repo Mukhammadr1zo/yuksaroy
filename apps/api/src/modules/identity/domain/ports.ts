@@ -70,8 +70,10 @@ export interface OtpSender {
 
 export interface SessionStore {
   create(s: { userId: string; refreshHash: string; expiresAt: Date; userAgent?: string; ip?: string }): Promise<{ id: string }>;
-  findByRefreshHash(hash: string): Promise<{ id: string; userId: string; expiresAt: Date; revokedAt: Date | null } | null>;
+  findByRefreshHash(hash: string): Promise<{ id: string; userId: string; expiresAt: Date; revokedAt: Date | null; replacedById: string | null } | null>;
   findById(id: string): Promise<{ revokedAt: Date | null } | null>;
+  /** Almashtirilgan sessiya tirikmi: yangilash poygasini o'g'rilikdan ajratish uchun. */
+  findLive(id: string): Promise<{ id: string; userId: string; expiresAt: Date; revokedAt: Date | null } | null>;
   rotate(oldId: string, next: { refreshHash: string; expiresAt: Date }): Promise<{ id: string }>;
   revoke(id: string): Promise<void>;
   revokeAllForUser(userId: string): Promise<void>;

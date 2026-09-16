@@ -10,6 +10,9 @@ export const REFRESH_TTL_SEC = 30 * 24 * 3600;
 /** sid = Session.id: logoutdan keyin access token ham qabul qilinmaydi (eski, sid'siz tokenlar ishlayveradi). */
 export interface AccessClaims { sub: string; sid?: string }
 
+/** Yangilash poygasi uchun oyna: shu vaqt ichidagi takror urinish o'g'rilik emas. */
+const REFRESH_RACE_MS = 30_000;
+
 @Injectable()
 export class TokenService {
   constructor(private readonly jwt: JwtService, @Inject(SESSION_STORE) private readonly sessions: SessionStore) {}
@@ -27,7 +30,28 @@ export class TokenService {
   async refresh(refreshToken: string) {
     const s = await this.sessions.findByRefreshHash(hashSecret(refreshToken, env.JWT_SECRET));
     if (!s) throw new UnauthorizedException('REFRESH_INVALID');
-    if (s.revokedAt) { await this.sessions.revokeAllForUser(s.userId); throw new UnauthorizedException('REFRESH_REUSED'); }
+    if (s.revokedAt) {
+      /*
+       * Bekor qilingan token ikki xil sababdan kelishi mumkin:
+       *  1) o'g'irlangan eski token qayta ishlatilyapti - bu xavf, hamma sessiya yopiladi;
+       *  2) bir vaqtda ketgan ikki so'rov ikkalasi ham yangilashni so'ragan - bu oddiy
+       *     poyga va foydalanuvchining aybi yo'q.
+       * Ikkinchisini birinchisi deb hisoblash og'ir oqibat berardi: sahifa bir nechta
+       * so'rovni barobar yuboradi, tokeni eskirgan odam esa panelning yarmini ko'rib,
+       * keyin butunlay tizimdan chiqib ketardi.
+       * Shuning uchun: almashtirilgan sessiya hali tirik va almashtirish yaqinda bo'lgan
+       * bo'lsa, bu poyga deb qabul qilinadi va o'sha tirik sessiyadan yangi juft beriladi.
+       */
+      const raceMs = Date.now() - s.revokedAt.getTime();
+      const live = s.replacedById && raceMs < REFRESH_RACE_MS ? await this.sessions.findLive(s.replacedById) : null;
+      if (live && !live.revokedAt && live.expiresAt > new Date()) {
+        const spare = randomToken(32);
+        const rotated = await this.sessions.rotate(live.id, { refreshHash: hashSecret(spare, env.JWT_SECRET), expiresAt: new Date(Date.now() + REFRESH_TTL_SEC * 1000) });
+        return { accessToken: this.signAccess(live.userId, rotated.id), refreshToken: spare, userId: live.userId };
+      }
+      await this.sessions.revokeAllForUser(s.userId);
+      throw new UnauthorizedException('REFRESH_REUSED');
+    }
     if (s.expiresAt < new Date()) throw new UnauthorizedException('REFRESH_EXPIRED');
     const next = randomToken(32);
     const created = await this.sessions.rotate(s.id, { refreshHash: hashSecret(next, env.JWT_SECRET), expiresAt: new Date(Date.now() + REFRESH_TTL_SEC * 1000) });
