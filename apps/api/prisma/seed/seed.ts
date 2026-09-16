@@ -84,7 +84,7 @@ const containerTariffs: T[] = [
 ];
 const PILOT: Array<{ name: string; stationRu: string; kind: TerminalKind; is24h: boolean; address: string; description: string; services: ServiceCode[]; passport: Record<string, unknown>; tariffs: T[] }> = [
   { name: 'Toshkent-tovar yuk saroyi', stationRu: 'Ташкент-Товарный', kind: 'MULTI', is24h: true, address: "Toshkent sh., Yashnobod tumani, Temiryo'lchilar ko'chasi",
-    description: "O'TY tizimidagi eng yirik yuk saroyi: ochiq maydon, yopiq ombor, SVX, avtotarozi, konteyner maydoni.",
+    description: "O'TY tizimidagi eng yirik yuk saroyi: ochiq maydon, yopiq ombor, bojxona ombori, avtotarozi, konteyner maydoni.",
     services: ['LOAD', 'UNLOAD', 'WEIGH', 'STORAGE', 'SVX', 'CONTAINER', 'SHUNTING'], passport: { tracks: 6, tracksLengthM: 3200, cranes: [{ type: 'ko\'prikli kran', capacityT: 32 }, { type: 'kozlovoy kran', capacityT: 20 }], warehouseM2: 8500, openAreaM2: 42000, hasSvx: true, hasScale: true, scaleT: 150 }, tariffs: yardTariffs },
   { name: "Chuqursoy konteyner terminali", stationRu: 'Чукурсай', kind: 'MULTI', is24h: true, address: "Toshkent sh., Olmazor tumani",
     description: "O'ztemiryo'lkonteyner tarkibidagi konteyner terminali: 20/40 ft konteynerlar, richstaker, bojxona posti yaqin.",
@@ -96,7 +96,7 @@ const PILOT: Array<{ name: string; stationRu: string; kind: TerminalKind; is24h:
     description: 'Toshkent viloyati janubi uchun konteyner maydoni; avtomobil yo\'li M-39 yonida.',
     services: ['LOAD', 'UNLOAD', 'CONTAINER', 'STORAGE'], passport: { tracks: 2, tracksLengthM: 900, cranes: [{ type: 'richstaker', capacityT: 45 }], openAreaM2: 15000, containerSlots: 500, hasSvx: false, hasScale: false }, tariffs: containerTariffs.map((t) => ({ ...t, priceSom: Math.round(t.priceSom * 0.85) })) },
   { name: 'Angren logistika markazi (quruq port)', stationRu: 'Ангрен', kind: 'MULTI', is24h: true, address: 'Toshkent viloyati, Angren sh., Angren-Pop yo\'nalishi',
-    description: "Farg'ona vodiysi yo'nalishidagi quruq port: SVX, bojxona posti, konteyner va vagon-avto qayta yuklash, 24/7.",
+    description: "Farg'ona vodiysi yo'nalishidagi quruq port: bojxona ombori, bojxona posti, konteyner va vagon-avto qayta yuklash, 24/7.",
     services: ['LOAD', 'UNLOAD', 'CONTAINER', 'STORAGE', 'SVX', 'WEIGH', 'LAST_MILE'], passport: { tracks: 8, tracksLengthM: 5600, cranes: [{ type: 'kozlovoy kran', capacityT: 41 }, { type: 'richstaker', capacityT: 45 }], warehouseM2: 12000, openAreaM2: 60000, hasSvx: true, hasScale: true, scaleT: 150, customsPost: true }, tariffs: containerTariffs },
   { name: 'Ohangaron yuk maydoni', stationRu: 'Ахангаран', kind: 'MULTI', is24h: false, address: 'Toshkent viloyati, Ohangaron sh.',
     description: 'Sement va qurilish materiallari uchun yuk maydoni; Ohangaron sement zavodi yonida.',

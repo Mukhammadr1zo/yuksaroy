@@ -267,7 +267,7 @@
       "warehouse": "Yopiq ombor",
       "openArea": "Ochiq maydon",
       "scale": "Tarozi",
-      "svx": "SVX (bojxona ombori)",
+      "svx": "Bojxona ombori",
       "containerSlots": "Konteyner o'rinlari",
       "customsPost": "Bojxona posti",
       "tracksValue": "{count} ta · {length} m"
@@ -485,7 +485,7 @@
     "UNLOAD": "Tushirish",
     "WEIGH": "Tarozi",
     "STORAGE": "Omborda saqlash",
-    "SVX": "SVX (bojxona ombori)",
+    "SVX": "Bojxona ombori",
     "CONTAINER": "Konteyner bilan ishlash",
     "LAST_MILE": "Avtoda yetkazib berish",
     "SHUNTING": "Manevr (teplovoz)"
