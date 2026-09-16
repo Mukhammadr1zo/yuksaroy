@@ -70,13 +70,19 @@ export function QuickQuote({ compact = false, terminalId, terminalName, tone = '
         </label>
         {!compact && (
           <div className="grid gap-4 sm:grid-cols-3">
-            <fieldset className="flex gap-2">
+            {/* legend fieldset ning birinchi bolasi bo'lishi shart va brauzer uni
+                maxsus joylashtiradi. Fieldset ning o'ziga flex berilsa legend ham
+                flex elementiga aylanib, tugmalarni siqib chiqaradi va ular qo'shni
+                maydon ustiga chiqib ketadi. Shuning uchun flex ichki div da. */}
+            <fieldset>
               <legend className={`mb-1 text-xs font-semibold ${muted}`}>{t('field.operation')}</legend>
-              {OPERATIONS.map((op) => (
-                <label key={op} className={`flex-1 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-teal has-[:focus-visible]:outline-offset-2 cursor-pointer rounded-xl border px-3 py-2 text-center text-sm font-semibold ${operation === op ? 'border-teal bg-teal-soft text-teal-ink' : dark ? 'border-white/15 bg-white/5' : 'border-line bg-white'}`}>
-                  <input type="radio" name="op" className="sr-only" checked={operation === op} onChange={() => setOperation(op)} />{ts(op)}
-                </label>
-              ))}
+              <div className="flex gap-2">
+                {OPERATIONS.map((op) => (
+                  <label key={op} className={`flex-1 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-teal has-[:focus-visible]:outline-offset-2 cursor-pointer rounded-xl border px-3 py-2 text-center text-sm font-semibold ${operation === op ? 'border-teal bg-teal-soft text-teal-ink' : dark ? 'border-white/15 bg-white/5' : 'border-line bg-white'}`}>
+                    <input type="radio" name="op" className="sr-only" checked={operation === op} onChange={() => setOperation(op)} />{ts(op)}
+                  </label>
+                ))}
+              </div>
             </fieldset>
             <label className={`block text-xs font-semibold ${muted}`}>{t('field.wagons')}
               <input inputMode="numeric" className={`${INPUT[tone]} mt-1 font-mono text-base font-normal`} value={wagons} onChange={(e) => setWagons(e.target.value.replace(/\D/g, ''))} />

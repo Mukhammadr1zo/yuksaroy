@@ -193,7 +193,6 @@
         "ADMIN": "administrator"
       },
       "org": "Organization",
-      "noOrg": "To place an order, first <link>create an organization</link>.",
       "cargoOptional": "Cargo type (optional)",
       "weightT": "Weight, tonnes",
       "wagonCount": "Number of wagons",
@@ -218,7 +217,6 @@
       "submitHint": "After sending, the terminal confirms within 30 minutes. Without confirmation the spot is released automatically.",
       "err": {
         "generic": "Something went wrong. Please try again.",
-        "noOrg": "Create an organization first.",
         "selectStation": "Select a station.",
         "enterWeight": "Enter the weight.",
         "noOffers": "No terminal at this station or nearby has published a tariff.",

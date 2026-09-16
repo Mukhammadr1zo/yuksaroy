@@ -193,7 +193,6 @@
         "ADMIN": "administrator"
       },
       "org": "Tashkilot",
-      "noOrg": "Buyurtma berish uchun avval <link>tashkilot yarating</link>.",
       "cargoOptional": "Yuk turi (ixtiyoriy)",
       "weightT": "Vazn, tonna",
       "wagonCount": "Vagon soni",
@@ -218,7 +217,6 @@
       "submitHint": "Buyurtma yuborilgach terminal 30 daqiqa ichida tasdiqlaydi. Tasdiqlanmasa joy avtomatik bo'shaydi.",
       "err": {
         "generic": "Xatolik yuz berdi. Qayta urinib ko'ring.",
-        "noOrg": "Avval tashkilot yarating.",
         "selectStation": "Stansiyani tanlang.",
         "enterWeight": "Vaznni kiriting.",
         "noOffers": "Bu stansiya va yaqin atrofda tarif e'lon qilgan terminal topilmadi.",

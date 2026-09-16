@@ -246,7 +246,12 @@ function Wizard() {
             </div>
           </fieldset>
 
-          <button disabled={busy || !orgs.length} className="rounded-full bg-navy px-6 py-3 font-semibold text-white transition hover:bg-navy-2 active:scale-[0.98] disabled:opacity-60">
+          {/* Tashkilot talab qilinmaydi: yuqoridagi yozuv ham shuni aytadi va server
+              birinchi buyurtmada uni foydalanuvchi nomi bilan o'zi ochadi
+              (create-order.usecase.ts: shipperOrgId ??= createShipperOrg). Ilgari bu
+              tugma tashkilotsiz odamga o'chirilgan edi, ya'ni yozuv va'da qilgan
+              narsani tugma taqiqlab turardi. */}
+          <button disabled={busy} className="rounded-full bg-navy px-6 py-3 font-semibold text-white transition hover:bg-navy-2 active:scale-[0.98] disabled:opacity-60">
             {busy ? t('calculating') : t('showTerminals')}
           </button>
         </form>
