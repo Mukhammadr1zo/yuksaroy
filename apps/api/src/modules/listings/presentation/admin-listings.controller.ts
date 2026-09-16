@@ -3,7 +3,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { LISTING_STATUSES } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
-import { pickIn } from '../../catalog/presentation/catalog.controller';
+import { clampInt, pickIn } from '../../catalog/presentation/catalog.controller';
 import { ListingsUseCase } from '../application/listings.usecase';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { DecideDto } from './dto';
@@ -23,8 +23,17 @@ export class AdminListingsController {
   ) {}
 
   @Get()
-  async list(@CurrentUserId() userId: string, @Query('status') status?: string) {
-    return (await this.repo.listByStatus(pickIn(status, LISTING_STATUSES) ?? 'PENDING_REVIEW')).map(ownerListing);
+  async list(
+    @CurrentUserId() userId: string,
+    @Query('status') status?: string,
+    @Query('q') q?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = clampInt(page, 1, 1, 10_000);
+    const take = clampInt(limit, 30, 1, 100);
+    const { rows, total } = await this.repo.listByStatus(pickIn(status, LISTING_STATUSES) ?? 'PENDING_REVIEW', { q, skip: (p - 1) * take, take });
+    return { items: rows.map(ownerListing), total, page: p, limit: take };
   }
 
   @Post(':id/decide')

@@ -15,7 +15,7 @@ import { som, stationName, uzDateTime } from '@/lib/format';
 import { listingHref, type AdminTerminal, type OrgRecord, type OwnerListing } from '@/lib/types-kabinet';
 import type { AdminPremiumOrder, ContactPage } from '@/lib/types-trust';
 import { useLang, useListingLabels } from '@/components/kabinet/bits';
-import { BTN, CARD, Notice, PageHead, Pill } from '@/components/admin/kit';
+import { BTN, BTN_DANGER, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
 import { Decide, type Decision } from '@/components/admin/Decide';
 
 type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'contact';
@@ -50,12 +50,13 @@ function Moderation() {
   useEffect(() => {
     // Har navbat alohida: biri yiqilsa qolgan bo'limlar ko'rinaveradi, xato esa bir marta e'lon qilinadi
     const fail = () => setErr(true);
-    void api<OwnerListing[]>('/admin/listings?status=PENDING_REVIEW').then(setListings).catch(fail);
+    void api<Paged<OwnerListing>>('/admin/listings?status=PENDING_REVIEW&limit=100').then((r) => setListings(r.items)).catch(fail);
     void api<OrgRecord[]>('/admin/orgs?kyc=PENDING').then(setOrgs).catch(fail);
     // /admin/terminals hamma turni qamraydi (shahobcha ham shu yerda), /admin/sidings uning bir qismi edi
     void api<AdminTerminal[]>('/admin/terminals?claim=PENDING').then(setClaims).catch(fail);
     void api<AdminPremiumOrder[]>('/admin/premium?status=PENDING').then(setPrem).catch(fail);
-    void api<ContactPage>('/admin/contact').then(setMsgs).catch(fail);
+    // Faqat yorliqdagi son uchun: to'liq ro'yxat, qidiruv va sahifalash ContactTab da.
+    void api<ContactPage>('/admin/contact/all?limit=1').then(setMsgs).catch(fail);
   }, []);
 
   const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, contact: msgs?.total ?? null };
@@ -71,7 +72,7 @@ function Moderation() {
     : tab === 'kyc' ? orgs?.map((o) => <OrgRow key={o.id} o={o} onDone={(d) => { drop(setOrgs, o.id); decided(d); }} />)
     : tab === 'claims' ? claims?.map((x) => <TerminalClaimRow key={x.id} x={x} onDone={(d) => { drop(setClaims, x.id); decided(d); }} />)
     : tab === 'premium' ? prem?.map((o) => <PremiumRow key={o.id} o={o} onDone={(text) => { drop(setPrem, o.id); setFlash({ text, tone: 'ok' }); }} />)
-    : msgs?.items.map((m) => <ContactRow key={m.id} m={m} />);
+    : null; // murojaatlar alohida komponentda: o'z qidiruvi va sahifalashi bor
 
   return (
     <>
@@ -90,7 +91,8 @@ function Moderation() {
       {err ? <Notice tone="err">{tc('loadFailed')}</Notice> : null}
       {flash ? <p role="status" className={`mt-3 text-sm font-semibold ${flash.tone === 'ok' ? 'text-teal-ink' : 'text-red-700'}`}>{flash.text}</p> : null}
 
-      {!loaded ? <p className="mt-5 text-sm text-muted">{err ? tc('loadFailed') : tc('loading')}</p>
+      {tab === 'contact' ? <ContactTab onChanged={(total) => setMsgs((m) => (m ? { ...m, total } : m))} />
+        : !loaded ? <p className="mt-5 text-sm text-muted">{err ? tc('loadFailed') : tc('loading')}</p>
         : counts[tab] === 0 ? <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{emptyText}</div>
         : <ul className="mt-5 space-y-3">{rows}</ul>}
       {tab === 'premium' || tab === 'contact' ? <p className="mt-3 text-xs text-muted">{tp(tab === 'premium' ? 'admin.lead' : 'messages.lead')}</p> : null}
@@ -199,9 +201,59 @@ function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string
   );
 }
 
-/** Aloqa formasidan kelgan murojaat: faqat o'qish, javob telefon yoki email orqali. */
-function ContactRow({ m }: { m: ContactPage['items'][number] }) {
+/**
+ * Murojaat qutisi: qidiruv, sahifalash va o'chirish.
+ *
+ * Ilgari bu yorliq /admin/contact ni sahifasiz chaqirardi va faqat eng yangi 30 tasini
+ * ko'rsatardi: yorliqda "412" deb tursa ham 31-xabarga yetib borish mumkin emas edi.
+ * Spamni o'chirish tugmasi ham yo'q edi, garchi API da o'chirish allaqachon bor.
+ */
+function ContactTab({ onChanged }: { onChanged: (total: number) => void }) {
+  const t = useTranslations('admin');
+  const tc = useTranslations('admin.common');
+  const tm = useTranslations('premium.messages');
+  const [qInput, setQInput] = useState('');
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  const list = useAdminList<ContactPage['items'][number]>('/admin/contact/all', { q, page });
+
+  useEffect(() => { if (list.data) onChanged(list.data.total); }, [list.data, onChanged]);
+
+  async function remove(id: string) {
+    setNote(null);
+    try {
+      await api(`/admin/contact/${id}`, { method: 'DELETE' });
+      await list.reload();
+    } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); }
+  }
+
+  return (
+    <>
+      <Toolbar onSubmit={() => { setQ(qInput.trim()); setPage(1); }}>
+        <Labeled label={tc('search')} className="w-72">
+          <input value={qInput} onChange={(e) => setQInput(e.target.value)} className={INPUT} />
+        </Labeled>
+        <button type="submit" className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal">{tc('apply')}</button>
+        {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
+      </Toolbar>
+      {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
+      {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
+      {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
+      {list.data && !list.loading ? (
+        list.data.items.length
+          ? <ul className="mt-4 space-y-3">{list.data.items.map((m) => <ContactRow key={m.id} m={m} onDelete={remove} />)}</ul>
+          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tm('empty')}</div>
+      ) : null}
+      <Pager page={page} pages={list.pages} onPage={setPage} />
+    </>
+  );
+}
+
+/** Aloqa formasidan kelgan murojaat: javob telefon yoki email orqali, spam o'chiriladi. */
+function ContactRow({ m, onDelete }: { m: ContactPage['items'][number]; onDelete: (id: string) => Promise<void> }) {
   const lang = useLang();
+  const tc = useTranslations('admin.common');
   const t = useTranslations('premium.messages');
   return (
     <li className={`${CARD} p-4`}>
@@ -212,6 +264,9 @@ function ContactRow({ m }: { m: ContactPage['items'][number] }) {
         <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(m.createdAt, lang)}</span>
       </div>
       <p className="mt-2 whitespace-pre-line break-words text-sm">{m.message}</p>
+      <div className="mt-3">
+        <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => onDelete(m.id)} className={`${BTN_DANGER} px-3 py-1 text-xs`} />
+      </div>
     </li>
   );
 }

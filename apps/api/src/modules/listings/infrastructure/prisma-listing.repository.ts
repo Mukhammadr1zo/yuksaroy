@@ -51,8 +51,22 @@ export class PrismaListingRepository {
   async listMine(userId: string, orgIds: string[]) {
     return (await this.prisma.listing.findMany({ where: { OR: [{ orgId: { in: orgIds } }, { ownerUserId: userId }] }, include, orderBy: [{ updatedAt: 'desc' }] })).map(toRecord);
   }
-  async listByStatus(status: ListingStatus) {
-    return (await this.prisma.listing.findMany({ where: { status }, include, orderBy: [{ updatedAt: 'asc' }], take: 200 })).map(toRecord);
+  /**
+   * Moderatsiya va admin ro'yxati. Ilgari qat'iy `take: 200` edi va jami son ham
+   * qaytmasdi: platforma 200 ta faol e'londan oshgach yangisiga yetib borib bo'lmasdi,
+   * qidiruv esa faqat brauzerdagi 200 qator ichida ishlardi.
+   */
+  async listByStatus(status: ListingStatus, opts: { q?: string; skip?: number; take?: number } = {}) {
+    const text = opts.q?.trim();
+    const where: Prisma.ListingWhereInput = {
+      status,
+      ...(text ? { OR: [{ title: ci(text) }, { slug: ci(text) }, { org: { name: ci(text) } }] } : {}),
+    };
+    const [total, rows] = await Promise.all([
+      this.prisma.listing.count({ where }),
+      this.prisma.listing.findMany({ where, include, orderBy: [{ updatedAt: 'asc' }], skip: opts.skip ?? 0, take: opts.take ?? 30 }),
+    ]);
+    return { rows: rows.map(toRecord), total };
   }
   async findBySlug(slug: string) {
     const r = await this.prisma.listing.findUnique({ where: { slug }, include });
