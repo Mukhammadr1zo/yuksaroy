@@ -54,13 +54,18 @@ quriladi va GHCR ga qo'yiladi, server faqat tortib oladi. Serverda qurilmasligin
 sababi: bu yerda yana 24 ta begona konteyner ishlaydi va Next qurilishi xotirani
 yeb, ularni yiqitishi mumkin.
 
-Workflow serverda `prod` shoxiga o'tadi va aynan o'sha commit obrazini ko'taradi
-(`IMAGE_TAG`), ya'ni kod va obraz hech qachon ajralib qolmaydi.
+Serverda git talab qilinmaydi va `/opt/yuksaroy` git klon emas. Workflow runnerdagi
+`deploy` papkasini serverga ko'chiradi, xolos. Ilova kodi butunlay obraz ichida
+keladi, migratsiyalar ham. Shu sababli serverga yopiq repoga kirish huquqi kerak emas.
+Eski `deploy` papkasining nusxasi har safar `~/ys-deploy-bak-*.tgz` ga olinadi.
 
-Qo'lda qurish faqat zaxira yo'l sifatida qoladi:
+Obraz aynan o'sha commit tegi bilan ko'tariladi (`IMAGE_TAG`), ya'ni kod va obraz
+hech qachon ajralib qolmaydi.
+
+Qo'lda qurish faqat zaxira yo'l sifatida qoladi. Buning uchun serverda repo kodi
+bo'lishi kerak, ya'ni avval uni o'zingiz ko'chirasiz:
 
 ```bash
-cd /opt/yuksaroy && git fetch && git checkout -B prod origin/master
 IMAGE_TAG=latest docker compose -f deploy/compose.prod.yml --env-file .env up -d --build
 docker image prune -f
 ```

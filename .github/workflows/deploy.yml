@@ -172,6 +172,23 @@ jobs:
           chmod 600 ~/.ssh/id
           ssh-keyscan -p "${{ secrets.VPS_PORT || 22 }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
+      # Serverdagi /opt/yuksaroy git klon emas (birinchi deploy shuni ko'rsatdi),
+      # shuning uchun u yerda git bilan yangilab bo'lmaydi. Kerak ham emas:
+      # runnerda repo allaqachon checkout qilingan va serverga faqat deploy papkasi
+      # kerak. Migratsiyalar obraz ichidan keladi, server kodini o'qimaydi.
+      # Yon foydasi: yopiq repoga kirish huquqi serverda umuman talab qilinmaydi.
+      - name: Deploy fayllarini serverga ko'chirish
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          P: ${{ secrets.VPS_PORT || 22 }}
+          DIR: ${{ vars.VPS_PATH || '/opt/yuksaroy' }}
+        run: |
+          tar czf - deploy | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
+            "mkdir -p '$DIR' && cd '$DIR' && \
+             (tar czf \$HOME/ys-deploy-bak-\$(date +%Y%m%d-%H%M%S).tgz deploy 2>/dev/null || true) && \
+             tar xzf - && echo 'deploy fayllari yangilandi'"
+
       # Repo yopiq, shuning uchun GHCR dagi obrazlar ham yopiq: server ularni
       # parolsiz torta olmaydi va "docker compose pull" unauthorized beradi.
       # Token quvur orqali uzatiladi: na runner diskida, na buyruq qatorida qolmaydi.
@@ -213,13 +230,6 @@ jobs:
           trap 'rm -rf "\$DOCKER_CONFIG"' EXIT
           # Aynan shu commit obrazini ko'taramiz: latest bilan kod va obraz ajralib qolardi
           export IMAGE_TAG="$SHA"
-
-          echo "== kod yangilanishi (compose fayllari va migratsiyalar uchun) =="
-          git fetch --all --prune
-          # Serverda qo'lda qilingan tuzatish bo'lsa yo'qolmasin (.env e'tiborsiz, u gitignore da)
-          git stash push -u -m "deploy oldidan $SHA" || true
-          # -B: ajralgan HEAD qolmasin, aks holda qo'lda git pull ishlamaydi
-          git checkout -B prod "$SHA"
 
           echo "== compose sozlamasi to'g'rimi =="
           # .env da majburiy o'zgaruvchi yetishmasa shu yerda to'xtaymiz,
