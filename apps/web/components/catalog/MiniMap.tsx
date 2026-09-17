@@ -1,5 +1,7 @@
 'use client';
 // Tafsilot sahifasi xarita ko'rinishi: LightMap bilan bir xil yorug' uslub, bitta yoki bir nechta pin, interaktiv emas.
+// Attributsiya (ODbL, CARTO) xarita burchagidagi mayda "i" belgisida: kartochka ostidagi
+// matn qatori ortiqcha edi, litsenziya talabi esa shu belgi bilan bajariladi.
 // maplibre-gl faqat brauzerda yuklanadi (window kerak), shuning uchun import useEffect ichida.
 // polygon: viloyat chegarasi (hub sahifasi), teal 8% to'ldirish; ko'p pin bo'lsa Marker o'rniga circle qatlami.
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -22,7 +24,7 @@ export function MiniMap({ pins, zoom = 11, className = 'h-56 w-full', polygon = 
       pins.forEach((p) => b.extend([p.lng, p.lat]));
       if (polygon) (polygon.type === 'Polygon' ? polygon.coordinates[0] ?? [] : polygon.coordinates.flatMap((r) => r[0] ?? [])).forEach(([x, y]) => b.extend([x!, y!]));
       const first = pins[0] ?? { lng: b.getCenter().lng, lat: b.getCenter().lat };
-      map = new Map({ container: node, style: '/map/light.json', interactive: false, attributionControl: false, center: [first.lng, first.lat], zoom });
+      map = new Map({ container: node, style: '/map/light.json', interactive: false, attributionControl: { compact: true }, center: [first.lng, first.lat], zoom });
       if (pins.length > 1 || polygon) map.fitBounds(b, { padding: 32, maxZoom: 12, duration: 0 });
       map.on('load', () => {
         if (!map) return;

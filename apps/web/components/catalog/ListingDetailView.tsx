@@ -134,7 +134,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('map')}</h2>
               <div className="mt-2"><MiniMap pins={[{ lat: l.lat, lng: l.lng }]} zoom={l.object ? 12 : 8} /></div>
-              <p className="mt-1 text-[11px] text-muted">{t('mapNote')} © OpenStreetMap, © CARTO</p>
+              <p className="mt-1 text-[11px] text-muted">{t('mapNote')}</p>
             </section>
           ) : null}
         </aside>

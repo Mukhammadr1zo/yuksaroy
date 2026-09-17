@@ -224,7 +224,6 @@ export default async function TerminalPage({ params }: Params) {
               {mapPoint ? (
                 <div className="mt-3">
                   <MiniMap pins={[{ lat: mapPoint.lat, lng: mapPoint.lng, color: PIN.siding }]} zoom={12} className="h-36 w-full" />
-                  <p className="mt-1 text-[11px] text-muted">© OpenStreetMap, © CARTO</p>
                 </div>
               ) : null}
               {/* station parametri ESR yoki stansiya id ni qabul qiladi: ESR bo'lmasa id bilan ketamiz,

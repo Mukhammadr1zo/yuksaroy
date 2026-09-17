@@ -89,7 +89,7 @@ export default async function CompanyPage({ params }: Params) {
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('detail.map')}</h2>
               <div className="mt-2"><MiniMap pins={pins} zoom={pins.length === 1 ? 11 : 7} className="h-64 w-full" /></div>
-              <p className="mt-1 text-[11px] text-muted">{t('detail.mapNote')} © OpenStreetMap, © CARTO</p>
+              <p className="mt-1 text-[11px] text-muted">{t('detail.mapNote')}</p>
             </section>
           ) : null}
         </aside>
