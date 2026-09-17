@@ -240,10 +240,7 @@
     },
     "cta": {
       "quote": "Calculate price",
-      "bookSlot": "Book a spot",
-      "chat": "Write",
-      "chatNote": "The reply arrives in your dashboard conversation.",
-      "chatPlatform": "This object has no registered owner yet: the platform will reply."
+      "bookSlot": "Book a spot"
     },
     "claim": {
       "title": "Is this your terminal?",
@@ -282,9 +279,7 @@
     },
     "stationCard": {
       "esr": "Station code",
-      "rju": "Junction",
-      "typeClass": "Station type",
-      "coords": "Coordinates"
+      "rju": "Junction"
     },
     "slots": {
       "heading": "Today's spots",

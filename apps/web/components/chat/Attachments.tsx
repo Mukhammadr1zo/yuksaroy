@@ -91,7 +91,7 @@ export function AttachmentChips({ files, onRemove }: { files: Attachment[]; onRe
           <span className="shrink-0 font-mono text-[10px] text-muted">{fileSize(f.size)}</span>
           <button
             type="button" aria-label={t('removeFile', { name: f.name })} onClick={() => onRemove(i)}
-            className="tap-40 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-red-700"
+            className="tap-40 relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-red-700"
           >
             <XIcon size={12} weight="bold" aria-hidden="true" />
           </button>

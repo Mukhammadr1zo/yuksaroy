@@ -240,10 +240,7 @@
     },
     "cta": {
       "quote": "Narxni hisoblash",
-      "bookSlot": "Joy band qilish",
-      "chat": "Yozish",
-      "chatNote": "Javob kabinetdagi yozishmaga keladi.",
-      "chatPlatform": "Bu obyekt egasi hali ro'yxatdan o'tmagan: xabarga platforma javob beradi."
+      "bookSlot": "Joy band qilish"
     },
     "claim": {
       "title": "Bu sizning terminalingizmi?",
@@ -282,9 +279,7 @@
     },
     "stationCard": {
       "esr": "Stansiya kodi",
-      "rju": "Uzel",
-      "typeClass": "Stansiya turi",
-      "coords": "Koordinata"
+      "rju": "Uzel"
     },
     "slots": {
       "heading": "Bugungi joylar",

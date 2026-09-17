@@ -6,6 +6,8 @@ import { PrismaService } from '../../../common/prisma.service';
 import { notifyTelegram, webUrl } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { ListingAccess } from './listing-access';
+import { FILE_URL } from '../../../common/file-url';
+import { AttachmentError, parseAttachments, type Attachment } from '../../chat/domain/attachments';
 
 /** Saqlangan yozuvdan domen kiritmasi (PATCH da birlashtirish va qayta tekshirish uchun). */
 export function inputOf(l: ListingRecord): ListingInput {
@@ -86,16 +88,36 @@ export class ListingsUseCase {
       : this.repo.setStatus(id, { status: to, rejectReason: reason });
   }
 
-  async inquire(userId: string, listingId: string, message: string, orgId: string | null) {
+  async inquire(userId: string, listingId: string, message: string, orgId: string | null, rawAttachments?: unknown) {
     const l = await this.repo.findById(listingId);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
     if (orgId && !(await this.access.membership(userId, orgId))) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     const text = message.trim();
+    // Bitta e'longa bitta yozishma: takroriy murojaat eskisiga qo'shiladi. Ilgari har
+    // safar yangi tred ochilardi va egasining ro'yxati bir odamdan kelgan o'nlab
+    // yozishma bilan to'lib ketardi, suhbat esa bo'linib qolardi.
+    const open = await this.prisma.inquiry.findFirst({
+      where: { listingId, fromUserId: userId, toOrgId: l.orgId, toUserId: l.ownerUserId },
+      select: { id: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    // Ilovalar birinchi xabarga ham ilashadi: narx so'rayotgan odam hujjatni o'sha zahoti yuboradi
+    let files: Attachment[];
+    try { files = parseAttachments(rawAttachments, FILE_URL); } catch (e) {
+      if (e instanceof AttachmentError) throw new BadRequestException({ code: e.code });
+      throw e;
+    }
+    if (open) {
+      await this.prisma.inquiryMessage.create({ data: { inquiryId: open.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
+      await this.prisma.inquiry.update({ where: { id: open.id }, data: { lastMessageAt: new Date() } });
+      void this.notifyOwner(l, userId, orgId, text, open.id).catch(() => {});
+      return open;
+    }
     // Qabul qiluvchi shu yerda qotiriladi: e'lon keyin boshqa tashkilotga o'tsa ham
     // eski yozishma yangi egaga ochilmaydi.
     const inquiry = await this.repo.createInquiry({ listingId, fromOrgId: orgId, fromUserId: userId, message: text, toOrgId: l.orgId, toUserId: l.ownerUserId });
     // So'rovning o'zi yozishmaning birinchi xabari: keyin ikki tomon shu tredda gaplashadi
-    await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, readBy: [userId] } });
+    await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
     await this.prisma.inquiry.update({ where: { id: inquiry.id }, data: { lastMessageAt: new Date() } });
     void this.notifyOwner(l, userId, orgId, text, inquiry.id).catch(() => {}); // javobni kutmaydi
     return inquiry;

@@ -11,7 +11,9 @@ import { Impressions } from '@/components/catalog/Impressions';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
 import { PhoneLink } from '@/components/catalog/PhoneLink';
-import { ListingContact } from '@/components/catalog/ListingContact';
+import { ChatLauncher } from '@/components/chat/ChatPanel';
+import { MiniMap } from '@/components/catalog/MiniMap';
+import { PIN } from '@/components/map/mapStyle';
 import { CardPhoto } from '@/components/catalog/CardPhoto';
 import { ClaimSiding } from '@/components/catalog/ClaimSiding';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
@@ -44,6 +46,11 @@ export default async function TerminalPage({ params }: Params) {
   ]);
   const [trv, tcl] = await Promise.all([getTranslations('reviews'), getTranslations('claim')]);
   const station = t.station?.nameUz ?? t.stationNameRaw ?? '';
+  // Obyektning o'z nuqtasi bo'lmasa stansiyaniki olinadi: reestrdan kelgan
+  // shahobchalarning aksariyatida koordinata aynan stansiyada turadi.
+  const mapPoint = t.lat != null && t.lng != null ? { lat: t.lat, lng: t.lng }
+    : t.station?.lat != null && t.station?.lng != null ? { lat: t.station.lat, lng: t.station.lng }
+    : null;
   // Reestrdan kelgan, hali egasi tasdiqlanmagan shahobcha: tarif, slot va baho yo'q, bo'lishi ham mumkin emas.
   // Ularni chizish "to'ldirilmagan terminal" taassurotini berardi, holbuki bu reestr yozuvi.
   const registryOnly = t.rail !== null && !t.claimed;
@@ -109,8 +116,7 @@ export default async function TerminalPage({ params }: Params) {
           {t.phone ? <span className="text-center"><PhoneLink phone={t.phone} kind="terminal" targetId={t.id} /></span> : null}
           {/* Telefon hammaga ochiq, lekin yozishma ham kerak: hujjat yuboriladi va
               kelishuv izi qoladi. Egasi tasdiqlanmagan obyektda javobni platforma beradi. */}
-          <ListingContact endpoint={`/terminals/${t.slug}/inquiries`} next={`/terminals/${t.slug}`} cta={tr('cta.chat')} />
-          <p className="text-center text-xs text-muted">{registryOnly ? tr('cta.chatPlatform') : tr('cta.chatNote')}</p>
+          <ChatLauncher target={{ kind: 'terminal', slug: t.slug, title: t.name, ownerless: registryOnly }} next={`/terminals/${t.slug}`} />
         </div>
       </header>
 
@@ -211,9 +217,16 @@ export default async function TerminalPage({ params }: Params) {
               <dl className="mt-2 space-y-1 font-mono text-xs text-muted">
                 <div className="flex justify-between"><dt>{tr('stationCard.esr')}</dt><dd>{t.station?.esrCode ?? t.rail?.esrCode ?? '·'}</dd></div>
                 <div className="flex justify-between"><dt>{tr('stationCard.rju')}</dt><dd>{t.station?.rju ?? t.rail?.rju ? trj((t.station?.rju ?? t.rail?.rju)!) : '·'}</dd></div>
-                {t.station ? <div className="flex justify-between"><dt>{tr('stationCard.typeClass')}</dt><dd>{t.station.stationType ?? '·'} / {t.station.classRank ?? '·'}</dd></div> : null}
-                {t.lat && t.lng ? <div className="flex justify-between"><dt>{tr('stationCard.coords')}</dt><dd><a className="underline" href={`https://www.openstreetmap.org/?mlat=${t.lat}&mlon=${t.lng}#map=15/${t.lat}/${t.lng}`} target="_blank" rel="noreferrer">{t.lat}, {t.lng}</a></dd></div> : null}
               </dl>
+              {/* Koordinata raqami va stansiya turi o'rniga xarita: raqam odamga hech narsa
+                  aytmaydi, joyini esa bir qarashda ko'rsatadi. Xarita qimirlamaydi,
+                  chunki bu joyni bildirish uchun, kezish uchun emas. */}
+              {mapPoint ? (
+                <div className="mt-3">
+                  <MiniMap pins={[{ lat: mapPoint.lat, lng: mapPoint.lng, color: PIN.siding }]} zoom={12} className="h-36 w-full" />
+                  <p className="mt-1 text-[11px] text-muted">© OpenStreetMap, © CARTO</p>
+                </div>
+              ) : null}
               {/* station parametri ESR yoki stansiya id ni qabul qiladi: ESR bo'lmasa id bilan ketamiz,
                   aks holda bo'sh qiymat filtr hisoblanmay, hamma temir yo'l terminali chiqib ketardi */}
               {t.station ? <Link href={`/terminals?station=${t.station.esrCode ?? t.station.id}&kind=RAIL`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tcl('sameStation')}</Link> : null}

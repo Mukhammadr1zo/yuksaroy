@@ -14,6 +14,9 @@ class MessageDto {
 class StartDto {
   @IsString() @Length(5, 1000) message!: string;
   @IsOptional() @IsString() orgId?: string;
+  // Birinchi xabarga ham fayl ilashadi: narx so'rayotgan odam ko'pincha
+  // yuk ro'yxatini yoki hujjat suratini aynan o'sha zahoti yuboradi
+  @IsOptional() @IsArray() attachments?: unknown[];
 }
 
 /** Yozishmalar: ro'yxat, tred va xabar yuborish. */
@@ -28,6 +31,12 @@ export class ChatController {
   @Get()
   list(@CurrentUserId() userId: string, @Query('scope') scope?: string) {
     return this.chat.list(userId, scope === 'mine' ? 'mine' : 'owner');
+  }
+
+  /** Obyekt sahifasida chat oynasi ochilganda avvalgi yozishma shu yerdan topiladi. */
+  @Get('find')
+  find(@CurrentUserId() userId: string, @Query('terminal') terminal?: string, @Query('listing') listing?: string) {
+    return this.chat.findForSubject(userId, terminal, listing);
   }
 
   /** Chap menyudagi belgi: o'qilmagan xabarlar soni. */
@@ -60,7 +69,7 @@ export class TerminalInquiryController {
 
   @Post('terminals/:slug/inquiries')
   async start(@CurrentUserId() userId: string, @Param('slug') slug: string, @Body() dto: StartDto) {
-    const i = await this.chat.startTerminal(userId, slug, dto.message, dto.orgId ?? null);
+    const i = await this.chat.startTerminal(userId, slug, dto.message, dto.orgId ?? null, dto.attachments);
     await this.audit.log({ actorId: userId, action: 'inquiry.create', entity: 'Inquiry', entityId: i.id, meta: { terminal: slug, orgId: dto.orgId ?? null } });
     return i;
   }

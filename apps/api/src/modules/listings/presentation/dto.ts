@@ -44,6 +44,8 @@ export class UpdateListingDto extends PartialType(ListingBodyDto) {}
 export class InquiryDto {
   @IsString() @Length(5, 1000) message!: string;
   @IsOptional() @IsString() orgId?: string;
+  // Birinchi xabarga ham fayl ilashadi (shakl tekshiruvi chat/domain/attachments.ts da)
+  @IsOptional() @IsArray() attachments?: unknown[];
 }
 export class DecideDto {
   @IsBoolean() approve!: boolean;

@@ -27,7 +27,8 @@
       "recommended": "tavsiya",
       "none": "yo'q",
       "onRequest": "so'rov bo'yicha",
-      "back": "Orqaga"
+      "back": "Orqaga",
+      "close": "Yopish"
     },
     "home": {
       "title": "Kabinet",
@@ -533,7 +534,19 @@
         "FILE_TOO_LARGE": "Fayl juda katta: hujjat 10 MB gacha, rasm 5 MB gacha.",
         "FILE_CONTENT_MISMATCH": "Fayl ichidagi ma'lumot turiga mos kelmadi.",
         "RATE_LIMITED": "Juda ko'p fayl yuklandi. Bir soatdan keyin urinib ko'ring."
-      }
+      },
+      "write": "Yozish",
+      "windowTitle": "{title} bilan yozishma",
+      "toOwner": "Javob obyekt egasidan keladi",
+      "toPlatform": "Egasi hali yo'q: javobni platforma beradi",
+      "loginToWrite": "Yozish uchun kirish kerak. Telefon hammaga ochiq.",
+      "login": "Kirish",
+      "emptyHint": "Birinchi xabarni yozing: qaysi muddatga, qancha va qayerga kerak.",
+      "asOrg": "Kim nomidan",
+      "asPerson": "Shaxsan o'zim",
+      "tooShort": "Birinchi xabar kamida 5 belgi bo'lsin.",
+      "firstHint": "Enter yuboradi. Fayl ham biriktirsa bo'ladi.",
+      "enterHint": "Enter yuboradi, Shift+Enter yangi qator."
     },
     "work": {
       "tab": {

@@ -116,14 +116,8 @@ export class ChatService {
     return Object.fromEntries(orgs.map((o) => [o.id, o.name]));
   }
 
-  /**
-   * Terminal egasiga yozishma ochish. Katalogdagi obyektga oldin faqat qo'ng'iroq
-   * qilish mumkin edi; endi yozib qo'yish ham mumkin va kelishuv izi platformada qoladi.
-   *
-   * Bitta obyektga bitta ochiq yozishma yetarli: takroriy murojaat eskisiga qo'shiladi,
-   * aks holda egasining ro'yxati bir xil odamdan kelgan o'nlab tred bilan to'lib ketardi.
-   */
-  async startTerminal(userId: string, slugOrId: string, message: string, orgId: string | null) {
+  /** Terminalni slug yoki id bo'yicha topish; yopiq obyektga yozib bo'lmaydi. */
+  private async openTerminal(slugOrId: string) {
     const terminal = await this.prisma.terminal.findFirst({
       where: { OR: [{ slug: slugOrId }, { id: slugOrId }] },
       select: { id: true, name: true, slug: true, orgId: true, status: true },
@@ -131,22 +125,55 @@ export class ChatService {
     // Yashirilgan yoki qoralama terminal katalogda ko'rinmaydi, demak unga yozib ham
     // bo'lmasligi kerak: e'lon yo'lida ham xuddi shunday tekshiruv bor.
     if (!terminal || terminal.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    return terminal;
+  }
+
+  /**
+   * Shu obyekt bo'yicha shu odamning yozishmasi.
+   *
+   * Qabul qiluvchi ham shartga kiradi: reestr obyekti egalik qilingandan keyin
+   * eski yozishma davom etmasligi kerak, aks holda xabar eski manzilga tushardi.
+   */
+  private static mine(userId: string, terminalId: string, orgId: string | null) {
+    return { terminalId, fromUserId: userId, toOrgId: orgId, toPlatform: orgId === null };
+  }
+
+  /** Oyna ochilganda avvalgi yozishma bor-yo'qligi: bo'lsa tarixi darhol ko'rinadi. */
+  async findForSubject(userId: string, terminalSlug?: string, listingId?: string): Promise<{ id: string | null }> {
+    if (terminalSlug) {
+      const t = await this.openTerminal(terminalSlug);
+      const inq = await this.prisma.inquiry.findFirst({ where: ChatService.mine(userId, t.id, t.orgId), select: { id: true }, orderBy: { createdAt: 'desc' } });
+      return { id: inq?.id ?? null };
+    }
+    if (listingId) {
+      const inq = await this.prisma.inquiry.findFirst({ where: { listingId, fromUserId: userId }, select: { id: true }, orderBy: { createdAt: 'desc' } });
+      return { id: inq?.id ?? null };
+    }
+    return { id: null };
+  }
+
+  /**
+   * Terminal egasiga yozishma ochish. Katalogdagi obyektga oldin faqat qo'ng'iroq
+   * qilish mumkin edi; endi yozib qo'yish ham mumkin va kelishuv izi platformada qoladi.
+   *
+   * Bitta obyektga bitta ochiq yozishma yetarli: takroriy murojaat eskisiga qo'shiladi,
+   * aks holda egasining ro'yxati bir xil odamdan kelgan o'nlab tred bilan to'lib ketardi.
+   */
+  async startTerminal(userId: string, slugOrId: string, message: string, orgId: string | null, rawAttachments?: unknown) {
+    const terminal = await this.openTerminal(slugOrId);
     if (orgId) {
       const member = await this.prisma.membership.findFirst({ where: { userId, orgId }, select: { id: true } });
       if (!member) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     }
+    const files = this.files(rawAttachments);
     const text = message.trim();
-    // Eski yozishma faqat qabul qiluvchisi hamon o'sha bo'lsa davom ettiriladi.
-    // Aks holda reestr obyekti egalik qilingandan keyin yozilgan xabar eski
-    // manzilga (platformaga yoki avvalgi tashkilotga) tushib ketardi, yangi egasi
-    // esa uni umuman ko'rmasdi.
     const existing = await this.prisma.inquiry.findFirst({
-      where: { terminalId: terminal.id, fromUserId: userId, toOrgId: terminal.orgId, toPlatform: terminal.orgId === null },
+      where: ChatService.mine(userId, terminal.id, terminal.orgId),
       select: { id: true },
       orderBy: { createdAt: 'desc' },
     });
     if (existing) {
-      await this.send(userId, existing.id, text);
+      await this.send(userId, existing.id, text, rawAttachments);
       return { id: existing.id };
     }
     const inquiry = await this.prisma.inquiry.create({
@@ -160,9 +187,17 @@ export class ChatService {
         lastMessageAt: new Date(),
       },
     });
-    await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, readBy: [userId] } });
+    await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
     void this.notifyNew(userId, inquiry.id, terminal, text).catch(() => {});
     return { id: inquiry.id };
+  }
+
+  /** Mijoz yuborgan ilovalarni tekshirish. Xato kodi mijozga o'qiladigan holda qaytadi. */
+  private files(raw: unknown): Attachment[] {
+    try { return parseAttachments(raw, FILE_URL); } catch (e) {
+      if (e instanceof AttachmentError) throw new BadRequestException({ code: e.code });
+      throw e;
+    }
   }
 
   private async notifyNew(fromUserId: string, inquiryId: string, terminal: { name: string; orgId: string | null }, text: string) {
@@ -201,11 +236,7 @@ export class ChatService {
   }
 
   async send(userId: string, inquiryId: string, text: string, rawAttachments?: unknown) {
-    let files: Attachment[];
-    try { files = parseAttachments(rawAttachments, FILE_URL); } catch (e) {
-      if (e instanceof AttachmentError) throw new BadRequestException({ code: e.code });
-      throw e;
-    }
+    const files = this.files(rawAttachments);
     const body = text.trim().slice(0, MAX);
     // Faqat fayl yuborish ham xabar: matn majburiy emas
     if (!body && !files.length) throw new BadRequestException({ code: 'MESSAGE_EMPTY' });

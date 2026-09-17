@@ -27,7 +27,8 @@
       "recommended": "recommended",
       "none": "none",
       "onRequest": "on request",
-      "back": "Back"
+      "back": "Back",
+      "close": "Close"
     },
     "home": {
       "title": "Cabinet",
@@ -533,7 +534,19 @@
         "FILE_TOO_LARGE": "File too large: up to 10 MB for documents, 5 MB for images.",
         "FILE_CONTENT_MISMATCH": "The file contents do not match its type.",
         "RATE_LIMITED": "Too many files uploaded. Try again in an hour."
-      }
+      },
+      "write": "Write",
+      "windowTitle": "Conversation: {title}",
+      "toOwner": "The owner of the object replies",
+      "toPlatform": "No owner yet: the platform replies",
+      "loginToWrite": "Sign in to write. The phone number is open to everyone.",
+      "login": "Sign in",
+      "emptyHint": "Write the first message: for what dates, how much and where to.",
+      "asOrg": "Writing as",
+      "asPerson": "Myself",
+      "tooShort": "The first message must be at least 5 characters.",
+      "firstHint": "Enter sends. You can attach files too.",
+      "enterHint": "Enter sends, Shift+Enter starts a new line."
     },
     "work": {
       "tab": {
