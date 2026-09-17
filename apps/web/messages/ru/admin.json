@@ -211,7 +211,7 @@
         "contactPhone": "Телефон ответственного",
         "registryNo": "No реестра"
       },
-      "deleteImpact": "Вместе удалится: {tariffs} тарифов, {reviews} отзывов, {services} услуг, {slots} окон.",
+      "deleteImpact": "Вместе удалится: {tariffs} тарифов, {reviews} отзывов, {services} услуг, {slots} окон, {inquiries} переписок.",
       "deleteAnyway": "Всё равно удалить"
     },
     "stations": {

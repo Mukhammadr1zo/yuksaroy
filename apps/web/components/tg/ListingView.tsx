@@ -69,7 +69,7 @@ export async function TgListingView({ slug, section }: { slug: string; section: 
         <h2 className="text-sm font-bold">{t('owner')}</h2>
         <p className="mt-1 text-sm">{l.owner.name}{l.owner.type === 'org' && l.owner.kyc === 'VERIFIED' ? <span className="ml-2 rounded-full bg-teal-soft px-2 py-0.5 text-[11px] font-semibold text-teal-ink">KYC</span> : null}</p>
         {l.contactPhone ? <p className="mt-2"><PhoneLink phone={l.contactPhone} kind="listing" targetId={l.id} /></p> : null}
-        <div className="mt-3"><ListingContact listingId={l.id} next={`/tg/${l.kind === 'TRUCK' ? 'carriers' : 'equipment'}/${l.slug}`} /></div>
+        <div className="mt-3"><ListingContact endpoint={`/listings/${l.id}/inquiries`} next={`/tg/${l.kind === 'TRUCK' ? 'carriers' : 'equipment'}/${l.slug}`} /></div>
         <p className="mt-2 text-[11px] text-muted">{t('loginNote')}</p>
       </section>
     </main>

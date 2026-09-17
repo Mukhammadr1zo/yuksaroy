@@ -13,7 +13,7 @@ import { BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, errText, INPUT, Label
 import { diffBody, fromRow, TerminalForm, type Draft, type TerminalFull } from '@/components/admin/TerminalForm';
 
 /** O'chirishda yo'qoladigan bog'liq qatorlar soni. */
-type Impact = { tariffs: number; reviews: number; services: number; slots: number };
+type Impact = { tariffs: number; reviews: number; services: number; slots: number; inquiries?: number };
 
 /** GET /admin/catalog/terminals ro'yxat proyeksiyasi. */
 type Row = {
@@ -180,7 +180,7 @@ export default function TerminalsPage() {
                 {impact ? (
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="rounded-xl bg-red-50 px-3 py-1.5 text-xs text-red-700">
-                      {tt('deleteImpact', { tariffs: impact.tariffs, reviews: impact.reviews, services: impact.services, slots: impact.slots })}
+                      {tt('deleteImpact', { tariffs: impact.tariffs, reviews: impact.reviews, services: impact.services, slots: impact.slots, inquiries: impact.inquiries ?? 0 })}
                     </span>
                     <ConfirmButton label={tt('deleteAnyway')} confirm={tc('confirm')} onRun={() => remove(true)} />
                   </span>

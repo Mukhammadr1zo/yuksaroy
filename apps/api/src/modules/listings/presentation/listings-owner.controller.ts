@@ -75,10 +75,4 @@ export class ListingsOwnerController {
     await this.audit.log({ actorId: userId, action: 'inquiry.create', entity: 'Inquiry', entityId: i.id, meta: { listingId: id, orgId: dto.orgId ?? null } });
     return i;
   }
-
-  /** `scope=owner`: mening e'lonlarimga kelganlar; `scope=mine`: men yuborganlarim. */
-  @Get('inquiries')
-  inquiries(@CurrentUserId() userId: string, @Query('scope') scope?: string) {
-    return this.listings.inquiries(userId, scope === 'mine' ? 'mine' : 'owner');
-  }
 }

@@ -7,7 +7,9 @@ import { authHeaders } from '@/lib/api';
 
 const ACCEPT = 'image/jpeg,image/png,image/webp';
 
-export async function uploadOne(file: File, retry = true): Promise<{ url?: string; code?: string }> {
+export type Uploaded = { url: string; name: string; size: number; mime: string };
+
+export async function uploadOne(file: File, retry = true): Promise<{ url?: string; file?: Uploaded; code?: string }> {
   const fd = new FormData();
   fd.append('file', file);
   const res = await fetch('/api/v1/uploads', { method: 'POST', body: fd, credentials: 'include', headers: authHeaders() }); // Mini App'da Bearer
@@ -16,7 +18,9 @@ export async function uploadOne(file: File, retry = true): Promise<{ url?: strin
     if (r.ok) return uploadOne(file, false);
   }
   const body = await res.json().catch(() => null);
-  return res.ok ? { url: body?.url } : { code: body?.code ?? 'UPLOAD' };
+  if (!res.ok) return { code: body?.code ?? 'UPLOAD' };
+  // Nom va o'lcham yozishmada kerak: hujjatning o'zi ko'rinmaydi, faqat nomi bilan tanaladi
+  return { url: body?.url, file: { url: body?.url, name: body?.name ?? file.name, size: body?.size ?? file.size, mime: body?.mime ?? file.type } };
 }
 
 export function PhotoUpload({ photos, onChange, max = LISTING.maxPhotos, error }: { photos: string[]; onChange: (p: string[]) => void; max?: number; error?: string }) {

@@ -239,7 +239,10 @@
     },
     "cta": {
       "quote": "Calculate price",
-      "bookSlot": "Book a spot"
+      "bookSlot": "Book a spot",
+      "chat": "Write",
+      "chatNote": "The reply arrives in your dashboard conversation.",
+      "chatPlatform": "This object has no registered owner yet: the platform will reply."
     },
     "claim": {
       "title": "Is this your terminal?",

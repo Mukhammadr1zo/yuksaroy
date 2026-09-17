@@ -239,7 +239,10 @@
     },
     "cta": {
       "quote": "Narxni hisoblash",
-      "bookSlot": "Joy band qilish"
+      "bookSlot": "Joy band qilish",
+      "chat": "Yozish",
+      "chatNote": "Javob kabinetdagi yozishmaga keladi.",
+      "chatPlatform": "Bu obyekt egasi hali ro'yxatdan o'tmagan: xabarga platforma javob beradi."
     },
     "claim": {
       "title": "Bu sizning terminalingizmi?",

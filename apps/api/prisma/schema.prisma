@@ -336,6 +336,7 @@ model Terminal {
   orders      Order[]
   listings    Listing[]
   reviews     Review[]
+  inquiries   Inquiry[]
 
   @@index([stationId])
   @@index([status, kind])
@@ -708,21 +709,37 @@ model Listing {
 }
 
 /// Narx so'rovi: e'lon egasiga xabar. status: OPEN | CLOSED (F1 da matn).
+/// Yozishma. Mavzusi e'lon yoki terminal bo'ladi: aynan bittasi to'ladi.
+/// Terminal ham qo'shildi, chunki katalogdagi obyekt egasiga oldin faqat telefon orqali
+/// murojaat qilinardi, yozib qo'yish imkoni yo'q edi.
 model Inquiry {
   id            String            @id @default(cuid())
-  listingId     String
-  listing       Listing           @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId     String?
+  listing       Listing?          @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  terminalId    String?
+  terminal      Terminal?         @relation(fields: [terminalId], references: [id], onDelete: Cascade)
   fromOrgId     String?
   fromUserId    String
   message       String
   status        String            @default("OPEN")
+  /// Kimga yozilgani yaratilganda aniqlanadi va keyin o'zgarmaydi. Huquq tekshiruvi
+  /// shu uch maydonga qaraydi, mavzuni qayta o'qimaydi: obyekt egasi almashsa ham
+  /// eski yozishma ochilib qolmaydi.
+  toOrgId       String?
+  toUserId      String?
+  /// Reestrdan kelgan terminalning egasi yo'q: bunday xabarga platforma javob beradi.
+  toPlatform    Boolean           @default(false)
   createdAt     DateTime          @default(now()) @db.Timestamptz(3)
   /// Yozishmadagi oxirgi xabar: ro'yxat shu bo'yicha tartiblanadi
   lastMessageAt DateTime?         @db.Timestamptz(3)
   messages      InquiryMessage[]
 
   @@index([listingId, createdAt])
+  @@index([terminalId, createdAt])
   @@index([fromUserId, createdAt])
+  @@index([toOrgId, lastMessageAt])
+  @@index([toUserId, lastMessageAt])
+  @@index([toPlatform, lastMessageAt])
 }
 
 /// So'rov ichidagi yozishma: mijoz va xizmat ko'rsatuvchi shu yerda gaplashadi.
@@ -733,6 +750,9 @@ model InquiryMessage {
   inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
   fromUserId String
   text       String
+  /// Biriktirilgan fayllar: [{ url, name, size, mime }]. Alohida jadval emas, chunki
+  /// fayl xabardan ajralib yashamaydi va hech qachon alohida qidirilmaydi.
+  attachments Json    @default("[]")
   createdAt  DateTime @default(now()) @db.Timestamptz(3)
   readBy     String[] @default([])
 

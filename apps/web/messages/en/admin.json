@@ -211,7 +211,7 @@
         "contactPhone": "Contact phone",
         "registryNo": "Registry No"
       },
-      "deleteImpact": "Also deleted: {tariffs} tariffs, {reviews} reviews, {services} services, {slots} time windows.",
+      "deleteImpact": "Also deleted: {tariffs} tariffs, {reviews} reviews, {services} services, {slots} time windows, {inquiries} conversations.",
       "deleteAnyway": "Delete anyway"
     },
     "stations": {

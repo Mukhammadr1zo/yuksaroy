@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectImageExt, parseTrustProxy, securityHeaders } from './security';
+import { detectDocExt, detectImageExt, parseTrustProxy, securityHeaders } from './security';
 
 describe('securityHeaders', () => {
   it('asosiy sarlavhalar har javobda, HSTS faqat prodda', () => {
@@ -48,5 +48,28 @@ describe('detectImageExt', () => {
     expect(detectImageExt(Buffer.from([0xff, 0xd8]))).toBeNull(); // kesilgan jpg imzosi
     expect(detectImageExt(Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('AVI ')]))).toBeNull();
     expect(detectImageExt(Buffer.alloc(0))).toBeNull();
+  });
+});
+
+describe('detectDocExt', () => {
+  const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  const pdf = Buffer.from('%PDF-1.7 ...');
+  const zip = Buffer.concat([Buffer.from([0x50, 0x4b, 0x03, 0x04]), Buffer.alloc(8)]);
+
+  it('pdf imzosi va mimetype mos kelishi shart', () => {
+    expect(detectDocExt(pdf, 'application/pdf')).toBe('pdf');
+    expect(detectDocExt(pdf, DOCX)).toBeNull(); // pdf ni docx deb yuborib bo'lmaydi
+  });
+
+  it('docx va xlsx ZIP imzosi bilan, turini mimetype belgilaydi', () => {
+    expect(detectDocExt(zip, DOCX)).toBe('docx');
+    expect(detectDocExt(zip, XLSX)).toBe('xlsx');
+    expect(detectDocExt(zip, 'application/zip')).toBeNull(); // oddiy arxiv qabul qilinmaydi
+  });
+
+  it("hujjat bo'lmagan bufer null", () => {
+    expect(detectDocExt(Buffer.from('<?php echo 1; ?>'), 'application/pdf')).toBeNull();
+    expect(detectDocExt(Buffer.alloc(0), DOCX)).toBeNull();
   });
 });

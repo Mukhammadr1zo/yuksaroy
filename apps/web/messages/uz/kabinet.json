@@ -210,18 +210,18 @@
     },
     "inquiries": {
       "title": "So'rovlar",
-      "lead": "Narx so'rovlari: e'lonlaringizga kelganlar va siz yuborganlar.",
+      "lead": "Terminal va e'lonlar bo'yicha yozishmalar: sizga kelganlar va siz boshlaganlar.",
       "tabs": {
         "owner": "Kelgan",
         "mine": "Yuborgan"
       },
       "empty": {
-        "owner": "Hali so'rov kelmagan. E'lon faol bo'lsa, so'rovlar shu yerda ko'rinadi.",
-        "mine": "Siz hali so'rov yubormagansiz."
+        "owner": "Hali xabar kelmagan. Obyektingiz katalogda ko'ringanda murojaatlar shu yerda chiqadi.",
+        "mine": "Siz hali xabar yubormagansiz."
       },
       "emptyCta": {
         "owner": "E'lon berish",
-        "mine": "Katalogni ko'rish"
+        "mine": "Terminallarni ko'rish"
       },
       "fromPrivate": "Xususiy shaxs",
       "openListing": "E'lonni ochish"
@@ -508,14 +508,22 @@
       "since": "Ro'yxatdan o'tgan: {date}"
     },
     "chat": {
-      "back": "So'rovlarga qaytish",
+      "back": "Yozishmalarga qaytish",
       "openListing": "E'lonni ochish",
+      "openTerminal": "Terminalni ochish",
+      "deletedSubject": "Obyekt o'chirilgan",
+      "terminalTag": "Terminal",
       "send": "Yuborish",
       "placeholder": "Xabar yozing",
-      "hint": "Ctrl+Enter bilan ham yuboriladi. Yozishma platformada saqlanadi.",
+      "hint": "Ctrl+Enter bilan ham yuboriladi. Rasm va hujjat biriktirsa bo'ladi, yozishma platformada saqlanadi.",
+      "attach": "Fayl biriktirish",
+      "download": "Faylni ochish",
+      "removeFile": "{name} faylini olib tashlash",
+      "tooManyFiles": "Bir xabarga ko'pi bilan {max} ta fayl",
+      "unread": "{count} ta yangi xabar",
       "role": {
-        "owner": "Mening e'lonimga so'rov",
-        "client": "Men yuborgan so'rov"
+        "owner": "Menga kelgan xabar",
+        "client": "Men yuborgan xabar"
       },
       "open": "Yozishmani ochish",
       "lastMessage": "Oxirgi xabar"

@@ -109,7 +109,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
             ) : <p className="mt-1 font-display text-xl font-bold text-navy">{t('onRequest')}</p>}
             <div className="mt-4 space-y-3">
               {l.contactPhone ? <PhoneLink phone={l.contactPhone} kind="listing" targetId={l.id} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}
-              <ListingContact listingId={l.id} next={listingHref(l)} />
+              <ListingContact endpoint={`/listings/${l.id}/inquiries`} next={listingHref(l)} />
             </div>
             {l.responseHours ? <p className="mt-3 text-xs text-muted"><span className="font-mono text-ink">{t('response', { hours: l.responseHours })}</span> · {t('responseNote')}</p> : null}
           </section>

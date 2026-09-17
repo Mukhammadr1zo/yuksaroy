@@ -31,10 +31,28 @@ export function parseTrustProxy(v: string | undefined): boolean | number | strin
  * begona URL, data: yoki javascript: <img src> ga tushmaydi. */
 export const PHOTO_URL = /^https?:\/\/[^\s/]+\/v1\/files\/\d{4}\/\d{2}\/[0-9a-f]{24}\.(?:jpg|png|webp)$/;
 
+/** Yozishmaga biriktiriladigan fayl: rasmlardan tashqari hujjat ham bo'ladi. */
+export const FILE_URL = /^https?:\/\/[^\s/]+\/v1\/files\/\d{4}\/\d{2}\/[0-9a-f]{24}\.(?:jpg|png|webp|pdf|docx|xlsx)$/;
+
 /** Fayl mazmuni bo'yicha tur (magic bytes). Mijoz e'lon qilgan mimetype ga ishonilmaydi. */
 export function detectImageExt(buf: Buffer): 'jpg' | 'png' | 'webp' | null {
   if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg';
   if (buf.length >= 8 && buf.subarray(0, 8).toString('hex') === '89504e470d0a1a0a') return 'png';
   if (buf.length >= 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'webp';
+  return null;
+}
+
+/**
+ * Hujjat imzosi. docx/xlsx ichida ZIP yotadi, shuning uchun ularni bir-biridan
+ * mazmun bo'yicha ajratib bo'lmaydi: ZIP ekani tasdiqlanadi, aniq turni esa mijoz
+ * aytgan mimetype belgilaydi. Bu xavfsiz, chunki fayl brauzerda bajarilmaydi
+ * (nosniff sarlavhasi bor) va nomi tasodifiy beriladi.
+ */
+export function detectDocExt(buf: Buffer, mimetype: string): 'pdf' | 'docx' | 'xlsx' | null {
+  if (buf.length >= 5 && buf.toString('ascii', 0, 5) === '%PDF-') return mimetype === 'application/pdf' ? 'pdf' : null;
+  const zip = buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
+  if (!zip) return null;
+  if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return 'docx';
+  if (mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return 'xlsx';
   return null;
 }

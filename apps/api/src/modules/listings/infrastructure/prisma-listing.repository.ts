@@ -20,11 +20,6 @@ export const toRecord = (r: Row): ListingRecord => ({ ...r, priceTiyin: r.priceT
 export type ListingWrite = ListingInput & { lat: number | null; lng: number | null };
 const writeData = <T extends ListingWrite>({ ownerType: _o, ...d }: T) => ({ ...d, priceTiyin: d.priceTiyin === null ? null : BigInt(d.priceTiyin), routes: d.routes as unknown as Prisma.InputJsonValue });
 
-export interface InquiryRecord {
-  id: string; listingId: string; listing: { id: string; slug: string; title: string; kind: ListingKind };
-  fromOrgId: string | null; fromOrgName: string | null; fromUserId: string; message: string; status: string; createdAt: Date;
-}
-
 @Injectable()
 export class PrismaListingRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -105,18 +100,7 @@ export class PrismaListingRepository {
   }
 
   // ── so'rovlar ──
-  async createInquiry(d: { listingId: string; fromOrgId: string | null; fromUserId: string; message: string }) {
-    return this.prisma.inquiry.create({ data: d });
-  }
-  async listInquiries(scope: { listingOrgIds: string[]; ownerUserId: string } | { fromUserId: string }): Promise<InquiryRecord[]> {
-    const rows = await this.prisma.inquiry.findMany({
-      where: 'fromUserId' in scope ? { fromUserId: scope.fromUserId } : { listing: { OR: [{ orgId: { in: scope.listingOrgIds } }, { ownerUserId: scope.ownerUserId }] } },
-      include: { listing: { select: { id: true, slug: true, title: true, kind: true } } },
-      orderBy: [{ createdAt: 'desc' }], take: 200,
-    });
-    const orgIds = [...new Set(rows.map((r) => r.fromOrgId).filter((x): x is string => !!x))];
-    const orgs = orgIds.length ? await this.prisma.organization.findMany({ where: { id: { in: orgIds } }, select: { id: true, name: true } }) : [];
-    const name = new Map(orgs.map((o) => [o.id, o.name]));
-    return rows.map((r) => ({ ...r, fromOrgName: r.fromOrgId ? (name.get(r.fromOrgId) ?? null) : null }));
+  async createInquiry(d: { listingId: string; fromOrgId: string | null; fromUserId: string; message: string; toOrgId: string | null; toUserId: string | null }) {
+    return this.prisma.inquiry.create({ data: { ...d, lastMessageAt: new Date() } });
   }
 }

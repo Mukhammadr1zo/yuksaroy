@@ -227,14 +227,15 @@ export class AdminCatalogController {
      * Endi nima yo'qolishi sanab beriladi va o'chirish faqat ataylab tasdiqlangandan
      * keyin (force) bajariladi. Bo'sh terminalda hech narsa o'zgarmaydi: sanoq nol.
      */
-    const [tariffs, reviews, services, slots] = await Promise.all([
+    const [tariffs, reviews, services, slots, inquiries] = await Promise.all([
       this.prisma.tariff.count({ where: { terminalId: id } }),
       this.prisma.review.count({ where: { terminalId: id } }),
       this.prisma.terminalService.count({ where: { terminalId: id } }),
       this.prisma.timeSlot.count({ where: { terminalId: id } }),
+      this.prisma.inquiry.count({ where: { terminalId: id } }),
     ]);
-    const impact = { tariffs, reviews, services, slots };
-    const loses = tariffs + reviews + services + slots;
+    const impact = { tariffs, reviews, services, slots, inquiries };
+    const loses = tariffs + reviews + services + slots + inquiries;
     if (loses > 0 && force !== '1') {
       throw new ConflictException({ code: 'TERMINAL_HAS_DATA', ...impact, hint: 'force=1' });
     }

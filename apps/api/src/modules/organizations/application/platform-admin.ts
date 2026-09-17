@@ -34,6 +34,19 @@ export class PlatformAdmin {
     return this.hasRole(userId, ['PLATFORM_ADMIN']);
   }
 
+  /**
+   * Panelga kira oladigan foydalanuvchilar. Egasi yo'q obyekt haqidagi yozishma
+   * shularga boradi, aks holda murojaat javobsiz qolardi.
+   */
+  async adminUserIds(): Promise<string[]> {
+    const roles: Role[] = ['PLATFORM_ADMIN', 'PLATFORM_OPERATOR'];
+    const [members, byPhone] = await Promise.all([
+      this.prisma.membership.findMany({ where: { roles: { hasSome: roles } }, select: { userId: true }, take: 50 }),
+      this.phones.size ? this.prisma.user.findMany({ where: { phone: { in: [...this.phones] } }, select: { id: true }, take: 50 }) : Promise.resolve([]),
+    ]);
+    return [...new Set([...members.map((m) => m.userId), ...byPhone.map((u) => u.id)])];
+  }
+
   async assertPlatformAdmin(userId: string): Promise<void> {
     if (!(await this.isPlatformAdmin(userId))) throw new ForbiddenException({ code: 'NOT_PLATFORM_ADMIN' });
   }

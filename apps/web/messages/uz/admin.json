@@ -211,7 +211,7 @@
         "contactPhone": "Mas'ul shaxs telefoni",
         "registryNo": "Reestr No"
       },
-      "deleteImpact": "Birga o'chadi: {tariffs} tarif, {reviews} baho, {services} xizmat, {slots} vaqt oynasi.",
+      "deleteImpact": "Birga o'chadi: {tariffs} tarif, {reviews} baho, {services} xizmat, {slots} vaqt oynasi, {inquiries} yozishma.",
       "deleteAnyway": "Baribir o'chirish"
     },
     "stations": {

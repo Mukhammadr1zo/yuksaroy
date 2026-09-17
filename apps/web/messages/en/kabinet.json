@@ -210,18 +210,18 @@
     },
     "inquiries": {
       "title": "Inquiries",
-      "lead": "Price inquiries: received on your listings and sent by you.",
+      "lead": "Conversations about terminals and listings: received and started by you.",
       "tabs": {
         "owner": "Received",
         "mine": "Sent"
       },
       "empty": {
-        "owner": "No inquiries yet. They appear here once a listing is active.",
-        "mine": "You have not sent any inquiries yet."
+        "owner": "No messages yet. Once your object is in the catalogue, enquiries appear here.",
+        "mine": "You have not written to anyone yet."
       },
       "emptyCta": {
         "owner": "Post a listing",
-        "mine": "Browse catalog"
+        "mine": "Browse terminals"
       },
       "fromPrivate": "Private person",
       "openListing": "Open listing"
@@ -508,16 +508,24 @@
       "since": "Member since {date}"
     },
     "chat": {
-      "back": "Back to inquiries",
+      "back": "Back to messages",
       "openListing": "Open the listing",
+      "openTerminal": "Open the terminal",
+      "deletedSubject": "Object deleted",
+      "terminalTag": "Terminal",
       "send": "Send",
       "placeholder": "Write a message",
-      "hint": "Ctrl+Enter also sends. The conversation is kept on the platform.",
+      "hint": "Ctrl+Enter sends too. You can attach photos and documents, the conversation is kept on the platform.",
+      "attach": "Attach a file",
+      "download": "Open the file",
+      "removeFile": "Remove file {name}",
+      "tooManyFiles": "Up to {max} files per message",
+      "unread": "{count} new messages",
       "role": {
-        "owner": "Inquiry on my listing",
-        "client": "My inquiry"
+        "owner": "Sent to me",
+        "client": "Sent by me"
       },
-      "open": "Open the chat",
+      "open": "Open the conversation",
       "lastMessage": "Last message"
     },
     "work": {

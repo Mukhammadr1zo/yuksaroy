@@ -7,7 +7,11 @@ import { Link } from '@/i18n/navigation';
 
 type Org = { orgId: string; org: { name: string } };
 
-export function ListingContact({ listingId, next }: { listingId: string; next: string }) {
+/**
+ * Yozishma ochish. `endpoint` e'longa ham, terminalga ham to'g'ri keladi:
+ * ikkalasida ham javob bitta tredga tushadi va kabinetda ochiladi.
+ */
+export function ListingContact({ endpoint, next, cta }: { endpoint: string; next: string; cta?: string }) {
   const t = useTranslations('listing.detail');
   const [authed, setAuthed] = useState<boolean | undefined>(undefined);
   const [orgs, setOrgs] = useState<Org[]>([]);
@@ -34,7 +38,7 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
     if (msg.trim().length < 5) return setState('short');
     setState('busy');
     try {
-      const inq = await post<{ id: string }>(`/listings/${listingId}/inquiries`, { message: msg.trim(), orgId: orgId || undefined });
+      const inq = await post<{ id: string }>(endpoint, { message: msg.trim(), orgId: orgId || undefined });
       setThreadId(inq.id);
       setState('sent');
     } catch { setState('err'); }
@@ -44,7 +48,7 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
   if (!authed) {
     return (
       <>
-        <Link href={`/login?next=${next}`} className="block rounded-full bg-teal px-6 py-3 text-center font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('ask')}</Link>
+        <Link href={`/login?next=${next}`} className="block rounded-full bg-teal px-6 py-3 text-center font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{cta ?? t('ask')}</Link>
         <p className="mt-2 text-xs text-muted">{t('loginToContact')}. {t('loginNote')}</p>
       </>
     );
@@ -55,7 +59,7 @@ export function ListingContact({ listingId, next }: { listingId: string; next: s
       {threadId ? <Link href={`/dashboard/inquiries/${threadId}`} className="mt-1 inline-block font-semibold underline">{t('inquiry.openChat')}</Link> : null}
     </div>
   );
-  if (!open) return <button type="button" onClick={() => setOpen(true)} className="w-full rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('ask')}</button>;
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className="w-full rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{cta ?? t('ask')}</button>;
   return (
     <form onSubmit={send} className="space-y-2">
       <label className="block text-xs text-muted" htmlFor="inq-msg">{t('inquiry.label')}</label>

@@ -33,9 +33,13 @@ export interface OwnerListing {
   warnings?: { field: string; code: string }[];
 }
 
+/** Yozishma mavzusi: e'lon yoki terminal. `sub` e'londa turi, terminalda TerminalKind. */
+export interface InquirySubject { kind: 'listing' | 'terminal'; id: string; slug: string; title: string; sub: string | null }
+
 export interface Inquiry {
-  id: string; listingId: string; listing: { id: string; slug: string; title: string; kind: ListingKind };
-  fromOrgId: string | null; fromOrgName: string | null; fromUserId: string; message: string; status: string; createdAt: string;
+  id: string; subject: InquirySubject | null;
+  fromOrgName: string | null; message: string; status: string; createdAt: string;
+  lastMessageAt: string | null; unread: number;
 }
 
 /** GET /sidings/mine va /admin/sidings (repo yozuvi, xaritalanmagan). */

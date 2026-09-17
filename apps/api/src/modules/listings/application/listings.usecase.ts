@@ -91,7 +91,9 @@ export class ListingsUseCase {
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
     if (orgId && !(await this.access.membership(userId, orgId))) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     const text = message.trim();
-    const inquiry = await this.repo.createInquiry({ listingId, fromOrgId: orgId, fromUserId: userId, message: text });
+    // Qabul qiluvchi shu yerda qotiriladi: e'lon keyin boshqa tashkilotga o'tsa ham
+    // eski yozishma yangi egaga ochilmaydi.
+    const inquiry = await this.repo.createInquiry({ listingId, fromOrgId: orgId, fromUserId: userId, message: text, toOrgId: l.orgId, toUserId: l.ownerUserId });
     // So'rovning o'zi yozishmaning birinchi xabari: keyin ikki tomon shu tredda gaplashadi
     await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, readBy: [userId] } });
     await this.prisma.inquiry.update({ where: { id: inquiry.id }, data: { lastMessageAt: new Date() } });
@@ -109,11 +111,6 @@ export class ListingsUseCase {
     await notifyTelegram(this.prisma, { orgIds: [l.orgId], userIds: [l.ownerUserId], exceptUserId: fromUserId }, 'inquiry', {
       title: l.title, from, message: message.slice(0, 500), url: webUrl(`/dashboard/inquiries/${inquiryId}`),
     });
-  }
-
-  async inquiries(userId: string, scope: 'owner' | 'mine') {
-    if (scope === 'mine') return this.repo.listInquiries({ fromUserId: userId });
-    return this.repo.listInquiries({ listingOrgIds: await this.access.orgIdsOf(userId), ownerUserId: userId });
   }
 
   /** E'lon mavjud va: tashkilotniki bo'lsa foydalanuvchi shu tashkilotda e'lon bera oladi; shaxsiy bo'lsa faqat egasi. */

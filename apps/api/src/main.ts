@@ -33,7 +33,7 @@ async function bootstrap() {
   }
 
   await app.register(fastifyCookie as any); // ponytail: @fastify/cookie v11 tip mosligi, ishlashga ta'sir qilmaydi
-  // Yuklashlar: multipart (bitta fayl, 5 MB) va statik berish /v1/files/<yyyy>/<mm>/<nom>
+  // Yuklashlar: multipart (bitta fayl, 10 MB) va statik berish /v1/files/<yyyy>/<mm>/<nom>
   await app.register(fastifyMultipart as any, { limits: { fileSize: UPLOAD_MAX_BYTES, files: 1 } });
   mkdirSync(UPLOADS_DIR, { recursive: true });
   await app.register(fastifyStatic as any, { root: UPLOADS_DIR, prefix: '/v1/files/', decorateReply: false, index: false, list: false });

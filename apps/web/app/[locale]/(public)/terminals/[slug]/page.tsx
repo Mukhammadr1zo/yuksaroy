@@ -11,6 +11,7 @@ import { Impressions } from '@/components/catalog/Impressions';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
 import { PhoneLink } from '@/components/catalog/PhoneLink';
+import { ListingContact } from '@/components/catalog/ListingContact';
 import { CardPhoto } from '@/components/catalog/CardPhoto';
 import { ClaimSiding } from '@/components/catalog/ClaimSiding';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
@@ -106,6 +107,10 @@ export default async function TerminalPage({ params }: Params) {
             </>
           )}
           {t.phone ? <span className="text-center"><PhoneLink phone={t.phone} kind="terminal" targetId={t.id} /></span> : null}
+          {/* Telefon hammaga ochiq, lekin yozishma ham kerak: hujjat yuboriladi va
+              kelishuv izi qoladi. Egasi tasdiqlanmagan obyektda javobni platforma beradi. */}
+          <ListingContact endpoint={`/terminals/${t.slug}/inquiries`} next={`/terminals/${t.slug}`} cta={tr('cta.chat')} />
+          <p className="text-center text-xs text-muted">{registryOnly ? tr('cta.chatPlatform') : tr('cta.chatNote')}</p>
         </div>
       </header>
 
