@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { num, rjuLabel } from '@/lib/format';
+import { num } from '@/lib/format';
 import type { RailPassport } from '@/lib/types';
 import { RailPhone } from '@/components/catalog/RailPhone';
 
@@ -18,6 +18,9 @@ export async function RailPassportCard({ rail, slug }: { rail: RailPassport; slu
     ? `${rail.contractStart.slice(0, 10)} - ${rail.contractEnd.slice(0, 10)}`
     : rail.contractEnd?.slice(0, 10) ?? null;
 
+  // Egasi so'radi: ulanish strelkasi, bashmaklar soni, guvohnoma raqami va temir yo'l
+  // bo'limi olib tashlandi. Bular reestrning ichki maydonlari va yuk yubormoqchi bo'lgan
+  // odamga hech narsa bermaydi; qaror uchun kerakligi yuqorida turibdi.
   const rows: [string, React.ReactNode][] = ([
     [t('registryNo'), rail.registryNo ?? rail.registryRef],
     [t('length'), m(rail.lengthM)],
@@ -26,8 +29,6 @@ export async function RailPassportCard({ rail, slug }: { rail: RailPassport; slu
     [t('unload'), w(rail.unloadCapacity)],
     [t('capacity'), w(rail.capacityWagons)],
     [t('deadEnd'), m(rail.deadEndDistanceM)],
-    [t('junction'), rail.junctionSwitch],
-    [t('brakeShoes'), rail.brakeShoes],
     [t('loco'), loco ?? rail.locoNote],
     [t('processing'), rail.processingHours ? t('hours', { count: rail.processingHours }) : null],
     [t('loadNorm'), rail.loadNorm],
@@ -36,10 +37,8 @@ export async function RailPassportCard({ rail, slug }: { rail: RailPassport; slu
     [t('unloadFront'), rail.unloadFront],
     [t('nogabarit'), rail.nogabarit],
     [t('equipment'), rail.equipment],
-    [t('contractNo'), rail.contractNo],
     [t('contractTerm'), term],
     [t('esr'), rail.esrCode],
-    [t('rjuRow'), rail.rju ? rjuLabel(rail.rju) : null],
   ] as [string, React.ReactNode][]).filter(([, v]) => v !== null && v !== undefined && v !== '');
 
   return (

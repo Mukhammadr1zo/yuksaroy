@@ -11,6 +11,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { regionOfPoint } from '../catalog/domain/region-of-point';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 
 /** Terminal (shahobcha yo'l ham shu jadvalda): nom va tur majburiy, qolgani pasport ustunlari. */
@@ -179,6 +180,7 @@ export class AdminCatalogController {
   @Post('catalog/terminals')
   async createTerminal(@CurrentUserId() userId: string, @Body() dto: TerminalCreateFullDto) {
     const data = terminalData(dto) as Prisma.TerminalUncheckedCreateInput;
+    await this.applyRegion(data, dto);
     if (dto.slug && (await this.prisma.terminal.findUnique({ where: { slug: dto.slug }, select: { id: true } }))) throw new ConflictException({ code: 'SLUG_TAKEN', slug: dto.slug });
     data.slug = dto.slug ?? (await this.freeSlug(slugify(dto.name) || 'terminal'));
     const t = await this.prisma.terminal.create({ data });
@@ -189,6 +191,7 @@ export class AdminCatalogController {
   @Patch('catalog/terminals/:id')
   async updateTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: TerminalUpdateDto) {
     const data = terminalData(dto);
+    await this.applyRegion(data as Record<string, unknown>, dto, id);
     // Noyob ustunlar: bandligi oldindan tekshiriladi, aks holda Prisma P2002 xom 500 bo'lib chiqardi
     if (dto.slug) {
       const busy = await this.prisma.terminal.findUnique({ where: { slug: dto.slug }, select: { id: true } });
@@ -239,6 +242,34 @@ export class AdminCatalogController {
     await this.prisma.terminal.delete({ where: { id } });
     await this.audit.log({ actorId: userId, action: 'admin.terminal.delete', entity: 'Terminal', entityId: id, meta: { name: t.name, ...impact } });
     return { id, deleted: true, ...impact };
+  }
+
+  /**
+   * Viloyat koordinatadan hisoblanadi.
+   *
+   * Sxemada shunday deb yozilgan edi, lekin uni hech narsa hisoblamasdi: koordinatani
+   * to'g'rilagan operator terminalni eski viloyatda qoldirar, reestrdan kelgan qatorlarda
+   * esa u umuman bo'sh edi va katalogdagi viloyat filtri ularni topmasdi.
+   *
+   * Operator viloyatni qo'lda yuborsa, hisob ustidan yozilmaydi: qo'lda kiritilgan
+   * qiymat har doim ustun.
+   *
+   * O'z koordinatasi bo'lmagan terminal uchun stansiya koordinatasi olinadi: shahobcha
+   * yo'llarning aksariyatida aynan shunday.
+   */
+  private async applyRegion(data: Record<string, unknown>, dto: { regionCode?: string; lat?: number | null; lng?: number | null; stationId?: string | null }, id?: string) {
+    if (dto.regionCode !== undefined) return; // qo'lda kiritilgan
+    let lat = dto.lat ?? null;
+    let lng = dto.lng ?? null;
+    if (lat == null || lng == null) {
+      const stationId = dto.stationId ?? (id ? (await this.prisma.terminal.findUnique({ where: { id }, select: { stationId: true } }))?.stationId ?? null : null);
+      if (!stationId) return;
+      const st = await this.prisma.station.findUnique({ where: { id: stationId }, select: { lat: true, lng: true } });
+      lat = st?.lat ?? null;
+      lng = st?.lng ?? null;
+    }
+    const code = regionOfPoint(lat, lng);
+    if (code) data.regionCode = code;
   }
 
   /** Slug band bo'lsa -2, -3 ...: reestrda bir xil nomli yo'llar ko'p. */

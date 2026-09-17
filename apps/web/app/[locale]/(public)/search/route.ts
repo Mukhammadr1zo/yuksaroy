@@ -24,5 +24,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ locale: 
     : p?.category === 'truck' ? `/carriers${qs(common)}`
     : `/terminals${qs({ ...common, service: p?.services.join(','), kind: p?.kind, bookable: p?.bookable ? '1' : '' })}`;
 
-  return NextResponse.redirect(new URL(getPathname({ locale: locale as Locale, href: dest }), req.url), 307);
+  /*
+   * Nisbiy Location: mutlaq manzil yasab bo'lmaydi.
+   *
+   * Konteyner nginx ortida turadi va `req.url` unga kelgan ichki manzilni beradi
+   * (http://0.0.0.0:3000/...). Undan yasalgan Location brauzerga o'shanday yuborilar,
+   * brauzer esa 0.0.0.0 ga borib ERR_ADDRESS_INVALID ko'rsatardi. Ya'ni bosh sahifadagi
+   * qidiruv prodda umuman ishlamasdi.
+   *
+   * Nisbiy Location RFC 7231 da ruxsat etilgan va brauzer uni o'zi joriy manzilga
+   * nisbatan hal qiladi, ya'ni proksi sozlamasiga umuman bog'liq emas.
+   */
+  const to = getPathname({ locale: locale as Locale, href: dest });
+  return new NextResponse(null, { status: 307, headers: { Location: to } });
 }
