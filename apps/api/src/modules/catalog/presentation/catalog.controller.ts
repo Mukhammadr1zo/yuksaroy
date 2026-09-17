@@ -66,6 +66,21 @@ export class CatalogController {
     const services = listIn(service, SERVICE_CODES), regions = listIn(region, REGIONS);
     const s = pickIn(sort, SORTS) ?? 'default';
     const p = clampInt(page, 1, 1, 1000), l = clampInt(limit, 20, 1, 50);
+
+    /*
+     * Tanilmagan filtr qiymati bo'sh natija beradi, jimgina tashlab yuborilmaydi.
+     *
+     * Ilgari noto'g'ri yoki eskirgan kod (masalan ?region=UZ-YOQ) filtrni butunlay
+     * yo'q qilar va katalog BUTUN ro'yxatni qaytarardi. Foydalanuvchi esa filtr
+     * ishladi deb o'ylab, boshqa viloyatning terminallarini ko'rib o'tirardi.
+     * Bo'sh natija esa rost: bunday viloyat yo'q va sahifa "topilmadi" deb aytadi.
+     */
+    const unknownRegion = !!region?.trim() && regions.length === 0;
+    const unknownKind = !!kind?.trim() && pickIn(kind, TERMINAL_KINDS) === undefined;
+    const unknownService = !!service?.trim() && services.length === 0;
+    if (unknownRegion || unknownKind || unknownService) {
+      return { items: [], total: 0, page: p, limit: l, summary: summarize([], {}, geo, services) };
+    }
     const base = {
       ...stationParam(station), rju: pickIn(rju, RJUS), kind: pickIn(kind, TERMINAL_KINDS),
       service: services.length ? services : undefined, q: q?.trim() || undefined,
