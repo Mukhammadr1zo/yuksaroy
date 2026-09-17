@@ -526,7 +526,14 @@
         "client": "Sent by me"
       },
       "open": "Open the conversation",
-      "lastMessage": "Last message"
+      "lastMessage": "Last message",
+      "err": {
+        "UPLOAD": "The file did not upload. Please try again.",
+        "FILE_TYPE": "Images (JPEG, PNG, WebP) or documents (PDF, DOCX, XLSX) only.",
+        "FILE_TOO_LARGE": "File too large: up to 10 MB for documents, 5 MB for images.",
+        "FILE_CONTENT_MISMATCH": "The file contents do not match its type.",
+        "RATE_LIMITED": "Too many files uploaded. Try again in an hour."
+      }
     },
     "work": {
       "tab": {

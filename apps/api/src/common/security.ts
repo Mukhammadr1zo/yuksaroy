@@ -29,10 +29,22 @@ export function parseTrustProxy(v: string | undefined): boolean | number | strin
 /** Yuklangan foto URL shakli: uploads controller aynan shunday chiqaradi
  * (<host>/v1/files/YYYY/MM/<24hex>.<ext>). Boshqa har qanday satr rad etiladi:
  * begona URL, data: yoki javascript: <img src> ga tushmaydi. */
-export const PHOTO_URL = /^https?:\/\/[^\s/]+\/v1\/files\/\d{4}\/\d{2}\/[0-9a-f]{24}\.(?:jpg|png|webp)$/;
-
+export const PHOTO_EXT = 'jpg|png|webp';
 /** Yozishmaga biriktiriladigan fayl: rasmlardan tashqari hujjat ham bo'ladi. */
-export const FILE_URL = /^https?:\/\/[^\s/]+\/v1\/files\/\d{4}\/\d{2}\/[0-9a-f]{24}\.(?:jpg|png|webp|pdf|docx|xlsx)$/;
+export const FILE_EXT = 'jpg|png|webp|pdf|docx|xlsx';
+
+/**
+ * Manzil shakli, o'z domenimizga bog'langan holda.
+ *
+ * Ilgari host qismi har qanday satrga mos kelardi, ya'ni mijoz begona serverdagi
+ * manzilni ham "bizning fayl" deb yuborishi mumkin edi. Yozishmada u ikkinchi
+ * tomonning brauzerida <img src> bo'lib ochilardi va yozuvchi o'qilgan vaqtni,
+ * IP va brauzerni bilib olardi. Endi faqat o'zimiz bergan manzil o'tadi.
+ */
+export function fileUrlPattern(base: string, exts: string): RegExp {
+  const host = base.replace(/\/+$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^${host}/v1/files/\\d{4}/\\d{2}/[0-9a-f]{24}\\.(?:${exts})$`);
+}
 
 /** Fayl mazmuni bo'yicha tur (magic bytes). Mijoz e'lon qilgan mimetype ga ishonilmaydi. */
 export function detectImageExt(buf: Buffer): 'jpg' | 'png' | 'webp' | null {

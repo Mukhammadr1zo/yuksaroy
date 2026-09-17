@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Length, Matches, Max, MaxLength, ValidateNested } from 'class-validator';
-import { PHOTO_URL } from '../../../common/security';
+import { PHOTO_URL } from '../../../common/file-url';
 import type { Condition, DealKind, ListingInput, ListingKind, PriceUnit, RegionCode } from '@yuksaroy/domain';
 
 /** Faqat shakl tekshiruvi; lug'at va diapazon qoidalari validateListing'da (bir xil xato kodlari forma uchun). */

@@ -2,7 +2,7 @@
 // Yozishmadagi fayllar: yuborishdan oldingi tanlov va yuborilgandan keyingi ko'rinish.
 // Rasm darhol ko'rinadi, hujjat esa nomi va o'lchami bilan chiqadi: yuk hujjatini
 // ochmasdan ham qaysi fayl ekanini bilish kerak.
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { FileArrowDownIcon, FilePdfIcon, FileXlsIcon, FileDocIcon, PaperclipIcon, XIcon } from '@phosphor-icons/react';
 import { uploadOne, type Uploaded } from '@/components/kabinet/PhotoUpload';
@@ -22,22 +22,104 @@ export function fileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Ketma-ket yuklaydi va tayyor bo'lganlarini qaytaradi. Bittasi yiqilsa qolganlari davom etadi. */
-export async function uploadMany(list: File[], room: number): Promise<Attachment[]> {
-  const done: Attachment[] = [];
-  for (const f of list.slice(0, Math.max(0, room))) {
-    const r = await uploadOne(f).catch(() => null);
-    if (r?.file?.url) done.push(r.file);
-  }
-  return done;
-}
-
 function FileIcon({ name }: { name: string }) {
   const props = { size: 20, weight: 'fill' as const, 'aria-hidden': true };
   if (/\.pdf$/i.test(name)) return <FilePdfIcon {...props} />;
   if (/\.xlsx?$/i.test(name)) return <FileXlsIcon {...props} />;
   if (/\.docx?$/i.test(name)) return <FileDocIcon {...props} />;
   return <FileArrowDownIcon {...props} />;
+}
+
+/**
+ * Biriktirilgan fayllar holati bitta joyda.
+ *
+ * Nega hook: fayl ikki yo'l bilan qo'shiladi, tugma orqali va matnga qo'yish orqali.
+ * Ilgari ikkalasi alohida holat yuritardi: qo'yilgan fayl xatosi jimgina yo'qolar,
+ * ikkitasi bir vaqtda yuklansa biri ro'yxatdan tushib qolar, yuklash tugamasdan
+ * yuborilgan xabar esa faylsiz ketib, fayl keyingi xabarga ilashib qolardi.
+ */
+export function useAttachments() {
+  const t = useTranslations('kabinet.chat');
+  const [files, setFiles] = useState<Attachment[]>([]);
+  const [busy, setBusy] = useState(0);
+  const [err, setErr] = useState<string | null>(null);
+  // Haqiqiy ro'yxat ref da: ketma-ket yuklashlar bir-birining natijasini o'chirmasin
+  const current = useRef<Attachment[]>([]);
+  const inflight = useRef(0);
+
+  const commit = useCallback((next: Attachment[]) => { current.current = next; setFiles(next); }, []);
+
+  const message = useCallback((code?: string) => (code && t.has(`err.${code}`) ? t(`err.${code}`) : t('err.UPLOAD')), [t]);
+
+  const add = useCallback(async (list: File[]) => {
+    if (!list.length) return;
+    setErr(null);
+    const room = MAX_ATTACHMENTS - current.current.length - inflight.current;
+    const chosen = list.slice(0, Math.max(0, room));
+    if (chosen.length < list.length) setErr(t('tooManyFiles', { max: MAX_ATTACHMENTS }));
+    if (!chosen.length) return;
+    inflight.current += chosen.length;
+    setBusy((n) => n + chosen.length);
+    for (const f of chosen) {
+      try {
+        const r = await uploadOne(f);
+        if (r.file?.url) commit([...current.current, r.file]);
+        else setErr(message(r.code));
+      } catch { setErr(message()); } finally {
+        inflight.current -= 1;
+        setBusy((n) => n - 1);
+      }
+    }
+  }, [commit, message, t]);
+
+  const remove = useCallback((i: number) => commit(current.current.filter((_, j) => j !== i)), [commit]);
+  const clear = useCallback(() => { commit([]); setErr(null); }, [commit]);
+
+  return { files, busy, err, add, remove, clear };
+}
+
+/** Tanlangan fayllar. Yozish maydonining ustida, to'liq kenglikda turadi. */
+export function AttachmentChips({ files, onRemove }: { files: Attachment[]; onRemove: (i: number) => void }) {
+  const t = useTranslations('kabinet.chat');
+  if (!files.length) return null;
+  return (
+    <ul className="mb-2 flex flex-wrap gap-1.5">
+      {files.map((f, i) => (
+        <li key={f.url} className="flex max-w-full items-center gap-1.5 rounded-full border border-line bg-white py-1 pl-2.5 pr-1 text-xs">
+          <FileIcon name={f.name} />
+          <span className="min-w-0 truncate font-semibold">{f.name}</span>
+          <span className="shrink-0 font-mono text-[10px] text-muted">{fileSize(f.size)}</span>
+          <button
+            type="button" aria-label={t('removeFile', { name: f.name })} onClick={() => onRemove(i)}
+            className="tap-40 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-red-700"
+          >
+            <XIcon size={12} weight="bold" aria-hidden="true" />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Faqat tugma: yozish qatorida turadi, shuning uchun kengligi qat'iy 52px. */
+export function AttachmentButton({ busy, disabled, onPick }: { busy: number; disabled?: boolean; onPick: (f: File[]) => void }) {
+  const t = useTranslations('kabinet.chat');
+  const input = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <button
+        type="button" onClick={() => input.current?.click()} disabled={disabled || busy > 0}
+        aria-label={t('attach')} title={t('attach')}
+        className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-xl border border-line bg-white text-muted transition hover:border-teal hover:text-teal-ink disabled:opacity-50"
+      >
+        {busy > 0 ? <span className="font-mono text-xs">{busy}</span> : <PaperclipIcon size={18} aria-hidden="true" />}
+      </button>
+      <input
+        ref={input} type="file" accept={CHAT_ACCEPT} multiple hidden
+        onChange={(e) => { onPick(Array.from(e.target.files ?? [])); e.target.value = ''; }}
+      />
+    </>
+  );
 }
 
 /** Yuborilgan xabardagi fayllar. `mine` faqat rang uchun. */
@@ -74,69 +156,6 @@ export function MessageFiles({ files, mine }: { files: Attachment[]; mine: boole
           <FileArrowDownIcon size={16} aria-hidden="true" className="shrink-0 opacity-70" />
         </a>
       ))}
-    </div>
-  );
-}
-
-/**
- * Fayl tanlash. Yuklash darhol boshlanadi, xabar yuborilganda esa tayyor URL ketadi:
- * shunday qilinganda yuborish tugmasi hech qachon uzoq kutmaydi.
- */
-export function AttachmentPicker({ files, onChange, disabled }: { files: Attachment[]; onChange: (f: Attachment[]) => void; disabled?: boolean }) {
-  const t = useTranslations('kabinet.chat');
-  const tf = useTranslations('kabinet.form');
-  const input = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(0);
-  const [err, setErr] = useState<string | null>(null);
-
-  async function pick(list: FileList | null) {
-    if (!list?.length) return;
-    setErr(null);
-    const room = Math.max(0, MAX_ATTACHMENTS - files.length);
-    const chosen = Array.from(list).slice(0, room);
-    if (chosen.length < list.length) setErr(t('tooManyFiles', { max: MAX_ATTACHMENTS }));
-    setBusy((n) => n + chosen.length);
-    const done: Attachment[] = [];
-    for (const f of chosen) {
-      try {
-        const r = await uploadOne(f);
-        if (r.file?.url) done.push(r.file);
-        else setErr(tf.has(`err.${r.code}`) ? tf(`err.${r.code}`) : tf('err.UPLOAD'));
-      } catch { setErr(tf('err.UPLOAD')); } finally { setBusy((n) => n - 1); }
-    }
-    if (done.length) onChange([...files, ...done]);
-    if (input.current) input.current.value = '';
-  }
-
-  return (
-    <div>
-      {files.length ? (
-        <ul className="mb-2 flex flex-wrap gap-1.5">
-          {files.map((f, i) => (
-            <li key={f.url} className="flex max-w-full items-center gap-1.5 rounded-full border border-line bg-white py-1 pl-2.5 pr-1 text-xs">
-              <FileIcon name={f.name} />
-              <span className="min-w-0 truncate font-semibold">{f.name}</span>
-              <span className="shrink-0 font-mono text-[10px] text-muted">{fileSize(f.size)}</span>
-              <button
-                type="button" aria-label={t('removeFile', { name: f.name })} onClick={() => onChange(files.filter((_, j) => j !== i))}
-                className="tap-40 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-sand hover:text-red-700"
-              >
-                <XIcon size={12} weight="bold" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      <button
-        type="button" onClick={() => input.current?.click()} disabled={disabled || busy > 0 || files.length >= MAX_ATTACHMENTS}
-        aria-label={t('attach')} title={t('attach')}
-        className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-xl border border-line bg-white text-muted transition hover:border-teal hover:text-teal-ink disabled:opacity-50"
-      >
-        {busy > 0 ? <span className="font-mono text-xs">{busy}</span> : <PaperclipIcon size={18} aria-hidden="true" />}
-      </button>
-      <input ref={input} type="file" accept={CHAT_ACCEPT} multiple hidden onChange={(e) => void pick(e.target.files)} />
-      {err ? <p role="alert" className="mt-1 text-xs font-semibold text-red-700">{err}</p> : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsNumber, IsObject, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
 import { LISTING, SERVICE_CODES, TARIFF_UNITS, TERMINAL_KINDS, TERMINAL_STATUSES, type ServiceCode, type TariffUnit, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import type { WeekHours } from '../domain/ports';
-import { PHOTO_URL } from '../../../common/security';
+import { PHOTO_URL } from '../../../common/file-url';
 
 export class CreateTerminalDto {
   @IsString() orgId!: string;

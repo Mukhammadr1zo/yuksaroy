@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, ForbiddenException, Get, Inject,
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { PartialType, PickType } from '@nestjs/swagger';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
-import { PHOTO_URL } from '../../../common/security';
+import { PHOTO_URL } from '../../../common/file-url';
 import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizeUzPhone, type KycStatus, type OrgKind, type RegionCode, type Role } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { CreateOrgUseCase } from '../application/create-org.usecase';

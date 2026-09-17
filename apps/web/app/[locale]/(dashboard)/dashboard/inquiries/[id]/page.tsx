@@ -9,7 +9,7 @@ import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { Err } from '@/components/tg/bits';
-import { AttachmentPicker, MessageFiles, MAX_ATTACHMENTS, uploadMany, type Attachment } from '@/components/chat/Attachments';
+import { AttachmentButton, AttachmentChips, MessageFiles, useAttachments, type Attachment } from '@/components/chat/Attachments';
 
 type Msg = { id: string; text: string; attachments: Attachment[]; createdAt: string; mine: boolean; author: string | null };
 type Subject = { kind: 'listing' | 'terminal'; id: string; slug: string; title: string; sub: string | null };
@@ -28,7 +28,7 @@ export default function InquiryThreadPage() {
   const [thread, setThread] = useState<Thread | null>(null);
   const [failed, setFailed] = useState(false);
   const [text, setText] = useState('');
-  const [files, setFiles] = useState<Attachment[]>([]);
+  const at = useAttachments();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
@@ -55,12 +55,14 @@ export default function InquiryThreadPage() {
   async function send(e?: React.FormEvent) {
     e?.preventDefault();
     const body = text.trim();
-    if ((!body && !files.length) || busy) return;
+    // Yuklash tugamaguncha yuborilmaydi: aks holda xabar faylsiz ketib,
+    // fayl keyingi xabarga ilashib qolardi.
+    if ((!body && !at.files.length) || busy || at.busy > 0) return;
     setBusy(true); setErr(null);
     try {
-      const m = await post<Msg>(`/inquiries/${id}/messages`, { text: body, attachments: files });
+      const m = await post<Msg>(`/inquiries/${id}/messages`, { text: body, attachments: at.files });
       setThread((x) => (x ? { ...x, messages: [...x.messages, m] } : x));
-      setText(''); setFiles([]);
+      setText(''); at.clear();
     } catch { setErr(tc('failed')); } finally { setBusy(false); }
   }
 
@@ -69,7 +71,7 @@ export default function InquiryThreadPage() {
 
   const s = thread.subject;
   const publicHref = s ? (s.kind === 'terminal' ? `/terminals/${s.slug}` : `/${s.sub === 'TRUCK' ? 'carriers' : 'equipment'}/${s.slug}`) : null;
-  const canSend = !busy && (!!text.trim() || files.length > 0);
+  const canSend = !busy && at.busy === 0 && (!!text.trim() || at.files.length > 0);
 
   return (
     <>
@@ -101,8 +103,11 @@ export default function InquiryThreadPage() {
       </div>
 
       <form onSubmit={send} className="mt-3">
+        {/* Fayl ro'yxati qatordan tashqarida: aks holda telefonda yuborish tugmasini chetga surib yuborardi */}
+        <AttachmentChips files={at.files} onRemove={at.remove} />
+        {at.err ? <p role="alert" className="mb-2 text-xs font-semibold text-red-700">{at.err}</p> : null}
         <div className="flex items-end gap-2">
-          <AttachmentPicker files={files} onChange={setFiles} disabled={busy} />
+          <AttachmentButton busy={at.busy} disabled={busy} onPick={at.add} />
           <textarea
             value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={2000} placeholder={t('placeholder')}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void send(); }}
@@ -111,9 +116,9 @@ export default function InquiryThreadPage() {
               const pasted = Array.from(e.clipboardData.files);
               if (!pasted.length) return;
               e.preventDefault();
-              void uploadMany(pasted, MAX_ATTACHMENTS - files.length).then((done) => { if (done.length) setFiles((x) => [...x, ...done]); });
+              void at.add(pasted);
             }}
-            className="min-h-[52px] w-full rounded-xl border border-line bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
+            className="min-h-[52px] w-full min-w-0 rounded-xl border border-line bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
           />
           <button
             disabled={!canSend} aria-label={t('send')}

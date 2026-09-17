@@ -526,7 +526,14 @@
         "client": "Men yuborgan xabar"
       },
       "open": "Yozishmani ochish",
-      "lastMessage": "Oxirgi xabar"
+      "lastMessage": "Oxirgi xabar",
+      "err": {
+        "UPLOAD": "Fayl yuklanmadi. Qaytadan urinib ko'ring.",
+        "FILE_TYPE": "Faqat rasm (JPEG, PNG, WebP) yoki hujjat (PDF, DOCX, XLSX).",
+        "FILE_TOO_LARGE": "Fayl juda katta: hujjat 10 MB gacha, rasm 5 MB gacha.",
+        "FILE_CONTENT_MISMATCH": "Fayl ichidagi ma'lumot turiga mos kelmadi.",
+        "RATE_LIMITED": "Juda ko'p fayl yuklandi. Bir soatdan keyin urinib ko'ring."
+      }
     },
     "work": {
       "tab": {

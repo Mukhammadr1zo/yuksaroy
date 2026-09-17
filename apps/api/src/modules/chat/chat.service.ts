@@ -3,6 +3,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { esc, notifyTelegram, webUrl } from '../../common/telegram';
+import { FILE_URL } from '../../common/file-url';
 import { AttachmentError, parseAttachments, type Attachment } from './domain/attachments';
 import { threadRole, type ThreadRole } from './domain/access';
 
@@ -127,13 +128,23 @@ export class ChatService {
       where: { OR: [{ slug: slugOrId }, { id: slugOrId }] },
       select: { id: true, name: true, slug: true, orgId: true, status: true },
     });
-    if (!terminal) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    // Yashirilgan yoki qoralama terminal katalogda ko'rinmaydi, demak unga yozib ham
+    // bo'lmasligi kerak: e'lon yo'lida ham xuddi shunday tekshiruv bor.
+    if (!terminal || terminal.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     if (orgId) {
       const member = await this.prisma.membership.findFirst({ where: { userId, orgId }, select: { id: true } });
       if (!member) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     }
     const text = message.trim();
-    const existing = await this.prisma.inquiry.findFirst({ where: { terminalId: terminal.id, fromUserId: userId }, select: { id: true }, orderBy: { createdAt: 'desc' } });
+    // Eski yozishma faqat qabul qiluvchisi hamon o'sha bo'lsa davom ettiriladi.
+    // Aks holda reestr obyekti egalik qilingandan keyin yozilgan xabar eski
+    // manzilga (platformaga yoki avvalgi tashkilotga) tushib ketardi, yangi egasi
+    // esa uni umuman ko'rmasdi.
+    const existing = await this.prisma.inquiry.findFirst({
+      where: { terminalId: terminal.id, fromUserId: userId, toOrgId: terminal.orgId, toPlatform: terminal.orgId === null },
+      select: { id: true },
+      orderBy: { createdAt: 'desc' },
+    });
     if (existing) {
       await this.send(userId, existing.id, text);
       return { id: existing.id };
@@ -191,7 +202,7 @@ export class ChatService {
 
   async send(userId: string, inquiryId: string, text: string, rawAttachments?: unknown) {
     let files: Attachment[];
-    try { files = parseAttachments(rawAttachments); } catch (e) {
+    try { files = parseAttachments(rawAttachments, FILE_URL); } catch (e) {
       if (e instanceof AttachmentError) throw new BadRequestException({ code: e.code });
       throw e;
     }
