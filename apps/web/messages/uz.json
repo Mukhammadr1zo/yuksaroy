@@ -90,7 +90,8 @@
     "platform": {
       "heading": "Platforma",
       "login": "Kirish / ro'yxatdan o'tish",
-      "telegramBot": "Telegram bot"
+      "telegramBot": "Telegram bot",
+      "telegramChannel": "Telegram kanal"
     },
     "legal": "© {year} YukSaroy",
     "apps": {

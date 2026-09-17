@@ -90,7 +90,8 @@
     "platform": {
       "heading": "Platform",
       "login": "Log in / sign up",
-      "telegramBot": "Telegram bot"
+      "telegramBot": "Telegram bot",
+      "telegramChannel": "Telegram channel"
     },
     "legal": "© {year} YukSaroy",
     "apps": {

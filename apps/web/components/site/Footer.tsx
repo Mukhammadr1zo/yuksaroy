@@ -35,7 +35,9 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
           <h3 className="text-sm font-bold">{t('platform.heading')}</h3>
           <ul className={`mt-3 space-y-2 text-sm ${muted}`}>
             {platform.map(([href, label]) => <li key={href}><Link className={hover} href={href}>{label}</Link></li>)}
+            {/* Bot kirish kodi uchun, kanal esa yangiliklar uchun: ikkalasi ham kerak */}
             <li><a className={hover} href="https://t.me/yuksaroy_bot" target="_blank" rel="noreferrer">{t('platform.telegramBot')}</a></li>
+            <li><a className={hover} href="https://t.me/yuksaroy_uzbekistan" target="_blank" rel="noreferrer">{t('platform.telegramChannel')}</a></li>
           </ul>
         </div>
         <div>
