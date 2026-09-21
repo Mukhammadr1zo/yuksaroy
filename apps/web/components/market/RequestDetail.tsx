@@ -57,7 +57,8 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
         <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{r.description}</p>
       </section>
 
-      {r.hasPhone && !r.isDemo ? (
+      {/* Raqam serverda OPEN va AWARDED so'rovga ochiladi; AWARDED da faqat tanlangan ijrochiga ko'rsatiladi, yopiq so'rovda "yo'q" deb aldamaydi */}
+      {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || (r.status === 'AWARDED' && r.myOffer?.status === 'AWARDED')) ? (
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('phone')}</h2>
           <div className="mt-2"><MarketPhone kind="request" targetId={r.id} next={next} /></div>

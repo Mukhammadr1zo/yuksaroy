@@ -38,7 +38,8 @@ export class AdminUsersController {
   async overview(@CurrentUserId() userId: string) {
     const [users, blocked, orgs, terminals, sidings, listings, orders, inquiries, messages, reviews] = await Promise.all([
       this.prisma.user.count(),
-      this.prisma.user.count({ where: { isActive: false } }),
+      // Namuna foydalanuvchilar (isActive=false) bloklangan hisoblanmaydi: ular hech qachon kirmaydi
+      this.prisma.user.count({ where: { isActive: false, id: { not: { startsWith: 'demo-user-' } } } }),
       this.prisma.organization.count(),
       // Ikki plitka bir-birini qoplamasligi kerak edi: egali temir yo'l terminali ikkalasida ham
       // sanalardi va yig'indi umumiy sondan katta chiqardi. Endi: egali avto/aralash va butun temir yo'l reestri.
@@ -60,7 +61,7 @@ export class AdminUsersController {
     const take = 30;
     const text = q?.trim();
     const where = {
-      ...(blocked === '1' ? { isActive: false } : {}),
+      ...(blocked === '1' ? { isActive: false, id: { not: { startsWith: 'demo-user-' } } } : {}),
       ...(text
         ? {
             OR: [

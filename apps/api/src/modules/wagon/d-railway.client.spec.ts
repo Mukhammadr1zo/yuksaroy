@@ -6,12 +6,12 @@ const cfg = { url: 'https://dr.example/', email: 'a@b.c', password: 'pw' };
 
 /** Soxta fetch: chaqiruvlar jurnali va tokenga qarab javob. */
 function fake(opts: { rejectToken?: string; loginFail?: boolean } = {}) {
-  const calls: { url: string; auth?: string; body?: string }[] = [];
+  const calls: { url: string; auth?: string; body?: string; signal?: AbortSignal | null }[] = [];
   let logins = 0;
   const fetchFn = (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
     const headers = (init?.headers ?? {}) as Record<string, string>;
-    calls.push({ url, auth: headers.authorization, body: typeof init?.body === 'string' ? init.body : undefined });
+    calls.push({ url, auth: headers.authorization, body: typeof init?.body === 'string' ? init.body : undefined, signal: init?.signal });
     if (url.endsWith('/auth/login')) {
       logins++;
       if (opts.loginFail) return json(401, { detail: 'bad' });
@@ -50,6 +50,10 @@ describe('DRailwayClient', () => {
     expect((await c.history('1'))?.count).toBe(1);
     // login, 401 bilan so'rov, qayta login, muvaffaqiyatli so'rov
     expect(f.calls.map((x) => x.auth ?? 'login')).toEqual(['login', 'Bearer tok1', 'login', 'Bearer tok2']);
+    // To'rtala bosqich bitta muddatni bo'lishadi: eng yomoni 10 soniya, 40 emas
+    const signals = new Set(f.calls.map((x) => x.signal));
+    expect(signals.size).toBe(1);
+    expect([...signals][0]).toBeInstanceOf(AbortSignal);
   });
 
   it("ikkinchi 401 ham rad bo'lsa xato, cheksiz halqa yo'q", async () => {

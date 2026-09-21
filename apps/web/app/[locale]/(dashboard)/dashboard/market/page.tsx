@@ -6,7 +6,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
-import type { MarketOffer, MarketRequest, ServiceProfileCard } from '@/lib/types-market';
+import type { MarketOffer, MarketRequest, Paged, ServiceProfileCard } from '@/lib/types-market';
+import { Pager } from '@/components/admin/kit';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, Notice } from '@/components/kabinet/bits';
 import { DemoBadge, MarketStatusPill, OfferStatusPill, useMarketLabels } from '@/components/market/bits';
 import { ProfileForm } from '@/components/market/ProfileForm';
@@ -15,6 +16,8 @@ import { requestHref } from '@/components/market/RequestCard';
 type Tab = 'requests' | 'offers' | 'profile';
 const TABS: Tab[] = ['requests', 'offers', 'profile'];
 type MyOffer = MarketOffer & { request: MarketRequest };
+// Sahifa hajmi: ro'yxat serverda sahifalanadi, 100 dan eski ochiq so'rov ham kabinetdan boshqariladi
+const PAGE = 20;
 
 export default function MarketDashboardPage() {
   const t = useTranslations('market.dash');
@@ -58,9 +61,12 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(focusId);
   const [copied, setCopied] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  const load = () => api<{ items: MarketRequest[] }>('/market/requests/mine').then((r) => setItems(r.items)).catch(() => { setErr(tc('loadFailed')); setItems([]); });
-  useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    api<Paged<MarketRequest>>(`/market/requests/mine?page=${page}&limit=${PAGE}`).then((r) => { setItems(r.items); setTotal(r.total); }).catch(() => { setErr(tc('loadFailed')); setItems([]); });
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setOpen(focusId); if (focusId) document.getElementById(`mr-${focusId}`)?.scrollIntoView({ block: 'center' }); }, [focusId, items?.length]);
 
   async function act(id: string, what: 'award' | 'close' | 'cancel', offerId?: string) {
@@ -141,6 +147,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
           );
         })}
       </ul>
+      <Pager page={page} pages={Math.ceil(total / PAGE)} onPage={setPage} />
     </>
   );
 }
@@ -150,7 +157,11 @@ function Offers({ t, tc }: { t: T; tc: T }) {
   const L = useMarketLabels();
   const [items, setItems] = useState<MyOffer[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  useEffect(() => { api<{ items: MyOffer[] }>('/market/offers/mine').then((r) => setItems(r.items)).catch(() => { setErr(tc('loadFailed')); setItems([]); }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    api<Paged<MyOffer>>(`/market/offers/mine?page=${page}&limit=${PAGE}`).then((r) => { setItems(r.items); setTotal(r.total); }).catch(() => { setErr(tc('loadFailed')); setItems([]); });
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
       {err ? <Notice tone="err">{err}</Notice> : null}
@@ -178,6 +189,7 @@ function Offers({ t, tc }: { t: T; tc: T }) {
           </li>
         ))}
       </ul>
+      <Pager page={page} pages={Math.ceil(total / PAGE)} onPage={setPage} />
     </>
   );
 }
@@ -224,19 +236,22 @@ function Profiles({ t, tc }: { t: T; tc: T }) {
               <li key={p.id} className={`min-w-0 rounded-card border bg-white p-4 ${p.status === 'ACTIVE' ? 'border-line' : 'border-dashed border-line opacity-80'}`}>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-teal-soft px-2.5 py-0.5 text-xs font-semibold text-teal-ink">{L.service[p.serviceType]}</span>
-                  <span className={`text-xs font-semibold ${p.status === 'ACTIVE' ? 'text-teal-ink' : 'text-muted'}`}>{p.status === 'ACTIVE' ? tp('active') : tp('hidden')}</span>
+                  <span className={`text-xs font-semibold ${p.status === 'ACTIVE' ? 'text-teal-ink' : 'text-muted'}`}>{p.status === 'ACTIVE' ? tp('active') : p.status === 'BLOCKED' ? tp('blocked') : tp('hidden')}</span>
                   {p.isDemo ? <DemoBadge /> : null}
                 </div>
                 <p className="mt-2 font-semibold wrap-anywhere">{p.title}</p>
                 <p className="mt-1 line-clamp-2 text-sm text-muted wrap-anywhere">{p.description}</p>
                 <p className="mt-1 text-xs text-muted wrap-anywhere">{p.regions.length ? p.regions.map((r) => L.region(r)).join(', ') : tg('regionsAll')}{p.priceNote ? ` · ${p.priceNote}` : ''}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setEditing(p)} className={BTN_GHOST}>{tp('edit')}</button>
-                  <button type="button" onClick={() => toggle(p)} disabled={busy !== null} className={BTN_GHOST}>
-                    {busy === p.id ? (p.status === 'ACTIVE' ? tp('hiding') : tp('showing')) : p.status === 'ACTIVE' ? tp('hide') : tp('show')}
-                  </button>
-                  {p.status === 'ACTIVE' ? <Link href={`/services/${p.id}`} className={BTN_GHOST}>{t('open')}</Link> : null}
-                </div>
+                {/* Admin yashirgan (BLOCKED) profilni egasi tahrirlay ham, ocha ham olmaydi: server rad etadi, tugma ham yo'q */}
+                {p.status !== 'BLOCKED' ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button type="button" onClick={() => setEditing(p)} className={BTN_GHOST}>{tp('edit')}</button>
+                    <button type="button" onClick={() => toggle(p)} disabled={busy !== null} className={BTN_GHOST}>
+                      {busy === p.id ? (p.status === 'ACTIVE' ? tp('hiding') : tp('showing')) : p.status === 'ACTIVE' ? tp('hide') : tp('show')}
+                    </button>
+                    {p.status === 'ACTIVE' ? <Link href={`/services/${p.id}`} className={BTN_GHOST}>{t('open')}</Link> : null}
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

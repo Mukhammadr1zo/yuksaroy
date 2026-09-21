@@ -6,14 +6,17 @@
  * bu ataylab, hech narsa saqlanmaydi.
  *
  * Joylashuv: o'ng past z-40. Chat oynasi (z-50) ochilsa u ustun, bu to'g'ri: odam egasi bilan
- * yozishyapti. Chap past ro'yxatdan o'tish taklifiniki, o'rta past solishtirish savatiniki.
+ * yozishyapti. Kompyuterda chap past ro'yxatdan o'tish taklifiniki, o'rta past solishtirish savatiniki.
+ * Telefonda (sm dan tor) ikkalasi ham butun enni oladi va o'ng pastga yetib keladi: shu paytda tugma
+ * chizilmaydi, aks holda ularning tugmalarini bosib qo'yardi. Qoida bitta va shu yerda, z-index emas.
  * Telegram Mini App (/tg) da chizilmaydi: u yerda o'z pastki panel bor.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ChatCircleDotsIcon, PaperPlaneRightIcon, XIcon } from '@phosphor-icons/react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
+import { getCompare, getCompareServer, subscribeCompare } from '@/lib/compare';
 
 type Faq = { id: string; q: string; a: string; href: string };
 type Related = { id: string; q: string; href: string };
@@ -23,6 +26,14 @@ type Msg = { id: number; mine: boolean; text: string; related?: Related[]; note?
 // Boshlang'ich chiplar: eng ko'p so'raladiganlar, tartib muhim (birinchi ikkitasi mobil ekranda ko'rinadi)
 const STARTERS = ['find-terminal', 'contact-owner', 'register', 'book', 'subscription', 'free'];
 let seq = 0;
+
+// Ro'yxatdan o'tish taklifi o'z holatini tashqariga bermaydi: DOM da turgan-turmaganini kuzatamiz
+const subscribeDom = (cb: () => void) => {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.body, { childList: true, subtree: true });
+  return () => mo.disconnect();
+};
+const nudgeShown = () => document.getElementById('nudge-title') !== null;
 
 export function HelpWidget() {
   const t = useTranslations('help');
@@ -36,6 +47,12 @@ export function HelpWidget() {
   const [err, setErr] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const end = useRef<HTMLDivElement>(null);
+  const compare = useSyncExternalStore(subscribeCompare, getCompare, getCompareServer);
+  const nudge = useSyncExternalStore(subscribeDom, nudgeShown, () => false);
+  // Savat solishtirish sahifasida chizilmaydi (CompareTray bilan bir xil shart)
+  const trayShown = !pathname.includes('/compare') && Object.values(compare).some((items) => items.length > 0);
+  // Telefonda burchak band: tugma faqat sm dan keng ekranda
+  const cornerBusy = open || trayShown || nudge;
 
   // Ro'yxat bir marta, faqat oyna ochilganda: vidjet har sahifada bor, so'rovni bekorga yubormaymiz
   useEffect(() => {
@@ -92,7 +109,7 @@ export function HelpWidget() {
     <>
       <button
         type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="help-widget" aria-label={t('open')}
-        className={`fixed bottom-6 right-4 z-40 inline-flex h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${open ? 'hidden sm:inline-flex' : ''}`}
+        className={`fixed bottom-6 right-4 z-40 inline-flex h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${cornerBusy ? 'hidden sm:inline-flex' : ''}`}
       >
         <ChatCircleDotsIcon size={22} weight="fill" aria-hidden="true" />
         <span className="hidden sm:inline">{t('open')}</span>

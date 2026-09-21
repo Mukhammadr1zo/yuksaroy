@@ -77,3 +77,18 @@ export function deriveCurrent(rows: readonly UpstreamEvent[]): WagonEvent | null
   }
   return best ? mapEvents([best])[0] : null;
 }
+
+/**
+ * Bitta kalit (foydalanuvchi) uchun ishlar navbat bilan: kvota tekshiruvi va qator yozuvi
+ * orasiga o'sha odamning ikkinchi so'rovi kirmasin (ikki oynadan bir vaqtda bosilsa ikkita bepul qidiruv bo'lardi).
+ * ponytail: bitta jarayon xotirasida (IpBucket kabi); ko'p nusxa bo'lsa bazada qulf (pg_advisory_xact_lock).
+ */
+const chains = new Map<string, Promise<unknown>>();
+export function serialize<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const prev = chains.get(key) ?? Promise.resolve();
+  const run = prev.then(fn, fn); // oldingisi xato bilan tugasa ham navbat davom etadi
+  chains.set(key, run);
+  const done = () => { if (chains.get(key) === run) chains.delete(key); };
+  run.then(done, done);
+  return run;
+}

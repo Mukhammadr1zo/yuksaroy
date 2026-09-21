@@ -66,10 +66,11 @@ export function TerminalRow({ t, lang }: { t: TerminalCard; lang: SearchLang }) 
 }
 
 
-/** E'lon qatori: rasm yoki bo'sh, sarlavha, tur va yil, viloyat, narx. */
+/** E'lon qatori: rasm yoki bo'sh, sarlavha (namuna bo'lsa "Namuna" yorlig'i), tur va yil, viloyat, narx. */
 export function ListingRow({ l, lang }: { l: ListingCard; lang: SearchLang }) {
   const L = LISTING_LABELS[lang];
   const tc = useTranslations('tg.common');
+  const tl = useTranslations('listing.card');
   const truck = l.kind === 'TRUCK';
   const sub = truck
     ? [l.truckType ? L.truckType[l.truckType as keyof typeof L.truckType] ?? l.truckType : null, l.tonnage ? `${l.tonnage} t` : null]
@@ -78,7 +79,11 @@ export function ListingRow({ l, lang }: { l: ListingCard; lang: SearchLang }) {
     <Link href={tgListingHref(l)} onClick={() => haptic()} className={`${CARD} flex gap-3 p-3 active:bg-sand`}>
       <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">{l.photo ? <img src={l.photo} alt="" className="h-full w-full object-cover" /> : null}</div>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-bold">{l.title}</p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="min-w-0 truncate font-bold">{l.title}</p>
+          {/* Namuna qator hamma joyda belgilanadi: catalog DemoBadge server komponent, bu yerda client */}
+          {l.isDemo ? <span className="shrink-0 rounded-full border border-dashed border-line bg-sand px-2 py-0.5 text-[11px] font-semibold text-muted">{tl('demo')}</span> : null}
+        </div>
         <p className="mt-0.5 truncate text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}{l.deal ? ` · ${SEARCH_LABELS[lang].deal[l.deal]}` : ''}</p>
         <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)} · {l.owner.name}</p>
         <p className="mt-1 font-mono text-sm font-semibold text-navy tabular-nums">{l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : tc('onRequest')}</p>

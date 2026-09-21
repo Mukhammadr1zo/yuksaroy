@@ -948,11 +948,12 @@ model ServiceProfile {
   experienceYears Int?
   priceNote       String? // "kelishiladi", "1 hujjat 150 000 so'm" kabi erkin matn
   contactPhone    String? // raqamning o'zi obunachiga GET /contacts orqali
-  status          String        @default("ACTIVE") // ACTIVE | HIDDEN
+  status          String        @default("ACTIVE") // ACTIVE | HIDDEN | BLOCKED (BLOCKED: admin yashirgan, egasi qaytara olmaydi)
   isDemo          Boolean       @default(false)
   createdAt       DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
 
+  @@unique([userId, serviceType]) // bir odamda har xizmat turidan bitta profil: tekshiruv bazada, poyga bo'lmaydi
   @@index([serviceType, status, createdAt])
   @@index([userId])
 }

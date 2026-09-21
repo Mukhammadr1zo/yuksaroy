@@ -80,8 +80,9 @@ export class ContactsController {
       return sp ? (sp.isDemo ? null : some(sp.contactPhone)) : undefined;
     }
     if (kind === 'request') {
-      // Ochiq so'rov: yopilgan yoki bekor qilinganning raqami ham yopiladi
-      const r = await this.prisma.marketRequest.findFirst({ where: { OR: [{ id }, { no: id }], status: 'OPEN' }, select: { contactPhone: true, isDemo: true } });
+      // Ochiq yoki tanlangan so'rov: tanlangan ta'minotchi egasiga qo'ng'iroq qila olishi kerak.
+      // Yopilgan yoki bekor qilinganning raqami yopiladi.
+      const r = await this.prisma.marketRequest.findFirst({ where: { OR: [{ id }, { no: id }], status: { in: ['OPEN', 'AWARDED'] } }, select: { contactPhone: true, isDemo: true } });
       return r ? (r.isDemo ? null : some(r.contactPhone)) : undefined;
     }
     // Terminal va shahobcha bitta jadvalda. Ochiq sahifa sharti: ACTIVE va (egasi bor yoki reestr shahobchasi).

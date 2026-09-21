@@ -9,6 +9,7 @@ import { WagonController } from './wagon.controller';
 @Module({
   imports: [IdentityModule, OrganizationsModule, SubscriptionModule], // JwtGuard; PlatformAdmin; SubscriberGuard
   controllers: [WagonController],
-  providers: [DRailwayClient],
+  // useFactory: konstruktor parametrlari (sozlama obyekti, fetch) Nest uchun token emas, oddiy class provider ishga tushmaydi
+  providers: [{ provide: DRailwayClient, useFactory: () => new DRailwayClient() }], // env dan manzil, login, parol
 })
 export class WagonModule {}

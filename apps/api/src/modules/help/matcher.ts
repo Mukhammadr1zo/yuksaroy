@@ -48,25 +48,32 @@ const KW_WEIGHT = 2;
 const Q_WEIGHT = 1;
 const MAX_QUERY_TOKENS = 30;
 
-export interface Scored { faq: Faq; score: number }
+export interface Scored { faq: Faq; score: number; matched: string[] }
 
-/** Har bir savol so'zi uchun eng yaxshi mosligi: kalit so'z 2, savol so'zi 1. Yig'indi. */
-export function score(queryTokens: string[], entry: Indexed): number {
+/** Har bir savol so'zi uchun eng yaxshi mosligi: kalit so'z 2, savol so'zi 1. Yig'indi va tushgan so'zlar. */
+export function score(queryTokens: string[], entry: Indexed): { score: number; matched: string[] } {
   let s = 0;
+  const matched: string[] = [];
   for (const t of queryTokens) {
     if (entry.kw.some((k) => stemEq(t, k))) s += KW_WEIGHT;
     else if (entry.q.some((k) => stemEq(t, k))) s += Q_WEIGHT;
+    else continue;
+    matched.push(t);
   }
-  return s;
+  return { score: s, matched };
 }
 
 /**
- * Eng yaqin 3 ta. Ishonchli = kamida bitta kalit so'z (2 ball) VA ikkinchi o'rindan ustun:
- * "terminal" so'zi ikki savolga teng tushsa, tanlab bermaymiz, ro'yxat ko'rsatamiz.
+ * Eng yaqin 3 ta. Ishonchli = birinchi o'rin ikkinchidan kamida bitta kalit so'zga (2 ball) ustun
+ * VA savolni qoplaydi: kamida ikki so'z tushgan, tushganlar savol so'zlarining yarmidan kam emas.
+ * "Vagon qancha turadi": "qancha" bepul va obuna savollariga teng tushadi, "vagon" esa boshqasiga,
+ * farq 1 ball, tanlab bermaymiz: ro'yxat yoki AI. "Akkauntni o'chirish": bitta so'z ham yetmaydi.
  */
 export function match(query: string, lang: HelpLang): { top: Scored[]; confident: boolean } {
   const tokens = tokenize(query).slice(0, MAX_QUERY_TOKENS);
-  const top = indexOf(lang).map((e) => ({ faq: e.faq, score: score(tokens, e) })).filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
-  const confident = top.length > 0 && top[0].score >= KW_WEIGHT && (top.length === 1 || top[0].score > top[1].score);
+  const top = indexOf(lang).map((e) => ({ faq: e.faq, ...score(tokens, e) })).filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
+  const first = top[0];
+  const confident = !!first && first.score - (top[1]?.score ?? 0) >= KW_WEIGHT
+    && first.matched.length >= 2 && first.matched.length * 2 >= tokens.length;
   return { top, confident };
 }

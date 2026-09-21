@@ -185,6 +185,7 @@
         "show": "Show again",
         "showing": "Showing",
         "hidden": "Hidden: clients cannot see it",
+        "blocked": "Hidden by the site admin: write to the help chat if you have a question",
         "active": "Visible",
         "saved": "Saved",
         "serviceType": "Service type",

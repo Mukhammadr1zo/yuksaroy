@@ -397,7 +397,8 @@
       },
       "profileStatus": {
         "ACTIVE": "Faol",
-        "HIDDEN": "Yashirin"
+        "HIDDEN": "Yashirin",
+        "BLOCKED": "Admin yashirgan"
       },
       "col": {
         "no": "Raqam",

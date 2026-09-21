@@ -76,7 +76,7 @@ function Requests({ region, svc }: { region: (c: string | null) => string; svc: 
     { key: 'by', head: tm('col.by'), cell: (r: Req) => <span>{r.createdBy ?? '-'}{r.contactPhone ? <span className="block font-mono text-[11px] text-muted">{r.contactPhone}</span> : null}</span> },
     { key: 'offers', head: tm('col.offers'), num: true, cell: (r: Req) => r.offersCount },
     { key: 'date', head: tm('col.date'), num: true, cell: (r: Req) => (r.loadDate ? uzDate(r.loadDate, locale) : uzDateTime(r.createdAt, locale)) },
-    { key: 'actions', head: tc('actions'), cell: (r: Req) => (r.status === 'OPEN' || r.status === 'AWARDED'
+    { key: 'actions', head: tc('actions'), cell: (r: Req) => (r.status === 'OPEN'
       ? <ConfirmButton label={tm('hide')} confirm={tm('hideConfirm')} className={`${BTN_DANGER} ${SM}`} onRun={async () => { await post(`/admin/market/requests/${r.id}/hide`, {}); await list.reload(); }} />
       : <span className="text-muted">-</span>) },
   ];
@@ -147,7 +147,7 @@ function Profiles({ region, svc }: { region: (c: string | null) => string; svc: 
         </Labeled>
         <Labeled label={tc('status')} className="w-44">
           <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className={INPUT}>
-            {(['ACTIVE', 'HIDDEN'] as const).map((s) => <option key={s} value={s}>{tm(`profileStatus.${s}`)}</option>)}
+            {(['ACTIVE', 'HIDDEN', 'BLOCKED'] as const).map((s) => <option key={s} value={s}>{tm(`profileStatus.${s}`)}</option>)}
           </select>
         </Labeled>
         {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}

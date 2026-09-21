@@ -10,7 +10,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightIcon, LockSimpleIcon, MagnifyingGlassIcon, TrainIcon } from '@phosphor-icons/react';
 import { WAGON } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
-import { ApiError, api, hasSession, post } from '@/lib/api';
+import { ApiError, api, hasSession } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 import type { WagonEvent, WagonMe, WagonQuota, WagonResult } from '@/lib/types-wagon';
@@ -42,10 +42,12 @@ export function WagonSearch() {
     if (!valid) { setSt({ s: 'err', code: 'WAGON_NO_INVALID' }); return; }
     setSt({ s: 'busy' });
     try {
-      const r = await post<WagonResult>('/wagon/search', { no });
+      // Server upstream ga 10 soniya beradi; brauzer undan sal ko'proq kutadi, keyin "manba javob bermadi"
+      const r = await api<WagonResult>('/wagon/search', { method: 'POST', body: JSON.stringify({ no }), signal: AbortSignal.timeout(15_000) });
       setQuota(r.quota);
       setSt({ s: 'result', r });
     } catch (e) {
+      if (e instanceof DOMException && e.name === 'TimeoutError') { setSt({ s: 'err', code: 'WAGON_UPSTREAM' }); return; }
       const status = e instanceof ApiError ? e.status : 0;
       if (status === 401) { setSt({ s: 'guest' }); return; }
       if (status === 402) { setSt({ s: 'subscribe' }); return; }

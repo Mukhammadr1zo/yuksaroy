@@ -397,7 +397,8 @@
       },
       "profileStatus": {
         "ACTIVE": "Active",
-        "HIDDEN": "Hidden"
+        "HIDDEN": "Hidden",
+        "BLOCKED": "Hidden by admin"
       },
       "col": {
         "no": "No.",

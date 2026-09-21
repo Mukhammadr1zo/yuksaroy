@@ -1,5 +1,5 @@
 import {
-  BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, HttpException, NotFoundException, Param, Post, Query, Req, UseGuards,
+  BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, HttpException, Inject, NotFoundException, Param, Post, Query, Req, UseGuards,
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
@@ -11,9 +11,10 @@ import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { clampInt } from '../catalog/presentation/catalog.controller';
-import { CurrentUserId, JwtGuard, optionalUserId } from '../identity/presentation/jwt.guard';
+import { CurrentUserId, JwtGuard, optionalUserId, readAccessToken } from '../identity/presentation/jwt.guard';
 import { TokenService } from '../identity/application/token.service';
-import { awardOffers, canMarketTransition, formatMarketNo, offerDenial, staleBefore, validateRequest } from './market.rules';
+import { SESSION_STORE, USER_REPOSITORY, type SessionStore, type UserRepository } from '../identity/domain/ports';
+import { canMarketTransition, formatMarketNo, offerDenial, staleBefore, validateRequest } from './market.rules';
 import { MarketService, offerView, requestView } from './market.service';
 
 class CreateRequestDto {
@@ -64,6 +65,8 @@ export class MarketController {
     private readonly audit: AuditService,
     private readonly market: MarketService,
     private readonly tokens: TokenService,
+    @Inject(USER_REPOSITORY) private readonly users: UserRepository,
+    @Inject(SESSION_STORE) private readonly sessions: SessionStore,
   ) {}
 
   /** Ochiq taxta: faqat OPEN va 30 kundan yangi; filtrlar taxtaga qarab. */
@@ -90,20 +93,35 @@ export class MarketController {
     return { items: rows.map(({ _count, ...r }) => requestView(r, _count.offers)), total, page: p, limit: take };
   }
 
-  /** Mening so'rovlarim, takliflari bilan. `mine` yo'li `:no` dan oldin turishi shart. */
+  /**
+   * Mening so'rovlarim, takliflari bilan. `mine` yo'li `:no` dan oldin turishi shart.
+   * Sahifalanadi: kabinet egasi uchun yagona boshqaruv joyi, 100 dan eski ochiq so'rov ko'rinmay qolmasin.
+   */
   @Get('requests/mine') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
-  async mine(@CurrentUserId() userId: string) {
-    const rows = await this.prisma.marketRequest.findMany({ where: { createdById: userId }, include: { offers: { orderBy: { createdAt: 'asc' } } }, orderBy: { createdAt: 'desc' }, take: MARKET.listTake });
+  async mine(@CurrentUserId() userId: string, @Query('page') page?: string, @Query('limit') lim?: string) {
+    const p = clampInt(page, 1, 1, 10_000);
+    const take = clampInt(lim, 20, 1, MARKET.listTake);
+    const where = { createdById: userId };
+    const [total, rows] = await Promise.all([
+      this.prisma.marketRequest.count({ where }),
+      this.prisma.marketRequest.findMany({ where, include: { offers: { orderBy: { createdAt: 'asc' } } }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
+    ]);
     const offers = rows.flatMap((r) => r.offers);
     const [orgs, users] = await Promise.all([this.market.orgsOf(offers), this.market.namesOf(offers.map((o) => o.providerUserId))]);
-    return { items: rows.map(({ offers, ...r }) => ({ ...requestView(r, offers.length, true), offers: offers.map((o) => offerView(o, orgs, users)) })) };
+    return { items: rows.map(({ offers, ...r }) => ({ ...requestView(r, offers.length, true), offers: offers.map((o) => offerView(o, orgs, users)) })), total, page: p, limit: take };
   }
 
-  /** Men yuborgan takliflar, so'rov qisqacha bilan. */
+  /** Men yuborgan takliflar, so'rov qisqacha bilan. Sahifalanadi. */
   @Get('offers/mine') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
-  async myOffers(@CurrentUserId() userId: string) {
-    const rows = await this.prisma.marketOffer.findMany({ where: { providerUserId: userId }, include: { request: true }, orderBy: { createdAt: 'desc' }, take: MARKET.listTake });
-    return { items: rows.map(({ request, ...o }) => ({ ...offerView(o), request: requestView(request, 0) })) };
+  async myOffers(@CurrentUserId() userId: string, @Query('page') page?: string, @Query('limit') lim?: string) {
+    const p = clampInt(page, 1, 1, 10_000);
+    const take = clampInt(lim, 20, 1, MARKET.listTake);
+    const where = { providerUserId: userId };
+    const [total, rows] = await Promise.all([
+      this.prisma.marketOffer.count({ where }),
+      this.prisma.marketOffer.findMany({ where, include: { request: true }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
+    ]);
+    return { items: rows.map(({ request, ...o }) => ({ ...offerView(o), request: requestView(request, 0) })), total, page: p, limit: take };
   }
 
   /**
@@ -116,7 +134,8 @@ export class MarketController {
     if (!r) throw new NotFoundException({ code: 'REQUEST_NOT_FOUND' });
     const userId = optionalUserId(req, this.tokens);
     const { offers, ...row } = r;
-    if (userId !== r.createdById) {
+    // Egasining ko'rinishi (telefon, takliflar) uchun imzo yetarli emas: chiqib ketgan sessiya ham JwtGuard kabi rad etiladi
+    if (userId !== r.createdById || !(await this.sessionAlive(req))) {
       // Taklif bergan odam o'z taklifini ko'rsin: forma o'rniga "yuborilgan" holati chiqadi
       const my = userId ? offers.find((o) => o.providerUserId === userId) : undefined;
       return { ...requestView(row, offers.length), myOffer: my ? offerView(my) : null };
@@ -166,12 +185,21 @@ export class MarketController {
     const providerOrgId = await this.market.memberOrgId(userId, dto.orgId);
     let o;
     try {
-      o = await this.prisma.marketOffer.create({
-        data: { requestId: id, providerUserId: userId, providerOrgId, priceTiyin: dto.priceTiyin == null ? null : BigInt(dto.priceTiyin), message: dto.message?.trim() || null },
+      // Taklif so'rov orqali yoziladi: OPEN sharti yozuv bilan bitta so'rovda tekshiriladi, yuqoridagi o'qish bilan
+      // orada egasi tanlab qo'ygan bo'lsa, tanlangan so'rovga SENT taklif kirib qolmaydi
+      const { offers } = await this.prisma.marketRequest.update({
+        where: { id, status: 'OPEN' },
+        data: { offers: { create: { providerUserId: userId, providerOrgId, priceTiyin: dto.priceTiyin == null ? null : BigInt(dto.priceTiyin), message: dto.message?.trim() || null } } },
+        select: { offers: { where: { providerUserId: userId } } },
       });
+      o = offers[0]!;
     } catch (e) {
-      // Noyoblik: bir so'rovga bir odamdan bitta taklif
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') throw new ConflictException({ code: 'OFFER_EXISTS' });
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        // Noyoblik: bir so'rovga bir odamdan bitta taklif
+        if (e.code === 'P2002') throw new ConflictException({ code: 'OFFER_EXISTS' });
+        // So'rov yozuv paytida OPEN emas edi
+        if (e.code === 'P2025') throw new ConflictException({ code: 'REQUEST_NOT_OPEN' });
+      }
       throw e;
     }
     await this.audit.log({ actorId: userId, action: 'market.offer', entity: 'MarketOffer', entityId: o.id, meta: { requestId: id, priceTiyin: dto.priceTiyin ?? null } });
@@ -185,15 +213,19 @@ export class MarketController {
   async award(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: AwardDto) {
     const r = await this.owned(userId, id);
     if (!canMarketTransition(r.status, 'AWARDED')) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to: 'AWARDED' });
-    const changes = awardOffers(r.offers, dto.offerId);
-    if (!changes) throw new ConflictException({ code: 'OFFER_NOT_SENT' });
-    await this.prisma.$transaction([
-      ...changes.map((c) => this.prisma.marketOffer.update({ where: { id: c.id }, data: { status: c.status } })),
-      this.prisma.marketRequest.update({ where: { id }, data: { status: 'AWARDED', awardedOfferId: dto.offerId } }),
-    ]);
-    await this.audit.log({ actorId: userId, action: 'market.award', entity: 'MarketRequest', entityId: id, meta: { offerId: dto.offerId } });
     const winner = r.offers.find((o) => o.id === dto.offerId);
-    if (winner) void this.market.notifyAward(r, winner.providerUserId).catch(() => {});
+    if (!winner || winner.status !== 'SENT') throw new ConflictException({ code: 'OFFER_NOT_SENT' });
+    // Har yozuv o'qilgan holatga shartlangan: ikki parallel tanlash (yoki tanlash + bekor) faqat bittasi o'tadi.
+    // Avval so'rov qatori qulflanadi, keyin takliflar shart bilan (yodda saqlangan ro'yxat emas): orada kelgan taklif ham rad bo'ladi.
+    await this.prisma.$transaction(async (tx) => {
+      const req = await tx.marketRequest.updateMany({ where: { id, status: r.status }, data: { status: 'AWARDED', awardedOfferId: dto.offerId } });
+      if (!req.count) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to: 'AWARDED' });
+      const won = await tx.marketOffer.updateMany({ where: { id: dto.offerId, requestId: id, status: 'SENT' }, data: { status: 'AWARDED' } });
+      if (!won.count) throw new ConflictException({ code: 'OFFER_NOT_SENT' });
+      await tx.marketOffer.updateMany({ where: { requestId: id, status: 'SENT' }, data: { status: 'DECLINED' } });
+    });
+    await this.audit.log({ actorId: userId, action: 'market.award', entity: 'MarketRequest', entityId: id, meta: { offerId: dto.offerId } });
+    void this.market.notifyAward(r, winner.providerUserId).catch(() => {});
     return this.mineOne(id);
   }
 
@@ -226,9 +258,22 @@ export class MarketController {
   private async transition(userId: string, id: string, to: MarketStatus) {
     const r = await this.owned(userId, id);
     if (!canMarketTransition(r.status, to)) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to });
-    await this.prisma.marketRequest.update({ where: { id }, data: { status: to } });
+    // Yozuv o'qilgan holatga shartlangan: orada tanlash o'tib ketgan bo'lsa AWARDED -> CANCELLED bo'lib qolmaydi
+    const { count } = await this.prisma.marketRequest.updateMany({ where: { id, status: r.status }, data: { status: to } });
+    if (!count) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to });
     await this.audit.log({ actorId: userId, action: `market.${to.toLowerCase()}`, entity: 'MarketRequest', entityId: id });
     return this.mineOne(id);
+  }
+
+  /** JwtGuard bilan bir xil tekshiruv, faqat xato o'rniga false: foydalanuvchi faol va sessiya (sid) bekor qilinmagan. */
+  private async sessionAlive(req: FastifyRequest): Promise<boolean> {
+    let claims: { sub: string; sid?: string };
+    try { claims = this.tokens.verifyAccess(readAccessToken(req) ?? ''); } catch { return false; }
+    const u = await this.users.findById(claims.sub);
+    if (!u?.isActive) return false;
+    if (!claims.sid) return true;
+    const s = await this.sessions.findById(claims.sid);
+    return !!s && !s.revokedAt;
   }
 
   private async owned(userId: string, id: string) {

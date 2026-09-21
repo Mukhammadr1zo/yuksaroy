@@ -32,6 +32,10 @@ describe('validateRequest', () => {
     const e = validateRequest({ ...cargo, fromRegion: 'XX', toRegion: null, weightT: 0, loadDate: '2026-09-20', truckType: 'BUS', cargoName: ' ' }, today);
     expect(e).toEqual({ fromRegion: 'INVALID', toRegion: 'REQUIRED', weightT: 'RANGE', loadDate: 'PAST', truckType: 'INVALID', cargoName: 'REQUIRED' });
     expect(validateRequest({ ...cargo, loadDate: '22.09.2026' }, today).loadDate).toBe('INVALID');
+    // Kalendarda yo'q kun: Date uni 3-martga surardi, so'rovchi kiritmagan sana saqlanib qolardi
+    expect(validateRequest({ ...cargo, loadDate: '2026-02-31' }, today).loadDate).toBe('INVALID');
+    expect(validateRequest({ ...cargo, loadDate: '2026-13-01' }, today).loadDate).toBe('INVALID');
+    expect(validateRequest({ ...cargo, loadDate: '2028-02-29' }, today)).toEqual({});
     expect(validateRequest({ ...cargo, weightT: null }, today).weightT).toBe('REQUIRED');
   });
 

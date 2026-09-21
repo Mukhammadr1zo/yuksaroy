@@ -8,7 +8,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import type { Prisma, PrismaClient } from '@prisma/client';
-import { LISTING, REGION_CENTERS } from '@yuksaroy/domain';
+import { REGION_CENTERS } from '@yuksaroy/domain';
 import { DEMO_LISTINGS, DEMO_ORGS, DEMO_REQUESTS, DEMO_SERVICES, DEMO_USERS } from './demo-data';
 
 export type DemoCounts = { orgs: number; users: number; listings: number; services: number; requests: number };
@@ -21,8 +21,11 @@ export async function seedDemo(prisma: PrismaClient, now = new Date()): Promise<
     const data = { kind: o.kind, kinds: [o.kind], name: o.name, description: o.description, regionCode: o.regionCode, kycStatus: 'NONE' as const, phone: null, isDemo: true };
     await prisma.organization.upsert({ where: { id: o.id }, create: { id: o.id, slug: o.slug, ...data }, update: { slug: o.slug, ...data } });
   }
+  // isActive=false: namuna telefon seriyasi kimgadir tegishli bo'lib chiqsa ham, OTP orqali kirib
+  // namuna tashkilot egasi bo'lib olmasin (JwtGuard nofaol odamni qaytaradi). Katalog va bozor
+  // user.isActive ni o'qimaydi, shuning uchun namuna qatorlar ko'rinaverishadi.
   for (const u of DEMO_USERS) {
-    const data = { phone: u.phone, fullName: u.fullName, locale: 'uz', isActive: true, passwordHash: null };
+    const data = { phone: u.phone, fullName: u.fullName, locale: 'uz', isActive: false, passwordHash: null };
     await prisma.user.upsert({ where: { id: u.id }, create: { id: u.id, ...data }, update: data });
     if (u.orgId) {
       await prisma.membership.upsert({
@@ -33,15 +36,15 @@ export async function seedDemo(prisma: PrismaClient, now = new Date()): Promise<
     }
   }
 
-  // Muddat har yuklashda yangilanadi: namuna e'lon 90 kundan keyin o'z-o'zidan tushib qolmasin
-  const expiresAt = new Date(now.getTime() + LISTING.expireDays * DAY);
+  // Muddatsiz (expiresAt=null, katalog buni "tugamaydi" deb o'qiydi): namuna e'lon 90 kundan keyin
+  // o'z-o'zidan tushib qolmasin, chunki hech kim qayta yuklashni eslab qolmaydi
   for (const l of DEMO_LISTINGS) {
     const { ownerType: _o, routes, priceTiyin, ...input } = l.input;
     const owner = DEMO_USERS.find((u) => u.orgId === l.orgId)!;
     const center = REGION_CENTERS[l.input.regionCode];
     const data = {
       ...input, routes: routes as unknown as Prisma.InputJsonValue, priceTiyin: priceTiyin === null ? null : BigInt(priceTiyin),
-      slug: l.slug, orgId: l.orgId, lat: center.lat, lng: center.lng, status: 'ACTIVE' as const, expiresAt, premiumUntil: null, isDemo: true,
+      slug: l.slug, orgId: l.orgId, lat: center.lat, lng: center.lng, status: 'ACTIVE' as const, expiresAt: null, premiumUntil: null, isDemo: true,
     };
     await prisma.listing.upsert({ where: { id: l.id }, create: { id: l.id, createdById: owner.id, publishedAt: now, ...data }, update: data });
   }
@@ -53,8 +56,9 @@ export async function seedDemo(prisma: PrismaClient, now = new Date()): Promise<
 
   for (const r of DEMO_REQUESTS) {
     const { id, loadInDays, ...rest } = r;
-    // Yuklash sanasi doim kelajakda: qayta yuklashda bugundan hisoblanadi
-    const data = { ...rest, loadDate: loadInDays === null ? null : new Date(now.getTime() + loadInDays * DAY), contactPhone: null, status: 'OPEN', awardedOfferId: null, isDemo: true };
+    // Yuklash sanasi doim kelajakda va createdAt ham bugun: bozor 30 kundan eski so'rovni ko'rsatmaydi,
+    // qayta yuklash namuna so'rovlarni doskaga qaytarishi kerak
+    const data = { ...rest, loadDate: loadInDays === null ? null : new Date(now.getTime() + loadInDays * DAY), createdAt: now, contactPhone: null, status: 'OPEN', awardedOfferId: null, isDemo: true };
     const exists = await prisma.marketRequest.findUnique({ where: { id }, select: { id: true } });
     if (exists) { await prisma.marketRequest.update({ where: { id }, data }); continue; }
     const [{ nextval }] = await prisma.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('market_no_seq')`;

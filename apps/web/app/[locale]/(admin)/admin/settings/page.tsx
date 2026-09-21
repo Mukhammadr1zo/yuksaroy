@@ -3,7 +3,7 @@
 // Faqat o'zgargan kalitlar yuboriladi: server o'zgarmaganini auditga yozmaydi, biz ham shovqin qilmaymiz.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { api } from '@/lib/api';
+import { api, post } from '@/lib/api';
 import { BTN, BTN_DANGER, CARD, ConfirmButton, INPUT, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
 
 type Item = { key: string; value: string | number; default: string | number; isDefault: boolean; updatedAt: string | null };
@@ -29,7 +29,8 @@ function DemoSection() {
   const run = async (action: 'seed' | 'remove') => {
     setMsg(null);
     try {
-      await api<DemoCounts>(`/admin/demo/${action}`, { method: 'POST' });
+      // Tanasiz POST bo'lmasin: content-type json bilan bo'sh tana Fastify'da 400 beradi
+      await post<DemoCounts>(`/admin/demo/${action}`, {});
       setCounts(await api<DemoCounts>('/admin/demo/status'));
       setMsg({ tone: 'ok', text: t(action === 'seed' ? 'seeded' : 'removed') });
     } catch { setMsg({ tone: 'err', text: t('failed') }); }

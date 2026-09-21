@@ -185,6 +185,7 @@
         "show": "Qayta ko'rsatish",
         "showing": "Ochilmoqda",
         "hidden": "Yashirilgan: mijozlarga ko'rinmaydi",
+        "blocked": "Sayt ma'muri yashirgan: savol bo'lsa yordam chatiga yozing",
         "active": "Ko'rinadi",
         "saved": "Saqlandi",
         "serviceType": "Xizmat turi",

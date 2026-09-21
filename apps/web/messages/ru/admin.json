@@ -397,7 +397,8 @@
       },
       "profileStatus": {
         "ACTIVE": "Активен",
-        "HIDDEN": "Скрыт"
+        "HIDDEN": "Скрыт",
+        "BLOCKED": "Скрыт админом"
       },
       "col": {
         "no": "Номер",

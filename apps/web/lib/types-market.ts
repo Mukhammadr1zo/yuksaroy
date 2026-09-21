@@ -3,7 +3,7 @@ import type { MarketBoard, MarketOfferStatus, MarketStatus, RegionCode, ServiceT
 
 export interface ServiceProfileCard {
   id: string; userId: string; orgId: string | null; serviceType: ServiceType; title: string; description: string; regions: RegionCode[];
-  experienceYears: number | null; priceNote: string | null; hasPhone: boolean; status: 'ACTIVE' | 'HIDDEN'; isDemo: boolean; createdAt: string; updatedAt: string;
+  experienceYears: number | null; priceNote: string | null; hasPhone: boolean; status: 'ACTIVE' | 'HIDDEN' | 'BLOCKED'; isDemo: boolean; createdAt: string; updatedAt: string;
   owner: string | null; ownerOrg: { name: string; slug: string | null; kyc: string } | null;
   /** Faqat egasiga (GET mine) */
   contactPhone?: string | null;

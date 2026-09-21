@@ -101,16 +101,21 @@ export class ServicesController {
   async create(@CurrentUserId() userId: string, @Body() dto: ProfileDto) {
     if (!createBucket.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
     if (!dto.title.trim() || !dto.description.trim()) throw new BadRequestException({ code: 'VALIDATION', errors: { ...(dto.title.trim() ? {} : { title: 'REQUIRED' }), ...(dto.description.trim() ? {} : { description: 'REQUIRED' }) } });
-    // Bir odam bir turda bitta profil: yashiringan bo'lsa ham qayta yaratilmaydi, tahrirlanadi
-    const dup = await this.prisma.serviceProfile.findFirst({ where: { userId, serviceType: dto.serviceType }, select: { id: true } });
-    if (dup) throw new ConflictException({ code: 'PROFILE_EXISTS', profileId: dup.id });
-    const r = await this.prisma.serviceProfile.create({
-      data: {
-        userId, orgId: await this.market.memberOrgId(userId, dto.orgId), serviceType: dto.serviceType, title: dto.title.trim(), description: dto.description.trim(),
-        regions: [...new Set(dto.regions)], experienceYears: dto.experienceYears ?? null, priceNote: clean(dto.priceNote) ?? null, contactPhone: phoneOf(dto.contactPhone),
-      },
-      include: INCLUDE,
-    });
+    let r;
+    try {
+      r = await this.prisma.serviceProfile.create({
+        data: {
+          userId, orgId: await this.market.memberOrgId(userId, dto.orgId), serviceType: dto.serviceType, title: dto.title.trim(), description: dto.description.trim(),
+          regions: [...new Set(dto.regions)], experienceYears: dto.experienceYears ?? null, priceNote: clean(dto.priceNote) ?? null, contactPhone: phoneOf(dto.contactPhone),
+        },
+        include: INCLUDE,
+      });
+    } catch (e) {
+      // Bir odam bir turda bitta profil: bazadagi noyob indeks (userId, serviceType) tekshiradi, ikki parallel yaratish ham o'tmaydi.
+      // Yashiringan bo'lsa ham qayta yaratilmaydi, tahrirlanadi.
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') throw new ConflictException({ code: 'PROFILE_EXISTS' });
+      throw e;
+    }
     await this.audit.log({ actorId: userId, action: 'service.profile.create', entity: 'ServiceProfile', entityId: r.id, meta: { serviceType: r.serviceType } });
     return profileView(r, true, true);
   }
@@ -118,18 +123,14 @@ export class ServicesController {
   @Patch(':id') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
   async patch(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: PatchProfileDto) {
     await this.owned(userId, id);
-    const r = await this.prisma.serviceProfile.update({
-      where: { id },
-      data: {
-        ...(dto.title != null ? { title: dto.title.trim() || undefined } : {}),
-        ...(dto.description != null ? { description: dto.description.trim() || undefined } : {}),
-        ...(dto.regions ? { regions: [...new Set(dto.regions)] } : {}),
-        ...(dto.experienceYears !== undefined ? { experienceYears: dto.experienceYears } : {}),
-        ...(dto.priceNote !== undefined ? { priceNote: clean(dto.priceNote) } : {}),
-        ...(dto.contactPhone !== undefined ? { contactPhone: phoneOf(dto.contactPhone) } : {}),
-        ...(dto.status ? { status: dto.status } : {}),
-      },
-      include: INCLUDE,
+    const r = await this.save(id, {
+      ...(dto.title != null ? { title: dto.title.trim() || undefined } : {}),
+      ...(dto.description != null ? { description: dto.description.trim() || undefined } : {}),
+      ...(dto.regions ? { regions: [...new Set(dto.regions)] } : {}),
+      ...(dto.experienceYears !== undefined ? { experienceYears: dto.experienceYears } : {}),
+      ...(dto.priceNote !== undefined ? { priceNote: clean(dto.priceNote) } : {}),
+      ...(dto.contactPhone !== undefined ? { contactPhone: phoneOf(dto.contactPhone) } : {}),
+      ...(dto.status ? { status: dto.status } : {}),
     });
     await this.audit.log({ actorId: userId, action: 'service.profile.update', entity: 'ServiceProfile', entityId: id, meta: { status: dto.status ?? null } });
     return profileView(r, true, true);
@@ -138,7 +139,7 @@ export class ServicesController {
   @Post(':id/hide') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
   async hide(@CurrentUserId() userId: string, @Param('id') id: string) {
     await this.owned(userId, id);
-    const r = await this.prisma.serviceProfile.update({ where: { id }, data: { status: 'HIDDEN' }, include: INCLUDE });
+    const r = await this.save(id, { status: 'HIDDEN' });
     await this.audit.log({ actorId: userId, action: 'service.profile.hide', entity: 'ServiceProfile', entityId: id });
     return profileView(r, true, true);
   }
@@ -147,5 +148,18 @@ export class ServicesController {
     const r = await this.prisma.serviceProfile.findUnique({ where: { id }, select: { userId: true } });
     if (!r) throw new NotFoundException({ code: 'PROFILE_NOT_FOUND' });
     if (r.userId !== userId) throw new ForbiddenException({ code: 'NOT_OWNER' });
+  }
+
+  /**
+   * Egasining yozuvi faqat ACTIVE yoki HIDDEN profilga. Admin yashirgan (BLOCKED) profilni egasi
+   * tahrirlay ham, qayta ocha ham olmaydi; shart yozuvning o'zida, orada bloklansa ham o'tmaydi.
+   */
+  private async save(id: string, data: Prisma.ServiceProfileUpdateInput) {
+    try {
+      return await this.prisma.serviceProfile.update({ where: { id, status: { in: ['ACTIVE', 'HIDDEN'] } }, data, include: INCLUDE });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') throw new ConflictException({ code: 'PROFILE_BLOCKED' });
+      throw e;
+    }
   }
 }

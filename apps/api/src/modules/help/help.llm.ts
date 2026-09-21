@@ -39,11 +39,14 @@ export class HelpLlm {
       const res = await this.client.messages.create({
         model: this.model,
         max_tokens: 300,
-        output_config: { effort: 'low' }, // qisqa javob, fikrlash chuqurligi shart emas; 8 s ichida ulgurishi kerak
+        // Fikrlash o'chiq: 1-3 gaplik lug'at javobiga kerak emas, yoqiq bo'lsa 300 token fikrlashga ketib javob kesilardi
+        thinking: { type: 'disabled' },
+        output_config: { effort: 'low' }, // qisqa javob; 8 s ichida ulgurishi kerak
         system: [{ type: 'text', text: systemPrompt(lang), cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: q }],
       }, { timeout: 8000, maxRetries: 0 });
-      if (res.stop_reason === 'refusal') return null;
+      // Rad etilgan yoki kesilgan javob ko'rsatilmaydi: yarim gap javob emas
+      if (res.stop_reason === 'refusal' || res.stop_reason === 'max_tokens') return null;
       const text = res.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map((b) => b.text).join(' ').trim();
       return text || null;
     } catch (e) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canSearch, deriveCurrent, mapEvents, upstreamNo } from './wagon.rules';
+import { canSearch, deriveCurrent, mapEvents, serialize, upstreamNo } from './wagon.rules';
 
 describe('vagon kvotasi', () => {
   it('obunachi cheksiz, qolganlarga freeTotal ta', () => {
@@ -50,5 +50,26 @@ describe('hodisalar', () => {
     expect(deriveCurrent([{ event_date: '2026-01-01' }, { event_date: '2026-02-01', station: 'B' }])?.station).toBe('B');
     expect(deriveCurrent([])).toBeNull();
     expect(deriveCurrent([{ event_date: null }])).toBeNull();
+  });
+});
+
+describe('foydalanuvchi navbati', () => {
+  const tick = () => new Promise<void>((r) => setTimeout(r, 5));
+
+  it("bir kalit: ikkinchisi birinchisi tugagach boshlanadi, xato navbatni to'xtatmaydi", async () => {
+    const log: string[] = [];
+    const a = serialize('u1', async () => { log.push('a:start'); await tick(); log.push('a:end'); throw new Error('a'); });
+    const b = serialize('u1', async () => { log.push('b:start'); return 'b'; });
+    await expect(a).rejects.toThrow('a');
+    expect(await b).toBe('b');
+    expect(log).toEqual(['a:start', 'a:end', 'b:start']);
+  });
+
+  it('har xil kalit bir vaqtda ishlaydi', async () => {
+    const log: string[] = [];
+    const a = serialize('u1', async () => { log.push('a:start'); await tick(); log.push('a:end'); });
+    const b = serialize('u2', async () => { log.push('b:start'); });
+    await Promise.all([a, b]);
+    expect(log).toEqual(['a:start', 'b:start', 'a:end']);
   });
 });

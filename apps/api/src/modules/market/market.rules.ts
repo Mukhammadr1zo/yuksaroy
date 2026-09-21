@@ -57,7 +57,9 @@ export function validateRequest(i: RequestInput, today = uzLocalDate(new Date())
   else if (i.cargoName!.length > 120) e.cargoName = 'TOO_LONG';
   if (i.weightT == null || !Number.isFinite(i.weightT)) e.weightT = 'REQUIRED';
   else if (i.weightT <= 0 || i.weightT > 10_000) e.weightT = 'RANGE';
-  if (!i.loadDate || !/^\d{4}-\d{2}-\d{2}$/.test(i.loadDate) || Number.isNaN(Date.parse(i.loadDate))) e.loadDate = i.loadDate ? 'INVALID' : 'REQUIRED';
+  // Sana orqaga aylantirib solishtiriladi: "2026-02-31" ni Date 3-martga surib qo'yadi, bunday kun rad etiladi
+  const d = i.loadDate ? new Date(`${i.loadDate}T00:00:00Z`) : null;
+  if (!i.loadDate || !d || Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== i.loadDate) e.loadDate = i.loadDate ? 'INVALID' : 'REQUIRED';
   else if (i.loadDate < today) e.loadDate = 'PAST';
   if (i.truckType && !has(TRUCK_TYPES, i.truckType)) e.truckType = 'INVALID';
   return e;
