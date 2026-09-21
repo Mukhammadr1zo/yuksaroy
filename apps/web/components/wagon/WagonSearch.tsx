@@ -127,7 +127,6 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
           {c.operation ? <Row k={t('operation')} v={c.operation} /> : null}
           <Row k={t('date')} v={dayLabel(c.date, locale)} mono />
           {c.cargo ? <Row k={t('cargo')} v={c.weightT != null ? `${c.cargo}, ${t('weight', { t: c.weightT })}` : c.cargo} /> : null}
-          {c.idleDays != null && c.idleDays > 0 ? <Row k={t('idle')} v={t('idleDays', { days: c.idleDays })} /> : null}
         </dl>
         <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
       </section>

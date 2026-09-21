@@ -8,7 +8,6 @@ export interface WagonEvent {
   operation: string | null;
   cargo: string | null;
   weightT: number | null;
-  idleDays: number | null;
 }
 
 export interface WagonQuota { subscriber: boolean; freeUsed: number; freeTotal: number }

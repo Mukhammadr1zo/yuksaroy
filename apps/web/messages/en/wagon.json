@@ -21,14 +21,16 @@
     "notFound": "Wagon {no} was not found. Check the number and try again.",
     "current": "Last known location",
     "stationUnknown": "Station not given",
-    "state": { "loaded": "Loaded", "empty": "Empty", "unknown": "State unknown" },
+    "state": {
+      "loaded": "Loaded",
+      "empty": "Empty",
+      "unknown": "State unknown"
+    },
     "destination": "Destination station",
     "operation": "Last operation",
     "date": "Time",
     "cargo": "Cargo",
     "weight": "{t} t",
-    "idle": "Standing",
-    "idleDays": "{days, plural, one {# day} other {# days}}",
     "fetchedAt": "Updated: {at}",
     "history": "Movement history",
     "errors": {

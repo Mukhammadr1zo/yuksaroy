@@ -20,9 +20,9 @@ describe('upstream raqami', () => {
 });
 
 const rows = [
-  { event_date: '2026-09-01T10:00:00', snapshot_date: '2026-09-01', module: 'idle', station: 'Ташкент-Товарный', dest_station: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weight: '68.5', idle_days: 2, extra: { secret: 1 } },
-  { event_date: '2026-09-03T08:00:00', snapshot_date: '2026-09-03', module: 'idle', station: 'Ангрен', dest_station: null, state: 'empty', operation: 'Выгрузка', cargo: '', weight: null, idle_days: null },
-  { event_date: '2026-09-02T12:00:00', snapshot_date: '2026-09-03', module: 'route', station: 'Тойтепа', dest_station: 'Ангрен', state: 'bogus', operation: null, cargo: null, weight: 'x', idle_days: '3' },
+  { event_date: '2026-09-01T10:00:00', snapshot_date: '2026-09-01', module: 'idle', station: 'Ташкент-Товарный', dest_station: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weight: '68.5', extra: { secret: 1 } },
+  { event_date: '2026-09-03T08:00:00', snapshot_date: '2026-09-03', module: 'idle', station: 'Ангрен', dest_station: null, state: 'empty', operation: 'Выгрузка', cargo: '' },
+  { event_date: '2026-09-02T12:00:00', snapshot_date: '2026-09-03', module: 'route', station: 'Тойтепа', dest_station: 'Ангрен', state: 'bogus', operation: null, cargo: null, weight: 'x' },
   { event_date: null, station: 'sanasi yoq' },
 ];
 
@@ -35,10 +35,9 @@ describe('hodisalar', () => {
   it("bizning shaklga o'giriladi, yangisi birinchi, sanasi yo'qlari tashlanadi, extra yo'q", () => {
     const ev = mapEvents(rows);
     expect(ev.map((e) => e.date)).toEqual(['2026-09-03T08:00:00', '2026-09-02T12:00:00', '2026-09-01T10:00:00']);
-    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', destination: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weightT: 68.5, idleDays: 2 });
+    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', destination: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weightT: 68.5 });
     expect(ev[1].state).toBe('unknown');
     expect(ev[1].weightT).toBeNull();
-    expect(ev[1].idleDays).toBe(3);
     expect(ev[0].cargo).toBeNull();
     expect(Object.keys(ev[0])).not.toContain('extra');
   });

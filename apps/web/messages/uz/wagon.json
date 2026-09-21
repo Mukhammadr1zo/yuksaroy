@@ -21,14 +21,16 @@
     "notFound": "{no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.",
     "current": "Oxirgi joylashuvi",
     "stationUnknown": "Stansiya ko'rsatilmagan",
-    "state": { "loaded": "Yuklangan", "empty": "Bo'sh", "unknown": "Holati noma'lum" },
+    "state": {
+      "loaded": "Yuklangan",
+      "empty": "Bo'sh",
+      "unknown": "Holati noma'lum"
+    },
     "destination": "Boradigan stansiya",
     "operation": "Oxirgi amal",
     "date": "Vaqti",
     "cargo": "Yuk",
     "weight": "{t} t",
-    "idle": "Turibdi",
-    "idleDays": "{days} kun",
     "fetchedAt": "Yangilangan: {at}",
     "history": "Harakat tarixi",
     "errors": {

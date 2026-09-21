@@ -9,7 +9,6 @@ export interface WagonEvent {
   operation: string | null;
   cargo: string | null;
   weightT: number | null;
-  idleDays: number | null;
 }
 
 /** d-railway.uz javobidagi bitta hodisa (bizga kerakli maydonlar). */
@@ -22,7 +21,6 @@ export interface UpstreamEvent {
   operation?: string | null;
   cargo?: string | null;
   weight?: number | string | null;
-  idle_days?: number | string | null;
 }
 
 export const EVENTS_MAX = 50;
@@ -61,7 +59,7 @@ export function mapEvents(rows: readonly UpstreamEvent[]): WagonEvent[] {
     .map((r) => ({
       date: r.event_date as string,
       station: unshout(str(r.station)), destination: unshout(str(r.dest_station)), state: stateOf(r.state), operation: unshout(str(r.operation)),
-      cargo: unshout(str(r.cargo)), weightT: numOrNull(r.weight), idleDays: numOrNull(r.idle_days),
+      cargo: unshout(str(r.cargo)), weightT: numOrNull(r.weight),
     }))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .slice(0, EVENTS_MAX);
