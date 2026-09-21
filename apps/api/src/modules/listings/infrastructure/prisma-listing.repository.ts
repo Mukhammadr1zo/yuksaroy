@@ -82,10 +82,6 @@ export class PrismaListingRepository {
     return toRecord(await this.prisma.listing.update({ where: { id }, data: d, include }));
   }
   async remove(id: string) { await this.prisma.listing.delete({ where: { id } }); }
-  /** Ko'rishlar soni: javobni kutmaydi, xato e'lonni to'xtatmaydi. */
-  bumpViews(id: string) {
-    this.prisma.listing.update({ where: { id }, data: { views: { increment: 1 } } }).catch(() => {});
-  }
   /** Bog'langan obyekt nuqtasi; obyekt yo'q bo'lsa null. */
   async objectPoint(type: 'terminal' | 'siding', id: string): Promise<{ lat: number | null; lng: number | null } | null> {
     const select = { lat: true, lng: true };

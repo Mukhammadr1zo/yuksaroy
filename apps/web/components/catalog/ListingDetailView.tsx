@@ -51,6 +51,8 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
         [t('capacityT'), l.capacityT ? `${l.capacityT} t` : null],
       ];
   specs.push([t('region'), regionName(l.regionCode, lang)], [t('published'), l.publishedAt ? uzDate(l.publishedAt, lang) : null]);
+  // Namuna e'londa son ko'rsatilmaydi: u haqiqiy taklif emas va raqam hech qanday qaror bermaydi
+  if (!l.isDemo) specs.push([t('views'), t('viewsShort', { count: l.views })]);
   const rows = specs.filter(([, v]) => v !== null && v !== undefined && v !== '');
 
   return (

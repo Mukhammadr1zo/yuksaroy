@@ -47,7 +47,8 @@
       "noPhoto": "Rasm yo'q",
       "phoneVerified": "Telefon tasdiqlangan",
       "phoneUnverified": "Telefon tasdiqlanmagan",
-      "demo": "Namuna"
+      "demo": "Namuna",
+      "viewsShort": "{count} marta ko'rilgan"
     },
     "empty": {
       "title": "Bu filtr bo'yicha e'lon topilmadi",
@@ -99,7 +100,9 @@
         "short": "Kamida 5 ta belgi yozing.",
         "openChat": "Yozishmani ochish"
       },
-      "demoNote": "Bu namuna e'lon: sayt qanday ishlashini ko'rsatish uchun qo'yilgan, haqiqiy taklif emas. Telefon va yozishma yo'q."
+      "demoNote": "Bu namuna e'lon: sayt qanday ishlashini ko'rsatish uchun qo'yilgan, haqiqiy taklif emas. Telefon va yozishma yo'q.",
+      "views": "Ko'rishlar",
+      "viewsShort": "{count} marta ko'rilgan"
     },
     "reviews": {
       "formTitle": "Izoh qoldirish",

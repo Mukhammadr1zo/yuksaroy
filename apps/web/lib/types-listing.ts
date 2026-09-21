@@ -17,6 +17,8 @@ export interface ListingCard {
   org: { name: string; slug: string | null; kyc: KycStatus } | null;
   object: { type: 'terminal' | 'siding'; id: string; name: string; slug?: string } | null;
   premium: boolean; publishedAt: string | null;
+  /** E'lon sahifasi necha marta ochilgan (brauzer mayoqlaridan, umrbod). */
+  views: number;
   /** Namuna qator: haqiqiy taklif emas, "Namuna" yorlig'i bilan chiziladi, telefon va chat berilmaydi. */
   isDemo: boolean;
 }

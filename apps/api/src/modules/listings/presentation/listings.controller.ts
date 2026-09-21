@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { DEAL_KINDS, LISTING_KINDS, REGIONS, distanceKm } from '@yuksaroy/domain';
 import { TokenService } from '../../identity/application/token.service';
+import { ImpressionsService } from '../../impressions/impressions.service';
 import { ACCESS_COOKIE } from '../../identity/presentation/jwt.guard';
 import { clampInt, geoNear, listIn, pickIn } from '../../catalog/presentation/catalog.controller';
 import { corridorMatch, parseCorridor, summarizeListings } from '../domain/listing-query';
@@ -15,7 +16,11 @@ const SORTS = ['new', 'price', 'nearest'] as const;
 @ApiTags('listings')
 @Controller('listings')
 export class ListingsController {
-  constructor(private readonly repo: PrismaListingRepository, private readonly tokens: TokenService) {}
+  constructor(
+    private readonly repo: PrismaListingRepository,
+    private readonly tokens: TokenService,
+    private readonly impressions: ImpressionsService,
+  ) {}
 
   /** `kind`, `region` vergulli; `region` bazaviy viloyat YOKI xizmat hududi; `corridor=A>B`; `near=lng,lat&radius`. */
   @Get()
@@ -35,8 +40,11 @@ export class ListingsController {
     const prem = (l: { premiumUntil: Date | null }) => l.premiumUntil !== null && l.premiumUntil > now;
     all.sort((a, b) => Number(prem(b)) - Number(prem(a)));
     const p = clampInt(page, 1, 1, 1000), l = clampInt(limit, 20, 1, 50);
+    const pageRows = all.slice((p - 1) * l, p * l);
+    // Bitta guruhli so'rov butun sahifaga: e'lon boshiga so'rov yuborilmaydi
+    const views = await this.impressions.detailViews('listing', pageRows.map((x) => x.id));
     return {
-      items: all.slice((p - 1) * l, p * l).map((x) => listingCard(x, geo, now)),
+      items: pageRows.map((x) => ({ ...listingCard(x, geo, now), views: views[x.id] ?? 0 })),
       total: all.length, page: p, limit: l,
       summary: summarizeListings(all, geo),
     };
@@ -46,8 +54,8 @@ export class ListingsController {
   async detail(@Param('slug') slug: string, @Req() req: FastifyRequest) {
     const l = await this.repo.findBySlug(slug);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
-    this.repo.bumpViews(l.id);
-    return listingDetail(l);
+    const views = await this.impressions.detailViews('listing', [l.id]);
+    return { ...listingDetail(l), views: views[l.id] ?? 0 };
   }
 
   /** Ixtiyoriy kirish: token bo'lsa va to'g'ri bo'lsa foydalanuvchi, aks holda mehmon. */

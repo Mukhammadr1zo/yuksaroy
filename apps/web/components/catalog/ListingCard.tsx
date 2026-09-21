@@ -46,7 +46,7 @@ export async function ListingCard({ l }: { l: L }) {
           {l.isDemo ? <DemoBadge /> : l.premium ? <PremiumBadge className="shrink-0" /> : null}
         </div>
         <p className="mt-0.5 text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
-        <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}</p>
+        <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}{!l.isDemo && l.views > 0 ? ` · ${t('viewsShort', { count: l.views })}` : ''}</p>
         {truck ? (
           <div className="mt-2 flex flex-wrap items-center gap-1">
             {regions.map((r) => <span key={r} className="rounded-full bg-teal-soft px-2 py-0.5 text-[11px] font-semibold text-teal-ink">{regionName(r, lang)}</span>)}

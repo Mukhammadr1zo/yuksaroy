@@ -47,7 +47,8 @@
       "noPhoto": "No photo",
       "phoneVerified": "Phone verified",
       "phoneUnverified": "Phone not verified",
-      "demo": "Sample"
+      "demo": "Sample",
+      "viewsShort": "{count, plural, one {# view} other {# views}}"
     },
     "empty": {
       "title": "No listings match this filter",
@@ -99,7 +100,9 @@
         "short": "Write at least 5 characters.",
         "openChat": "Open the chat"
       },
-      "demoNote": "This is a sample listing: it shows how the site works and is not a real offer. No phone or chat."
+      "demoNote": "This is a sample listing: it shows how the site works and is not a real offer. No phone or chat.",
+      "views": "Views",
+      "viewsShort": "{count, plural, one {# view} other {# views}}"
     },
     "reviews": {
       "formTitle": "Leave a review",

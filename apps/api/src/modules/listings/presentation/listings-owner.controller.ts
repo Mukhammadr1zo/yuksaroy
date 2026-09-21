@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Use
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
+import { ImpressionsService } from '../../impressions/impressions.service';
 import { ListingAccess } from '../application/listing-access';
 import { ListingsUseCase } from '../application/listings.usecase';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
@@ -19,12 +20,16 @@ export class ListingsOwnerController {
     private readonly listings: ListingsUseCase,
     private readonly access: ListingAccess,
     private readonly audit: AuditService,
+    private readonly impressions: ImpressionsService,
   ) {}
 
   /** Foydalanuvchi tashkilotlarining va shaxsiy e'lonlari (har qanday holat). */
   @Get('listings/mine')
   async mine(@CurrentUserId() userId: string) {
-    return (await this.repo.listMine(userId, await this.access.orgIdsOf(userId))).map(ownerListing);
+    const rows = await this.repo.listMine(userId, await this.access.orgIdsOf(userId));
+    // Ko'rishlar soni mayoqlardan: Listing.views kesh sababli kam sanaydi va egasini chalg'itardi
+    const views = await this.impressions.detailViews('listing', rows.map((r) => r.id));
+    return rows.map((r) => ({ ...ownerListing(r), views: views[r.id] ?? 0 }));
   }
 
   @Post('listings')

@@ -6,6 +6,7 @@ import type { Slot, TerminalDetail } from '@/lib/types';
 import { Link } from '@/i18n/navigation';
 import { regionName } from '@/components/tg/labels';
 import { TerminalCta } from '@/components/tg/TerminalCta';
+import { Impressions } from '@/components/catalog/Impressions';
 
 // /tg/terminals/[slug]: ixcham tafsilot: nom, tur, viloyat, baho, tariflar ustuni, bugungi slotlar tasmasi, telefon (kirganlarga), bron va xarita tugmalari. MainButton = bron.
 export const revalidate = 60;
@@ -27,6 +28,8 @@ export default async function TgTerminalPage({ params }: Params) {
 
   return (
     <main className="mx-auto max-w-md px-4 pb-28 pt-4">
+      {/* Botdagi ochilish ham sanalsin: veb terminal sahifasi bilan bir xil mayoq */}
+      <Impressions kind="terminal" ids={[x.id]} surface="detail" />
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{L.kind[x.kind]}</span>
         {x.is24h ? <span className="rounded-full bg-teal px-3 py-1 font-mono text-xs font-semibold text-white">24/7</span> : null}

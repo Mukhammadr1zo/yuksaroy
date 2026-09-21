@@ -51,8 +51,12 @@ export function listingDetail(l: ListingRecord) {
   };
 }
 
-/** Kabinet va admin: tafsilot + orgId, ko'rishlar, rad sababi, muddat. Egasi o'z raqamini ko'radi. */
+/**
+ * Kabinet va admin: tafsilot + orgId, rad sababi, muddat. Egasi o'z raqamini ko'radi.
+ * `views` bu yerda 0: haqiqiy son mayoqlardan keladi va uni ro'yxat kontrolleri qo'shadi
+ * (Listing.views ustuni kesh sababli kam sanardi va endi yozilmaydi).
+ */
 export function ownerListing(l: ListingRecord) {
   // premiumUntil: admin ro'yxatida "qachongacha" ko'rinishi kerak, faqat ha/yo'q emas
-  return { ...listingDetail(l), contactPhone: l.contactPhone, orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt, premiumUntil: l.premiumUntil };
+  return { ...listingDetail(l), contactPhone: l.contactPhone, orgId: l.orgId, ownerUserId: l.ownerUserId, views: 0, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt, premiumUntil: l.premiumUntil };
 }

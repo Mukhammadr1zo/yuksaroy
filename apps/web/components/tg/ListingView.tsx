@@ -9,6 +9,7 @@ import { listingPrice, regionName } from '@/components/tg/labels';
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { DemoBadge } from '@/components/catalog/ListingCard';
 import { PhotoGallery } from '@/components/catalog/PhotoGallery';
+import { Impressions } from '@/components/catalog/Impressions';
 
 /** /tg/equipment/[slug] va /tg/carriers/[slug]: ixcham e'lon tafsiloti. Tur mos kelmasa boshqa bo'limga o'tkaziladi (start_param listing_ uchun). */
 export async function TgListingView({ slug, section }: { slug: string; section: 'equipment' | 'carriers' }) {
@@ -49,6 +50,9 @@ export async function TgListingView({ slug, section }: { slug: string; section: 
       <h1 className="font-display mt-2 text-xl font-bold">{l.title}</h1>
       <p className="mt-1 text-sm text-muted">{[regionName(l.regionCode, lang), l.year, l.model].filter(Boolean).join(' · ')}</p>
 
+      {/* Botdagi ochilish ham sanalsin: veb sahifasi bilan bir xil mayoq, aks holda
+          shaxsiy e'lon egasi botdan kelgan tashriflarni umuman ko'rmaydi */}
+      <Impressions kind="listing" ids={[l.id]} surface="detail" />
       {l.photos.length ? <PhotoGallery photos={l.photos} alt={l.title} className="mt-3" /> : null}
 
       <section className="mt-3 rounded-card border border-line bg-white p-4">

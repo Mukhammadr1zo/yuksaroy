@@ -44,11 +44,13 @@ export class ImpressionsController {
   async listing(@CurrentUserId() userId: string, @Param('id') id: string) {
     const l = await this.listings.owned(userId, id);
     const now = new Date();
-    const [s, inquiries] = await Promise.all([
+    const [s, inquiries, views] = await Promise.all([
       this.impressions.series('listing', id, now),
       this.prisma.inquiry.count({ where: { listingId: id, createdAt: { gte: since30(now) } } }),
+      this.impressions.detailViews('listing', [id]),
     ]);
-    return { ...s, inquiries, views: l.views };
+    // Umumiy son ham mayoqlardan: 30 kunlik qator bilan bir manbadan bo'lsin
+    return { ...s, inquiries, views: views[id] ?? 0 };
   }
 
   /** Terminal xodimi: ko'rsatishlar + shu terminaldagi e'lonlarga so'rovlar + buyurtmalar (30 kun). */
