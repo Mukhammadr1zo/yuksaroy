@@ -33,7 +33,7 @@
     "history": "Harakat tarixi",
     "errors": {
       "WAGON_NO_INVALID": "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
-      "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hali ulanmagan. Tez orada ishga tushadi.",
+      "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
       "WAGON_UPSTREAM": "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
       "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
       "generic": "Qidirilmadi. Qayta urinib ko'ring."

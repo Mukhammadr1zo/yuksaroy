@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { DashLink } from '@/components/site/DashLink';
 import { sapiOrNull } from '@/lib/server-api';
 import { alt } from '@/lib/seo';
 
@@ -34,7 +35,7 @@ export default async function HelpPage({ params }: Props) {
             <details key={f.id} id={f.id} className="group px-5 py-4">
               <summary className="cursor-pointer list-none font-display font-bold text-navy marker:content-none">{f.q}</summary>
               <p className="mt-2 text-sm text-ink wrap-anywhere">{f.a}</p>
-              <Link href={f.href} className="mt-2 inline-block text-sm font-semibold text-teal-ink hover:underline">{t('page.more')}</Link>
+              <DashLink href={f.href} className="mt-2 inline-block text-sm font-semibold text-teal-ink hover:underline">{t('page.more')}</DashLink>
             </details>
           ))}
         </div>

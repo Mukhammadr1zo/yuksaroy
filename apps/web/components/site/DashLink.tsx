@@ -5,12 +5,12 @@
 import { Link } from '@/i18n/navigation';
 import { useAuthed } from './AuthOnly';
 
-export function DashLink({ href, className, children, signupLabel }: {
-  href: string; className?: string; children: React.ReactNode; signupLabel?: string;
+export function DashLink({ href, className, children, signupLabel, onClick }: {
+  href: string; className?: string; children: React.ReactNode; signupLabel?: string; onClick?: () => void;
 }) {
   const authed = useAuthed();
-  if (!href.startsWith('/dashboard')) return <Link href={href} className={className}>{children}</Link>;
+  if (!href.startsWith('/dashboard')) return <Link href={href} className={className} onClick={onClick}>{children}</Link>;
   if (authed === undefined) return null;
-  if (authed) return <Link href={href} className={className}>{children}</Link>;
-  return <Link href={`/signup?next=${encodeURIComponent(href)}`} className={className}>{signupLabel ?? children}</Link>;
+  if (authed) return <Link href={href} className={className} onClick={onClick}>{children}</Link>;
+  return <Link href={`/signup?next=${encodeURIComponent(href)}`} className={className} onClick={onClick}>{signupLabel ?? children}</Link>;
 }

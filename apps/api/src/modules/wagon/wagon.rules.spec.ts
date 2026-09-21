@@ -27,6 +27,11 @@ const rows = [
 ];
 
 describe('hodisalar', () => {
+  it('butunlay bosh harfli nom yumshatiladi, aralash yozuv tegilmaydi', () => {
+    const ev = mapEvents([{ event_date: '2026-09-01', station: 'ТАШКЕНТ-ТОВАРНЫЙ', dest_station: 'УзТЖ', operation: 'ОТПРАВЛЕНИЕ', cargo: 'Уголь' }]);
+    expect(ev[0]).toMatchObject({ station: 'Ташкент-Товарный', destination: 'УзТЖ', operation: 'Отправление', cargo: 'Уголь' });
+  });
+
   it("bizning shaklga o'giriladi, yangisi birinchi, sanasi yo'qlari tashlanadi, extra yo'q", () => {
     const ev = mapEvents(rows);
     expect(ev.map((e) => e.date)).toEqual(['2026-09-03T08:00:00', '2026-09-02T12:00:00', '2026-09-01T10:00:00']);

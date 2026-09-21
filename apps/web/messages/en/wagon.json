@@ -28,12 +28,12 @@
     "cargo": "Cargo",
     "weight": "{t} t",
     "idle": "Standing",
-    "idleDays": "{days} days",
+    "idleDays": "{days, plural, one {# day} other {# days}}",
     "fetchedAt": "Updated: {at}",
     "history": "Movement history",
     "errors": {
       "WAGON_NO_INVALID": "The number must have 7 or 8 digits.",
-      "WAGON_NOT_CONFIGURED": "Wagon search is not connected yet. It will be available soon.",
+      "WAGON_NOT_CONFIGURED": "Wagon search is not working yet. It will be available soon.",
       "WAGON_UPSTREAM": "The search did not go through. Try again in a little while.",
       "RATE_LIMITED": "Too many searches. You can continue in an hour.",
       "generic": "Search failed. Try again."

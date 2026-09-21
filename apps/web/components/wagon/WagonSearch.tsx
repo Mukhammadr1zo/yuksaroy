@@ -11,7 +11,7 @@ import { ArrowRightIcon, LockSimpleIcon, MagnifyingGlassIcon, TrainIcon } from '
 import { WAGON } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, hasSession } from '@/lib/api';
-import { uzDateTime } from '@/lib/format';
+import { uzDate, uzDateTime, uzToday } from '@/lib/format';
 import { BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 import type { WagonEvent, WagonMe, WagonQuota, WagonResult } from '@/lib/types-wagon';
 
@@ -22,6 +22,15 @@ type State =
 
 const ERRS: Record<number, Err> = { 400: 'WAGON_NO_INVALID', 429: 'RATE_LIMITED', 502: 'WAGON_UPSTREAM', 503: 'WAGON_NOT_CONFIGURED' };
 const STATE_TONE: Record<WagonEvent['state'], string> = { loaded: 'bg-teal text-white', empty: 'bg-line text-ink', unknown: 'bg-sand text-muted' };
+
+/**
+ * Hodisa sanasi faqat kun ("2026-09-20"), soati yo'q: soat bilan chiqarilsa har qatorda uydirma
+ * 05:00 turardi. Yil faqat boshqa yildagi qator uchun yoziladi, ro'yxatning ko'pi shu yildan.
+ */
+function dayLabel(d: string, locale: string): string {
+  const y = d.slice(0, 4);
+  return y === uzToday().slice(0, 4) ? uzDate(d, locale) : `${uzDate(d, locale)} ${y}`;
+}
 
 export function WagonSearch() {
   const t = useTranslations('wagon');
@@ -79,7 +88,11 @@ export function WagonSearch() {
             <LockSimpleIcon size={14} aria-hidden="true" />{t('guest')} <Link href="/login?next=/wagon" className={cta}>{t('loginCta')}</Link>
           </p>
         ) : quota ? (
-          <p className="mt-3 text-sm text-muted">{quota.subscriber ? t('quotaSub') : t('quotaFree', { left: Math.max(0, quota.freeTotal - quota.freeUsed) })}</p>
+          <p className="mt-3 text-sm text-muted">
+            {quota.subscriber ? t('quotaSub') : t('quotaFree', { left: Math.max(0, quota.freeTotal - quota.freeUsed) })}
+            {/* Bepul qidiruv tugagan: odam devorga urilmasdan oldin obunaga yo'l ko'rsin */}
+            {!quota.subscriber && quota.freeUsed >= quota.freeTotal ? <> <Link href="/dashboard/subscription" className={cta}>{t('subscribeCta')}</Link></> : null}
+          </p>
         ) : null}
       </form>
 
@@ -112,7 +125,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
         <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           {c.destination ? <Row k={t('destination')} v={c.destination} /> : null}
           {c.operation ? <Row k={t('operation')} v={c.operation} /> : null}
-          <Row k={t('date')} v={uzDateTime(c.date, locale)} mono />
+          <Row k={t('date')} v={dayLabel(c.date, locale)} mono />
           {c.cargo ? <Row k={t('cargo')} v={c.weightT != null ? `${c.cargo}, ${t('weight', { t: c.weightT })}` : c.cargo} /> : null}
           {c.idleDays != null && c.idleDays > 0 ? <Row k={t('idle')} v={t('idleDays', { days: c.idleDays })} /> : null}
         </dl>
@@ -124,7 +137,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
         <ol className="mt-3 divide-y divide-line rounded-card border border-line bg-white">
           {r.events.map((e, i) => (
             <li key={`${e.date}-${i}`} className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1 px-4 py-3 text-sm">
-              <span className="font-mono tabular-nums text-muted">{uzDateTime(e.date, locale)}</span>
+              <span className="font-mono tabular-nums text-muted">{dayLabel(e.date, locale)}</span>
               <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5 font-semibold text-ink wrap-anywhere">
                 {e.station ?? t('stationUnknown')}
                 {e.destination ? <><ArrowRightIcon size={14} className="shrink-0 text-muted" aria-hidden="true" />{e.destination}</> : null}

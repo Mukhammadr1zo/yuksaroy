@@ -15,6 +15,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ChatCircleDotsIcon, PaperPlaneRightIcon, XIcon } from '@phosphor-icons/react';
 import { Link, usePathname } from '@/i18n/navigation';
+import { DashLink } from '@/components/site/DashLink';
 import { ApiError, api, post } from '@/lib/api';
 import { getCompare, getCompareServer, subscribeCompare } from '@/lib/compare';
 
@@ -152,9 +153,9 @@ export function HelpWidget() {
                 {!m.mine && (m.related?.length || m.note) ? (
                   <span className="mt-2 flex flex-wrap gap-1.5">
                     {m.related?.map((r) => (
-                      <Link key={r.id} href={r.href} onClick={() => setOpen(false)} className="max-w-full rounded-full bg-sand px-2.5 py-1 text-xs font-semibold text-teal-ink transition hover:bg-line wrap-anywhere">
+                      <DashLink key={r.id} href={r.href} onClick={() => setOpen(false)} className="max-w-full rounded-full bg-sand px-2.5 py-1 text-xs font-semibold text-teal-ink transition hover:bg-line wrap-anywhere">
                         {t('related')}: {r.q}
-                      </Link>
+                      </DashLink>
                     ))}
                     {m.note ? <Link href="/contact" onClick={() => setOpen(false)} className="rounded-full bg-navy px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-navy-2">{t('contact')}</Link> : null}
                   </span>

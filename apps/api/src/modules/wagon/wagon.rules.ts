@@ -43,6 +43,13 @@ const numOrNull = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 const stateOf = (v: unknown): WagonEvent['state'] => (v === 'loaded' || v === 'empty' ? v : 'unknown');
+/**
+ * Stansiya, amal va yuk nomlari hisobotlardan BOSH HARFLAR bilan keladi ("ТАШКЕНТ-ТОВАРНЫЙ").
+ * Butun satr bosh harfli bo'lsagina har so'zning birinchi harfi qoldirilib qolgani kichiklashtiriladi;
+ * aralash yozuv (masalan qisqartma) tegilmaydi, chunki uni to'g'ri o'girib bo'lmaydi.
+ */
+const unshout = (v: string | null): string | null =>
+  v === null || /\p{Ll}/u.test(v) ? v : v.replace(/\p{L}[\p{L}\p{Nd}]*/gu, (w) => w[0] + w.slice(1).toLowerCase());
 
 /** Upstream raqami: boshidagi nollarsiz ("00123456" -> "123456"); hammasi nol bo'lsa "0". */
 export const upstreamNo = (digits: string): string => digits.replace(/^0+(?=\d)/, '');
@@ -53,8 +60,8 @@ export function mapEvents(rows: readonly UpstreamEvent[]): WagonEvent[] {
     .filter((r) => !!str(r.event_date))
     .map((r) => ({
       date: r.event_date as string,
-      station: str(r.station), destination: str(r.dest_station), state: stateOf(r.state), operation: str(r.operation),
-      cargo: str(r.cargo), weightT: numOrNull(r.weight), idleDays: numOrNull(r.idle_days),
+      station: unshout(str(r.station)), destination: unshout(str(r.dest_station)), state: stateOf(r.state), operation: unshout(str(r.operation)),
+      cargo: unshout(str(r.cargo)), weightT: numOrNull(r.weight), idleDays: numOrNull(r.idle_days),
     }))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .slice(0, EVENTS_MAX);
