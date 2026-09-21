@@ -9,7 +9,6 @@ export interface WagonEvent {
   cargo: string | null;
   weightT: number | null;
   idleDays: number | null;
-  source: string | null;
 }
 
 export interface WagonQuota { subscriber: boolean; freeUsed: number; freeTotal: number }
@@ -23,6 +22,5 @@ export interface WagonResult {
   /** Yangisi birinchi, eng ko'pi 50 ta. */
   events: WagonEvent[];
   fetchedAt: string;
-  fromCache: boolean;
   quota: WagonQuota;
 }

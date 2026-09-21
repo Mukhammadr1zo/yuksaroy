@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckIcon } from '@phosphor-icons/react/dist/ssr';
-import { PRICING } from '@yuksaroy/domain';
+import { PLATFORM_DEFAULTS, PRICING } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { DashLink } from '@/components/site/DashLink';
 import { num } from '@/lib/format';
+import { sapi } from '@/lib/server-api';
 import { BTN, Faq } from '@/components/marketing/bits';
 import { alt } from '@/lib/seo';
 
@@ -23,10 +24,19 @@ const PLANS = [
   { key: 'deal', n: 3, href: '/contact?topic=partner', hot: false },
 ] as const;
 
+/** Obuna narxi admin panelida turadi; chaqiruv ishlamasa sahifa yiqilmasin, sukut narx ko'rsatiladi. */
+type SubPrice = { pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number };
+const SUB_FALLBACK: SubPrice = {
+  pricePerMonthSom: PLATFORM_DEFAULTS.subscriptionMonthSom,
+  phoneRevealDaily: PLATFORM_DEFAULTS.phoneRevealDaily,
+  wagonSearchFree: PLATFORM_DEFAULTS.wagonSearchFree,
+};
+
 export default async function PricingPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('pricing');
+  const sub = await sapi<SubPrice>('/subscription/price').catch(() => SUB_FALLBACK);
   return (
     <>
       <section className="border-b border-line bg-white">
@@ -59,6 +69,31 @@ export default async function PricingPage({ params }: Params) {
             </li>
           ))}
         </ul>
+
+        <div className="mt-8 grid gap-6 rounded-card border border-teal/40 bg-teal-soft p-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-8">
+          <div className="min-w-0">
+            <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-teal-ink">{t('subscription.heading')}</h2>
+            <p className="mt-2 max-w-[52ch] text-lg font-semibold text-navy">{t('subscription.line')}</p>
+            <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+              <li className="flex gap-2.5 text-sm text-ink/85">
+                <CheckIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-teal-ink" aria-hidden="true" />{t('subscription.f1', { phones: sub.phoneRevealDaily })}
+              </li>
+              <li className="flex gap-2.5 text-sm text-ink/85">
+                <CheckIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-teal-ink" aria-hidden="true" />{t('subscription.f2', { free: sub.wagonSearchFree })}
+              </li>
+              <li className="flex gap-2.5 text-sm text-ink/85">
+                <CheckIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-teal-ink" aria-hidden="true" />{t('subscription.f3')}
+              </li>
+            </ul>
+            <p className="mt-4 max-w-[70ch] text-sm text-muted">{t('subscription.note')}</p>
+          </div>
+          <div className="shrink-0 md:text-right">
+            <p className="font-display text-3xl font-bold tabular-nums text-navy">
+              {num(sub.pricePerMonthSom, locale)} <span className="font-mono text-base font-normal text-muted">{t('perMonth')}</span>
+            </p>
+            <DashLink href="/dashboard/subscription" className={`mt-4 ${BTN.primary}`}>{t('subscription.cta')}</DashLink>
+          </div>
+        </div>
 
         <div className="mt-8 rounded-card border border-line bg-sand p-6">
           <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-teal-ink">{t('commission.heading')}</h2>

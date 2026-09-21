@@ -39,6 +39,15 @@
       "f3": "Price depends on the number of listings",
       "cta": "Contact us"
     },
+    "subscription": {
+      "heading": "Subscription",
+      "line": "Owner phone numbers and wagon search open up with a subscription.",
+      "note": "The catalogue, map, chat and requests stay open without one. A subscription does not renew itself: you extend it when it runs out.",
+      "f1": "Phone numbers of listing and terminal owners, up to {phones} a day",
+      "f2": "Unlimited wagon search ({free} free without a subscription)",
+      "f3": "From 1 to 12 months, you choose",
+      "cta": "Subscribe"
+    },
     "commission": {
       "heading": "Booking commission",
       "line": "Booking commission is 0 % today. Once bookings exceed 100 per month it becomes 2 to 3 %, announced in advance.",

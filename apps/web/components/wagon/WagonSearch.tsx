@@ -1,6 +1,6 @@
 'use client';
 /**
- * Vagon qidiruvi: raqam kiritiladi, natija kartasi "hozir qayerda" va harakat tarixi.
+ * Vagon qidiruvi: raqam kiritiladi, natija kartasi "oxirgi joylashuvi" va harakat tarixi.
  * Mehmonga forma yopiq: kirish havolasi. 402 obuna, 503 xizmat ulanmagan, topilmasa oddiy matn.
  * Stansiya nomlari upstream dan ruscha keladi va shundayligicha ko'rsatiladi: rasmiy nomlar.
  * Boshlang'ich holat server va brauzerda bir xil: sessiya faqat brauzerda bilinadi.
@@ -42,7 +42,7 @@ export function WagonSearch() {
     if (!valid) { setSt({ s: 'err', code: 'WAGON_NO_INVALID' }); return; }
     setSt({ s: 'busy' });
     try {
-      // Server upstream ga 10 soniya beradi; brauzer undan sal ko'proq kutadi, keyin "manba javob bermadi"
+      // Server 10 soniya kutadi; brauzer undan sal ko'proq, keyin "hozir qidirib bo'lmadi"
       const r = await api<WagonResult>('/wagon/search', { method: 'POST', body: JSON.stringify({ no }), signal: AbortSignal.timeout(15_000) });
       setQuota(r.quota);
       setSt({ s: 'result', r });
@@ -79,7 +79,7 @@ export function WagonSearch() {
             <LockSimpleIcon size={14} aria-hidden="true" />{t('guest')} <Link href="/login?next=/wagon" className={cta}>{t('loginCta')}</Link>
           </p>
         ) : quota ? (
-          <p className="mt-3 text-sm text-muted">{quota.subscriber ? t('quotaSub') : t('quotaFree', { used: quota.freeUsed, total: quota.freeTotal })}</p>
+          <p className="mt-3 text-sm text-muted">{quota.subscriber ? t('quotaSub') : t('quotaFree', { left: Math.max(0, quota.freeTotal - quota.freeUsed) })}</p>
         ) : null}
       </form>
 
@@ -116,7 +116,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
           {c.cargo ? <Row k={t('cargo')} v={c.weightT != null ? `${c.cargo}, ${t('weight', { t: c.weightT })}` : c.cargo} /> : null}
           {c.idleDays != null && c.idleDays > 0 ? <Row k={t('idle')} v={t('idleDays', { days: c.idleDays })} /> : null}
         </dl>
-        <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}{r.fromCache ? ` · ${t('fromCache')}` : ''}</p>
+        <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
       </section>
 
       <section className="mt-5">
@@ -130,7 +130,6 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
                 {e.destination ? <><ArrowRightIcon size={14} className="shrink-0 text-muted" aria-hidden="true" />{e.destination}</> : null}
               </span>
               <span className="text-muted">{[e.operation, e.state === 'unknown' ? null : t(`state.${e.state}`)].filter(Boolean).join(' · ')}</span>
-              {e.source ? <span className="ml-auto text-xs text-muted">{t('source')}: {e.source}</span> : null}
             </li>
           ))}
         </ol>

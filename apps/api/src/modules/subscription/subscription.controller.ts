@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Get, HttpCode, Param, Post, Quer
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
+import { PlatformConfigService } from '../../common/platform-config.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { pickIn } from '../catalog/presentation/catalog.controller';
@@ -14,6 +15,22 @@ class OrderDto {
 /** Bekor qilish sababi majburiy: auditga yoziladi. */
 class CancelDto {
   @IsOptional() @IsString() @MaxLength(300) reason?: string;
+}
+
+/**
+ * Ochiq: obuna nima berishi va narxi. Kirish shart emas, chunki narxlar sahifasi mehmonga
+ * ham ko'rinadi: obunani faqat devorga urilgan odam topmasin.
+ */
+@ApiTags('subscription')
+@Controller('subscription')
+export class SubscriptionPublicController {
+  constructor(private readonly config: PlatformConfigService) {}
+
+  @Get('price')
+  async price() {
+    const cfg = await this.config.get();
+    return { pricePerMonthSom: cfg.subscriptionMonthSom, phoneRevealDaily: cfg.phoneRevealDaily, wagonSearchFree: cfg.wagonSearchFree };
+  }
 }
 
 /** Obuna: foydalanuvchi buyurtma beradi (PENDING), admin to'lovni tasdiqlaydi (ACTIVE). */

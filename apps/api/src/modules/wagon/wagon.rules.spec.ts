@@ -30,7 +30,7 @@ describe('hodisalar', () => {
   it("bizning shaklga o'giriladi, yangisi birinchi, sanasi yo'qlari tashlanadi, extra yo'q", () => {
     const ev = mapEvents(rows);
     expect(ev.map((e) => e.date)).toEqual(['2026-09-03T08:00:00', '2026-09-02T12:00:00', '2026-09-01T10:00:00']);
-    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', destination: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weightT: 68.5, idleDays: 2, source: 'idle' });
+    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', destination: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weightT: 68.5, idleDays: 2 });
     expect(ev[1].state).toBe('unknown');
     expect(ev[1].weightT).toBeNull();
     expect(ev[1].idleDays).toBe(3);

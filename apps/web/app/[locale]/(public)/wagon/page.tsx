@@ -24,7 +24,6 @@ export default async function WagonPage({ params }: Params) {
       <div className="mt-8">
         <WagonSearch />
       </div>
-      <p className="mt-6 text-sm text-muted">{t('note')}</p>
     </section>
   );
 }

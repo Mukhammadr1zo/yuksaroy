@@ -39,6 +39,15 @@
       "f3": "Narx e'lonlar soniga qarab kelishiladi",
       "cta": "Bog'lanish"
     },
+    "subscription": {
+      "heading": "Obuna",
+      "line": "Telefon raqamini ko'rish va vagon qidiruvi obuna bilan ochiladi.",
+      "note": "Katalog, xarita, chat va so'rovlar obunasiz ham ochiq. Obuna avtomatik yangilanmaydi: muddati tugasa o'zingiz uzaytirasiz.",
+      "f1": "E'lon va terminal egalarining telefon raqami, kuniga {phones} tagacha",
+      "f2": "Vagon qidiruvi cheksiz ({free} tasi obunasiz ham bepul)",
+      "f3": "Muddat 1 dan 12 oygacha, o'zingiz tanlaysiz",
+      "cta": "Obuna bo'lish"
+    },
     "commission": {
       "heading": "Bron komissiyasi",
       "line": "Bron komissiyasi hozir 0 %, 100 ta buyurtma/oy dan oshganda 2 dan 3 % gacha, avval e'lon qilinadi.",

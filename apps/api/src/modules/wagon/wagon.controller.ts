@@ -97,7 +97,7 @@ export class WagonController {
       q.freeUsed++;
     }
     await this.audit.log({ actorId: userId, action: 'wagon.search', entity: 'Wagon', entityId: wagonNo, meta: { found, fromCache: !!cached } });
-    return { wagonNo, found, ...result, fromCache: !!cached, quota: q };
+    return { wagonNo, found, ...result, quota: q };
   }
 
   private async quota(userId: string) {

@@ -68,7 +68,6 @@ describe('WagonController.search', () => {
     expect(r1.wagonNo).toBe('1234567');
     const r2 = await c.search('a', { no: '01234567' });
     expect(r2.wagonNo).toBe('1234567');
-    expect(r2.fromCache).toBe(true);
     expect(upstreamCalls).toEqual(['1234567']);
     expect(rows).toHaveLength(1); // qayta ochish o'ziniki: qator yozilmaydi
   });
@@ -78,12 +77,11 @@ describe('WagonController.search', () => {
     vi.setSystemTime(new Date('2026-09-21T09:00:00Z'));
     await c.search('a', { no: '1234567' });
     vi.setSystemTime(new Date('2026-09-21T14:00:00Z'));
-    const b = await c.search('b', { no: '1234567' });
-    expect(b.fromCache).toBe(true);
+    await c.search('b', { no: '1234567' });
+    expect(upstreamCalls).toHaveLength(1); // 5 soatda keshdan: upstream tinch
     expect(rows[1].result).toBeNull(); // keshdan olingan qator natijasiz: kvota uchun
     vi.setSystemTime(new Date('2026-09-21T19:00:00Z'));
-    const cc = await c.search('c', { no: '1234567' });
-    expect(cc.fromCache).toBe(false);
+    await c.search('c', { no: '1234567' });
     expect(upstreamCalls).toHaveLength(2);
   });
 
