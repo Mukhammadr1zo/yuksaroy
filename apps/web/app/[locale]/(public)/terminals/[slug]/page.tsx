@@ -15,6 +15,7 @@ import { ChatLauncher } from '@/components/chat/ChatPanel';
 import { MiniMap } from '@/components/catalog/MiniMap';
 import { PIN } from '@/components/map/mapStyle';
 import { CardPhoto } from '@/components/catalog/CardPhoto';
+import { PhotoGallery } from '@/components/catalog/PhotoGallery';
 import { ClaimSiding } from '@/components/catalog/ClaimSiding';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
 
@@ -93,6 +94,7 @@ export default async function TerminalPage({ params }: Params) {
         <div className="max-w-2xl break-words">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(t.kind)}</span>
+            {t.isDemo ? <span className="rounded-full border border-amber/40 bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{tr('demoBadge')}</span> : null}
             {registryOnly ? null : <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>}
             {registryOnly ? <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">{t.claimStatus === 'PENDING' ? tcl('pendingBadge') : tcl('registryBadge')}</span>
               : !t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber">{tr('badge.unverifiedPassport')}</span> : null}
@@ -101,11 +103,11 @@ export default async function TerminalPage({ params }: Params) {
           <h1 className="font-display mt-3 text-3xl font-bold md:text-4xl">{t.name}</h1>
           <p className="mt-2 text-muted">{station ? <>{station} {tr('station.suffix')} </> : null}{t.station?.esrCode ?? t.rail?.esrCode ? <span className="font-mono">({t.station?.esrCode ?? t.rail?.esrCode})</span> : null}{t.station?.rju ?? t.rail?.rju ? <> · {trj((t.station?.rju ?? t.rail?.rju)!)} {tr('rju.suffix')}</> : null}{t.address ? ` · ${t.address}` : ''}</p>
           {t.description ? <p className="mt-4 text-ink/85">{t.description}</p> : null}
+          {/* Namuna terminal: bron ishlaydi (sinab ko'rish uchun), lekin tasdiqlaydigan egasi yo'q */}
+          {t.isDemo ? <p className="mt-3 rounded-xl border border-dashed border-line bg-sand px-4 py-3 text-sm text-muted">{tr('demoNote')}</p> : null}
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-64">
-          <div className="aspect-[16/10] overflow-hidden rounded-card border border-line bg-navy">
-            <CardPhoto kind={t.kind} slug={t.slug} photo={t.photos[0]} alt={t.name} />
-          </div>
+          <PhotoGallery photos={t.photos} alt={t.name} fallback={<CardPhoto kind={t.kind} slug={t.slug} alt={t.name} />} />
           {registryOnly ? null : (
             <>
               <Link href={`/quote?terminal=${t.id}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>

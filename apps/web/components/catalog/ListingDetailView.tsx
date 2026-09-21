@@ -10,6 +10,7 @@ import { KycBadge, PhoneBadge } from './KycBadge';
 import { ChatLauncher } from '@/components/chat/ChatPanel';
 import { PhoneReveal } from './PhoneReveal';
 import { MiniMap } from './MiniMap';
+import { PhotoGallery } from './PhotoGallery';
 import { PremiumBadge } from './PremiumBadge';
 import { Impressions } from './Impressions';
 import { ListingReviews } from '@/components/reviews/ListingReviews';
@@ -71,16 +72,10 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">
           <section>
-            <div className="aspect-[16/10] overflow-hidden rounded-card border border-line bg-sand">
-              {l.photos[0] ? <img src={l.photos[0]} alt={l.title} className="h-full w-full object-cover" /> : (
-                <div className="flex h-full w-full items-center justify-center text-navy/30"><Icon size={96} weight="duotone" aria-hidden="true" /></div>
-              )}
-            </div>
-            {l.photos.length > 1 ? (
-              <div className="mt-2 flex gap-2 overflow-x-auto">
-                {l.photos.slice(1).map((p) => <img key={p} src={p} alt="" className="h-16 w-24 shrink-0 rounded-xl border border-line object-cover" />)}
-              </div>
-            ) : null}
+            <PhotoGallery
+              photos={l.photos} alt={l.title}
+              fallback={<div className="flex h-full w-full items-center justify-center text-navy/30"><Icon size={96} weight="duotone" aria-hidden="true" /></div>}
+            />
           </section>
           {l.description ? <p className="whitespace-pre-line text-ink/85">{l.description}</p> : null}
           <section>

@@ -36,7 +36,7 @@ const toTerminal = (t: TerminalRow): TerminalRecord => ({
   id: t.id, orgId: t.orgId, orgName: t.org?.name ?? null, stationId: t.stationId, station: t.station, regionCode: t.regionCode,
   kind: t.kind, slug: t.slug, name: t.name, description: t.description, address: t.address, phone: t.phone, lat: t.lat, lng: t.lng,
   is24h: t.is24h, hours: (t.hours as WeekHours | null) ?? null, passport: (t.passport as Record<string, unknown> | null) ?? null,
-  photos: t.photos, status: t.status, claimedAt: t.claimedAt, ratingAvg: t.ratingAvg, ratingCount: t.ratingCount,
+  photos: t.photos, status: t.status, claimedAt: t.claimedAt, isDemo: t.isDemo, ratingAvg: t.ratingAvg, ratingCount: t.ratingCount,
   claimStatus: t.claimStatus, claimOrgId: t.claimOrgId,
   services: t.services.map((s) => ({ serviceCode: s.serviceCode, isEnabled: s.isEnabled, leadTimeMin: s.leadTimeMin })),
   tariffs: t.tariffs.map(toTariff),

@@ -13,7 +13,8 @@
  *   pnpm --filter @yuksaroy/api exec tsx prisma/seed/demo-sql.ts > <migration>.sql
  */
 import { REGION_CENTERS } from '@yuksaroy/domain';
-import { DEMO_LISTINGS, DEMO_ORGS, DEMO_REQUESTS, DEMO_SERVICES, DEMO_USERS } from '../../src/modules/admin/demo/demo-data';
+import { BOOKING } from '@yuksaroy/domain';
+import { DEMO_LISTINGS, DEMO_ORGS, DEMO_REQUESTS, DEMO_SERVICES, DEMO_SLOT_DAYS, DEMO_TERMINALS, DEMO_TERMINAL_ORGS, DEMO_TERMINAL_USERS, DEMO_USERS } from '../../src/modules/admin/demo/demo-data';
 
 /** SQL satri: bitta tirnoq ikkilantiriladi, boshqa hech narsa o'zgarmaydi. */
 const s = (v: string) => `'${v.replace(/'/g, "''")}'`;
@@ -32,7 +33,7 @@ out.push(`-- migratsiya bir marta ishlagani uchun ular qaytib kelmaydi.`);
 out.push(`-- Fayl qo'lda yozilmagan: prisma/seed/demo-sql.ts shu ma'lumotdan yasaydi.`);
 out.push('');
 
-for (const o of DEMO_ORGS) {
+for (const o of [...DEMO_ORGS, ...DEMO_TERMINAL_ORGS]) {
   out.push(
     `INSERT INTO "Organization" ("id", "slug", "kind", "kinds", "name", "description", "regionCode", "kycStatus", "phone", "isDemo", "createdAt", "updatedAt")\n` +
       `VALUES (${s(o.id)}, ${s(o.slug)}, ${s(o.kind)}::"OrgKind", ${enumArr([o.kind], 'OrgKind')}, ${s(o.name)}, ${s(o.description)}, ${s(o.regionCode)}, 'NONE'::"KycStatus", NULL, true, now(), now())\n` +
@@ -41,7 +42,7 @@ for (const o of DEMO_ORGS) {
 }
 out.push('');
 
-for (const u of DEMO_USERS) {
+for (const u of [...DEMO_USERS, ...DEMO_TERMINAL_USERS]) {
   // isActive=false: namuna telefon seriyasi kimgadir tegishli bo'lsa ham, uning nomidan kirib bo'lmaydi
   out.push(
     `INSERT INTO "User" ("id", "phone", "fullName", "locale", "isActive", "createdAt", "updatedAt")\n` +
@@ -74,7 +75,8 @@ for (const l of DEMO_LISTINGS) {
       `  ${i.priceUnit ? `${s(i.priceUnit)}::"PriceUnit"` : 'NULL'}, ${arr(i.photos ?? [])}, ${n(i.year)}, ${i.condition ? `${s(i.condition)}::"Condition"` : 'NULL'},\n` +
       `  ${or(i.model)}, ${n(i.qty ?? 1)}, ${or(i.wagonType)}, ${n(i.capacityT)}, ${or(i.truckType)}, ${n(i.tonnage)}, ${n(i.fleetSize)},\n` +
       `  ${arr((i.serviceRegions ?? []) as string[])}, ${json(routes)}, NULL, ${n(i.responseHours)}, now(), NULL, NULL, true, now(), now())\n` +
-      `ON CONFLICT ("id") DO NOTHING;`,
+      // Rasm yangilanadi: prodda matnli SVG bilan yozilgan qatorlar haqiqiy suratga o'tsin
+      `ON CONFLICT ("id") DO UPDATE SET "photos" = EXCLUDED."photos";`,
   );
 }
 out.push('');
@@ -106,6 +108,49 @@ for (const r of DEMO_REQUESTS) {
       `  'OPEN', NULL, replace(gen_random_uuid()::text, '-', ''), true, now(), now())\n` +
       `ON CONFLICT ("id") DO NOTHING;`,
   );
+}
+
+// ── Namuna terminallar: xizmat, tarif va slot kalendari bilan ──
+const WORK_HOURS = { mon: [['08:00', '18:00']], tue: [['08:00', '18:00']], wed: [['08:00', '18:00']], thu: [['08:00', '18:00']], fri: [['08:00', '18:00']], sat: [['08:00', '14:00']] };
+out.push('');
+for (const t of DEMO_TERMINALS) {
+  // Stansiya nomi bo'yicha topiladi; reestrda bo'lmasa NULL qoladi va terminal koordinatasi o'zinikida turaveradi
+  const station = `(SELECT "id" FROM "Station" WHERE "nameRu" = ${s(t.stationRu)} LIMIT 1)`;
+  out.push(
+    `INSERT INTO "Terminal" ("id", "slug", "orgId", "stationId", "kind", "name", "description", "address", "phone",\n` +
+      `  "lat", "lng", "is24h", "hours", "passport", "photos", "status", "claimStatus", "claimedAt", "regionCode", "isDemo", "createdAt", "updatedAt")\n` +
+      `VALUES (${s(t.id)}, ${s(t.slug)}, ${s(t.orgId)}, ${station}, ${s(t.kind)}::"TerminalKind", ${s(t.name)}, ${s(t.description)}, ${s(t.address)}, NULL,\n` +
+      `  ${n(t.lat)}, ${n(t.lng)}, ${b(t.is24h)}, ${t.is24h ? 'NULL' : json(WORK_HOURS)}, ${json(t.passport)}, ${arr(t.photos)},\n` +
+      `  'ACTIVE'::"TerminalStatus", 'APPROVED'::"ClaimStatus", now(), ${s(t.regionCode)}, true, now(), now())\n` +
+      `ON CONFLICT ("id") DO NOTHING;`,
+  );
+  for (const code of t.services) {
+    out.push(
+      `INSERT INTO "TerminalService" ("id", "terminalId", "serviceCode", "isEnabled", "leadTimeMin")\n` +
+        `VALUES (${s(`${t.id}-${code.toLowerCase()}`)}, ${s(t.id)}, ${s(code)}::"ServiceCode", true, 0)\n` +
+        `ON CONFLICT ("terminalId", "serviceCode") DO NOTHING;`,
+    );
+  }
+  for (const [i, x] of t.tariffs.entries()) {
+    out.push(
+      `INSERT INTO "Tariff" ("id", "terminalId", "serviceCode", "version", "validFrom", "priceTiyin", "unit", "minTiyin", "note", "createdAt")\n` +
+        `VALUES (${s(`${t.id}-tar-${i + 1}`)}, ${s(t.id)}, ${s(x.serviceCode)}::"ServiceCode", 1, now() - interval '1 day',\n` +
+        `  ${x.priceSom * 100}::BIGINT, ${s(x.unit)}::"TariffUnit", ${x.minSom === null ? 'NULL' : `${x.minSom * 100}::BIGINT`}, NULL, now())\n` +
+        `ON CONFLICT ("terminalId", "serviceCode", "version") DO NOTHING;`,
+    );
+  }
+  // Kalendar: bugundan DEMO_SLOT_DAYS kunga, har kuni BOOKING.defaultWindows oynalari.
+  // Vaqt Toshkent bo'yicha yoziladi va UTC ga o'giriladi (AT TIME ZONE), ya'ni yozgi/qishgi farq yo'q.
+  const windows = BOOKING.defaultWindows.map(([from, to], i) => `(${i + 1}, ${s(from)}, ${s(to)})`).join(', ');
+  out.push(
+    `INSERT INTO "TimeSlot" ("id", "terminalId", "localDate", "window", "startsAt", "endsAt", "capacity", "createdAt", "updatedAt")\n` +
+      `SELECT replace(gen_random_uuid()::text, '-', ''), ${s(t.id)}, d::date, w.win,\n` +
+      `       ((d::date + w.a::time) AT TIME ZONE 'Asia/Tashkent'), ((d::date + w.b::time) AT TIME ZONE 'Asia/Tashkent'), ${t.capacity}, now(), now()\n` +
+      `FROM generate_series(CURRENT_DATE, CURRENT_DATE + ${DEMO_SLOT_DAYS - 1}, interval '1 day') d\n` +
+      `CROSS JOIN (VALUES ${windows}) AS w(win, a, b)\n` +
+      `ON CONFLICT ("terminalId", "localDate", "window") DO NOTHING;`,
+  );
+  out.push('');
 }
 
 console.log(out.join('\n'));

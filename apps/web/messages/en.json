@@ -298,7 +298,9 @@
       "free": "{count} free",
       "none": "No open spots today",
       "book": "Book a spot"
-    }
+    },
+    "demoNote": "This is a demo terminal, here so you can try how the site works. Booking creates a real order, but there is no real owner to confirm it.",
+    "demoBadge": "Demo"
   },
   "texnika": {
     "lead": "Shunting locomotives and wagons. The owner lists equipment for sale or rent and sets the terms.",

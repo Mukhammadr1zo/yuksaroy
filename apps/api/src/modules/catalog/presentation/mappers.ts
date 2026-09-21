@@ -47,7 +47,7 @@ export function publicTerminalCard(t: TerminalRecord, freeToday = 0, near?: GeoN
     address: t.address, lat: t.lat, lng: t.lng, is24h: t.is24h, hours: t.hours, photos: t.photos,
     // Halol reyting: o'rtacha faqat REVIEW.minToShow bahodan keyin, aks holda null (soni qoladi)
     ratingAvg: ratingDisplay({ avg: t.ratingAvg, count: t.ratingCount }).avg, ratingCount: t.ratingCount,
-    claimed: t.claimedAt !== null, orgName: t.orgName, claimStatus: t.claimStatus,
+    claimed: t.claimedAt !== null, orgName: t.orgName, claimStatus: t.claimStatus, isDemo: t.isDemo,
     services: t.services.filter((s) => s.isEnabled).map((s) => s.serviceCode),
     fromPriceTiyin: fromPriceTiyin(t),
     tariffs: cardTariffs(t),

@@ -51,7 +51,8 @@ export interface TerminalRecord {
   id: string; orgId: string | null; orgName: string | null; stationId: string | null; station: StationRecord | null;
   kind: TerminalKind; slug: string; name: string; description: string | null; address: string | null; phone: string | null;
   lat: number | null; lng: number | null; is24h: boolean; hours: WeekHours | null; passport: Record<string, unknown> | null;
-  photos: string[]; status: TerminalStatus; claimedAt: Date | null; ratingAvg: number; ratingCount: number;
+  photos: string[]; status: TerminalStatus; claimedAt: Date | null;
+  isDemo: boolean; ratingAvg: number; ratingCount: number;
   /** Egasiz terminalga da'vo: PENDING -> admin hal qiladi; claimOrgId da'vogar tashkilot. */
   claimStatus: ClaimStatus; claimOrgId: string | null;
   services: TerminalServiceRecord[];

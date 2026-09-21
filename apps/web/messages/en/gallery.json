@@ -1,0 +1,9 @@
+{
+  "gallery": {
+    "prev": "Previous photo",
+    "next": "Next photo",
+    "openFull": "Full screen",
+    "close": "Close",
+    "photoN": "Photo {n}"
+  }
+}

@@ -295,6 +295,7 @@ model Terminal {
   ratingCount Int               @default(0)
   createdAt   DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime          @updatedAt @db.Timestamptz(3)
+  isDemo      Boolean           @default(false) // namuna terminal: sahifada "Namuna" belgisi, telefon yo'q
   slotConfig  Json? // { windows: [{ window, start, end, capacity }] }: slot generatsiyasi uchun
 
   // ─── Temir yo'l pasporti ───────────────────────────────────────────────

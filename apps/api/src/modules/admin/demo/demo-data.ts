@@ -8,18 +8,58 @@
  */
 import {
   ORG_KIND_ROLES, REGIONS, type Condition, type ListingInput, type OrgKind, type PriceUnit, type RegionCode, type Role,
-  type ServiceType, type TruckType, type WagonType,
+  type ServiceCode, type ServiceType, type TariffUnit, type TerminalKind, type TruckType, type WagonType,
 } from '@yuksaroy/domain';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * Namuna terminal kalendari necha kunga ochiladi. BOOKING.horizonDays (30) emas: namuna
+ * qatorlar bir marta yoziladi va hech kim ularni yangilab turmaydi, 30 kundan keyin
+ * kalendar bo'shab qolardi va "joy band qilish" sinab ko'rib bo'lmasdi.
+ */
+export const DEMO_SLOT_DAYS = 180;
 export const DEMO_ID = { org: (i: number) => `demo-org-${pad(i)}`, user: (i: number) => `demo-user-${pad(i)}`, listing: (i: number) => `demo-listing-${pad(i)}`, service: (i: number) => `demo-service-${pad(i)}`, request: (i: number) => `demo-request-${pad(i)}` };
 /** Namuna telefonlar +998900000101.. : haqiqiy raqam bo'lishi mumkin emas (900 000 01xx seriyasi berilmagan). */
 export const demoPhone = (i: number) => `+9989000001${pad(i)}`;
 const som = (n: number) => n * 100;
 
 /** Rasm majburiy (WAGON, SHUNTING_LOCO), lekin namuna uchun haqiqiy surat yo'q: oddiy, halol "Namuna rasm" plakati. */
-export const demoPhoto = (label: string) =>
-  `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400"><rect width="640" height="400" fill="#f3efe6"/><text x="320" y="190" font-family="sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="#002352">${label}</text><text x="320" y="232" font-family="sans-serif" font-size="20" text-anchor="middle" fill="#7a7368">Namuna rasm</text></svg>`)}`;
+/**
+ * Namuna rasmlari: apps/web/public/demo dagi haqiqiy suratlar (erkin litsenziya).
+ * Ilgari bu yerda ustiga sarlavha yozilgan bo'sh SVG turardi: e'lon sahifasi tayyor
+ * emasdek ko'rinardi va odam mahsulotni ko'z bilan solishtira olmasdi.
+ * Har e'lon turiga mos to'plamdan 2 ta rasm oladi, ro'yxat aylanma: bir xil turdagi
+ * qo'shni e'lonlar bir xil rasm bilan chiqmasin.
+ */
+const PHOTO_SETS = {
+  COVERED: ['wagon-covered-1', 'wagon-covered-2'],
+  GONDOLA: ['wagon-gondola-1', 'wagon-gondola-2', 'wagon-gondola-3'],
+  PLATFORM: ['wagon-platform-1', 'wagon-platform-2', 'wagon-platform-3'],
+  TANK: ['wagon-tank-1', 'wagon-tank-2', 'wagon-tank-3'],
+  HOPPER: ['wagon-hopper-1', 'wagon-hopper-2'],
+  // Refrijerator vagon tashqaridan yopiq vagonga o'xshaydi: shu to'plam ishlatiladi
+  REFRIGERATOR: ['wagon-covered-2', 'wagon-covered-1'],
+  // Tentli fura: brendsiz, to'g'ri kuzovli surat topilmadi. Bo'sh ro'yxat = rasmsiz e'lon
+  // (galereya turiga mos belgi chizadi). Noto'g'ri kuzov ko'rsatishdan ko'ra shu to'g'ri.
+  TENT: [],
+  REF: ['truck-reefer-1', 'truck-reefer-2'],
+  TIPPER: ['truck-dump-1', 'truck-dump-2'],
+  CONTAINER: ['truck-container-1', 'truck-container-2'],
+  TRUCK_TANK: ['truck-tank-1'],
+  FLATBED: ['excavator-1', 'excavator-2'],
+  LOCO: ['loco-1', 'loco-2', 'loco-3'],
+  TERMINAL_CONTAINER: ['terminal-container-1', 'terminal-container-2', 'terminal-container-3', 'terminal-crane-1'],
+  TERMINAL_YARD: ['terminal-rail-1', 'terminal-rail-2', 'terminal-crane-2', 'terminal-rail-3'],
+  TERMINAL_WAREHOUSE: ['terminal-warehouse-1', 'terminal-warehouse-2', 'terminal-warehouse-3'],
+} as const;
+export type PhotoSet = keyof typeof PHOTO_SETS;
+
+/** To'plamdan `count` ta rasm, `offset` dan boshlab aylanma tartibda. */
+export const demoPhotos = (set: PhotoSet, offset = 0, count = 2): string[] => {
+  const list = PHOTO_SETS[set];
+  return Array.from({ length: Math.min(count, list.length) }, (_, k) => `/demo/${list[(offset + k) % list.length]}.jpg`);
+};
 
 // ───────────────────────── Tashkilotlar va odamlar ─────────────────────────
 
@@ -116,13 +156,14 @@ const LOCOS: LocoRow[] = [
 export const DEMO_LISTINGS: DemoListing[] = [
   ...WAGONS.map(([title, slug, wagonType, year, condition, qty, capacityT, model, deal, price, regionCode, org, description], i) =>
     listing(i + 1, slug, org, { kind: 'WAGON', deal, title, description, regionCode, wagonType, year, condition, qty, capacityT, model,
-      priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', photos: [demoPhoto(title)] })),
+      priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', photos: demoPhotos(wagonType as PhotoSet, i) })),
   ...TRUCKS.map(([title, slug, truckType, tonnage, fleetSize, regionCode, serviceRegions, routes, priceUnit, price, org, description], i) =>
     listing(WAGONS.length + i + 1, slug, org, { kind: 'TRUCK', deal: null, title, description, regionCode, truckType, tonnage, fleetSize, serviceRegions,
-      routes: routes.map(([from, to]) => ({ from, to })), priceTiyin: som(price), priceUnit, responseHours: 2 })),
+      routes: routes.map(([from, to]) => ({ from, to })), priceTiyin: som(price), priceUnit, responseHours: 2,
+      photos: demoPhotos(truckType === 'TANK' ? 'TRUCK_TANK' : (truckType as PhotoSet), i) })),
   ...LOCOS.map(([title, slug, year, condition, model, capacityT, deal, price, regionCode, responseHours, org, description], i) =>
     listing(WAGONS.length + TRUCKS.length + i + 1, slug, org, { kind: 'SHUNTING_LOCO', deal, title, description, regionCode, year, condition, model, capacityT,
-      priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', responseHours, photos: [demoPhoto(title)] })),
+      priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', responseHours, photos: demoPhotos('LOCO', i) })),
 ];
 
 // ───────────────────────── Xizmatlar markazi ─────────────────────────
@@ -223,6 +264,73 @@ export const DEMO_REQUESTS: DemoRequest[] = [
     id: DEMO_ID.request(CARGO_ROWS.length + i + 1), board: 'SERVICE', createdById: DEMO_ID.user(user), orgId: DEMO_USERS[user - 1].orgId,
     title, description, serviceType, regionCode, fromRegion: null, toRegion: null, fromText: null, toText: null, cargoName: null, weightT: null, truckType: null, loadInDays: null,
   })),
+];
+
+// ───────────────────────── Namuna terminallar ─────────────────────────
+// Nega alohida id oralig'i (org 21+, user 41+): yuqoridagi ro'yxatlar indeksga bog'langan
+// (xizmat profillari va bozor so'rovlari DEMO_USERS[n] ni oladi), oxiriga qo'shilsa ularning
+// egasi siljib ketardi. Shu sabab terminal egalari o'z oralig'ida turadi.
+
+export interface DemoTerminalOrg extends DemoOrg { ownerName: string }
+const TERMINAL_ORG_ROWS: [string, string, RegionCode, string][] = [
+  ['Sergeli Konteyner Maydoni MChJ', 'Ulug\'bek Rahmonov', 'UZ-TK', "Konteyner qabul qilish, saqlash va avtoga ortish. Kran va yuk tarozisi o'zimizniki."],
+  ['Navoiy Yuk Maydoni MChJ', 'Sanjar Eshonov', 'UZ-NW', "Ko'mir, shag'al va mineral o'g'it uchun ochiq maydon. Vagondan avtoga va aksincha."],
+  ['Chuqursoy Ombor Terminali MChJ', 'Dilshod Aliyev', 'UZ-TK', "Yopiq ombor va yuk maydoni. Saqlash, qayta ortish va shahar ichiga yetkazib berish."],
+];
+export const DEMO_TERMINAL_ORGS: DemoOrg[] = TERMINAL_ORG_ROWS.map(([name, , regionCode, description], i) => ({
+  id: DEMO_ID.org(21 + i),
+  slug: `namuna-${name.toLowerCase().replace(/['`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`,
+  name, kind: 'TERMINAL' as OrgKind, regionCode, description,
+}));
+export const DEMO_TERMINAL_USERS: DemoUser[] = TERMINAL_ORG_ROWS.map(([, ownerName], i) => ({
+  id: DEMO_ID.user(41 + i), phone: demoPhone(41 + i), fullName: ownerName,
+  orgId: DEMO_TERMINAL_ORGS[i].id, roles: ORG_KIND_ROLES.TERMINAL,
+}));
+
+export interface DemoTariff { serviceCode: ServiceCode; priceSom: number; unit: TariffUnit; minSom: number | null }
+export interface DemoTerminal {
+  id: string; slug: string; orgId: string; ownerId: string; name: string; kind: TerminalKind;
+  /** Stansiya nomi ruscha: bazada shu nom bo'yicha topiladi, topilmasa terminal stansiyasiz qoladi. */
+  stationRu: string; regionCode: RegionCode; lat: number; lng: number;
+  address: string; description: string; is24h: boolean;
+  services: ServiceCode[]; tariffs: DemoTariff[]; photos: string[];
+  passport: { tracks: number; tracksLengthM: number; cranes: { type: string; capacityT: number }[]; warehouseM2: number; openAreaM2: number; hasScale: boolean; scaleT: number };
+  /** Slot oynasi sig'imi: bir oynada nechta mashina qabul qilinadi. */
+  capacity: number;
+}
+const tariff = (serviceCode: ServiceCode, priceSom: number, unit: TariffUnit, minSom: number | null = null): DemoTariff => ({ serviceCode, priceSom, unit, minSom });
+
+export const DEMO_TERMINALS: DemoTerminal[] = [
+  {
+    id: 'demo-terminal-01', slug: 'namuna-sergeli-konteyner-maydoni', orgId: DEMO_TERMINAL_ORGS[0].id, ownerId: DEMO_TERMINAL_USERS[0].id,
+    name: 'Sergeli konteyner maydoni', kind: 'MULTI', stationRu: 'Сергели', regionCode: 'UZ-TK', lat: 41.2170, lng: 69.2180,
+    address: 'Toshkent sh., Sergeli tumani', is24h: true,
+    description: "Konteyner va qadoqlangan yuk uchun maydon. Vagondan avtoga ortamiz, saqlash uchun ochiq va yopiq joy bor. Kechasi ham ishlaymiz.",
+    services: ['LOAD', 'UNLOAD', 'CONTAINER', 'STORAGE', 'WEIGH'],
+    tariffs: [tariff('LOAD', 180_000, 'PER_TON', 900_000), tariff('UNLOAD', 160_000, 'PER_TON', 800_000), tariff('CONTAINER', 1_400_000, 'PER_OPERATION'), tariff('STORAGE', 38_000, 'PER_DAY'), tariff('WEIGH', 120_000, 'PER_WAGON')],
+    photos: demoPhotos('TERMINAL_CONTAINER', 0, 4), passport: { tracks: 6, tracksLengthM: 3200, cranes: [{ type: 'Kozlovoy kran', capacityT: 32 }, { type: 'Richstaker', capacityT: 45 }], warehouseM2: 4200, openAreaM2: 28000, hasScale: true, scaleT: 120 },
+    capacity: 4,
+  },
+  {
+    id: 'demo-terminal-02', slug: 'namuna-navoiy-yuk-maydoni', orgId: DEMO_TERMINAL_ORGS[1].id, ownerId: DEMO_TERMINAL_USERS[1].id,
+    name: 'Navoiy yuk maydoni', kind: 'RAIL', stationRu: 'Навои', regionCode: 'UZ-NW', lat: 40.0844, lng: 65.3792,
+    address: 'Navoiy viloyati, Navoiy sh.', is24h: false,
+    description: "Sochiluvchi yuklar uchun ochiq maydon: ko'mir, shag'al, mineral o'g'it. Vagonni ag'daramiz va avtoga ortamiz.",
+    services: ['LOAD', 'UNLOAD', 'STORAGE', 'WEIGH'],
+    tariffs: [tariff('LOAD', 140_000, 'PER_TON', 700_000), tariff('UNLOAD', 130_000, 'PER_TON', 650_000), tariff('STORAGE', 26_000, 'PER_DAY'), tariff('WEIGH', 110_000, 'PER_WAGON')],
+    photos: demoPhotos('TERMINAL_YARD', 0, 4), passport: { tracks: 3, tracksLengthM: 1800, cranes: [{ type: 'Kozlovoy kran', capacityT: 20 }], warehouseM2: 0, openAreaM2: 19000, hasScale: true, scaleT: 100 },
+    capacity: 3,
+  },
+  {
+    id: 'demo-terminal-03', slug: 'namuna-chuqursoy-ombor-terminali', orgId: DEMO_TERMINAL_ORGS[2].id, ownerId: DEMO_TERMINAL_USERS[2].id,
+    name: 'Chuqursoy ombor terminali', kind: 'MULTI', stationRu: 'Чукурсай', regionCode: 'UZ-TK', lat: 41.3280, lng: 69.2010,
+    address: 'Toshkent sh., Uchtepa tumani', is24h: false,
+    description: "Yopiq ombor va yuk maydoni. Qadoqlangan mahsulot saqlaymiz, shahar ichiga kichik mashinalarda yetkazib beramiz.",
+    services: ['LOAD', 'UNLOAD', 'STORAGE', 'LAST_MILE'],
+    tariffs: [tariff('LOAD', 170_000, 'PER_TON', 850_000), tariff('UNLOAD', 150_000, 'PER_TON', 750_000), tariff('STORAGE', 42_000, 'PER_DAY'), tariff('LAST_MILE', 900_000, 'PER_OPERATION')],
+    photos: demoPhotos('TERMINAL_WAREHOUSE', 0, 3), passport: { tracks: 2, tracksLengthM: 1100, cranes: [{ type: 'Kozlovoy kran', capacityT: 16 }], warehouseM2: 6800, openAreaM2: 9000, hasScale: true, scaleT: 80 },
+    capacity: 3,
+  },
 ];
 
 /** Spec uchun: hamma viloyat kodi haqiqiy ro'yxatdan. */

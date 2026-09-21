@@ -298,7 +298,9 @@
       "free": "{count} ta bo'sh",
       "none": "Bugun ochiq joy yo'q",
       "book": "Joy band qilish"
-    }
+    },
+    "demoNote": "Bu namuna terminal: sayt qanday ishlashini sinab ko'rish uchun. Joy band qilsangiz haqiqiy buyurtma yaratiladi, lekin uni tasdiqlaydigan haqiqiy egasi yo'q.",
+    "demoBadge": "Namuna"
   },
   "texnika": {
     "lead": "Manevr teplovozlari va vagonlar. Egasi texnikasini sotish yoki arendaga berish uchun e'lon qo'yadi, shartlarni o'zi belgilaydi.",

@@ -87,7 +87,7 @@ export class ContactsController {
     }
     // Terminal va shahobcha bitta jadvalda. Ochiq sahifa sharti: ACTIVE va (egasi bor yoki reestr shahobchasi).
     // Raqam: obyektning o'z raqami, bo'lmasa reestrdagi mas'ul shaxs raqami.
-    const t = await this.prisma.terminal.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] }] }, select: { phone: true, contactPhone: true } });
-    return t ? (some(t.phone) ?? some(t.contactPhone)) : undefined;
+    const t = await this.prisma.terminal.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] }] }, select: { phone: true, contactPhone: true, isDemo: true } });
+    return t ? (t.isDemo ? null : (some(t.phone) ?? some(t.contactPhone))) : undefined;
   }
 }

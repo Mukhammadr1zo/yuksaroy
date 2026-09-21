@@ -37,6 +37,8 @@ export interface TerminalCard {
   ratingAvg: number | null; ratingCount: number; claimed: boolean; orgName: string | null; services: ServiceCode[]; fromPriceTiyin: number | null;
   /** Egasiz terminalga da'vo holati (PENDING: operator tekshirmoqda). */
   claimStatus?: ClaimStatus;
+  /** Namuna terminal: sahifada belgi va izoh chiqadi, telefon berilmaydi. */
+  isDemo?: boolean;
   // Ro'yxat qo'shimchalari: joriy umumiy tariflar (max 6), bugungi bo'sh slotlar, near bo'lsa masofa
   tariffs?: CardTariff[]; freeToday?: number; distanceKm?: number | null;
 }
