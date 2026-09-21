@@ -3,8 +3,11 @@
 # Nega VPS da qurilmaydi: serverda 24 ta boshqa konteyner ishlayapti (uzrailmap, taminot, smm, uty)
 # va Next qurilishi xotirani yeb, ularni yiqitishi mumkin. Shuning uchun qurish runner da.
 #
-# QO'LDA ishga tushiriladi (Actions > Deploy > Run workflow). Avtomatik emas: prodga
-# har push bilan chiqish bu loyihada xohlanmaydi.
+# Ikki yo'l bilan ishga tushadi:
+#   1. CI master da yashil tugagach o'zi (workflow_run). Push = CI = deploy, qo'l tegmaydi.
+#      CI yiqilsa deploy bo'lmaydi: build ishidagi if shuni tekshiradi.
+#   2. Qo'lda (Actions > Deploy > Run workflow), masalan zaxirasiz qayta chiqarish uchun.
+# Avtomatik yo'lni o'chirish kerak bo'lsa: pastdagi workflow_run blokini olib tashlash kifoya.
 #
 # Sirlar (Settings > Secrets and variables > Actions > Secrets):
 #   VPS_HOST         MAJBURIY, server IP yoki domen
@@ -27,6 +30,10 @@ on:
         description: "Baza zaxirasini o'tkazib yuborish (tavsiya etilmaydi)"
         type: boolean
         default: false
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
 
 concurrency:
   # Ikkita deploy bir vaqtda ketmasin
@@ -39,6 +46,9 @@ env:
 
 jobs:
   build:
+    # workflow_run har tugashda keladi, yiqilganida ham: faqat yashil CI dan keyin quriladi.
+    # ship ishi build ga bog'liq (needs), shuning uchun u ham o'z-o'zidan o'tkazib yuboriladi.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
