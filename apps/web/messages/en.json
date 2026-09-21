@@ -72,6 +72,18 @@
       "urgent": {
         "title": "Urgent request",
         "body": "Sent to providers in the region"
+      },
+      "service": {
+        "title": "Offer a service",
+        "body": "As a forwarder, freight cashier or document specialist"
+      },
+      "cargo": {
+        "title": "Post cargo",
+        "body": "Carriers make offers, you choose"
+      },
+      "serviceRequest": {
+        "title": "Request a service",
+        "body": "When you need a forwarder, cashier or paperwork"
       }
     },
     "notifications": {

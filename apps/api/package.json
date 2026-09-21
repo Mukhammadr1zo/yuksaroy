@@ -13,6 +13,7 @@
     "prisma:studio": "node --env-file=../../.env node_modules/prisma/build/index.js studio",
     "test": "node --env-file-if-exists=../../.env node_modules/vitest/vitest.mjs run",
     "db:seed": "node --env-file=../../.env node_modules/tsx/dist/cli.mjs prisma/seed/seed.ts",
+    "db:seed:demo": "node --env-file=../../.env node_modules/tsx/dist/cli.mjs prisma/seed/demo.ts",
     "db:build-data": "node --env-file=../../.env node_modules/tsx/dist/cli.mjs prisma/seed/build-data.ts",
     "db:build-railmap": "node --env-file=../../.env node_modules/tsx/dist/cli.mjs prisma/seed/build-railmap.ts",
     "backfill:region": "node --env-file=../../.env node_modules/tsx/dist/cli.mjs prisma/seed/backfill-region.ts"

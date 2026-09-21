@@ -5,7 +5,7 @@ import { ORG_KINDS, type OrgKind, type SearchLang } from '@yuksaroy/domain';
 import { sapi, qs } from '@/lib/server-api';
 import type { CompanyCard } from '@/lib/types-listing';
 import type { Page } from '@/lib/types';
-import { regionName } from '@/components/catalog/ListingCard';
+import { DemoBadge, regionName } from '@/components/catalog/ListingCard';
 import { KycBadge } from '@/components/catalog/KycBadge';
 import { RegionFilter } from '@/components/catalog/RegionFilter';
 import { Sel } from '@/components/catalog/Sel';
@@ -60,8 +60,8 @@ export default async function CompaniesPage({ params, searchParams }: Params & {
           {data.items.map((o) => (
             <Link key={o.id} href={`/companies/${o.slug ?? o.id}`} className="group rounded-card border border-line bg-white p-4 text-ink transition hover:border-teal">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="truncate font-bold group-hover:text-teal-ink">{o.name}</h3>
-                <KycBadge kyc={o.kyc} />
+                <h3 className="min-w-0 truncate font-bold group-hover:text-teal-ink">{o.name}</h3>
+                {o.isDemo ? <DemoBadge /> : <KycBadge kyc={o.kyc} />}
               </div>
               <p className="mt-0.5 text-xs text-muted">{regionName(o.regionCode, lang) || ' '}</p>
               <div className="mt-2 flex flex-wrap gap-1">

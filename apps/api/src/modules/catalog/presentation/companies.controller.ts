@@ -12,13 +12,13 @@ import { clampInt, pickIn } from './catalog.controller';
 import { publicTerminalCard } from './mappers';
 
 const cardSelect = (now: Date) => ({
-  id: true, slug: true, name: true, kind: true, kinds: true, kycStatus: true, regionCode: true,
+  id: true, slug: true, name: true, kind: true, kinds: true, kycStatus: true, regionCode: true, isDemo: true,
   // Shahobcha ham terminal: da'vosi tasdiqlangani orgId bilan terminals ichida sanaladi, alohida sanoq yo'q
   _count: { select: { terminals: { where: { status: 'ACTIVE' as const } }, listings: { where: activeListing(now) } } },
 });
 type CardRow = Prisma.OrganizationGetPayload<{ select: ReturnType<typeof cardSelect> }>;
 const companyCard = (o: CardRow) => ({
-  id: o.id, slug: o.slug, name: o.name, kinds: o.kinds.length ? o.kinds : [o.kind], kyc: o.kycStatus, regionCode: o.regionCode,
+  id: o.id, slug: o.slug, name: o.name, kinds: o.kinds.length ? o.kinds : [o.kind], kyc: o.kycStatus, regionCode: o.regionCode, isDemo: o.isDemo,
   counts: { terminals: o._count.terminals, listings: o._count.listings },
 });
 

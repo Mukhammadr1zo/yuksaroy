@@ -18,7 +18,7 @@ import { LockSimpleIcon, PhoneIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, hasSession, post, tgTokens } from '@/lib/api';
 
-type Kind = 'listing' | 'terminal' | 'siding' | 'org';
+type Kind = 'listing' | 'terminal' | 'org' | 'service' | 'request';
 type State =
   | { s: 'idle' } | { s: 'busy' } | { s: 'phone'; phone: string }
   | { s: 'login' } | { s: 'subscribe' } | { s: 'limit' } | { s: 'none' } | { s: 'err' };

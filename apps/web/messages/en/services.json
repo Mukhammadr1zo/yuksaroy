@@ -1,5 +1,77 @@
 {
   "services": {
-    "title": "Services centre"
+    "title": "Services centre",
+    "meta": {
+      "title": "Services centre: freight forwarders, freight cashiers, document preparation · YukSaroy",
+      "description": "People and firms that help you ship cargo, in one place. Pick the service you need or leave a request and specialists will send you offers."
+    },
+    "demo": "Sample",
+    "hero": {
+      "eyebrow": "Services centre",
+      "title": "People who help you ship cargo",
+      "lead": "Need a freight forwarder, a freight cashier or someone to prepare documents? Pick from the list or write what you need, and specialists will send you offers.",
+      "ctaAsk": "Leave a request",
+      "ctaAskNote": "You write what you need, specialists send offers",
+      "ctaOffer": "Offer a service",
+      "ctaOfferNote": "If you provide a service, list yourself here"
+    },
+    "types": {
+      "all": "All",
+      "FORWARDER": "Shipping cargo, finding a wagon or a truck, tracking it on the way",
+      "CASHIER": "Preparing freight paperwork at the station and handling payments",
+      "DOCS": "Filling in declarations, contracts and other paperwork"
+    },
+    "filter": {
+      "region": "Region",
+      "regionAll": "All regions",
+      "apply": "Show"
+    },
+    "grid": {
+      "title": "Who provides services",
+      "count": "{count}",
+      "empty": "Nobody here yet. Be the first to list yourself, or leave a request.",
+      "years": "{n} years of experience",
+      "regionsAll": "All of Uzbekistan",
+      "noPrice": "Price negotiable",
+      "hasPhone": "Phone available",
+      "more": "Details"
+    },
+    "detail": {
+      "back": "Back to services centre",
+      "notFound": "This page was not found or is hidden.",
+      "about": "What they do",
+      "regions": "Regions",
+      "experience": "Experience",
+      "price": "Price",
+      "phone": "Phone",
+      "since": "Listed since",
+      "askTitle": "Need exactly this service?",
+      "askBody": "Leave a request: this and other specialists of this type will send offers, and you pick the best one.",
+      "askCta": "Leave a request",
+      "demoNote": "This is a sample, not a real offer. It shows what a page looks like."
+    },
+    "requests": {
+      "title": "Who needs a service",
+      "lead": "People wrote what they need. If you provide the service, send an offer.",
+      "empty": "No open requests right now.",
+      "offerCta": "Make an offer",
+      "needIn": "needed in {region}",
+      "offers": "{count} offers"
+    },
+    "ask": {
+      "title": "Leave a request",
+      "lead": "Write what you need. Specialists of that type get notified, send offers, and you choose. Prices are visible only to you."
+    },
+    "requestDetail": {
+      "back": "All requests",
+      "notFound": "Request not found.",
+      "eyebrow": "Service request",
+      "type": "Which service",
+      "region": "Where",
+      "created": "Posted",
+      "description": "What is needed",
+      "phone": "Requester phone",
+      "offerTitle": "Send an offer"
+    }
   }
 }

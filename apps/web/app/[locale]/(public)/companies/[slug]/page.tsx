@@ -6,7 +6,7 @@ import { type OrgKind, type SearchLang } from '@yuksaroy/domain';
 import { sapiOrNull } from '@/lib/server-api';
 import { num } from '@/lib/format';
 import type { CompanyDetail } from '@/lib/types-listing';
-import { ListingCard, regionName } from '@/components/catalog/ListingCard';
+import { DemoBadge, ListingCard, regionName } from '@/components/catalog/ListingCard';
 import { TerminalCard } from '@/components/catalog/TerminalCard';
 import { KycBadge } from '@/components/catalog/KycBadge';
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
@@ -45,10 +45,11 @@ export default async function CompanyPage({ params }: Params) {
       <header className="mt-3 max-w-3xl">
         <div className="flex flex-wrap items-center gap-2">
           {o.kinds.map((k) => <span key={k} className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(k as OrgKind)}</span>)}
-          <KycBadge kyc={o.kyc} size="md" />
+          {o.isDemo ? <DemoBadge className="px-3 py-1 text-xs" /> : <KycBadge kyc={o.kyc} size="md" />}
         </div>
         <h1 className="font-display mt-3 text-3xl font-bold text-navy md:text-4xl">{o.name}</h1>
         {o.regionCode ? <p className="mt-2 text-muted">{regionName(o.regionCode, lang)}</p> : null}
+        {o.isDemo ? <p className="mt-3 rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{t('demoNote')}</p> : null}
       </header>
 
       <dl className="mt-6 grid grid-cols-3 gap-3">

@@ -16,6 +16,7 @@ const GROUPS: { key: string; items: Item[] }[] = [
     { href: '/admin/moderation', key: 'moderation', badge: 'pending' },
     { href: '/admin/orders', key: 'orders' },
     { href: '/admin/urgent', key: 'urgent' },
+    { href: '/admin/market', key: 'market' },
   ] },
   { key: 'catalog', items: [
     { href: '/admin/terminals', key: 'terminals' },

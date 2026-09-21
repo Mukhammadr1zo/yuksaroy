@@ -28,6 +28,8 @@
       "map": "Obyektlar xaritada",
       "mapNote": "Koordinatalar taxminiy.",
       "none": "hali yo'q"
-    }
+    },
+    "demo": "Namuna",
+    "demoNote": "Bu namuna tashkilot: sayt qanday ishlashini ko'rsatish uchun qo'yilgan, haqiqiy kompaniya emas. Telefon va yozishma yo'q."
   }
 }

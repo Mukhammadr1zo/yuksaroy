@@ -8,7 +8,7 @@ import { visibleCompany } from '../catalog/infrastructure/prisma-catalog.reposit
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { SubscriberGuard } from './subscriber.guard';
 
-const KINDS = ['listing', 'terminal', 'org'] as const;
+const KINDS = ['listing', 'terminal', 'org', 'service', 'request'] as const;
 type Kind = (typeof KINDS)[number];
 
 /** Bo'sh satr ham "raqam yo'q": forma tozalanganda '' saqlanib qoladi. */
@@ -65,14 +65,24 @@ export class ContactsController {
   private async lookup(kind: Kind, id: string): Promise<string | null | undefined> {
     const byIdOrSlug = { OR: [{ id }, { slug: id }] };
     const now = new Date();
+    // Namuna qatorlar (isDemo) hech qachon raqam bermaydi: ular haqiqiy taklif emas
     if (kind === 'listing') {
-      const l = await this.prisma.listing.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] }, select: { contactPhone: true } });
-      return l ? some(l.contactPhone) : undefined;
+      const l = await this.prisma.listing.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] }, select: { contactPhone: true, isDemo: true } });
+      return l ? (l.isDemo ? null : some(l.contactPhone)) : undefined;
     }
     if (kind === 'org') {
       // Katalogdagi kompaniya sahifasi bilan bir xil shart: ko'rinmagan tashkilot raqami ham berilmaydi
-      const o = await this.prisma.organization.findFirst({ where: { AND: [byIdOrSlug, visibleCompany(now)] }, select: { phone: true } });
-      return o ? some(o.phone) : undefined;
+      const o = await this.prisma.organization.findFirst({ where: { AND: [byIdOrSlug, visibleCompany(now)] }, select: { phone: true, isDemo: true } });
+      return o ? (o.isDemo ? null : some(o.phone)) : undefined;
+    }
+    if (kind === 'service') {
+      const sp = await this.prisma.serviceProfile.findFirst({ where: { id, status: 'ACTIVE' }, select: { contactPhone: true, isDemo: true } });
+      return sp ? (sp.isDemo ? null : some(sp.contactPhone)) : undefined;
+    }
+    if (kind === 'request') {
+      // Ochiq so'rov: yopilgan yoki bekor qilinganning raqami ham yopiladi
+      const r = await this.prisma.marketRequest.findFirst({ where: { OR: [{ id }, { no: id }], status: 'OPEN' }, select: { contactPhone: true, isDemo: true } });
+      return r ? (r.isDemo ? null : some(r.contactPhone)) : undefined;
     }
     // Terminal va shahobcha bitta jadvalda. Ochiq sahifa sharti: ACTIVE va (egasi bor yoki reestr shahobchasi).
     // Raqam: obyektning o'z raqami, bo'lmasa reestrdagi mas'ul shaxs raqami.

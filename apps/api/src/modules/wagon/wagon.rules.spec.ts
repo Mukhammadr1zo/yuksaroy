@@ -1,0 +1,54 @@
+import { describe, expect, it } from 'vitest';
+import { canSearch, deriveCurrent, mapEvents, upstreamNo } from './wagon.rules';
+
+describe('vagon kvotasi', () => {
+  it('obunachi cheksiz, qolganlarga freeTotal ta', () => {
+    expect(canSearch(true, 999, 1)).toBe(true);
+    expect(canSearch(false, 0, 1)).toBe(true);
+    expect(canSearch(false, 1, 1)).toBe(false);
+    expect(canSearch(false, 0, 0)).toBe(false);
+    expect(canSearch(false, 2, 3)).toBe(true);
+  });
+});
+
+describe('upstream raqami', () => {
+  it('boshidagi nollar olib tashlanadi', () => {
+    expect(upstreamNo('00123456')).toBe('123456');
+    expect(upstreamNo('12345678')).toBe('12345678');
+    expect(upstreamNo('0000000')).toBe('0');
+  });
+});
+
+const rows = [
+  { event_date: '2026-09-01T10:00:00', snapshot_date: '2026-09-01', module: 'idle', station: 'Ташкент-Товарный', dest_station: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weight: '68.5', idle_days: 2, extra: { secret: 1 } },
+  { event_date: '2026-09-03T08:00:00', snapshot_date: '2026-09-03', module: 'idle', station: 'Ангрен', dest_station: null, state: 'empty', operation: 'Выгрузка', cargo: '', weight: null, idle_days: null },
+  { event_date: '2026-09-02T12:00:00', snapshot_date: '2026-09-03', module: 'route', station: 'Тойтепа', dest_station: 'Ангрен', state: 'bogus', operation: null, cargo: null, weight: 'x', idle_days: '3' },
+  { event_date: null, station: 'sanasi yoq' },
+];
+
+describe('hodisalar', () => {
+  it("bizning shaklga o'giriladi, yangisi birinchi, sanasi yo'qlari tashlanadi, extra yo'q", () => {
+    const ev = mapEvents(rows);
+    expect(ev.map((e) => e.date)).toEqual(['2026-09-03T08:00:00', '2026-09-02T12:00:00', '2026-09-01T10:00:00']);
+    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', destination: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weightT: 68.5, idleDays: 2, source: 'idle' });
+    expect(ev[1].state).toBe('unknown');
+    expect(ev[1].weightT).toBeNull();
+    expect(ev[1].idleDays).toBe(3);
+    expect(ev[0].cargo).toBeNull();
+    expect(Object.keys(ev[0])).not.toContain('extra');
+  });
+
+  it("eng ko'pi 50 ta", () => {
+    const many = Array.from({ length: 70 }, (_, i) => ({ event_date: `2026-01-${String((i % 28) + 1).padStart(2, '0')}T00:00:${String(i % 60).padStart(2, '0')}` }));
+    expect(mapEvents(many)).toHaveLength(50);
+  });
+
+  it("hozirgi joy: eng so'nggi hisobotdagi eng keyingi hodisa", () => {
+    // 09-03 hisobotida ikkita hodisa bor: 09-03 08:00 va 09-02 12:00; keyingisi olinadi
+    expect(deriveCurrent(rows)?.station).toBe('Ангрен');
+    // snapshot_date bo'lmasa event_date bo'yicha
+    expect(deriveCurrent([{ event_date: '2026-01-01' }, { event_date: '2026-02-01', station: 'B' }])?.station).toBe('B');
+    expect(deriveCurrent([])).toBeNull();
+    expect(deriveCurrent([{ event_date: null }])).toBeNull();
+  });
+});

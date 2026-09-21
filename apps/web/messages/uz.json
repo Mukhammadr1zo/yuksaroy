@@ -72,6 +72,18 @@
       "urgent": {
         "title": "Shoshilinch so'rov",
         "body": "Viloyatdagi ijrochilarga tarqatiladi"
+      },
+      "service": {
+        "title": "Xizmat taklif qilish",
+        "body": "Ekspeditor, tovar kassiri yoki hujjat mutaxassisi sifatida"
+      },
+      "cargo": {
+        "title": "Yuk e'lon qilish",
+        "body": "Tashuvchilar taklif beradi, siz tanlaysiz"
+      },
+      "serviceRequest": {
+        "title": "Xizmat so'rash",
+        "body": "Ekspeditor, kassir yoki hujjat kerak bo'lsa"
       }
     },
     "notifications": {

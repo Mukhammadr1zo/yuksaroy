@@ -91,6 +91,8 @@ export class ListingsUseCase {
   async inquire(userId: string, listingId: string, message: string, orgId: string | null, rawAttachments?: unknown) {
     const l = await this.repo.findById(listingId);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
+    // Namuna e'lon haqiqiy taklif emas: unga yozilgan xabar hech kimga bormaydi, shuning uchun qabul qilinmaydi
+    if ((l as { isDemo?: boolean }).isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
     if (orgId && !(await this.access.membership(userId, orgId))) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     const text = message.trim();
     // Bitta e'longa bitta yozishma: takroriy murojaat eskisiga qo'shiladi. Ilgari har

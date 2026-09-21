@@ -11,6 +11,7 @@ const LINKS: { href: string; key: string; exact?: boolean }[] = [
   { href: '/dashboard/objects', key: 'objects' },
   { href: '/dashboard/orders', key: 'orders' },
   { href: '/dashboard/inquiries', key: 'chats' },
+  { href: '/dashboard/market', key: 'market' },
   { href: '/dashboard/subscription', key: 'subscription' },
   { href: '/dashboard/documents', key: 'documents' },
   { href: '/dashboard/organization', key: 'org' },

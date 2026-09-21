@@ -1,5 +1,27 @@
 {
   "help": {
-    "title": "Help"
+    "title": "Help",
+    "open": "Ask a question",
+    "close": "Close",
+    "greeting": "Hello! Ask anything about the site or pick one of the questions below.",
+    "starters": "Frequently asked",
+    "placeholder": "Type your question",
+    "send": "Send",
+    "thinking": "Looking for an answer",
+    "error": "No answer received. Please try again.",
+    "tooMany": "Too many questions. Try again in a minute.",
+    "noAnswer": "I could not find an exact answer. Check the similar questions below or write to us.",
+    "limited": "Today's question limit is used up, so here is the closest ready answer. For a precise answer, write to us.",
+    "contact": "Write to us",
+    "related": "Read more",
+    "all": "All questions",
+    "page": {
+      "eyebrow": "Help",
+      "title": "Frequently asked questions",
+      "lead": "How the site works: finding, contacting, booking, listings and payment. If your answer is not here, write to us.",
+      "more": "Read more",
+      "askTitle": "Did not find the answer?",
+      "askBody": "Use the form on the Contact page, we answer on business days."
+    }
   }
 }

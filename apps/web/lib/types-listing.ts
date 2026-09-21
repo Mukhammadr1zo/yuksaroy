@@ -17,6 +17,8 @@ export interface ListingCard {
   org: { name: string; slug: string | null; kyc: KycStatus } | null;
   object: { type: 'terminal' | 'siding'; id: string; name: string; slug?: string } | null;
   premium: boolean; publishedAt: string | null;
+  /** Namuna qator: haqiqiy taklif emas, "Namuna" yorlig'i bilan chiziladi, telefon va chat berilmaydi. */
+  isDemo: boolean;
 }
 export interface ListingDetail extends ListingCard {
   description: string | null; photos: string[]; responseHours: number | null;
@@ -29,6 +31,7 @@ export interface ListingPage { items: ListingCard[]; total: number; page: number
 export interface CompanyCard {
   id: string; slug: string | null; name: string; kinds: OrgKind[]; kyc: KycStatus; regionCode: string | null;
   counts: { terminals: number; listings: number };
+  isDemo: boolean;
 }
 export interface CompanyDetail extends CompanyCard {
   description: string | null; telegram: string | null; website: string | null; hasPhone: boolean;

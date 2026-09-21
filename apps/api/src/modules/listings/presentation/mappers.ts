@@ -32,6 +32,9 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
       : null,
     premium: l.premiumUntil !== null && l.premiumUntil > now,
     publishedAt: l.publishedAt,
+    // Namuna e'lon: UI "Namuna" yorlig'ini chizadi, telefon va chat tugmasini bermaydi.
+    // ListingRecord da maydon yo'q, lekin toRecord Prisma qatorini to'liq nusxalaydi.
+    isDemo: (l as { isDemo?: boolean }).isDemo === true,
   };
 }
 

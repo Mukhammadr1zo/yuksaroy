@@ -1,5 +1,27 @@
 {
   "help": {
-    "title": "Yordam"
+    "title": "Yordam",
+    "open": "Savol bering",
+    "close": "Yopish",
+    "greeting": "Salom! Sayt haqida savolingiz bo'lsa yozing yoki quyidagi savollardan birini tanlang.",
+    "starters": "Ko'p so'raladigan savollar",
+    "placeholder": "Savolingizni yozing",
+    "send": "Yuborish",
+    "thinking": "Javob qidirilmoqda",
+    "error": "Javob olinmadi. Qayta urinib ko'ring.",
+    "tooMany": "Juda ko'p savol yubordingiz. Bir daqiqadan keyin qayta urinib ko'ring.",
+    "noAnswer": "Bu savolga aniq javob topolmadim. Quyidagi o'xshash savollarga qarang yoki bizga yozing.",
+    "limited": "Bugungi savollar chegarasi tugadi, eng yaqin tayyor javobni ko'rsatdim. Aniqroq javob uchun bizga yozing.",
+    "contact": "Bizga yozish",
+    "related": "Batafsil",
+    "all": "Barcha savollar",
+    "page": {
+      "eyebrow": "Yordam",
+      "title": "Ko'p so'raladigan savollar",
+      "lead": "Sayt qanday ishlaydi: topish, bog'lanish, bron, e'lon va to'lov. Javob topilmasa, bizga yozing.",
+      "more": "Batafsil",
+      "askTitle": "Javob topilmadimi?",
+      "askBody": "Murojaat sahifasidagi forma orqali yozing, ish kunlari javob beramiz."
+    }
   }
 }

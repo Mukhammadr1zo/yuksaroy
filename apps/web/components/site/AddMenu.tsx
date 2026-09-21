@@ -3,7 +3,7 @@
 // bir-biridan uzoq sahifalardan boshlanardi. Formalar o'zgarmadi, faqat kirish yo'li bitta bo'ldi.
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { PlusIcon, ShippingContainerIcon, PathIcon, TrainIcon, TruckIcon, PackageIcon, LightningIcon } from '@phosphor-icons/react';
+import { PlusIcon, ShippingContainerIcon, PathIcon, TrainIcon, TruckIcon, PackageIcon, LightningIcon, BriefcaseIcon, HandshakeIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { useMe } from './useMe';
 
@@ -12,10 +12,13 @@ const OFFER = [
   { key: 'siding', href: '/dashboard/sidings', Icon: PathIcon },
   { key: 'equipment', href: '/dashboard/listings/new', Icon: TrainIcon },
   { key: 'truck', href: '/dashboard/listings/new?kind=TRUCK', Icon: TruckIcon },
+  { key: 'service', href: '/dashboard/market?tab=profile', Icon: BriefcaseIcon },
 ] as const;
 const NEED = [
   { key: 'order', href: '/dashboard/orders/new', Icon: PackageIcon },
   { key: 'urgent', href: '/dashboard/orders?tab=urgent', Icon: LightningIcon },
+  { key: 'cargo', href: '/cargo/new', Icon: PackageIcon },
+  { key: 'serviceRequest', href: '/services/request', Icon: HandshakeIcon },
 ] as const;
 
 export function AddMenu() {

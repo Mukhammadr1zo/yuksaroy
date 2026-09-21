@@ -1,5 +1,77 @@
 {
   "services": {
-    "title": "Xizmatlar markazi"
+    "title": "Xizmatlar markazi",
+    "meta": {
+      "title": "Xizmatlar markazi: ekspeditor, tovar kassiri, hujjat to'ldirish · YukSaroy",
+      "description": "Yuk jo'natishga yordam beradigan odamlar va firmalar bir joyda. Kerakli xizmatni tanlang yoki so'rov qoldiring, mutaxassislar o'zi taklif yuboradi."
+    },
+    "demo": "Namuna",
+    "hero": {
+      "eyebrow": "Xizmatlar markazi",
+      "title": "Yuk jo'natishga yordam beradigan odamlar",
+      "lead": "Ekspeditor, tovar kassiri yoki hujjat to'ldiruvchi kerakmi? Ro'yxatdan tanlang yoki nima kerakligini yozib qoldiring, mutaxassislar o'zi sizga taklif yuboradi.",
+      "ctaAsk": "So'rov qoldirish",
+      "ctaAskNote": "Nima kerakligini yozasiz, mutaxassislar taklif yuboradi",
+      "ctaOffer": "Xizmat taklif qilish",
+      "ctaOfferNote": "Siz xizmat ko'rsatsangiz, o'zingizni shu yerda e'lon qiling"
+    },
+    "types": {
+      "all": "Hammasi",
+      "FORWARDER": "Yukni jo'natish, vagon yoki mashina topish, yo'lda kuzatib borish",
+      "CASHIER": "Stansiyada yuk hujjatlarini rasmiylashtirish va to'lovlarni o'tkazish",
+      "DOCS": "Deklaratsiya, shartnoma va boshqa qog'ozlarni to'ldirib berish"
+    },
+    "filter": {
+      "region": "Viloyat",
+      "regionAll": "Barcha viloyatlar",
+      "apply": "Ko'rsatish"
+    },
+    "grid": {
+      "title": "Kim xizmat ko'rsatadi",
+      "count": "{count} ta",
+      "empty": "Bu bo'limda hali hech kim yo'q. Birinchi bo'lib o'zingizni e'lon qiling yoki so'rov qoldiring.",
+      "years": "{n} yil tajriba",
+      "regionsAll": "Butun O'zbekiston",
+      "noPrice": "Narx kelishiladi",
+      "hasPhone": "Telefon bor",
+      "more": "Batafsil"
+    },
+    "detail": {
+      "back": "Xizmatlar markaziga",
+      "notFound": "Bu sahifa topilmadi yoki yashirilgan.",
+      "about": "Nima qiladi",
+      "regions": "Qaysi viloyatlarda",
+      "experience": "Tajriba",
+      "price": "Narx",
+      "phone": "Telefon",
+      "since": "Ro'yxatda",
+      "askTitle": "Aynan shu xizmat kerakmi?",
+      "askBody": "So'rov qoldiring: bu va shu turdagi boshqa mutaxassislar sizga taklif yuboradi, siz eng qulayini tanlaysiz.",
+      "askCta": "So'rov qoldirish",
+      "demoNote": "Bu namuna: haqiqiy taklif emas, sahifa qanday ko'rinishini ko'rsatish uchun."
+    },
+    "requests": {
+      "title": "Kimga xizmat kerak",
+      "lead": "Odamlar nima kerakligini yozib qoldirgan. Siz xizmat ko'rsatsangiz, taklif yuboring.",
+      "empty": "Hozir ochiq so'rov yo'q.",
+      "offerCta": "Taklif berish",
+      "needIn": "{region} viloyatida kerak",
+      "offers": "{count} ta taklif"
+    },
+    "ask": {
+      "title": "So'rov qoldirish",
+      "lead": "Nima kerakligini yozing. Shu turdagi mutaxassislarga xabar boradi, ular taklif yuboradi, siz tanlaysiz. Narxlar faqat sizga ko'rinadi."
+    },
+    "requestDetail": {
+      "back": "Barcha so'rovlar",
+      "notFound": "So'rov topilmadi.",
+      "eyebrow": "Xizmat so'rovi",
+      "type": "Qanday xizmat",
+      "region": "Qayerda",
+      "created": "Qoldirilgan",
+      "description": "Nima kerak",
+      "phone": "Buyurtmachi telefoni",
+      "offerTitle": "Taklif yuborish"
+    }
   }
 }

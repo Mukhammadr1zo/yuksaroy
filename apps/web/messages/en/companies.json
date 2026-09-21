@@ -28,6 +28,8 @@
       "map": "Objects on the map",
       "mapNote": "Coordinates are approximate.",
       "none": "none yet"
-    }
+    },
+    "demo": "Sample",
+    "demoNote": "This is a sample organization: it shows how the site works and is not a real company. No phone or chat."
   }
 }

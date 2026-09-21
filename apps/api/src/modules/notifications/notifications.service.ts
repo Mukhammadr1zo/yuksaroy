@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 
-export type NotificationKind = 'inquiry' | 'message' | 'orderNew' | 'orderStatus' | 'claim' | 'kyc' | 'premium';
+export type NotificationKind = 'inquiry' | 'message' | 'orderNew' | 'orderStatus' | 'claim' | 'kyc' | 'premium' | 'market';
 export interface NotificationInput { kind: NotificationKind; title: string; body?: string | null; href?: string | null }
 
 /**

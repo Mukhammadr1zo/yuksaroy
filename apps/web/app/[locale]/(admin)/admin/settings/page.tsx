@@ -4,12 +4,58 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { BTN, CARD, INPUT, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
+import { BTN, BTN_DANGER, CARD, ConfirmButton, INPUT, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
 
 type Item = { key: string; value: string | number; default: string | number; isDefault: boolean; updatedAt: string | null };
 type Resp = { items: Item[] };
 
 const LABEL = 'font-mono text-[11px] text-muted';
+
+type DemoCounts = { orgs: number; users: number; listings: number; services: number; requests: number };
+const DEMO_KEYS = ['orgs', 'users', 'listings', 'services', 'requests'] as const;
+
+/**
+ * Namuna ma'lumotlar: prodda katalog bo'sh ko'rinmasin deb yuklanadi, har qatori "Namuna"
+ * yorlig'i bilan. Ikkala tugma ham ikki bosqichli: o'chirish qaytmaydi, yuklash esa butun
+ * saytga ko'rinadi. Sonlar amaldan keyin serverdan qayta o'qiladi, taxmin qilinmaydi.
+ */
+function DemoSection() {
+  const t = useTranslations('admin.demo');
+  const tc = useTranslations('admin.common');
+  const [counts, setCounts] = useState<DemoCounts | null>(null);
+  const [msg, setMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  useEffect(() => { api<DemoCounts>('/admin/demo/status').then(setCounts).catch(() => setMsg({ tone: 'err', text: tc('loadFailed') })); }, [tc]);
+
+  const run = async (action: 'seed' | 'remove') => {
+    setMsg(null);
+    try {
+      await api<DemoCounts>(`/admin/demo/${action}`, { method: 'POST' });
+      setCounts(await api<DemoCounts>('/admin/demo/status'));
+      setMsg({ tone: 'ok', text: t(action === 'seed' ? 'seeded' : 'removed') });
+    } catch { setMsg({ tone: 'err', text: t('failed') }); }
+  };
+  const loaded = counts !== null && DEMO_KEYS.some((k) => counts[k] > 0);
+
+  return (
+    <section className={`${CARD} mt-8 p-4`}>
+      <h2 className="font-semibold text-navy">{t('title')}</h2>
+      <p className="mt-0.5 max-w-[64ch] text-xs text-muted">{t('lead')}</p>
+      <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs tabular-nums">
+        {DEMO_KEYS.map((k) => (
+          <div key={k} className="flex items-baseline gap-1">
+            <dd className={`text-base font-semibold ${counts?.[k] ? 'text-navy' : 'text-muted'}`}>{counts ? counts[k] : '-'}</dd>
+            <dt className="text-muted">{t(`counts.${k}`)}</dt>
+          </div>
+        ))}
+      </dl>
+      {msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <ConfirmButton label={t('seed')} confirm={t('seedConfirm')} className={BTN} onRun={() => run('seed')} disabled={counts === null} />
+        <ConfirmButton label={t('remove')} confirm={t('removeConfirm')} className={BTN_DANGER} onRun={() => run('remove')} disabled={!loaded} />
+      </div>
+    </section>
+  );
+}
 
 /**
  * Har bir kalitning chegarasi serverdagi tekshiruv bilan bir xil
@@ -99,6 +145,8 @@ export default function SettingsPage() {
 
         {items ? <div className="mt-4 flex justify-end"><button type="submit" className={BTN} disabled={!dirty || busy}>{tc('save')}</button></div> : null}
       </form>
+
+      <DemoSection />
     </>
   );
 }

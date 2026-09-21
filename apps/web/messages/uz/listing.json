@@ -46,7 +46,8 @@
       "regionsMore": "+{count}",
       "noPhoto": "Rasm yo'q",
       "phoneVerified": "Telefon tasdiqlangan",
-      "phoneUnverified": "Telefon tasdiqlanmagan"
+      "phoneUnverified": "Telefon tasdiqlanmagan",
+      "demo": "Namuna"
     },
     "empty": {
       "title": "Bu filtr bo'yicha e'lon topilmadi",
@@ -97,7 +98,8 @@
         "err": "Yuborilmadi, qayta urinib ko'ring.",
         "short": "Kamida 5 ta belgi yozing.",
         "openChat": "Yozishmani ochish"
-      }
+      },
+      "demoNote": "Bu namuna e'lon: sayt qanday ishlashini ko'rsatish uchun qo'yilgan, haqiqiy taklif emas. Telefon va yozishma yo'q."
     },
     "reviews": {
       "formTitle": "Izoh qoldirish",

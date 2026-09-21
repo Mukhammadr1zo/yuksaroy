@@ -79,6 +79,27 @@ const TEXTS = {
     ru: '❌ <b>Заявка на объект отклонена</b>\n{object}\n\n{url}',
     en: '❌ <b>Ownership claim rejected</b>\n{object}\n\n{url}',
   },
+  // Yuk bozori va xizmatlar markazi: {where} = yo'nalish yoki viloyat, {what} = yuk yoki xizmat turi
+  marketCargoNew: {
+    uz: "🚚 <b>Yangi yuk {no}</b>\n{where}\n{what}\n\n{title}\n\nTaklif berish: {url}",
+    ru: '🚚 <b>Новый груз {no}</b>\n{where}\n{what}\n\n{title}\n\nПредложить: {url}',
+    en: '🚚 <b>New cargo {no}</b>\n{where}\n{what}\n\n{title}\n\nMake an offer: {url}',
+  },
+  marketServiceNew: {
+    uz: "🧾 <b>Yangi xizmat so'rovi {no}</b>\n{what} · {where}\n\n{title}\n\nTaklif berish: {url}",
+    ru: '🧾 <b>Новый запрос на услугу {no}</b>\n{what} · {where}\n\n{title}\n\nПредложить: {url}',
+    en: '🧾 <b>New service request {no}</b>\n{what} · {where}\n\n{title}\n\nMake an offer: {url}',
+  },
+  marketOffer: {
+    uz: "💬 <b>So'rovingizga taklif keldi</b>\n{no} · {title}\n{from}\n\nKo'rish: {url}",
+    ru: '💬 <b>По вашему запросу есть предложение</b>\n{no} · {title}\n{from}\n\nПосмотреть: {url}',
+    en: '💬 <b>You have a new offer</b>\n{no} · {title}\n{from}\n\nView: {url}',
+  },
+  marketAward: {
+    uz: '✅ <b>Taklifingiz tanlandi</b>\n{no} · {title}\nBuyurtmachi siz bilan bog\'lanadi.\n\n{url}',
+    ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nЗаказчик свяжется с вами.\n\n{url}',
+    en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nThe requester will contact you.\n\n{url}',
+  },
 } as const;
 
 export type NotifyKind = keyof typeof TEXTS;

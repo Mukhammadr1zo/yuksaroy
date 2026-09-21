@@ -440,7 +440,8 @@
       "chats": "Chats",
       "documents": "Documents",
       "org": "Organization",
-      "subscription": "Subscription"
+      "subscription": "Subscription",
+      "market": "Requests and offers"
     },
     "objects": {
       "title": "My objects",

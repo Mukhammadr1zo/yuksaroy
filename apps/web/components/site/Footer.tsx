@@ -3,9 +3,9 @@ import { Link } from '@/i18n/navigation';
 import { Logo } from './Logo';
 
 export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
-  const [t, nav, tm, tp, tf, ta, tc, tb] = await Promise.all([
+  const [t, nav, tm, tp, tf, ta, tc, tb, n2] = await Promise.all([
     getTranslations('footer'), getTranslations('nav'), getTranslations('marketing'),
-    getTranslations('pricing'), getTranslations('features'), getTranslations('about'), getTranslations('contact'), getTranslations('blog'),
+    getTranslations('pricing'), getTranslations('features'), getTranslations('about'), getTranslations('contact'), getTranslations('blog'), getTranslations('nav2'),
   ]);
   const dark = tone === 'dark';
   const muted = dark ? 'text-white/55' : 'text-muted';
@@ -29,6 +29,10 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
             <li><Link className={hover} href="/terminals">{nav('terminals')}</Link></li>
             {/* SVX endi tur emas, xizmat: eski ?kind=SVX filtri jimgina e'tiborsiz qolardi */}
             <li><Link className={hover} href="/terminals?service=SVX">{t('catalog.customsWarehouses')}</Link></li>
+            {/* Yangi bo'limlar: header bilan bir xil yorliqlar (nav2) */}
+            <li><Link className={hover} href="/cargo">{n2('cargo')}</Link></li>
+            <li><Link className={hover} href="/services">{n2('services')}</Link></li>
+            <li><Link className={hover} href="/wagon">{n2('wagon')}</Link></li>
           </ul>
         </div>
         <div>

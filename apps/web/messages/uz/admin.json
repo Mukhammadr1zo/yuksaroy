@@ -100,7 +100,8 @@
         "system": "Tizim"
       },
       "urgent": "Shoshilinch",
-      "reviews": "Baholar"
+      "reviews": "Baholar",
+      "market": "Yuklar va xizmatlar"
     },
     "common": {
       "search": "Qidiruv",
@@ -358,6 +359,60 @@
         "CRANE": "Kran",
         "OTHER": "Boshqa"
       }
+    },
+    "demo": {
+      "title": "Namuna ma'lumotlar",
+      "lead": "Katalog bo'sh ko'rinmasin deb qo'yiladigan namuna tashkilot, e'lon, xizmat va so'rovlar. Har biri \"Namuna\" yorlig'i bilan chiqadi, telefoni yo'q. Qayta yuklash xavfsiz: bor qatorlar yangilanadi, yangisi ochilmaydi.",
+      "counts": {
+        "orgs": "tashkilot",
+        "users": "odam",
+        "listings": "e'lon",
+        "services": "xizmat profili",
+        "requests": "so'rov"
+      },
+      "seed": "Namuna ma'lumotlarni yuklash",
+      "seedConfirm": "Yuklaysizmi",
+      "remove": "Namuna ma'lumotlarni o'chirish",
+      "removeConfirm": "O'chirasizmi",
+      "seeded": "Namuna yuklandi.",
+      "removed": "Namuna o'chirildi.",
+      "failed": "Bajarilmadi, qayta urinib ko'ring."
+    },
+    "market": {
+      "lead": "Yuk e'lonlari, xizmat so'rovlari va xizmat ko'rsatuvchilar. Shikoyat bo'lsa yashirasiz, egasining telefoni shu yerda.",
+      "tabs": {
+        "requests": "So'rovlar",
+        "profiles": "Xizmat ko'rsatuvchilar"
+      },
+      "board": {
+        "all": "Hammasi",
+        "CARGO": "Yuk",
+        "SERVICE": "Xizmat"
+      },
+      "status": {
+        "OPEN": "Ochiq",
+        "AWARDED": "Tanlangan",
+        "CLOSED": "Yopilgan",
+        "CANCELLED": "Bekor qilingan"
+      },
+      "profileStatus": {
+        "ACTIVE": "Faol",
+        "HIDDEN": "Yashirin"
+      },
+      "col": {
+        "no": "Raqam",
+        "what": "Nima",
+        "by": "Kim",
+        "offers": "Takliflar",
+        "date": "Sana",
+        "board": "Turi",
+        "type": "Xizmat turi"
+      },
+      "demo": "Namuna",
+      "allRegions": "Butun respublika",
+      "hide": "Yashirish",
+      "hideConfirm": "Yashirilsinmi? So'rov bekor qilinadi, profil ro'yxatdan tushadi.",
+      "empty": "Hozircha yo'q."
     }
   }
 }

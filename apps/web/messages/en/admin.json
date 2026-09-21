@@ -100,7 +100,8 @@
         "system": "System"
       },
       "urgent": "Urgent",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "market": "Cargo and services"
     },
     "common": {
       "search": "Search",
@@ -358,6 +359,60 @@
         "CRANE": "Crane",
         "OTHER": "Other"
       }
+    },
+    "demo": {
+      "title": "Sample data",
+      "lead": "Sample organizations, listings, services and requests so the catalog does not look empty. Each one carries a \"Sample\" badge and has no phone. Reloading is safe: existing rows are updated, no new ones are created.",
+      "counts": {
+        "orgs": "organizations",
+        "users": "people",
+        "listings": "listings",
+        "services": "service profiles",
+        "requests": "requests"
+      },
+      "seed": "Load sample data",
+      "seedConfirm": "Load?",
+      "remove": "Remove sample data",
+      "removeConfirm": "Remove?",
+      "seeded": "Sample data loaded.",
+      "removed": "Sample data removed.",
+      "failed": "Failed, please try again."
+    },
+    "market": {
+      "lead": "Cargo posts, service requests and providers. Hide on complaint; the owner phone is shown here.",
+      "tabs": {
+        "requests": "Requests",
+        "profiles": "Providers"
+      },
+      "board": {
+        "all": "All",
+        "CARGO": "Cargo",
+        "SERVICE": "Service"
+      },
+      "status": {
+        "OPEN": "Open",
+        "AWARDED": "Awarded",
+        "CLOSED": "Closed",
+        "CANCELLED": "Cancelled"
+      },
+      "profileStatus": {
+        "ACTIVE": "Active",
+        "HIDDEN": "Hidden"
+      },
+      "col": {
+        "no": "No.",
+        "what": "What",
+        "by": "Who",
+        "offers": "Offers",
+        "date": "Date",
+        "board": "Board",
+        "type": "Service type"
+      },
+      "demo": "Sample",
+      "allRegions": "Whole country",
+      "hide": "Hide",
+      "hideConfirm": "Hide it? The request is cancelled, the profile leaves the list.",
+      "empty": "Nothing yet."
     }
   }
 }

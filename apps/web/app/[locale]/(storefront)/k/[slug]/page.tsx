@@ -8,7 +8,7 @@ import { sapiOrNull } from '@/lib/server-api';
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { num } from '@/lib/format';
 import type { CompanyStorefront } from '@/lib/types-urgent';
-import { ListingCard, regionName } from '@/components/catalog/ListingCard';
+import { DemoBadge, ListingCard, regionName } from '@/components/catalog/ListingCard';
 import { TerminalCard } from '@/components/catalog/TerminalCard';
 import { KycBadge } from '@/components/catalog/KycBadge';
 import { OrgMap } from './OrgMap';
@@ -67,7 +67,7 @@ export default async function ShopPage({ params }: Params) {
           <div className="min-w-0 flex-1 pt-14">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-bold text-navy md:text-4xl">{o.name}</h1>
-              <KycBadge kyc={o.kyc} size="md" />
+              {o.isDemo ? <DemoBadge className="px-3 py-1 text-xs" /> : <KycBadge kyc={o.kyc} size="md" />}
             </div>
             {sf.tagline ? <p className="mt-1 text-lg text-ink/85">{sf.tagline}</p> : null}
             <p className="mt-1 text-sm text-muted">{o.kinds.map((k) => tk(k as OrgKind)).join(' · ')}{o.regionCode ? ` · ${regionName(o.regionCode, lang)}` : ''}</p>

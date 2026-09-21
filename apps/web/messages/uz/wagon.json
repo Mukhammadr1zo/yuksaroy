@@ -1,5 +1,45 @@
 {
   "wagon": {
-    "title": "Vagon qidiruvi"
+    "title": "Vagon qidiruvi",
+    "meta": {
+      "title": "Vagon qayerda · YukSaroy",
+      "description": "Vagon raqamini kiriting: hozir qaysi stansiyada, yuklangan yoki bo'sh, oxirgi harakati qachon bo'lgan."
+    },
+    "eyebrow": "Vagon qayerda",
+    "lead": "Vagon raqamini kiriting: hozir qaysi stansiyada, yuklangan yoki bo'sh, oxirgi marta qachon qimirlagan.",
+    "note": "Ma'lumot temir yo'l hisobotlaridan olinadi va kuniga bir necha marta yangilanadi. Birinchi qidiruv bepul, keyingilari obuna bilan.",
+    "label": "Vagon raqami",
+    "placeholder": "Masalan 24567890",
+    "hint": "7 yoki 8 ta raqam, vagonning yon tomonida yozilgan.",
+    "submit": "Qidirish",
+    "searching": "Qidirilmoqda",
+    "guest": "Qidirish uchun kirish kerak. Birinchi qidiruv bepul.",
+    "loginCta": "Kirish",
+    "quotaFree": "Bepul qidiruv: {total} dan {used} ishlatildi",
+    "quotaSub": "Obunachi: cheksiz qidiruv",
+    "subscribe": "Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.",
+    "subscribeCta": "Obuna bo'lish",
+    "notFound": "{no} raqamli vagon so'nggi hisobotlarda yo'q. Raqamni tekshirib qayta urinib ko'ring.",
+    "current": "Hozir qayerda",
+    "stationUnknown": "Stansiya ko'rsatilmagan",
+    "state": { "loaded": "Yuklangan", "empty": "Bo'sh", "unknown": "Holati noma'lum" },
+    "destination": "Boradigan stansiya",
+    "operation": "Oxirgi amal",
+    "date": "Vaqti",
+    "cargo": "Yuk",
+    "weight": "{t} t",
+    "idle": "Turibdi",
+    "idleDays": "{days} kun",
+    "fetchedAt": "Ma'lumot olingan vaqt: {at}",
+    "fromCache": "so'nggi 6 soat ichida olingan",
+    "history": "Harakat tarixi",
+    "source": "Manba",
+    "errors": {
+      "WAGON_NO_INVALID": "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
+      "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hali ulanmagan. Tez orada ishga tushadi.",
+      "WAGON_UPSTREAM": "Ma'lumot manbasi javob bermadi. Birozdan keyin qayta urinib ko'ring.",
+      "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
+      "generic": "Qidirilmadi. Qayta urinib ko'ring."
+    }
   }
 }

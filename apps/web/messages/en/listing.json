@@ -46,7 +46,8 @@
       "regionsMore": "+{count}",
       "noPhoto": "No photo",
       "phoneVerified": "Phone verified",
-      "phoneUnverified": "Phone not verified"
+      "phoneUnverified": "Phone not verified",
+      "demo": "Sample"
     },
     "empty": {
       "title": "No listings match this filter",
@@ -97,7 +98,8 @@
         "err": "Not sent, please try again.",
         "short": "Write at least 5 characters.",
         "openChat": "Open the chat"
-      }
+      },
+      "demoNote": "This is a sample listing: it shows how the site works and is not a real offer. No phone or chat."
     },
     "reviews": {
       "formTitle": "Leave a review",

@@ -5,7 +5,7 @@ import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type Se
 import { sapi, sapiOrNull } from '@/lib/server-api';
 import { uzDate } from '@/lib/format';
 import type { ListingDetail, ListingPage } from '@/lib/types-listing';
-import { KIND_ICON, ListingCard, listingHref, regionName } from './ListingCard';
+import { DemoBadge, KIND_ICON, ListingCard, listingHref, regionName } from './ListingCard';
 import { KycBadge, PhoneBadge } from './KycBadge';
 import { ChatLauncher } from '@/components/chat/ChatPanel';
 import { PhoneReveal } from './PhoneReveal';
@@ -59,6 +59,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
       <header className="mt-3 max-w-3xl">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{L.kind[l.kind]}</span>
+          {l.isDemo ? <DemoBadge className="px-3 py-1 text-xs" /> : null}
           {l.premium ? <PremiumBadge className="px-3 py-1 text-xs" /> : null}
           {l.deal ? <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold text-white ${l.deal === 'RENT' ? 'bg-teal' : 'bg-navy'}`}>{SEARCH_LABELS[lang].deal[l.deal]}</span> : null}
           {l.condition ? <span className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold text-ink/80">{L.condition[l.condition]}</span> : null}
@@ -107,10 +108,13 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
             {l.priceTiyin != null ? (
               <p className="mt-1 font-display text-2xl font-bold text-navy tabular-nums">{formatSom(l.priceTiyin, lang)}{l.priceUnit && l.priceUnit !== 'TOTAL' ? <span className="ml-2 font-mono text-sm font-normal text-muted">{L.priceUnit[l.priceUnit]}</span> : null}</p>
             ) : <p className="mt-1 font-display text-xl font-bold text-navy">{t('onRequest')}</p>}
-            <div className="mt-4 space-y-3">
-              {l.hasPhone ? <PhoneReveal kind="listing" targetId={l.id} next={listingHref(l)} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}
-              <ChatLauncher target={{ kind: 'listing', id: l.id, title: l.title }} next={listingHref(l)} />
-            </div>
+            {/* Namuna e'londa telefon ham, yozishma ham yo'q: odam haqiqiy taklif deb so'rov yubormasin */}
+            {l.isDemo ? <p className="mt-4 rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{t('demoNote')}</p> : (
+              <div className="mt-4 space-y-3">
+                {l.hasPhone ? <PhoneReveal kind="listing" targetId={l.id} next={listingHref(l)} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}
+                <ChatLauncher target={{ kind: 'listing', id: l.id, title: l.title }} next={listingHref(l)} />
+              </div>
+            )}
             {l.responseHours ? <p className="mt-3 text-xs text-muted"><span className="font-mono text-ink">{t('response', { hours: l.responseHours })}</span> · {t('responseNote')}</p> : null}
           </section>
 

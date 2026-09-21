@@ -14,6 +14,12 @@ export const listingPrice = (tiyin: number, unit: PriceUnit | null, lang: Search
   unit && unit !== 'TOTAL' ? `${formatSom(tiyin)} ${LISTING_LABELS[lang].priceUnit[unit]}` : formatSom(tiyin);
 export const KIND_ICON: Record<ListingKind, typeof TrainIcon> = { SHUNTING_LOCO: TrainIcon, WAGON: TrainIcon, TRUCK: TruckIcon };
 
+/** "Namuna" yorlig'i: namuna qator haqiqiy taklif emasligi har joyda ko'rinsin (e'lon, kompaniya, do'kon). */
+export async function DemoBadge({ className = '' }: { className?: string }) {
+  const t = await getTranslations('listing.card');
+  return <span className={`inline-flex shrink-0 items-center rounded-full border border-dashed border-line bg-sand px-2 py-0.5 text-[11px] font-semibold text-muted ${className}`}>{t('demo')}</span>;
+}
+
 /** E'lon kartasi: rasm yoki tur ikonkasi, sarlavha, tur + yil + holat, viloyat, narx, egasi (tashkilot KYC yoki haydovchi telefoni), obyekt qatori. */
 export async function ListingCard({ l }: { l: L }) {
   const [lang, t] = await Promise.all([getLocale() as Promise<SearchLang>, getTranslations('listing.card')]);
@@ -37,7 +43,7 @@ export async function ListingCard({ l }: { l: L }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="min-w-0 truncate font-bold group-hover:text-teal-ink">{l.title}</h3>
-          {l.premium ? <PremiumBadge className="shrink-0" /> : null}
+          {l.isDemo ? <DemoBadge /> : l.premium ? <PremiumBadge className="shrink-0" /> : null}
         </div>
         <p className="mt-0.5 text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
         <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}</p>
