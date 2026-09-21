@@ -18,7 +18,7 @@ import { CARD, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
 
 type Health = {
   db: { ok: boolean; ms?: number; error?: string };
-  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; ordersPending: number };
+  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number };
   recent: { users: number; orders: number; listings: number };
   oldestPending: string | null;
   /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
@@ -33,6 +33,7 @@ const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   { key: 'orgsPendingKyc', label: 'pendingKyc', href: '/admin/moderation?tab=kyc' },
   { key: 'terminalClaimsPending', label: 'pendingClaims', href: '/admin/moderation?tab=claims' },
   { key: 'premiumPending', label: 'pendingPremium', href: '/admin/moderation?tab=premium' },
+  { key: 'subscriptionPending', label: 'pendingSubscription', href: '/admin/moderation?tab=subscription' },
   { key: 'ordersPending', label: 'pendingOrders', href: '/admin/orders?status=PENDING' },
 ];
 const OVERVIEW: (keyof Overview)[] = ['users', 'blocked', 'orgs', 'terminals', 'sidings', 'listings', 'orders', 'inquiries', 'messages', 'reviews'];

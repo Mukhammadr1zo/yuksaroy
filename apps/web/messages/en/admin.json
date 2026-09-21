@@ -173,7 +173,8 @@
       "pendingOrders": "Orders awaiting confirmation",
       "activity": "Recent actions",
       "activityEmpty": "Nothing has happened yet.",
-      "waitingDays": "oldest has waited {days} d"
+      "waitingDays": "oldest has waited {days} d",
+      "pendingSubscription": "Subscription payments"
     },
     "terminals": {
       "lead": "Terminals and rail sidings, registry records included.",

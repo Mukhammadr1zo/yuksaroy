@@ -173,7 +173,8 @@
       "pendingOrders": "Tasdiq kutayotgan buyurtma",
       "activity": "Oxirgi amallar",
       "activityEmpty": "Hali amal qilinmagan.",
-      "waitingDays": "eng uzog'i {days} kundan beri kutmoqda"
+      "waitingDays": "eng uzog'i {days} kundan beri kutmoqda",
+      "pendingSubscription": "Obuna to'lovlari"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",

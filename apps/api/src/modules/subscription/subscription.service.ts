@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { extendPremium } from '../premium/extend-premium';
@@ -56,13 +57,25 @@ export class SubscriptionService {
    * tugmani ikki marta bosgan odam admin navbatida ikki qator bo'lib chiqmasin.
    */
   async order(userId: string, months: number) {
-    const open = await this.prisma.subscription.findFirst({ where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' } });
-    if (open) return { order: subscriptionView(open), payInstructions: payInstructions(), reused: true };
     const cfg = await this.config.get();
-    const s = await this.prisma.subscription.create({
-      data: { userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
-    });
-    return { order: subscriptionView(s), payInstructions: payInstructions(), reused: false };
+    const openWhere = { where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' as const } };
+    try {
+      // Serializable: ikki so'rov bir vaqtda kelsa (ikki marta bosish, ikki varaq) ikkinchisi
+      // yiqiladi va pastda mavjud buyurtma qaytariladi; aks holda navbatda ikki qator bo'lardi
+      return await this.prisma.$transaction(async (tx) => {
+        const open = await tx.subscription.findFirst(openWhere);
+        if (open) return { order: subscriptionView(open), payInstructions: payInstructions(), reused: true };
+        const s = await tx.subscription.create({
+          data: { userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
+        });
+        return { order: subscriptionView(s), payInstructions: payInstructions(), reused: false };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (e) {
+      if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2034')) throw e;
+      const open = await this.prisma.subscription.findFirst(openWhere);
+      if (!open) throw e;
+      return { order: subscriptionView(open), payInstructions: payInstructions(), reused: true };
+    }
   }
 
   /** Admin navbati: berilgan holat, eski birinchi. */
@@ -92,8 +105,10 @@ export class SubscriptionService {
       });
       const endsAt = extendPremium(cur?.endsAt ?? null, s.months, now);
       const startsAt = cur?.endsAt ?? now;
-      const done = await tx.subscription.update({ where: { id }, data: { status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' } });
-      return subscriptionView(done);
+      // Holat sharti yangilashning o'zida: ikki admin bir vaqtda bossa faqat bittasi o'tadi
+      const r = await tx.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' } });
+      if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING' });
+      return subscriptionView({ ...s, status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' });
     });
   }
 
@@ -101,7 +116,8 @@ export class SubscriptionService {
   async cancel(id: string) {
     const s = await this.prisma.subscription.findUnique({ where: { id } });
     if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
-    if (s.status !== 'PENDING') throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING', status: s.status });
-    return subscriptionView(await this.prisma.subscription.update({ where: { id }, data: { status: 'CANCELLED' } }));
+    const r = await this.prisma.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'CANCELLED' } });
+    if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING', status: s.status });
+    return subscriptionView({ ...s, status: 'CANCELLED' });
   }
 }

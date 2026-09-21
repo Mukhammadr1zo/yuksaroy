@@ -20,7 +20,7 @@ export interface ListingCard {
 }
 export interface ListingDetail extends ListingCard {
   description: string | null; photos: string[]; responseHours: number | null;
-  /** Faqat kirganlarga (1A qarori), mehmonga null. */
+  /** Raqam ochiq javobda yo'q; hasPhone tugma ko'rsatish uchun, raqam obunachiga GET /contacts orqali. */
   hasPhone: boolean; status: ListingStatus; createdAt: string;
 }
 export interface ListingSummary { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null; onRequest: number; nearestKm: number | null }

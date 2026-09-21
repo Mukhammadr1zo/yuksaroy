@@ -831,6 +831,23 @@ model Impression {
 }
 
 /// Premium buyurtmasi: hozircha qo'lda to'lov (manual), keyin Payme/Click.
+model PremiumOrder {
+  id          String    @id @default(cuid())
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  orgId       String?
+  userId      String
+  months      Int // 1..12
+  amountTiyin BigInt
+  status      String    @default("PENDING") // PENDING | PAID | CANCELLED
+  provider    String? // 'manual'
+  paidAt      DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([listingId])
+  @@index([status])
+}
+
 /// Foydalanuvchi obunasi. Premium bitta e'longa tegishli, obuna esa odamga: telefon
 /// raqamini ko'rish, vagon qidiruvi kabi pullik imkoniyatlar shu bilan ochiladi.
 /// To'lov hozircha qo'lda: admin tasdiqlaydi (PremiumOrder bilan bir xil yo'l).
@@ -849,23 +866,6 @@ model Subscription {
   createdAt   DateTime  @default(now()) @db.Timestamptz(3)
 
   @@index([userId, endsAt])
-  @@index([status])
-}
-
-model PremiumOrder {
-  id          String    @id @default(cuid())
-  listingId   String
-  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  orgId       String?
-  userId      String
-  months      Int // 1..12
-  amountTiyin BigInt
-  status      String    @default("PENDING") // PENDING | PAID | CANCELLED
-  provider    String? // 'manual'
-  paidAt      DateTime? @db.Timestamptz(3)
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
-
-  @@index([listingId])
   @@index([status])
 }
 

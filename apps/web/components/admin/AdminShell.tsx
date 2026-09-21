@@ -35,7 +35,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     api<{ counts: Record<string, number> }>('/admin/health')
       .then((h) => {
         const c = h.counts ?? {};
-        setCounts({ pending: (c.listingsPendingReview ?? 0) + (c.orgsPendingKyc ?? 0) + (c.terminalClaimsPending ?? 0) + (c.premiumPending ?? 0) });
+        setCounts({ pending: (c.listingsPendingReview ?? 0) + (c.orgsPendingKyc ?? 0) + (c.terminalClaimsPending ?? 0) + (c.premiumPending ?? 0) + (c.subscriptionPending ?? 0) });
       })
       .catch(() => {});
   }, [me?.isPlatformAdmin, path]);

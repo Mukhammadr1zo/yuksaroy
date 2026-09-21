@@ -207,13 +207,14 @@ export class AdminSystemController {
       }
     };
 
-    const [db, listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, ordersPending, users, orders, listings, oldest] =
+    const [db, listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, subscriptionPending, ordersPending, users, orders, listings, oldest] =
       await Promise.all([
         this.pingDb(),
         safe('listingsPendingReview', () => this.prisma.listing.count({ where: { status: 'PENDING_REVIEW' } })),
         safe('orgsPendingKyc', () => this.prisma.organization.count({ where: { kycStatus: 'PENDING' } })),
         safe('terminalClaimsPending', () => this.prisma.terminal.count({ where: { claimStatus: 'PENDING' } })),
         safe('premiumPending', () => this.prisma.premiumOrder.count({ where: { status: 'PENDING' } })), // PremiumOrder.status - String
+        safe('subscriptionPending', () => this.prisma.subscription.count({ where: { status: 'PENDING' } })),
         safe('ordersPending', () => this.prisma.order.count({ where: { status: 'PENDING' } })),
         safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
         safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
@@ -227,6 +228,7 @@ export class AdminSystemController {
         orgsPendingKyc: orgsPendingKyc ?? 0,
         terminalClaimsPending: terminalClaimsPending ?? 0,
         premiumPending: premiumPending ?? 0,
+        subscriptionPending: subscriptionPending ?? 0,
         ordersPending: ordersPending ?? 0,
       },
       recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },

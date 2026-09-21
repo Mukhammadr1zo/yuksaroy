@@ -44,7 +44,7 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
 export function listingDetail(l: ListingRecord) {
   return {
     ...listingCard(l), description: l.description, photos: l.photos, responseHours: l.responseHours,
-    hasPhone: l.contactPhone !== null, status: l.status, createdAt: l.createdAt,
+    hasPhone: !!l.contactPhone?.trim(), status: l.status, createdAt: l.createdAt,
   };
 }
 

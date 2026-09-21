@@ -53,8 +53,6 @@
     "meters": "{count} m",
     "source": "Data source: registry of railway sidings.",
     "contactHeading": "Contact person",
-    "phoneLocked": "The number is open to registered users.",
-    "phoneLoginCta": "Sign in",
     "contactNote": "The number comes from the registry. When you call, say you found it through YukSaroy.",
     "registryOwner": "Registry owner",
     "esr": "Station code",

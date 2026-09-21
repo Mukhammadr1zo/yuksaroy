@@ -173,7 +173,8 @@
       "pendingOrders": "Заказы без подтверждения",
       "activity": "Последние действия",
       "activityEmpty": "Действий пока нет.",
-      "waitingDays": "самое старое ждёт {days} дн."
+      "waitingDays": "самое старое ждёт {days} дн.",
+      "pendingSubscription": "Оплаты подписок"
     },
     "terminals": {
       "lead": "Терминалы и подъездные пути: записи реестра тоже здесь.",

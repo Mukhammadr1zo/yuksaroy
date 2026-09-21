@@ -32,7 +32,7 @@ function railCard(t: TerminalRecord) {
     // Reestrdagi egasi (tashkilot nomi): Taminotda ham ochiq turadi, telefondan farqli
     ownerNameRaw: r.ownerNameRaw,
     // Mas'ul shaxs ismi ochiq, raqami yo'q: raqam faqat kirgan foydalanuvchiga (publicTerminal)
-    contactName: r.contactName, hasPhone: r.contactPhone !== null,
+    contactName: r.contactName, hasPhone: !!r.contactPhone?.trim(),
   };
 }
 
@@ -66,7 +66,7 @@ export function publicTerminal(t: TerminalRecord, freeToday = 0) {
   const r = t.rail;
   return {
     ...publicTerminalCard(t, freeToday),
-    description: t.description, hasPhone: t.phone !== null || (r?.contactPhone ?? null) !== null, passport: t.passport,
+    description: t.description, hasPhone: !!t.phone?.trim() || !!r?.contactPhone?.trim(), passport: t.passport,
     station: t.station,
     serviceDetails: t.services.filter((s) => s.isEnabled).map((s) => ({ serviceCode: s.serviceCode, leadTimeMin: s.leadTimeMin })),
     tariffs: t.tariffs.map(publicTariff),
@@ -128,7 +128,7 @@ export function publicSiding(s: SidingRecord) {
     contractState: s.contractState, category: s.category, usageType: s.usageType, status: s.status,
     contactName: s.contactName,
     /** Raqam bor, lekin ko'rish uchun obuna kerak: UI shu bilan tugma ko'rsatadi. */
-    hasPhone: s.contactPhone !== null,
+    hasPhone: !!s.contactPhone?.trim(),
   };
 }
 

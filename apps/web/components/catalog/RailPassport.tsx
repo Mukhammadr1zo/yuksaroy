@@ -5,7 +5,7 @@ import type { RailPassport } from '@/lib/types';
 /**
  * Temir yo'l terminalining (shahobcha yo'lining) texnik pasporti: O'TY Taminot reestridagi
  * hamma maydon. Bo'sh maydon chizilmaydi, aks holda jadval yolg'on to'liqlik ko'rsatardi.
- * Mas'ul shaxs raqami faqat kirgan foydalanuvchiga keladi (API uni null qilib yuboradi).
+ * Mas'ul shaxs raqami bu yerda yo'q: u obunachiga sahifa boshidagi tugma orqali (PhoneReveal).
  */
 export async function RailPassportCard({ rail }: { rail: RailPassport }) {
   const locale = await getLocale();

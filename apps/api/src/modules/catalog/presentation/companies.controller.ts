@@ -63,7 +63,7 @@ export class CompaniesController {
     const storefront = (o.storefront as Storefront | null) ?? null;
     return {
       ...companyCard(o),
-      description: o.description, telegram: o.telegram, website: o.website, hasPhone: o.phone !== null, storefront,
+      description: o.description, telegram: o.telegram, website: o.website, hasPhone: !!o.phone?.trim(), storefront,
       terminals: terminals.map((t) => publicTerminalCard(t, free[t.id] ?? 0)),
       listings: listings.map((l) => listingCard(toListingRecord(l), undefined, now)),
     };
