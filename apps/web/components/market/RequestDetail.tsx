@@ -69,7 +69,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
         <h2 className="font-display text-xl font-bold text-navy">{t('offerTitle')}</h2>
         {cargo ? <p className="mt-1 text-sm text-muted">{t('offerLead')}</p> : null}
         <div className="mt-4">
-          {r.isDemo ? <p className="text-sm text-muted">{td('demoNote')}</p>
+          {r.isDemo ? <><OfferForm request={r} next={next} preview /><p className="mt-3 text-sm text-muted">{td('demoNote')}</p></>
             : r.status !== 'OPEN' && cargo ? <Notice tone="warn">{t('closedNote')}</Notice>
             : <OfferForm request={r} next={next} />}
         </div>

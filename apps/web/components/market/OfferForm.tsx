@@ -1,5 +1,7 @@
 'use client';
 // Taklif formasi: narx so'mda (tiyinga aylanadi) va izoh. Mehmonga kirish havolasi, bergan odamga o'z taklifi.
+// preview: namuna so'rovda forma o'chirilgan holda ko'rsatiladi, serverga hech narsa ketmaydi. Namunaning maqsadi
+// sahifa qanday ko'rinishini ko'rsatish, eng muhim qismi (qanday taklif beriladi) yashirin qolmasin.
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -9,7 +11,7 @@ import type { MarketOffer, MarketRequest } from '@/lib/types-market';
 import { BTN_NAVY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { OfferStatusPill } from './bits';
 
-export function OfferForm({ request, next }: { request: MarketRequest; next: string }) {
+export function OfferForm({ request, next, preview = false }: { request: MarketRequest; next: string; preview?: boolean }) {
   const t = useTranslations('market.offer');
   const te = useTranslations('market.err');
   const locale = useLocale();
@@ -24,12 +26,13 @@ export function OfferForm({ request, next }: { request: MarketRequest; next: str
 
   // Sahifa keshlangan va cookie'siz: o'z taklifim va "bu mening so'rovim" faqat brauzerda ma'lum bo'ladi
   useEffect(() => {
+    if (preview) return;
     if (!hasSession()) { setAuthed(false); return; }
     setAuthed(true);
     api<MarketRequest>(`/market/requests/${encodeURIComponent(request.no)}`)
       .then((r) => { if (r.offers) setOwn(true); if (r.myOffer) setMine(r.myOffer); })
       .catch(() => {});
-  }, [request.no]);
+  }, [request.no, preview]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -46,6 +49,15 @@ export function OfferForm({ request, next }: { request: MarketRequest; next: str
     } finally { setBusy(false); }
   }
 
+  if (preview) {
+    return (
+      <fieldset disabled className="grid gap-3 opacity-70" aria-label={t('price')}>
+        <Field label={t('price')} hint={t('priceHint')}><input className={`${INPUT} font-mono`} type="number" inputMode="numeric" readOnly /></Field>
+        <Field label={t('message')}><textarea className={INPUT} rows={3} placeholder={t('messagePh')} readOnly /></Field>
+        <div><button type="button" className={BTN_NAVY}>{t('send')}</button></div>
+      </fieldset>
+    );
+  }
   if (authed === null) return null;
   if (!authed) return <Notice tone="warn">{t('loginNeeded')} <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold underline underline-offset-4">{t('loginCta')}</Link></Notice>;
   if (own) return <Notice tone="warn">{t('OWN_REQUEST')}</Notice>;
