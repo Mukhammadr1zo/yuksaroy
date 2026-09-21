@@ -101,7 +101,8 @@
       },
       "urgent": "Urgent",
       "reviews": "Reviews",
-      "market": "Cargo and services"
+      "market": "Cargo and services",
+      "team": "Team"
     },
     "common": {
       "search": "Search",
@@ -414,6 +415,40 @@
       "hide": "Hide",
       "hideConfirm": "Hide it? The request is cancelled, the profile leaves the list.",
       "empty": "Nothing yet."
+    },
+    "team": {
+      "title": "Team",
+      "lead": "Who can open the panel and at what level. Only an owner can change this.",
+      "phone": "Phone number",
+      "level": "Level",
+      "addCta": "Add",
+      "addHint": "The person must already have an account: access is granted to the account with this number.",
+      "levels": {
+        "owner": "Owner",
+        "moderator": "Moderator"
+      },
+      "empty": "Nobody on the team yet.",
+      "noName": "No name given",
+      "since": "since {date}",
+      "you": "You",
+      "fromEnv": "From server settings",
+      "blocked": "Blocked",
+      "selfNote": "You cannot change yourself",
+      "envNote": "Set in server settings, cannot be removed here",
+      "toOwner": "Make owner",
+      "toModerator": "Make moderator",
+      "remove": "Remove from panel",
+      "added": "Added",
+      "changed": "Level changed",
+      "removed": "Removed from panel",
+      "err": {
+        "USER_NOT_FOUND": "No account with this number. Ask them to sign in first.",
+        "INVALID_PHONE": "That phone number is not valid.",
+        "CANNOT_CHANGE_SELF": "You cannot change yourself: you would lose access to the panel.",
+        "FROM_ENV": "This person's access comes from server settings and cannot be removed here.",
+        "KIND_NOT_ALLOWED": "That organisation type cannot be set.",
+        "NOT_PLATFORM_OWNER": "Only an owner can do this."
+      }
     }
   }
 }

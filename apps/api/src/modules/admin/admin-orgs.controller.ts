@@ -115,6 +115,9 @@ export class AdminOrgsController {
   /** Yuborilmagan maydon ustiga yozilmaydi: `data` faqat aniq kelgan kalitlardan yig'iladi. */
   @Patch('orgs/:id')
   async update(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: AdminUpdateOrgDto) {
+    // PLATFORM turi bu yerdan berilmaydi (create-org.usecase ham taqiqlaydi): shu tur
+    // tashkilotda a'zo taklif qilish platforma rolini berishga ochiq yo'l ochardi
+    if (dto.kinds?.includes('PLATFORM')) throw new BadRequestException({ code: 'KIND_NOT_ALLOWED' });
     const data: Prisma.OrganizationUpdateInput = Object.fromEntries(Object.entries(dto).filter(([, v]) => v !== undefined));
     // `kind` = kinds[0]: eski kod shu maydonni o'qiydi, shuning uchun birga yangilanadi
     if (dto.kinds?.length) data.kind = dto.kinds[0];
@@ -218,8 +221,15 @@ export class AdminOrgsController {
     return m;
   }
 
-  /** Oxirgi egani olib tashlab bo'lmaydi: tashkilot egasiz qolib, hech kim uni boshqara olmaydi. */
+  /**
+   * Oxirgi egani olib tashlab bo'lmaydi: tashkilot egasiz qolib, hech kim uni boshqara olmaydi.
+   *
+   * Ega qulfi qo'shish va tahrirlashdagidek: a'zoni o'chirish ham huquqni o'zgartirish.
+   * Qulfsiz moderator platforma adminining a'zoligini o'chirib, uni paneldan chiqarib
+   * yuborardi (isOwner tekshiruvi buni ushlamaydi: platforma roli isOwner=false qatorda turadi).
+   */
   @Delete('orgs/:id/members/:userId')
+  @UseGuards(PlatformOwnerGuard)
   async removeMember(@CurrentUserId() actorId: string, @Param('id') id: string, @Param('userId') memberId: string) {
     const m = await this.prisma.membership.findUnique({ where: { userId_orgId: { userId: memberId, orgId: id } }, select: { isOwner: true } });
     if (!m) throw new NotFoundException({ code: 'MEMBER_NOT_FOUND' });

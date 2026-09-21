@@ -10,6 +10,7 @@ import { AdminOrgsController } from './admin-orgs.controller';
 import { AdminOpsController } from './admin-ops.controller';
 import { AdminSystemController } from './admin-system.controller';
 import { AdminDemoController } from './admin-demo.controller';
+import { AdminTeamController } from './team/admin-team.controller';
 
 /**
  * Platforma egasi uchun panel. Ilgari bu yerda faqat foydalanuvchilar bor edi va
@@ -21,7 +22,7 @@ import { AdminDemoController } from './admin-demo.controller';
 @Module({
   // BookingModule: admin buyurtmani majburan bekor qilganda band qilingan joy bo'shatiladi
   imports: [IdentityModule, OrganizationsModule, BookingModule],
-  controllers: [AdminUsersController, AdminCatalogController, AdminOrgsController, AdminOpsController, AdminSystemController, AdminDemoController],
+  controllers: [AdminUsersController, AdminCatalogController, AdminOrgsController, AdminOpsController, AdminSystemController, AdminDemoController, AdminTeamController],
   providers: [PlatformAdminGuard, PlatformOwnerGuard],
 })
 export class AdminModule {}

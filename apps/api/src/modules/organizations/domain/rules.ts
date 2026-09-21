@@ -1,9 +1,18 @@
 // Tashkilot qoidalari: tur -> rollar, admin telefonlari. Sof funksiyalar, DB yo'q.
 import { ORG_KIND_ROLES, normalizeUzPhone, type OrgKind, type Role } from '@yuksaroy/domain';
 
-/** Tashkilot turlari bo'yicha ruxsat etilgan rollar birlashmasi. */
+/**
+ * Platforma rollari o'z-o'ziga xizmat yo'lidan hech qachon berilmaydi: ular faqat
+ * platforma egasi orqali (admin panelidagi Jamoa) beriladi.
+ *
+ * Bularsiz moderator o'z tashkilotini ochib, uni PLATFORM deb belgilab, o'zini
+ * PLATFORM_ADMIN qilib taklif qila olardi va to'liq ega huquqini olardi.
+ */
+const PLATFORM_ONLY: readonly Role[] = ['PLATFORM_ADMIN', 'PLATFORM_OPERATOR'];
+
+/** Tashkilot turlari bo'yicha ruxsat etilgan rollar birlashmasi (platforma rollarisiz). */
 export function rolesForKinds(kinds: readonly OrgKind[]): Role[] {
-  return [...new Set(kinds.flatMap((k) => ORG_KIND_ROLES[k]))];
+  return [...new Set(kinds.flatMap((k) => ORG_KIND_ROLES[k]))].filter((r) => !PLATFORM_ONLY.includes(r));
 }
 
 /** So'ralgan rollardan faqat tur ruxsat berganlari; bo'sh so'rov = hammasi. */

@@ -27,6 +27,7 @@ const GROUPS: { key: string; items: Item[] }[] = [
   { key: 'people', items: [
     { href: '/admin/orgs', key: 'orgs' },
     { href: '/admin/users', key: 'users' },
+    { href: '/admin/team', key: 'team', owner: true },
   ] },
   { key: 'system', items: [
     { href: '/admin/audit', key: 'audit' },

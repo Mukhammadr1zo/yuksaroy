@@ -101,7 +101,8 @@
       },
       "urgent": "Shoshilinch",
       "reviews": "Baholar",
-      "market": "Yuklar va xizmatlar"
+      "market": "Yuklar va xizmatlar",
+      "team": "Jamoa"
     },
     "common": {
       "search": "Qidiruv",
@@ -414,6 +415,40 @@
       "hide": "Yashirish",
       "hideConfirm": "Yashirilsinmi? So'rov bekor qilinadi, profil ro'yxatdan tushadi.",
       "empty": "Hozircha yo'q."
+    },
+    "team": {
+      "title": "Jamoa",
+      "lead": "Panelga kim kira oladi va qaysi darajada. Faqat ega o'zgartira oladi.",
+      "phone": "Telefon raqami",
+      "level": "Daraja",
+      "addCta": "Qo'shish",
+      "addHint": "Odam avval saytda ro'yxatdan o'tgan bo'lishi kerak: huquq shu raqamdagi hisobga beriladi.",
+      "levels": {
+        "owner": "Ega",
+        "moderator": "Moderator"
+      },
+      "empty": "Jamoada hech kim yo'q.",
+      "noName": "Ism kiritilmagan",
+      "since": "{date} dan",
+      "you": "Siz",
+      "fromEnv": "Server sozlamasidan",
+      "blocked": "Bloklangan",
+      "selfNote": "O'zingizni o'zgartirib bo'lmaydi",
+      "envNote": "Server sozlamasida, paneldan olinmaydi",
+      "toOwner": "Ega qilish",
+      "toModerator": "Moderator qilish",
+      "remove": "Paneldan chiqarish",
+      "added": "Qo'shildi",
+      "changed": "Daraja o'zgartirildi",
+      "removed": "Paneldan chiqarildi",
+      "err": {
+        "USER_NOT_FOUND": "Bu raqam bilan hisob topilmadi. Odam avval saytga kirsin.",
+        "INVALID_PHONE": "Telefon raqami noto'g'ri.",
+        "CANNOT_CHANGE_SELF": "O'zingizni o'zgartirib bo'lmaydi: aks holda panelga kira olmay qolasiz.",
+        "FROM_ENV": "Bu odamning huquqi server sozlamasidan kelgan, paneldan olib bo'lmaydi.",
+        "KIND_NOT_ALLOWED": "Bu tur tashkilotga berilmaydi.",
+        "NOT_PLATFORM_OWNER": "Bu amal faqat egada."
+      }
     }
   }
 }

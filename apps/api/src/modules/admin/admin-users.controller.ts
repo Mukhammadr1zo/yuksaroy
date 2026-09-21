@@ -6,6 +6,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { DeleteAccountUseCase } from '../identity/application/delete-account.usecase';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
+import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 
 class BlockDto {
@@ -31,6 +32,7 @@ export class AdminUsersController {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly del: DeleteAccountUseCase,
+    private readonly admin: PlatformAdmin,
   ) {}
 
   /** Platformaning umumiy raqamlari: nima bor va nima o'syapti. */
@@ -105,6 +107,9 @@ export class AdminUsersController {
     // O'zini bloklash panelga kirishni butunlay yopadi va qaytish yo'li faqat serverdagi
     // .env orqali bo'ladi. Jadvalda qatorlar bir xil ko'rinadi, ya'ni bitta noto'g'ri bosish yetadi.
     if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });
+    // Jamoa a'zosini bloklash ham huquqni o'zgartirish: bloklangan odam panelga kira olmaydi.
+    // Qulfsiz moderator hamma egalarni bloklab, platformani boshqarishni to'xtatib qo'yardi.
+    if (dto.block && (await this.admin.isPlatformAdmin(id))) await this.admin.assertPlatformOwner(userId);
     await this.prisma.user.update({ where: { id }, data: { isActive: !dto.block } });
     if (dto.block) await this.prisma.session.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() } });
     await this.audit.log({ actorId: userId, action: dto.block ? 'admin.user.block' : 'admin.user.unblock', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null } });
