@@ -36,6 +36,8 @@ export async function TerminalCard({ t }: { t: T }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="truncate font-bold group-hover:text-teal-ink">{t.name}</h3>
+          {/* Namuna terminal ro'yxatda ham belgilanadi: kartani haqiqiy taklif deb o'ylamasin */}
+          {t.isDemo ? <span className="shrink-0 rounded-full border border-amber/40 bg-amber-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-amber-ink">{c('terminal.demoBadge')}</span> : null}
           {t.is24h ? <span className="shrink-0 rounded-full bg-teal-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-teal-ink">24/7</span> : null}
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-2">
