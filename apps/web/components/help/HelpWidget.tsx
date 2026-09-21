@@ -109,7 +109,10 @@ export function HelpWidget() {
     <>
       <button
         type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="help-widget" aria-label={t('open')}
-        className={`fixed bottom-6 right-4 z-40 inline-flex h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${cornerBusy ? 'hidden sm:inline-flex' : ''}`}
+        // display faqat bitta joydan keladi: asosiy ro'yxatda ham inline-flex bo'lsa,
+        // Tailwind da hidden bilan ikkisi bir xil xususiyatni belgilab, qaysi biri ustun
+        // bo'lishini sinf tartibi emas, stil fayli tartibi hal qilardi va tugma yashirinmasdi
+        className={`fixed bottom-6 right-4 z-40 h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${cornerBusy ? 'hidden sm:inline-flex' : 'inline-flex'}`}
       >
         <ChatCircleDotsIcon size={22} weight="fill" aria-hidden="true" />
         <span className="hidden sm:inline">{t('open')}</span>
