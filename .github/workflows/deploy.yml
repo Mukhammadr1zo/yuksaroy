@@ -189,6 +189,29 @@ jobs:
              (tar czf \$HOME/ys-deploy-bak-\$(date +%Y%m%d-%H%M%S).tgz deploy 2>/dev/null || true) && \
              tar xzf - && echo 'deploy fayllari yangilandi'"
 
+      # Vagon qidiruvi uchun d-railway.uz xizmat hisobi. Sir qo'yilmagan bo'lsa qadam
+      # hech narsa qilmaydi va /wagon sahifasi "xizmat hali ulanmagan" deb turaveradi.
+      # Qiymatlar quvur orqali boradi: na runner diskida, na buyruq qatorida qolmaydi.
+      # Serverdagi mavjud kalit qayta yozilmaydi, faqat yo'q bo'lsa qo'shiladi.
+      - name: Vagon qidiruvi sozlamasi (ixtiyoriy)
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          P: ${{ secrets.VPS_PORT || 22 }}
+          DIR: ${{ vars.VPS_PATH || '/opt/yuksaroy' }}
+          URL: ${{ secrets.D_RAILWAY_URL || 'https://d-railway.uz' }}
+          EMAIL: ${{ secrets.D_RAILWAY_EMAIL }}
+          PASSWORD: ${{ secrets.D_RAILWAY_PASSWORD }}
+        run: |
+          # secrets konteksti if: da ishlamaydi, shuning uchun tekshiruv shu yerda
+          if [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
+            echo "vagon sozlamasi yo'q, o'tkazib yuborildi"
+            exit 0
+          fi
+          { echo "D_RAILWAY_URL=$URL"; echo "D_RAILWAY_EMAIL=$EMAIL"; echo "D_RAILWAY_PASSWORD=$PASSWORD"; } \
+            | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
+              "cd '$DIR' && if grep -q '^D_RAILWAY_EMAIL=' .env 2>/dev/null; then cat > /dev/null; echo 'vagon sozlamasi allaqachon bor'; else cat >> .env && echo 'vagon sozlamasi qoshildi'; fi"
+
       # Repo yopiq, shuning uchun GHCR dagi obrazlar ham yopiq: server ularni
       # parolsiz torta olmaydi va "docker compose pull" unauthorized beradi.
       # Token quvur orqali uzatiladi: na runner diskida, na buyruq qatorida qolmaydi.

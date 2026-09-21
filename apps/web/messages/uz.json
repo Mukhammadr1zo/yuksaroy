@@ -43,7 +43,8 @@
       "profile": "Profil",
       "org": "Tashkilot",
       "admin": "Admin panel",
-      "logout": "Chiqish"
+      "logout": "Chiqish",
+      "subscription": "Obuna"
     },
     "add": {
       "label": "Qo'shish",

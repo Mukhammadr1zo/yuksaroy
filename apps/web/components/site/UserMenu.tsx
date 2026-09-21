@@ -44,6 +44,8 @@ export function UserMenu() {
           <Link role="menuitem" href="/dashboard" className={item} onClick={() => setOpen(false)}>{t('workspace')}</Link>
           <Link role="menuitem" href="/dashboard/profile" className={item} onClick={() => setOpen(false)}>{t('profile')}</Link>
           <Link role="menuitem" href="/dashboard/organization" className={item} onClick={() => setOpen(false)}>{t('org')}</Link>
+          {/* Obuna shu yerda: u hisobga tegishli, sarlavhadagi bo'limlar esa katalog va bozor */}
+          <Link role="menuitem" href="/dashboard/subscription" className={item} onClick={() => setOpen(false)}>{t('subscription')}</Link>
           {me.isPlatformAdmin ? <Link role="menuitem" href="/admin" className={item} onClick={() => setOpen(false)}>{t('admin')}</Link> : null}
           <button role="menuitem" type="button" className={`${item} w-full text-left text-red-700`}
             onClick={async () => { await post('/auth/logout', {}).catch(() => {}); clearAuthedCache(); setOpen(false); router.replace('/'); }}>

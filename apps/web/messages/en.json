@@ -43,7 +43,8 @@
       "profile": "Profile",
       "org": "Organization",
       "admin": "Admin panel",
-      "logout": "Log out"
+      "logout": "Log out",
+      "subscription": "Subscription"
     },
     "add": {
       "label": "Add",
