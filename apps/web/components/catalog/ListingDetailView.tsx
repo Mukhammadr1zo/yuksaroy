@@ -4,7 +4,7 @@ import { EyeIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
 import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type SearchLang } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
-import { uzDate } from '@/lib/format';
+import { num, uzDate } from '@/lib/format';
 import type { ListingDetail, ListingPage } from '@/lib/types-listing';
 import { DemoBadge, KIND_ICON, ListingCard, listingHref, regionName } from './ListingCard';
 import { KycBadge, PhoneBadge } from './KycBadge';
@@ -71,9 +71,9 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
           <p className="text-muted">{[regionName(l.regionCode, lang), l.year, l.model].filter(Boolean).join(' · ')}</p>
           {/* Ko'rishlar jadval qatorida ko'zga tashlanmasdi: sarlavha ostida, ko'z belgisi bilan.
               Namuna e'londa ham chiqadi: son haqiqiy, yorliq esa e'lon taklif emasligini aytadi. */}
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sand px-3 py-1 font-mono text-xs font-semibold text-ink ring-1 ring-line tabular-nums">
+          <span aria-label={t('viewsShort', { count: l.views })} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sand px-3 py-1 font-mono text-xs font-semibold text-ink ring-1 ring-line tabular-nums">
             <EyeIcon size={15} weight="duotone" className="text-teal-ink" aria-hidden="true" />
-            {t('viewsShort', { count: l.views })}
+            {num(l.views, lang)}
           </span>
         </div>
       </header>

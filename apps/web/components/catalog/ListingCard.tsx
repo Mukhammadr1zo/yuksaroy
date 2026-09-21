@@ -2,6 +2,7 @@ import { Link } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type ListingKind, type PriceUnit, type RegionCode, type SearchLang } from '@yuksaroy/domain';
 import { EyeIcon, PhoneIcon, SealCheckIcon, TrainIcon, TrainRegionalIcon, TruckIcon } from '@phosphor-icons/react/dist/ssr';
+import { num } from '@/lib/format';
 import type { ListingCard as L } from '@/lib/types-listing';
 import { CompareCheck } from '@/components/compare/CompareCheck';
 import { PremiumBadge } from './PremiumBadge';
@@ -50,8 +51,8 @@ export async function ListingCard({ l }: { l: L }) {
           <span className="truncate">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}</span>
           {/* Ko'rishlar alohida: matn ichida yo'qolib ketmasin */}
           {l.views > 0 ? (
-            <span className="inline-flex shrink-0 items-center gap-1 font-mono font-semibold text-ink/70 tabular-nums">
-              <EyeIcon size={13} weight="duotone" className="text-teal-ink" aria-hidden="true" />{l.views}
+            <span aria-label={t('viewsShort', { count: l.views })} className="inline-flex shrink-0 items-center gap-1 font-mono font-semibold text-ink/70 tabular-nums">
+              <EyeIcon size={13} weight="duotone" className="text-teal-ink" aria-hidden="true" />{num(l.views, lang)}
             </span>
           ) : null}
         </p>
