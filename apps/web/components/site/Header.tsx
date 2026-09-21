@@ -20,12 +20,13 @@ export async function Header() {
   const label = (n: (typeof NAV)[number]) => (n.ns === 'nav' ? t(n.key) : n.ns === 'nav2' ? t2(n.key) : t3(n.key));
   return (
     <header className="sticky top-0 z-30 border-b border-line/70 bg-sand/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6">
-        {/* Belgi siqilmaydi: 768 da olti havola sig'magani uchun ular chip qatoriga tushadi (lg dan yuqori gorizontal menyu) */}
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6">
+        {/* Belgi siqilmaydi. Yetti havola + kirgan foydalanuvchining tugmalari 1152 px ga sig'magani
+            uchun ustun 1280 px ga kengaydi va gorizontal menyu xl dan boshlanadi; undan pastda chip qatori. */}
         <Link href="/" aria-label={t('aria.home')} className="shrink-0"><Logo compact /></Link>
-        <nav aria-label={t('aria.main')} className="hidden min-w-0 items-center gap-1 lg:flex">
+        <nav aria-label={t('aria.main')} className="hidden min-w-0 items-center gap-0.5 xl:flex">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-ink/80 hover:bg-white hover:text-navy">
+            <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-semibold text-ink/80 hover:bg-white hover:text-navy">
               {label(n)}
             </Link>
           ))}
@@ -35,7 +36,7 @@ export async function Header() {
           <AuthArea />
         </div>
       </div>
-      <nav aria-label={t('aria.mainMobile')} className="no-scrollbar flex gap-1 overflow-x-auto px-3 pb-2 sm:px-6 lg:hidden">
+      <nav aria-label={t('aria.mainMobile')} className="no-scrollbar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 pb-2 sm:px-6 xl:hidden">
         {NAV.map((n) => (
           <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink/80">
             {label(n)}
