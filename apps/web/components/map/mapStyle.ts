@@ -105,8 +105,17 @@ export function addBaseLayers(map: MLMap, o: { far?: boolean } = {}): string | u
   return firstSymbol;
 }
 
-/** Pin ranglari: terminal to'q sariq, shahobcha (stansiya) teal halqa, texnika navy, avtotransport amber halqa. */
-export const PIN = { terminal: '#FD7B03', siding: '#077F84', equipment: '#002352', truck: '#FD7B03' } as const;
+/**
+ * Pin ranglari uch toifa bo'yicha: terminal to'q sariq, texnika navy, avtotransport teal.
+ *
+ * Shahobcha terminal bilan bir xil rangda, chunki u alohida toifa emas (katalogda ham
+ * shunday). Farqni shakl bildiradi: to'la pin = aniq joy, ichi bo'sh halqa va ichidagi
+ * raqam = stansiya bo'yicha taxminiy joy va o'sha stansiyadagi yo'llar soni.
+ *
+ * Ilgari shahobcha teal, avtotransport esa terminal bilan bir xil sariq edi: xaritada
+ * bitta sariq nuqta ikki toifa taassurotini berardi.
+ */
+export const PIN = { terminal: '#FD7B03', siding: '#FD7B03', equipment: '#002352', truck: '#077F84' } as const;
 
 /** Koridordan tashqaridagi obyekt xira (dim xususiyati). Klaster: ichida yorug' nuqta bo'lmasa xira (lit, clusterProperties). */
 const DIM: ExpressionSpecification = ['case', ['to-boolean', ['get', 'dim']], 0.3, 1];

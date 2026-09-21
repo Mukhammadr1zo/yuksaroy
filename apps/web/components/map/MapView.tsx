@@ -53,11 +53,11 @@ const PIN_STYLE: Record<FeatKind, Parameters<typeof pinLayers>[2]> = {
 };
 /** Legenda va toifa tugmalaridagi kichik belgi: pin bilan bir xil rang va shakl (halqa = taxminiy joylashuv). */
 const SWATCH: Record<FeatKind, string> = {
-  terminal: 'bg-[#FD7B03] ring-1 ring-white', siding: 'border-2 border-teal bg-white', equipment: 'bg-navy ring-1 ring-white', truck: 'border-2 border-[#FD7B03] bg-white',
+  terminal: 'bg-[#FD7B03] ring-1 ring-white', siding: 'border-2 border-[#FD7B03] bg-white', equipment: 'bg-navy ring-1 ring-white', truck: 'border-2 border-teal bg-white',
 };
 // Xaritadagi pin ichidagi belgi bilan bir xil ikonka: rang yolg'iz yetarli emas edi
 const KIND_ICON: Record<FeatKind, Icon> = { terminal: ShippingContainerIcon, siding: PathIcon, equipment: TrainIcon, truck: TruckIcon };
-const ICON_TONE: Record<FeatKind, string> = { terminal: 'text-white', siding: 'text-teal', equipment: 'text-white', truck: 'text-[#FD7B03]' };
+const ICON_TONE: Record<FeatKind, string> = { terminal: 'text-white', siding: 'text-[#FD7B03]', equipment: 'text-white', truck: 'text-teal' };
 
 /** Toifa belgisi: rangli doira va ichida ikonka (legenda, chiplar, ro'yxat uchun bir xil). */
 function KindBadge({ kind, className = '' }: { kind: FeatKind; className?: string }) {

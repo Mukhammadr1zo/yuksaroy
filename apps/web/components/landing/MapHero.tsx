@@ -64,7 +64,7 @@ export function MapHero({ terminals }: { terminals: number | null }) {
         <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-0 w-4 border-t-2 border-dashed border-navy" />{t('map.legend.rail')}</li>
         <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-[2px] w-4 rounded bg-[#F39C1F]" />{t('map.legend.road')}</li>
         <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#FD7B03] ring-1 ring-white" />{t('map.legend.terminal')}</li>
-        <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-2 w-2 rounded-full border-2 border-teal bg-white" />{t('map.legend.siding')}</li>
+        <li className="flex items-center gap-1.5"><span aria-hidden="true" className="h-2 w-2 rounded-full border-2 border-[#FD7B03] bg-white" />{t('map.legend.siding')}</li>
       </ul>
 
       {/* Plitka litsenziyasi (ODbL, CARTO) attributsiyani talab qiladi: tugma o'rniga mayda matn qatori */}
