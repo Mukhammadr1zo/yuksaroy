@@ -14,7 +14,7 @@ export interface CargoType { id: string; code: string; codeTo: string; name: str
 export interface RailCard {
   registryNo: number | null; lengthM: number | null; trackCount: number | null; capacityWagons: number | null;
   loadCapacity: number; unloadCapacity: number; ownerNameRaw: string | null;
-  /** Mas'ul shaxs: ismi ochiq, raqami faqat kirgandan keyin (hasPhone taklif ko'rsatadi). */
+  /** Mas'ul shaxs: ismi ochiq, raqami obunachiga GET /contacts orqali (hasPhone tugma ko'rsatadi). */
   contactName: string | null; hasPhone: boolean;
 }
 export interface RailPassport extends RailCard {
@@ -25,7 +25,6 @@ export interface RailPassport extends RailCard {
   locoType: string | null; locoNote: string | null; processingHours: number | null;
   contractNo: string | null; contractStart: string | null; contractEnd: string | null; contractState: string | null;
   category: string | null; usageType: string | null; operStatus: string | null; note: string | null;
-  contactPhone: string | null;
 }
 
 export interface TerminalCard {
@@ -45,7 +44,8 @@ export interface CardTariff { serviceCode: ServiceCode; priceTiyin: number; unit
 export interface Tariff { id: string; serviceCode: ServiceCode; cargoGroupCode: string | null; priceTiyin: number; unit: TariffUnit; minTiyin: number | null; validFrom: string; validTo: string | null; version: number; note: string | null }
 export interface TerminalDetail extends Omit<TerminalCard, 'station' | 'tariffs' | 'rail'> {
   station: Station | null; rail: RailPassport | null;
-  description: string | null; phone: string | null; passport: Passport | null;
+  /** hasPhone: o'z raqami yoki reestrdagi mas'ul shaxs raqami bor; raqamning o'zi obunachiga (PhoneReveal). */
+  description: string | null; hasPhone: boolean; passport: Passport | null;
   serviceDetails: { serviceCode: ServiceCode; leadTimeMin: number }[]; tariffs: Tariff[];
 }
 export interface Passport {

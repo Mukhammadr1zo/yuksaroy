@@ -8,7 +8,7 @@ import type { ListingDetail, ListingPage } from '@/lib/types-listing';
 import { KIND_ICON, ListingCard, listingHref, regionName } from './ListingCard';
 import { KycBadge, PhoneBadge } from './KycBadge';
 import { ChatLauncher } from '@/components/chat/ChatPanel';
-import { PhoneLink } from './PhoneLink';
+import { PhoneReveal } from './PhoneReveal';
 import { MiniMap } from './MiniMap';
 import { PremiumBadge } from './PremiumBadge';
 import { Impressions } from './Impressions';
@@ -108,7 +108,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
               <p className="mt-1 font-display text-2xl font-bold text-navy tabular-nums">{formatSom(l.priceTiyin, lang)}{l.priceUnit && l.priceUnit !== 'TOTAL' ? <span className="ml-2 font-mono text-sm font-normal text-muted">{L.priceUnit[l.priceUnit]}</span> : null}</p>
             ) : <p className="mt-1 font-display text-xl font-bold text-navy">{t('onRequest')}</p>}
             <div className="mt-4 space-y-3">
-              {l.contactPhone ? <PhoneLink phone={l.contactPhone} kind="listing" targetId={l.id} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}
+              {l.hasPhone ? <PhoneReveal kind="listing" targetId={l.id} next={listingHref(l)} /> : <p className="text-sm text-muted">{t('noPhone')}</p>}
               <ChatLauncher target={{ kind: 'listing', id: l.id, title: l.title }} next={listingHref(l)} />
             </div>
             {l.responseHours ? <p className="mt-3 text-xs text-muted"><span className="font-mono text-ink">{t('response', { hours: l.responseHours })}</span> · {t('responseNote')}</p> : null}

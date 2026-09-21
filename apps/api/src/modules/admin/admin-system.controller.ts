@@ -24,6 +24,8 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   slotHoldTtlMin: posInt,
   terminalConfirmMin: posInt,
   docSlaHours: posInt,
+  subscriptionMonthSom: posInt,
+  phoneRevealDaily: posInt,
 };
 
 /**

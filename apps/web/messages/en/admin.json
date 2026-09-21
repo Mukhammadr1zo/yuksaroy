@@ -286,14 +286,18 @@
         "commissionPayer": "Who pays the commission",
         "slotHoldTtlMin": "Slot hold time",
         "terminalConfirmMin": "Terminal confirmation window",
-        "docSlaHours": "Document SLA"
+        "docSlaHours": "Document SLA",
+        "subscriptionMonthSom": "Subscription price",
+        "phoneRevealDaily": "Phone reveals per day"
       },
       "hint": {
         "commissionPct": "In basis points: 300 = 3.00%.",
         "commissionPayer": "TERMINAL or CLIENT.",
         "slotHoldTtlMin": "In minutes.",
         "terminalConfirmMin": "In minutes.",
-        "docSlaHours": "In hours."
+        "docSlaHours": "In hours.",
+        "subscriptionMonthSom": "UZS per month. Phone numbers and wagon search unlock for subscribers.",
+        "phoneRevealDaily": "How many phone numbers a subscriber can reveal per day."
       }
     },
     "listings": {

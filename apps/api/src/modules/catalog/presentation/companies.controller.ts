@@ -46,7 +46,7 @@ export class CompaniesController {
     return { items: rows.map(companyCard), total, page: p, limit: l };
   }
 
-  /** Telefon hammaga ochiq (egasi qarori): so'rov yuborish esa kirishni talab qiladi. */
+  /** Telefon obunachiga, GET /contacts/org/:id orqali; bu yerda faqat bor-yo'qligi. */
   @Get(':slug')
   async detail(@Param('slug') slug: string) {
     const now = new Date();
@@ -61,10 +61,9 @@ export class CompaniesController {
     ]);
     const free = await this.repo.freeTodayByTerminal(terminals.map((t) => t.id), now);
     const storefront = (o.storefront as Storefront | null) ?? null;
-    // Telefon hammaga ochiq: kompaniya sahifasi ommaviy tijorat profili (so'rov yuborish esa kirish bilan)
     return {
       ...companyCard(o),
-      description: o.description, telegram: o.telegram, website: o.website, phone: o.phone, storefront,
+      description: o.description, telegram: o.telegram, website: o.website, hasPhone: o.phone !== null, storefront,
       terminals: terminals.map((t) => publicTerminalCard(t, free[t.id] ?? 0)),
       listings: listings.map((l) => listingCard(toListingRecord(l), undefined, now)),
     };

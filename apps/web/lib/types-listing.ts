@@ -21,7 +21,7 @@ export interface ListingCard {
 export interface ListingDetail extends ListingCard {
   description: string | null; photos: string[]; responseHours: number | null;
   /** Faqat kirganlarga (1A qarori), mehmonga null. */
-  contactPhone: string | null; status: ListingStatus; createdAt: string;
+  hasPhone: boolean; status: ListingStatus; createdAt: string;
 }
 export interface ListingSummary { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null; onRequest: number; nearestKm: number | null }
 export interface ListingPage { items: ListingCard[]; total: number; page: number; limit: number; summary: ListingSummary }
@@ -31,7 +31,7 @@ export interface CompanyCard {
   counts: { terminals: number; listings: number };
 }
 export interface CompanyDetail extends CompanyCard {
-  description: string | null; telegram: string | null; website: string | null; phone: string | null;
+  description: string | null; telegram: string | null; website: string | null; hasPhone: boolean;
   terminals: TerminalCard[]; listings: ListingCard[];
 }
 

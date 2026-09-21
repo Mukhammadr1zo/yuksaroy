@@ -10,7 +10,7 @@ import { TerminalReviews } from '@/components/reviews/TerminalReviews';
 import { Impressions } from '@/components/catalog/Impressions';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
-import { PhoneLink } from '@/components/catalog/PhoneLink';
+import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { ChatLauncher } from '@/components/chat/ChatPanel';
 import { MiniMap } from '@/components/catalog/MiniMap';
 import { PIN } from '@/components/map/mapStyle';
@@ -82,7 +82,6 @@ export default async function TerminalPage({ params }: Params) {
         '@context': 'https://schema.org', '@type': 'LocalBusiness', name: t.name, url: url(locale, `/terminals/${t.slug}`),
         address: { '@type': 'PostalAddress', streetAddress: t.address ?? undefined, addressRegion: t.regionCode ?? undefined, addressCountry: 'UZ' },
         geo: t.lat != null && t.lng != null ? { '@type': 'GeoCoordinates', latitude: t.lat, longitude: t.lng } : undefined,
-        telephone: t.phone ?? undefined,
         openingHoursSpecification: t.is24h
           ? [{ '@type': 'OpeningHoursSpecification', dayOfWeek: DAYS.map((d) => SCHEMA_DAY[d]), opens: '00:00', closes: '23:59' }]
           : DAYS.flatMap((d) => (t.hours?.[d] ?? []).map(([opens, closes]) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: SCHEMA_DAY[d], opens, closes }))),
@@ -113,16 +112,17 @@ export default async function TerminalPage({ params }: Params) {
               <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>
             </>
           )}
-          {t.phone ? <span className="text-center"><PhoneLink phone={t.phone} kind="terminal" targetId={t.id} /></span> : null}
-          {/* Telefon hammaga ochiq, lekin yozishma ham kerak: hujjat yuboriladi va
-              kelishuv izi qoladi. Egasi tasdiqlanmagan obyektda javobni platforma beradi. */}
+          {/* Raqam obunachiga, bosilganda: sahifa keshlangan, raqam brauzerdan olinadi (PhoneReveal) */}
+          {t.hasPhone ? <span className="text-center"><PhoneReveal kind="terminal" targetId={t.slug} next={`/terminals/${t.slug}`} /></span> : null}
+          {/* Yozishma ham kerak: hujjat yuboriladi va kelishuv izi qoladi.
+              Egasi tasdiqlanmagan obyektda javobni platforma beradi. */}
           <ChatLauncher target={{ kind: 'terminal', slug: t.slug, title: t.name, ownerless: registryOnly }} next={`/terminals/${t.slug}`} />
         </div>
       </header>
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">
-          {t.rail ? <RailPassportCard rail={t.rail} slug={t.slug} /> : null}
+          {t.rail ? <RailPassportCard rail={t.rail} /> : null}
           <section hidden={registryOnly}>
             <h2 className="text-lg font-bold">{tr('tariffs.heading')}</h2>
             {t.tariffs.length === 0 ? <p className="mt-2 text-sm text-muted">{tr('tariffs.empty')}</p> : (

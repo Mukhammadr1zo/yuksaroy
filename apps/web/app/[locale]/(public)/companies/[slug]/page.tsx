@@ -9,7 +9,7 @@ import type { CompanyDetail } from '@/lib/types-listing';
 import { ListingCard, regionName } from '@/components/catalog/ListingCard';
 import { TerminalCard } from '@/components/catalog/TerminalCard';
 import { KycBadge } from '@/components/catalog/KycBadge';
-import { PhoneLink } from '@/components/catalog/PhoneLink';
+import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { MiniMap, type Pin } from '@/components/catalog/MiniMap';
 import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
 
@@ -80,7 +80,7 @@ export default async function CompanyPage({ params }: Params) {
               {tg ? <li className="flex items-center gap-2"><TelegramLogoIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><a href={`https://t.me/${tg}`} target="_blank" rel="noreferrer" className="font-semibold text-navy hover:text-teal-ink">@{tg}</a></li> : null}
               {site ? <li className="flex items-center gap-2"><GlobeIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><a href={site} target="_blank" rel="noreferrer" className="font-semibold text-navy hover:text-teal-ink">{site.replace(/^https?:\/\//, '')}</a></li> : null}
               <li className="flex items-center gap-2">
-                {o.phone ? <PhoneLink phone={o.phone} kind="org" targetId={o.id} /> : <><PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><span className="text-muted">{t('detail.noPhone')}</span></>}
+                {o.hasPhone ? <PhoneReveal kind="org" targetId={slug} next={`/companies/${slug}`} /> : <><PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><span className="text-muted">{t('detail.noPhone')}</span></>}
               </li>
             </ul>
             {!tg && !site ? <p className="mt-3 text-xs text-muted">{t('detail.noContact')}</p> : null}

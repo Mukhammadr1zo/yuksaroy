@@ -8,6 +8,8 @@ export interface PlatformConfigValues {
   slotHoldTtlMin: number;
   terminalConfirmMin: number;
   docSlaHours: number;
+  subscriptionMonthSom: number;
+  phoneRevealDaily: number;
 }
 
 /** PlatformConfig jadvali + PLATFORM_DEFAULTS. 60 s kesh - sozlama admin tomonidan kamdan-kam o'zgaradi. */

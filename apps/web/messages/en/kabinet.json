@@ -439,7 +439,8 @@
       "orders": "Orders",
       "chats": "Chats",
       "documents": "Documents",
-      "org": "Organization"
+      "org": "Organization",
+      "subscription": "Subscription"
     },
     "objects": {
       "title": "My objects",

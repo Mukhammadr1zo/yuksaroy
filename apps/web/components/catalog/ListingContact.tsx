@@ -1,5 +1,5 @@
 'use client';
-// So'rov yuborish: kirish talab qilinadi (telefon esa hammaga ochiq, PhoneLink da).
+// So'rov yuborish: kirish talab qilinadi (telefon esa obunachiga, PhoneReveal da).
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, hasSession, post } from '@/lib/api';

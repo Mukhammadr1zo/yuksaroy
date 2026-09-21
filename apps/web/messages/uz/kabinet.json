@@ -439,7 +439,8 @@
       "orders": "Buyurtmalar",
       "chats": "Suhbatlar",
       "documents": "Hujjatlar",
-      "org": "Tashkilot"
+      "org": "Tashkilot",
+      "subscription": "Obuna"
     },
     "objects": {
       "title": "Mening obyektlarim",

@@ -36,18 +36,20 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
 }
 
 /**
- * E'lon ommaviy tijorat taklifi: telefon hammaga ochiq (egasi aynan qo'ng'iroqni kutadi).
- * Platforma orqali so'rov yuborish esa kirishni talab qiladi.
+ * Ochiq tafsilot. Telefon raqamining o'zi bu yerda yo'q: u obunachiga, bosilganda,
+ * GET /contacts/listing/:id orqali beriladi (kunlik chegara va audit bilan).
+ * Ilgari raqam hammaga ochiq edi va narx sahifasidagi va'daga zid edi.
+ * `hasPhone` tugmani ko'rsatish yoki ko'rsatmaslik uchun.
  */
 export function listingDetail(l: ListingRecord) {
   return {
     ...listingCard(l), description: l.description, photos: l.photos, responseHours: l.responseHours,
-    contactPhone: l.contactPhone, status: l.status, createdAt: l.createdAt,
+    hasPhone: l.contactPhone !== null, status: l.status, createdAt: l.createdAt,
   };
 }
 
-/** Kabinet va admin: tafsilot + orgId, ko'rishlar, rad sababi, muddat. */
+/** Kabinet va admin: tafsilot + orgId, ko'rishlar, rad sababi, muddat. Egasi o'z raqamini ko'radi. */
 export function ownerListing(l: ListingRecord) {
   // premiumUntil: admin ro'yxatida "qachongacha" ko'rinishi kerak, faqat ha/yo'q emas
-  return { ...listingDetail(l), orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt, premiumUntil: l.premiumUntil };
+  return { ...listingDetail(l), contactPhone: l.contactPhone, orgId: l.orgId, ownerUserId: l.ownerUserId, views: l.views, rejectReason: l.rejectReason, expiresAt: l.expiresAt, updatedAt: l.updatedAt, premiumUntil: l.premiumUntil };
 }

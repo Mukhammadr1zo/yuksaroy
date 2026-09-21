@@ -1,0 +1,63 @@
+{
+  "subscription": {
+    "nav": "Subscription",
+    "title": "Subscription",
+    "lead": "With a subscription you see phone numbers of terminals, listings and companies. Chat stays free without it.",
+    "active": "Subscription active",
+    "activeUntil": "until {until}",
+    "inactive": "No subscription",
+    "perMonth": "{price} / month",
+    "months": "Duration",
+    "month": "{n} months",
+    "total": "Total",
+    "submit": "Place order",
+    "sending": "Sending",
+    "failed": "Could not create the order. Try again.",
+    "pending": "Awaiting payment",
+    "orderNo": "Write in the payment note",
+    "amount": "Amount",
+    "pay": "Payment",
+    "afterPay": "The subscription starts once the payment is confirmed, usually within 1 business day.",
+    "extend": "Extend",
+    "loadFailed": "Could not load.",
+    "reveal": {
+      "show": "Show number",
+      "loading": "Loading",
+      "login": "The number is available to registered users.",
+      "loginCta": "Sign in",
+      "subscribe": "A subscription is needed to see the number.",
+      "subscribeCta": "Subscribe",
+      "limit": "Daily limit reached. Try again tomorrow.",
+      "none": "No number provided.",
+      "err": "Could not load.",
+      "retry": "Retry"
+    },
+    "admin": {
+      "tab": "Subscriptions",
+      "lead": "Manual payment: check the money arrived, confirm, and the subscription activates.",
+      "status": {
+        "PENDING": "Awaiting payment",
+        "ACTIVE": "Active",
+        "CANCELLED": "Cancelled"
+      },
+      "months": "{n} months",
+      "user": "User",
+      "created": "Requested",
+      "confirm": "Confirm payment",
+      "confirming": "Confirming",
+      "confirmed": "Confirmed, subscription until {until}",
+      "failed": "Not confirmed. Refresh the page.",
+      "empty": "Queue is empty.",
+      "cancel": "Cancel",
+      "cancelled": "Order cancelled."
+    },
+    "nudge": {
+      "title": "Create an account",
+      "body": "Chat, phone numbers and booking need an account. It takes a minute.",
+      "cta": "Sign up",
+      "login": "Sign in",
+      "later": "Later",
+      "close": "Close"
+    }
+  }
+}

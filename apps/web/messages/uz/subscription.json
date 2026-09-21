@@ -1,0 +1,63 @@
+{
+  "subscription": {
+    "nav": "Obuna",
+    "title": "Obuna",
+    "lead": "Obuna bilan terminal, e'lon va kompaniya telefon raqamlarini ko'rasiz. Chat obunasiz ham bepul.",
+    "active": "Obuna faol",
+    "activeUntil": "{until} gacha",
+    "inactive": "Obuna yo'q",
+    "perMonth": "{price} / oy",
+    "months": "Muddat",
+    "month": "{n} oy",
+    "total": "Jami",
+    "submit": "Buyurtma berish",
+    "sending": "Yuborilmoqda",
+    "failed": "Buyurtma yaratilmadi. Qayta urinib ko'ring.",
+    "pending": "To'lov kutilmoqda",
+    "orderNo": "To'lov izohiga yozing",
+    "amount": "Summa",
+    "pay": "To'lov",
+    "afterPay": "To'lov tasdiqlangach obuna yoqiladi. Tasdiq odatda 1 ish kuni ichida.",
+    "extend": "Uzaytirish",
+    "loadFailed": "Ma'lumot yuklanmadi.",
+    "reveal": {
+      "show": "Raqamni ko'rish",
+      "loading": "Olinmoqda",
+      "login": "Raqam ro'yxatdan o'tganlarga.",
+      "loginCta": "Kirish",
+      "subscribe": "Raqamni ko'rish uchun obuna kerak.",
+      "subscribeCta": "Obuna",
+      "limit": "Bugungi chegara tugadi. Ertaga davom etadi.",
+      "none": "Raqam ko'rsatilmagan.",
+      "err": "Olinmadi.",
+      "retry": "Qayta"
+    },
+    "admin": {
+      "tab": "Obunalar",
+      "lead": "Qo'lda to'lov: summa kelganini tekshirib tasdiqlang, obuna yoqiladi.",
+      "status": {
+        "PENDING": "To'lov kutilmoqda",
+        "ACTIVE": "Faol",
+        "CANCELLED": "Bekor qilingan"
+      },
+      "months": "{n} oy",
+      "user": "Foydalanuvchi",
+      "created": "So'ralgan",
+      "confirm": "To'lovni tasdiqlash",
+      "confirming": "Tasdiqlanmoqda",
+      "confirmed": "Tasdiqlandi, obuna {until} gacha",
+      "failed": "Tasdiqlanmadi. Sahifani yangilang.",
+      "empty": "Navbat bo'sh.",
+      "cancel": "Bekor qilish",
+      "cancelled": "Buyurtma bekor qilindi."
+    },
+    "nudge": {
+      "title": "Ro'yxatdan o'ting",
+      "body": "Chat, telefon raqamlari va joy band qilish uchun hisob kerak. Bir daqiqa oladi.",
+      "cta": "Ro'yxatdan o'tish",
+      "login": "Kirish",
+      "later": "Keyinroq",
+      "close": "Yopish"
+    }
+  }
+}

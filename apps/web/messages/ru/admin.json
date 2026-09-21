@@ -286,14 +286,18 @@
         "commissionPayer": "Кто платит комиссию",
         "slotHoldTtlMin": "Время удержания слота",
         "terminalConfirmMin": "Срок подтверждения терминалом",
-        "docSlaHours": "Срок по документам"
+        "docSlaHours": "Срок по документам",
+        "subscriptionMonthSom": "Цена подписки",
+        "phoneRevealDaily": "Лимит номеров в день"
       },
       "hint": {
         "commissionPct": "В базисных пунктах: 300 = 3,00 %.",
         "commissionPayer": "TERMINAL или CLIENT.",
         "slotHoldTtlMin": "В минутах.",
         "terminalConfirmMin": "В минутах.",
-        "docSlaHours": "В часах."
+        "docSlaHours": "В часах.",
+        "subscriptionMonthSom": "Сум за один месяц. Телефоны и поиск вагонов открываются подписчику.",
+        "phoneRevealDaily": "Сколько телефонных номеров подписчик может открыть за день."
       }
     },
     "listings": {

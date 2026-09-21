@@ -17,5 +17,12 @@ export interface PremiumCreated { order: PremiumOrder; pricePerMonthSom: number;
 /** GET /admin/premium qatori. */
 export type AdminPremiumOrder = PremiumOrder & { listing: { slug: string; title: string; premiumUntil: string | null; orgName: string | null } };
 
+/** GET /admin/subscriptions: foydalanuvchi obunasi, admin navbati uchun. */
+export interface AdminSubscription {
+  id: string; userId: string; months: number; amountTiyin: number; status: 'PENDING' | 'ACTIVE' | 'CANCELLED';
+  startsAt: string | null; endsAt: string | null; paidAt: string | null; createdAt: string;
+  user: { fullName: string | null; phone: string | null; email: string | null };
+}
+
 export interface ContactMessage { id: string; name: string; contact: string; topic: string; message: string; createdAt: string }
 export interface ContactPage { items: ContactMessage[]; total: number; page: number; limit: number }

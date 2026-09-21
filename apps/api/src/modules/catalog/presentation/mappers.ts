@@ -57,14 +57,16 @@ export function publicTerminalCard(t: TerminalRecord, freeToday = 0, near?: GeoN
 }
 
 /**
- * `authed`: mas'ul shaxs telefoni faqat ro'yxatdan o'tgan foydalanuvchiga ko'rinadi.
- * U reestrdan kelgan shaxsiy raqam, egasi uni o'zi e'lon qilmagan.
+ * Telefon raqamining o'zi ochiq javobda yo'q: u obunachiga, bosilganda,
+ * GET /contacts/terminal/:id orqali beriladi. Ilgari terminalning o'z raqami hammaga,
+ * reestrdagi mas'ul shaxs raqami esa kirgan foydalanuvchiga ochiq edi.
+ * `hasPhone`: obyektning o'z raqami yoki reestrdagi raqam bormi (tugma uchun).
  */
-export function publicTerminal(t: TerminalRecord, freeToday = 0, authed = false) {
+export function publicTerminal(t: TerminalRecord, freeToday = 0) {
   const r = t.rail;
   return {
     ...publicTerminalCard(t, freeToday),
-    description: t.description, phone: t.phone, passport: t.passport,
+    description: t.description, hasPhone: t.phone !== null || (r?.contactPhone ?? null) !== null, passport: t.passport,
     station: t.station,
     serviceDetails: t.services.filter((s) => s.isEnabled).map((s) => ({ serviceCode: s.serviceCode, leadTimeMin: s.leadTimeMin })),
     tariffs: t.tariffs.map(publicTariff),
@@ -78,7 +80,6 @@ export function publicTerminal(t: TerminalRecord, freeToday = 0, authed = false)
       locoType: r.locoType, locoNote: r.locoNote, processingHours: r.processingHours,
       contractNo: r.contractNo, contractStart: r.contractStart, contractEnd: r.contractEnd, contractState: r.contractState,
       category: r.category, usageType: r.usageType, operStatus: r.status, note: r.note,
-      contactPhone: authed ? r.contactPhone : null,
     },
   };
 }
@@ -105,10 +106,10 @@ export function summarize(all: TerminalRecord[], free: Record<string, number>, n
 
 /**
  * ownerNameRaw hech qachon chiqmaydi; tasdiqlangan claim bo'lsa tashkilot nomi.
- * Mas'ul shaxs telefoni faqat ro'yxatdan o'tgan foydalanuvchiga: u reestrdan kelgan
- * shaxsiy raqam, egasi uni o'zi e'lon qilmagan (e'londagi telefondan farqi shunda).
+ * Mas'ul shaxs telefoni javobda yo'q: u obunachiga GET /contacts/siding/:id orqali
+ * beriladi. Bu reestrdan kelgan shaxsiy raqam, egasi uni o'zi e'lon qilmagan.
  */
-export function publicSiding(s: SidingRecord, authed = false) {
+export function publicSiding(s: SidingRecord) {
   return {
     id: s.id, slug: s.slug, registryNo: s.registryNo, station: s.station, stationNameRaw: s.stationNameRaw, esrCode: s.esrCode, rju: s.rju,
     regionCode: s.regionCode, lat: s.lat, lng: s.lng,
@@ -116,8 +117,7 @@ export function publicSiding(s: SidingRecord, authed = false) {
     // Rasm faqat tasdiqlangan egada ko'rinadi: da'vo hal bo'lmaguncha uni hech kim ko'rmaydi
     photos: s.claimStatus === 'APPROVED' ? s.photos : [],
     claimStatus: s.claimStatus, owner: s.claimStatus === 'APPROVED' ? s.ownerOrgName : null,
-    // Texnik pasport (Taminot reestri). Mas'ul shaxs ismi ochiq, telefoni esa faqat
-    // ro'yxatdan o'tgan foydalanuvchiga (pastdagi `authed`): u reestrdagi shaxsiy raqam.
+    // Texnik pasport (Taminot reestri). Mas'ul shaxs ismi ochiq, telefoni obuna ortida.
     name: s.name, registryRef: s.registryRef, trackCount: s.trackCount,
     capacityWagons: s.capacityWagons, occupiedWagons: s.occupiedWagons,
     deadEndDistanceM: s.deadEndDistanceM, junctionSwitch: s.junctionSwitch, brakeShoes: s.brakeShoes,
@@ -127,8 +127,7 @@ export function publicSiding(s: SidingRecord, authed = false) {
     contractNo: s.contractNo, contractStart: s.contractStart, contractEnd: s.contractEnd,
     contractState: s.contractState, category: s.category, usageType: s.usageType, status: s.status,
     contactName: s.contactName,
-    contactPhone: authed ? s.contactPhone : null,
-    /** Raqam bor, lekin ko'rish uchun kirish kerak: UI shu bilan taklif ko'rsatadi. */
+    /** Raqam bor, lekin ko'rish uchun obuna kerak: UI shu bilan tugma ko'rsatadi. */
     hasPhone: s.contactPhone !== null,
   };
 }

@@ -1,6 +1,6 @@
 'use client';
 /**
- * Moderatsiya navbatlari: e'lonlar, KYC, obyekt da'volari, Premium to'lovlar, murojaatlar.
+ * Moderatsiya navbatlari: e'lonlar, KYC, obyekt da'volari, Premium to'lovlar, obunalar, murojaatlar.
  * Shahobcha ham terminal, shuning uchun da'vo navbati bitta: ilgari ikkita bo'lim bir xil
  * qatorlarni ko'rsatib, qarorni ikki xil endpointga yuborardi.
  * Faol bo'lim URL da (?tab=), shunda bosh sahifadagi "kutilmoqda" havolalari to'g'ri bo'limga olib keladi.
@@ -13,13 +13,13 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, stationName, uzDateTime } from '@/lib/format';
 import { listingHref, type AdminTerminal, type OrgRecord, type OwnerListing } from '@/lib/types-kabinet';
-import type { AdminPremiumOrder, ContactPage } from '@/lib/types-trust';
+import type { AdminPremiumOrder, AdminSubscription, ContactPage } from '@/lib/types-trust';
 import { useLang, useListingLabels } from '@/components/kabinet/bits';
 import { BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
 import { Decide, type Decision } from '@/components/admin/Decide';
 
-type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'contact';
-const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'contact'];
+type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'subscription' | 'contact';
+const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'subscription', 'contact'];
 const isTab = (v: string | null): v is Tab => TABS.includes(v as Tab);
 
 type Flash = { text: string; tone: 'ok' | 'bad' } | null;
@@ -34,6 +34,7 @@ function Moderation() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tp = useTranslations('premium');
+  const tsb = useTranslations('subscription');
   const router = useRouter();
   const pathname = usePathname();
   const q = useSearchParams().get('tab');
@@ -43,6 +44,7 @@ function Moderation() {
   const [orgs, setOrgs] = useState<OrgRecord[] | null>(null);
   const [claims, setClaims] = useState<AdminTerminal[] | null>(null);
   const [prem, setPrem] = useState<AdminPremiumOrder[] | null>(null);
+  const [subs, setSubs] = useState<AdminSubscription[] | null>(null);
   const [msgs, setMsgs] = useState<ContactPage | null>(null);
   const [err, setErr] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
@@ -55,13 +57,14 @@ function Moderation() {
     // /admin/terminals hamma turni qamraydi (shahobcha ham shu yerda), /admin/sidings uning bir qismi edi
     void api<AdminTerminal[]>('/admin/terminals?claim=PENDING').then(setClaims).catch(fail);
     void api<AdminPremiumOrder[]>('/admin/premium?status=PENDING').then(setPrem).catch(fail);
+    void api<AdminSubscription[]>('/admin/subscriptions?status=PENDING').then(setSubs).catch(fail);
     // Faqat yorliqdagi son uchun: to'liq ro'yxat, qidiruv va sahifalash ContactTab da.
     void api<ContactPage>('/admin/contact/all?limit=1').then(setMsgs).catch(fail);
   }, []);
 
-  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, contact: msgs?.total ?? null };
-  const tabLabel = (k: Tab) => (k === 'premium' ? tp('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
-  const emptyText = tab === 'premium' ? tp('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty');
+  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, subscription: subs?.length ?? null, contact: msgs?.total ?? null };
+  const tabLabel = (k: Tab) => (k === 'premium' ? tp('admin.tab') : k === 'subscription' ? tsb('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
+  const emptyText = tab === 'premium' ? tp('admin.empty') : tab === 'subscription' ? tsb('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty');
 
   // Qaror berilgan qator ro'yxatdan chiqadi, natija esa ro'yxat tepasida bir qator bo'lib qoladi
   const decided = (d: Decision) => setFlash({ text: t(`decided.${d}`), tone: d === 'approved' ? 'ok' : 'bad' });
@@ -72,6 +75,7 @@ function Moderation() {
     : tab === 'kyc' ? orgs?.map((o) => <OrgRow key={o.id} o={o} onDone={(d) => { drop(setOrgs, o.id); decided(d); }} />)
     : tab === 'claims' ? claims?.map((x) => <TerminalClaimRow key={x.id} x={x} onDone={(d) => { drop(setClaims, x.id); decided(d); }} />)
     : tab === 'premium' ? prem?.map((o) => <PremiumRow key={o.id} o={o} onDone={(text) => { drop(setPrem, o.id); setFlash({ text, tone: 'ok' }); }} />)
+    : tab === 'subscription' ? subs?.map((s) => <SubscriptionRow key={s.id} s={s} onDone={(text) => { drop(setSubs, s.id); setFlash({ text, tone: 'ok' }); }} />)
     : null; // murojaatlar alohida komponentda: o'z qidiruvi va sahifalashi bor
 
   return (
@@ -96,6 +100,7 @@ function Moderation() {
         : counts[tab] === 0 ? <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{emptyText}</div>
         : <ul className="mt-5 space-y-3">{rows}</ul>}
       {tab === 'premium' || tab === 'contact' ? <p className="mt-3 text-xs text-muted">{tp(tab === 'premium' ? 'admin.lead' : 'messages.lead')}</p> : null}
+      {tab === 'subscription' ? <p className="mt-3 text-xs text-muted">{tsb('admin.lead')}</p> : null}
     </>
   );
 }
@@ -207,6 +212,60 @@ function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string
         {t('org')}: <span className="text-ink">{o.listing.orgName ?? '·'}</span> · <span className="font-mono">{t('months', { n: o.months })}</span> · <span className="font-mono font-semibold text-navy">{som(o.amountTiyin, lang)}</span> · {t('until')}: <span className="font-mono">{o.listing.premiumUntil ? uzDateTime(o.listing.premiumUntil, lang) : t('noPremium')}</span>
       </p>
       <p className="mt-1 font-mono text-xs text-muted">{o.id}</p>
+      <div className="mt-3">
+        {reason === null ? (
+          <div className="flex flex-wrap gap-2">
+            <button type="button" disabled={busy} onClick={confirm} className={BTN}>{busy ? t('confirming') : t('confirm')}</button>
+            <button type="button" disabled={busy} onClick={() => setReason('')} className={BTN_DANGER}>{t('cancel')}</button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300}
+              placeholder={ta('reason')} className={`${INPUT} w-full sm:w-72`} />
+            <ConfirmButton label={t('cancel')} confirm={ta('confirmReject')} onRun={cancel} disabled={busy || !reason.trim()} />
+            <button type="button" onClick={() => setReason(null)} className={BTN_GHOST}>{ta('cancel')}</button>
+          </div>
+        )}
+        {err ? <p role="alert" className="mt-2 text-sm text-red-700">{t('failed')}</p> : null}
+      </div>
+    </li>
+  );
+}
+
+/**
+ * Obuna to'lovi (qo'lda): foydalanuvchi, oylar, summa. Tasdiq -> ACTIVE va muddat
+ * boshlanadi (faol obuna bo'lsa uzayadi). Bekor -> CANCELLED, obuna berilmaydi.
+ * Premium qatori bilan bir xil shakl: operator ikkalasini bir xil o'qiydi.
+ */
+function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: string) => void }) {
+  const lang = useLang();
+  const t = useTranslations('subscription.admin');
+  const ta = useTranslations('admin');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(false);
+  const [reason, setReason] = useState<string | null>(null); // null = sabab maydoni yopiq
+  async function confirm() {
+    setBusy(true); setErr(false);
+    try { const r = await post<{ endsAt: string }>(`/admin/subscriptions/${s.id}/confirm`, {}); onDone(t('confirmed', { until: uzDateTime(r.endsAt, lang) })); }
+    catch { setErr(true); setBusy(false); }
+  }
+  async function cancel() {
+    setBusy(true); setErr(false);
+    try { await post(`/admin/subscriptions/${s.id}/cancel`, { reason: reason?.trim() }); onDone(t('cancelled')); }
+    catch { setErr(true); setBusy(false); }
+  }
+  const who = s.user.fullName || s.user.phone || s.user.email || s.userId;
+  return (
+    <li className={`${CARD} p-4`}>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-semibold">{who}</span>
+        <Pill tone="warn">{t(`status.${s.status}`)}</Pill>
+        <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(s.createdAt, lang)}</span>
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        {t('user')}: <span className="font-mono text-ink">{s.user.phone ?? s.user.email ?? '·'}</span> · <span className="font-mono">{t('months', { n: s.months })}</span> · <span className="font-mono font-semibold text-navy">{som(s.amountTiyin, lang)}</span>
+      </p>
+      <p className="mt-1 font-mono text-xs text-muted">{s.id}</p>
       <div className="mt-3">
         {reason === null ? (
           <div className="flex flex-wrap gap-2">

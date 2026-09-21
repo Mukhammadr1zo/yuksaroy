@@ -1,11 +1,8 @@
-import { Controller, Get, Header, Inject, NotFoundException, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Header, Inject, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { FastifyRequest } from 'fastify';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { EQUIPMENT_KINDS, REGIONS, RJUS, SEARCH_CATEGORIES, SERVICE_CODES, TERMINAL_KINDS, distanceKm, type ListingKind, type Rju, type ServiceCode, type TerminalKind } from '@yuksaroy/domain';
-import { TokenService } from '../../identity/application/token.service';
-import { optionalUserId } from '../../identity/presentation/jwt.guard';
 import { parseCorridor } from '../../listings/domain/listing-query';
 import { PrismaListingRepository } from '../../listings/infrastructure/prisma-listing.repository';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
@@ -35,7 +32,6 @@ export class CatalogController {
   constructor(
     @Inject(CATALOG_REPOSITORY) private readonly repo: CatalogRepository,
     private readonly listings: PrismaListingRepository,
-    private readonly tokens: TokenService,
   ) {}
 
   @Get('stations')
@@ -157,16 +153,15 @@ export class CatalogController {
   }
 
   @Get('terminals/:slug')
-  async terminal(@Param('slug') slug: string, @Req() req: FastifyRequest) {
+  async terminal(@Param('slug') slug: string) {
     const now = new Date();
     const t = await this.repo.findTerminalBySlug(slug, now);
     // Shahobcha reestrdan keladi va egasi yo'q: uni ham ochiq ko'rsatamiz, egasi keyin da'vo qiladi
     const open = t !== null && t.status === 'ACTIVE' && (t.orgId !== null || t.kind === 'RAIL');
     if (!open) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     const free = await this.repo.freeTodayByTerminal([t.id], now);
-    // Mas'ul shaxs telefoni faqat kirgan foydalanuvchiga. Token TEKSHIRILADI: ilgari shunchaki
-    // `ys_access` nomli cookie bor-yo'qligiga qaralardi, ya'ni istalgan odam uni o'zi qo'yib raqamni olardi.
-    return publicTerminal(t, free[t.id] ?? 0, optionalUserId(req, this.tokens) !== null);
+    // Telefon raqami bu javobda yo'q: u obunachiga GET /contacts/terminal/:id orqali beriladi
+    return publicTerminal(t, free[t.id] ?? 0);
   }
 
   @Get('sidings')
@@ -184,12 +179,11 @@ export class CatalogController {
   }
 
   @Get('sidings/:id')
-  async siding(@Param('id') id: string, @Req() req: FastifyRequest) {
+  async siding(@Param('id') id: string) {
     const s = await this.repo.findSidingById(id, true);
     // hozircha egasiz reestr shahobchalari ham ochiq: egasi/rasm faqat da'vo tasdiqlanganda ko'rinadi (publicSiding)
     if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
-    // Telefon uchun token tekshiriladi (cookie nomi yetarli emas), Bearer bilan kelgan bot/mobil ham ishlaydi
-    return publicSiding(s, optionalUserId(req, this.tokens) !== null);
+    return publicSiding(s);
   }
 
   /** Xarita: platformadagi obyektlar (temir yo'l tarmog'i emas). */

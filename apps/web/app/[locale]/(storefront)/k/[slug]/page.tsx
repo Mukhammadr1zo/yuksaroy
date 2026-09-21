@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { GlobeIcon, PhoneIcon, TelegramLogoIcon } from '@phosphor-icons/react/dist/ssr';
+import { GlobeIcon, TelegramLogoIcon } from '@phosphor-icons/react/dist/ssr';
 import type { OrgKind, SearchLang } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { sapiOrNull } from '@/lib/server-api';
+import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { num } from '@/lib/format';
 import type { CompanyStorefront } from '@/lib/types-urgent';
 import { ListingCard, regionName } from '@/components/catalog/ListingCard';
@@ -96,9 +97,10 @@ export default async function ShopPage({ params }: Params) {
               <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('contact')}</h2>
               <div className="mt-3 flex flex-col gap-2">
                 {tg ? <a href={`https://t.me/${tg}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-teal px-5 py-2.5 font-semibold text-white transition hover:bg-teal-ink"><TelegramLogoIcon size={18} aria-hidden="true" />{t('telegram')}</a> : null}
-                {o.phone ? <a href={`tel:${o.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-navy px-5 py-2.5 font-semibold text-navy transition hover:bg-sand"><PhoneIcon size={18} aria-hidden="true" /><span className="font-mono">{o.phone}</span></a> : null}
+                {/* Raqam obunachiga, bosilganda: do'kon sahifasi ham umumiy qoidaga bo'ysunadi */}
+                {o.hasPhone ? <PhoneReveal kind="org" targetId={slug} next={`/k/${slug}`} /> : null}
                 {site ? <a href={site} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:text-teal-ink"><GlobeIcon size={16} aria-hidden="true" />{site.replace(/^https?:\/\//, '')}</a> : null}
-                {!tg && !o.phone && !site ? <p className="text-sm text-muted">{t('noContact')}</p> : null}
+                {!tg && !o.hasPhone && !site ? <p className="text-sm text-muted">{t('noContact')}</p> : null}
               </div>
             </section>
             {mapKeys.length ? (

@@ -1,14 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { num } from '@/lib/format';
 import type { RailPassport } from '@/lib/types';
-import { RailPhone } from '@/components/catalog/RailPhone';
 
 /**
  * Temir yo'l terminalining (shahobcha yo'lining) texnik pasporti: O'TY Taminot reestridagi
  * hamma maydon. Bo'sh maydon chizilmaydi, aks holda jadval yolg'on to'liqlik ko'rsatardi.
  * Mas'ul shaxs raqami faqat kirgan foydalanuvchiga keladi (API uni null qilib yuboradi).
  */
-export async function RailPassportCard({ rail, slug }: { rail: RailPassport; slug: string }) {
+export async function RailPassportCard({ rail }: { rail: RailPassport }) {
   const locale = await getLocale();
   const t = await getTranslations('claim');
   const m = (v: number | null) => (v == null ? null : t('meters', { count: num(v, locale) }));
@@ -54,13 +53,11 @@ export async function RailPassportCard({ rail, slug }: { rail: RailPassport; slu
         ))}
       </dl>
 
-      {/* Mas'ul shaxs: ism ochiq, raqam faqat kirgandan keyin. Raqam reestrdan kelgan shaxsiy raqam. */}
+      {/* Mas'ul shaxs: ism ochiq. Raqam sahifa boshidagi tugma orqali, obunachiga (PhoneReveal). */}
       {rail.contactName || rail.hasPhone ? (
         <div className="mt-4 rounded-card border border-line bg-white p-4">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('contactHeading')}</h3>
           {rail.contactName ? <p className="mt-1.5 font-semibold text-navy">{rail.contactName}</p> : null}
-          {/* Raqamni RailPhone brauzerdan oladi: sahifaning o'zi keshlangan va cookie'siz (RailPhone izohiga qarang) */}
-          {rail.hasPhone ? <RailPhone slug={slug} /> : null}
           <p className="mt-3 border-t border-line/70 pt-2 text-[11px] text-muted">{t('contactNote')}</p>
         </div>
       ) : null}

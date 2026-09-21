@@ -62,6 +62,7 @@ model User {
   sessions      Session[]
   listings      Listing[] // yakka haydovchi e'lonlari (ownerUserId)
   notifications Notification[]
+  subscriptions Subscription[]
 }
 
 /// Telefon ↔ Telegram chat bog'lanishi. OTP shu chatga yuboriladi (SMS yo'q).
@@ -830,6 +831,27 @@ model Impression {
 }
 
 /// Premium buyurtmasi: hozircha qo'lda to'lov (manual), keyin Payme/Click.
+/// Foydalanuvchi obunasi. Premium bitta e'longa tegishli, obuna esa odamga: telefon
+/// raqamini ko'rish, vagon qidiruvi kabi pullik imkoniyatlar shu bilan ochiladi.
+/// To'lov hozircha qo'lda: admin tasdiqlaydi (PremiumOrder bilan bir xil yo'l).
+model Subscription {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  months      Int // 1..12
+  amountTiyin BigInt
+  status      String    @default("PENDING") // PENDING | ACTIVE | CANCELLED
+  provider    String? // 'manual'
+  /// Tasdiqlangan obunaning amal qilish oralig'i. Faol = ACTIVE va endsAt > hozir.
+  startsAt    DateTime? @db.Timestamptz(3)
+  endsAt      DateTime? @db.Timestamptz(3)
+  paidAt      DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, endsAt])
+  @@index([status])
+}
+
 model PremiumOrder {
   id          String    @id @default(cuid())
   listingId   String

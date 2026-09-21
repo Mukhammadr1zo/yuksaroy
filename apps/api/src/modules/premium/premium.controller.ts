@@ -4,12 +4,12 @@ import { BadRequestException } from '@nestjs/common';
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { PRICING, premiumAmountTiyin } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
-import { env } from '../../common/env';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { pickIn } from '../catalog/presentation/catalog.controller';
 import { extendPremium } from './extend-premium';
+import { payInstructions } from './pay-instructions';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 
 class PremiumDto {
@@ -22,8 +22,6 @@ class CancelDto {
 }
 
 const STATUSES = ['PENDING', 'PAID', 'CANCELLED'] as const;
-/** Rekvizitlar env'da bo'lmasa: qo'lda to'lov, /contact orqali. */
-const PAY_PLACEHOLDER = "To'lov rekvizitlari hali kiritilmagan. Buyurtma raqamini ko'rsatib /contact orqali yozing, to'lov tasdiqlangach Premium yoqiladi.";
 
 type OrderRow = { id: string; listingId: string; orgId: string | null; userId: string; months: number; amountTiyin: bigint; status: string; provider: string | null; paidAt: Date | null; createdAt: Date };
 /** BigInt -> Number (JSON). */
@@ -51,7 +49,7 @@ export class PremiumController {
     return {
       order: orderView(o),
       pricePerMonthSom: PRICING.premiumPerListingPerMonthSom,
-      payInstructions: { method: 'manual' as const, details: env.PREMIUM_PAY_DETAILS ?? PAY_PLACEHOLDER },
+      payInstructions: payInstructions(),
     };
   }
 

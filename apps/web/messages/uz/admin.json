@@ -286,14 +286,18 @@
         "commissionPayer": "Komissiyani kim to'laydi",
         "slotHoldTtlMin": "Joy band turish muddati",
         "terminalConfirmMin": "Terminal tasdiqlash muddati",
-        "docSlaHours": "Hujjat muddati"
+        "docSlaHours": "Hujjat muddati",
+        "subscriptionMonthSom": "Obuna narxi",
+        "phoneRevealDaily": "Kuniga raqam ochish chegarasi"
       },
       "hint": {
         "commissionPct": "Bazis punktda: 300 = 3,00 %.",
         "commissionPayer": "TERMINAL yoki CLIENT.",
         "slotHoldTtlMin": "Daqiqada.",
         "terminalConfirmMin": "Daqiqada.",
-        "docSlaHours": "Soatda."
+        "docSlaHours": "Soatda.",
+        "subscriptionMonthSom": "So'm, bir oy uchun. Telefon raqami va vagon qidiruvi obunachiga ochiladi.",
+        "phoneRevealDaily": "Obunachi kuniga nechta telefon raqamini ocha oladi."
       }
     },
     "listings": {
