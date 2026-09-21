@@ -268,7 +268,8 @@
       },
       "logout": "Выйти",
       "loggedOut": "Вы вышли. При следующем открытии вход через Telegram.",
-      "telegram": "Telegram @{username}"
+      "telegram": "Telegram @{username}",
+      "subscription": "Подписка: телефоны и поиск вагона"
     },
     "map": {
       "title": "Карта"

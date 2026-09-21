@@ -2,7 +2,7 @@
   "subscription": {
     "nav": "Obuna",
     "title": "Obuna",
-    "lead": "Obuna bilan terminal, e'lon va kompaniya telefon raqamlarini ko'rasiz. Chat obunasiz ham bepul.",
+    "lead": "Obuna bilan terminal, e'lon va kompaniya telefon raqamlarini ko'rasiz, vagon qidiruvi cheksiz bo'ladi. Chat obunasiz ham bepul.",
     "active": "Obuna faol",
     "activeUntil": "{until} gacha",
     "inactive": "Obuna yo'q",

@@ -268,7 +268,8 @@
       },
       "logout": "Chiqish",
       "loggedOut": "Chiqdingiz. Ilovani qayta ochganda Telegram orqali kirasiz.",
-      "telegram": "Telegram @{username}"
+      "telegram": "Telegram @{username}",
+      "subscription": "Obuna: telefon raqamlari va vagon qidiruvi"
     },
     "map": {
       "title": "Xarita"

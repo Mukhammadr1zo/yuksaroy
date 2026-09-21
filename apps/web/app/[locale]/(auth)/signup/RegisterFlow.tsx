@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowRightIcon, BuildingsIcon, CheckCircleIcon, CheckIcon, MagnifyingGlassIcon, StorefrontIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { ORG_KINDS, REGIONS, type OrgKind } from '@yuksaroy/domain';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError, api, clearAuthedCache, post } from '@/lib/api';
 import type { LoginResponse, Me, OrgRecord } from '@/lib/types-auth';
 import { GoogleButton } from '@/components/auth/GoogleButton';
@@ -52,6 +52,7 @@ function Cards({ list, value, label, onPick }: {
 
 export function RegisterFlow({ next }: { next: string | null }) {
   const t = useTranslations('auth2.register');
+  const router = useRouter();
   const tk = useTranslations('orgKind');
   const tr = useTranslations('region');
   // 0 = kirganmi tekshirilmoqda
@@ -64,7 +65,14 @@ export function RegisterFlow({ next }: { next: string | null }) {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const loggedIn = (u: Me) => { clearAuthedCache(); setForm((f) => ({ ...f, fullName: u.fullName ?? '' })); setStep(u.hasPassword || !u.phone ? 3 : 2); };
+  const loggedIn = (u: Me) => {
+    clearAuthedCache();
+    // Profili allaqachon bor odam (ism kiritilgan) biror sahifadan kelgan bo'lsa, o'sha yerga qaytadi:
+    // masalan "Obuna bo'lish" bosgan eski mijoz niyat va ismni qayta so'ralmasin
+    if (u.fullName && next) { router.replace(stripLocale(next)); return; }
+    setForm((f) => ({ ...f, fullName: u.fullName ?? '' }));
+    setStep(u.hasPassword || !u.phone ? 3 : 2);
+  };
   useEffect(() => { api<Me>('/auth/me').then(loggedIn).catch(() => setStep(1)); }, []);
 
   const run = async (fn: () => Promise<void>, fail: (code: string | null) => string) => {
@@ -110,12 +118,15 @@ export function RegisterFlow({ next }: { next: string | null }) {
     </label>
   );
 
-  // Tayyor qadam: haydovchi uchun e'lon va kabinet, tashkilot uchun kabinet, e'lon, terminal
+  // Tayyor qadam: qayerdan kelgan bo'lsa avval o'sha yerga ("Davom etish"), keyin odatiy yo'llar.
+  // Kabinet doim kabinetga boradi: avval next shu yorliq ostida yashiringan edi va odam obuna sahifasiga
+  // "Buyurtmalar, tashkilot" deb yozilgan tugmadan tushardi.
+  const back = next ? [{ key: 'continue', href: stripLocale(next) }] : [];
   const actions = org
-    ? [{ key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }, { key: 'listing', href: '/dashboard/listings/new' }, { key: 'terminal', href: '/dashboard/orders?tab=incoming' }]
+    ? [...back, { key: 'cabinet', href: '/dashboard' }, { key: 'listing', href: '/dashboard/listings/new' }, { key: 'terminal', href: '/dashboard/orders?tab=incoming' }]
     : who === 'shipper'
-      ? [{ key: 'findTerminal', href: '/terminals' }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }]
-      : [{ key: 'driverListing', href: { pathname: '/dashboard/listings/new', query: { kind: 'TRUCK' } } }, { key: 'cabinet', href: next ? stripLocale(next) : '/dashboard' }];
+      ? [...back, { key: 'findTerminal', href: '/terminals' }, { key: 'cabinet', href: '/dashboard' }]
+      : [...back, { key: 'driverListing', href: { pathname: '/dashboard/listings/new', query: { kind: 'TRUCK' } } }, { key: 'cabinet', href: '/dashboard' }];
 
   return (
     <div className="rounded-card border border-line bg-white p-4 sm:p-8">

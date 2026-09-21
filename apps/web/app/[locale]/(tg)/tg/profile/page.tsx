@@ -2,8 +2,8 @@
 // Profil: ism va avatar, telefon (requestContact orqali bog'lash), til (PATCH /auth/me + URL prefiksi), to'liq sayt havolalari, chiqish (tg token tozalanadi).
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowSquareOutIcon } from '@phosphor-icons/react';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { ArrowRightIcon, ArrowSquareOutIcon } from '@phosphor-icons/react';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { routing, type Locale } from '@/i18n/routing';
 import { api } from '@/lib/api';
 import type { Me } from '@/lib/types-auth';
@@ -54,6 +54,12 @@ export default function TgProfilePage() {
         <div className="mt-2 grid grid-cols-3 gap-2">
           {routing.locales.map((l) => <button key={l} type="button" aria-pressed={l === locale} disabled={busy} onClick={() => void setLocale(l)} className={CHIP(l === locale)}>{LOCALE_LABEL[l]}</button>)}
         </div>
+      </section>
+
+      <section className="mt-5">
+        <Link href="/tg/subscription" onClick={() => haptic()} className={`${CARD} flex min-h-12 items-center justify-between px-4 text-sm font-semibold active:bg-sand`}>
+          <span>{t('subscription')}</span><ArrowRightIcon size={16} className="text-muted" aria-hidden="true" />
+        </Link>
       </section>
 
       <section className="mt-5">

@@ -164,7 +164,11 @@
           "body": "Free spots today and tariffs"
         },
         "shipperLead": "Your account is ready. You can start looking for a terminal.",
-        "shipperHint": "An organization is created automatically with your first order; the tax ID is asked when documents are issued."
+        "shipperHint": "An organization is created automatically with your first order; the tax ID is asked when documents are issued.",
+        "continue": {
+          "title": "Continue",
+          "body": "Back to where you started"
+        }
       }
     }
   }

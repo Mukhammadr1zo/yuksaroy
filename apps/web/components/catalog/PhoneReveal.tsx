@@ -53,15 +53,12 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
   }
   if (st.s === 'login') return <p className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('login')} <Link href={`/login?next=${next}`} className={cta}>{t('loginCta')}</Link></p>;
   if (st.s === 'subscribe') {
-    // Telegram Mini App da kabinet cookie'si yo'q: /dashboard u yerda kirish sahifasiga qaytaradi.
-    // Shuning uchun obuna sahifasi tashqi brauzerda ochiladi.
-    const inTg = tgTokens() !== null;
+    // Telegram Mini App da kabinet cookie'si yo'q: /dashboard u yerda kirish sahifasiga qaytaradi,
+    // shuning uchun Mini App o'z obuna sahifasiga boradi (karta bir xil)
     return (
       <p className={hint}>
         <LockSimpleIcon size={14} aria-hidden="true" />{t('subscribe')}{' '}
-        {inTg
-          ? <a href="https://yuksaroy.uz/dashboard/subscription" target="_blank" rel="noreferrer" className={cta}>{t('subscribeCta')}</a>
-          : <Link href="/dashboard/subscription" className={cta}>{t('subscribeCta')}</Link>}
+        <Link href={tgTokens() !== null ? '/tg/subscription' : '/dashboard/subscription'} className={cta}>{t('subscribeCta')}</Link>
       </p>
     );
   }

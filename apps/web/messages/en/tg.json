@@ -268,7 +268,8 @@
       },
       "logout": "Sign out",
       "loggedOut": "Signed out. Next time you open the app you sign in through Telegram.",
-      "telegram": "Telegram @{username}"
+      "telegram": "Telegram @{username}",
+      "subscription": "Subscription: phone numbers and wagon search"
     },
     "map": {
       "title": "Map"

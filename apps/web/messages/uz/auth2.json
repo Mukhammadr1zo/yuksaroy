@@ -164,7 +164,11 @@
           "body": "Bugungi bo'sh joylar va tariflar"
         },
         "shipperLead": "Hisobingiz tayyor. Terminal qidirishni boshlashingiz mumkin.",
-        "shipperHint": "Tashkilot birinchi buyurtmada avtomatik ochiladi, STIR esa hujjat kerak bo'lganda so'raladi."
+        "shipperHint": "Tashkilot birinchi buyurtmada avtomatik ochiladi, STIR esa hujjat kerak bo'lganda so'raladi.",
+        "continue": {
+          "title": "Davom etish",
+          "body": "Boshlagan joyingizga qaytish"
+        }
       }
     }
   }
