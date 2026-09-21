@@ -148,7 +148,8 @@ export function pinLayers(prefix: string, source: string, o: { color: string; ha
   if (o.label) layers.push({
     id: `${prefix}-label`, type: 'symbol', source, filter: ['all', single, ['has', 'count']],
     layout: { 'text-field': ['to-string', ['get', 'count']], 'text-font': ['Montserrat Medium'], 'text-size': z(5, 9, 10, 11), 'text-allow-overlap': true },
-    paint: { 'text-color': o.color, 'text-opacity': DIM },
+    // To'ldirilgan pinda son oq bo'lmasa ko'rinmaydi
+    paint: { 'text-color': o.hollow ? o.color : '#FFFFFF', 'text-opacity': DIM },
   });
   layers.push({
     id: `${prefix}-cluster`, type: 'circle', source, filter: ['has', 'point_count'],

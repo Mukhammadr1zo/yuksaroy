@@ -144,8 +144,7 @@
         "aria": "Map legend",
         "rail": "Railway",
         "road": "Road",
-        "terminal": "Terminal",
-        "siding": "Siding"
+        "terminal": "Terminal"
       }
     }
   },

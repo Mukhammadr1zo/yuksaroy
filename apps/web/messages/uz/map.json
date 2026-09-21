@@ -31,7 +31,7 @@
       "zoomOut": "Butun xaritani ko'rish"
     },
     "siding": {
-      "count": "{count} ta shahobcha yo'l",
+      "count": "{count} ta terminal",
       "approx": "taxminiy joylashuv, stansiya bo'yicha",
       "open": "Stansiya ro'yxati"
     },
@@ -46,7 +46,6 @@
     "legend": {
       "aria": "Xarita legendasi",
       "terminal": "Terminal",
-      "siding": "Shahobcha (stansiya)",
       "equipment": "Texnika",
       "truck": "Avtotransport"
     },

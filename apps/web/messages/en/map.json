@@ -31,7 +31,7 @@
       "zoomOut": "Show the whole map"
     },
     "siding": {
-      "count": "{count, plural, one {# private siding} other {# private sidings}}",
+      "count": "{count, plural, one {# terminal} other {# terminals}}",
       "approx": "approximate location, by station",
       "open": "Station list"
     },
@@ -46,7 +46,6 @@
     "legend": {
       "aria": "Map legend",
       "terminal": "Terminal",
-      "siding": "Siding (station)",
       "equipment": "Equipment",
       "truck": "Road transport"
     },
