@@ -2,6 +2,9 @@
   "nav2": {
     "equipment": "Texnika",
     "carriers": "Avtotransport",
-    "companies": "Kompaniyalar"
+    "companies": "Kompaniyalar",
+    "services": "Xizmatlar",
+    "cargo": "Yuklar",
+    "wagon": "Vagon qidiruvi"
   }
 }

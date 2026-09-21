@@ -18,6 +18,9 @@ import { ChatModule } from './modules/chat/chat.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { UrgentModule } from './modules/urgent/urgent.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { MarketModule } from './modules/market/market.module';
+import { WagonModule } from './modules/wagon/wagon.module';
+import { HelpModule } from './modules/help/help.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -27,6 +30,7 @@ import { HealthController } from './health.controller';
     UrgentModule, // 6-bosqich: shoshilinch so'rovlar
     NotificationsModule, ChatModule, AdminModule, // saytdagi bildirishnoma va so'rov yozishmasi
     SubscriptionModule, // obuna: telefon raqami va vagon qidiruvi shu bilan ochiladi
+    MarketModule, WagonModule, HelpModule, // xizmatlar markazi va yuk bozori, vagon qidiruvi, yordam chati
   ],
   controllers: [HealthController],
 })

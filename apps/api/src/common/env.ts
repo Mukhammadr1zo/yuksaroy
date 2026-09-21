@@ -34,6 +34,10 @@ const schema = z.object({
   YORDAMCHI_MODEL: opt(z.string()),
   YORDAMCHI_GUEST_DAILY: opt(z.coerce.number().int().min(0)),
   YORDAMCHI_USER_DAILY: opt(z.coerce.number().int().min(0)),
+  // Ixtiyoriy: vagon qidiruvi uchun d-railway.uz xizmat hisobi; bo'lmasa bo'lim "ulanmagan" deb ko'rsatiladi
+  D_RAILWAY_URL: opt(z.string().url()),
+  D_RAILWAY_EMAIL: opt(z.string()),
+  D_RAILWAY_PASSWORD: opt(z.string()),
 });
 
 export const env = schema.parse(process.env);

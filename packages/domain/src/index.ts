@@ -143,6 +143,10 @@ export const PLATFORM_DEFAULTS = {
   subscriptionMonthSom: 99000,
   /** Obunachi kuniga nechta raqam ocha oladi: bazani ko'chirib olishga qarshi chegara. */
   phoneRevealDaily: 50,
+  /** Obunasiz odamga nechta vagon qidiruvi bepul (umrbod, kunlik emas): "birinchisi tekin". */
+  wagonSearchFree: 1,
+  /** Yordam chatida kuniga nechta savol LLM ga ketadi (tez-tez so'raladigan savollar bepul va cheksiz). */
+  helpAskDaily: 30,
 } as const;
 export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
 
@@ -412,3 +416,44 @@ export function formatUrgentNo(seq: number): string {
 export const YORDAMCHI = { llmThreshold: 0.6, guestDaily: 10, userDaily: 100, timeoutMs: 8000, maxTokens: 512 } as const;
 
 
+
+// ───────────────────────── Xizmatlar markazi va yuk bozori ─────────────────────────
+
+/** Xizmatlar markazi: kim xizmat ko'rsatadi. Tashkilot turi emas, odam yoki firma o'zini shu bilan e'lon qiladi. */
+export const SERVICE_TYPES = ['FORWARDER', 'CASHIER', 'DOCS'] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+export const SERVICE_TYPE_LABELS: Record<SearchLang, Record<ServiceType, string>> = {
+  uz: { FORWARDER: 'Ekspeditor', CASHIER: 'Tovar kassiri', DOCS: "Hujjat to'ldirish" },
+  ru: { FORWARDER: 'Экспедитор', CASHIER: 'Товарный кассир', DOCS: 'Оформление документов' },
+  en: { FORWARDER: 'Freight forwarder', CASHIER: 'Freight cashier', DOCS: 'Document preparation' },
+};
+
+/**
+ * Bozor so'rovi: xizmat so'rovi (SERVICE) va yuk e'loni (CARGO) bir xil hayot siklida
+ * yashaydi: ochiq -> taklif tanlandi -> yopiq. Shoshilinch so'rovlar (/urgent) bilan bir xil
+ * shakl, lekin maydonlari boshqa (yo'nalish, og'irlik, sana), shuning uchun alohida jadval.
+ */
+export const MARKET_BOARDS = ['SERVICE', 'CARGO'] as const;
+export type MarketBoard = (typeof MARKET_BOARDS)[number];
+export const MARKET_STATUSES = ['OPEN', 'AWARDED', 'CLOSED', 'CANCELLED'] as const;
+export type MarketStatus = (typeof MARKET_STATUSES)[number];
+export const MARKET_OFFER_STATUSES = ['SENT', 'AWARDED', 'DECLINED'] as const;
+export type MarketOfferStatus = (typeof MARKET_OFFER_STATUSES)[number];
+export const MARKET = {
+  descriptionMax: 2000,
+  titleMax: 120,
+  /** Bir so'rovga bir ta'minotchidan bitta taklif. */
+  offersPerRequestPerProvider: 1,
+  requestsPerHour: 5,
+  offersPerHour: 20,
+  listTake: 100,
+  /** Ochiq so'rov shuncha kundan keyin ro'yxatdan tushadi (yopilmaydi, faqat ko'rinmaydi). */
+  staleDays: 30,
+} as const;
+
+/** Vagon raqami: 7 yoki 8 raqam (oxirgisi nazorat raqami). Faqat raqamlar saqlanadi. */
+export const WAGON = { noMinDigits: 7, noMaxDigits: 8 } as const;
+export function normalizeWagonNo(value: string): string | null {
+  const digits = value.replace(/\D/g, '');
+  return digits.length >= WAGON.noMinDigits && digits.length <= WAGON.noMaxDigits ? digits : null;
+}

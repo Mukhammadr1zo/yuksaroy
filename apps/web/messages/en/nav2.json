@@ -2,6 +2,9 @@
   "nav2": {
     "equipment": "Equipment",
     "carriers": "Road carriers",
-    "companies": "Companies"
+    "companies": "Companies",
+    "services": "Services",
+    "cargo": "Cargo",
+    "wagon": "Wagon search"
   }
 }

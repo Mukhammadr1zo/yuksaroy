@@ -10,6 +10,8 @@ export interface PlatformConfigValues {
   docSlaHours: number;
   subscriptionMonthSom: number;
   phoneRevealDaily: number;
+  wagonSearchFree: number;
+  helpAskDaily: number;
 }
 
 /** PlatformConfig jadvali + PLATFORM_DEFAULTS. 60 s kesh - sozlama admin tomonidan kamdan-kam o'zgaradi. */

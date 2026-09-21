@@ -32,5 +32,9 @@ import pricing from './pricing.json';
 import a11y from './a11y.json';
 import seo2 from './seo2.json';
 import subscription from './subscription.json';
+import services from './services.json';
+import cargo from './cargo.json';
+import wagon from './wagon.json';
+import help from './help.json';
 
-export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2, ...subscription };
+export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2, ...subscription, ...services, ...cargo, ...wagon, ...help };

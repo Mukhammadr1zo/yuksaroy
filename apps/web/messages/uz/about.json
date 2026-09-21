@@ -25,8 +25,8 @@
         "body": "Tarif va e'lon narxlari ro'yxatdan o'tmasdan ko'rinadi. Yashirin narx yo'q: ochiq ko'rasiz, solishtirasiz va o'zingizga mosini tanlaysiz."
       },
       "fair": {
-        "title": "Halol joylashuv",
-        "body": "Ro'yxat tartibi ochiq: yangi, narx yoki masofa. Premium faqat shu tartib ichida yuqorida turadi va belgi bilan ajratiladi. Yashirin reklama yo'q."
+        "title": "E'lonlar qanday tartibda chiqadi",
+        "body": "Siz tanlaysiz: yangi, arzon yoki yaqin. Pullik e'lon yuqorida chiqadi, lekin \"Premium\" belgisi bilan, yashirin emas. Tartibga boshqa hech narsa aralashmaydi."
       },
       "owners": {
         "title": "Egalar e'loni",

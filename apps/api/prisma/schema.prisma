@@ -63,6 +63,9 @@ model User {
   listings      Listing[] // yakka haydovchi e'lonlari (ownerUserId)
   notifications Notification[]
   subscriptions Subscription[]
+  serviceProfiles ServiceProfile[]
+  marketRequests  MarketRequest[]
+  wagonSearches   WagonSearch[]
 }
 
 /// Telefon ↔ Telegram chat bog'lanishi. OTP shu chatga yuboriladi (SMS yo'q).
@@ -132,6 +135,9 @@ model Organization {
   supplied       Invoice[]    @relation("InvoiceSupplier")
   listings       Listing[]
   reviews        Review[]
+  serviceProfiles ServiceProfile[]
+  /// Namuna tashkilot: prodda saytni to'ldirish uchun, har joyda Namuna yorlig'i bilan
+  isDemo         Boolean      @default(false)
 
   @@index([kind])
 }
@@ -707,6 +713,8 @@ model Listing {
   @@index([ownerUserId, status])
   @@index([terminalId])
   @@index([status, expiresAt])
+  /// Namuna e'lon: haqiqiy taklif emas, sayt bo'sh ko'rinmasligi uchun; telefon berilmaydi
+  isDemo      Boolean @default(false)
 }
 
 /// Narx so'rovi: e'lon egasiga xabar. status: OPEN | CLOSED (F1 da matn).
@@ -921,4 +929,95 @@ model UrgentOffer {
   createdAt      DateTime      @default(now()) @db.Timestamptz(3)
 
   @@index([requestId])
+}
+
+// ───────────────────────── Xizmatlar markazi va yuk bozori ─────────────────────────
+
+/// Xizmatlar markazi: ekspeditor, tovar kassiri yoki hujjat mutaxassisi o'zini e'lon qiladi.
+/// Listing emas: u texnika va avtotransport uchun, bu esa odamning xizmati.
+model ServiceProfile {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orgId           String?
+  org             Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+  serviceType     String // FORWARDER | CASHIER | DOCS (domain SERVICE_TYPES)
+  title           String
+  description     String
+  regions         String[]      @default([]) // qaysi viloyatlarda ishlaydi
+  experienceYears Int?
+  priceNote       String? // "kelishiladi", "1 hujjat 150 000 so'm" kabi erkin matn
+  contactPhone    String? // raqamning o'zi obunachiga GET /contacts orqali
+  status          String        @default("ACTIVE") // ACTIVE | HIDDEN
+  isDemo          Boolean       @default(false)
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([serviceType, status, createdAt])
+  @@index([userId])
+}
+
+/// Bozor so'rovi: xizmat so'rovi (SERVICE) yoki yuk e'loni (CARGO). /urgent shaklida:
+/// so'rov -> takliflar -> tanlash -> yopish. Maydonlar taxtaga qarab to'ladi.
+model MarketRequest {
+  id             String        @id @default(cuid())
+  no             String        @unique // SR-1001 / CR-1001, market_no_seq dan
+  board          String // SERVICE | CARGO
+  serviceType    String? // SERVICE: FORWARDER | CASHIER | DOCS
+  regionCode     String? // SERVICE: qayerda kerak; CARGO: yuklash viloyati (fromRegion bilan bir xil)
+  fromRegion     String? // CARGO
+  toRegion       String? // CARGO
+  fromText       String? // CARGO: aniq manzil yoki stansiya
+  toText         String?
+  cargoName      String? // CARGO
+  weightT        Float? // CARGO, tonna
+  loadDate       DateTime?     @db.Date // CARGO: yuklash sanasi
+  truckType      String? // CARGO: domain TRUCK_TYPES
+  title          String
+  description    String
+  contactPhone   String? // raqamning o'zi obunachiga GET /contacts orqali
+  createdById    String
+  createdBy      User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  orgId          String?
+  status         String        @default("OPEN") // domain MARKET_STATUSES
+  awardedOfferId String?
+  statusToken    String        @unique // ochiq holat sahifasi uchun
+  isDemo         Boolean       @default(false)
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(3)
+  offers         MarketOffer[]
+
+  @@index([board, status, createdAt])
+  @@index([board, fromRegion, toRegion])
+  @@index([createdById])
+}
+
+model MarketOffer {
+  id             String        @id @default(cuid())
+  requestId      String
+  request        MarketRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerUserId String
+  providerOrgId  String?
+  priceTiyin     BigInt?
+  message        String?
+  status         String        @default("SENT") // domain MARKET_OFFER_STATUSES
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@unique([requestId, providerUserId]) // bir so'rovga bir ta'minotchidan bitta taklif
+  @@index([providerUserId])
+}
+
+/// Vagon qidiruvi jurnali. Bepul urinishlar soni shundan sanaladi (wagonSearchFree),
+/// natija ham saqlanadi: bir xil raqamni qayta so'rash tashqi API ga bormaydi.
+model WagonSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wagonNo   String // faqat raqamlar
+  found     Boolean
+  result    Json?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([userId, createdAt])
+  @@index([wagonNo, createdAt])
 }

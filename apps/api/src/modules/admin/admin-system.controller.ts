@@ -26,6 +26,8 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   docSlaHours: posInt,
   subscriptionMonthSom: posInt,
   phoneRevealDaily: posInt,
+  wagonSearchFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul urinish yo'q
+  helpAskDaily: posInt,
 };
 
 /**

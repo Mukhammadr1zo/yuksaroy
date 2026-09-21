@@ -289,7 +289,9 @@
         "terminalConfirmMin": "Terminal tasdiqlash muddati",
         "docSlaHours": "Hujjat muddati",
         "subscriptionMonthSom": "Obuna narxi",
-        "phoneRevealDaily": "Kuniga raqam ochish chegarasi"
+        "phoneRevealDaily": "Kuniga raqam ochish chegarasi",
+        "wagonSearchFree": "Bepul vagon qidiruvi",
+        "helpAskDaily": "Yordam chati: kunlik savol"
       },
       "hint": {
         "commissionPct": "Bazis punktda: 300 = 3,00 %.",
@@ -298,7 +300,9 @@
         "terminalConfirmMin": "Daqiqada.",
         "docSlaHours": "Soatda.",
         "subscriptionMonthSom": "So'm, bir oy uchun. Telefon raqami va vagon qidiruvi obunachiga ochiladi.",
-        "phoneRevealDaily": "Obunachi kuniga nechta telefon raqamini ocha oladi."
+        "phoneRevealDaily": "Obunachi kuniga nechta telefon raqamini ocha oladi.",
+        "wagonSearchFree": "Obunasiz odamga nechta qidiruv bepul (umrbod). 0 = darhol obuna so'raladi.",
+        "helpAskDaily": "Bir odam kuniga nechta savolni sun'iy intellektga yubora oladi."
       }
     },
     "listings": {

@@ -25,8 +25,8 @@
         "body": "Tariffs and listing prices are visible without signing in. No hidden prices: look, compare and pick what fits."
       },
       "fair": {
-        "title": "Fair placement",
-        "body": "The ordering is open: newest, price or distance. Premium only rises within that order and is marked with a badge. No hidden ads."
+        "title": "How listings are ordered",
+        "body": "You choose: newest, cheapest or nearest. A paid listing goes higher but is marked Premium, never hidden. Nothing else affects the order."
       },
       "owners": {
         "title": "Owners' listings",
