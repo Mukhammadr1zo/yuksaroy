@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { EyeIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
 import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type SearchLang } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
@@ -51,9 +52,6 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
         [t('capacityT'), l.capacityT ? `${l.capacityT} t` : null],
       ];
   specs.push([t('region'), regionName(l.regionCode, lang)], [t('published'), l.publishedAt ? uzDate(l.publishedAt, lang) : null]);
-  // Namuna e'londa ham ko'rsatiladi: son haqiqiy (sahifa shuncha marta ochilgan),
-  // e'lonning o'zi taklif emasligini "Namuna" yorlig'i aytadi
-  specs.push([t('views'), t('viewsShort', { count: l.views })]);
   const rows = specs.filter(([, v]) => v !== null && v !== undefined && v !== '');
 
   return (
@@ -69,7 +67,15 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
           {l.condition ? <span className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold text-ink/80">{L.condition[l.condition]}</span> : null}
         </div>
         <h1 className="font-display mt-3 text-3xl font-bold text-navy md:text-4xl">{l.title}</h1>
-        <p className="mt-2 text-muted">{[regionName(l.regionCode, lang), l.year, l.model].filter(Boolean).join(' · ')}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <p className="text-muted">{[regionName(l.regionCode, lang), l.year, l.model].filter(Boolean).join(' · ')}</p>
+          {/* Ko'rishlar jadval qatorida ko'zga tashlanmasdi: sarlavha ostida, ko'z belgisi bilan.
+              Namuna e'londa ham chiqadi: son haqiqiy, yorliq esa e'lon taklif emasligini aytadi. */}
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sand px-3 py-1 font-mono text-xs font-semibold text-ink ring-1 ring-line tabular-nums">
+            <EyeIcon size={15} weight="duotone" className="text-teal-ink" aria-hidden="true" />
+            {t('viewsShort', { count: l.views })}
+          </span>
+        </div>
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.5fr_1fr]">

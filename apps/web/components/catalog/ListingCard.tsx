@@ -1,7 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type ListingKind, type PriceUnit, type RegionCode, type SearchLang } from '@yuksaroy/domain';
-import { PhoneIcon, SealCheckIcon, TrainIcon, TrainRegionalIcon, TruckIcon } from '@phosphor-icons/react/dist/ssr';
+import { EyeIcon, PhoneIcon, SealCheckIcon, TrainIcon, TrainRegionalIcon, TruckIcon } from '@phosphor-icons/react/dist/ssr';
 import type { ListingCard as L } from '@/lib/types-listing';
 import { CompareCheck } from '@/components/compare/CompareCheck';
 import { PremiumBadge } from './PremiumBadge';
@@ -46,7 +46,15 @@ export async function ListingCard({ l }: { l: L }) {
           {l.isDemo ? <DemoBadge /> : l.premium ? <PremiumBadge className="shrink-0" /> : null}
         </div>
         <p className="mt-0.5 text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
-        <p className="mt-0.5 truncate text-xs text-muted">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}{l.views > 0 ? ` · ${t('viewsShort', { count: l.views })}` : ''}</p>
+        <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted">
+          <span className="truncate">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}</span>
+          {/* Ko'rishlar alohida: matn ichida yo'qolib ketmasin */}
+          {l.views > 0 ? (
+            <span className="inline-flex shrink-0 items-center gap-1 font-mono font-semibold text-ink/70 tabular-nums">
+              <EyeIcon size={13} weight="duotone" className="text-teal-ink" aria-hidden="true" />{l.views}
+            </span>
+          ) : null}
+        </p>
         {truck ? (
           <div className="mt-2 flex flex-wrap items-center gap-1">
             {regions.map((r) => <span key={r} className="rounded-full bg-teal-soft px-2 py-0.5 text-[11px] font-semibold text-teal-ink">{regionName(r, lang)}</span>)}

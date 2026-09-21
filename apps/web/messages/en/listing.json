@@ -101,7 +101,6 @@
         "openChat": "Open the chat"
       },
       "demoNote": "This is a sample listing: it shows how the site works and is not a real offer. No phone or chat.",
-      "views": "Views",
       "viewsShort": "{count, plural, one {# view} other {# views}}"
     },
     "reviews": {
