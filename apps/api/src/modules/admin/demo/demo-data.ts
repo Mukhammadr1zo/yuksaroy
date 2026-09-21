@@ -40,9 +40,7 @@ const PHOTO_SETS = {
   HOPPER: ['wagon-hopper-1', 'wagon-hopper-2'],
   // Refrijerator vagon tashqaridan yopiq vagonga o'xshaydi: shu to'plam ishlatiladi
   REFRIGERATOR: ['wagon-covered-2', 'wagon-covered-1'],
-  // Tentli fura: brendsiz, to'g'ri kuzovli surat topilmadi. Bo'sh ro'yxat = rasmsiz e'lon
-  // (galereya turiga mos belgi chizadi). Noto'g'ri kuzov ko'rsatishdan ko'ra shu to'g'ri.
-  TENT: [],
+  TENT: ['truck-tent-1', 'truck-tent-2', 'truck-tent-3'],
   REF: ['truck-reefer-1', 'truck-reefer-2'],
   TIPPER: ['truck-dump-1', 'truck-dump-2'],
   CONTAINER: ['truck-container-1', 'truck-container-2'],

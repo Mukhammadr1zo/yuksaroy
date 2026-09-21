@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ChatCircleTextIcon, ClipboardTextIcon, KanbanIcon, ReceiptIcon, SealCheckIcon } from '@phosphor-icons/react/dist/ssr';
 import { sapi } from '@/lib/server-api';
+import { subscriptionPrice } from '@/lib/subscription-price';
 import type { Stats } from '@/lib/types';
 import { CtaBand, Faq, Hero, ValueCards } from '@/components/marketing/bits';
 import { ProviderRoi } from '@/components/marketing/Roi';
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ForProvidersPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, stats] = await Promise.all([getTranslations('marketing.providers'), sapi<Stats>('/stats', 60).catch(() => null)]);
+  const [t, stats, sub] = await Promise.all([getTranslations('marketing.providers'), sapi<Stats>('/stats', 60).catch(() => null), subscriptionPrice()]);
   const facts = stats ? [t('facts.companies', { count: stats.companies ?? 0 }), t('facts.listings', { count: stats.listings ?? 0 }), t('facts.terminals', { count: stats.terminals })] : [];
   return (
     <>
@@ -33,7 +34,7 @@ export default async function ForProvidersPage({ params }: Params) {
         <div className="mx-auto max-w-6xl px-6 py-14 md:py-16">
           <h2 className="font-display text-2xl font-bold text-navy md:text-3xl">{t('roi.heading')}</h2>
           <p className="mt-2 max-w-[62ch] text-muted">{t('roi.lead')}</p>
-          <div className="mt-8"><ProviderRoi /></div>
+          <div className="mt-8"><ProviderRoi pricePerMonthSom={sub.pricePerMonthSom} /></div>
         </div>
       </section>
       <Faq side="providers" />

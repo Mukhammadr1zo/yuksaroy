@@ -2,27 +2,6 @@
   "premium": {
     "badge": "Premium",
     "col": "Premium",
-    "get": "Premium olish",
-    "extend": "Uzaytirish",
-    "notEligible": "faol e'longa",
-    "modal": {
-      "title": "Premium: {title}",
-      "lead": "Premium e'lon ro'yxatda va xaritada birinchi chiqadi, Premium belgisi oladi. Narx bitta e'lon uchun.",
-      "months": "Muddat",
-      "month": "{n} oy",
-      "perMonth": "{price} / oy",
-      "total": "Jami",
-      "submit": "Buyurtma berish",
-      "sending": "Yuborilmoqda",
-      "cancel": "Bekor",
-      "close": "Yopish",
-      "created": "Buyurtma qabul qilindi",
-      "orderNo": "To'lov izohiga yozing",
-      "amount": "Summa",
-      "pay": "To'lov",
-      "afterPay": "To'lov tasdiqlangach Premium yoqiladi. Tasdiq odatda 1 ish kuni ichida.",
-      "failed": "Buyurtma yaratilmadi. Qayta urinib ko'ring."
-    },
     "admin": {
       "tab": "Premium to'lovlar",
       "lead": "Qo'lda to'lov: summa kelganini tekshirib tasdiqlang, e'lon Premium muddati uzayadi.",
@@ -56,6 +35,8 @@
       },
       "shown": "{n} / {total}",
       "empty": "Murojaat yo'q."
-    }
+    },
+    "viaSub": "Obuna bilan",
+    "getSub": "Obuna bo'lish"
   }
 }

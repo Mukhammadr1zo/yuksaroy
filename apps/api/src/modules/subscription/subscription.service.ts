@@ -11,9 +11,29 @@ type Row = { id: string; userId: string; months: number; amountTiyin: bigint; st
 /** BigInt -> Number (JSON). */
 export const subscriptionView = (s: Row) => ({ ...s, amountTiyin: Number(s.amountTiyin) });
 
+/** Obunachining e'lonlari: o'zinikilari va a'zo bo'lgan tashkilotlarniki. */
+export async function subscriberListingFilter(tx: Pick<PrismaService, 'membership'>, userId: string) {
+  const orgIds = (await tx.membership.findMany({ where: { userId }, select: { orgId: true } })).map((m) => m.orgId);
+  return { OR: [{ ownerUserId: userId }, { createdById: userId }, ...(orgIds.length ? [{ orgId: { in: orgIds } }] : [])] };
+}
+
 /**
- * Foydalanuvchi obunasi. Premium bitta e'longa tegishli, obuna esa odamga: telefon
- * raqamini ko'rish va vagon qidiruvi shu bilan ochiladi.
+ * Obuna muddatigacha e'lonlarni ko'taradi. Faqat uzaytiradi: qo'lda berilgan uzoqroq
+ * muddat (eski Premium to'lovi) qisqarib ketmasin.
+ */
+async function raiseListings(tx: Pick<PrismaService, 'membership' | 'listing'>, userId: string, endsAt: Date) {
+  const owner = await subscriberListingFilter(tx, userId);
+  await tx.listing.updateMany({
+    where: { AND: [owner, { OR: [{ premiumUntil: null }, { premiumUntil: { lt: endsAt } }] }] },
+    data: { premiumUntil: endsAt },
+  });
+}
+
+/**
+ * Foydalanuvchi obunasi: platformadagi yagona pullik mahsulot. U bilan telefon raqami
+ * ochiladi, vagon qidiruvi cheksiz bo'ladi va odamning barcha e'lonlari ro'yxatda
+ * yuqorida chiqadi. Ilgari e'lonni ko'tarish alohida sotilardi (Premium, har e'longa
+ * alohida to'lov) va mijoz ikki marta to'lardi; endi bitta obuna hammasini qamraydi.
  *
  * To'lov yo'li Premium bilan bir xil: buyurtma PENDING, admin tasdiqlaydi, obuna
  * ACTIVE bo'ladi. Narx PlatformConfig da, admin o'zgartiradi.
@@ -31,6 +51,19 @@ export class SubscriptionService {
       where: { userId, status: 'ACTIVE', endsAt: { gt: now } },
       orderBy: { endsAt: 'desc' },
       select: { id: true, endsAt: true },
+    });
+  }
+
+  /**
+   * Bitta e'lonni obuna muddatigacha ko'taradi: obunachi yangi e'lon bersa, u keyingi
+   * tasdiqni kutmasdan darhol yuqorida chiqadi. Obunasi yo'q bo'lsa hech narsa qilmaydi.
+   */
+  async raiseListing(userId: string, listingId: string): Promise<void> {
+    const act = await this.active(userId);
+    if (!act?.endsAt) return;
+    await this.prisma.listing.updateMany({
+      where: { id: listingId, OR: [{ premiumUntil: null }, { premiumUntil: { lt: act.endsAt } }] },
+      data: { premiumUntil: act.endsAt },
     });
   }
 
@@ -108,6 +141,7 @@ export class SubscriptionService {
       // Holat sharti yangilashning o'zida: ikki admin bir vaqtda bossa faqat bittasi o'tadi
       const r = await tx.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' } });
       if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING' });
+      await raiseListings(tx, s.userId, endsAt);
       return subscriptionView({ ...s, status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' });
     });
   }

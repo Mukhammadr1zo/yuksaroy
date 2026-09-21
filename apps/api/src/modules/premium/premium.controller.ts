@@ -2,7 +2,6 @@ import { Body, Controller, ConflictException, Get, HttpCode, NotFoundException, 
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { BadRequestException } from '@nestjs/common';
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
-import { PRICING, premiumAmountTiyin } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
@@ -27,7 +26,11 @@ type OrderRow = { id: string; listingId: string; orgId: string | null; userId: s
 /** BigInt -> Number (JSON). */
 const orderView = (o: OrderRow) => ({ ...o, amountTiyin: Number(o.amountTiyin) });
 
-/** Premium: egasi buyurtma beradi (PENDING), admin to'lovni tasdiqlaydi (PAID) va listing.premiumUntil uzayadi. */
+/**
+ * Premium buyurtmalari tarixi. E'lonni alohida ko'tarish endi sotilmaydi: obuna
+ * egasining barcha e'lonlarini ko'taradi (subscription.service.ts). Bu yerda faqat
+ * eski, to'lanmagan buyurtmalarni admin yopishi uchun ro'yxat va amallar qoldi.
+ */
 @ApiTags('premium')
 @ApiCookieAuth('ys_access')
 @Controller()
@@ -38,20 +41,6 @@ export class PremiumController {
     private readonly listings: ListingsUseCase,
     private readonly audit: AuditService,
   ) {}
-
-  @Post('listings/:id/premium') @HttpCode(201)
-  async create(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: PremiumDto) {
-    const l = await this.listings.owned(userId, id);
-    const o = await this.prisma.premiumOrder.create({
-      data: { listingId: id, orgId: l.orgId, userId, months: dto.months, amountTiyin: BigInt(premiumAmountTiyin(dto.months)), status: 'PENDING', provider: 'manual' },
-    });
-    await this.audit.log({ actorId: userId, action: 'premium.create', entity: 'PremiumOrder', entityId: o.id, meta: { listingId: id, months: dto.months, amountTiyin: Number(o.amountTiyin) } });
-    return {
-      order: orderView(o),
-      pricePerMonthSom: PRICING.premiumPerListingPerMonthSom,
-      payInstructions: payInstructions(),
-    };
-  }
 
   /** Admin navbati: `status` (default PENDING), eski birinchi. */
   @Get('admin/premium')

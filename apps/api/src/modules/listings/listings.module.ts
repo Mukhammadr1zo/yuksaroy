@@ -4,13 +4,15 @@ import { PrismaListingRepository } from './infrastructure/prisma-listing.reposit
 import { ListingAccess } from './application/listing-access';
 import { ListingsUseCase } from './application/listings.usecase';
 import { OrganizationsModule } from '../organizations/organizations.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 import { ListingsOwnerController } from './presentation/listings-owner.controller';
 import { AdminListingsController } from './presentation/admin-listings.controller';
 import { UploadsController } from './presentation/uploads.controller';
 import { ListingsController } from './presentation/listings.controller';
 
 @Module({
-  imports: [IdentityModule, OrganizationsModule],
+  // SubscriptionModule: e'lon ACTIVE bo'lganda egasining obunasi uni yuqoriga ko'taradi
+  imports: [IdentityModule, OrganizationsModule, SubscriptionModule],
   // Tartib muhim: `listings/mine` statik yo'li `listings/:slug` dan oldin ro'yxatga olinadi.
   controllers: [ListingsOwnerController, AdminListingsController, UploadsController, ListingsController],
   providers: [PrismaListingRepository, ListingAccess, ListingsUseCase],

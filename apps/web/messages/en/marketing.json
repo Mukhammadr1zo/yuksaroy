@@ -138,8 +138,8 @@
           "hint": "{n, plural, one {# extra order} other {# extra orders}} per listing per month"
         },
         "gross": "Yearly revenue",
-        "price": "Platform price (Premium, planned)",
-        "priceNote": "{price} / listing / month. Listing is free in the pilot.",
+        "price": "Platform cost (subscription)",
+        "priceNote": "{price} / month, whatever the number of listings. Posting is free during the pilot.",
         "net": "Net revenue",
         "formula": "Yearly revenue = 12 × listings × demand × average value; platform price = 12 × listings × {price}"
       },

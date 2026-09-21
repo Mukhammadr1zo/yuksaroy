@@ -9,7 +9,6 @@ import { som, uzDateTime } from '@/lib/format';
 import { listingHref, type OwnerListing } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, ListingStatusPill, Notice, errText, useLang, useListingLabels } from '@/components/kabinet/bits';
 import { PremiumBadge } from '@/components/catalog/PremiumBadge';
-import { PremiumModal } from '@/components/kabinet/PremiumModal';
 
 export default function MyListingsPage() {
   const t = useTranslations('kabinet.listings');
@@ -24,7 +23,6 @@ export default function MyListingsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [prem, setPrem] = useState<OwnerListing | null>(null); // Premium modal ochiq e'lon
 
   const load = () => api<OwnerListing[]>('/listings/mine').then(setItems).catch(() => setErr(tc('loadFailed')));
   useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -91,10 +89,10 @@ export default function MyListingsPage() {
                     <td className="px-4 py-3 whitespace-nowrap">{l.owner.type === 'org' ? l.owner.name : <span className="text-muted">{LISTING_OWNER_LABELS[lang].person}</span>}</td>
                     <td className="px-4 py-3"><ListingStatusPill status={l.status} /></td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {l.premium ? <PremiumBadge className="mr-2" /> : null}
-                      {l.status === 'ACTIVE' || l.status === 'PENDING_REVIEW'
-                        ? <button type="button" onClick={() => setPrem(l)} className="text-xs font-semibold text-teal-ink underline hover:text-navy">{tp(l.premium ? 'extend' : 'get')}</button>
-                        : l.premium ? null : <span className="text-muted">·</span>}
+                      {/* E'lonni alohida ko'tarish sotilmaydi: obuna egasining barcha e'lonlarini ko'taradi */}
+                      {l.premium
+                        ? <><PremiumBadge className="mr-2" /><span className="text-xs text-muted">{tp('viaSub')}</span></>
+                        : <Link href="/dashboard/subscription" className="text-xs font-semibold text-teal-ink underline hover:text-navy">{tp('getSub')}</Link>}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right font-mono tabular-nums">
                       {l.priceTiyin != null ? <>{som(l.priceTiyin, lang)}{l.priceUnit ? <span className="text-muted"> / {L.priceUnit[l.priceUnit]}</span> : null}</> : <span className="text-muted">{tc('onRequest')}</span>}
@@ -119,7 +117,6 @@ export default function MyListingsPage() {
         </div>
       ) : null}
 
-      {prem ? <PremiumModal listing={prem} onClose={() => setPrem(null)} /> : null}
     </main>
   );
 }

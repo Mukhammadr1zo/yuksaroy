@@ -57,15 +57,19 @@ export function ShipperRoi() {
 // ponytail: e'lon boshiga oylik qo'shimcha buyurtma; real ko'rsatkich yig'ilgach shu jadval almashadi
 const DEMAND = { low: 1, mid: 2, high: 4 } as const;
 type Demand = keyof typeof DEMAND;
-/** Xizmat ko'rsatuvchi: yillik daromad = 12 × e'lonlar × talab × o'rtacha summa, minus Premium narxi (PRICING). */
-export function ProviderRoi() {
+/**
+ * Xizmat ko'rsatuvchi: yillik daromad = 12 x e'lonlar x talab x o'rtacha summa, minus obuna narxi.
+ * Xarajat e'lon soniga ko'paytirilmaydi: bitta obuna barcha e'lonlarni qamraydi (ilgari
+ * Premium har e'longa alohida sotilardi va hisob e'lon soniga bog'liq edi).
+ */
+export function ProviderRoi({ pricePerMonthSom }: { pricePerMonthSom: number }) {
   const t = useTranslations('marketing.providers.roi');
   const [listings, setListings] = useState(3);
   const [avg, setAvg] = useState(2500000);
   const [demand, setDemand] = useState<Demand>('mid');
-  const price = PRICING.premiumPerListingPerMonthSom;
+  const price = pricePerMonthSom;
   const gross = 12 * listings * DEMAND[demand] * avg;
-  const cost = 12 * listings * price;
+  const cost = 12 * price;
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
       <div className="grid content-start gap-4 sm:grid-cols-2">

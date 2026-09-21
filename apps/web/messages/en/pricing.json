@@ -18,17 +18,17 @@
       "f4": "Company page and the verified badge",
       "cta": "Post a listing"
     },
-    "premium": {
-      "name": "Premium",
-      "note": "per listing",
-      "badge": "More visibility",
-      "f1": "Ranked first in the list",
-      "f2": "Premium badge on the card and page",
-      "f3": "Highlighted on the map",
-      "f4": "Analytics: 30-day views and inquiries",
-      "f5": "Term from 1 to 12 months, your choice",
-      "cta": "Get Premium",
-      "hint": "The My listings table in the dashboard has a Premium column: pick the number of months, see the total and the payment instructions."
+    "subscription": {
+      "name": "Subscription",
+      "note": "per person",
+      "badge": "Everything included",
+      "f1": "Phone numbers of listing and terminal owners, up to {phones} a day",
+      "f2": "Unlimited wagon search ({free} free without a subscription)",
+      "f3": "All your listings rank higher in the list",
+      "f4": "Metrics: views and enquiries over 30 days",
+      "f5": "From 1 to 12 months, you choose",
+      "cta": "Subscribe",
+      "hint": "The catalogue, map, chat and requests stay open without one. A subscription does not renew itself: you extend it when it runs out."
     },
     "deal": {
       "name": "Contract",
@@ -38,15 +38,6 @@
       "f2": "Company storefront page: /k/your-name",
       "f3": "Price depends on the number of listings",
       "cta": "Contact us"
-    },
-    "subscription": {
-      "heading": "Subscription",
-      "line": "Owner phone numbers and wagon search open up with a subscription.",
-      "note": "The catalogue, map, chat and requests stay open without one. A subscription does not renew itself: you extend it when it runs out.",
-      "f1": "Phone numbers of listing and terminal owners, up to {phones} a day",
-      "f2": "Unlimited wagon search ({free} free without a subscription)",
-      "f3": "From 1 to 12 months, you choose",
-      "cta": "Subscribe"
     },
     "commission": {
       "heading": "Booking commission",

@@ -138,8 +138,8 @@
           "hint": "{n} qo'shimcha buyurtma / e'lon / oy"
         },
         "gross": "Yillik daromad",
-        "price": "Platforma narxi (Premium, reja)",
-        "priceNote": "{price} / e'lon / oy. Pilotda e'lon berish bepul.",
+        "price": "Platforma narxi (obuna)",
+        "priceNote": "{price} / oy, e'lonlar soniga bog'liq emas. Pilotda e'lon berish bepul.",
         "net": "Sof daromad",
         "formula": "Yillik daromad = 12 × e'lonlar × talab × o'rtacha summa; platforma narxi = 12 × e'lonlar × {price}"
       },

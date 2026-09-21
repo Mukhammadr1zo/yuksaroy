@@ -2,27 +2,6 @@
   "premium": {
     "badge": "Premium",
     "col": "Premium",
-    "get": "Get Premium",
-    "extend": "Extend",
-    "notEligible": "active listings only",
-    "modal": {
-      "title": "Premium: {title}",
-      "lead": "A Premium listing comes first in lists and on the map and gets the Premium badge. Price is per listing.",
-      "months": "Duration",
-      "month": "{n} mo",
-      "perMonth": "{price} / month",
-      "total": "Total",
-      "submit": "Place order",
-      "sending": "Sending",
-      "cancel": "Cancel",
-      "close": "Close",
-      "created": "Order received",
-      "orderNo": "Put this in the payment reference",
-      "amount": "Amount",
-      "pay": "Payment",
-      "afterPay": "Premium turns on once the payment is confirmed, usually within 1 business day.",
-      "failed": "Order was not created. Please try again."
-    },
     "admin": {
       "tab": "Premium payments",
       "lead": "Manual payment: check the transfer and confirm; the listing's Premium period is extended.",
@@ -56,6 +35,8 @@
       },
       "shown": "{n} / {total}",
       "empty": "No messages."
-    }
+    },
+    "viaSub": "With subscription",
+    "getSub": "Subscribe"
   }
 }

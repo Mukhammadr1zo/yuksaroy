@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { LISTING, REGION_CENTERS, TransitionError, assertListingTransition, slugify, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
 import { uniqueSlug, type ListingRecord } from '../domain/listing-query';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { SubscriptionService } from '../../subscription/subscription.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { notifyTelegram, webUrl } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
@@ -29,6 +30,7 @@ export class ListingsUseCase {
     private readonly access: ListingAccess,
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly subs: SubscriptionService,
   ) {}
 
   /** orgId bo'lsa tashkilot nomidan (ruxsat tekshiriladi), bo'lmasa shaxsan (faqat TRUCK; validateListing ORG_REQUIRED). */
@@ -58,7 +60,10 @@ export class ListingsUseCase {
     this.transition(l, 'PENDING_REVIEW', 'OWNER');
     const now = new Date();
     if (m?.org.kycStatus !== 'VERIFIED') return this.repo.setStatus(id, { status: 'PENDING_REVIEW', rejectReason: null });
-    return this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
+    const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
+    // Obuna e'lonni ham ko'taradi: alohida Premium sotib olish yo'q
+    await this.subs.raiseListing(userId, id);
+    return out;
   }
 
   async archive(userId: string, id: string) {
@@ -83,9 +88,11 @@ export class ListingsUseCase {
     const to: ListingStatus = approve ? 'ACTIVE' : l.status === 'ACTIVE' ? 'ARCHIVED' : 'REJECTED';
     this.transition(l, to, 'ADMIN');
     const now = new Date();
-    return approve
-      ? this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null })
-      : this.repo.setStatus(id, { status: to, rejectReason: reason });
+    if (!approve) return this.repo.setStatus(id, { status: to, rejectReason: reason });
+    const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
+    // Tekshiruvdan o'tgan e'lon egasi obunachi bo'lsa darhol yuqoriga chiqadi
+    await this.subs.raiseListing(l.ownerUserId ?? l.createdById, id);
+    return out;
   }
 
   async inquire(userId: string, listingId: string, message: string, orgId: string | null, rawAttachments?: unknown) {

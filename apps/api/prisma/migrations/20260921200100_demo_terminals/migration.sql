@@ -331,7 +331,7 @@ INSERT INTO "Listing" ("id", "slug", "orgId", "createdById", "kind", "deal", "st
   "publishedAt", "expiresAt", "premiumUntil", "isDemo", "createdAt", "updatedAt")
 VALUES ('demo-listing-11', 'namuna-tentli-fura-toshkent-fargona', 'demo-org-01', 'demo-user-01', 'TRUCK'::"ListingKind", NULL, 'ACTIVE'::"ListingStatus",
   'Tentli fura 20 t, Toshkent-Farg''ona', 'Vodiyga har kuni jo''naymiz, yo''lda 8-9 soat. Yuk sug''urtasi bor, haydovchilar tajribali.', 'UZ-TK', 41.311, 69.28, 320000000::BIGINT,
-  'PER_TRIP'::"PriceUnit", ARRAY[]::TEXT[], NULL, NULL,
+  'PER_TRIP'::"PriceUnit", ARRAY['/demo/truck-tent-1.jpg', '/demo/truck-tent-2.jpg']::TEXT[], NULL, NULL,
   NULL, 1, NULL, NULL, 'TENT', 20, 6,
   ARRAY['UZ-TK', 'UZ-TO', 'UZ-FA', 'UZ-AN', 'UZ-NG']::TEXT[], '[{"from":"UZ-TK","to":"UZ-FA"},{"from":"UZ-TK","to":"UZ-AN"}]'::jsonb, NULL, 2, now(), NULL, NULL, true, now(), now())
 ON CONFLICT ("id") DO UPDATE SET "photos" = EXCLUDED."photos";
@@ -361,7 +361,7 @@ INSERT INTO "Listing" ("id", "slug", "orgId", "createdById", "kind", "deal", "st
   "publishedAt", "expiresAt", "premiumUntil", "isDemo", "createdAt", "updatedAt")
 VALUES ('demo-listing-14', 'namuna-tentli-20t-samarqand-toshkent', 'demo-org-02', 'demo-user-02', 'TRUCK'::"ListingKind", NULL, 'ACTIVE'::"ListingStatus",
   'Tentli 20 t, Samarqand-Toshkent', 'Har hafta 3-4 reys, qaytishda ham yuk olamiz. Yuk ortish va tushirishga yordam beramiz.', 'UZ-SA', 39.655, 66.96, 260000000::BIGINT,
-  'PER_TRIP'::"PriceUnit", ARRAY[]::TEXT[], NULL, NULL,
+  'PER_TRIP'::"PriceUnit", ARRAY['/demo/truck-tent-1.jpg', '/demo/truck-tent-2.jpg']::TEXT[], NULL, NULL,
   NULL, 1, NULL, NULL, 'TENT', 20, 3,
   ARRAY['UZ-SA', 'UZ-TK', 'UZ-TO']::TEXT[], '[{"from":"UZ-SA","to":"UZ-TK"}]'::jsonb, NULL, 2, now(), NULL, NULL, true, now(), now())
 ON CONFLICT ("id") DO UPDATE SET "photos" = EXCLUDED."photos";
@@ -381,7 +381,7 @@ INSERT INTO "Listing" ("id", "slug", "orgId", "createdById", "kind", "deal", "st
   "publishedAt", "expiresAt", "premiumUntil", "isDemo", "createdAt", "updatedAt")
 VALUES ('demo-listing-16', 'namuna-tentli-10t-vodiy', 'demo-org-03', 'demo-user-03', 'TRUCK'::"ListingKind", NULL, 'ACTIVE'::"ListingStatus",
   'Tentli 10 t, vodiy ichida', 'Kichik partiyalar uchun 10 tonnalik mashinalar. Shahar ichi va vodiy bo''ylab bir kunda.', 'UZ-FA', 40.386, 71.786, 600000::BIGINT,
-  'PER_KM'::"PriceUnit", ARRAY[]::TEXT[], NULL, NULL,
+  'PER_KM'::"PriceUnit", ARRAY['/demo/truck-tent-3.jpg', '/demo/truck-tent-1.jpg']::TEXT[], NULL, NULL,
   NULL, 1, NULL, NULL, 'TENT', 10, 8,
   ARRAY['UZ-FA', 'UZ-AN', 'UZ-NG']::TEXT[], '[{"from":"UZ-FA","to":"UZ-AN"},{"from":"UZ-FA","to":"UZ-NG"}]'::jsonb, NULL, 2, now(), NULL, NULL, true, now(), now())
 ON CONFLICT ("id") DO UPDATE SET "photos" = EXCLUDED."photos";
@@ -401,7 +401,7 @@ INSERT INTO "Listing" ("id", "slug", "orgId", "createdById", "kind", "deal", "st
   "publishedAt", "expiresAt", "premiumUntil", "isDemo", "createdAt", "updatedAt")
 VALUES ('demo-listing-18', 'namuna-tentli-20t-buxoro-toshkent', 'demo-org-04', 'demo-user-04', 'TRUCK'::"ListingKind", NULL, 'ACTIVE'::"ListingStatus",
   'Tentli 20 t, Buxoro-Toshkent', 'Buxorodan Toshkentga haftada ikki marta, yo''lda Navoiy va Samarqandda yuk olamiz.', 'UZ-BU', 39.775, 64.429, 410000000::BIGINT,
-  'PER_TRIP'::"PriceUnit", ARRAY[]::TEXT[], NULL, NULL,
+  'PER_TRIP'::"PriceUnit", ARRAY['/demo/truck-tent-2.jpg', '/demo/truck-tent-3.jpg']::TEXT[], NULL, NULL,
   NULL, 1, NULL, NULL, 'TENT', 20, 5,
   ARRAY['UZ-BU', 'UZ-NW', 'UZ-SA', 'UZ-TK']::TEXT[], '[{"from":"UZ-BU","to":"UZ-TK"}]'::jsonb, NULL, 2, now(), NULL, NULL, true, now(), now())
 ON CONFLICT ("id") DO UPDATE SET "photos" = EXCLUDED."photos";
