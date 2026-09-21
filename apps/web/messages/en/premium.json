@@ -1,7 +1,7 @@
 {
   "premium": {
-    "badge": "Premium",
-    "col": "Premium",
+    "badge": "Subscriber",
+    "col": "Subscription",
     "admin": {
       "tab": "Premium payments",
       "lead": "Manual payment: check the transfer and confirm; the listing's Premium period is extended.",

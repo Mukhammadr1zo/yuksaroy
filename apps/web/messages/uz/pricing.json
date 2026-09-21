@@ -2,11 +2,11 @@
   "pricing": {
     "meta": {
       "title": "Tariflar · YukSaroy",
-      "description": "Katalog, xarita va so'rovlar bepul. Premium e'lon oyiga belgilangan narxda. Bron komissiyasi hozir 0 %."
+      "description": "Katalog, xarita va so'rovlar bepul. Bitta obuna: telefon raqamlari, vagon qidiruvi va e'lonlar yuqorida. Bron komissiyasi hozir 0 %."
     },
     "eyebrow": "Tariflar",
-    "title": "Ko'rish bepul. Ajralib turish Premium.",
-    "lead": "Katalog, xarita va so'rovlar hamma uchun ochiq, narxlar mehmonlardan ham yashirilmaydi. Premium bitta e'lonni ro'yxat va xaritada yuqoriga chiqaradi.",
+    "title": "Ko'rish bepul. Ishlash obuna bilan.",
+    "lead": "Katalog, xarita va so'rovlar hamma uchun ochiq, narxlar mehmonlardan ham yashirilmaydi. Obuna telefon raqamlarini ochadi, vagon qidiruvini cheksiz qiladi va e'lonlaringizni yuqoriga chiqaradi.",
     "perMonth": "so'm / oy",
     "free": {
       "name": "Bepul",
@@ -46,12 +46,12 @@
     },
     "faq": {
       "heading": "Ko'p so'raladigan savollar",
-      "q1": "Premium qanday to'lanadi?",
-      "a1": "Kabinetda oylar sonini tanlaysiz, summa va to'lov rekvizitlari chiqadi. Hozircha to'lov qo'lda: o'tkazmadan keyin platforma tasdiqlaydi va e'lon shu zahoti Premium bo'ladi. Payme va Click keyinroq qo'shiladi.",
-      "q2": "Premium nimani kafolatlaydi?",
+      "q1": "Obuna qanday to'lanadi?",
+      "a1": "Obuna sahifasida oylar sonini tanlaysiz, summa va to'lov rekvizitlari chiqadi. Hozircha to'lov qo'lda: o'tkazmadan keyin platforma tasdiqlaydi va obuna shu zahoti yoqiladi. Payme va Click keyinroq qo'shiladi.",
+      "q2": "Obuna nimani beradi?",
       "a2": "Faqat joylashuv va belgini: e'lon o'z turkumida tanlangan tartib ichida birinchi chiqadi, xaritada ajralib turadi, ko'rsatkichlar ochiladi. Ko'rishlar yoki so'rovlar soni kafolatlanmaydi.",
       "q3": "Bir nechta e'lonim bo'lsa?",
-      "a3": "Premium har bir e'longa alohida olinadi. Beshdan ortiq e'lon bo'lsa Kelishuv rejasi qulayroq: bog'laning, narxni e'lonlar soniga qarab kelishamiz.",
+      "a3": "Obuna odamga beriladi va uning barcha e'lonlarini qamraydi, e'lon soniga qarab ko'paymaydi. Juda ko'p e'lon bo'lsa Kelishuv rejasi qulayroq: bog'laning.",
       "q4": "Komissiya qachon paydo bo'ladi?",
       "a4": "Platforma orqali oyiga 100 tadan ortiq buyurtma o'tganda. Chegara aniqlangach kamida 30 kun oldin e'lon qilamiz, foiz 2 dan 3 gacha bo'ladi.",
       "q5": "Terminal va shahobcha yo'l egalari uchun to'lov bormi?",

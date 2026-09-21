@@ -2,11 +2,11 @@
   "pricing": {
     "meta": {
       "title": "Pricing · YukSaroy",
-      "description": "Catalog, map and inquiries are free. Premium listing at a fixed monthly price. Booking commission is 0 % today."
+      "description": "The catalogue, map and requests are free. One subscription: phone numbers, wagon search and listings ranked higher. Booking commission is 0 % for now."
     },
     "eyebrow": "Pricing",
-    "title": "Browsing is free. Standing out is Premium.",
-    "lead": "Catalog, map and inquiries are open to everyone, prices are never hidden from guests. Premium lifts one listing to the top of the list and the map.",
+    "title": "Browsing is free. Working needs a subscription.",
+    "lead": "The catalogue, map and requests are open to everyone and prices are not hidden from guests. A subscription opens phone numbers, lifts the wagon search limit and lifts your listings higher.",
     "perMonth": "UZS / month",
     "free": {
       "name": "Free",
@@ -46,12 +46,12 @@
     },
     "faq": {
       "heading": "Frequently asked questions",
-      "q1": "How is Premium paid?",
-      "a1": "In the dashboard you pick the number of months and see the total and the payment details. Payment is manual for now: after the transfer the platform confirms it and the listing becomes Premium immediately. Payme and Click come later.",
-      "q2": "What does Premium guarantee?",
+      "q1": "How do I pay for the subscription?",
+      "a1": "On the subscription page you choose the term, then the amount and bank details appear. Payment is manual for now: after the transfer the platform confirms it and the subscription switches on. Payme and Click come later.",
+      "q2": "What does the subscription give me?",
       "a2": "Only the position and the badge: the listing comes first in its category within the chosen sort, stands out on the map, and analytics open up. The number of views or inquiries is not guaranteed.",
       "q3": "What if I have several listings?",
-      "a3": "Premium is bought per listing. With more than five listings the Contract plan is easier: contact us and we agree a price by volume.",
+      "a3": "A subscription belongs to a person and covers all of their listings; it does not grow with the number of them. With a very large number of listings the Deal plan is easier: get in touch.",
       "q4": "When does the commission start?",
       "a4": "When more than 100 orders a month go through the platform. Once the threshold is reached we announce it at least 30 days ahead; the rate will be 2 to 3 %.",
       "q5": "Do terminal and siding owners pay?",
