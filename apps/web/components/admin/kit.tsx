@@ -70,9 +70,16 @@ export function DataTable<T>({ cols, rows, keyOf, empty, onRow }: {
 }) {
   if (!rows.length) return <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{empty}</div>;
   return (
-    <div className={`${CARD} mt-4 overflow-x-auto`}>
-      <table className="w-full min-w-[640px] text-sm">
-        <thead className="bg-sand text-left">
+    <div className={`${CARD} mt-4 sm:overflow-x-auto`}>
+      {/*
+        Telefonda jadval jadval bo'lib qolmaydi: har qator kartochkaga aylanadi va
+        ustun sarlavhasi katakning chap tomonida turadi. Ilgari jadval 640px dan tor
+        bo'lmasdi, ya'ni telefonda amal tugmasiga yetish uchun har safar yon tomonga
+        surish kerak edi. Bo'sh katak mobil ko'rinishda umuman chiqmaydi, aks holda
+        sarlavha yonida hech nima turmasdi.
+      */}
+      <table className="block w-full text-sm sm:table sm:min-w-[640px]">
+        <thead className="hidden bg-sand text-left sm:table-header-group">
           <tr>
             {cols.map((c) => (
               <th key={c.key} scope="col" style={c.width ? { width: c.width } : undefined}
@@ -82,13 +89,16 @@ export function DataTable<T>({ cols, rows, keyOf, empty, onRow }: {
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="block sm:table-row-group">
           {rows.map((r) => (
             <tr key={keyOf(r)} onClick={onRow ? () => onRow(r) : undefined}
-              className={`border-t border-line/70 ${onRow ? 'cursor-pointer hover:bg-sand/60' : ''}`}>
+              className={`block border-t border-line/70 px-3 py-3 sm:table-row sm:p-0 ${onRow ? 'cursor-pointer hover:bg-sand/60' : ''}`}>
               {/* Raqam va sana hech qachon sinmaydi: "3-" / "sentabr" ikki qatorga bo'linib o'qilmas edi */}
               {cols.map((c) => (
-                <td key={c.key} className={`px-3 py-2 align-top ${c.num ? 'whitespace-nowrap text-right font-mono tabular-nums' : ''}`}>{c.cell(r)}</td>
+                <td key={c.key} data-label={c.head}
+                  className={`flex items-baseline justify-between gap-3 py-0.5 empty:hidden before:shrink-0 before:font-mono before:text-[11px] before:font-semibold before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] sm:table-cell sm:px-3 sm:py-2 sm:align-top sm:empty:table-cell sm:before:content-none ${c.num ? 'font-mono tabular-nums sm:whitespace-nowrap sm:text-right' : ''}`}>
+                  {c.cell(r)}
+                </td>
               ))}
             </tr>
           ))}
