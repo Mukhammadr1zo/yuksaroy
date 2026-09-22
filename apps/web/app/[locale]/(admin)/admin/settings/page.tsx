@@ -69,7 +69,6 @@ const BOUNDS: Record<string, { min: number; max?: number }> = {
   commissionPct: { min: 0, max: 10000 },
   slotHoldTtlMin: { min: 1 },
   terminalConfirmMin: { min: 1 },
-  docSlaHours: { min: 1 },
 };
 
 export default function SettingsPage() {

@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { LISTING_STATUSES, type ListingStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
-import { num, som, uzDate, uzDateTime } from '@/lib/format';
+import { som } from '@/lib/format';
 import { listingHref, type OwnerListing } from '@/lib/types-kabinet';
 import { ListingStatusPill, useListingLabels } from '@/components/kabinet/bits';
 import { BTN_DANGER, BTN_GHOST, ConfirmButton, DataTable, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
@@ -34,6 +34,7 @@ export default function AdminListingsPage() {
     { key: 'title', head: tc('name'), cell: (l: OwnerListing) => (
       <>
         <span className="font-semibold">{l.title}</span>
+        {l.isDemo ? <Pill tone="warn">{tl('demo')}</Pill> : null}
         {l.status === 'ACTIVE'
           ? <Link href={listingHref(l)} target="_blank" className="block font-mono text-[11px] text-teal-ink underline">{l.slug}</Link>
           : <span className="block font-mono text-[11px] text-muted">{l.slug}</span>}
@@ -44,9 +45,6 @@ export default function AdminListingsPage() {
     { key: 'region', head: tc('region'), cell: (l: OwnerListing) => (tr.has(l.regionCode) ? tr(l.regionCode) : l.regionCode) },
     { key: 'owner', head: tl('owner'), cell: (l: OwnerListing) => l.owner.name },
     { key: 'price', head: tl('price'), num: true, cell: (l: OwnerListing) => (l.priceTiyin != null ? som(l.priceTiyin, locale) : <span className="font-sans text-muted">{t('listing.onRequest')}</span>) },
-    { key: 'views', head: tl('views'), num: true, cell: (l: OwnerListing) => num(l.views, locale) },
-    { key: 'premium', head: tl('premium'), num: true, cell: (l: OwnerListing) => (l.premiumUntil ? uzDate(l.premiumUntil, locale) : l.premium ? <Pill tone="ok">{tl('premium')}</Pill> : <span className="text-muted">-</span>) },
-    { key: 'updated', head: tl('updatedAt'), num: true, cell: (l: OwnerListing) => uzDateTime(l.updatedAt, locale) },
     { key: 'actions', head: tc('actions'), cell: (l: OwnerListing) => <RowActions l={l} onDone={patch} /> },
   ];
 
@@ -75,35 +73,34 @@ export default function AdminListingsPage() {
 }
 
 /**
- * Tekshiruvdagi e'lon: tasdiqlash yoki sabab bilan rad etish. Faol e'lon: faqat sabab bilan tortib olish.
- * Rad sababi majburiy va egasiga ko'rinadi, shuning uchun input ochilmaguncha yuborish tugmasi yo'q.
+ * Faol e'lonni sabab bilan tortib olish. Tekshiruvdagi e'lonni tasdiqlash bu yerda YO'Q:
+ * u Moderatsiya bo'limida, Decide bilan. Ilgari bitta qaror ikki ekranda, ikki xil
+ * ko'rinishda turardi va operator qaysi biri to'g'ri ekanini bilmasdi.
+ * Rad sababi majburiy va egasiga ko'rinadi, shuning uchun input ochilmaguncha tugma yo'q.
  */
 function RowActions({ l, onDone }: { l: OwnerListing; onDone: () => void }) {
   const t = useTranslations('admin');
   const [reason, setReason] = useState<string | null>(null); // null = sabab maydoni yopiq
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<unknown>(null);
-  if (l.status !== 'PENDING_REVIEW' && l.status !== 'ACTIVE') return null;
+  if (l.status !== 'ACTIVE') return null;
 
-  async function decide(approve: boolean) {
+  async function withdraw() {
     setBusy(true); setErr(null);
-    try { await post<OwnerListing>(`/admin/listings/${l.id}/decide`, { approve, reason: approve ? undefined : reason?.trim() }); setReason(null); onDone(); }
+    try { await post<OwnerListing>(`/admin/listings/${l.id}/decide`, { approve: false, reason: reason?.trim() }); setReason(null); onDone(); }
     catch (e) { setErr(e); } finally { setBusy(false); }
   }
 
   return (
     <div className="flex min-w-[10rem] flex-col gap-1.5">
       {reason === null ? (
-        <div className="flex gap-1.5">
-          {l.status === 'PENDING_REVIEW' ? <button type="button" disabled={busy} onClick={() => decide(true)} className={`${BTN_GHOST} ${SM}`}>{t('approve')}</button> : null}
-          <button type="button" disabled={busy} onClick={() => setReason('')} className={`${BTN_DANGER} ${SM}`}>{t('reject')}</button>
-        </div>
+        <button type="button" disabled={busy} onClick={() => setReason('')} className={`${BTN_DANGER} ${SM}`}>{t('reject')}</button>
       ) : (
         <>
           <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} placeholder={t('reason')} className={`${INPUT} py-1 text-xs`} />
           <div className="flex gap-1.5">
             {reason.trim()
-              ? <ConfirmButton label={t('reject')} confirm={t('confirmReject')} onRun={() => decide(false)} className={`${BTN_DANGER} ${SM}`} />
+              ? <ConfirmButton label={t('reject')} confirm={t('confirmReject')} onRun={withdraw} className={`${BTN_DANGER} ${SM}`} />
               : <button type="button" disabled className={`${BTN_DANGER} ${SM}`}>{t('reject')}</button>}
             <button type="button" onClick={() => setReason(null)} className={`${BTN_GHOST} ${SM}`}>{t('cancel')}</button>
           </div>

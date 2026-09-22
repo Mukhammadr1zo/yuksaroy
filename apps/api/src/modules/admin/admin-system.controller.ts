@@ -23,7 +23,6 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   commissionPayer: (v) => v === 'TERMINAL' || v === 'CLIENT',
   slotHoldTtlMin: posInt,
   terminalConfirmMin: posInt,
-  docSlaHours: posInt,
   subscriptionMonthSom: posInt,
   phoneRevealDaily: posInt,
   wagonSearchFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul urinish yo'q

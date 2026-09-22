@@ -138,7 +138,6 @@ export const PLATFORM_DEFAULTS = {
   commissionPayer: 'TERMINAL' as 'TERMINAL' | 'CLIENT',
   slotHoldTtlMin: 10,
   terminalConfirmMin: 30,
-  docSlaHours: 4,
   /** Obuna narxi, so'm/oy. Telefon raqami va vagon qidiruvi obunachiga ochiladi; narxni admin qo'yadi. */
   subscriptionMonthSom: 99000,
   /** Obunachi kuniga nechta raqam ocha oladi: bazani ko'chirib olishga qarshi chegara. */

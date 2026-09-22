@@ -277,7 +277,6 @@
         "commissionPayer": "Komissiyani kim to'laydi",
         "slotHoldTtlMin": "Joy band turish muddati",
         "terminalConfirmMin": "Terminal tasdiqlash muddati",
-        "docSlaHours": "Hujjat muddati",
         "subscriptionMonthSom": "Obuna narxi",
         "phoneRevealDaily": "Kuniga raqam ochish chegarasi",
         "wagonSearchFree": "Bepul vagon qidiruvi",
@@ -288,7 +287,6 @@
         "commissionPayer": "TERMINAL yoki CLIENT.",
         "slotHoldTtlMin": "Daqiqada.",
         "terminalConfirmMin": "Daqiqada.",
-        "docSlaHours": "Soatda.",
         "subscriptionMonthSom": "So'm, bir oy uchun. Telefon raqami va vagon qidiruvi obunachiga ochiladi.",
         "phoneRevealDaily": "Obunachi kuniga nechta telefon raqamini ocha oladi.",
         "wagonSearchFree": "Obunasiz odamga nechta qidiruv bepul (umrbod). 0 = darhol obuna so'raladi.",
@@ -297,12 +295,10 @@
     },
     "listings": {
       "lead": "Hamma e'lonlar, holati bo'yicha. Moderatsiya navbati alohida bo'limda.",
-      "views": "Ko'rish",
-      "premium": "Premium",
       "kind": "Turi",
       "owner": "Egasi",
       "price": "Narxi",
-      "updatedAt": "Yangilangan"
+      "demo": "Namuna"
     },
     "moderation": {
       "lead": "Tasdiq kutayotgan e'lonlar, tashkilotlar, obyekt da'volari va to'lovlar."

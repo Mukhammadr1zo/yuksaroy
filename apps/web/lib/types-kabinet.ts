@@ -29,7 +29,7 @@ export interface OwnerListing {
   org: { name: string; slug: string | null; kyc: KycStatus } | null;
   object: { type: 'terminal' | 'siding'; id: string; name: string; slug?: string } | null;
   premium: boolean; publishedAt: string | null; description: string | null; responseHours: number | null; contactPhone: string | null;
-  status: ListingStatus; createdAt: string; orgId: string | null; ownerUserId: string | null; views: number; rejectReason: string | null; expiresAt: string | null; updatedAt: string;
+  status: ListingStatus; createdAt: string; orgId: string | null; ownerUserId: string | null; views: number; isDemo: boolean; rejectReason: string | null; expiresAt: string | null; updatedAt: string;
   warnings?: { field: string; code: string }[];
 }
 

@@ -7,7 +7,6 @@ export interface PlatformConfigValues {
   commissionPayer: 'TERMINAL' | 'CLIENT';
   slotHoldTtlMin: number;
   terminalConfirmMin: number;
-  docSlaHours: number;
   subscriptionMonthSom: number;
   phoneRevealDaily: number;
   wagonSearchFree: number;
