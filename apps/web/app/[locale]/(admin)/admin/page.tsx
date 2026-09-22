@@ -24,7 +24,6 @@ type Health = {
   /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
   failed?: string[];
 };
-type Overview = { users: number; blocked: number; orgs: number; terminals: number; sidings: number; listings: number; orders: number; inquiries: number; messages: number; reviews: number };
 type Actor = { id: string; phone: string; fullName: string | null };
 type AuditRow = { id: string; action: string; entity: string | null; createdAt: string; actor: Actor | null };
 
@@ -36,7 +35,6 @@ const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   { key: 'subscriptionPending', label: 'pendingSubscription', href: '/admin/moderation?tab=subscription' },
   { key: 'ordersPending', label: 'pendingOrders', href: '/admin/orders?status=PENDING' },
 ];
-const OVERVIEW: (keyof Overview)[] = ['users', 'blocked', 'orgs', 'terminals', 'sidings', 'listings', 'orders', 'inquiries', 'messages', 'reviews'];
 const RECENT: { key: keyof Health['recent']; label: string }[] = [
   { key: 'users', label: 'newUsers' }, { key: 'orders', label: 'newOrders' }, { key: 'listings', label: 'newListings' },
 ];
@@ -47,19 +45,16 @@ const daysWaiting = (iso: string) => Math.floor((Date.now() - new Date(iso).getT
 export default function AdminHomePage() {
   const t = useTranslations('admin');
   const th = useTranslations('admin.home');
-  const to = useTranslations('admin.overview');
   const tc = useTranslations('admin.common');
   const ta = useTranslations('admin.audit');
   const locale = useLocale();
   const [health, setHealth] = useState<Health | null>(null);
-  const [overview, setOverview] = useState<Overview | null>(null);
   const [feed, setFeed] = useState<AuditRow[] | null>(null);
   const [err, setErr] = useState<unknown>(null);
 
   useEffect(() => {
     api<Health>('/admin/health').then(setHealth).catch(setErr);
-    // Umumiy raqamlar va tasma yiqilsa sahifa buzilmasin: navbat muhimroq
-    api<Overview>('/admin/overview').then(setOverview).catch(() => {});
+    // Tasma yiqilsa sahifa buzilmasin: navbat muhimroq
     api<{ items: AuditRow[] }>('/admin/audit?limit=8').then((r) => setFeed(r.items)).catch(() => setFeed([]));
   }, []);
 
@@ -155,17 +150,6 @@ export default function AdminHomePage() {
             </section>
           </div>
         </>
-      ) : null}
-
-      {overview ? (
-        <dl className={`${CARD} mt-4 grid grid-cols-2 gap-x-3 gap-y-3 p-4 sm:grid-cols-5`}>
-          {OVERVIEW.map((k) => (
-            <div key={k} className="min-w-0">
-              <dd className={`font-display text-lg font-bold tabular-nums ${k === 'blocked' && overview[k] ? 'text-red-700' : 'text-navy'}`}>{num(overview[k], locale)}</dd>
-              <dt className="font-mono text-[11px] uppercase tracking-wide text-muted">{to(k)}</dt>
-            </div>
-          ))}
-        </dl>
       ) : null}
     </>
   );

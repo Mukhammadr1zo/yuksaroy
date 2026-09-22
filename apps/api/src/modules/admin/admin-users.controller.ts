@@ -35,26 +35,6 @@ export class AdminUsersController {
     private readonly admin: PlatformAdmin,
   ) {}
 
-  /** Platformaning umumiy raqamlari: nima bor va nima o'syapti. */
-  @Get('overview')
-  async overview(@CurrentUserId() userId: string) {
-    const [users, blocked, orgs, terminals, sidings, listings, orders, inquiries, messages, reviews] = await Promise.all([
-      this.prisma.user.count(),
-      // Namuna foydalanuvchilar (isActive=false) bloklangan hisoblanmaydi: ular hech qachon kirmaydi
-      this.prisma.user.count({ where: { isActive: false, id: { not: { startsWith: 'demo-user-' } } } }),
-      this.prisma.organization.count(),
-      // Ikki plitka bir-birini qoplamasligi kerak edi: egali temir yo'l terminali ikkalasida ham
-      // sanalardi va yig'indi umumiy sondan katta chiqardi. Endi: egali avto/aralash va butun temir yo'l reestri.
-      this.prisma.terminal.count({ where: { orgId: { not: null }, kind: { in: ['ROAD', 'MULTI'] } } }),
-      this.prisma.terminal.count({ where: { kind: 'RAIL' } }),
-      this.prisma.listing.count({ where: { status: 'ACTIVE' } }),
-      this.prisma.order.count(),
-      this.prisma.inquiry.count(),
-      this.prisma.inquiryMessage.count(),
-      this.prisma.review.count(),
-    ]);
-    return { users, blocked, orgs, terminals, sidings, listings, orders, inquiries, messages, reviews };
-  }
 
   /** Ro'yxat: telefon, ism yoki email bo'yicha qidiruv. */
   @Get('users')

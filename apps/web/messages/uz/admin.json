@@ -5,7 +5,7 @@
     "forbidden": "Bu bo'lim faqat platforma administratori uchun.",
     "tabs": {
       "listings": "E'lonlar",
-      "kyc": "Tashkilotlar (KYC)",
+      "kyc": "Tashkilot tasdig'i",
       "claims": "Obyekt da'volari"
     },
     "empty": "Navbat bo'sh.",
@@ -69,18 +69,6 @@
       "personalRoles": "Shaxsiy rollar",
       "deleteWarn": "Hisob anonimlashadi va qaytarib bo'lmaydi."
     },
-    "overview": {
-      "users": "Foydalanuvchi",
-      "blocked": "Bloklangan",
-      "orgs": "Tashkilot",
-      "terminals": "Terminal",
-      "sidings": "Temir yo'l terminali",
-      "listings": "Faol e'lon",
-      "orders": "Buyurtma",
-      "inquiries": "So'rov",
-      "messages": "Xabar",
-      "reviews": "Baho"
-    },
     "nav": {
       "aria": "Admin bo'limlari",
       "home": "Boshqaruv",
@@ -132,11 +120,11 @@
       "name": "Nomi",
       "phone": "Telefon",
       "email": "Email",
-      "slug": "Manzil (slug)",
+      "slug": "Sahifa manzili",
       "id": "ID"
     },
     "err": {
-      "TERMINAL_HAS_ORDERS": "Bu terminalda buyurtmalar bor, o'chirib bo'lmaydi. Holatini HIDDEN qiling.",
+      "TERMINAL_HAS_ORDERS": "Bu terminalda buyurtmalar bor, o'chirib bo'lmaydi. Uni ro'yxatdan yashiring.",
       "STATION_IN_USE": "Bu stansiyaga terminallar bog'langan, o'chirib bo'lmaydi.",
       "ORG_IN_USE": "Tashkilotda obyekt yoki buyurtma bor, o'chirib bo'lmaydi.",
       "LAST_OWNER": "Bu tashkilotning yagona egasi, o'chirib bo'lmaydi.",
@@ -169,7 +157,7 @@
       "newListings": "Yangi e'lon",
       "oldestPending": "Eng eski kutayotgan e'lon",
       "pendingListings": "E'lon moderatsiyasi",
-      "pendingKyc": "KYC tekshiruvi",
+      "pendingKyc": "Tashkilot tasdig'i",
       "pendingClaims": "Obyekt da'volari",
       "pendingPremium": "Premium to'lovlari",
       "pendingOrders": "Tasdiq kutayotgan buyurtma",
@@ -194,7 +182,7 @@
       "contact": "Mas'ul shaxs",
       "deleteWarn": "Terminal butunlay o'chadi. Buyurtmasi bor bo'lsa o'chmaydi.",
       "f": {
-        "slug": "Manzil (slug)",
+        "slug": "Sahifa manzili",
         "stationId": "Stansiya ID",
         "orgId": "Egasi tashkilot ID",
         "address": "Manzil",
@@ -223,7 +211,7 @@
       "nameUz": "Nomi (uz)",
       "nameRu": "Nomi (ru)",
       "nameEn": "Nomi (en)",
-      "esr": "ESR",
+      "esr": "Stansiya kodi",
       "rju": "Bo'lim",
       "lat": "Kenglik",
       "lng": "Uzunlik",
@@ -252,9 +240,9 @@
       "wagons": "Vagon"
     },
     "orgs": {
-      "lead": "Tashkilotlar, KYC holati va a'zolar. Yangi admin shu yerda rol berib tayinlanadi.",
+      "lead": "Tashkilotlar, ularning tasdig'i va a'zolari.",
       "stir": "STIR",
-      "kyc": "KYC",
+      "kyc": "Tasdiq",
       "kinds": "Turlari",
       "members": "A'zolar",
       "roles": "Rollari",
@@ -264,7 +252,7 @@
       "objects": "Obyektlar",
       "adminNote": "PLATFORM_ADMIN roli butun platformaga to'liq huquq beradi. Ehtiyot bo'ling.",
       "deleteWarn": "Tashkilot o'chadi. Obyekti yoki buyurtmasi bo'lsa o'chmaydi.",
-      "kycNote": "KYC izohi"
+      "kycNote": "Tasdiq izohi"
     },
     "audit": {
       "lead": "Kim nima qilgani. Yozuvlar o'zgarmaydi va o'chmaydi.",
@@ -317,7 +305,7 @@
       "updatedAt": "Yangilangan"
     },
     "moderation": {
-      "lead": "Tasdiq kutayotgan e'lonlar, KYC so'rovlari, obyekt da'volari va to'lovlar."
+      "lead": "Tasdiq kutayotgan e'lonlar, tashkilotlar, obyekt da'volari va to'lovlar."
     },
     "reviews": {
       "lead": "Terminal baholari va e'lon izohlari. Soxta yoki haqoratli bahoni shu yerdan o'chirasiz.",

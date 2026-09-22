@@ -5,7 +5,7 @@
     "forbidden": "This area is for platform administrators only.",
     "tabs": {
       "listings": "Listings",
-      "kyc": "Organizations (KYC)",
+      "kyc": "Company checks",
       "claims": "Object claims"
     },
     "empty": "The queue is empty.",
@@ -69,18 +69,6 @@
       "personalRoles": "Personal roles",
       "deleteWarn": "The account is anonymized and this cannot be undone."
     },
-    "overview": {
-      "users": "Users",
-      "blocked": "Blocked",
-      "orgs": "Organizations",
-      "terminals": "Terminals",
-      "sidings": "Rail terminals",
-      "listings": "Active listings",
-      "orders": "Orders",
-      "inquiries": "Inquiries",
-      "messages": "Messages",
-      "reviews": "Reviews"
-    },
     "nav": {
       "aria": "Admin sections",
       "home": "Overview",
@@ -132,11 +120,11 @@
       "name": "Name",
       "phone": "Phone",
       "email": "Email",
-      "slug": "Address (slug)",
+      "slug": "Page address",
       "id": "ID"
     },
     "err": {
-      "TERMINAL_HAS_ORDERS": "This terminal has orders and cannot be deleted. Set its status to HIDDEN instead.",
+      "TERMINAL_HAS_ORDERS": "This terminal has orders and cannot be deleted. Hide it from the list instead.",
       "STATION_IN_USE": "Terminals are linked to this station, so it cannot be deleted.",
       "ORG_IN_USE": "The organization still has objects or orders and cannot be deleted.",
       "LAST_OWNER": "This is the organization's only owner and cannot be removed.",
@@ -169,7 +157,7 @@
       "newListings": "New listings",
       "oldestPending": "Oldest listing waiting",
       "pendingListings": "Listings to review",
-      "pendingKyc": "KYC to check",
+      "pendingKyc": "Company checks",
       "pendingClaims": "Object claims",
       "pendingPremium": "Premium payments",
       "pendingOrders": "Orders awaiting confirmation",
@@ -194,7 +182,7 @@
       "contact": "Contact person",
       "deleteWarn": "The terminal is deleted permanently. One with orders cannot be deleted.",
       "f": {
-        "slug": "Address (slug)",
+        "slug": "Page address",
         "stationId": "Station ID",
         "orgId": "Owner organization ID",
         "address": "Address",
@@ -223,7 +211,7 @@
       "nameUz": "Name (uz)",
       "nameRu": "Name (ru)",
       "nameEn": "Name (en)",
-      "esr": "ESR",
+      "esr": "Station code",
       "rju": "Division",
       "lat": "Latitude",
       "lng": "Longitude",
@@ -252,9 +240,9 @@
       "wagons": "Wagons"
     },
     "orgs": {
-      "lead": "Organizations, KYC state and members. A new admin is appointed here by granting a role.",
+      "lead": "Companies, their checks and members.",
       "stir": "Tax ID",
-      "kyc": "KYC",
+      "kyc": "Checked",
       "kinds": "Kinds",
       "members": "Members",
       "roles": "Roles",
@@ -264,7 +252,7 @@
       "objects": "Objects",
       "adminNote": "The PLATFORM_ADMIN role grants full rights over the whole platform. Be careful.",
       "deleteWarn": "The organization is deleted. One with objects or orders cannot be deleted.",
-      "kycNote": "KYC note"
+      "kycNote": "Check note"
     },
     "audit": {
       "lead": "Who did what. Entries are never changed or removed.",
@@ -317,7 +305,7 @@
       "updatedAt": "Updated"
     },
     "moderation": {
-      "lead": "Listings, KYC requests, object claims and payments awaiting a decision."
+      "lead": "Listings, companies, object claims and payments waiting for a decision."
     },
     "reviews": {
       "lead": "Terminal ratings and listing comments. Remove fake or abusive ones here.",
