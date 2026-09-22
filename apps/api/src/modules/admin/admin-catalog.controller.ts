@@ -87,12 +87,9 @@ class StationCreateDto {
   @IsOptional() @IsString() @MaxLength(120) nameRu?: string;
   @IsOptional() @IsString() @MaxLength(120) nameEn?: string;
   @IsOptional() @Matches(/^\d{5,6}$/) esrCode?: string;
-  @IsOptional() @IsString() @MaxLength(30) stationType?: string;
-  @IsOptional() @IsString() @MaxLength(10) classRank?: string;
   @IsOptional() @IsLatitude() lat?: number;
   @IsOptional() @IsLongitude() lng?: number;
   @IsOptional() @IsBoolean() isListed?: boolean;
-  @IsOptional() @IsBoolean() isTariff?: boolean;
 }
 
 class StationUpdateDto extends PartialType(StationCreateDto) {}

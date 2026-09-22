@@ -218,11 +218,8 @@
       "listed": "On the map",
       "terminals": "Objects",
       "noCoords": "Missing coordinates",
-      "type": "Type",
-      "classRank": "Class",
       "deleteWarn": "The station is deleted. One with linked objects cannot be deleted.",
       "notListed": "Not on the map",
-      "tariff": "Tariff station",
       "coords": "Coordinates (lat, lng)"
     },
     "orders": {

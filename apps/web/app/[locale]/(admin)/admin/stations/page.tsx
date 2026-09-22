@@ -9,21 +9,19 @@ import { BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labe
 
 type Row = {
   id: string; esrCode: string | null; nameUz: string; nameRu: string | null; nameEn: string | null; rju: Rju;
-  stationType: string | null; classRank: string | null; isTariff: boolean; isListed: boolean;
-  lat: number | null; lng: number | null; _count: { terminals: number };
+  isListed: boolean; lat: number | null; lng: number | null; _count: { terminals: number };
 };
 /** PATCH/POST javobi: stansiyaning o'zi, `_count` siz. */
 type Saved = Omit<Row, '_count'>;
 
 type Form = {
-  nameUz: string; nameRu: string; nameEn: string; esrCode: string; rju: string; stationType: string; classRank: string;
-  lat: string; lng: string; isListed: boolean; isTariff: boolean;
+  nameUz: string; nameRu: string; nameEn: string; esrCode: string; rju: string;
+  lat: string; lng: string; isListed: boolean;
 };
-const EMPTY: Form = { nameUz: '', nameRu: '', nameEn: '', esrCode: '', rju: '', stationType: '', classRank: '', lat: '', lng: '', isListed: true, isTariff: true };
+const EMPTY: Form = { nameUz: '', nameRu: '', nameEn: '', esrCode: '', rju: '', lat: '', lng: '', isListed: true };
 const toForm = (r: Row): Form => ({
   nameUz: r.nameUz, nameRu: r.nameRu ?? '', nameEn: r.nameEn ?? '', esrCode: r.esrCode ?? '', rju: r.rju,
-  stationType: r.stationType ?? '', classRank: r.classRank ?? '', lat: r.lat == null ? '' : String(r.lat), lng: r.lng == null ? '' : String(r.lng),
-  isListed: r.isListed, isTariff: r.isTariff,
+  lat: r.lat == null ? '' : String(r.lat), lng: r.lng == null ? '' : String(r.lng), isListed: r.isListed,
 });
 const NUM = new Set<keyof Form>(['lat', 'lng']);
 /** Tahrirda faqat o'zgargan kalitlar (bo'sh = null, ustun tozalanadi), yaratishda faqat to'ldirilganlari. */
@@ -40,9 +38,7 @@ function payload(form: Form, orig: Form | null) {
 // Jadval ichidagi tugma va maydon: kit'dagi kattalari qator balandligini ikki baravar qilib yuboradi
 const SM = 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold transition duration-150 active:scale-[0.98] disabled:opacity-60';
 const BTN_SM = `${SM} bg-teal text-white hover:bg-teal-ink`;
-const BTN_SM_GHOST = `${SM} border border-line bg-white text-navy hover:border-teal hover:text-teal-ink`;
 const INPUT_SM = 'w-24 rounded-lg border border-line bg-white px-2 py-1 font-mono text-xs tabular-nums outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
-const STATION_TYPES = ['passenger', 'freight', 'mixed', 'junction', 'yard', 'terminal', 'border', 'halt'];
 
 /** Koordinatasi yo'q qator: ikki maydon va saqlash, varaqsiz. Enter ham saqlaydi. */
 function CoordCell({ row, onSaved }: { row: Row; onSaved: (s: Saved) => void }) {
@@ -149,7 +145,6 @@ export default function AdminStationsPage() {
         {r.nameRu ? <div className="text-xs text-muted">{r.nameRu}</div> : null}
       </div>
     ) },
-    { key: 'en', head: ts('nameEn'), cell: (r) => <span className="text-muted">{r.nameEn ?? ''}</span> },
     { key: 'esr', head: ts('esr'), num: true, cell: (r) => r.esrCode ?? '' },
     { key: 'rju', head: ts('rju'), cell: (r) => tr(r.rju) },
     { key: 'coords', head: ts('coords'), width: '20rem', cell: (r) => (
@@ -159,11 +154,10 @@ export default function AdminStationsPage() {
     ) },
     { key: 'listed', head: ts('listed'), cell: (r) => (r.isListed ? <Pill tone="ok">{ts('listed')}</Pill> : null) },
     { key: 'terminals', head: ts('terminals'), num: true, cell: (r) => r._count.terminals },
-    { key: 'edit', head: tc('actions'), cell: (r) => <button type="button" className={BTN_SM_GHOST} onClick={() => open(r)}>{tc('edit')}</button> },
   ];
 
   const F = dr?.form ?? EMPTY;
-  const text = (k: 'nameUz' | 'nameRu' | 'nameEn' | 'esrCode' | 'stationType' | 'classRank', label: string, extra: InputHTMLAttributes<HTMLInputElement> = {}) => (
+  const text = (k: 'nameUz' | 'nameRu' | 'nameEn' | 'esrCode', label: string, extra: InputHTMLAttributes<HTMLInputElement> = {}) => (
     <Labeled label={label}><input className={INPUT} value={F[k]} onChange={(e) => set(k, e.target.value)} {...extra} /></Labeled>
   );
   // Koordinatasi yo'q rejimida "necha qoldi" soni: qator ichida to'g'rilanganlari darrov ayiriladi
@@ -235,16 +229,10 @@ export default function AdminStationsPage() {
                 {RJUS.map((r) => <option key={r} value={r}>{tr(r)}</option>)}
               </select>
             </Labeled>
-            {text('stationType', ts('type'), { list: 'station-types' })}
-            <datalist id="station-types">{STATION_TYPES.map((s) => <option key={s} value={s} />)}</datalist>
-            {text('classRank', ts('classRank'))}
             <Labeled label={ts('lat')}><input type="number" step="any" className={`${INPUT} font-mono`} value={F.lat} onChange={(e) => set('lat', e.target.value)} /></Labeled>
             <Labeled label={ts('lng')}><input type="number" step="any" className={`${INPUT} font-mono`} value={F.lng} onChange={(e) => set('lng', e.target.value)} /></Labeled>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" className="accent-teal" checked={F.isListed} onChange={(e) => set('isListed', e.target.checked)} />{ts('listed')}
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" className="accent-teal" checked={F.isTariff} onChange={(e) => set('isTariff', e.target.checked)} />{ts('tariff')}
             </label>
             {dMsg ? <div className="sm:col-span-2"><Notice tone={dMsg.tone}>{dMsg.text}</Notice></div> : null}
           </form>

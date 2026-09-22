@@ -218,11 +218,8 @@
       "listed": "Xaritada",
       "terminals": "Obyekt",
       "noCoords": "Koordinatasi yo'q",
-      "type": "Turi",
-      "classRank": "Sinfi",
       "deleteWarn": "Stansiya o'chadi. Unga bog'langan obyekt bo'lsa o'chmaydi.",
       "notListed": "Xaritada emas",
-      "tariff": "Tarif stansiyasi",
       "coords": "Koordinata (kenglik, uzunlik)"
     },
     "orders": {
