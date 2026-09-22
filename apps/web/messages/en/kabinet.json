@@ -199,7 +199,7 @@
         "TRANSITION_NOT_ALLOWED": "This action is not available in the current status. Refresh the page.",
         "NOT_DRAFT": "Only drafts can be deleted, archive the rest.",
         "FILE_TYPE": "JPEG, PNG or WebP only.",
-        "FILE_TOO_LARGE": "File is larger than 5 MB.",
+        "FILE_TOO_LARGE": "File is larger than 10 MB.",
         "UPLOAD": "Photo upload failed. Try again.",
         "ORG_REQUIRED": "This kind can only be listed by an organization."
       },
@@ -428,7 +428,7 @@
         "LOGIN_LOCKED": "Too many attempts. Try again in 15 minutes.",
         "CONFIRM_MISMATCH": "The confirmation text did not match.",
         "FILE_TYPE": "JPEG, PNG or WebP only.",
-        "FILE_TOO_LARGE": "File is larger than 5 MB.",
+        "FILE_TOO_LARGE": "File is larger than 10 MB.",
         "UPLOAD": "Photo upload failed. Try again."
       }
     },
@@ -533,7 +533,7 @@
       "err": {
         "UPLOAD": "The file did not upload. Please try again.",
         "FILE_TYPE": "Images (JPEG, PNG, WebP) or documents (PDF, DOCX, XLSX) only.",
-        "FILE_TOO_LARGE": "File too large: up to 10 MB for documents, 5 MB for images.",
+        "FILE_TOO_LARGE": "File is larger than 10 MB.",
         "FILE_CONTENT_MISMATCH": "The file contents do not match its type.",
         "RATE_LIMITED": "Too many files uploaded. Try again in an hour."
       },

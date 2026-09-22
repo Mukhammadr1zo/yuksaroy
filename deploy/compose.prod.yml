@@ -55,7 +55,10 @@ services:
       API_INTERNAL_URL: http://api:4000
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
     depends_on:
-      api: { condition: service_started }
+      # service_started emas, service_healthy: web konteyner API javob berguncha kutadi.
+      # Ilgari har deployda bir necha soniyalik oyna bor edi, o'sha paytda ochilgan
+      # sahifa API ga yeta olmay xato ko'rsatardi. API ning tekshiruvi allaqachon bor.
+      api: { condition: service_healthy }
 
   bot:
     image: ghcr.io/mukhammadr1zo/yuksaroy-bot:${IMAGE_TAG:-latest}

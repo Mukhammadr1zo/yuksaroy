@@ -199,7 +199,7 @@
         "TRANSITION_NOT_ALLOWED": "Bu holatda bunday harakat mumkin emas. Sahifani yangilang.",
         "NOT_DRAFT": "Faqat qoralama o'chiriladi, qolganlarini arxivlang.",
         "FILE_TYPE": "Faqat JPEG, PNG yoki WebP.",
-        "FILE_TOO_LARGE": "Fayl 5 MB dan katta.",
+        "FILE_TOO_LARGE": "Fayl 10 MB dan katta.",
         "UPLOAD": "Rasm yuklanmadi. Qayta urinib ko'ring.",
         "ORG_REQUIRED": "Bu tur faqat tashkilot nomidan beriladi."
       },
@@ -428,7 +428,7 @@
         "LOGIN_LOCKED": "Urinishlar ko'p. 15 daqiqadan keyin qayta urinib ko'ring.",
         "CONFIRM_MISMATCH": "Tasdiq matni mos kelmadi.",
         "FILE_TYPE": "Faqat JPEG, PNG yoki WebP.",
-        "FILE_TOO_LARGE": "Fayl 5 MB dan katta.",
+        "FILE_TOO_LARGE": "Fayl 10 MB dan katta.",
         "UPLOAD": "Rasm yuklanmadi. Qayta urinib ko'ring."
       }
     },
@@ -533,7 +533,7 @@
       "err": {
         "UPLOAD": "Fayl yuklanmadi. Qaytadan urinib ko'ring.",
         "FILE_TYPE": "Faqat rasm (JPEG, PNG, WebP) yoki hujjat (PDF, DOCX, XLSX).",
-        "FILE_TOO_LARGE": "Fayl juda katta: hujjat 10 MB gacha, rasm 5 MB gacha.",
+        "FILE_TOO_LARGE": "Fayl 10 MB dan katta.",
         "FILE_CONTENT_MISMATCH": "Fayl ichidagi ma'lumot turiga mos kelmadi.",
         "RATE_LIMITED": "Juda ko'p fayl yuklandi. Bir soatdan keyin urinib ko'ring."
       },
