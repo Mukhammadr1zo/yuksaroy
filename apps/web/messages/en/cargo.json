@@ -58,8 +58,17 @@
   },
   "market": {
     "demo": "Sample",
-    "status": { "OPEN": "Open", "AWARDED": "Provider chosen", "CLOSED": "Closed", "CANCELLED": "Cancelled" },
-    "offerStatus": { "SENT": "Sent", "AWARDED": "Chosen", "DECLINED": "Not chosen" },
+    "status": {
+      "OPEN": "Open",
+      "AWARDED": "Provider chosen",
+      "CLOSED": "Closed",
+      "CANCELLED": "Cancelled"
+    },
+    "offerStatus": {
+      "SENT": "Sent",
+      "AWARDED": "Chosen",
+      "DECLINED": "Not chosen"
+    },
     "err": {
       "REQUIRED": "Fill this in",
       "INVALID": "Invalid value",
@@ -96,8 +105,10 @@
       "phoneHint": "The number opens only to subscribed providers. Leave it empty and they will write their offers here.",
       "submit": "Post",
       "sending": "Sending",
-      "loginNeeded": "You need to sign in to post. It takes a minute.",
-      "loginCta": "Sign in",
+      "authTitle": "Confirm your number before sending.",
+      "authLead": "Your request is ready. It goes out as soon as the code is confirmed, and what you typed stays here.",
+      "authSubmit": "Confirm and send",
+      "authBack": "Back to the request",
       "done": "Posted: {no}",
       "doneBody": "Providers have been notified. Offers will show in your dashboard, and in Telegram if it is linked.",
       "viewMine": "See offers",

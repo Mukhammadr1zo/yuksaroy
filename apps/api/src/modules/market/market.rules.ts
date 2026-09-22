@@ -1,4 +1,4 @@
-import { MARKET, REGIONS, SERVICE_TYPES, TRUCK_TYPES, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
+import { MARKET, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
 
 // Taklif tanlash va hudud+qo'shnilar shoshilinch so'rovlar bilan bir xil: qayta yozilmaydi
 export { awardOffers, notifyRegions } from '../urgent/urgent.rules';
@@ -20,50 +20,8 @@ export const formatMarketNo = (board: MarketBoard, seq: number): string => `${bo
 /** Ro'yxatda ko'rinish chegarasi: shu sanadan eski OPEN so'rov tushib qoladi. */
 export const staleBefore = (now = new Date()): Date => new Date(now.getTime() - MARKET.staleDays * 86_400_000);
 
-export type RequestInput = {
-  board: string;
-  title?: string | null; description?: string | null;
-  serviceType?: string | null; regionCode?: string | null;
-  fromRegion?: string | null; toRegion?: string | null; fromText?: string | null; toText?: string | null;
-  cargoName?: string | null; weightT?: number | null; loadDate?: string | null; truckType?: string | null;
-};
-export type FieldError = 'REQUIRED' | 'INVALID' | 'RANGE' | 'PAST' | 'TOO_LONG';
-
-const has = (list: readonly string[], v: string | null | undefined) => !!v && list.includes(v);
-const blank = (v: string | null | undefined) => !v || !v.trim();
-
-/**
- * So'rov maydonlari taxtaga qarab tekshiriladi. Natija: maydon -> xato kodi; bo'sh obyekt = to'g'ri.
- * Sana Toshkent kuni bilan solishtiriladi: kechqurun yuborilgan "bugun" ertaga aylanib ketmasin.
- */
-export function validateRequest(i: RequestInput, today = uzLocalDate(new Date())): Record<string, FieldError> {
-  const e: Record<string, FieldError> = {};
-  if (blank(i.title)) e.title = 'REQUIRED';
-  else if (i.title!.trim().length > MARKET.titleMax) e.title = 'TOO_LONG';
-  if (blank(i.description)) e.description = 'REQUIRED';
-  else if (i.description!.trim().length > MARKET.descriptionMax) e.description = 'TOO_LONG';
-  if (i.fromText && i.fromText.length > 200) e.fromText = 'TOO_LONG';
-  if (i.toText && i.toText.length > 200) e.toText = 'TOO_LONG';
-
-  if (i.board === 'SERVICE') {
-    if (!has(SERVICE_TYPES, i.serviceType)) e.serviceType = i.serviceType ? 'INVALID' : 'REQUIRED';
-    if (!has(REGIONS, i.regionCode)) e.regionCode = i.regionCode ? 'INVALID' : 'REQUIRED';
-    return e;
-  }
-  if (i.board !== 'CARGO') { e.board = 'INVALID'; return e; }
-  if (!has(REGIONS, i.fromRegion)) e.fromRegion = i.fromRegion ? 'INVALID' : 'REQUIRED';
-  if (!has(REGIONS, i.toRegion)) e.toRegion = i.toRegion ? 'INVALID' : 'REQUIRED';
-  if (blank(i.cargoName)) e.cargoName = 'REQUIRED';
-  else if (i.cargoName!.length > 120) e.cargoName = 'TOO_LONG';
-  if (i.weightT == null || !Number.isFinite(i.weightT)) e.weightT = 'REQUIRED';
-  else if (i.weightT <= 0 || i.weightT > 10_000) e.weightT = 'RANGE';
-  // Sana orqaga aylantirib solishtiriladi: "2026-02-31" ni Date 3-martga surib qo'yadi, bunday kun rad etiladi
-  const d = i.loadDate ? new Date(`${i.loadDate}T00:00:00Z`) : null;
-  if (!i.loadDate || !d || Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== i.loadDate) e.loadDate = i.loadDate ? 'INVALID' : 'REQUIRED';
-  else if (i.loadDate < today) e.loadDate = 'PAST';
-  if (i.truckType && !has(TRUCK_TYPES, i.truckType)) e.truckType = 'INVALID';
-  return e;
-}
+// Maydon tekshiruvi domen paketida: bir xil qoida mijozda ham, serverda ham ishlaydi
+export { validateRequest, type FieldError, type RequestInput } from '@yuksaroy/domain';
 
 /**
  * Kim taklif bera oladi. O'z so'roviga yo'q; yopiq so'rovga yo'q; xizmat so'roviga faqat

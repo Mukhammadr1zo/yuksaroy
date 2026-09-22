@@ -4,7 +4,7 @@
 // tikda emas. Ikkinchisi: amallar jurnali va ko'rishlar jadvaliga umuman tegilmaydi, chunki
 // telefon kvotasi jurnaldan, e'lon kartasidagi ko'rishlar soni esa ko'rishlar jadvalidan
 // hisoblanadi; ular o'chsa ekrandagi raqam sababsiz kichrayib ketardi.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma.service';
 import type { IdempotencyService } from '../../../common/idempotency.service';
 import type { BookingRepository } from '../../booking/domain/ports';
@@ -53,22 +53,15 @@ describe('kunlik tozalash', () => {
 
   it('sutkadan keyin yana ishlaydi', async () => {
     const { svc, purged } = setup();
-    await svc.tick();
-    const real = Date.now;
+    vi.useFakeTimers();
     try {
-      const later = real() + DAY + 1000;
-      Date.now = () => later;
-      // tick ichida `new Date()` ishlatiladi, u ham soxta vaqtni olsin
-      const RealDate = Date;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (globalThis as any).Date = class extends RealDate {
-        constructor(...a: unknown[]) { super(...(a.length ? (a as []) : [later])); }
-        static now() { return later; }
-      };
+      vi.setSystemTime(new Date('2026-09-22T10:00:00Z'));
       await svc.tick();
-      (globalThis as any).Date = RealDate;
+      expect(purged).toHaveLength(1);
+      vi.setSystemTime(new Date(Date.now() + DAY + 1000));
+      await svc.tick();
     } finally {
-      Date.now = real;
+      vi.useRealTimers();
     }
     expect(purged).toHaveLength(2);
   });

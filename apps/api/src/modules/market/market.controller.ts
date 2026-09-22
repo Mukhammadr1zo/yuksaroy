@@ -147,10 +147,10 @@ export class MarketController {
   @Post('requests') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)
   async create(@CurrentUserId() userId: string, @Body() dto: CreateRequestDto) {
     limit(createBucket, userId);
+    // Telefonni ham validateRequest tekshiradi: mijozdagi va serverdagi qoida bitta bo'lsin
     const errors = validateRequest(dto);
-    const contactPhone = dto.contactPhone?.trim() ? normalizeUzPhone(dto.contactPhone) : null;
-    if (dto.contactPhone?.trim() && !contactPhone) errors.contactPhone = 'INVALID';
     if (Object.keys(errors).length) throw new BadRequestException({ code: 'VALIDATION', errors });
+    const contactPhone = dto.contactPhone?.trim() ? normalizeUzPhone(dto.contactPhone) : null;
     const orgId = await this.market.memberOrgId(userId, dto.orgId);
     const cargo = dto.board === 'CARGO';
     const r = await this.prisma.$transaction(async (tx) => {

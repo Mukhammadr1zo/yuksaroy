@@ -1,12 +1,22 @@
 'use client';
-// So'rov formasi: yuk (yo'nalish, yuk, og'irlik, sana, kuzov) yoki xizmat (tur, viloyat). Xatolar maydon ostida oddiy so'z bilan.
-import { useEffect, useState } from 'react';
+/**
+ * So'rov formasi: yuk (yo'nalish, yuk, og'irlik, sana, kuzov) yoki xizmat (tur, viloyat).
+ * Xatolar maydon ostida oddiy so'z bilan.
+ *
+ * Mehmon ham to'liq formani ko'radi. Ilgari kirmagan odamga forma o'rniga "avval kiring"
+ * havolasi chiqardi: platformadagi eng qimmat harakat eng baland devor ortida turardi.
+ * Endi tartib teskari: odam yozadi, yuborishni bosadi, va faqat shundan keyin raqamini
+ * tasdiqlaydi; kod tasdiqlangan zahoti so'rov o'zi ketadi va sahifa almashmaydi.
+ */
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { REGIONS, SERVICE_TYPES, TRUCK_TYPES, type MarketBoard, type ServiceType } from '@yuksaroy/domain';
+import { REGIONS, SERVICE_TYPES, TRUCK_TYPES, validateRequest, type MarketBoard, type ServiceType } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
-import { ApiError, hasSession, post } from '@/lib/api';
+import { ApiError, clearAuthedCache, hasSession, post } from '@/lib/api';
 import { uzToday } from '@/lib/format';
 import type { FieldErrors, MarketRequest } from '@/lib/types-market';
+import { GoogleButton } from '@/components/auth/GoogleButton';
+import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { BTN_GHOST, BTN_PRIMARY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { useMarketLabels } from './bits';
 
@@ -16,38 +26,83 @@ type Draft = {
 };
 const EMPTY: Draft = { title: '', description: '', serviceType: '', regionCode: '', fromRegion: '', toRegion: '', fromText: '', toText: '', cargoName: '', weightT: '', loadDate: '', truckType: '', contactPhone: '' };
 
-export function RequestForm({ board, next, serviceType }: { board: MarketBoard; next: string; serviceType?: string }) {
+/**
+ * Yozilgan qoralama brauzer yorlig'ida saqlanadi. Hisobi yo'q odamga kod Telegram orqali
+ * keladi, ya'ni u brauzerdan chiqib ketadi; telefonda yorliq o'chib qolsa faqat xotirada
+ * turgan matn yo'qolardi va aynan birinchi marta kelgan odam ketib qolardi.
+ * Kalit taxta bo'yicha ajraydi: ikki forma bir-birini bosmasin.
+ */
+const DRAFT_KEY = (board: MarketBoard) => `ys-req-${board}`;
+const readDraft = (board: MarketBoard): Partial<Draft> => {
+  try { return JSON.parse(sessionStorage.getItem(DRAFT_KEY(board)) || '{}') as Partial<Draft>; } catch { return {}; }
+};
+
+export function RequestForm({ board, serviceType }: { board: MarketBoard; serviceType?: string }) {
   const t = useTranslations('market.form');
   const te = useTranslations('market.err');
   const L = useMarketLabels();
   const cargo = board === 'CARGO';
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [d, setD] = useState<Draft>({ ...EMPTY, serviceType: (SERVICE_TYPES as readonly string[]).includes(serviceType ?? '') ? serviceType! : '' });
+  const picked = (SERVICE_TYPES as readonly string[]).includes(serviceType ?? '') ? serviceType! : '';
+  const [d, setD] = useState<Draft>(() => {
+    const saved = readDraft(board);
+    return { ...EMPTY, ...saved, serviceType: picked || saved.serviceType || '' };
+  });
+  const [needAuth, setNeedAuth] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [top, setTop] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<MarketRequest | null>(null);
 
-  useEffect(() => { setAuthed(hasSession()); }, []);
-  const set = (p: Partial<Draft>) => setD((x) => ({ ...x, ...p }));
+  const set = (p: Partial<Draft>) => setD((x) => {
+    const v = { ...x, ...p };
+    try { sessionStorage.setItem(DRAFT_KEY(board), JSON.stringify(v)); } catch { /* xususiy oynada yozib bo'lmaydi, forma baribir ishlaydi */ }
+    return v;
+  });
   const err = (k: keyof Draft) => (errors[k] ? te(errors[k]!) : undefined);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true); setTop(null); setErrors({});
+  const body = () => (cargo
+    ? { board, title: d.title, description: d.description, fromRegion: d.fromRegion, toRegion: d.toRegion, fromText: d.fromText, toText: d.toText, cargoName: d.cargoName, weightT: d.weightT ? Number(d.weightT) : undefined, loadDate: d.loadDate, truckType: d.truckType || undefined, contactPhone: d.contactPhone }
+    : { board, title: d.title, description: d.description, serviceType: d.serviceType, regionCode: d.regionCode, contactPhone: d.contactPhone });
+
+  async function send() {
+    setBusy(true); setTop(null);
     try {
-      const body = cargo
-        ? { board, title: d.title, description: d.description, fromRegion: d.fromRegion, toRegion: d.toRegion, fromText: d.fromText, toText: d.toText, cargoName: d.cargoName, weightT: d.weightT ? Number(d.weightT) : undefined, loadDate: d.loadDate, truckType: d.truckType || undefined, contactPhone: d.contactPhone }
-        : { board, title: d.title, description: d.description, serviceType: d.serviceType, regionCode: d.regionCode, contactPhone: d.contactPhone };
-      setDone(await post<MarketRequest>('/market/requests', body));
+      const r = await post<MarketRequest>('/market/requests', body());
+      try { sessionStorage.removeItem(DRAFT_KEY(board)); } catch { /* yuborildi, qoralama endi kerak emas */ }
+      setDone(r);
     } catch (e) {
+      // Ikkinchi marta 401 kelsa kirish qadami ochiq qoladi va sabab yoziladi:
+      // odam nega to'xtaganini bilmay qolmasin
+      if (e instanceof ApiError && e.status === 401) { if (needAuth) setTop(te('generic')); else setNeedAuth(true); return; }
+      setNeedAuth(false);
       if (e instanceof ApiError && e.status === 400 && e.body?.errors) setErrors(e.body.errors as FieldErrors);
       else setTop(e instanceof ApiError && e.status === 429 ? te('RATE_LIMITED') : te('generic'));
     } finally { setBusy(false); }
   }
 
-  if (authed === null) return null;
-  if (!authed) return <Notice tone="warn">{t('loginNeeded')} <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold underline underline-offset-4">{t('loginCta')}</Link></Notice>;
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setTop(null);
+    // Avval mijozda tekshiriladi: maydonini to'ldirmagan odamdan raqam so'rash ma'nosiz
+    const errs = validateRequest(body()) as FieldErrors;
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+    if (!hasSession()) { setNeedAuth(true); return; }
+    void send();
+  }
+
+  if (needAuth) {
+    return (
+      <div className="grid gap-4">
+        <Notice tone="warn"><span className="font-semibold">{t('authTitle')}</span> {t('authLead')}</Notice>
+        <PhoneOtp submitLabel={t('authSubmit')} initialPhone={d.contactPhone} onDone={() => { clearAuthedCache(); void send(); }} />
+        <GoogleButton onLogin={() => { clearAuthedCache(); void send(); }} />
+        {busy ? <p className="text-sm text-muted">{t('sending')}</p> : null}
+        {top ? <Notice tone="err">{top}</Notice> : null}
+        <div><button type="button" disabled={busy} onClick={() => setNeedAuth(false)} className={BTN_GHOST}>{t('authBack')}</button></div>
+      </div>
+    );
+  }
   if (done) {
     const publicHref = cargo ? `/cargo/${done.no}` : `/services/requests/${done.no}`;
     return (

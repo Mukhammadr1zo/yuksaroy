@@ -25,7 +25,9 @@ export function RegisterNudge() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (hasSession() || /^\/(login|signup)/.test(pathname)) return;
+    // Forma to'ldirilayotgan sahifada taklif chiqmaydi: kirish qadami formaning o'zida
+    // va oyna telefonda aynan yuborish tugmasi ustiga tushardi
+    if (hasSession() || /^\/(login|signup|cargo\/new|services\/request)/.test(pathname)) return;
     let first = 0;
     let snoozed = 0;
     try {

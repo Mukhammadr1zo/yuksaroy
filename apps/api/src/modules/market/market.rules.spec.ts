@@ -28,6 +28,13 @@ describe('validateRequest', () => {
     expect(validateRequest({ ...cargo, loadDate: today, truckType: null }, today)).toEqual({});
   });
 
+  // Telefon tekshiruvi kontrollerdan shu yerga ko'chdi: endi mijoz ham xuddi shu qoidani ishlatadi
+  it("telefon raqami tekshiriladi, bo'sh bo'lsa talab qilinmaydi", () => {
+    expect(validateRequest({ ...cargo, contactPhone: '123' }, today).contactPhone).toBe('INVALID');
+    expect(validateRequest({ ...cargo, contactPhone: '+998901234567' }, today)).toEqual({});
+    expect(validateRequest({ ...cargo, contactPhone: '' }, today)).toEqual({});
+  });
+
   it("yuk: yo'nalish, og'irlik, sana va kuzov tekshiriladi", () => {
     const e = validateRequest({ ...cargo, fromRegion: 'XX', toRegion: null, weightT: 0, loadDate: '2026-09-20', truckType: 'BUS', cargoName: ' ' }, today);
     expect(e).toEqual({ fromRegion: 'INVALID', toRegion: 'REQUIRED', weightT: 'RANGE', loadDate: 'PAST', truckType: 'INVALID', cargoName: 'REQUIRED' });

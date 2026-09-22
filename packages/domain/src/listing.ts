@@ -1,5 +1,5 @@
 // E'lonlar: temir yo'l texnikasi (ijara/sotuv) va avtotashuvchilar. Framework'siz, Prisma enum'lari shu bilan bir xil.
-import { REGIONS, normalizeUzPhone, type RegionCode, type SearchLang } from './index';
+import { MARKET, REGIONS, SERVICE_TYPES, normalizeUzPhone, uzLocalDate, type RegionCode, type SearchLang } from './index';
 import { TransitionError } from './transition';
 import { DEAL_KINDS, type DealKind } from './search';
 
@@ -218,3 +218,59 @@ export const LISTING_LABELS: Record<SearchLang, {
     priceUnit: { TOTAL: 'total', PER_MONTH: 'per month', PER_DAY: 'per day', PER_HOUR: 'per hour', PER_KM: 'per km', PER_TON: 'per ton', PER_TRIP: 'per trip' },
   },
 };
+
+// ── Bozor so'rovi: maydon tekshiruvi ──
+//
+// Bu tekshiruv ilgari faqat serverda turardi, shuning uchun so'rov formasi mehmonni
+// avval kirishga yuborardi: mijozda tekshiradigan narsa yo'q edi. Endi bitta funksiya
+// ikki tomonda ham ishlaydi, ya'ni mehmon formani to'ldiradi va faqat yuborish oldidan
+// raqamini tasdiqlaydi. Domen paketida turgani uchun ikki nusxa bo'lib ajralib ketmaydi.
+
+export type RequestInput = {
+  board: string;
+  title?: string | null; description?: string | null;
+  serviceType?: string | null; regionCode?: string | null;
+  fromRegion?: string | null; toRegion?: string | null; fromText?: string | null; toText?: string | null;
+  cargoName?: string | null; weightT?: number | null; loadDate?: string | null; truckType?: string | null;
+  contactPhone?: string | null;
+};
+export type FieldError = 'REQUIRED' | 'INVALID' | 'RANGE' | 'PAST' | 'TOO_LONG';
+
+// Nomlari `has`/`blank` emas: validateListing ichida boshqa ma'nodagi `has` bor, soyalanmasin
+const inList = (list: readonly string[], v: string | null | undefined) => !!v && list.includes(v);
+const isBlank = (v: string | null | undefined) => !v || !v.trim();
+
+/**
+ * So'rov maydonlari taxtaga qarab tekshiriladi. Natija: maydon -> xato kodi; bo'sh obyekt = to'g'ri.
+ * Sana Toshkent kuni bilan solishtiriladi: kechqurun yuborilgan "bugun" ertaga aylanib ketmasin.
+ */
+export function validateRequest(i: RequestInput, today = uzLocalDate(new Date())): Record<string, FieldError> {
+  const e: Record<string, FieldError> = {};
+  if (isBlank(i.title)) e.title = 'REQUIRED';
+  else if (i.title!.trim().length > MARKET.titleMax) e.title = 'TOO_LONG';
+  if (isBlank(i.description)) e.description = 'REQUIRED';
+  else if (i.description!.trim().length > MARKET.descriptionMax) e.description = 'TOO_LONG';
+  if (i.fromText && i.fromText.length > 200) e.fromText = 'TOO_LONG';
+  if (i.toText && i.toText.length > 200) e.toText = 'TOO_LONG';
+  // Telefon SERVICE shoxidan oldin: u shox erta qaytadi va raqam ikkala taxtada ham bor
+  if (i.contactPhone?.trim() && !normalizeUzPhone(i.contactPhone)) e.contactPhone = 'INVALID';
+
+  if (i.board === 'SERVICE') {
+    if (!inList(SERVICE_TYPES, i.serviceType)) e.serviceType = i.serviceType ? 'INVALID' : 'REQUIRED';
+    if (!inList(REGIONS, i.regionCode)) e.regionCode = i.regionCode ? 'INVALID' : 'REQUIRED';
+    return e;
+  }
+  if (i.board !== 'CARGO') { e.board = 'INVALID'; return e; }
+  if (!inList(REGIONS, i.fromRegion)) e.fromRegion = i.fromRegion ? 'INVALID' : 'REQUIRED';
+  if (!inList(REGIONS, i.toRegion)) e.toRegion = i.toRegion ? 'INVALID' : 'REQUIRED';
+  if (isBlank(i.cargoName)) e.cargoName = 'REQUIRED';
+  else if (i.cargoName!.length > 120) e.cargoName = 'TOO_LONG';
+  if (i.weightT == null || !Number.isFinite(i.weightT)) e.weightT = 'REQUIRED';
+  else if (i.weightT <= 0 || i.weightT > 10_000) e.weightT = 'RANGE';
+  // Sana orqaga aylantirib solishtiriladi: "2026-02-31" ni Date 3-martga surib qo'yadi, bunday kun rad etiladi
+  const d = i.loadDate ? new Date(`${i.loadDate}T00:00:00Z`) : null;
+  if (!i.loadDate || !d || Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== i.loadDate) e.loadDate = i.loadDate ? 'INVALID' : 'REQUIRED';
+  else if (i.loadDate < today) e.loadDate = 'PAST';
+  if (i.truckType && !inList(TRUCK_TYPES, i.truckType)) e.truckType = 'INVALID';
+  return e;
+}

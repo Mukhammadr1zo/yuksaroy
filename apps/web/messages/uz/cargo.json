@@ -58,8 +58,17 @@
   },
   "market": {
     "demo": "Namuna",
-    "status": { "OPEN": "Ochiq", "AWARDED": "Ijrochi tanlangan", "CLOSED": "Yopilgan", "CANCELLED": "Bekor qilingan" },
-    "offerStatus": { "SENT": "Yuborilgan", "AWARDED": "Tanlangan", "DECLINED": "Tanlanmadi" },
+    "status": {
+      "OPEN": "Ochiq",
+      "AWARDED": "Ijrochi tanlangan",
+      "CLOSED": "Yopilgan",
+      "CANCELLED": "Bekor qilingan"
+    },
+    "offerStatus": {
+      "SENT": "Yuborilgan",
+      "AWARDED": "Tanlangan",
+      "DECLINED": "Tanlanmadi"
+    },
     "err": {
       "REQUIRED": "To'ldiring",
       "INVALID": "Noto'g'ri qiymat",
@@ -96,8 +105,10 @@
       "phoneHint": "Raqam faqat obunachi ijrochilarga ochiladi. Bo'sh qoldirsangiz, ular takliflarini shu yerda yozadi.",
       "submit": "E'lon qilish",
       "sending": "Yuborilmoqda",
-      "loginNeeded": "E'lon qilish uchun kirish kerak. Bu bir daqiqa oladi.",
-      "loginCta": "Kirish",
+      "authTitle": "Yuborishdan oldin raqamingizni tasdiqlang.",
+      "authLead": "So'rov tayyor. Kod tasdiqlangan zahoti u o'zi yuboriladi, yozganlaringiz shu yerda turadi.",
+      "authSubmit": "Tasdiqlash va yuborish",
+      "authBack": "So'rovga qaytish",
       "done": "E'lon qilindi: {no}",
       "doneBody": "Ijrochilarga xabar ketdi. Takliflar kabinetingizda ko'rinadi, Telegram bog'langan bo'lsa u yerga ham keladi.",
       "viewMine": "Takliflarni ko'rish",

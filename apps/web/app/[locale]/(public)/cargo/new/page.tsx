@@ -22,7 +22,7 @@ export default async function CargoNewPage({ params }: Params) {
       <h1 className="font-display mt-4 text-3xl font-bold text-navy">{t('new.title')}</h1>
       <p className="mt-2 max-w-[62ch] text-muted">{t('new.lead')}</p>
       <div className="mt-8 rounded-card border border-line bg-white p-5 md:p-6">
-        <RequestForm board="CARGO" next="/cargo/new" />
+        <RequestForm board="CARGO" />
       </div>
     </div>
   );
