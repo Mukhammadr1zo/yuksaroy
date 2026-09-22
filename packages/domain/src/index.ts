@@ -273,6 +273,16 @@ export function uzLocalDate(at: Date): string {
   return new Date(at.getTime() + UZ_UTC_OFFSET_MINUTES * 60_000).toISOString().slice(0, 10);
 }
 
+/** Oy nomlari: sana odamga ko'rinadigan hamma joyda shu jadvaldan olinadi. */
+export const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'] as const;
+
+/** "2026-10-04" -> "4-oktabr". Serverda ham ishlaydi: Intl jadvali kerak emas. */
+export function uzDateText(iso: string): string {
+  const [, m, d] = iso.split('-');
+  const name = UZ_MONTHS[Number(m) - 1];
+  return name ? `${Number(d)}-${name}` : iso;
+}
+
 // ── Hujjatlar va hisob (S4, M5.1) ──
 
 /** F1 da ikki hujjat: bajarilgan ishlar dalolatnomasi va to'lov uchun hisob. */

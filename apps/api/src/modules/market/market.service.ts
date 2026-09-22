@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { REGION_LABELS, SERVICE_TYPE_LABELS, uzLocalDate, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
+import { REGION_LABELS, SERVICE_TYPE_LABELS, uzDateText, uzLocalDate, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
 import { env } from '../../common/env';
 import { PrismaService } from '../../common/prisma.service';
 import { esc, notifyTelegram, sendTelegram, webUrl } from '../../common/telegram';
@@ -135,7 +135,7 @@ export class MarketService {
     if (!chat || env.NODE_ENV !== 'production' || r.board !== 'CARGO' || r.isDemo) return;
     const where = `${region(r.fromRegion)} -> ${region(r.toRegion)}`;
     const what = `${r.cargoName ?? ''}${r.weightT ? `, ${r.weightT} t` : ''}`;
-    const when = r.loadDate ? uzLocalDate(r.loadDate) : '';
+    const when = r.loadDate ? uzDateText(uzLocalDate(r.loadDate)) : '';
     const lines = [
       `<b>${esc(where)}</b>`,
       esc(what),

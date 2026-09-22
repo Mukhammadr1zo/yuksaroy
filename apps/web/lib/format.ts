@@ -1,4 +1,4 @@
-import { RJU_LABELS, SERVICE_LABELS, TARIFF_UNIT_LABELS, TERMINAL_KIND_LABELS, type Rju, type ServiceCode, type TariffUnit, type TerminalKind } from '@yuksaroy/domain';
+import { RJU_LABELS, SERVICE_LABELS, TARIFF_UNIT_LABELS, TERMINAL_KIND_LABELS, UZ_MONTHS, type Rju, type ServiceCode, type TariffUnit, type TerminalKind } from '@yuksaroy/domain';
 import type { WeekDay, WeekHours } from './types';
 
 export { RJU_LABELS, SERVICE_LABELS, TARIFF_UNIT_LABELS, TERMINAL_KIND_LABELS };
@@ -85,7 +85,6 @@ export function isOpenNow(hours: WeekHours | null, is24h: boolean, now = new Dat
 // ── Toshkent vaqti, sana ──
 // Intl'da uz-UZ oy nomlari "M09" ko'rinishida chiqadi, shuning uchun o'zbekcha nomlar qo'lda; ru va en da Intl.
 const TZ = 'Asia/Tashkent';
-const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
 const UZ_MON = ['yan', 'fev', 'mar', 'apr', 'may', 'iyun', 'iyul', 'avg', 'sen', 'okt', 'noy', 'dek'];
 const UZ_WD: Record<string, string> = { Mon: 'Du', Tue: 'Se', Wed: 'Cho', Thu: 'Pa', Fri: 'Ju', Sat: 'Sha', Sun: 'Ya' };
 const PARTS = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });

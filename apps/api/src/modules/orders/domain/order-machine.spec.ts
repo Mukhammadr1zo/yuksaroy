@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ORDER_FINAL, ORDER_STATUSES, ORDER_TRANSITIONS, TransitionError,
-  assertOrderTransition, canOrderTransition, formatOrderNo, uzLocalDate, uzLocalToUtc,
+  assertOrderTransition, canOrderTransition, formatOrderNo, uzDateText, uzLocalDate, uzLocalToUtc,
   type OrderStatus,
 } from '@yuksaroy/domain';
 import { defaultWindows, enumerateDates } from '../../booking/application/manage-slots.usecase';
@@ -61,6 +61,15 @@ describe('slot kalendari va Toshkent vaqti', () => {
     // Yarim tundan keyingi UTC vaqti - ertangi Toshkent kuni
     expect(uzLocalDate(new Date('2026-09-10T19:30:00Z'))).toBe('2026-09-11');
     expect(uzLocalDate(new Date('2026-09-10T18:59:00Z'))).toBe('2026-09-10');
+  });
+
+  // Sana odamga ko'rinadigan joyda (Telegram kanali posti) oy nomi bilan yoziladi
+  it("sana odam o'qiydigan matnga o'giriladi", () => {
+    expect(uzDateText('2026-10-04')).toBe('4-oktabr');
+    expect(uzDateText('2026-01-31')).toBe('31-yanvar');
+    expect(uzDateText('2026-12-09')).toBe('9-dekabr');
+    // Noto'g'ri qiymat yutilmaydi: kiritilgani qaytadi, karta bo'sh qolmaydi
+    expect(uzDateText('bekor')).toBe('bekor');
   });
 
   it('standart oynalar: 6 × 2 soat, raqamlar ketma-ket', () => {
