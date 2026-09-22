@@ -222,6 +222,25 @@ jobs:
             | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
               "cd '$DIR' && if grep -q '^D_RAILWAY_EMAIL=' .env 2>/dev/null; then cat > /dev/null; echo 'vagon sozlamasi allaqachon bor'; else cat >> .env && echo 'vagon sozlamasi qoshildi'; fi"
 
+      # Yangi yuklar chiqadigan Telegram kanali. Bot o'sha kanalda administrator
+      # bo'lishi shart, aks holda Telegram postni rad etadi.
+      - name: Yuklar kanali sozlamasi (ixtiyoriy)
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          P: ${{ secrets.VPS_PORT || 22 }}
+          DIR: ${{ vars.VPS_PATH || '/opt/yuksaroy' }}
+          CHANNEL: ${{ secrets.TELEGRAM_CARGO_CHANNEL }}
+        run: |
+          # secrets konteksti if: da ishlamaydi, shuning uchun tekshiruv shu yerda
+          if [ -z "$CHANNEL" ]; then
+            echo "kanal sozlamasi yo'q, o'tkazib yuborildi"
+            exit 0
+          fi
+          echo "TELEGRAM_CARGO_CHANNEL=$CHANNEL" \
+            | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
+              "cd '$DIR' && if grep -q '^TELEGRAM_CARGO_CHANNEL=' .env 2>/dev/null; then cat > /dev/null; echo 'kanal sozlamasi allaqachon bor'; else cat >> .env && echo 'kanal sozlamasi qoshildi'; fi"
+
       # Repo yopiq, shuning uchun GHCR dagi obrazlar ham yopiq: server ularni
       # parolsiz torta olmaydi va "docker compose pull" unauthorized beradi.
       # Token quvur orqali uzatiladi: na runner diskida, na buyruq qatorida qolmaydi.
