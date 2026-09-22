@@ -161,6 +161,7 @@
       "pendingClaims": "Obyekt da'volari",
       "pendingPremium": "Premium to'lovlari",
       "pendingOrders": "Tasdiq kutayotgan buyurtma",
+      "pendingUrgent": "Shoshilinch so'rov",
       "activity": "Oxirgi amallar",
       "activityEmpty": "Hali amal qilinmagan.",
       "waitingDays": "eng uzog'i {days} kundan beri kutmoqda",

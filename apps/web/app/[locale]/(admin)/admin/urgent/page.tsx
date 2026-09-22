@@ -10,6 +10,7 @@
  * Yopish sababi majburiy: so'rov egasiga bu ko'rinadi va keyin nega yopilgani so'raladi.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { REGIONS, URGENT_STATUSES, type UrgentStatus } from '@yuksaroy/domain';
 import { api, post } from '@/lib/api';
@@ -43,7 +44,11 @@ export default function AdminUrgentPage() {
   const tr = useTranslations('region');
   const locale = useLocale();
 
-  const [status, setStatus] = useState('');
+  // Bosh sahifadagi "Shoshilinch so'rov" kartochkasi ?status=OPEN bilan keladi: bosgan odam
+  // ochiq so'rovlarni ko'rishni kutadi, yopilganlari aralashib turishini emas.
+  // Suspense shart emas: AdminShell huquq tasdiqlanguncha bolalarni chizmaydi.
+  const sp = useSearchParams();
+  const [status, setStatus] = useState(URGENT_STATUSES.includes(sp.get('status') as never) ? (sp.get('status') as string) : '');
   const [region, setRegion] = useState('');
   const [page, setPage] = useState(1);
   const [sel, setSel] = useState<string | null>(null);

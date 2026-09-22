@@ -208,7 +208,7 @@ export class AdminSystemController {
       }
     };
 
-    const [db, listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, subscriptionPending, ordersPending, users, orders, listings, oldest] =
+    const [db, listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, subscriptionPending, ordersPending, urgentOpen, users, orders, listings, oldest] =
       await Promise.all([
         this.pingDb(),
         safe('listingsPendingReview', () => this.prisma.listing.count({ where: { status: 'PENDING_REVIEW' } })),
@@ -217,6 +217,8 @@ export class AdminSystemController {
         safe('premiumPending', () => this.prisma.premiumOrder.count({ where: { status: 'PENDING' } })), // PremiumOrder.status - String
         safe('subscriptionPending', () => this.prisma.subscription.count({ where: { status: 'PENDING' } })),
         safe('ordersPending', () => this.prisma.order.count({ where: { status: 'PENDING' } })),
+        // Shoshilinch so'rov ham navbat: ichida mijozning telefoni turadi va u javob kutadi
+        safe('urgentOpen', () => this.prisma.urgentRequest.count({ where: { status: 'OPEN' } })),
         safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
         safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
         safe('recentListings', () => this.prisma.listing.count({ where: { createdAt: { gte: since } } })),
@@ -231,9 +233,10 @@ export class AdminSystemController {
         premiumPending: premiumPending ?? 0,
         subscriptionPending: subscriptionPending ?? 0,
         ordersPending: ordersPending ?? 0,
+        urgentOpen: urgentOpen ?? 0,
       },
       recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },
-      oldestPending: oldest?.createdAt ?? null, // SLA signali: eng uzoq kutayotgan e'lon
+      oldestPending: oldest?.createdAt ?? null, // eng uzoq kutayotgan e'lon
       failed, // bo'sh bo'lsa hammasi joyida
     };
   }

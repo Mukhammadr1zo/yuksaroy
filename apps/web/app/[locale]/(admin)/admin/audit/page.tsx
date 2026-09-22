@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
-import { BTN, BTN_GHOST, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Toolbar, errText, useAdminList, type Col } from '@/components/admin/kit';
+import { BTN, BTN_GHOST, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Toolbar, errText, useActionText, useAdminList, type Col } from '@/components/admin/kit';
 
 type Actor = { id: string; phone: string; fullName: string | null };
 type Row = {
@@ -19,25 +19,6 @@ type Row = {
 type ActionCount = { action: string; count: number };
 
 const EMPTY = { action: '', entity: '', entityId: '', actor: '', from: '', to: '' };
-
-/**
- * Amal kodini gapga aylantiradi: "listing.decide" o'rniga "E'lonni tasdiqladi".
- *
- * Kalitda nuqta chiziqchaga almashadi, aks holda next-intl kodni ichma-ich obyekt deb
- * o'qirdi va "listing-decide" bir vaqtda ham satr, ham obyekt bo'lishi kerak bo'lardi.
- * Qaror amallarida natija tafsilotdagi `approve` dan olinadi: tasdiqlangan bilan rad
- * etilgan jurnalda bir xil ko'rinib turardi.
- * Kalit topilmasa kodning o'zi chiqadi: yangi amal qo'shilsa varaq yiqilmaydi.
- */
-function useActionText() {
-  const ta = useTranslations('admin.audit');
-  return (action: string, meta: unknown) => {
-    const base = `act.${action.replace(/\./g, '-')}`;
-    const ok = meta && typeof meta === 'object' ? (meta as { approve?: unknown }).approve : undefined;
-    const k = typeof ok === 'boolean' ? `${base}-${ok ? 'yes' : 'no'}` : base;
-    return ta.has(k) ? ta(k) : ta.has(base) ? ta(base) : action;
-  };
-}
 
 export default function AuditPage() {
   const t = useTranslations('admin');

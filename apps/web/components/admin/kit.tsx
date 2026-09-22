@@ -61,9 +61,29 @@ export type Col<T> = {
 };
 
 /**
+ * Amal kodini gapga aylantiradi: "listing.decide" o'rniga "E'lonni tasdiqladi".
+ * Jurnal ham, bosh sahifadagi tasma ham shundan o'qiydi.
+ *
+ * Kalitda nuqta chiziqchaga almashadi, aks holda next-intl kodni ichma-ich obyekt deb
+ * o'qirdi va "listing-decide" bir vaqtda ham satr, ham obyekt bo'lishi kerak bo'lardi.
+ * Qaror amallarida natija tafsilotdagi `approve` dan olinadi: tasdiqlangan bilan rad
+ * etilgan jurnalda bir xil ko'rinib turardi.
+ * Kalit topilmasa kodning o'zi chiqadi: yangi amal qo'shilsa varaq yiqilmaydi.
+ */
+export function useActionText() {
+  const ta = useTranslations('admin.audit');
+  return (action: string, meta?: unknown) => {
+    const base = `act.${action.replace(/\./g, '-')}`;
+    const ok = meta && typeof meta === 'object' ? (meta as { approve?: unknown }).approve : undefined;
+    const k = typeof ok === 'boolean' ? `${base}-${ok ? 'yes' : 'no'}` : base;
+    return ta.has(k) ? ta(k) : ta.has(base) ? ta(base) : action;
+  };
+}
+
+/**
  * Jadval. Admin ma'lumoti ustunlarga taqqoslanadi (qaysi biri eskiroq, qaysi biri kattaroq),
- * shuning uchun bu yerda kartochka emas, haqiqiy jadval. Tor ekranda yon tomonga suriladi
- * va sahifaning o'zi hech qachon gorizontal surilmaydi.
+ * shuning uchun keng ekranda bu kartochka emas, haqiqiy jadval. Telefonda esa har qator
+ * kartochkaga aylanadi: sahifaning o'zi ham, jadval ham hech qachon yon tomonga surilmaydi.
  */
 export function DataTable<T>({ cols, rows, keyOf, empty, onRow }: {
   cols: Col<T>[]; rows: T[]; keyOf: (row: T) => string; empty: string; onRow?: (row: T) => void;

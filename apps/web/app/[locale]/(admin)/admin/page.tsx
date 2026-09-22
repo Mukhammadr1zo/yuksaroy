@@ -14,18 +14,18 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { num, uzDateTime } from '@/lib/format';
-import { CARD, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
+import { CARD, Notice, PageHead, Pill, errText, useActionText } from '@/components/admin/kit';
 
 type Health = {
   db: { ok: boolean; ms?: number; error?: string };
-  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number };
+  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number; urgentOpen: number };
   recent: { users: number; orders: number; listings: number };
   oldestPending: string | null;
   /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
   failed?: string[];
 };
 type Actor = { id: string; phone: string; fullName: string | null };
-type AuditRow = { id: string; action: string; entity: string | null; createdAt: string; actor: Actor | null };
+type AuditRow = { id: string; action: string; entity: string | null; meta: unknown; createdAt: string; actor: Actor | null };
 
 const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   { key: 'listingsPendingReview', label: 'pendingListings', href: '/admin/moderation?tab=listings' },
@@ -34,6 +34,9 @@ const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   { key: 'premiumPending', label: 'pendingPremium', href: '/admin/moderation?tab=premium' },
   { key: 'subscriptionPending', label: 'pendingSubscription', href: '/admin/moderation?tab=subscription' },
   { key: 'ordersPending', label: 'pendingOrders', href: '/admin/orders?status=PENDING' },
+  // Shoshilinch so'rov ham shu yerda: ilgari u faqat o'z ekranida turardi va bosh sahifaga
+  // qaragan operator ochiq so'rov borligini bilmasdi
+  { key: 'urgentOpen', label: 'pendingUrgent', href: '/admin/urgent?status=OPEN' },
 ];
 const RECENT: { key: keyof Health['recent']; label: string }[] = [
   { key: 'users', label: 'newUsers' }, { key: 'orders', label: 'newOrders' }, { key: 'listings', label: 'newListings' },
@@ -51,6 +54,7 @@ export default function AdminHomePage() {
   const [health, setHealth] = useState<Health | null>(null);
   const [feed, setFeed] = useState<AuditRow[] | null>(null);
   const [err, setErr] = useState<unknown>(null);
+  const actionText = useActionText();
 
   useEffect(() => {
     api<Health>('/admin/health').then(setHealth).catch(setErr);
@@ -122,8 +126,9 @@ export default function AdminHomePage() {
                   <ul className="mt-2 divide-y divide-line/70">
                     {feed.map((r) => (
                       <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 py-1.5 text-sm">
-                        <span className="min-w-0 font-semibold wrap-anywhere">{ta.has(`action.${r.action}`) ? ta(`action.${r.action}`) : r.action}</span>
-                        <span className="min-w-0 text-muted wrap-anywhere">{r.actor ? r.actor.fullName || r.actor.phone : ta('system')}</span>
+                        {/* Avval kim, keyin nima qilgani: qator gap bo'lib o'qiladi */}
+                        <span className="min-w-0 font-semibold wrap-anywhere">{r.actor ? r.actor.fullName || r.actor.phone : ta('system')}</span>
+                        <span className="min-w-0 text-muted wrap-anywhere">{actionText(r.action, r.meta)}</span>
                         <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">{uzDateTime(r.createdAt, locale)}</span>
                       </li>
                     ))}

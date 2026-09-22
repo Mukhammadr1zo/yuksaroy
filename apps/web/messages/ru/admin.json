@@ -161,6 +161,7 @@
       "pendingClaims": "Заявки на объекты",
       "pendingPremium": "Платежи премиум",
       "pendingOrders": "Заказы без подтверждения",
+      "pendingUrgent": "Срочные заявки",
       "activity": "Последние действия",
       "activityEmpty": "Действий пока нет.",
       "waitingDays": "самое старое ждёт {days} дн.",
