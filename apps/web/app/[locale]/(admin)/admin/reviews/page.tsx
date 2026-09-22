@@ -9,8 +9,9 @@
  * Terminal bahosi o'chirilganda server terminal reytingini qaytadan hisoblaydi, shuning
  * uchun kartochkadagi raqam ham darrov to'g'rilanadi.
  *
- * Ikki jadval alohida komponent: shakllari boshqa, bitta jadvalga tiqilsa har katakda
- * "qaysi turdagi qator" deb tekshirish kerak bo'lardi.
+ * Jadval bitta: ikki ro'yxatning farqi faqat "nima haqida" katagida. Buyurtma raqami
+ * o'sha katak ostida, reytingga kirmasligi esa bahoning yonida turadi: ikkalasi ham
+ * yonidagi qiymatsiz ma'nosiz, alohida ustun bo'lib turishi shart emas.
  */
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -30,6 +31,8 @@ type TerminalReview = Base & {
   org: { id: string; name: string } | null;
 };
 type ListingReview = Base & { listing: { id: string; title: string; slug: string } };
+type Review = TerminalReview | ListingReview;
+const isTerminal = (r: Review): r is TerminalReview => 'terminal' in r;
 
 const SM = 'px-3 py-1 text-xs';
 
@@ -50,9 +53,9 @@ export default function AdminReviewsPage() {
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
 
   const path = tab === 'terminal' ? '/admin/reviews' : '/admin/listing-reviews';
-  const list = useAdminList<TerminalReview | ListingReview>(path, { q, page });
+  const list = useAdminList<Review>(path, { q, page });
 
-  const switchTab = (k: Tab) => { setTab(k); setPage(1); setQ(''); setQInput(''); setNote(null); };
+  const switchTab = (k: Tab) => { setTab(k); setPage(1); setNote(null); };
 
   async function remove(id: string) {
     setNote(null);
@@ -89,11 +92,7 @@ export default function AdminReviewsPage() {
       {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
       {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
 
-      {list.data && !list.loading ? (
-        tab === 'terminal'
-          ? <TerminalTable rows={list.data.items as TerminalReview[]} onDelete={remove} />
-          : <ListingTable rows={list.data.items as ListingReview[]} onDelete={remove} />
-      ) : null}
+      {list.data && !list.loading ? <ReviewTable rows={list.data.items} onDelete={remove} /> : null}
 
       <Pager page={page} pages={list.pages} onPage={setPage} />
     </>
@@ -111,47 +110,35 @@ function TextCell({ r }: { r: Base }) {
   );
 }
 
-function DeleteCell({ id, onDelete }: { id: string; onDelete: (id: string) => Promise<void> }) {
-  const tc = useTranslations('admin.common');
-  return <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => onDelete(id)} className={`${BTN_DANGER} ${SM}`} />;
-}
-
-function TerminalTable({ rows, onDelete }: { rows: TerminalReview[]; onDelete: (id: string) => Promise<void> }) {
+function ReviewTable({ rows, onDelete }: { rows: Review[]; onDelete: (id: string) => Promise<void> }) {
   const tc = useTranslations('admin.common');
   const tv = useTranslations('admin.reviews');
   const locale = useLocale();
-  const cols: Col<TerminalReview>[] = [
-    { key: 'rating', head: tv('rating'), num: true, cell: (r) => <Stars n={r.rating} /> },
-    { key: 'target', head: tv('terminal'), cell: (r) => (
-      <Link href={`/terminals/${r.terminal.slug}`} target="_blank" className="font-semibold text-teal-ink underline wrap-anywhere">{r.terminal.name}</Link>
+  const cols: Col<Review>[] = [
+    { key: 'rating', head: tv('rating'), num: true, cell: (r) => (
+      <div className="flex flex-col items-end gap-1">
+        <Stars n={r.rating} />
+        {/* Arms-length: buyurtmachi va terminal egasi bir tomon bo'lsa baho reytingga kirmaydi */}
+        {isTerminal(r) && r.excluded ? <Pill tone="warn">{tv('excluded')}</Pill> : null}
+      </div>
     ) },
+    { key: 'target', head: tv('target'), cell: (r) => (isTerminal(r) ? (
+      <div className="min-w-0">
+        <Link href={`/terminals/${r.terminal.slug}`} target="_blank" className="font-semibold text-teal-ink underline wrap-anywhere">{r.terminal.name}</Link>
+        <div className="font-mono text-xs text-muted">{tv('orderNo')}: {r.orderNo}</div>
+      </div>
+    ) : <span className="font-semibold wrap-anywhere">{r.listing.title}</span>) },
     { key: 'text', head: tv('text'), cell: (r) => <TextCell r={r} /> },
     { key: 'author', head: tv('author'), cell: (r) => (
       <div className="min-w-0 wrap-anywhere">
         <span>{r.author || <span className="text-muted">{tv('noAuthor')}</span>}</span>
-        {r.org ? <span className="block text-xs text-muted">{r.org.name}</span> : null}
+        {isTerminal(r) && r.org ? <span className="block text-xs text-muted">{r.org.name}</span> : null}
       </div>
     ) },
-    { key: 'order', head: tv('orderNo'), num: true, cell: (r) => r.orderNo },
-    // Arms-length: buyurtmachi va terminal egasi bir tomon bo'lsa baho reytingga kirmaydi
-    { key: 'flags', head: tv('flags'), cell: (r) => (r.excluded ? <Pill tone="warn">{tv('excluded')}</Pill> : null) },
     { key: 'createdAt', head: tc('createdAt'), num: true, cell: (r) => uzDateTime(r.createdAt, locale) },
-    { key: 'actions', head: tc('actions'), cell: (r) => <DeleteCell id={r.id} onDelete={onDelete} /> },
-  ];
-  return <DataTable cols={cols} rows={rows} keyOf={(r) => r.id} empty={tc('empty')} />;
-}
-
-function ListingTable({ rows, onDelete }: { rows: ListingReview[]; onDelete: (id: string) => Promise<void> }) {
-  const tc = useTranslations('admin.common');
-  const tv = useTranslations('admin.reviews');
-  const locale = useLocale();
-  const cols: Col<ListingReview>[] = [
-    { key: 'rating', head: tv('rating'), num: true, cell: (r) => <Stars n={r.rating} /> },
-    { key: 'target', head: tv('listing'), cell: (r) => <span className="font-semibold wrap-anywhere">{r.listing.title}</span> },
-    { key: 'text', head: tv('text'), cell: (r) => <TextCell r={r} /> },
-    { key: 'author', head: tv('author'), cell: (r) => r.author || <span className="text-muted">{tv('noAuthor')}</span> },
-    { key: 'createdAt', head: tc('createdAt'), num: true, cell: (r) => uzDateTime(r.createdAt, locale) },
-    { key: 'actions', head: tc('actions'), cell: (r) => <DeleteCell id={r.id} onDelete={onDelete} /> },
+    { key: 'actions', head: tc('actions'), cell: (r) => (
+      <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => onDelete(r.id)} className={`${BTN_DANGER} ${SM}`} />
+    ) },
   ];
   return <DataTable cols={cols} rows={rows} keyOf={(r) => r.id} empty={tc('empty')} />;
 }
