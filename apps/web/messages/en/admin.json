@@ -247,10 +247,7 @@
       "members": "Members",
       "roles": "Roles",
       "isOwner": "Owner",
-      "addMember": "Add member",
-      "userId": "User id",
       "objects": "Objects",
-      "adminNote": "The PLATFORM_ADMIN role grants full rights over the whole platform. Be careful.",
       "deleteWarn": "The organization is deleted. One with objects or orders cannot be deleted.",
       "kycNote": "Check note"
     },

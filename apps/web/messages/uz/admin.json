@@ -247,10 +247,7 @@
       "members": "A'zolar",
       "roles": "Rollari",
       "isOwner": "Egasi",
-      "addMember": "A'zo qo'shish",
-      "userId": "Foydalanuvchi id",
       "objects": "Obyektlar",
-      "adminNote": "PLATFORM_ADMIN roli butun platformaga to'liq huquq beradi. Ehtiyot bo'ling.",
       "deleteWarn": "Tashkilot o'chadi. Obyekti yoki buyurtmasi bo'lsa o'chmaydi.",
       "kycNote": "Tasdiq izohi"
     },

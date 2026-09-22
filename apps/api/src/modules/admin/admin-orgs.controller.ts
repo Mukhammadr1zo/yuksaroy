@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
 import { KYC_STATUSES, ORG_KINDS, ROLES, type KycStatus, type OrgKind, type Role } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
+import { PLATFORM_ROLES } from './team/team.rules';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
@@ -199,6 +200,12 @@ export class AdminOrgsController {
     const roles = dto.roles ? this.checkRoles(dto.roles) : undefined;
     const cur = await this.prisma.membership.findUnique({ where: { userId_orgId: { userId: memberId, orgId: id } }, select: { isOwner: true, roles: true } });
     if (!cur) throw new NotFoundException({ code: 'MEMBER_NOT_FOUND' });
+    // O'z panel huquqini shu yerdan olib tashlab bo'lmaydi: Jamoa ekranida shunday qulf bor,
+    // bu yo'l esa uni aylanib o'tardi va odam o'zini paneldan chiqarib yuborardi.
+    // Qaytish yo'li faqat serverdagi .env bo'lib qolardi.
+    if (memberId === actorId && roles && PLATFORM_ROLES.some((r) => cur.roles.includes(r) && !roles.includes(r))) {
+      throw new ConflictException({ code: 'CANNOT_CHANGE_SELF' });
+    }
     // Egalikni olib tashlash ham a'zoni o'chirish kabi: oxirgi ega ketsa tashkilotni hech kim boshqara olmaydi
     if (cur.isOwner && dto.isOwner === false && (await this.prisma.membership.count({ where: { orgId: id, isOwner: true } })) === 1) {
       throw new ConflictException({ code: 'LAST_OWNER' });

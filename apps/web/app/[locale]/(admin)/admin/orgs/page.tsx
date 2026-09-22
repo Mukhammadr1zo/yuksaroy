@@ -3,8 +3,8 @@
 // tayinlanadi (PLATFORM_ADMIN roli), shuning uchun bu rol belgilanganda ekran ochiq ogohlantiradi.
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { KYC_STATUSES, ORG_KINDS, ROLES } from '@yuksaroy/domain';
-import { api, post } from '@/lib/api';
+import { KYC_STATUSES, ORG_KINDS } from '@yuksaroy/domain';
+import { api } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
 import { phoneDisplay } from '@/components/ui/fields';
 import { BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
@@ -18,29 +18,13 @@ type Detail = Omit<Row, '_count'> & { kycNote: string | null; counts: { terminal
 type Form = { name: string; slug: string; stir: string; kycStatus: string; kycNote: string };
 type MemberEdit = { roles: string[]; isOwner: boolean };
 
-const ADMIN = 'PLATFORM_ADMIN';
 const kycTone = (s: string) => (s === 'VERIFIED' ? 'ok' : s === 'PENDING' ? 'warn' : s === 'REJECTED' ? 'bad' : 'neutral');
 const toForm = (d: Detail): Form => ({ name: d.name, slug: d.slug, stir: d.stir ?? '', kycStatus: d.kycStatus, kycNote: d.kycNote ?? '' });
-
-/** Rollar guruhi: a'zo qatorida ham, qo'shish formasida ham bir xil ko'rinadi. */
-function RoleBoxes({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
-  const tr = useTranslations('kabinet.org.role');
-  return (
-    <div className="flex flex-wrap gap-x-3 gap-y-1">
-      {ROLES.map((r) => (
-        <label key={r} className={`flex items-center gap-1 text-xs ${r === ADMIN ? 'font-semibold text-amber-ink' : ''}`}>
-          <input type="checkbox" checked={value.includes(r)} className="accent-teal"
-            onChange={(e) => onChange(e.target.checked ? [...value, r] : value.filter((x) => x !== r))} />
-          {tr(r)}
-        </label>
-      ))}
-    </div>
-  );
-}
 
 export default function AdminOrgsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
+  const trole = useTranslations('kabinet.org.role');
   const tk = useTranslations('kyc');
   const tok = useTranslations('orgKind');
   const locale = useLocale();
@@ -53,7 +37,6 @@ export default function AdminOrgsPage() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [form, setForm] = useState<Form | null>(null);
   const [mem, setMem] = useState<Record<string, MemberEdit>>({});
-  const [add, setAdd] = useState<{ userId: string; roles: string[]; isOwner: boolean }>({ userId: '', roles: [], isOwner: false });
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -66,7 +49,7 @@ export default function AdminOrgsPage() {
     []);
 
   useEffect(() => {
-    setDetail(null); setForm(null); setNote(null); setAdd({ userId: '', roles: [], isOwner: false });
+    setDetail(null); setForm(null); setNote(null);
     if (sel) void loadDetail(sel);
   }, [sel, loadDetail]);
 
@@ -132,17 +115,6 @@ export default function AdminOrgsPage() {
     } catch (e) { fail(e); }
   }
 
-  async function addMember() {
-    if (!detail || !add.userId.trim() || !add.roles.length) return;
-    setBusy(true); setNote(null);
-    try {
-      await post(`/admin/orgs/${detail.id}/members`, { ...add, userId: add.userId.trim() });
-      setNote({ tone: 'ok', text: tc('created') });
-      setAdd({ userId: '', roles: [], isOwner: false });
-      await refresh();
-    } catch (e) { fail(e); } finally { setBusy(false); }
-  }
-
   const cols: Col<Row>[] = [
     { key: 'name', head: tc('name'), cell: (o) => (
       <div className="min-w-0">
@@ -160,7 +132,6 @@ export default function AdminOrgsPage() {
   ];
 
   // Ogohlantirish: kimdadir PLATFORM_ADMIN bor yoki hozir belgilanmoqda - yangi admin shu daqiqada tug'iladi
-  const adminFlag = Object.values(mem).some((m) => m.roles.includes(ADMIN)) || add.roles.includes(ADMIN);
 
   return (
     <>
@@ -234,7 +205,6 @@ export default function AdminOrgsPage() {
 
             <section>
               <h3 className="mb-2 text-sm font-semibold text-navy">{t('orgs.members')} <span className="font-mono text-xs text-muted">{detail.members.length}</span></h3>
-              {adminFlag ? <p className="mb-2 text-xs font-semibold text-amber-ink">{t('orgs.adminNote')}</p> : null}
               <div className="divide-y divide-line rounded-card border border-line bg-white">
                 {detail.members.length === 0 ? <p className="px-3 py-4 text-center text-sm text-muted">{tc('none')}</p> : null}
                 {detail.members.map((m) => {
@@ -249,7 +219,9 @@ export default function AdminOrgsPage() {
                           {t('orgs.isOwner')}
                         </label>
                       </div>
-                      <RoleBoxes value={e.roles} onChange={(roles) => setMem({ ...mem, [m.id]: { ...e, roles } })} />
+                      {/* Rollar faqat ko'rinadi: ularni tashkilot egasi o'z kabinetida qo'yadi,
+                          panel huquqi esa Jamoa ekranidan beriladi (u yerda o'zini qulflab qo'yishdan himoya bor) */}
+                      <p className="text-xs text-muted">{m.roles.map((r) => trole(r)).join(', ') || tc('none')}</p>
                       <div className="flex gap-1.5">
                         <button type="button" disabled={busy} onClick={() => void saveMember(m.id)} className={`${BTN_GHOST} px-3 py-1 text-xs`}>{tc('save')}</button>
                         <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => removeMember(m.id)}
@@ -261,22 +233,6 @@ export default function AdminOrgsPage() {
               </div>
             </section>
 
-            <section className="rounded-card border border-line bg-white p-3">
-              <h3 className="mb-2 text-sm font-semibold text-navy">{t('orgs.addMember')}</h3>
-              <div className="space-y-2">
-                <Labeled label={t('orgs.userId')}>
-                  <input value={add.userId} onChange={(e) => setAdd({ ...add, userId: e.target.value })} className={`${INPUT} font-mono`} />
-                </Labeled>
-                <RoleBoxes value={add.roles} onChange={(roles) => setAdd({ ...add, roles })} />
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-1 text-xs">
-                    <input type="checkbox" checked={add.isOwner} className="accent-teal" onChange={(e) => setAdd({ ...add, isOwner: e.target.checked })} />
-                    {t('orgs.isOwner')}
-                  </label>
-                  <button type="button" disabled={busy || !add.userId.trim() || !add.roles.length} onClick={() => void addMember()} className={`${BTN} ml-auto`}>{tc('create')}</button>
-                </div>
-              </div>
-            </section>
           </div>
         )}
       </Drawer>
