@@ -3,11 +3,7 @@
 export interface WagonEvent {
   date: string;
   station: string | null;
-  destination: string | null;
   state: 'loaded' | 'empty' | 'unknown';
-  operation: string | null;
-  cargo: string | null;
-  weightT: number | null;
 }
 
 export interface WagonQuota { subscriber: boolean; freeUsed: number; freeTotal: number }

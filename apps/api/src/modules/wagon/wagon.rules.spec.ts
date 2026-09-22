@@ -20,26 +20,25 @@ describe('upstream raqami', () => {
 });
 
 const rows = [
-  { event_date: '2026-09-01T10:00:00', snapshot_date: '2026-09-01', module: 'idle', station: 'Ташкент-Товарный', dest_station: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weight: '68.5', extra: { secret: 1 } },
-  { event_date: '2026-09-03T08:00:00', snapshot_date: '2026-09-03', module: 'idle', station: 'Ангрен', dest_station: null, state: 'empty', operation: 'Выгрузка', cargo: '' },
-  { event_date: '2026-09-02T12:00:00', snapshot_date: '2026-09-03', module: 'route', station: 'Тойтепа', dest_station: 'Ангрен', state: 'bogus', operation: null, cargo: null, weight: 'x' },
+  { event_date: '2026-09-01T10:00:00', snapshot_date: '2026-09-01', module: 'idle', station: 'Ташкент-Товарный', state: 'loaded', extra: { secret: 1 } },
+  { event_date: '2026-09-03T08:00:00', snapshot_date: '2026-09-03', module: 'idle', station: 'Ангрен', state: 'empty' },
+  { event_date: '2026-09-02T12:00:00', snapshot_date: '2026-09-03', module: 'route', station: 'Тойтепа', state: 'bogus' },
   { event_date: null, station: 'sanasi yoq' },
 ];
 
 describe('hodisalar', () => {
   it('butunlay bosh harfli nom yumshatiladi, aralash yozuv tegilmaydi', () => {
-    const ev = mapEvents([{ event_date: '2026-09-01', station: 'ТАШКЕНТ-ТОВАРНЫЙ', dest_station: 'УзТЖ', operation: 'ОТПРАВЛЕНИЕ', cargo: 'Уголь' }]);
-    expect(ev[0]).toMatchObject({ station: 'Ташкент-Товарный', destination: 'УзТЖ', operation: 'Отправление', cargo: 'Уголь' });
+    expect(mapEvents([{ event_date: '2026-09-01', station: 'ТАШКЕНТ-ТОВАРНЫЙ' }])[0].station).toBe('Ташкент-Товарный');
+    expect(mapEvents([{ event_date: '2026-09-01', station: 'УзТЖ' }])[0].station).toBe('УзТЖ');
   });
 
   it("bizning shaklga o'giriladi, yangisi birinchi, sanasi yo'qlari tashlanadi, extra yo'q", () => {
     const ev = mapEvents(rows);
     expect(ev.map((e) => e.date)).toEqual(['2026-09-03T08:00:00', '2026-09-02T12:00:00', '2026-09-01T10:00:00']);
-    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', destination: 'Ангрен', state: 'loaded', operation: 'Отправление', cargo: 'Уголь', weightT: 68.5 });
+    expect(ev[2]).toEqual({ date: '2026-09-01T10:00:00', station: 'Ташкент-Товарный', state: 'loaded' });
     expect(ev[1].state).toBe('unknown');
-    expect(ev[1].weightT).toBeNull();
-    expect(ev[0].cargo).toBeNull();
-    expect(Object.keys(ev[0])).not.toContain('extra');
+    // Kartada faqat joylashuv, holat va sana: qolgan maydonlar javobga umuman chiqmaydi
+    expect(Object.keys(ev[0]).sort()).toEqual(['date', 'state', 'station']);
   });
 
   it("eng ko'pi 50 ta", () => {

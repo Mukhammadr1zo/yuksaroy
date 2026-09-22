@@ -4,11 +4,7 @@
 export interface WagonEvent {
   date: string;
   station: string | null;
-  destination: string | null;
   state: 'loaded' | 'empty' | 'unknown';
-  operation: string | null;
-  cargo: string | null;
-  weightT: number | null;
 }
 
 /** d-railway.uz javobidagi bitta hodisa (bizga kerakli maydonlar). */
@@ -16,11 +12,7 @@ export interface UpstreamEvent {
   event_date?: string | null;
   snapshot_date?: string | null;
   station?: string | null;
-  dest_station?: string | null;
   state?: string | null;
-  operation?: string | null;
-  cargo?: string | null;
-  weight?: number | string | null;
 }
 
 export const EVENTS_MAX = 50;
@@ -35,11 +27,6 @@ export const canSearch = (subscriber: boolean, freeUsed: number, freeTotal: numb
   subscriber || freeUsed < freeTotal;
 
 const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v.trim() : null);
-const numOrNull = (v: unknown): number | null => {
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-};
 const stateOf = (v: unknown): WagonEvent['state'] => (v === 'loaded' || v === 'empty' ? v : 'unknown');
 /**
  * Stansiya, amal va yuk nomlari hisobotlardan BOSH HARFLAR bilan keladi ("ТАШКЕНТ-ТОВАРНЫЙ").
@@ -58,8 +45,7 @@ export function mapEvents(rows: readonly UpstreamEvent[]): WagonEvent[] {
     .filter((r) => !!str(r.event_date))
     .map((r) => ({
       date: r.event_date as string,
-      station: unshout(str(r.station)), destination: unshout(str(r.dest_station)), state: stateOf(r.state), operation: unshout(str(r.operation)),
-      cargo: unshout(str(r.cargo)), weightT: numOrNull(r.weight),
+      station: unshout(str(r.station)), state: stateOf(r.state),
     }))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .slice(0, EVENTS_MAX);

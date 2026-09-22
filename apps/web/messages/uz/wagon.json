@@ -26,11 +26,7 @@
       "empty": "Bo'sh",
       "unknown": "Holati noma'lum"
     },
-    "destination": "Boradigan stansiya",
-    "operation": "Oxirgi amal",
     "date": "Vaqti",
-    "cargo": "Yuk",
-    "weight": "{t} t",
     "fetchedAt": "Yangilangan: {at}",
     "errors": {
       "WAGON_NO_INVALID": "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",

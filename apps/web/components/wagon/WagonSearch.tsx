@@ -123,10 +123,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${STATE_TONE[c.state]}`}>{t(`state.${c.state}`)}</span>
         </div>
         <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-          {c.destination ? <Row k={t('destination')} v={c.destination} /> : null}
-          {c.operation ? <Row k={t('operation')} v={c.operation} /> : null}
           <Row k={t('date')} v={dayLabel(c.date, locale)} mono />
-          {c.cargo ? <Row k={t('cargo')} v={c.weightT != null ? `${c.cargo}, ${t('weight', { t: c.weightT })}` : c.cargo} /> : null}
         </dl>
       <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
     </section>
