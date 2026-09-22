@@ -180,8 +180,14 @@ export interface CatalogRepository {
     terminals: { id: string; slug: string; name: string; kind: string; lat: number | null; lng: number | null }[];
     sidings: { id: string; name: string; lat: number; lng: number; count: number; regionCode: string | null }[];
   }>;
-  /** Landing va ROI raqamlari: faol obyektlar, ochiq kompaniyalar, bugungi bo'sh slotlar yig'indisi. */
-  publicStats(): Promise<{ terminals: number; sidings: number; stations: number; listings: number; companies: number; freeSlotsToday: number }>;
+  /**
+   * Landing raqamlari: faol obyektlar, ochiq kompaniyalar, bugungi bo'sh slotlar yig'indisi
+   * va oxirgi 30 kunlik tashriflar (soni hamda viloyatlar kesimi, bosh sahifadagi xarita uchun).
+   */
+  publicStats(): Promise<{
+    terminals: number; sidings: number; stations: number; listings: number; companies: number; freeSlotsToday: number;
+    visits30: number; visitRegions: { region: string; count: number }[];
+  }>;
   /** Xarita uchun rasmiy ro'yxatdagi, koordinatasi bor stansiyalar (nomi uch tilda). */
   listedStations(): Promise<{
     id: string; esrCode: string | null; nameUz: string; nameRu: string | null; nameEn: string | null;

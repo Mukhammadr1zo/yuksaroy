@@ -90,7 +90,8 @@
       "urgent": "Shoshilinch",
       "reviews": "Baholar",
       "market": "Yuklar va xizmatlar",
-      "team": "Jamoa"
+      "team": "Jamoa",
+      "visits": "Tashriflar"
     },
     "common": {
       "search": "Qidiruv",
@@ -579,6 +580,16 @@
         "KIND_NOT_ALLOWED": "Bu tur tashkilotga berilmaydi.",
         "NOT_PLATFORM_OWNER": "Bu amal faqat egada."
       }
+    },
+    "visits": {
+      "lead": "Oxirgi 30 kun: nechta tashrif va qayerdan.",
+      "total30": "30 kunlik tashriflar",
+      "daily": "Kunlar bo'yicha",
+      "regions": "Viloyatlar bo'yicha",
+      "countries": "Davlatlar bo'yicha",
+      "mapAria": "Viloyatlar bo'yicha tashriflar xaritasi",
+      "unknown": "Aniqlanmadi",
+      "accuracy": "Joy IP manzilidan aniqlanadi. O'zbekiston ichida bu qo'pol: aloqa operatorlari trafikni Toshkentdagi manzillardan chiqaradi, shuning uchun viloyat kesimi Toshkentga og'adi. Davlat darajasi ishonchli."
     }
   }
 }

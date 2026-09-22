@@ -29,9 +29,14 @@ services:
       NODE_ENV: production
       API_PORT: 4000
       TRUST_PROXY: "1" # Caddy ortida: haqiqiy IP X-Forwarded-For dan
+      # Tashriflar xaritasi uchun joy bazasi. Fayl bo'lmasa xizmat baribir ishlaydi,
+      # tashriflar esa "ZZ" bo'lib yoziladi.
+      GEOIP_DB: /app/geo/GeoLite2-City.mmdb
     depends_on:
       db: { condition: service_healthy }
-    volumes: ["uploads:/app/uploads"]
+    # ../geo, ./geo emas: nisbiy yo'l shu faylning papkasiga (deploy/) nisbatan
+    # hisoblanadi, ./geo esa $DIR/deploy/geo bo'lib, har deploydagi zaxira arxiviga tushardi
+    volumes: ["uploads:/app/uploads", "../geo:/app/geo:ro"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 20s

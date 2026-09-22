@@ -222,6 +222,46 @@ jobs:
             | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
               "cd '$DIR' && if grep -q '^D_RAILWAY_EMAIL=' .env 2>/dev/null; then cat > /dev/null; echo 'vagon sozlamasi allaqachon bor'; else cat >> .env && echo 'vagon sozlamasi qoshildi'; fi"
 
+      # Tashriflar xaritasi uchun joy bazasi (MaxMind GeoLite2 City, ~70 MB).
+      # Serverda turadi, obrazga kirmaydi: obraz har deployda qayta tortiladi,
+      # baza esa haftada bir marta yangilansa yetarli.
+      # Fayl bo'lmasa xizmat yiqilmaydi, tashriflar "ZZ" bo'lib yoziladi.
+      - name: Joy bazasi (ixtiyoriy)
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          P: ${{ secrets.VPS_PORT || 22 }}
+          DIR: ${{ vars.VPS_PATH || '/opt/yuksaroy' }}
+          KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
+        run: |
+          # secrets konteksti if: da ishlamaydi, shuning uchun tekshiruv shu yerda
+          if [ -z "$KEY" ]; then
+            echo "joy bazasi kaliti yo'q, o'tkazib yuborildi"
+            exit 0
+          fi
+          # Kalit quvur orqali boradi: na runner diskida, na buyruq qatorida qolmaydi.
+          # Fayl 7 kundan yangi bo'lsa qayta yuklanmaydi.
+          printf '%s' "$KEY" | ssh -i ~/.ssh/id -p "$P" "$U@$H" "
+            set -e
+            mkdir -p '$DIR/geo'
+            cd '$DIR/geo'
+            if [ -f GeoLite2-City.mmdb ] && [ -z \"\$(find GeoLite2-City.mmdb -mtime +7)\" ]; then
+              echo 'joy bazasi yangi, qayta yuklanmadi'; cat > /dev/null; exit 0
+            fi
+            k=\$(cat)
+            url=\"https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=\$k&suffix=tar.gz\"
+            if curl -fsS \"\$url\" -o db.tgz; then
+              tar xzf db.tgz --strip-components=1 --wildcards '*/GeoLite2-City.mmdb' -O > new.mmdb
+              # mv atomik: xizmat eski faylni o'qiyotgan bo'lsa ham buzilmaydi
+              mv -f new.mmdb GeoLite2-City.mmdb
+              rm -f db.tgz
+              echo 'joy bazasi yangilandi'
+            else
+              rm -f db.tgz
+              echo 'joy bazasi yuklab olinmadi, eskisi qoladi'
+            fi
+          "
+
       # Yangi yuklar chiqadigan Telegram kanali. Bot o'sha kanalda administrator
       # bo'lishi shart, aks holda Telegram postni rad etadi.
       - name: Yuklar kanali sozlamasi (ixtiyoriy)

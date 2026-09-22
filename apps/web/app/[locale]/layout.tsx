@@ -6,6 +6,7 @@ import { JetBrains_Mono, Manrope, Unbounded } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { SITE, url } from '@/lib/seo';
 import '../globals.css';
+import { VisitBeacon } from '@/components/site/VisitBeacon';
 
 // next/font: build vaqtida yuklanadi, self-host, layout shift yo'q (CLS ≤ .05)
 // Kirill subseti uchala shriftda ham bor, ya'ni rus tili qo'shimcha fayl talab qilmaydi.
@@ -52,7 +53,10 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {children}
+          <VisitBeacon />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

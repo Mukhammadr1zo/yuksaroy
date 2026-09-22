@@ -79,7 +79,11 @@ export interface Siding {
 export interface Page<T> { items: T[]; total: number; page: number; limit: number; summary?: ListSummary }
 /** Filtrlangan to'plam bo'yicha qaror satri (GET /terminals). */
 export interface ListSummary { freeToday: number; ratedCount?: number; cheapestTiyin: number | null; cheapestUnit: TariffUnit | null; nearestKm: number | null }
-export interface Stats { terminals: number; sidings: number; stations: number; listings?: number; companies?: number; freeSlotsToday?: number }
+export interface Stats {
+  terminals: number; sidings: number; stations: number; listings?: number; companies?: number; freeSlotsToday?: number;
+  /** Ixtiyoriy: eski API bilan sahifa yiqilmasin */
+  visits30?: number; visitRegions?: { region: string; count: number }[];
+}
 
 export interface QuoteLine { serviceCode: ServiceCode; unit: TariffUnit; qty: number; unitPriceTiyin: number; amountTiyin: number; minApplied: boolean }
 export interface QuoteOffer {

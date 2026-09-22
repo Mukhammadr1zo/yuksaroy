@@ -839,6 +839,22 @@ model Impression {
   @@unique([kind, targetId, day, surface])
 }
 
+/// Kunlik tashriflar: bir kun va bir joy uchun bitta qator.
+/// Xom yozuv saqlanmaydi: IP ham, sessiya ham, sahifa manzili ham yo'q, ya'ni
+/// bu jadvaldan bitta odamni ajratib olib bo'lmaydi.
+model Visit {
+  id      String   @id @default(cuid())
+  day     DateTime @db.Date
+  country String // ISO 3166-1 alpha-2; aniqlanmasa "ZZ"
+  /// "UZ-TK" ko'rinishida. NULL emas, bo'sh satr: Postgres da NULL lar bir-biriga
+  /// teng emas va noyob indeks takror qatorlarni to'sa olmasdi.
+  region  String
+  count   Int      @default(0)
+
+  /// day birinchi ustun: "oxirgi N kun" so'rovi shu indeksdan foydalanadi
+  @@unique([day, country, region])
+}
+
 /// Premium buyurtmasi: hozircha qo'lda to'lov (manual), keyin Payme/Click.
 model PremiumOrder {
   id          String    @id @default(cuid())

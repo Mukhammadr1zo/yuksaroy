@@ -30,7 +30,6 @@
     "@nestjs/platform-fastify": "^11.0.0",
     "@nestjs/swagger": "^11.0.0",
     "@prisma/client": "^6.0.0",
-    "prisma": "^6.0.0",
     "@yuksaroy/domain": "workspace:*",
     "argon2": "^0.45.1",
     "class-transformer": "^0.5.1",
@@ -38,7 +37,9 @@
     "dotenv": "^16.4.5",
     "fastify": "^5.0.0",
     "google-auth-library": "^11.0.2",
+    "maxmind": "^5.0.7",
     "pdfkit": "^0.20.2",
+    "prisma": "^6.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.0.0"

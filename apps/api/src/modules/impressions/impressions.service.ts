@@ -49,6 +49,49 @@ export class ImpressionsService {
     return Object.fromEntries(rows.map((r) => [r.targetId, r._sum.count ?? 0]));
   }
 
+  /**
+   * Bitta tashrif: kun va joy bo'yicha yig'iladi.
+   *
+   * Xom yozuv saqlanmaydi: na IP, na sessiya, na sahifa manzili. Ya'ni bu jadvaldan
+   * bitta odamni ajratib olib bo'lmaydi, faqat "shu kuni shu joydan nechta" chiqadi.
+   */
+  async recordVisit(geo: { country: string; region: string }, now = new Date()) {
+    const day = new Date(uzLocalDate(now));
+    await this.prisma.visit.upsert({
+      where: { day_country_region: { day, country: geo.country, region: geo.region } },
+      create: { day, country: geo.country, region: geo.region, count: 1 },
+      update: { count: { increment: 1 } },
+    });
+  }
+
+  /** Oxirgi 30 kun: kunlar qatori, viloyatlar va davlatlar kesimi. */
+  async visits(now = new Date()) {
+    const keys = dayKeys(now);
+    const from = new Date(keys[0]!);
+    const rows = await this.prisma.visit.findMany({
+      where: { day: { gte: from } },
+      select: { day: true, country: true, region: true, count: true },
+    });
+    const byDay = new Map<string, number>(keys.map((k) => [k, 0]));
+    const byRegion = new Map<string, number>();
+    const byCountry = new Map<string, number>();
+    let total = 0;
+    for (const r of rows) {
+      const k = r.day.toISOString().slice(0, 10);
+      byDay.set(k, (byDay.get(k) ?? 0) + r.count);
+      byCountry.set(r.country, (byCountry.get(r.country) ?? 0) + r.count);
+      if (r.region) byRegion.set(r.region, (byRegion.get(r.region) ?? 0) + r.count);
+      total += r.count;
+    }
+    const sorted = (m: Map<string, number>) => [...m].sort((a, b) => b[1] - a[1]);
+    return {
+      total,
+      days: keys.map((day) => ({ day, count: byDay.get(day) ?? 0 })),
+      regions: sorted(byRegion).map(([region, count]) => ({ region, count })),
+      countries: sorted(byCountry).map(([country, count]) => ({ country, count })),
+    };
+  }
+
   /** Oxirgi 30 kun: { days: [{ day, list, map, detail, compare, bot }], totals }. */
   async series(kind: ImpressionKind, targetId: string, now = new Date()) {
     const keys = dayKeys(now);

@@ -1,11 +1,13 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { sapi } from '@/lib/server-api';
+import type { SearchLang } from '@yuksaroy/domain';
 import type { Stats } from '@/lib/types';
 import { Header } from '@/components/site/Header';
 import { MapHero } from '@/components/landing/MapHero';
 import { CategoryGrid } from '@/components/landing/CategoryGrid';
 import { HowItWorks } from '@/components/landing/HowItWorks';
+import { VisitMap } from '@/components/landing/VisitMap';
 import { Footer } from '@/components/site/Footer';
 import { Ld, alt, url } from '@/lib/seo';
 
@@ -45,6 +47,8 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
         </div>
 
         <HowItWorks stats={stats} />
+
+        <VisitMap total={stats?.visits30 ?? 0} regions={stats?.visitRegions ?? []} lang={locale as SearchLang} />
 
         <section className="bg-navy">
           <div className="mx-auto max-w-6xl px-6 py-14 md:py-20">

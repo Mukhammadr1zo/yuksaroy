@@ -4,6 +4,7 @@ import { IsObject } from 'class-validator';
 import { PLATFORM_DEFAULTS, type PlatformConfigKey, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { ImpressionsService } from '../impressions/impressions.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
@@ -64,7 +65,20 @@ export class AdminSystemController {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly config: PlatformConfigService,
+    private readonly impressions: ImpressionsService,
   ) {}
+
+  /**
+   * Tashriflar: oxirgi 30 kun, kunlar qatori hamda viloyat va davlat kesimi.
+   *
+   * Joy IP dan aniqlanadi. O'zbekiston ichida bu ishonchsiz: mobil operatorlar va
+   * Uztelecom trafikni Toshkentdagi manzil bloklaridan chiqaradi, ya'ni viloyat
+   * kesimi haqiqiy taqsimotdan ko'ra Toshkentga og'adi. Davlat darajasi ishonchli.
+   */
+  @Get('visits')
+  visits() {
+    return this.impressions.visits();
+  }
 
   /** Audit izi: kim, nima, qachon. `action` prefiks bo'yicha ("admin." barcha admin amallarini beradi). */
   @Get('audit')

@@ -198,6 +198,11 @@
       "title": "Terminal yoki shahobcha yo'l egasimisiz",
       "body": "Obyektingizni ro'yxatga oling, bajaradigan ishlaringizni belgilang va arizalarni kabinetingizda qabul qiling. Pilot davomida bepul.",
       "ctaCatalog": "Katalogni ko'rish"
+    },
+    "visits": {
+      "heading": "Qayerdan kirishmoqda",
+      "lead": "Oxirgi 30 kundagi tashriflar",
+      "mapAria": "Viloyatlar bo'yicha tashriflar xaritasi"
     }
   },
   "terminals": {

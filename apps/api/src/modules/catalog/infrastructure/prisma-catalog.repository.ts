@@ -395,7 +395,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
 
   async publicStats() {
     const now = new Date();
-    const [terminals, sidings, stations, listings, companies, free] = await Promise.all([
+    // Tashriflar oxirgi 30 kun bo'yicha: bitta kunning soni juda o'zgaruvchan va
+    // bosh sahifada u ishonch emas, tasodif ko'rsatardi
+    const from = new Date(now.getTime() - 30 * 86_400_000);
+    const [terminals, sidings, stations, listings, companies, free, visits, visitRows] = await Promise.all([
       // terminals: ochiq katalog bilan bir xil son (egasi bor avto/aralash + butun temir yo'l reestri),
       // aks holda bosh sahifa "2 terminal" deb turib katalog 1 700 ta ko'rsatardi.
       // sidings: faqat temir yo'l turi, admin panel uchun; ochiq sahifalar alohida ko'rsatmaydi.
@@ -404,8 +407,17 @@ export class PrismaCatalogRepository implements CatalogRepository {
       this.prisma.station.count(),
       this.prisma.listing.count({ where: activeListing(now) }), this.prisma.organization.count({ where: visibleCompany(now) }),
       this.freeToday({ terminal: { status: 'ACTIVE', orgId: { not: null } } }, now),
+      this.prisma.visit.aggregate({ _sum: { count: true }, where: { day: { gte: from } } }),
+      this.prisma.visit.groupBy({ by: ['region'], where: { day: { gte: from }, region: { not: '' } }, _sum: { count: true } }),
     ]);
-    return { terminals, sidings, stations, listings, companies, freeSlotsToday: Object.values(free).reduce((a, b) => a + b, 0) };
+    return {
+      terminals, sidings, stations, listings, companies,
+      freeSlotsToday: Object.values(free).reduce((a, b) => a + b, 0),
+      visits30: visits._sum.count ?? 0,
+      visitRegions: visitRows
+        .map((r) => ({ region: r.region, count: r._sum.count ?? 0 }))
+        .sort((a, b) => b.count - a.count),
+    };
   }
 }
 

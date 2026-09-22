@@ -243,6 +243,7 @@ export class CatalogController {
 
   /** Landing ishonch belgilari: jonli raqamlar. */
   @Get('stats')
+  @Header('Cache-Control', 'public, max-age=60')
   stats() {
     return this.repo.publicStats();
   }

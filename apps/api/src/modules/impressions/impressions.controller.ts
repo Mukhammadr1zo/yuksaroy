@@ -3,7 +3,8 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsIn, IsString, Length, ValidateNested } from 'class-validator';
 import { IMPRESSION_SURFACES, type ImpressionSurface } from '@yuksaroy/domain';
-import { IpBucket } from '../../common/ip-bucket';
+import { locate } from '../../common/geoip';
+import { DailyBucket, IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
@@ -20,6 +21,14 @@ class ImpressionsDto {
 }
 
 const bucket = new IpBucket(60, 60_000); // bitta IP: daqiqasiga 60 ta so'rov
+const visitDaily = new DailyBucket();
+/**
+ * Bitta ommaviy IP dan kuniga nechta tashrif yoziladi. Chegara ataylab baland:
+ * Ucell, Beeline va Uztelecom minglab abonentni bitta manzil ortiga qo'yadi, ya'ni
+ * past chegara haqiqiy odamlarni sanoqdan chiqarib yuborardi. Bu chelak takrorni
+ * emas, faqat skript bilan raqam shishirishni to'xtatadi.
+ */
+const VISITS_PER_IP_DAY = 2000;
 const since30 = (now: Date) => new Date(now.getTime() - 30 * 86_400_000);
 
 /** Ko'rsatish hodisalari (ochiq, IP limit) va egasi analitikasi (oxirgi 30 kun). */
@@ -37,6 +46,24 @@ export class ImpressionsController {
   record(@Ip() ip: string, @Body() dto: ImpressionsDto) {
     if (!bucket.take(ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
     return this.impressions.record(dto.items);
+  }
+
+  /**
+   * Tashrif mayog'i: brauzer kuniga bir marta yuboradi (qaror brauzerda, chunki bitta
+   * mobil operator minglab odamni bitta ommaviy IP ortiga qo'yadi va IP bo'yicha
+   * ajratish haqiqiy tashriflarni yo'qotib qo'yardi).
+   *
+   * Tanasi yo'q: sahifa manzili ham, boshqa hech narsa ham yuborilmaydi. Serverga
+   * faqat IP keladi va undan davlat bilan viloyat chiqariladi, IP esa saqlanmaydi.
+   */
+  @Post('events/visit') @HttpCode(200)
+  async visit(@Ip() ip: string) {
+    if (!bucket.take(ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
+    // Chegara baland va faqat suiiste'molga qarshi: yuqoridagi sababga ko'ra past
+    // chegara oddiy foydalanuvchilarni ham kesib tashlardi
+    if (!visitDaily.take(ip ?? '?', VISITS_PER_IP_DAY).ok) return { ok: true };
+    await this.impressions.recordVisit(await locate(ip));
+    return { ok: true };
   }
 
   /** E'lon egasi: yuzalar bo'yicha ko'rsatishlar + so'rovlar (30 kun) + jami ko'rishlar. */

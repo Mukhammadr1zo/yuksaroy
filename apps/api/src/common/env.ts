@@ -27,6 +27,9 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: opt(z.string().min(10)),
   PLATFORM_ADMIN_PHONES: opt(z.string()),
   API_PUBLIC_URL: opt(z.string().url()),
+  // Ixtiyoriy: IP dan joyni aniqlaydigan MaxMind GeoLite2 City bazasi (konteyner ichidagi yo'l).
+  // Bo'sh bo'lsa tashriflar yoziladi, lekin joyi "ZZ" bo'ladi va xarita bo'sh ko'rinadi.
+  GEOIP_DB: opt(z.string()),
   // Ixtiyoriy: yangi yuklar chiqadigan Telegram kanali (masalan -1001234567890 yoki @yuksaroy_yuklar).
   // Bo'sh bo'lsa post yuborilmaydi. Bot o'sha kanalda administrator bo'lishi kerak.
   TELEGRAM_CARGO_CHANNEL: opt(z.string()),

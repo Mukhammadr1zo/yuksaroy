@@ -198,6 +198,11 @@
       "title": "Own a terminal or a private siding",
       "body": "List your facility, mark the operations you handle, and receive requests in your account. Free during the pilot.",
       "ctaCatalog": "View catalog"
+    },
+    "visits": {
+      "heading": "Where visitors come from",
+      "lead": "Visits in the last 30 days",
+      "mapAria": "Map of visits by region"
     }
   },
   "terminals": {

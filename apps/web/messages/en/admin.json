@@ -90,7 +90,8 @@
       "urgent": "Urgent",
       "reviews": "Reviews",
       "market": "Cargo and services",
-      "team": "Team"
+      "team": "Team",
+      "visits": "Visits"
     },
     "common": {
       "search": "Search",
@@ -579,6 +580,16 @@
         "KIND_NOT_ALLOWED": "That organisation type cannot be set.",
         "NOT_PLATFORM_OWNER": "Only an owner can do this."
       }
+    },
+    "visits": {
+      "lead": "Last 30 days: how many visits and where from.",
+      "total30": "Visits in 30 days",
+      "daily": "By day",
+      "regions": "By region",
+      "countries": "By country",
+      "mapAria": "Map of visits by region",
+      "unknown": "Not determined",
+      "accuracy": "Location comes from the IP address. Inside Uzbekistan this is rough: carriers route traffic through Tashkent address blocks, so the regional split leans towards Tashkent. The country level is reliable."
     }
   }
 }
