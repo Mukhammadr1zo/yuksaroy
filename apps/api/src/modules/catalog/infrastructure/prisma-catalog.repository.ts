@@ -153,7 +153,11 @@ export class PrismaCatalogRepository implements CatalogRepository {
     // Sukut tartib: egasi bor obyektlar oldinda (reestr qatori ulardan keyin), keyin baho va nom.
     // Ilgari bu saralash xotirada qilinardi va faqat birinchi 200 qatorga ta'sir qilardi.
     const orderBy: Prisma.TerminalOrderByWithRelationInput[] =
-      f.sort === 'name' ? [{ name: 'asc' }, { id: 'asc' }]
+      // Da'vo navbati ish ro'yxati: eng uzoq kutgani birinchi chiqsin, aks holda operator
+      // yuqoridan ishlaganda eski da'vo pastda qolib ketardi. Da'vo qachon berilgani alohida
+      // ustunda yo'q (claimedAt faqat tasdiqlanganda to'ladi), shuning uchun oxirgi o'zgarish vaqti.
+      f.claimStatus === 'PENDING' ? [{ updatedAt: 'asc' }, { id: 'asc' }]
+      : f.sort === 'name' ? [{ name: 'asc' }, { id: 'asc' }]
       : f.sort === 'rating' ? [{ ratingAvg: 'desc' }, { name: 'asc' }, { id: 'asc' }]
       : f.sort === 'default' ? [{ orgId: { sort: 'desc', nulls: 'last' } }, { ratingAvg: 'desc' }, { name: 'asc' }, { id: 'asc' }]
       : [{ ratingAvg: 'desc' }, { name: 'asc' }, { id: 'asc' }];

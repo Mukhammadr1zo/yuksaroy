@@ -20,14 +20,23 @@ type ActionCount = { action: string; count: number };
 
 const EMPTY = { action: '', entity: '', entityId: '', actor: '', from: '', to: '' };
 
-/** "admin.terminal.update": prefiks xira, qolgani qalin - ko'z avval nima qilinganini ushlaydi, keyin qaysi modulda. */
-function Action({ a }: { a: string }) {
-  const i = a.indexOf('.');
-  return (
-    <span className="font-mono text-xs">
-      {i < 0 ? <b>{a}</b> : <><span className="text-muted">{a.slice(0, i + 1)}</span><b>{a.slice(i + 1)}</b></>}
-    </span>
-  );
+/**
+ * Amal kodini gapga aylantiradi: "listing.decide" o'rniga "E'lonni tasdiqladi".
+ *
+ * Kalitda nuqta chiziqchaga almashadi, aks holda next-intl kodni ichma-ich obyekt deb
+ * o'qirdi va "listing-decide" bir vaqtda ham satr, ham obyekt bo'lishi kerak bo'lardi.
+ * Qaror amallarida natija tafsilotdagi `approve` dan olinadi: tasdiqlangan bilan rad
+ * etilgan jurnalda bir xil ko'rinib turardi.
+ * Kalit topilmasa kodning o'zi chiqadi: yangi amal qo'shilsa varaq yiqilmaydi.
+ */
+function useActionText() {
+  const ta = useTranslations('admin.audit');
+  return (action: string, meta: unknown) => {
+    const base = `act.${action.replace(/\./g, '-')}`;
+    const ok = meta && typeof meta === 'object' ? (meta as { approve?: unknown }).approve : undefined;
+    const k = typeof ok === 'boolean' ? `${base}-${ok ? 'yes' : 'no'}` : base;
+    return ta.has(k) ? ta(k) : ta.has(base) ? ta(base) : action;
+  };
 }
 
 export default function AuditPage() {
@@ -43,12 +52,15 @@ export default function AuditPage() {
   const [f, setF] = useState({ ...init, page: 1 });
   const [actions, setActions] = useState<ActionCount[]>([]);
   const [open, setOpen] = useState<Row | null>(null);
+  const actionText = useActionText();
   const { data, pages, loading, err } = useAdminList<Row>('/admin/audit', { ...f, limit: 50 });
 
   useEffect(() => { api<ActionCount[]>('/admin/audit/actions').then(setActions).catch(() => {}); }, []);
 
   const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setDraft((d) => ({ ...d, [k]: e.target.value }));
 
+  // Obyekt ustuni olindi: u baza modelining inglizcha nomini ("Listing", "Organization")
+  // ko'rsatardi, endi gapning o'zi nima ustida ish qilinganini aytadi.
   const cols: Col<Row>[] = [
     { key: 'when', head: ta('when'), num: true, width: '1%', cell: (r) => <span className="whitespace-nowrap text-xs">{uzDateTime(r.createdAt, locale)}</span> },
     {
@@ -56,12 +68,7 @@ export default function AuditPage() {
         ? <><div className="font-semibold text-navy">{r.actor.fullName || r.actor.phone}</div><div className="font-mono text-[11px] text-muted">{r.actor.phone}</div></>
         : <span className="text-muted">{ta('system')}</span>,
     },
-    { key: 'action', head: ta('action'), cell: (r) => <Action a={r.action} /> },
-    {
-      key: 'entity', head: ta('entity'), cell: (r) => <>
-        <div>{r.entity ?? ''}</div>
-      </>,
-    },
+    { key: 'action', head: ta('action'), cell: (r) => actionText(r.action, r.meta) },
   ];
 
   return (
@@ -72,7 +79,7 @@ export default function AuditPage() {
         <Labeled label={ta('action')} className="w-full sm:w-56">
           <select className={INPUT} value={draft.action} onChange={set('action')}>
             <option value="">{ta('allActions')}</option>
-            {actions.map((a) => <option key={a.action} value={a.action}>{a.action} ({a.count})</option>)}
+            {actions.map((a) => <option key={a.action} value={a.action}>{actionText(a.action, null)} ({a.count})</option>)}
           </select>
         </Labeled>
         <Labeled label={ta('actor')} className="w-full sm:w-56">
@@ -94,19 +101,18 @@ export default function AuditPage() {
       <DataTable cols={cols} rows={data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} onRow={setOpen} />
       <Pager page={f.page} pages={pages} onPage={(page) => setF((x) => ({ ...x, page }))} />
 
-      <Drawer open={!!open} title={open?.action ?? ''} onClose={() => setOpen(null)}>
+      <Drawer open={!!open} title={open ? actionText(open.action, open.meta) : ''} onClose={() => setOpen(null)}>
         {open ? (
           <dl className="space-y-3 text-sm">
             <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('when')}</dt><dd className="font-mono">{uzDateTime(open.createdAt, locale)}</dd></div>
             <div>
               <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('actor')}</dt>
               <dd>{open.actor ? <>{open.actor.fullName || open.actor.phone} <span className="font-mono text-xs text-muted">{open.actor.phone}</span></> : <span className="text-muted">{ta('system')}</span>}</dd>
-              {open.actorId ? <dd className="font-mono text-[11px] text-muted">{open.actorId}</dd> : null}
             </div>
-            <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('action')}</dt><dd><Action a={open.action} /></dd></div>
+            <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('action')}</dt><dd>{actionText(open.action, open.meta)} <span className="font-mono text-[11px] text-muted">{open.action}</span></dd></div>
             <div>
               <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('entity')}</dt>
-              <dd>{open.entity ?? tc('none')}</dd>
+              <dd>{open.entity ? (ta.has(`ent.${open.entity}`) ? ta(`ent.${open.entity}`) : open.entity) : tc('none')}</dd>
               {open.entityId ? <dd className="font-mono text-[11px] text-muted">{open.entityId}</dd> : null}
             </div>
             {open.ip ? <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{t('audit.ip')}</dt><dd className="font-mono text-xs">{open.ip}</dd></div> : null}
