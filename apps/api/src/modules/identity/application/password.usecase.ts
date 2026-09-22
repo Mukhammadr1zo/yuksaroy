@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import argon2 from 'argon2';
-import { normalizeUzPhone } from '@yuksaroy/domain';
+import { normalizePhone } from '@yuksaroy/domain';
 import { USER_REPOSITORY, type UserRepository } from '../domain/ports';
 import { BadCredentialsError, LoginLockedError, NoPasswordError } from '../domain/errors';
 import { afterLoginAttempt, lockRetryAfter } from '../domain/account';
@@ -19,7 +19,7 @@ export class PasswordUseCase {
   ) {}
 
   async login(rawPhone: string, password: string, ctx: Ctx) {
-    const phone = normalizeUzPhone(rawPhone);
+    const phone = normalizePhone(rawPhone);
     const user = phone ? await this.users.findByPhone(phone) : null;
     // ponytail: noma'lum telefon uchun dummy argon2.verify yo'q; vaqt farqi bilan telefon aniqlash xavfi qabul qilingan
     if (!user || !user.isActive) throw new BadCredentialsError();

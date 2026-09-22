@@ -1,7 +1,7 @@
 import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsString, MaxLength } from 'class-validator';
-import { normalizeUzPhone } from '@yuksaroy/domain';
+import { normalizePhone } from '@yuksaroy/domain';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { env } from '../../../common/env';
@@ -82,7 +82,7 @@ export class AdminTeamController {
   /** Telefon bo'yicha qo'shish yoki darajasini almashtirish. Odam avval ro'yxatdan o'tgan bo'lishi kerak. */
   @Post()
   async add(@CurrentUserId() actorId: string, @Body() dto: SetLevelDto) {
-    const phone = normalizeUzPhone(dto.phone);
+    const phone = normalizePhone(dto.phone);
     if (!phone) throw new BadRequestException({ code: 'INVALID_PHONE' });
     const user = await this.prisma.user.findUnique({ where: { phone }, select: { id: true, fullName: true } });
     // Hisobsiz odamga huquq berib bo'lmaydi: avval saytga kirsin, keyin qo'shiladi

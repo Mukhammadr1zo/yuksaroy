@@ -87,7 +87,7 @@
         "name": "For example: Sergeli freight yard",
         "description": "Services, equipment, working order",
         "address": "Street, building",
-        "phone": "+998 71 123 45 67",
+        "phone": "71 123 45 67",
         "craneType": "For example: gantry"
       },
       "noOrg": "A terminal is added only on behalf of a TERMINAL organization. Set that kind on your organization.",

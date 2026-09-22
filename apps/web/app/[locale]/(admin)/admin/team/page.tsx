@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { ShieldCheckIcon, UserIcon } from '@phosphor-icons/react';
 import { api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
-import { phoneDisplay } from '@/components/ui/fields';
+import { PhoneField, phoneDisplay } from '@/components/ui/fields';
 import { BTN, BTN_DANGER, CARD, ConfirmButton, INPUT, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
 
 type Level = 'owner' | 'moderator';
@@ -57,7 +57,7 @@ export default function TeamPage() {
       <form onSubmit={submit} className={`${CARD} mt-4 flex flex-wrap items-end gap-3 p-4`}>
         <label className="grow basis-56 text-sm">
           <span className="font-mono text-[11px] text-muted">{t('phone')}</span>
-          <input value={add.phone} onChange={(e) => setAdd({ ...add, phone: e.target.value })} placeholder="+998 90 123 45 67" maxLength={20} required className={`${INPUT} mt-1 font-mono`} />
+          <PhoneField value={add.phone} onChange={(phone) => setAdd({ ...add, phone })} required className={`${INPUT} mt-1 font-mono`} />
         </label>
         <label className="basis-44 text-sm">
           <span className="font-mono text-[11px] text-muted">{t('level')}</span>

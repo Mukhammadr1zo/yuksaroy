@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { OTP, normalizeUzPhone } from '@yuksaroy/domain';
+import { OTP, normalizePhone } from '@yuksaroy/domain';
 import { OTP_STORE, USER_REPOSITORY, type OtpStore, type UserRecord, type UserRepository } from '../domain/ports';
 import { OtpInvalidError, PhoneTakenError } from '../domain/errors';
 import { hashSecret } from '../domain/otp';
@@ -18,7 +18,7 @@ export class VerifyOtpUseCase {
 
   /** Kodni tekshiradi va yoqadi; normallashgan telefonni qaytaradi. Parol tiklash va telefon almashtirish ham shu yerdan. */
   async consume(rawPhone: string, code: string): Promise<string> {
-    const phone = normalizeUzPhone(rawPhone);
+    const phone = normalizePhone(rawPhone);
     if (!phone) throw new OtpInvalidError('NOT_FOUND');
 
     const challenge = await this.otps.latestActive(phone);

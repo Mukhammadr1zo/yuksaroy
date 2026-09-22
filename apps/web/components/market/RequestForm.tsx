@@ -15,6 +15,7 @@ import { Link } from '@/i18n/navigation';
 import { ApiError, clearAuthedCache, hasSession, post } from '@/lib/api';
 import { uzToday } from '@/lib/format';
 import type { FieldErrors, MarketRequest } from '@/lib/types-market';
+import { PhoneField } from '@/components/ui/fields';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { BTN_GHOST, BTN_PRIMARY, Field, INPUT, Notice } from '@/components/kabinet/bits';
@@ -169,7 +170,7 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
         <textarea className={INPUT} rows={4} maxLength={2000} placeholder={cargo ? t('descriptionPhCargo') : t('descriptionPhService')} value={d.description} onChange={(e) => set({ description: e.target.value })} />
       </Field>
       <Field label={t('phone')} hint={t('phoneHint')} error={err('contactPhone')}>
-        <input className={`${INPUT} font-mono`} type="tel" inputMode="tel" placeholder="+998 90 123 45 67" value={d.contactPhone} onChange={(e) => set({ contactPhone: e.target.value })} />
+        <PhoneField className={`${INPUT} font-mono`} value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} />
       </Field>
       {top ? <Notice tone="err">{top}</Notice> : null}
       <div><button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('sending') : t('submit')}</button></div>

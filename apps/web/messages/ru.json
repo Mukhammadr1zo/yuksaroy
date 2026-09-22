@@ -384,7 +384,11 @@
     "lead": "Код придёт не по SMS, а в Telegram-бот.",
     "phone": {
       "label": "Номер телефона",
-      "placeholder": "+998 90 123 45 67"
+      "placeholder": "90 123 45 67",
+      "country": "Код страны",
+      "search": "Поиск страны",
+      "other": "Другая страна (код введите сами)",
+      "numberPlaceholder": "Номер телефона"
     },
     "requestCode": "Получить код",
     "link": {

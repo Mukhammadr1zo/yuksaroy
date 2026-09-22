@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { randomBytes } from 'node:crypto';
-import { MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizeUzPhone, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
+import { MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizePhone, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
@@ -169,7 +169,7 @@ export class MarketController {
     // Telefonni ham validateRequest tekshiradi: mijozdagi va serverdagi qoida bitta bo'lsin
     const errors = validateRequest(dto);
     if (Object.keys(errors).length) throw new BadRequestException({ code: 'VALIDATION', errors });
-    const contactPhone = dto.contactPhone?.trim() ? normalizeUzPhone(dto.contactPhone) : null;
+    const contactPhone = dto.contactPhone?.trim() ? normalizePhone(dto.contactPhone) : null;
     const orgId = await this.market.memberOrgId(userId, dto.orgId);
     const cargo = dto.board === 'CARGO';
     const r = await this.prisma.$transaction(async (tx) => {

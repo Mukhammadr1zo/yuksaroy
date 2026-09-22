@@ -4,7 +4,7 @@ import {
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min } from 'class-validator';
 import { randomBytes } from 'node:crypto';
-import { REGIONS, REGION_LABELS, URGENT_KINDS, URGENT_KIND_LABELS, formatUrgentNo, normalizeUzPhone, type RegionCode, type UrgentKind } from '@yuksaroy/domain';
+import { REGIONS, REGION_LABELS, URGENT_KINDS, URGENT_KIND_LABELS, formatUrgentNo, normalizePhone, type RegionCode, type UrgentKind } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { env } from '../../common/env';
 import { IpBucket } from '../../common/ip-bucket';
@@ -65,7 +65,7 @@ export class UrgentController {
   @Post() @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)
   async create(@CurrentUserId() userId: string, @Body() dto: CreateUrgentDto) {
     limit(createBucket, userId);
-    const contactPhone = normalizeUzPhone(dto.contactPhone);
+    const contactPhone = normalizePhone(dto.contactPhone);
     if (!contactPhone) throw new BadRequestException({ code: 'PHONE_INVALID' });
     const orgId = dto.orgId ? (await this.memberOrgId(userId, dto.orgId)) : null;
     const r = await this.prisma.$transaction(async (tx) => {

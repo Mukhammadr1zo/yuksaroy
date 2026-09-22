@@ -3,7 +3,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { PartialType, PickType } from '@nestjs/swagger';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
 import { PHOTO_URL } from '../../../common/file-url';
-import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizeUzPhone, type KycStatus, type OrgKind, type RegionCode, type Role } from '@yuksaroy/domain';
+import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizePhone, type KycStatus, type OrgKind, type RegionCode, type Role } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { CreateOrgUseCase } from '../application/create-org.usecase';
 import { ORG_REPOSITORY, type OrganizationRepository, type Storefront } from '../domain/ports';
@@ -95,7 +95,7 @@ export class OrgsController {
   async invite(@CurrentUserId() userId: string, @Param('orgId') orgId: string, @Body() dto: InviteDto) {
     const m = await this.orgs.findMembership(userId, orgId);
     if (!m?.isOwner) throw new ForbiddenException({ code: 'NOT_OWNER' });
-    const phone = normalizeUzPhone(dto.phone);
+    const phone = normalizePhone(dto.phone);
     if (!phone) throw new BadRequestException({ code: 'INVALID_PHONE' });
     const kinds = m.org.kinds.length ? m.org.kinds : [m.org.kind];
     const roles = filterRoles(dto.roles, kinds);

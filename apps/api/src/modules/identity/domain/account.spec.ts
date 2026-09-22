@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PASSWORD, normalizeUzPhone } from '@yuksaroy/domain';
+import { PASSWORD, normalizePhone } from '@yuksaroy/domain';
 import { afterLoginAttempt, anonymizedUser, deleteConfirmed, lockRetryAfter } from './account';
 
 const now = new Date('2026-09-08T10:00:00Z');
@@ -35,10 +35,48 @@ describe('delete helpers', () => {
     expect(p.fullName).toBe("O'chirilgan foydalanuvchi");
   });
   it("tasdiq: DELETE yoki o'z telefoni", () => {
-    expect(deleteConfirmed('DELETE', '+998901234567', normalizeUzPhone)).toBe(true);
-    expect(deleteConfirmed(' 90 123 45 67 ', '+998901234567', normalizeUzPhone)).toBe(true);
-    expect(deleteConfirmed('+998907654321', '+998901234567', normalizeUzPhone)).toBe(false);
-    expect(deleteConfirmed('+998901234567', null, normalizeUzPhone)).toBe(false);
-    expect(deleteConfirmed('delete', '+998901234567', normalizeUzPhone)).toBe(false);
+    expect(deleteConfirmed('DELETE', '+998901234567', normalizePhone)).toBe(true);
+    expect(deleteConfirmed(' 90 123 45 67 ', '+998901234567', normalizePhone)).toBe(true);
+    expect(deleteConfirmed('+998907654321', '+998901234567', normalizePhone)).toBe(false);
+    expect(deleteConfirmed('+998901234567', null, normalizePhone)).toBe(false);
+    expect(deleteConfirmed('delete', '+998901234567', normalizePhone)).toBe(false);
+  });
+});
+
+/**
+ * Raqam faqat +998 bo'lishi shart emas: platforma import, eksport va tranzitni ham
+ * qamraydi, kod esa Telegram orqali boradi va u har qanday davlatda ishlaydi.
+ */
+describe('normalizePhone', () => {
+  it("O'zbekiston raqami uch xil yozilsa ham bitta shaklga keladi", () => {
+    expect(normalizePhone('901234567')).toBe('+998901234567');
+    expect(normalizePhone('998901234567')).toBe('+998901234567');
+    expect(normalizePhone('+998 90 123 45 67')).toBe('+998901234567');
+  });
+
+  it('99 operator kodidagi raqam prefiks deb kesilmaydi', () => {
+    // "998123456" - bu 99-8-12-34-56, ya'ni milliy raqamning o'zi
+    expect(normalizePhone('998123456')).toBe('+998998123456');
+  });
+
+  it("chet el raqami \"+\" bilan qabul qilinadi", () => {
+    expect(normalizePhone('+77011234567')).toBe('+77011234567');
+    expect(normalizePhone('+7 701 123 45 67')).toBe('+77011234567');
+    expect(normalizePhone('+90 532 123 45 67')).toBe('+905321234567');
+    expect(normalizePhone('+8613812345678')).toBe('+8613812345678');
+  });
+
+  it("\"+\" siz yozilgan chet el raqami qabul qilinmaydi", () => {
+    // To'qqiz xonali bo'lmagan va 998 bilan boshlanmagan qiymat qaysi davlatniki - noma'lum
+    expect(normalizePhone('77011234567')).toBeNull();
+  });
+
+  it("noto'g'ri qiymatlar rad etiladi", () => {
+    expect(normalizePhone('')).toBeNull();
+    expect(normalizePhone('12345')).toBeNull();
+    expect(normalizePhone('+998901234')).toBeNull();
+    expect(normalizePhone('+0123456789')).toBeNull();
+    expect(normalizePhone('+1234567')).toBeNull();
+    expect(normalizePhone('+1234567890123456')).toBeNull();
   });
 });

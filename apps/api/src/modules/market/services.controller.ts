@@ -4,7 +4,7 @@ import {
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { ArrayMaxSize, IsArray, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
-import { MARKET, REGIONS, SERVICE_TYPES, normalizeUzPhone, type ServiceType } from '@yuksaroy/domain';
+import { MARKET, REGIONS, SERVICE_TYPES, normalizePhone, type ServiceType } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
@@ -54,7 +54,7 @@ export function profileView(p: Row, full = false, withPhone = false) {
 const createBucket = new IpBucket(5, 3_600_000);
 const phoneOf = (raw: string | undefined): string | null => {
   if (!raw?.trim()) return null;
-  const p = normalizeUzPhone(raw);
+  const p = normalizePhone(raw);
   if (!p) throw new BadRequestException({ code: 'VALIDATION', errors: { contactPhone: 'INVALID' } });
   return p;
 };

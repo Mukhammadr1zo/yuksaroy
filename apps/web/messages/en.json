@@ -384,7 +384,11 @@
     "lead": "The code comes to the Telegram bot, not by SMS.",
     "phone": {
       "label": "Phone number",
-      "placeholder": "+998 90 123 45 67"
+      "placeholder": "90 123 45 67",
+      "country": "Country code",
+      "search": "Search for a country",
+      "other": "Another country (type the code yourself)",
+      "numberPlaceholder": "Phone number"
     },
     "requestCode": "Get code",
     "link": {

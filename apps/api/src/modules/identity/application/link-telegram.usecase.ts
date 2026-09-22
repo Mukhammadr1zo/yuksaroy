@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { normalizeUzPhone } from '@yuksaroy/domain';
+import { normalizePhone } from '@yuksaroy/domain';
 import { OTP_SENDER, OTP_STORE, USER_REPOSITORY, type OtpSender, type OtpStore, type UserRepository } from '../domain/ports';
 import { PhoneTakenError } from '../domain/errors';
 import { generateOtpCode, hashSecret, otpExpiry } from '../domain/otp';
@@ -25,7 +25,7 @@ export class LinkTelegramUseCase {
   ) {}
 
   async execute(input: LinkTelegramInput): Promise<{ linked: true; codeSent: boolean }> {
-    const phone = normalizeUzPhone(input.phone);
+    const phone = normalizePhone(input.phone);
     if (!phone) throw new Error('INVALID_PHONE');
 
     // Mini App orqali ochilgan telefonsiz user (chat allaqachon bog'langan): telefon shu userga, yangi user ochilmaydi

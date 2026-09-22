@@ -384,7 +384,11 @@
     "lead": "Kod SMS emas, Telegram botga keladi.",
     "phone": {
       "label": "Telefon raqam",
-      "placeholder": "+998 90 123 45 67"
+      "placeholder": "90 123 45 67",
+      "country": "Davlat kodi",
+      "search": "Davlatni qidiring",
+      "other": "Boshqa davlat (kodni o'zingiz yozing)",
+      "numberPlaceholder": "Telefon raqami"
     },
     "requestCode": "Kod olish",
     "link": {

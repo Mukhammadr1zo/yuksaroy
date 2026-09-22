@@ -1,5 +1,5 @@
 // E'lonlar: temir yo'l texnikasi (ijara/sotuv) va avtotashuvchilar. Framework'siz, Prisma enum'lari shu bilan bir xil.
-import { MARKET, REGIONS, SERVICE_TYPES, normalizeUzPhone, uzLocalDate, type RegionCode, type SearchLang } from './index';
+import { MARKET, REGIONS, SERVICE_TYPES, normalizePhone, uzLocalDate, type RegionCode, type SearchLang } from './index';
 import { TransitionError } from './transition';
 import { DEAL_KINDS, type DealKind } from './search';
 
@@ -176,7 +176,7 @@ export function validateListing(input: ListingInput): { errors: ListingIssue[]; 
   else if (input.routes.some((r) => r.from === r.to)) err('routes', 'ROUTE_SAME_REGION');
 
   if (input.photos.length > LISTING.maxPhotos) err('photos', 'TOO_MANY');
-  if (input.contactPhone && !normalizeUzPhone(input.contactPhone)) err('contactPhone', 'INVALID');
+  if (input.contactPhone && !normalizePhone(input.contactPhone)) err('contactPhone', 'INVALID');
 
   return { errors, warnings };
 }
@@ -253,7 +253,7 @@ export function validateRequest(i: RequestInput, today = uzLocalDate(new Date())
   if (i.fromText && i.fromText.length > 200) e.fromText = 'TOO_LONG';
   if (i.toText && i.toText.length > 200) e.toText = 'TOO_LONG';
   // Telefon SERVICE shoxidan oldin: u shox erta qaytadi va raqam ikkala taxtada ham bor
-  if (i.contactPhone?.trim() && !normalizeUzPhone(i.contactPhone)) e.contactPhone = 'INVALID';
+  if (i.contactPhone?.trim() && !normalizePhone(i.contactPhone)) e.contactPhone = 'INVALID';
 
   if (i.board === 'SERVICE') {
     if (!inList(SERVICE_TYPES, i.serviceType)) e.serviceType = i.serviceType ? 'INVALID' : 'REQUIRED';

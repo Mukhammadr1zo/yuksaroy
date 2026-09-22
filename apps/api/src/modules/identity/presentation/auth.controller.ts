@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ApiTags } from '@nestjs/swagger';
-import { PERSONAL_ROLES, normalizeUzPhone, type Role } from '@yuksaroy/domain';
+import { PERSONAL_ROLES, normalizePhone, type Role } from '@yuksaroy/domain';
 import { RequestOtpUseCase, InvalidPhoneError, TooManyRequestsError } from '../application/request-otp.usecase';
 import { VerifyOtpUseCase } from '../application/verify-otp.usecase';
 import { GoogleLoginUseCase, GoogleDisabledError, GoogleInvalidError } from '../application/google-login.usecase';
@@ -36,7 +36,7 @@ const limit = (b: IpBucket, req: FastifyRequest) => { if (!b.take(req.ip ?? '?')
 /** Telefon bo'yicha cheklov: bitta IP butun tarmoqni bloklamaydi, bitta raqam nishonlanmaydi. */
 const limitPhone = (b: IpBucket, phone: string | null) => { if (phone && !b.take(phone)) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
 /** Kod iste'mol qiluvchi yo'l: IP va telefon bo'yicha, VerifyOtpUseCase'dan oldin. */
-const limitConsume = (req: FastifyRequest, phone: string | null) => { limit(consumeIpBucket, req); limitPhone(consumePhoneBucket, normalizeUzPhone(phone ?? '')); };
+const limitConsume = (req: FastifyRequest, phone: string | null) => { limit(consumeIpBucket, req); limitPhone(consumePhoneBucket, normalizePhone(phone ?? '')); };
 type Ctx = { userAgent?: string; ip?: string };
 const ctxOf = (req: FastifyRequest): Ctx => ({ userAgent: req.headers['user-agent'], ip: req.ip });
 
@@ -60,7 +60,7 @@ export class AuthController {
   @Post('otp/request') @HttpCode(200)
   async otpRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(otpBucket, req);
-    limitPhone(otpPhoneBucket, normalizeUzPhone(dto.phone));
+    limitPhone(otpPhoneBucket, normalizePhone(dto.phone));
     return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
@@ -123,7 +123,7 @@ export class AuthController {
   @Post('password/reset/request') @HttpCode(200)
   async passwordResetRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(resetBucket, req);
-    limitPhone(otpPhoneBucket, normalizeUzPhone(dto.phone));
+    limitPhone(otpPhoneBucket, normalizePhone(dto.phone));
     return this.otpRequestOrThrow(dto.phone, dto.locale);
   }
 
@@ -184,7 +184,7 @@ export class AuthController {
   /** Telefon almashtirish: kod YANGI raqamga (o'sha OTP oqimi), keyin /phone/change kod bilan. */
   @Post('phone/change/request') @HttpCode(200) @UseGuards(JwtGuard)
   async phoneChangeRequest(@CurrentUserId() userId: string, @Body() dto: RequestOtpDto) {
-    const phone = normalizeUzPhone(dto.phone);
+    const phone = normalizePhone(dto.phone);
     const me = await this.users.findById(userId);
     if (phone && me?.phone === phone) throw new HttpException({ code: 'SAME_PHONE' }, 400);
     return this.otpRequestOrThrow(dto.phone, dto.locale);
@@ -208,7 +208,7 @@ export class AuthController {
   async deleteMe(@CurrentUserId() userId: string, @Body() dto: DeleteMeDto, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const me = await this.users.findById(userId);
     if (!me) throw new HttpException({ code: 'USER_NOT_FOUND' }, HttpStatus.UNAUTHORIZED);
-    if (!deleteConfirmed(dto.confirm, me.phone, normalizeUzPhone)) throw new HttpException({ code: 'CONFIRM_MISMATCH' }, 400);
+    if (!deleteConfirmed(dto.confirm, me.phone, normalizePhone)) throw new HttpException({ code: 'CONFIRM_MISMATCH' }, 400);
     const report = await this.deleteAccount.execute(userId);
     await this.audit.log({ actorId: userId, action: 'auth.delete', entity: 'User', entityId: userId, ip: req.ip, meta: report });
     this.clearCookies(res);

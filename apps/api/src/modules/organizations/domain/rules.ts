@@ -1,5 +1,5 @@
 // Tashkilot qoidalari: tur -> rollar, admin telefonlari. Sof funksiyalar, DB yo'q.
-import { ORG_KIND_ROLES, normalizeUzPhone, type OrgKind, type Role } from '@yuksaroy/domain';
+import { ORG_KIND_ROLES, normalizePhone, type OrgKind, type Role } from '@yuksaroy/domain';
 
 /**
  * Platforma rollari o'z-o'ziga xizmat yo'lidan hech qachon berilmaydi: ular faqat
@@ -23,5 +23,5 @@ export function filterRoles(requested: readonly Role[] | undefined, kinds: reado
 
 /** PLATFORM_ADMIN_PHONES="+998901234567, 90 765 43 21" -> E.164 to'plam; notanish qiymatlar tashlanadi. */
 export function parseAdminPhones(csv: string | undefined): Set<string> {
-  return new Set((csv ?? '').split(',').map((s) => normalizeUzPhone(s.trim())).filter((p): p is string => p !== null));
+  return new Set((csv ?? '').split(',').map((s) => normalizePhone(s.trim())).filter((p): p is string => p !== null));
 }

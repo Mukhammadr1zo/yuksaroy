@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { REGIONS, SERVICE_TYPES, type ServiceType } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
 import type { FieldErrors, ServiceProfileCard } from '@/lib/types-market';
+import { PhoneField } from '@/components/ui/fields';
 import { BTN_GHOST, BTN_PRIMARY, CHIP, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { useMarketLabels } from './bits';
 
@@ -66,7 +67,7 @@ export function ProfileForm({ initial, taken, onSaved, onCancel }: { initial?: S
         <Field label={t('experience')} error={err('experienceYears')}><input className={`${INPUT} font-mono`} type="number" min={0} max={60} inputMode="numeric" value={d.experienceYears} onChange={(e) => set({ experienceYears: e.target.value })} /></Field>
         <Field label={t('priceNote')} error={err('priceNote')} className="sm:col-span-2"><input className={INPUT} maxLength={120} placeholder={t('priceNotePh')} value={d.priceNote} onChange={(e) => set({ priceNote: e.target.value })} /></Field>
       </div>
-      <Field label={t('phone')} hint={t('phoneHint')} error={err('contactPhone')}><input className={`${INPUT} font-mono`} type="tel" inputMode="tel" placeholder="+998 90 123 45 67" value={d.contactPhone} onChange={(e) => set({ contactPhone: e.target.value })} /></Field>
+      <Field label={t('phone')} hint={t('phoneHint')} error={err('contactPhone')}><PhoneField className={`${INPUT} font-mono`} value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} /></Field>
       {top ? <Notice tone="err">{top}</Notice> : null}
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('saving') : t('save')}</button>

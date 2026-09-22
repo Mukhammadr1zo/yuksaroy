@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { OTP, normalizeUzPhone } from '@yuksaroy/domain';
+import { OTP, normalizePhone } from '@yuksaroy/domain';
 import { OTP_SENDER, OTP_STORE, USER_REPOSITORY, type OtpSender, type OtpStore, type UserRepository } from '../domain/ports';
 import { generateOtpCode, hashSecret, otpExpiry, randomToken } from '../domain/otp';
 import { env } from '../../../common/env';
@@ -21,7 +21,7 @@ export class RequestOtpUseCase {
   ) {}
 
   async execute(rawPhone: string, locale?: string | null): Promise<RequestOtpResult> {
-    const phone = normalizeUzPhone(rawPhone);
+    const phone = normalizePhone(rawPhone);
     if (!phone) throw new InvalidPhoneError();
 
     const last = await this.otps.latestActive(phone);

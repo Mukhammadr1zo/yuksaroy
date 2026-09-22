@@ -55,12 +55,35 @@ export const PASSWORD = {
   lockMinutes: 15,
 } as const;
 
-/** O'zbekiston telefon raqamini E.164 ga normalizatsiya: 90 123 45 67 → +998901234567. */
-export function normalizeUzPhone(raw: string): string | null {
-  const d = raw.replace(/\D/g, '');
-  const local = d.startsWith('998') ? d.slice(3) : d;
-  if (local.length !== 9) return null;
-  return `+998${local}`;
+/**
+ * Telefon raqami E.164 shakliga keltiriladi: "+998901234567".
+ *
+ * O'zbekiston raqami uchun "+" shart emas: "901234567" va "998901234567" ham qabul
+ * qilinadi, chunki odamlarning katta qismi raqamni shunday yozadi. Boshqa davlat
+ * raqami esa "+" bilan yoziladi, aks holda to'qqiz xonali qiymat qaysi davlatniki
+ * ekani noma'lum bo'lib qoladi.
+ *
+ * Nega xalqaro: platforma import, eksport va tranzitni ham qamraydi, ya'ni yuk egasi
+ * ham, tashuvchi ham chet eldan bo'lishi mumkin. Kod esa Telegram orqali boradi va u
+ * har qanday davlat raqami uchun ishlaydi.
+ */
+export function normalizePhone(raw: string): string | null {
+  const t = raw.trim();
+  const d = t.replace(/\D/g, '');
+  if (!d) return null;
+  if (t.startsWith('+')) {
+    // O'zbekiston raqami uzunligi qat'iy: +998 va to'qqiz xonali milliy qism
+    if (d.startsWith('998')) return d.length === 12 ? `+998${d.slice(3)}` : null;
+    // E.164: davlat kodi noldan boshlanmaydi, umumiy uzunlik 8 dan 15 gacha
+    if (d.startsWith('0') || d.length < 8 || d.length > 15) return null;
+    return `+${d}`;
+  }
+  // "+" siz yozilgan qiymat O'zbekiston raqami deb o'qiladi.
+  // Uzunlik bo'yicha ajratiladi: "998123456" ning o'zi ham haqiqiy milliy raqam
+  // (99 operator kodi, 8-12-34-56), shuning uchun uni prefiks deb kesib bo'lmaydi.
+  if (d.length === 9) return `+998${d}`;
+  if (d.length === 12 && d.startsWith('998')) return `+998${d.slice(3)}`;
+  return null;
 }
 
 // ───────────────────────── Katalog (S2) ─────────────────────────
