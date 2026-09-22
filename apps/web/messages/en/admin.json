@@ -268,7 +268,16 @@
       "history": "History",
       "items": "Lines",
       "operation": "Operation / direction",
-      "wagons": "Wagons"
+      "wagons": "Wagons",
+      "op": {
+        "LOAD": "Loading",
+        "UNLOAD": "Unloading"
+      },
+      "dir": {
+        "LOCAL": "Domestic",
+        "IMPORT": "Import",
+        "EXPORT": "Export"
+      }
     },
     "orgs": {
       "lead": "Companies, their checks and members.",

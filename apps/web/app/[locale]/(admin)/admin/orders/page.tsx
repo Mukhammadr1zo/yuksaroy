@@ -46,8 +46,11 @@ function Orders() {
     { key: 'no', head: to('no'), cell: (r) => <span className="font-mono font-bold">{r.no}</span> },
     { key: 'status', head: tc('status'), cell: (r) => <StatusPill status={r.status} /> },
     { key: 'terminal', head: to('terminal'), cell: (r) => <Link href={`/terminals/${r.terminal.slug}`} target="_blank" onClick={STOP} className="text-teal-ink underline">{r.terminal.name}</Link> },
-    { key: 'shipper', head: to('shipper'), cell: (r) => r.shipperOrg.name },
-    { key: 'op', head: to('operation'), cell: (r) => <span className="font-mono text-[11px] text-muted">{r.operation} / {r.direction}</span> },
+    { key: 'shipper', head: to('shipper'), cell: (r) => (
+      <Link href={`/admin/orgs?q=${encodeURIComponent(r.shipperOrg.name)}`} onClick={STOP} className="text-teal-ink underline">{r.shipperOrg.name}</Link>
+    ) },
+    // Ilgari bu yerda "LOAD / IMPORT" turardi: baza qiymatining o'zi, tarjimasiz
+    { key: 'op', head: to('operation'), cell: (r) => `${to(`op.${r.operation}`)} / ${to(`dir.${r.direction}`)}` },
     { key: 'wagons', head: to('wagons'), num: true, cell: (r) => num(r.wagonCount, locale) },
     { key: 'total', head: to('total'), num: true, cell: (r) => som(r.totalTiyin, locale) },
     { key: 'created', head: tc('createdAt'), num: true, cell: (r) => uzDateTime(r.createdAt, locale) },
@@ -120,7 +123,7 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 wrap-anywhere">
             <dt className="text-muted">{tc('status')}</dt><dd><StatusPill status={d.status} /></dd>
             <dt className="text-muted">{to('terminal')}</dt><dd><Link href={`/terminals/${d.terminal.slug}`} target="_blank" className="text-teal-ink underline">{d.terminal.name}</Link></dd>
-            <dt className="text-muted">{to('shipper')}</dt><dd>{d.shipperOrg.name}</dd>
+            <dt className="text-muted">{to('shipper')}</dt><dd><Link href={`/admin/orgs?q=${encodeURIComponent(d.shipperOrg.name)}`} className="text-teal-ink underline">{d.shipperOrg.name}</Link></dd>
             <dt className="text-muted">{tc('createdAt')}</dt><dd className="font-mono tabular-nums">{uzDateTime(d.createdAt, locale)}</dd>
           </dl>
 

@@ -268,7 +268,16 @@
       "history": "Tarix",
       "items": "Qatorlar",
       "operation": "Amal / yo'nalish",
-      "wagons": "Vagon"
+      "wagons": "Vagon",
+      "op": {
+        "LOAD": "Yuklash",
+        "UNLOAD": "Tushirish"
+      },
+      "dir": {
+        "LOCAL": "Ichki",
+        "IMPORT": "Import",
+        "EXPORT": "Eksport"
+      }
     },
     "orgs": {
       "lead": "Tashkilotlar, ularning tasdig'i va a'zolari.",

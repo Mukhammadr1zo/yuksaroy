@@ -2,6 +2,7 @@
 // Tashkilotlar reestri: KYC holati, a'zolar va rollar. Yangi platforma admini AYNAN shu yerda
 // tayinlanadi (PLATFORM_ADMIN roli), shuning uchun bu rol belgilanganda ekran ochiq ogohlantiradi.
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { KYC_STATUSES, ORG_KINDS } from '@yuksaroy/domain';
 import { api } from '@/lib/api';
@@ -28,8 +29,12 @@ export default function AdminOrgsPage() {
   const tk = useTranslations('kyc');
   const tok = useTranslations('orgKind');
   const locale = useLocale();
-  const [f, setF] = useState({ q: '', kyc: '', kind: '', page: 1 });
-  const [q, setQ] = useState('');
+  // Buyurtmalar varag'idagi yuk egasi nomi shu yerga havola qiladi: ilgari operator
+  // nomni qo'lda ko'chirib, qidiruvga yopishtirishi kerak edi.
+  // Suspense shart emas: AdminShell huquq tasdiqlanguncha bolalarni chizmaydi.
+  const init = useSearchParams().get('q') ?? '';
+  const [f, setF] = useState({ q: init, kyc: '', kind: '', page: 1 });
+  const [q, setQ] = useState(init);
   const { data, pages, loading, err, reload } = useAdminList<Row>('/admin/orgs/all', { ...f, limit: 30 });
 
   // Yon varaq holati: qaysi tashkilot, uning to'liq yozuvi, tahrir formasi va a'zolar nusxasi
