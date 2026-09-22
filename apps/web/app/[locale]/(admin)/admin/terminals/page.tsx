@@ -5,10 +5,9 @@
  * ochilganda to'liq qator alohida so'raladi. PATCH ga faqat o'zgargan kalitlar ketadi.
  */
 import { useCallback, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { CLAIM_STATUSES, REGIONS, TERMINAL_KINDS, TERMINAL_STATUSES, type ClaimStatus, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
-import { uzDate } from '@/lib/format';
 import { BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, errText, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, useAdminList, type Col } from '@/components/admin/kit';
 import { diffBody, fromRow, TerminalForm, type Draft, type TerminalFull } from '@/components/admin/TerminalForm';
 
@@ -36,9 +35,10 @@ export default function TerminalsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tt = useTranslations('admin.terminals');
+  const ts = useTranslations('terminalsAdmin.status');
+  const tcl = useTranslations('claimStatus');
   const tk = useTranslations('kind');
   const tr = useTranslations('region');
-  const locale = useLocale();
 
   // form: filtr kataklari; f: qo'llangan filtr. Ajratilgan, chunki har harfda so'rov ketmasin.
   const [form, setForm] = useState(F0);
@@ -112,11 +112,9 @@ export default function TerminalsPage() {
     { key: 'station', head: tt('station'), cell: (r) => r.station?.nameUz ?? r.stationNameRaw ?? '' },
     { key: 'region', head: tc('region'), cell: (r) => (r.regionCode && tr.has(r.regionCode) ? tr(r.regionCode) : r.regionCode ?? '') },
     { key: 'owner', head: tt('owner'), cell: (r) => (r.org ? r.org.name : <Pill>{tt('noOwner')}</Pill>) },
-    { key: 'claim', head: tt('claim'), cell: (r) => <Pill tone={CLAIM_TONE[r.claimStatus]}>{r.claimStatus}</Pill> },
-    { key: 'status', head: tc('status'), cell: (r) => <Pill tone={STATUS_TONE[r.status]}>{r.status}</Pill> },
-    { key: 'coords', head: tt('coords'), num: true, cell: (r) => (r.lat != null && r.lng != null ? <span className="text-teal-ink">&#10003;</span> : <span className="text-muted">-</span>) },
+    { key: 'claim', head: tt('claim'), cell: (r) => <Pill tone={CLAIM_TONE[r.claimStatus]}>{tcl(r.claimStatus)}</Pill> },
+    { key: 'status', head: tc('status'), cell: (r) => <Pill tone={STATUS_TONE[r.status]}>{ts(r.status)}</Pill> },
     { key: 'registryNo', head: t('claim.registry'), num: true, cell: (r) => r.registryNo ?? '' },
-    { key: 'createdAt', head: tc('createdAt'), num: true, cell: (r) => uzDate(r.createdAt, locale) },
   ];
 
   const selectCls = 'w-full sm:w-40';
@@ -144,12 +142,12 @@ export default function TerminalsPage() {
         </Labeled>
         <Labeled label={tc('status')} className={selectCls}>
           <select className={INPUT} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-            {opt('', tc('all'))}{TERMINAL_STATUSES.map((s) => opt(s, s))}
+            {opt('', tc('all'))}{TERMINAL_STATUSES.map((s) => opt(s, ts(s)))}
           </select>
         </Labeled>
         <Labeled label={tt('claim')} className={selectCls}>
           <select className={INPUT} value={form.claim} onChange={(e) => setForm({ ...form, claim: e.target.value })}>
-            {opt('', tc('all'))}{CLAIM_STATUSES.map((s) => opt(s, s))}
+            {opt('', tc('all'))}{CLAIM_STATUSES.map((s) => opt(s, tcl(s)))}
           </select>
         </Labeled>
         <Labeled label={tt('owner')} className={selectCls}>

@@ -265,7 +265,6 @@
       "from": "From",
       "to": "To",
       "allActions": "All actions",
-      "entityId": "Object ID",
       "ip": "IP"
     },
     "settings": {

@@ -1,6 +1,9 @@
 'use client';
 // Audit jurnali: ilgari faqat yozilardi, hech kim o'qiy olmasdi. "Buni kim qildi" ga javob shu yerda.
-// ?entity=Terminal&entityId=... bilan kelsa filtr tayyor turadi: boshqa sahifalar shu havolani beradi.
+// Obyekt turi va ID bo'yicha qo'lda filtr yo'q: ular baza modelining inglizcha nomini
+// harfma-harf yozishni talab qilardi, qabul qilinadigan so'zlar ro'yxati hech qayerda
+// ko'rsatilmasdi va bir harf xato jimgina nol natija berardi. Havola bilan kelgan
+// ?entity= va ?entityId= esa ishlayveradi: kelajakda qatordan jurnalga o'tish uchun.
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -16,7 +19,6 @@ type Row = {
 type ActionCount = { action: string; count: number };
 
 const EMPTY = { action: '', entity: '', entityId: '', actor: '', from: '', to: '' };
-const metaText = (m: unknown) => (m == null ? '' : JSON.stringify(m));
 
 /** "admin.terminal.update": prefiks xira, qolgani qalin - ko'z avval nima qilinganini ushlaydi, keyin qaysi modulda. */
 function Action({ a }: { a: string }) {
@@ -58,14 +60,7 @@ export default function AuditPage() {
     {
       key: 'entity', head: ta('entity'), cell: (r) => <>
         <div>{r.entity ?? ''}</div>
-        {r.entityId ? <div className="font-mono text-[11px] text-muted">{r.entityId}</div> : null}
       </>,
-    },
-    {
-      key: 'meta', head: ta('meta'), cell: (r) => {
-        const s = metaText(r.meta);
-        return <span className="font-mono text-[11px] text-muted">{s.length > 80 ? `${s.slice(0, 80)}...` : s}</span>;
-      },
     },
   ];
 
@@ -79,12 +74,6 @@ export default function AuditPage() {
             <option value="">{ta('allActions')}</option>
             {actions.map((a) => <option key={a.action} value={a.action}>{a.action} ({a.count})</option>)}
           </select>
-        </Labeled>
-        <Labeled label={ta('entity')} className="w-full sm:w-36">
-          <input className={INPUT} value={draft.entity} onChange={set('entity')} />
-        </Labeled>
-        <Labeled label={t('audit.entityId')} className="w-full sm:w-56">
-          <input className={`${INPUT} font-mono`} value={draft.entityId} onChange={set('entityId')} />
         </Labeled>
         <Labeled label={ta('actor')} className="w-full sm:w-56">
           <input className={`${INPUT} font-mono`} value={draft.actor} onChange={set('actor')} />

@@ -265,7 +265,6 @@
       "from": "С даты",
       "to": "По дату",
       "allActions": "Все действия",
-      "entityId": "ID объекта",
       "ip": "IP"
     },
     "settings": {
