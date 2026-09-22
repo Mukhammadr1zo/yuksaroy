@@ -76,12 +76,34 @@ export class MarketService {
   async notifyNew(r: RequestRow): Promise<void> {
     let userIds: string[];
     if (r.board === 'CARGO') {
+      // Yuklash viloyati va qo'shnilari: yuk shu atrofdagi mashinalarga ko'rinadi
       const regions = notifyRegions((r.fromRegion ?? r.regionCode) as RegionCode);
-      const ms = await this.prisma.membership.findMany({
-        where: { isOwner: true, userId: { not: r.createdById }, org: { kinds: { has: 'CARRIER' }, OR: [{ regionCode: { in: regions } }, { regionCode: null }] } },
-        select: { userId: true }, take: 500,
+      const [ms, trucks] = await Promise.all([
+        // isOwner sharti yo'q: dispetcher ham xabar olishi kerak, yukni u tanlaydi
+        this.prisma.membership.findMany({
+          where: { userId: { not: r.createdById }, org: { kinds: { has: 'CARRIER' }, OR: [{ regionCode: { in: regions } }, { regionCode: null }] } },
+          select: { userId: true }, take: 500,
+        }),
+        // Mashinasi bor odam tashkilotsiz ham bo'ladi: ro'yxatdan o'tish oqimi haydovchini
+        // aynan shaxsiy e'lon berishga yuboradi, lekin unga hech qachon yuk xabari bormasdi.
+        // Kuzov turi mos kelsa yoki e'londa ko'rsatilmagan bo'lsa yuboriladi: chatga soatiga
+        // 5 xabar chegarasi bor, filtrsiz haydovchi mos yukni o'tkazib yuborardi.
+        this.prisma.listing.findMany({
+          where: {
+            kind: 'TRUCK', status: 'ACTIVE', isDemo: false,
+            AND: [
+              { OR: [{ serviceRegions: { hasSome: regions } }, { regionCode: { in: regions } }] },
+              ...(r.truckType ? [{ OR: [{ truckType: r.truckType }, { truckType: null }] }] : []),
+            ],
+          },
+          select: { ownerUserId: true, orgId: true }, take: 500,
+        }),
+      ]);
+      userIds = await this.notifications.recipients({
+        userIds: [...ms.map((m) => m.userId), ...trucks.map((l) => l.ownerUserId)],
+        orgIds: trucks.map((l) => l.orgId),
       });
-      userIds = ms.map((m) => m.userId);
+      userIds = userIds.filter((id) => id !== r.createdById);
     } else {
       const ps = await this.prisma.serviceProfile.findMany({ where: { status: 'ACTIVE', serviceType: r.serviceType ?? '', userId: { not: r.createdById } }, select: { userId: true }, take: 500 });
       userIds = ps.map((p) => p.userId);
