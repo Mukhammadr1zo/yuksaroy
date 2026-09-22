@@ -27,6 +27,9 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: opt(z.string().min(10)),
   PLATFORM_ADMIN_PHONES: opt(z.string()),
   API_PUBLIC_URL: opt(z.string().url()),
+  // Ixtiyoriy: yangi yuklar chiqadigan Telegram kanali (masalan -1001234567890 yoki @yuksaroy_yuklar).
+  // Bo'sh bo'lsa post yuborilmaydi. Bot o'sha kanalda administrator bo'lishi kerak.
+  TELEGRAM_CARGO_CHANNEL: opt(z.string()),
   // Ixtiyoriy: Premium to'lov rekvizitlari (matn); bo'sh bo'lsa placeholder ko'rsatiladi
   PREMIUM_PAY_DETAILS: opt(z.string()),
   // Ixtiyoriy: Yordamchi LLM (kalit bo'lmasa faqat lug'at parseri); model va kunlik limitlar (domain YORDAMCHI standart)

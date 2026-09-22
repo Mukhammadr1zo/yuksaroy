@@ -228,16 +228,16 @@ export interface DemoRequest {
 type CargoRow = [RegionCode, RegionCode, string, string, string, number, TruckType, number, number, string];
 const CARGO_ROWS: CargoRow[] = [
   // dan, ga, dan matn, ga matn, yuk, tonna, kuzov, necha kundan keyin, egasi user, tavsif
-  ['UZ-JI', 'UZ-TK', "Jizzax, don ombori", "Toshkent, Sergeli", "Bug'doy uni, qopda", 20, 'TENT', 2, 12, "Qopda 20 tonna un. Yuklash ertalab, ombor yuklovchisi bor. Toshkentda tushirish bir joyda."],
-  ['UZ-FA', 'UZ-TK', "Marg'ilon, fabrika", "Toshkent, Yashnobod", "Tayyor gazlama, rulonda", 12, 'TENT', 3, 39, "Rulonlar nam bo'lmasligi kerak, tent butun bo'lsin. Yuklash 2 soat."],
-  ['UZ-SA', 'UZ-XO', "Samarqand, sovutgich ombori", "Urganch", "Olma, yashikda", 16, 'REF', 1, 40, "Harorat +2 dan +4 gacha. Kechasi yo'lga chiqsa yaxshi, ertalab Urganchda bo'lsin."],
-  ['UZ-TK', 'UZ-BU', "Toshkent, Chuqursoy", "Buxoro, sanoat zonasi", "Uskuna, 2 ta konteyner 20 fut", 24, 'CONTAINER', 5, 8, "Ikki konteyner, bitta mashinaga sig'adi. Terminalda yuklash navbati bor, oldindan kelish kerak."],
-  ['UZ-NW', 'UZ-SA', "Navoiy, karer", "Samarqand, qurilish", "Shag'al", 25, 'TIPPER', 1, 9, "Har kuni 4-5 reys, bir hafta davomida. Bir mashina emas, bir nechta kerak."],
-  ['UZ-AN', 'UZ-TK', "Andijon, avtozavod hududi", "Toshkent, Yangihayot", "Avto ehtiyot qismlar, palletda", 8, 'TENT', 4, 12, "22 pallet, ehtiyot qismlar. Yuk qimmat, sug'urta bo'lsa afzal."],
-  ['UZ-QA', 'UZ-TK', "Qarshi", "Toshkent, Qo'yliq", "Kartoshka, qopda", 20, 'TENT', 2, 39, "Bozorga ertalab yetib borishi kerak. Yuklash kechqurun, dalada."],
-  ['UZ-BU', 'UZ-NW', "Buxoro, moy zavodi", "Navoiy", "Paxta moyi", 20, 'TANK', 6, 40, "Oziq-ovqat sisternasi kerak, yuvilgan va dalolatnomasi bilan. Ikki reys."],
-  ['UZ-TK', 'UZ-SU', "Toshkent, Sergeli", "Termiz", "Qurilish texnikasi, ekskavator", 18, 'FLATBED', 7, 8, "Bitta ekskavator, o'zi chiqadi. Balandligi 3,2 metr, yo'lda ko'prik bor-yo'qligini tekshiring."],
-  ['UZ-XO', 'UZ-TK', "Xiva", "Toshkent, Chilonzor", "Qovun, yashikda", 14, 'REF', 3, 12, "Mavsum yuki, 3 kun ichida jo'nashi kerak. Sovutgich +8 atrofida."],
+  ['UZ-JI', 'UZ-TK', "Jizzax, don ombori", "Toshkent, Sergeli", "Bug'doy uni, qopda", 20, 'TENT', 12, 12, "Qopda 20 tonna un. Yuklash ertalab, ombor yuklovchisi bor. Toshkentda tushirish bir joyda."],
+  ['UZ-FA', 'UZ-TK', "Marg'ilon, fabrika", "Toshkent, Yashnobod", "Tayyor gazlama, rulonda", 12, 'TENT', 18, 39, "Rulonlar nam bo'lmasligi kerak, tent butun bo'lsin. Yuklash 2 soat."],
+  ['UZ-SA', 'UZ-XO', "Samarqand, sovutgich ombori", "Urganch", "Olma, yashikda", 16, 'REF', 9, 40, "Harorat +2 dan +4 gacha. Kechasi yo'lga chiqsa yaxshi, ertalab Urganchda bo'lsin."],
+  ['UZ-TK', 'UZ-BU', "Toshkent, Chuqursoy", "Buxoro, sanoat zonasi", "Uskuna, 2 ta konteyner 20 fut", 24, 'CONTAINER', 25, 8, "Ikki konteyner, bitta mashinaga sig'adi. Terminalda yuklash navbati bor, oldindan kelish kerak."],
+  ['UZ-NW', 'UZ-SA', "Navoiy, karer", "Samarqand, qurilish", "Shag'al", 25, 'TIPPER', 14, 9, "Har kuni 4-5 reys, bir hafta davomida. Bir mashina emas, bir nechta kerak."],
+  ['UZ-AN', 'UZ-TK', "Andijon, avtozavod hududi", "Toshkent, Yangihayot", "Avto ehtiyot qismlar, palletda", 8, 'TENT', 21, 12, "22 pallet, ehtiyot qismlar. Yuk qimmat, sug'urta bo'lsa afzal."],
+  ['UZ-QA', 'UZ-TK', "Qarshi", "Toshkent, Qo'yliq", "Kartoshka, qopda", 20, 'TENT', 11, 39, "Bozorga ertalab yetib borishi kerak. Yuklash kechqurun, dalada."],
+  ['UZ-BU', 'UZ-NW', "Buxoro, moy zavodi", "Navoiy", "Paxta moyi", 20, 'TANK', 27, 40, "Oziq-ovqat sisternasi kerak, yuvilgan va dalolatnomasi bilan. Ikki reys."],
+  ['UZ-TK', 'UZ-SU', "Toshkent, Sergeli", "Termiz", "Qurilish texnikasi, ekskavator", 18, 'FLATBED', 16, 8, "Bitta ekskavator, o'zi chiqadi. Balandligi 3,2 metr, yo'lda ko'prik bor-yo'qligini tekshiring."],
+  ['UZ-XO', 'UZ-TK', "Xiva", "Toshkent, Chilonzor", "Qovun, yashikda", 14, 'REF', 23, 12, "Mavsum yuki, sovutgich +8 atrofida ushlansin."],
 ];
 type ServiceReqRow = [ServiceType, RegionCode, string, number, string];
 const SERVICE_REQ_ROWS: ServiceReqRow[] = [

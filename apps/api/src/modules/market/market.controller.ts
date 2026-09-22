@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { randomBytes } from 'node:crypto';
-import { MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizeUzPhone, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
+import { MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizeUzPhone, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
@@ -45,13 +45,32 @@ class AwardDto {
   @IsString() offerId!: string;
 }
 
+class RelistDto {
+  @IsString() @MaxLength(10) loadDate!: string;
+}
+
 // Har so'rov hududdagi ta'minotchilarga xabar yuboradi: chelak foydalanuvchi bo'yicha
 const createBucket = new IpBucket(MARKET.requestsPerHour, 3_600_000);
 const offerBucket = new IpBucket(MARKET.offersPerHour, 3_600_000);
+// Qayta e'lon qilish so'rovni doskaning tepasiga qaytaradi: kuniga uchtadan ko'p emas
+const relistBucket = new IpBucket(3, 24 * 3_600_000);
 const limit = (b: IpBucket, userId: string) => { if (!b.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
 const inList = (list: readonly string[], v: string | undefined) => (v && list.includes(v) ? v : undefined);
-/** Ro'yxatda ko'rinadigan so'rov: ochiq va eskirmagan. */
-const visible = (now = new Date()) => ({ status: 'OPEN', createdAt: { gte: staleBefore(now) } });
+/**
+ * Ro'yxatda ko'rinadigan so'rov: ochiq, eskirmagan va yuklash sanasi o'tmagan.
+ *
+ * Sanasi o'tgan yuk doskada turaverardi va tashuvchi unga qo'ng'iroq qilib vaqtini
+ * yo'qotardi. Holat o'zgarmaydi: eski havola ishlayveradi, egasi so'rovni kabinetida
+ * ko'radi va bir bosishda yangi sana bilan qaytara oladi.
+ *
+ * Sana Toshkent kuni bilan solishtiriladi va shartlar AND ichida: ro'yxatdagi viloyat
+ * filtri OR ni band qilgan, shu yerga yozilsa ikkalasi bir-birini bosib qolardi.
+ */
+const visible = (now = new Date()) => ({
+  status: 'OPEN',
+  createdAt: { gte: staleBefore(now) },
+  AND: [{ OR: [{ loadDate: null }, { loadDate: { gte: new Date(`${uzLocalDate(now)}T00:00:00Z`) } }] }],
+});
 
 /**
  * Bozor so'rovlari: yuk e'lonlari (CARGO) va xizmat so'rovlari (SERVICE) bitta hayot siklida.
@@ -170,7 +189,9 @@ export class MarketController {
       });
     });
     await this.audit.log({ actorId: userId, action: 'market.request.create', entity: 'MarketRequest', entityId: r.id, meta: { no: r.no, board: r.board } });
-    void this.market.notifyNew(r).catch(() => {}); // javobni kutmaydi
+    void this.market.notifyNew(r).catch(() => {});
+    // Kanal posti alohida: notifyNew mos odamlarga ketadi, kanal esa ochiq ro'yxat
+    void this.market.postChannel(r).catch(() => {}); // javobni kutmaydi
     return { ...requestView(r, 0, true), offers: [] };
   }
 
@@ -234,6 +255,30 @@ export class MarketController {
 
   @Post('requests/:id/cancel') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
   cancel(@CurrentUserId() userId: string, @Param('id') id: string) { return this.transition(userId, id, 'CANCELLED'); }
+
+  /**
+   * Sanasi o'tgan yukni yangi sana bilan doskaga qaytarish.
+   *
+   * Yangi so'rov yaratish emas: raqam, takliflar va ochiq holat sahifasi o'sha joyida
+   * qoladi. Doska createdAt bo'yicha saralanadi, shuning uchun u ham yangilanadi.
+   */
+  @Post('requests/:id/relist') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
+  async relist(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: RelistDto) {
+    limit(relistBucket, userId);
+    const r = await this.owned(userId, id);
+    if (r.board !== 'CARGO') throw new ConflictException({ code: 'RELIST_NOT_ALLOWED', status: r.status });
+    const errors = validateRequest({ ...r, loadDate: dto.loadDate });
+    if (errors.loadDate) throw new BadRequestException({ code: 'VALIDATION', errors: { loadDate: errors.loadDate } });
+    // Yozuv o'qilgan holatga shartlangan: boshqa oynada bekor qilingan so'rov
+    // 200 bilan qaytib, kabinetda o'zgargandek ko'rinmasin
+    const { count } = await this.prisma.marketRequest.updateMany({
+      where: { id, status: 'OPEN' },
+      data: { loadDate: new Date(`${dto.loadDate}T00:00:00Z`), createdAt: new Date() },
+    });
+    if (!count) throw new ConflictException({ code: 'RELIST_NOT_ALLOWED', status: r.status });
+    await this.audit.log({ actorId: userId, action: 'market.relist', entity: 'MarketRequest', entityId: id, meta: { loadDate: dto.loadDate } });
+    return this.mineOne(id);
+  }
 
   /** Ochiq holat sahifasi (/m/:token): narx yo'q, telefon yo'q. */
   @Get('status/:token')

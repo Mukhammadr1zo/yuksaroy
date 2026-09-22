@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
-import { som, uzDateTime } from '@/lib/format';
+import { som, uzDateTime, uzToday } from '@/lib/format';
 import type { MarketOffer, MarketRequest, Paged, ServiceProfileCard } from '@/lib/types-market';
 import { Pager } from '@/components/admin/kit';
-import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, Notice } from '@/components/kabinet/bits';
+import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, INPUT, Notice } from '@/components/kabinet/bits';
 import { DemoBadge, MarketStatusPill, OfferStatusPill, useMarketLabels } from '@/components/market/bits';
 import { ProfileForm } from '@/components/market/ProfileForm';
 import { requestHref } from '@/components/market/RequestCard';
@@ -61,6 +61,8 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(focusId);
   const [copied, setCopied] = useState<string | null>(null);
+  // Qayta e'lon qilish uchun yozilayotgan sana: so'rov id si bo'yicha, bir vaqtda bittasi ochiq
+  const [relistDate, setRelistDate] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -77,6 +79,17 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
       const r = await post<MarketRequest>(`/market/requests/${id}/${what}`, offerId ? { offerId } : {});
       setItems((xs) => (xs ?? []).map((x) => (x.id === id ? r : x)));
     } catch { setErr(tc('failed')); } finally { setBusy(null); }
+  }
+  /** Sanasi o'tgan yukni yangi sana bilan doskaga qaytarish: raqam va takliflar o'sha joyida qoladi. */
+  async function relist(id: string) {
+    const loadDate = relistDate[id];
+    if (!loadDate) return;
+    setBusy(`${id}:relist`); setErr(null);
+    try {
+      const r = await post<MarketRequest>(`/market/requests/${id}/relist`, { loadDate });
+      setItems((xs) => (xs ?? []).map((x) => (x.id === id ? r : x)));
+      setRelistDate((d) => ({ ...d, [id]: '' }));
+    } catch { setErr(t('err.RELIST_NOT_ALLOWED')); } finally { setBusy(null); }
   }
   async function copy(id: string, url: string) {
     try { await navigator.clipboard.writeText(url); setCopied(id); window.setTimeout(() => setCopied(null), 2000); } catch { setCopied(null); }
@@ -115,6 +128,20 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                     {r.status === 'OPEN' || r.status === 'AWARDED' ? <button type="button" onClick={() => act(r.id, 'close')} disabled={busy !== null} className={BTN_GHOST}>{busy === `${r.id}:close` ? t('closing') : t('close')}</button> : null}
                     {r.status === 'OPEN' ? <button type="button" onClick={() => act(r.id, 'cancel')} disabled={busy !== null} className={BTN_GHOST}>{busy === `${r.id}:cancel` ? t('cancelling') : t('cancel')}</button> : null}
                   </div>
+                  {/* Sanasi o'tgan yuk doskadan tushadi, lekin bu yerda qoladi: yangi sana bilan qaytariladi */}
+                  {r.status === 'OPEN' && r.board === 'CARGO' && r.loadDate && r.loadDate.slice(0, 10) < uzToday() ? (
+                    <div className="mt-3">
+                      <Notice tone="warn">{t('relistHint')}</Notice>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <input type="date" min={uzToday()} value={relistDate[r.id] ?? ''} aria-label={t('relistDate')}
+                          onChange={(e) => setRelistDate((d) => ({ ...d, [r.id]: e.target.value }))}
+                          className={`${INPUT} font-mono sm:w-auto sm:flex-1`} />
+                        <button type="button" onClick={() => relist(r.id)} disabled={busy !== null || !relistDate[r.id]} className={BTN_NAVY}>
+                          {busy === `${r.id}:relist` ? t('relisting') : t('relist')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                   {r.status === 'AWARDED' ? <div className="mt-3"><Notice tone="ok">{t('awardedNote')}</Notice></div> : null}
                   {r.statusUrl ? (
                     <div className="mt-3">

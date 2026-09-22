@@ -45,6 +45,13 @@ const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map()) => {
 };
 const statusUrl = (token: string) => `${env.WEB_ORIGIN}/status/${token}`;
 // Har so'rov hududdagi provayderlarga Telegram xabar yuboradi, shuning uchun foydalanuvchi bo'yicha chelak
+/**
+ * Ijrochi ro'yxatida so'rov qancha turadi. Shoshilinch ish ikki kundan keyin
+ * shoshilinch emas; hisobotda 24 soat taklif qilingan edi, lekin tunda yuborilgan
+ * so'rov ertasi kuni kechqurun ro'yxatdan tushib, ijrochining ko'ziga tushmay qolardi.
+ */
+const URGENT_LIST_HOURS = 48;
+
 const createBucket = new IpBucket(5, 3_600_000); // soatiga 5 ta shoshilinch so'rov
 const offerBucket = new IpBucket(20, 3_600_000); // soatiga 20 ta taklif
 const limit = (b: IpBucket, userId: string) => { if (!b.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
@@ -151,8 +158,12 @@ export class UrgentController {
     // ponytail: hududi kiritilmagan tashkilot hamma so'rovni ko'radi
     const all = ms.some((m) => !m.org.regionCode);
     const regions = [...new Set(ms.flatMap((m) => (m.org.regionCode ? notifyRegions(m.org.regionCode as RegionCode) : [])))];
+    // Shoshilinch ish ikki kundan keyin shoshilinch emas: egasi yopishni unutgan so'rov
+    // ro'yxatni to'ldirib, ijrochini o'lik qatorlarga qo'ng'iroq qilishga majburlardi.
+    // Holat o'zgarmaydi: egasi uni o'z kabinetida ko'radi.
+    const fresh = new Date(Date.now() - URGENT_LIST_HOURS * 3_600_000);
     const rows = await this.prisma.urgentRequest.findMany({
-      where: { status: 'OPEN', createdById: { not: userId }, ...(all ? {} : { regionCode: { in: regions } }) },
+      where: { status: 'OPEN', createdById: { not: userId }, createdAt: { gte: fresh }, ...(all ? {} : { regionCode: { in: regions } }) },
       include: { offers: { where: { providerUserId: userId } } },
       orderBy: { createdAt: 'desc' }, take: 100,
     });

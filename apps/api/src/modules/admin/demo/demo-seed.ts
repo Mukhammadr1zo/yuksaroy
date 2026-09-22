@@ -61,6 +61,8 @@ export async function seedDemo(prisma: PrismaClient, now = new Date()): Promise<
 
   for (const r of DEMO_REQUESTS) {
     const { id, loadInDays, ...rest } = r;
+    // Namuna hayoti ikki shart bilan kesiladi: createdAt (30 kunlik eskirish) va yuklash sanasi.
+    // Sana shu oynaga sig'ishi shart, aks holda namuna yuklar doskadan erta tushib ketadi.
     // Yuklash sanasi doim kelajakda va createdAt ham bugun: bozor 30 kundan eski so'rovni ko'rsatmaydi,
     // qayta yuklash namuna so'rovlarni doskaga qaytarishi kerak
     const data = { ...rest, loadDate: loadInDays === null ? null : new Date(now.getTime() + loadInDays * DAY), createdAt: now, contactPhone: null, status: 'OPEN', awardedOfferId: null, isDemo: true };

@@ -74,7 +74,7 @@ function db(reqs: Req[], offers: Off[], profiles: Prof[] = []) {
 }
 
 const audit = { log: async () => {} } as unknown as AuditService;
-const market = { orgsOf: async () => new Map(), namesOf: async () => new Map(), memberOrgId: async () => null, activeServiceTypes: async () => [], notifyAward: async () => {}, notifyOffer: async () => {}, notifyNew: async () => {} } as unknown as MarketService;
+const market = { orgsOf: async () => new Map(), namesOf: async () => new Map(), memberOrgId: async () => null, activeServiceTypes: async () => [], notifyAward: async () => {}, notifyOffer: async () => {}, notifyNew: async () => {}, postChannel: async () => {} } as unknown as MarketService;
 // Token = sessiya nomi: "live" tirik, "revoked" bekor qilingan, boshqasi noto'g'ri imzo
 const tokens = { verifyAccess: (t: string) => { if (t === 'live' || t === 'revoked') return { sub: 'owner', sid: t }; throw new Error('TOKEN_INVALID'); } } as unknown as TokenService;
 const users = { findById: async (id: string) => ({ id, isActive: true }) } as unknown as UserRepository;

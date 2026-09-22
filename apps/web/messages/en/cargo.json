@@ -215,6 +215,13 @@
         "saving": "Saving",
         "cancel": "Cancel",
         "PROFILE_EXISTS": "You already have a profile of this type. Edit it instead."
+      },
+      "relistHint": "The load date has passed, so this load is not on the board. Set a new date and it comes back within a few minutes.",
+      "relistDate": "New load date",
+      "relist": "Post again",
+      "relisting": "Sending",
+      "err": {
+        "RELIST_NOT_ALLOWED": "The request could not be reposted. Refresh the page."
       }
     }
   }

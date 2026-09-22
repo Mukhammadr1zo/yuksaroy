@@ -215,6 +215,13 @@
         "saving": "Saqlanmoqda",
         "cancel": "Bekor",
         "PROFILE_EXISTS": "Bu turda profilingiz bor. Uni tahrirlang."
+      },
+      "relistHint": "Yuklash sanasi o'tgan, shuning uchun bu yuk doskada ko'rinmaydi. Yangi sana qo'ysangiz bir necha daqiqada qaytadan chiqadi.",
+      "relistDate": "Yangi yuklash sanasi",
+      "relist": "Qayta e'lon qilish",
+      "relisting": "Yuborilmoqda",
+      "err": {
+        "RELIST_NOT_ALLOWED": "So'rovni qaytarib bo'lmadi. Sahifani yangilang."
       }
     }
   }

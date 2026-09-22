@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { REGION_LABELS, SERVICE_TYPE_LABELS, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
+import { REGION_LABELS, SERVICE_TYPE_LABELS, uzLocalDate, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
+import { env } from '../../common/env';
 import { PrismaService } from '../../common/prisma.service';
-import { notifyTelegram, webUrl } from '../../common/telegram';
+import { esc, notifyTelegram, sendTelegram, webUrl } from '../../common/telegram';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
 import { notifyRegions } from './market.rules';
 
@@ -117,6 +118,31 @@ export class MarketService {
     await notifyTelegram(this.prisma, { userIds }, r.board === 'CARGO' ? 'marketCargoNew' : 'marketServiceNew', (l) => ({
       no: r.no, title: r.title.slice(0, 200), where, what: r.board === 'CARGO' ? cargoWhat : svc(l, r.serviceType), url: webUrl(href),
     }));
+  }
+
+  /**
+   * Yangi yuk Telegram kanaliga bitta post bo'lib chiqadi: bu birinchi bepul tarqatish yo'li.
+   *
+   * Narx ham, telefon ham yo'q: kanal ochiq, raqam esa faqat saytda va obuna ortida.
+   * Namuna qatorlar chiqmaydi. Kanal id si muhit o'zgaruvchisida; qo'yilmagan bo'lsa
+   * hech narsa yuborilmaydi va hech narsa buzilmaydi.
+   *
+   * Faqat prodda: dev va prod bitta bot tokenini bo'lishadi, ya'ni mahalliy ishga tushirish
+   * haqiqiy kanalga post yozib yuborardi.
+   */
+  async postChannel(r: RequestRow): Promise<void> {
+    const chat = env.TELEGRAM_CARGO_CHANNEL;
+    if (!chat || env.NODE_ENV !== 'production' || r.board !== 'CARGO' || r.isDemo) return;
+    const where = `${region(r.fromRegion)} -> ${region(r.toRegion)}`;
+    const what = `${r.cargoName ?? ''}${r.weightT ? `, ${r.weightT} t` : ''}`;
+    const when = r.loadDate ? uzLocalDate(r.loadDate) : '';
+    const lines = [
+      `<b>${esc(where)}</b>`,
+      esc(what),
+      when ? `Yuklash: ${esc(when)}` : '',
+      webUrl(`/cargo/${r.no}`),
+    ].filter(Boolean);
+    await sendTelegram([chat], lines.join(String.fromCharCode(10)));
   }
 
   /** Yangi taklif: so'rov egasiga. */

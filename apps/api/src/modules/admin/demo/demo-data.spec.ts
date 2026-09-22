@@ -69,8 +69,10 @@ describe('namuna ma\'lumotlar', () => {
       expect(r.fromRegion).toBe(r.regionCode);
       expect((TRUCK_TYPES as readonly string[]).includes(r.truckType!)).toBe(true);
       expect(r.weightT).toBeGreaterThan(0);
-      expect(r.loadInDays).toBeGreaterThanOrEqual(1);
-      expect(r.loadInDays).toBeLessThanOrEqual(14);
+      // Yuklash sanasi doskaning ikki shartiga ham sig'ishi kerak: sanasi o'tgan yuk
+      // tushib qoladi, 30 kundan eskisi ham. Namuna esa bir marta ekiladi.
+      expect(r.loadInDays).toBeGreaterThanOrEqual(9);
+      expect(r.loadInDays).toBeLessThanOrEqual(29);
     }
     for (const r of service) expect((SERVICE_TYPES as readonly string[]).includes(r.serviceType!)).toBe(true);
   });
