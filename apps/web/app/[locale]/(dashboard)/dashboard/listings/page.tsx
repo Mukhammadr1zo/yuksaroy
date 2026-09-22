@@ -8,6 +8,7 @@ import { api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
 import { listingHref, type OwnerListing } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, ListingStatusPill, Notice, errText, useLang, useListingLabels } from '@/components/kabinet/bits';
+import { OpenCargoLink } from '@/components/kabinet/OpenCargoLink';
 import { PremiumBadge } from '@/components/catalog/PremiumBadge';
 
 export default function MyListingsPage() {
@@ -23,6 +24,8 @@ export default function MyListingsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  // Chop etilgan e'lonning o'zi: ochiq yuklar havolasi shundan viloyat va holatni oladi
+  const [live, setLive] = useState<OwnerListing | null>(null);
 
   const load = () => api<OwnerListing[]>('/listings/mine').then(setItems).catch(() => setErr(tc('loadFailed')));
   useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -31,10 +34,11 @@ export default function MyListingsPage() {
     if (what === 'delete' && !window.confirm(t('confirmDelete'))) return;
     setBusy(`${l.id}:${what}`); setErr(null); setOk(null);
     try {
-      if (what === 'delete') { await api(`/listings/${l.id}`, { method: 'DELETE' }); setItems((xs) => xs?.filter((x) => x.id !== l.id) ?? null); }
+      if (what === 'delete') { await api(`/listings/${l.id}`, { method: 'DELETE' }); setItems((xs) => xs?.filter((x) => x.id !== l.id) ?? null); setLive(null); }
       else {
         const r = await post<OwnerListing>(`/listings/${l.id}/${what}`, {});
         setItems((xs) => xs?.map((x) => (x.id === l.id ? r : x)) ?? null);
+        setLive(what === 'publish' ? r : null);
         if (what === 'publish') setOk(`${l.title}: ${t(r.status === 'ACTIVE' ? 'published.ACTIVE' : 'published.PENDING_REVIEW')}`);
       }
     } catch (e) { setErr(errText(e, te, te.has, tc('failed'))); } finally { setBusy(null); }
@@ -48,7 +52,7 @@ export default function MyListingsPage() {
       </div>
 
       {err ? <div className="mt-5"><Notice tone="err">{err}</Notice></div> : null}
-      {ok ? <div className="mt-5"><Notice tone="ok">{ok}</Notice></div> : null}
+      {ok ? <div className="mt-5"><Notice tone="ok">{ok} <OpenCargoLink l={live} /></Notice></div> : null}
       {!items && !err ? <p className="mt-6 text-sm text-muted">{tc('loading')}</p> : null}
 
       {items && items.length === 0 ? (

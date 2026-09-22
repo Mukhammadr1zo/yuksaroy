@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { LISTING_STATUSES } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
@@ -39,6 +39,9 @@ export class AdminListingsController {
   @Post(':id/decide')
   @HttpCode(200)
   async decide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: DecideDto) {
+    // Sabab egasiga ko'rinadi va qayta yuborilgan e'lonni tekshiruvda ushlab turadi:
+    // sababsiz rad etilsa e'lon ikkinchi bosishda hech kim ko'rmasdan katalogga tushardi
+    if (!dto.approve && !dto.reason?.trim()) throw new BadRequestException({ code: 'REASON_REQUIRED' });
     const l = await this.listings.decide(id, dto.approve, dto.reason ?? null);
     await this.audit.log({ actorId: userId, action: 'listing.decide', entity: 'Listing', entityId: id, meta: { approve: dto.approve, reason: dto.reason ?? null } });
     return ownerListing(l);

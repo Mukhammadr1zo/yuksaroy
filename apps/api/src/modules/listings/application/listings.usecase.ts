@@ -23,6 +23,13 @@ export function inputOf(l: ListingRecord): ListingInput {
 
 const expiry = (now: Date) => new Date(now.getTime() + LISTING.expireDays * 86_400_000);
 
+/**
+ * Yakka odam tekshiruvsiz nechta e'lonni bir vaqtda faol ushlab turishi mumkin.
+ * Haydovchida odatda bitta mashina bo'ladi; uchtadan ko'pi bu bitta odam emas, ya'ni
+ * keyingisi odamning ko'zidan o'tsin.
+ */
+const PERSON_ACTIVE_MAX = 3;
+
 @Injectable()
 export class ListingsUseCase {
   constructor(
@@ -53,17 +60,46 @@ export class ListingsUseCase {
     return { listing: await this.repo.update(id, { ...input, ...point }), warnings };
   }
 
-  /** Egasi yuboradi: KYC VERIFIED bo'lsa darhol ACTIVE (SYSTEM), aks holda PENDING_REVIEW. Shaxsiy e'lon doim tekshiruvga. */
+  /**
+   * Egasi yuboradi: tasdiqlangan tashkilot yoki telefoni tasdiqlangan yakka haydovchi
+   * darhol ACTIVE (SYSTEM), qolganlari PENDING_REVIEW.
+   */
   async publish(userId: string, id: string) {
     const l = await this.owned(userId, id);
-    const m = l.orgId ? await this.access.membership(userId, l.orgId) : null;
     this.transition(l, 'PENDING_REVIEW', 'OWNER');
     const now = new Date();
-    if (m?.org.kycStatus !== 'VERIFIED') return this.repo.setStatus(id, { status: 'PENDING_REVIEW', rejectReason: null });
+    if (!(await this.instant(l, userId, now))) return this.repo.setStatus(id, { status: 'PENDING_REVIEW', rejectReason: null });
     const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
     // Obuna e'lonni ham ko'taradi: alohida Premium sotib olish yo'q
     await this.subs.raiseListing(userId, id);
     return out;
+  }
+
+  /**
+   * Tekshiruvsiz darhol faol bo'ladimi.
+   *
+   * Tashkilot: tasdiqdan o'tgan bo'lsa (eski qoida o'zgarmaydi).
+   * Yakka haydovchi: telefoni kod bilan tasdiqlangan (telefon User qatoriga faqat shu yo'l
+   * bilan tushadi) va shu paytda uchtadan ko'p faol e'loni yo'q. Ro'yxatdan o'tish oqimi
+   * haydovchini aynan shaxsiy e'lon berishga yuboradi, lekin e'loni tekshiruvni kutib
+   * turardi va u o'sha kuni bozorda ko'rinmasdi.
+   *
+   * Admin sabab yozgan e'lon bu yo'ldan o'tmaydi. Faqat REJECTED ni tekshirish yetmaydi:
+   * decide() faol e'lonni tortib olganda ARCHIVED yozadi va sababni o'sha qatorga qo'yadi,
+   * ARCHIVED dan qayta yuborish esa egasiga ochiq. Sabab bor ekan, ikkinchi qarash kerak.
+   *
+   * Namuna e'lonlar uchun alohida shart yo'q: ular bazaga to'g'ridan-to'g'ri ACTIVE holida
+   * ekiladi va egasi hisobi faol emas, ya'ni bu yo'lga umuman kira olmaydi.
+   */
+  private async instant(l: ListingRecord, userId: string, now: Date): Promise<boolean> {
+    if (l.status === 'REJECTED' || l.rejectReason) return false;
+    if (l.orgId) return (await this.access.membership(userId, l.orgId))?.org.kycStatus === 'VERIFIED';
+    if (l.kind !== 'TRUCK' || !l.ownerUserId || !l.ownerUser?.phone) return false;
+    // Muddati o'tgan ACTIVE qatorlar sanalmaydi: ularni hech kim EXPIRED ga surmaydi
+    const active = await this.prisma.listing.count({
+      where: { ownerUserId: l.ownerUserId, status: 'ACTIVE', id: { not: l.id }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+    });
+    return active < PERSON_ACTIVE_MAX;
   }
 
   async archive(userId: string, id: string) {

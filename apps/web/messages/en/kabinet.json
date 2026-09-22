@@ -87,7 +87,8 @@
       "published": {
         "PENDING_REVIEW": "Sent for review",
         "ACTIVE": "Listing is active"
-      }
+      },
+      "cargoOpen": "{region}: {count, plural, one {# open load} other {# open loads}}"
     },
     "form": {
       "titleNew": "New listing",
@@ -177,7 +178,7 @@
       "saved": "Draft saved",
       "published": {
         "PENDING_REVIEW": "Sent for review. The listing goes live once a moderator approves it.",
-        "ACTIVE": "Listing is active. The organization is verified, no moderation needed."
+        "ACTIVE": "Listing is active."
       },
       "currentStatus": "Status",
       "err": {

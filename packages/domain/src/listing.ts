@@ -31,7 +31,7 @@ export type ListingActor = 'OWNER' | 'ADMIN' | 'SYSTEM';
 
 export const LISTING_TRANSITIONS: readonly { from: ListingStatus; to: ListingStatus; actors: readonly ListingActor[] }[] = [
   { from: 'DRAFT', to: 'PENDING_REVIEW', actors: ['OWNER'] },
-  { from: 'PENDING_REVIEW', to: 'ACTIVE', actors: ['ADMIN', 'SYSTEM'] }, // SYSTEM: tashkilot KYC VERIFIED bo'lsa darhol
+  { from: 'PENDING_REVIEW', to: 'ACTIVE', actors: ['ADMIN', 'SYSTEM'] }, // SYSTEM: tasdiqlangan tashkilot yoki telefoni tasdiqlangan haydovchi uchun darhol
   { from: 'PENDING_REVIEW', to: 'REJECTED', actors: ['ADMIN'] },
   { from: 'REJECTED', to: 'PENDING_REVIEW', actors: ['OWNER'] },
   { from: 'ACTIVE', to: 'ARCHIVED', actors: ['OWNER', 'ADMIN'] },

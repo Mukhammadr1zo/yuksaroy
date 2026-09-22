@@ -1,6 +1,6 @@
 'use client';
 // E'lon formasi: 1) tur tanlash, 2) LISTING_RULES bo'yicha maydonlar. validateListing jonli: xatolar inline (urinishdan keyin), tavsiyalar amber.
-// Qoralama: POST/PATCH /listings. E'lon berish: saqlash + POST /listings/:id/publish (VERIFIED tashkilot darhol ACTIVE).
+// Qoralama: POST/PATCH /listings. E'lon berish: saqlash + POST /listings/:id/publish (tasdiqlangan tashkilot va telefoni tasdiqlangan haydovchi darhol ACTIVE).
 // Egasi: TRUCK ni shaxsan (orgId yo'q) yoki tashkilot nomidan; temir yo'l turlari faqat tashkilot (ORG_REQUIRED). Egasi keyin o'zgarmaydi.
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -13,6 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { ApiError, api, post } from '@/lib/api';
 import type { Membership, MyTerminal, OwnerListing } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_PRIMARY, CHIP, Field, INPUT, ListingStatusPill, Notice, useListingLabels } from './bits';
+import { OpenCargoLink } from './OpenCargoLink';
 import { PhotoUpload } from './PhotoUpload';
 import { PhoneField } from '@/components/ui/fields';
 
@@ -118,7 +119,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
       const p = await post<OwnerListing>(`/listings/${l.id}/publish`, {});
       setStatus(p.status);
       const key = p.status === 'ACTIVE' ? 'published.ACTIVE' : 'published.PENDING_REVIEW';
-      setNotice({ tone: 'ok', text: <>{t(key)} <Link href="/dashboard/listings" className="ml-2 font-semibold underline">{t('backToList')}</Link></> });
+      setNotice({ tone: 'ok', text: <>{t(key)} <Link href="/dashboard/listings" className="ml-2 font-semibold underline">{t('backToList')}</Link> <OpenCargoLink l={p} /></> });
     } catch (e) { setNotice({ tone: 'err', text: apiErr(e) }); } finally { setBusy(null); }
   }
 

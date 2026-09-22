@@ -87,7 +87,8 @@
       "published": {
         "PENDING_REVIEW": "Tekshiruvga yuborildi",
         "ACTIVE": "E'lon faol"
-      }
+      },
+      "cargoOpen": "{region}: {count} ta ochiq yuk"
     },
     "form": {
       "titleNew": "Yangi e'lon",
@@ -177,7 +178,7 @@
       "saved": "Qoralama saqlandi",
       "published": {
         "PENDING_REVIEW": "Tekshiruvga yuborildi. Moderator ko'rib chiqqach e'lon faol bo'ladi.",
-        "ACTIVE": "E'lon faol. Tashkilot tasdiqlangan, moderatsiya shart emas."
+        "ACTIVE": "E'lon faol."
       },
       "currentStatus": "Holat",
       "err": {

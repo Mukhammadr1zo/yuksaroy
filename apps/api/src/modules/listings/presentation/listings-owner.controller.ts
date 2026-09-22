@@ -48,7 +48,7 @@ export class ListingsOwnerController {
     return { ...ownerListing(listing), warnings };
   }
 
-  /** DRAFT/REJECTED/ARCHIVED/EXPIRED -> PENDING_REVIEW; tashkilot KYC VERIFIED bo'lsa darhol ACTIVE. */
+  /** DRAFT/REJECTED/ARCHIVED/EXPIRED -> PENDING_REVIEW; tasdiqlangan tashkilot yoki telefoni tasdiqlangan haydovchi darhol ACTIVE. */
   @Post('listings/:id/publish')
   @HttpCode(200)
   async publish(@CurrentUserId() userId: string, @Param('id') id: string) {
