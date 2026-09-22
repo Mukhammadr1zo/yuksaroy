@@ -10,14 +10,17 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { DRailwayClient } from './d-railway.client';
-import { CACHE_MS, canSearch, deriveCurrent, mapEvents, serialize, upstreamNo, type WagonEvent } from './wagon.rules';
+import { CACHE_MS, canSearch, deriveCurrent, serialize, upstreamNo, type WagonEvent } from './wagon.rules';
 
 class SearchDto {
   @IsString() @MaxLength(20) no!: string;
 }
 
-/** Bazada saqlanadigan natija: kesh ham, foydalanuvchiga javob ham shu. */
-type Stored = { current: WagonEvent | null; events: WagonEvent[]; fetchedAt: string };
+/**
+ * Bazada saqlanadigan natija: kesh ham, foydalanuvchiga javob ham shu.
+ * Harakat tarixi saqlanmaydi va yuborilmaydi: sahifa faqat joriy joylashuvni ko'rsatadi.
+ */
+type Stored = { current: WagonEvent | null; fetchedAt: string };
 
 // Har qidiruv upstream ga so'rov: foydalanuvchi bo'yicha soatiga 30 ta
 const searchBucket = new IpBucket(30, 3_600_000);
@@ -89,7 +92,7 @@ export class WagonController {
         throw new HttpException({ code: 'WAGON_UPSTREAM' }, 502);
       }
       found = h !== null;
-      result = { current: h ? deriveCurrent(h.events) : null, events: h ? mapEvents(h.events) : [], fetchedAt: new Date().toISOString() };
+      result = { current: h ? deriveCurrent(h.events) : null, fetchedAt: new Date().toISOString() };
     }
     // ponytail: o'zining qatori bor, kesh esa eskirgan (kam uchraydi) bo'lsa yangi natija saqlanmaydi: har qator kvota sanaydi
     if (!own) {

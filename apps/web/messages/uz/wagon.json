@@ -32,7 +32,6 @@
     "cargo": "Yuk",
     "weight": "{t} t",
     "fetchedAt": "Yangilangan: {at}",
-    "history": "Harakat tarixi",
     "errors": {
       "WAGON_NO_INVALID": "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
       "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",

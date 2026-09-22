@@ -32,7 +32,6 @@
     "cargo": "Cargo",
     "weight": "{t} t",
     "fetchedAt": "Updated: {at}",
-    "history": "Movement history",
     "errors": {
       "WAGON_NO_INVALID": "The number must have 7 or 8 digits.",
       "WAGON_NOT_CONFIGURED": "Wagon search is not working yet. It will be available soon.",

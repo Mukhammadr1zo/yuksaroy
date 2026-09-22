@@ -19,7 +19,6 @@ export interface WagonResult {
   found: boolean;
   current: WagonEvent | null;
   /** Yangisi birinchi, eng ko'pi 50 ta. */
-  events: WagonEvent[];
   fetchedAt: string;
   quota: WagonQuota;
 }

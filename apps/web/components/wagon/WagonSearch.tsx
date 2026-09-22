@@ -1,13 +1,14 @@
 'use client';
 /**
- * Vagon qidiruvi: raqam kiritiladi, natija kartasi "oxirgi joylashuvi" va harakat tarixi.
+ * Vagon qidiruvi: raqam kiritiladi, natija bitta karta: vagon hozir qayerda.
+ * Harakat tarixi ko'rsatilmaydi: odamga kerak bo'lgani joriy joylashuv, qolgani shovqin.
  * Mehmonga forma yopiq: kirish havolasi. 402 obuna, 503 xizmat ulanmagan, topilmasa oddiy matn.
  * Stansiya nomlari upstream dan ruscha keladi va shundayligicha ko'rsatiladi: rasmiy nomlar.
  * Boshlang'ich holat server va brauzerda bir xil: sessiya faqat brauzerda bilinadi.
  */
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowRightIcon, LockSimpleIcon, MagnifyingGlassIcon, TrainIcon } from '@phosphor-icons/react';
+import { LockSimpleIcon, MagnifyingGlassIcon, TrainIcon } from '@phosphor-icons/react';
 import { WAGON } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, hasSession } from '@/lib/api';
@@ -114,8 +115,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
   if (!r.found || !r.current) return <Notice tone="warn">{t('notFound', { no: r.wagonNo })}</Notice>;
   const c = r.current;
   return (
-    <>
-      <section className="rounded-card border border-teal/40 bg-teal-soft p-5 md:p-6">
+    <section className="rounded-card border border-teal/40 bg-teal-soft p-5 md:p-6">
         <p className="font-mono text-xs uppercase tracking-wide text-teal-ink">{t('current')} · {r.wagonNo}</p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <TrainIcon size={32} weight="duotone" className="shrink-0 text-teal" aria-hidden="true" />
@@ -128,25 +128,8 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
           <Row k={t('date')} v={dayLabel(c.date, locale)} mono />
           {c.cargo ? <Row k={t('cargo')} v={c.weightT != null ? `${c.cargo}, ${t('weight', { t: c.weightT })}` : c.cargo} /> : null}
         </dl>
-        <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
-      </section>
-
-      <section className="mt-5">
-        <h3 className="font-display text-lg font-bold text-navy">{t('history')}</h3>
-        <ol className="mt-3 divide-y divide-line rounded-card border border-line bg-white">
-          {r.events.map((e, i) => (
-            <li key={`${e.date}-${i}`} className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1 px-4 py-3 text-sm">
-              <span className="font-mono tabular-nums text-muted">{dayLabel(e.date, locale)}</span>
-              <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5 font-semibold text-ink wrap-anywhere">
-                {e.station ?? t('stationUnknown')}
-                {e.destination ? <><ArrowRightIcon size={14} className="shrink-0 text-muted" aria-hidden="true" />{e.destination}</> : null}
-              </span>
-              <span className="text-muted">{[e.operation, e.state === 'unknown' ? null : t(`state.${e.state}`)].filter(Boolean).join(' · ')}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
-    </>
+      <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
+    </section>
   );
 }
 

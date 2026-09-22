@@ -29,8 +29,8 @@ function fakePrisma() {
     },
     count: async ({ where }: { where: Where }) => rows.filter((r) => match(r, where)).length,
     create: async ({ data }: { data: { userId: string; wagonNo: string; found: boolean; result: unknown } }) => {
-      // Prisma.DbNull bazada NULL bo'ladi: bu yerda null
-      const result = data.result && typeof data.result === 'object' && 'events' in (data.result as object) ? data.result : null;
+      // Prisma.DbNull bazada NULL bo'ladi: bu yerda null. Haqiqiy natijani `fetchedAt` bo'yicha ajratamiz
+      const result = data.result && typeof data.result === 'object' && 'fetchedAt' in (data.result as object) ? data.result : null;
       const row: Row = { id: `r${rows.length + 1}`, ...data, result, createdAt: new Date() };
       rows.push(row);
       return row;
