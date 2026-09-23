@@ -74,14 +74,17 @@ function CountryPicker({ iso, onPick, disabled }: { iso: string; onPick: (iso: s
       const t = e.target as Node;
       if (!box.current?.contains(t) && !panel.current?.contains(t)) setOpen(false);
     };
+    // Ro'yxatning O'ZI aylantirilsa yopilmaydi: hodisa ushlash bosqichida keladi va
+    // shartsiz yopish ro'yxatni birinchi aylantirishdayoq yopib qo'yardi
+    const onScroll = (e: Event) => { if (!panel.current?.contains(e.target as Node)) setOpen(false); };
     const close = () => setOpen(false);
     document.addEventListener('mousedown', outside);
-    window.addEventListener('scroll', close, true);
+    window.addEventListener('scroll', onScroll, true);
     window.addEventListener('resize', close);
     search.current?.focus();
     return () => {
       document.removeEventListener('mousedown', outside);
-      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('resize', close);
     };
   }, [open]);
