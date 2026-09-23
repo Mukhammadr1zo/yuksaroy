@@ -3,13 +3,15 @@
 // Tab ?tab= dan o'qiladi (window orqali: useSearchParams statik sahifada Suspense talab qiladi), ?id= so'rovni ajratadi.
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import type { KycStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, uzDateTime, uzToday } from '@/lib/format';
 import type { MarketOffer, MarketRequest, Paged, ServiceProfileCard } from '@/lib/types-market';
 import { Pager } from '@/components/admin/kit';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, INPUT, Notice } from '@/components/kabinet/bits';
-import { DemoBadge, MarketStatusPill, OfferStatusPill, useMarketLabels } from '@/components/market/bits';
+import { KycBadge, PhoneBadge } from '@/components/catalog/KycBadge';
+import { DemoBadge, MarketPhone, MarketStatusPill, OfferStatusPill, useMarketLabels } from '@/components/market/bits';
 import { ProfileForm } from '@/components/market/ProfileForm';
 import { requestHref } from '@/components/market/RequestCard';
 
@@ -74,6 +76,8 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   async function act(id: string, what: 'award' | 'close' | 'cancel', offerId?: string) {
     if (what === 'close' && !window.confirm(t('confirmClose'))) return;
     if (what === 'cancel' && !window.confirm(t('confirmCancel'))) return;
+    // Tanlash qaytarib bo'lmaydigan qadam: qolgan takliflar yopiladi va raqamlar ochiladi
+    if (what === 'award' && !window.confirm(t('confirmAward'))) return;
     setBusy(offerId ?? `${id}:${what}`); setErr(null);
     try {
       const r = await post<MarketRequest>(`/market/requests/${id}/${what}`, offerId ? { offerId } : {});
@@ -159,12 +163,22 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                       <li key={o.id} className={`rounded-card border p-3 ${o.status === 'AWARDED' ? 'border-teal' : 'border-line'}`}>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                           <span className="font-semibold wrap-anywhere">{o.providerName ?? '-'}</span>
+                          {/* Kim ekani ko'rinsin: tashkilot bo'lsa tasdig'i, yakka odam bo'lsa raqami */}
+                          {o.providerOrg ? <KycBadge kyc={o.providerOrg.kyc as KycStatus} />
+                            : o.providerPhoneVerified != null ? <PhoneBadge verified={o.providerPhoneVerified} /> : null}
                           <OfferStatusPill status={o.status} />
                           <span className="ml-auto font-mono text-xs text-muted tabular-nums">{uzDateTime(o.createdAt, locale)}</span>
                         </div>
                         <p className="mt-1 font-mono text-sm text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin, locale) : tc('onRequest')}</p>
                         {o.message ? <p className="mt-1 whitespace-pre-line text-sm text-ink/85 wrap-anywhere">{o.message}</p> : null}
                         {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => act(r.id, 'award', o.id)} disabled={busy !== null} className={`${BTN_NAVY} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}
+                        {/* Tanlangandan keyin halqa yopiladi: g'olibning raqami shu yerda ochiladi */}
+                        {r.status === 'AWARDED' && o.status === 'AWARDED' && !r.isDemo ? (
+                          <div className="mt-2">
+                            <p className="text-xs text-muted">{t('winnerPhone')}</p>
+                            <MarketPhone kind="offer" targetId={o.id} next="/dashboard/market?tab=requests" />
+                          </div>
+                        ) : null}
                       </li>
                     ))}
                   </ul>

@@ -34,6 +34,6 @@ export function useMarketLabels() {
 }
 
 // integrator ikkala tarafni kengaytirguncha shu yerda bitta joyda o'tkaziladi.
-export function MarketPhone({ kind, targetId, next }: { kind: 'service' | 'request'; targetId: string; next: string }) {
+export function MarketPhone({ kind, targetId, next }: { kind: 'service' | 'request' | 'offer'; targetId: string; next: string }) {
   return <PhoneReveal kind={kind} targetId={targetId} next={next} />;
 }

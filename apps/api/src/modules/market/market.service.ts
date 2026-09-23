@@ -23,12 +23,16 @@ export function requestView(r: RequestRow, offersCount: number, withPhone = fals
 }
 
 /** BigInt -> Number (JSON); tashkilot nomi bo'lsa qo'shiladi. */
-export const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map(), users: Map<string, string | null> = new Map()) => {
+export const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map(), users: Map<string, { name: string | null; phoneVerified: boolean }> = new Map()) => {
   const org = o.providerOrgId ? orgs.get(o.providerOrgId) : undefined;
+  const u = users.get(o.providerUserId);
   return {
     ...o, priceTiyin: o.priceTiyin == null ? null : Number(o.priceTiyin),
     providerOrg: org ? { id: org.id, name: org.name, slug: org.slug, kyc: org.kycStatus } : null,
-    providerName: org?.name ?? users.get(o.providerUserId) ?? null,
+    providerName: org?.name ?? u?.name ?? null,
+    // Faqat xaritada yozuv bo'lganda: offerView uch joyda xaritasiz chaqiriladi va
+    // u yerda `false` yozilsa raqami tasdiqlangan odam haqida yolg'on aytilardi
+    ...(u ? { providerPhoneVerified: u.phoneVerified } : {}),
   };
 };
 
@@ -49,12 +53,16 @@ export class MarketService {
     return new Map(orgs.map((o) => [o.id, o]));
   }
 
-  /** Foydalanuvchi nomlari: tashkilotsiz ta'minotchi (haydovchi) uchun. */
-  async namesOf(userIds: string[]): Promise<Map<string, string | null>> {
+  /**
+   * Tashkilotsiz ta'minotchi (haydovchi) haqida: nomi va raqami tasdiqlanganmi.
+   * Raqam User qatoriga faqat kod tasdig'idan keyin tushadi, ya'ni uning borligi
+   * tasdiqlanganlik belgisi (e'lon kartasidagi qoida bilan bir xil).
+   */
+  async namesOf(userIds: string[]): Promise<Map<string, { name: string | null; phoneVerified: boolean }>> {
     const ids = [...new Set(userIds)];
     if (!ids.length) return new Map();
-    const users = await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, fullName: true } });
-    return new Map(users.map((u) => [u.id, u.fullName]));
+    const users = await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, fullName: true, phone: true } });
+    return new Map(users.map((u) => [u.id, { name: u.fullName, phoneVerified: u.phone != null }]));
   }
 
   /** Odamning faol xizmat profillari turlari: xizmat so'roviga taklif berish huquqi shundan. */
@@ -152,9 +160,12 @@ export class MarketService {
     await notifyTelegram(this.prisma, { userIds: [r.createdById] }, 'marketOffer', { no: r.no, title: r.title.slice(0, 200), from: from ?? '', url: webUrl(href) });
   }
 
-  /** Taklif tanlandi: g'olib ta'minotchiga. */
+  /**
+   * Taklif tanlandi: g'olib ta'minotchiga.
+   * Havola so'rov sahifasiga boradi, chunki buyurtmachining raqami aynan o'sha yerda ochiladi.
+   */
   async notifyAward(r: RequestRow, providerUserId: string): Promise<void> {
-    const href = `/dashboard/market?tab=offers`;
+    const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
     await this.notifications.push([providerUserId], { kind: KIND, title: `${r.no} · ${r.title}`, body: null, href });
     await notifyTelegram(this.prisma, { userIds: [providerUserId] }, 'marketAward', { no: r.no, title: r.title.slice(0, 200), url: webUrl(href) });
   }

@@ -13,6 +13,8 @@ export interface MarketOffer {
   id: string; requestId: string; providerUserId: string; providerOrgId: string | null; priceTiyin: number | null; message: string | null;
   status: MarketOfferStatus; createdAt: string;
   providerOrg?: { id: string; name: string; slug: string | null; kyc: string } | null; providerName?: string | null;
+  /** Yakka ta'minotchining raqami tasdiqlanganmi; tashkilot uchun providerOrg.kyc ishlatiladi */
+  providerPhoneVerified?: boolean;
 }
 
 export interface MarketRequest {

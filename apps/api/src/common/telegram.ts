@@ -96,9 +96,9 @@ const TEXTS = {
     en: '💬 <b>You have a new offer</b>\n{no} · {title}\n{from}\n\nView: {url}',
   },
   marketAward: {
-    uz: '✅ <b>Taklifingiz tanlandi</b>\n{no} · {title}\nBuyurtmachi siz bilan bog\'lanadi.\n\n{url}',
-    ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nЗаказчик свяжется с вами.\n\n{url}',
-    en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nThe requester will contact you.\n\n{url}',
+    uz: '✅ <b>Taklifingiz tanlandi</b>\n{no} · {title}\nRaqamlaringiz bir-biringizga ochildi.\n\n{url}',
+    ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nНомера открыты друг для друга.\n\n{url}',
+    en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nYou can now see each other\'s numbers.\n\n{url}',
   },
 } as const;
 

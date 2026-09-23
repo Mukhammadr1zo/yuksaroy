@@ -222,7 +222,9 @@
       "relisting": "Sending",
       "err": {
         "RELIST_NOT_ALLOWED": "The request could not be reposted. Refresh the page."
-      }
+      },
+      "confirmAward": "Choose this provider? Your numbers open to each other and the other offers close.",
+      "winnerPhone": "The chosen provider's number"
     }
   }
 }

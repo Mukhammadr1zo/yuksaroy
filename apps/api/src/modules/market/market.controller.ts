@@ -123,7 +123,7 @@ export class MarketController {
     const where = { createdById: userId };
     const [total, rows] = await Promise.all([
       this.prisma.marketRequest.count({ where }),
-      this.prisma.marketRequest.findMany({ where, include: { offers: { orderBy: { createdAt: 'asc' } } }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
+      this.prisma.marketRequest.findMany({ where, include: { offers: { orderBy: [{ priceTiyin: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }] } }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
     ]);
     const offers = rows.flatMap((r) => r.offers);
     const [orgs, users] = await Promise.all([this.market.orgsOf(offers), this.market.namesOf(offers.map((o) => o.providerUserId))]);
@@ -149,7 +149,7 @@ export class MarketController {
    */
   @Get('requests/:no')
   async one(@Req() req: FastifyRequest, @Param('no') no: string) {
-    const r = await this.prisma.marketRequest.findUnique({ where: { no }, include: { offers: { orderBy: { createdAt: 'asc' } } } });
+    const r = await this.prisma.marketRequest.findUnique({ where: { no }, include: { offers: { orderBy: [{ priceTiyin: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }] } } });
     if (!r) throw new NotFoundException({ code: 'REQUEST_NOT_FOUND' });
     const userId = optionalUserId(req, this.tokens);
     const { offers, ...row } = r;
@@ -329,7 +329,7 @@ export class MarketController {
   }
 
   private async mineOne(id: string) {
-    const { offers, ...r } = await this.prisma.marketRequest.findUniqueOrThrow({ where: { id }, include: { offers: { orderBy: { createdAt: 'asc' } } } });
+    const { offers, ...r } = await this.prisma.marketRequest.findUniqueOrThrow({ where: { id }, include: { offers: { orderBy: [{ priceTiyin: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }] } } });
     const [orgs, users] = await Promise.all([this.market.orgsOf(offers), this.market.namesOf(offers.map((o) => o.providerUserId))]);
     return { ...requestView(r, offers.length, true), offers: offers.map((o) => offerView(o, orgs, users)) };
   }

@@ -1,8 +1,10 @@
 'use client';
 // So'rov tafsiloti (yuk yoki xizmat): faktlar, tavsif, egasining telefoni (obunachiga), taklif formasi.
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
+import { api, hasSession } from '@/lib/api';
 import { uzDate, uzDateTime } from '@/lib/format';
 import type { MarketRequest } from '@/lib/types-market';
 import { Notice } from '@/components/kabinet/bits';
@@ -17,6 +19,21 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
   const td = useTranslations('services.detail');
   const L = useMarketLabels();
   const next = requestHref(r);
+  /*
+   * Sahifa serverda cookie'siz va keshlangan holda yasaladi, ya'ni javobdagi myOffer
+   * doim bo'sh. Tanlangan ijrochi esa aynan shu yerda buyurtmachining raqamini
+   * ko'rishi kerak, shuning uchun so'rov brauzerda bir marta qayta o'qiladi va
+   * natija taklif formasiga ham beriladi (ikki marta so'ralmasin).
+   */
+  const [me, setMe] = useState<MarketRequest | null>(null);
+  useEffect(() => {
+    if (r.isDemo || !hasSession()) return;
+    let alive = true;
+    api<MarketRequest>(`/market/requests/${encodeURIComponent(r.no)}`)
+      .then((x) => { if (alive) setMe(x); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [r.no, r.isDemo]);
   const facts: [string, React.ReactNode][] = cargo
     ? [
         [t('route'), <span key="r" className="inline-flex flex-wrap items-center gap-1">{L.region(r.fromRegion)}<ArrowRightIcon size={14} className="text-teal" aria-hidden="true" />{L.region(r.toRegion)}</span>],
@@ -58,7 +75,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
       </section>
 
       {/* Raqam serverda OPEN va AWARDED so'rovga ochiladi; AWARDED da faqat tanlangan ijrochiga ko'rsatiladi, yopiq so'rovda "yo'q" deb aldamaydi */}
-      {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || (r.status === 'AWARDED' && r.myOffer?.status === 'AWARDED')) ? (
+      {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || (r.status === 'AWARDED' && me?.myOffer?.status === 'AWARDED')) ? (
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('phone')}</h2>
           <div className="mt-2"><MarketPhone kind="request" targetId={r.id} next={next} /></div>
@@ -71,7 +88,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
         <div className="mt-4">
           {r.isDemo ? <><OfferForm request={r} next={next} preview /><p className="mt-3 text-sm text-muted">{td('demoNote')}</p></>
             : r.status !== 'OPEN' && cargo ? <Notice tone="warn">{t('closedNote')}</Notice>
-            : <OfferForm request={r} next={next} />}
+            : <OfferForm request={r} next={next} me={me} />}
         </div>
       </section>
     </div>

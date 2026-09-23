@@ -5,34 +5,32 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { ApiError, api, hasSession, post } from '@/lib/api';
+import { ApiError, hasSession, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
 import type { MarketOffer, MarketRequest } from '@/lib/types-market';
 import { BTN_NAVY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { OfferStatusPill } from './bits';
 
-export function OfferForm({ request, next, preview = false }: { request: MarketRequest; next: string; preview?: boolean }) {
+export function OfferForm({ request, next, preview = false, me = null }: {
+  request: MarketRequest; next: string; preview?: boolean;
+  /** Brauzerda o'qilgan so'rov: o'z taklifim va "bu mening so'rovim" shundan. Ota komponent beradi. */
+  me?: MarketRequest | null;
+}) {
   const t = useTranslations('market.offer');
   const te = useTranslations('market.err');
   const locale = useLocale();
   const [authed, setAuthed] = useState<boolean | null>(null);
-  const [mine, setMine] = useState<MarketOffer | null>(request.myOffer ?? null);
-  const [own, setOwn] = useState(false);
+  // Yuborilgan taklif shu yerda qoladi, qolgani ota komponentdan keladi
+  const [sent, setSent] = useState<MarketOffer | null>(null);
+  const mine = sent ?? me?.myOffer ?? null;
+  const own = !!me?.offers;
   const [price, setPrice] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [justSent, setJustSent] = useState(false);
 
-  // Sahifa keshlangan va cookie'siz: o'z taklifim va "bu mening so'rovim" faqat brauzerda ma'lum bo'ladi
-  useEffect(() => {
-    if (preview) return;
-    if (!hasSession()) { setAuthed(false); return; }
-    setAuthed(true);
-    api<MarketRequest>(`/market/requests/${encodeURIComponent(request.no)}`)
-      .then((r) => { if (r.offers) setOwn(true); if (r.myOffer) setMine(r.myOffer); })
-      .catch(() => {});
-  }, [request.no, preview]);
+  useEffect(() => { if (!preview) setAuthed(hasSession()); }, [preview]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +40,7 @@ export function OfferForm({ request, next, preview = false }: { request: MarketR
         priceTiyin: price ? Math.round(Number(price) * 100) : undefined,
         message: message.trim() || undefined,
       });
-      setMine(o); setJustSent(true);
+      setSent(o); setJustSent(true);
     } catch (e) {
       const code = e instanceof ApiError ? String(e.body?.code ?? '') : '';
       setErr(code && t.has(code) ? code : code === 'RATE_LIMITED' ? 'RATE_LIMITED' : 'generic');

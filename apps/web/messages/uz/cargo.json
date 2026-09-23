@@ -222,7 +222,9 @@
       "relisting": "Yuborilmoqda",
       "err": {
         "RELIST_NOT_ALLOWED": "So'rovni qaytarib bo'lmadi. Sahifani yangilang."
-      }
+      },
+      "confirmAward": "Shu ijrochini tanlaysizmi? Raqamlaringiz bir-biringizga ochiladi, qolgan takliflar yopiladi.",
+      "winnerPhone": "Tanlangan ijrochining raqami"
     }
   }
 }
