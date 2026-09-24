@@ -10,6 +10,12 @@ describe('bozor holatlari', () => {
     expect(canMarketTransition('AWARDED', 'CLOSED')).toBe(true);
     expect(canMarketTransition('AWARDED', 'CANCELLED')).toBe(false);
     expect(canMarketTransition('CLOSED', 'OPEN')).toBe(false);
+    expect(canMarketTransition('AWARDED', 'DONE')).toBe(true);
+    // Ish qilinmagan so'rovni bajarilgan deb belgilab bo'lmaydi
+    expect(canMarketTransition('OPEN', 'DONE')).toBe(false);
+    // DONE yakuniy: sanoq ortga qaytmasin
+    expect(canMarketTransition('DONE', 'CLOSED')).toBe(false);
+    expect(canMarketTransition('DONE', 'OPEN')).toBe(false);
     expect(canMarketTransition('nope', 'CLOSED')).toBe(false);
   });
 

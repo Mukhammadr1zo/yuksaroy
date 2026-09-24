@@ -48,6 +48,7 @@
       "phoneUnverified": "Телефон не подтверждён",
       "demo": "Образец",
       "viewsShort": "{count, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}",
+      "rating": "Оценка {avg}, {count} шт.",
       "posted": "{days} дн. назад"
     },
     "empty": {

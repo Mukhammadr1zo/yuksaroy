@@ -80,7 +80,9 @@ export class ServicesController {
       this.prisma.serviceProfile.count({ where }),
       this.prisma.serviceProfile.findMany({ where, include: INCLUDE, orderBy: [{ isDemo: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
     ]);
-    return { items: rows.map((r) => profileView(r)), total, page: p, limit: take };
+    // Butun sahifaga bitta guruhlash so'rovi: profil boshiga so'rov yuborilmaydi
+    const done = await this.market.doneCounts(rows.map((r) => r.userId));
+    return { items: rows.map((r) => ({ ...profileView(r), doneCount: done.get(r.userId) ?? 0 })), total, page: p, limit: take };
   }
 
   /** `mine` yo'li `:id` dan oldin turishi shart. */
@@ -94,7 +96,8 @@ export class ServicesController {
   async one(@Param('id') id: string) {
     const r = await this.prisma.serviceProfile.findFirst({ where: { id, status: 'ACTIVE' }, include: INCLUDE });
     if (!r) throw new NotFoundException({ code: 'PROFILE_NOT_FOUND' });
-    return profileView(r, true);
+    const done = await this.market.doneCounts([r.userId]);
+    return { ...profileView(r, true), doneCount: done.get(r.userId) ?? 0 };
   }
 
   @Post() @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)

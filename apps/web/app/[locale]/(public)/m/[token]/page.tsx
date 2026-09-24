@@ -7,7 +7,7 @@ import { uzDate, uzDateTime } from '@/lib/format';
 import type { MarketStatusPublic } from '@/lib/types-market';
 
 type Params = { params: Promise<{ locale: string; token: string }> };
-const TONE: Record<string, string> = { OPEN: 'bg-teal-soft text-teal-ink', AWARDED: 'bg-navy text-white', CLOSED: 'bg-line text-ink/70', CANCELLED: 'bg-red-50 text-red-700' };
+const TONE: Record<string, string> = { OPEN: 'bg-teal-soft text-teal-ink', AWARDED: 'bg-navy text-white', DONE: 'bg-teal text-white', CLOSED: 'bg-line text-ink/70', CANCELLED: 'bg-red-50 text-red-700' };
 const load = (token: string) => sapiOrNull<MarketStatusPublic>(`/market/status/${encodeURIComponent(token)}`, 30);
 
 export async function generateMetadata({ params }: Params) {

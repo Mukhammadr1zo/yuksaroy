@@ -554,6 +554,7 @@
       "status": {
         "OPEN": "Ochiq",
         "AWARDED": "Tanlangan",
+        "DONE": "Bajarilgan",
         "CLOSED": "Yopilgan",
         "CANCELLED": "Bekor qilingan"
       },

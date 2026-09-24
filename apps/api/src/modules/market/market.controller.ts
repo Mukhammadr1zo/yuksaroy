@@ -266,6 +266,13 @@ export class MarketController {
   @Post('requests/:id/close') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
   close(@CurrentUserId() userId: string, @Param('id') id: string) { return this.transition(userId, id, 'CLOSED'); }
 
+  /**
+   * Ish bajarildi. Yopishdan farqi: bu ijrochining hisobiga yoziladigan yagona belgi.
+   * Yopish esa ish bo'lmaganda ham bosiladi, shuning uchun u sanalmaydi.
+   */
+  @Post('requests/:id/done') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
+  done(@CurrentUserId() userId: string, @Param('id') id: string) { return this.transition(userId, id, 'DONE'); }
+
   @Post('requests/:id/cancel') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
   cancel(@CurrentUserId() userId: string, @Param('id') id: string) { return this.transition(userId, id, 'CANCELLED'); }
 

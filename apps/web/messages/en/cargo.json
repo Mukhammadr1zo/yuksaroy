@@ -66,6 +66,7 @@
     "status": {
       "OPEN": "Open",
       "AWARDED": "Provider chosen",
+      "DONE": "Work completed",
       "CLOSED": "Closed",
       "CANCELLED": "Cancelled"
     },
@@ -162,6 +163,7 @@
         "CREATED": "Request posted",
         "OFFER": "Offer received",
         "AWARDED": "Provider chosen",
+        "DONE": "Work completed",
         "CLOSED": "Request closed",
         "CANCELLED": "Request cancelled"
       }
@@ -182,8 +184,12 @@
       "noOffers": "No offers yet. Providers have been notified.",
       "award": "Choose",
       "awarding": "Choosing",
-      "awardedNote": "Provider chosen. Close the request once the work is done.",
+      "awardedNote": "Provider chosen. When the work is done, press Work completed.",
+      "doneNote": "Marked as completed work. It shows on the provider's record.",
       "close": "Close",
+      "markDone": "Work completed",
+      "markingDone": "Saving",
+      "confirmDone": "The request will be marked as completed and closed, and the job will count towards the provider. Continue?",
       "closing": "Closing",
       "cancel": "Cancel",
       "cancelling": "Cancelling",

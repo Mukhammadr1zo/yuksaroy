@@ -41,13 +41,15 @@ function setup(opts: {
       findFirst: async ({ where }: { where: Where }) => {
         const r = opts.request;
         if (!r) return null;
-        // Kontroller ikki shartni AND ichida yuboradi: ikkinchisi holat va g'oliblik
+        // Kontroller ikki shartni AND ichida yuboradi: ikkinchisi holat va g'oliblik.
+        // Tanlangan shoxning holati ro'yxat bilan keladi (AWARDED va DONE)
         const cond = where.AND[1].OR as Where[];
-        const wantsAwarded = cond.find((c) => c.status === 'AWARDED');
-        const who = wantsAwarded?.offers?.some?.providerUserId as string | undefined;
+        const closed = cond.find((c) => c.offers);
+        const states = (closed?.status?.in as string[] | undefined) ?? [];
+        const who = closed?.offers?.some?.providerUserId as string | undefined;
         if (r.status === 'OPEN') return { contactPhone: r.contactPhone, isDemo: !!r.isDemo, status: 'OPEN' };
-        if (r.status === 'AWARDED' && who && who === r.awardedTo) {
-          return { contactPhone: r.contactPhone, isDemo: !!r.isDemo, status: 'AWARDED' };
+        if (states.includes(r.status) && who && who === r.awardedTo) {
+          return { contactPhone: r.contactPhone, isDemo: !!r.isDemo, status: r.status };
         }
         return null;
       },

@@ -41,6 +41,8 @@ export default async function ServiceProfilePage({ params }: Params) {
         {p.isDemo ? <span className="rounded-full border border-amber/40 bg-amber-soft px-2.5 py-0.5 text-[11px] font-semibold text-amber-ink">{tsv('demo')}</span> : null}
       </div>
       {p.owner ? <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">{p.owner}{p.ownerOrg ? <KycBadge kyc={p.ownerOrg.kyc as KycStatus} /> : null}</p> : null}
+      {/* Faqat noldan katta bo'lsa. Jadvalga (facts) qo'yilmaydi: bo'sh qiymatli qator "-" bo'lib turardi */}
+      {p.doneCount ? <p className="mt-2 font-mono text-sm font-semibold tabular-nums text-teal-ink">{tg('done', { count: p.doneCount })}</p> : null}
       {p.isDemo ? <p className="mt-4 rounded-card border border-amber/30 bg-amber-soft px-4 py-3 text-sm text-amber-ink">{t('demoNote')}</p> : null}
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-2">

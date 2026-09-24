@@ -81,8 +81,9 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
         </section>
       ) : null}
 
-      {/* Raqam serverda OPEN va AWARDED so'rovga ochiladi; AWARDED da faqat tanlangan ijrochiga ko'rsatiladi, yopiq so'rovda "yo'q" deb aldamaydi */}
-      {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || (r.status === 'AWARDED' && me?.myOffer?.status === 'AWARDED')) ? (
+      {/* Raqam serverda OPEN, AWARDED va DONE so'rovga ochiladi; oxirgi ikkisida faqat tanlangan
+          ijrochiga: ish bajarilgach ham hisob-kitob uchun kerak. Yopiq so'rovda "yo'q" deb aldamaydi */}
+      {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || ((r.status === 'AWARDED' || r.status === 'DONE') && me?.myOffer?.status === 'AWARDED')) ? (
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('phone')}</h2>
           <div className="mt-2"><MarketPhone kind="request" targetId={r.id} next={next} /></div>

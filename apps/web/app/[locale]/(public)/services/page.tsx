@@ -105,6 +105,8 @@ export default async function ServicesPage({ params, searchParams }: Params & { 
                 {p.owner ? <p className="mt-0.5 text-sm text-muted wrap-anywhere">{p.owner}</p> : null}
                 <p className="mt-2 line-clamp-3 text-sm text-ink/85 wrap-anywhere">{p.description}</p>
                 <p className="mt-3 text-xs text-muted wrap-anywhere">{p.regions.length ? p.regions.map(regionName).join(', ') : t('grid.regionsAll')}</p>
+                {/* Faqat noldan katta bo'lsa: yangi odamda "0" turgani qaror bermaydi */}
+                {p.doneCount ? <p className="mt-2 font-mono text-xs font-semibold tabular-nums text-teal-ink">{t('grid.done', { count: p.doneCount })}</p> : null}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 text-sm">
                   <span className="font-mono text-navy tabular-nums wrap-anywhere">{p.priceNote ?? t('grid.noPrice')}</span>
                   <Link href={`/services/${p.id}`} className="font-semibold text-navy underline-offset-4 hover:text-teal-ink hover:underline">{t('grid.more')}</Link>

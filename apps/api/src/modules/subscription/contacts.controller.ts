@@ -186,14 +186,16 @@ export class ContactsController {
         where: {
           AND: [
             { OR: [{ id }, { no: id }] },
-            { OR: [{ status: 'OPEN' }, { status: 'AWARDED', offers: { some: { status: 'AWARDED', providerUserId: userId } } }] },
+            // Tanlangandan keyin raqam faqat g'olibniki. DONE ham shu yerda:
+            // ish bajarilgan deb belgilangani raqamni yopish sababi emas
+            { OR: [{ status: 'OPEN' }, { status: { in: ['AWARDED', 'DONE'] }, offers: { some: { status: 'AWARDED', providerUserId: userId } } }] },
           ],
         },
         select: { id: true, contactPhone: true, isDemo: true, status: true },
       });
       if (!r) return undefined;
-      // Tanlangan so'rov: bitim tuzilgan, raqam obunasiz beriladi
-      return { id: r.id, phone: r.isDemo ? null : some(r.contactPhone), free: r.status === 'AWARDED' };
+      // Tanlangan yoki bajarilgan so'rov: bitim tuzilgan, raqam obunasiz beriladi
+      return { id: r.id, phone: r.isDemo ? null : some(r.contactPhone), free: r.status !== 'OPEN' };
     }
     if (kind === 'offer') {
       /*

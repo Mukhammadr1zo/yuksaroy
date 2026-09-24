@@ -189,3 +189,36 @@ describe('bir turda bitta profil', () => {
     await conflict(s.create('u1', dto), 'PROFILE_EXISTS');
   });
 });
+
+/**
+ * Ish yakuni. CLOSED bilan ikki xil: CLOSED "boshqa taklif kerak emas" (ish bo'lmasa ham
+ * bosiladi), DONE esa ijrochining hisobiga yoziladigan yagona belgi, shuning uchun
+ * undan chiqish yo'li yo'q.
+ */
+describe('ish yakuni', () => {
+  it("tanlangan so'rov bajarilgan bo'ladi va DONE dan chiqib bo'lmaydi", async () => {
+    const reqs = [request({ status: 'AWARDED', awardedOfferId: 'o1' })];
+    const c = ctl(db(reqs, [offer('o1', 'p1', 'AWARDED')]));
+    await c.done('owner', 'r1');
+    expect(reqs[0]!.status).toBe('DONE');
+    // Ikkinchi bosish ham, keyin yopish ham o'tmaydi: holat jadvali yakuniy
+    await conflict(c.done('owner', 'r1'), 'MARKET_TRANSITION');
+    await conflict(c.close('owner', 'r1'), 'MARKET_TRANSITION');
+    expect(reqs[0]!.status).toBe('DONE');
+  });
+
+  it("ochiq so'rovni bajarilgan deb belgilab bo'lmaydi", async () => {
+    const reqs = [request()];
+    await conflict(ctl(db(reqs, [])).done('owner', 'r1'), 'MARKET_TRANSITION');
+    expect(reqs[0]!.status).toBe('OPEN');
+  });
+
+  it("orada holat o'zgargan bo'lsa eskirgan o'qish bilan ham o'tmaydi", async () => {
+    const reqs = [request({ status: 'CLOSED', awardedOfferId: 'o1' })];
+    const p = db(reqs, [offer('o1', 'p1', 'AWARDED')]);
+    // Boshqa oynada allaqachon yopilgan, bu handler esa AWARDED deb o'qigan edi
+    p.marketRequest.findUnique = async () => ({ ...reqs[0], status: 'AWARDED', offers: [] });
+    await conflict(ctl(p).done('owner', 'r1'), 'MARKET_TRANSITION');
+    expect(reqs[0]!.status).toBe('CLOSED');
+  });
+});

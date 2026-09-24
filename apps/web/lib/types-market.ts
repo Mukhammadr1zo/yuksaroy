@@ -5,6 +5,8 @@ export interface ServiceProfileCard {
   id: string; userId: string; orgId: string | null; serviceType: ServiceType; title: string; description: string; regions: RegionCode[];
   experienceYears: number | null; priceNote: string | null; hasPhone: boolean; status: 'ACTIVE' | 'HIDDEN' | 'BLOCKED'; isDemo: boolean; createdAt: string; updatedAt: string;
   owner: string | null; ownerOrg: { name: string; slug: string | null; kyc: string } | null;
+  /** Bajarilgan ish soni: ochiq ro'yxat va profil sahifasida keladi, kabinet va adminda yo'q. */
+  doneCount?: number;
   /** Faqat egasiga (GET mine) */
   contactPhone?: string | null;
 }
@@ -15,6 +17,8 @@ export interface MarketOffer {
   providerOrg?: { id: string; name: string; slug: string | null; kyc: string } | null; providerName?: string | null;
   /** Yakka ta'minotchining raqami tasdiqlanganmi; tashkilot uchun providerOrg.kyc ishlatiladi */
   providerPhoneVerified?: boolean;
+  /** Shu ijrochida nechta bajarilgan ish bor. Faqat egasining ko'rinishida keladi. */
+  providerDoneCount?: number;
 }
 
 export interface MarketRequest {

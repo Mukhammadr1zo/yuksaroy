@@ -484,10 +484,14 @@ export const TRUCKS_WORD: Record<SearchLang, string> = { uz: 'ta mashina', ru: '
  * Bozor so'rovi: xizmat so'rovi (SERVICE) va yuk e'loni (CARGO) bir xil hayot siklida
  * yashaydi: ochiq -> taklif tanlandi -> yopiq. Shoshilinch so'rovlar (/urgent) bilan bir xil
  * shakl, lekin maydonlari boshqa (yo'nalish, og'irlik, sana), shuning uchun alohida jadval.
+ *
+ * DONE va CLOSED ataylab ikki xil: CLOSED "boshqa taklif kerak emas" degani (ish bo'lmasa
+ * ham bosiladi), DONE esa "ish haqiqatan bajarildi". Bajarilgan ish soni ishonch belgisi,
+ * shuning uchun u ikki ma'noli tugmadan sanalmaydi.
  */
 export const MARKET_BOARDS = ['SERVICE', 'CARGO'] as const;
 export type MarketBoard = (typeof MARKET_BOARDS)[number];
-export const MARKET_STATUSES = ['OPEN', 'AWARDED', 'CLOSED', 'CANCELLED'] as const;
+export const MARKET_STATUSES = ['OPEN', 'AWARDED', 'DONE', 'CLOSED', 'CANCELLED'] as const;
 export type MarketStatus = (typeof MARKET_STATUSES)[number];
 export const MARKET_OFFER_STATUSES = ['SENT', 'AWARDED', 'DECLINED'] as const;
 export type MarketOfferStatus = (typeof MARKET_OFFER_STATUSES)[number];

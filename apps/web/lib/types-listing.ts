@@ -19,6 +19,8 @@ export interface ListingCard {
   premium: boolean; publishedAt: string | null;
   /** E'lon sahifasi necha marta ochilgan (brauzer mayoqlaridan, umrbod). */
   views: number;
+  /** O'rtacha baho: 3 tadan kam baho bo'lsa null (ratingCount qoladi). */
+  ratingAvg: number | null; ratingCount: number;
   /** Namuna qator: haqiqiy taklif emas, "Namuna" yorlig'i bilan chiziladi, telefon va chat berilmaydi. */
   isDemo: boolean;
 }

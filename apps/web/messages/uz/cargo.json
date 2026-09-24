@@ -66,6 +66,7 @@
     "status": {
       "OPEN": "Ochiq",
       "AWARDED": "Ijrochi tanlangan",
+      "DONE": "Ish bajarildi",
       "CLOSED": "Yopilgan",
       "CANCELLED": "Bekor qilingan"
     },
@@ -162,6 +163,7 @@
         "CREATED": "So'rov qoldirildi",
         "OFFER": "Taklif keldi",
         "AWARDED": "Ijrochi tanlandi",
+        "DONE": "Ish bajarildi",
         "CLOSED": "So'rov yopildi",
         "CANCELLED": "So'rov bekor qilindi"
       }
@@ -182,8 +184,12 @@
       "noOffers": "Hali taklif yo'q. Ijrochilarga xabar ketdi.",
       "award": "Tanlash",
       "awarding": "Tanlanmoqda",
-      "awardedNote": "Ijrochi tanlandi. Ish tugagach so'rovni yoping.",
+      "awardedNote": "Ijrochi tanlandi. Ish tugagach Ish bajarildi tugmasini bosing.",
+      "doneNote": "Ish bajarildi deb belgilandi. Bu ijrochining hisobida ko'rinadi.",
       "close": "Yopish",
+      "markDone": "Ish bajarildi",
+      "markingDone": "Yozilmoqda",
+      "confirmDone": "Ish bajarildi deb belgilanadi, so'rov yopiladi va bu ijrochining hisobiga yoziladi. Davom etasizmi?",
       "closing": "Yopilmoqda",
       "cancel": "Bekor qilish",
       "cancelling": "Bekor qilinmoqda",

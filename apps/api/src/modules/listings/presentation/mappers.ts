@@ -1,5 +1,5 @@
 // Javob shakllari: karta (ro'yxat), tafsilot (telefon faqat kirganlarga), egasi ko'rinishi (holat, ko'rishlar).
-import { distanceKm } from '@yuksaroy/domain';
+import { distanceKm, ratingDisplay } from '@yuksaroy/domain';
 import type { GeoNear } from '../../catalog/domain/ports';
 import { listingOwner, type ListingRecord } from '../domain/listing-query';
 
@@ -30,6 +30,9 @@ export function listingCard(l: ListingRecord, near?: GeoNear, now = new Date()) 
         ? { type: 'siding' as const, id: l.terminal.id, name: sidingLabel(l.terminal), slug: l.terminal.slug }
         : { type: 'terminal' as const, id: l.terminal.id, name: l.terminal.name, slug: l.terminal.slug }
       : null,
+    // Baho kartada ham kerak: tafsilotgacha borish uchun bitta bosish ortiqcha edi.
+    // ratingDisplay 3 tadan kam bahoda avg bermaydi, ya'ni "5,0" degan yolg'on chiqmaydi
+    ratingAvg: ratingDisplay({ avg: l.ratingAvg ?? 0, count: l.ratingCount }).avg, ratingCount: l.ratingCount,
     premium: l.premiumUntil !== null && l.premiumUntil > now,
     publishedAt: l.publishedAt,
     // Namuna e'lon: UI "Namuna" yorlig'ini chizadi, telefon va chat tugmasini bermaydi.

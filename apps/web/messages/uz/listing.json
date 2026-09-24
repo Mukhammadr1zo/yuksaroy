@@ -48,6 +48,7 @@
       "phoneUnverified": "Telefon tasdiqlanmagan",
       "demo": "Namuna",
       "viewsShort": "{count} marta ko'rilgan",
+      "rating": "Baho {avg}, {count} ta",
       "posted": "{days} kun oldin"
     },
     "empty": {

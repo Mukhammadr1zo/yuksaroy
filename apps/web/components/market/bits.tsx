@@ -5,7 +5,7 @@ import { LISTING_LABELS, PAYMENT_TERM_LABELS, SEARCH_LABELS, SERVICE_TYPE_LABELS
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { useLang } from '@/components/kabinet/bits';
 
-const TONE: Record<MarketStatus, string> = { OPEN: 'bg-teal-soft text-teal-ink', AWARDED: 'bg-navy text-white', CLOSED: 'bg-line text-ink/70', CANCELLED: 'bg-red-50 text-red-700' };
+const TONE: Record<MarketStatus, string> = { OPEN: 'bg-teal-soft text-teal-ink', AWARDED: 'bg-navy text-white', DONE: 'bg-teal text-white', CLOSED: 'bg-line text-ink/70', CANCELLED: 'bg-red-50 text-red-700' };
 const OFFER_TONE: Record<MarketOfferStatus, string> = { SENT: 'bg-teal-soft text-teal-ink', AWARDED: 'bg-navy text-white', DECLINED: 'bg-line text-ink/70' };
 
 export function MarketStatusPill({ status }: { status: MarketStatus }) {

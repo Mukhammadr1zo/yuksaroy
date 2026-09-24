@@ -24,7 +24,7 @@ export function requestView(r: RequestRow, offersCount: number, withPhone = fals
 }
 
 /** BigInt -> Number (JSON); tashkilot nomi bo'lsa qo'shiladi. */
-export const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map(), users: Map<string, { name: string | null; phoneVerified: boolean }> = new Map()) => {
+export const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map(), users: Map<string, { name: string | null; phoneVerified: boolean; done: number }> = new Map()) => {
   const org = o.providerOrgId ? orgs.get(o.providerOrgId) : undefined;
   const u = users.get(o.providerUserId);
   return {
@@ -32,8 +32,9 @@ export const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map(), us
     providerOrg: org ? { id: org.id, name: org.name, slug: org.slug, kyc: org.kycStatus } : null,
     providerName: org?.name ?? u?.name ?? null,
     // Faqat xaritada yozuv bo'lganda: offerView uch joyda xaritasiz chaqiriladi va
-    // u yerda `false` yozilsa raqami tasdiqlangan odam haqida yolg'on aytilardi
-    ...(u ? { providerPhoneVerified: u.phoneVerified } : {}),
+    // u yerda `false` yozilsa raqami tasdiqlangan odam haqida yolg'on aytilardi.
+    // Bajarilgan ish soni ham shunday: so'ralmagan joyda 0 yozish "hech narsa qilmagan" degan yolg'on
+    ...(u ? { providerPhoneVerified: u.phoneVerified, providerDoneCount: u.done } : {}),
   };
 };
 
@@ -71,11 +72,36 @@ export class MarketService {
    * Raqam User qatoriga faqat kod tasdig'idan keyin tushadi, ya'ni uning borligi
    * tasdiqlanganlik belgisi (e'lon kartasidagi qoida bilan bir xil).
    */
-  async namesOf(userIds: string[]): Promise<Map<string, { name: string | null; phoneVerified: boolean }>> {
+  async namesOf(userIds: string[]): Promise<Map<string, { name: string | null; phoneVerified: boolean; done: number }>> {
     const ids = [...new Set(userIds)];
     if (!ids.length) return new Map();
-    const users = await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, fullName: true, phone: true } });
-    return new Map(users.map((u) => [u.id, { name: u.fullName, phoneVerified: u.phone != null }]));
+    // Ikkalasi yonma-yon: takliflar ro'yxati bitta javobda to'liq chiqadi
+    const [users, done] = await Promise.all([
+      this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, fullName: true, phone: true } }),
+      this.doneCounts(ids),
+    ]);
+    return new Map(users.map((u) => [u.id, { name: u.fullName, phoneVerified: u.phone != null, done: done.get(u.id) ?? 0 }]));
+  }
+
+  /**
+   * Bajarilgan ish soni: tanlangan taklifi bajarilgan so'rovda turganlar soni.
+   *
+   * Yangi ustun yo'q va kesh yo'q: sanoq ustuni saqlansa u eskirar va qayta hisoblash
+   * uchun yana admin tugmasi kerak bo'lardi (terminal reytingida shunday bo'lgan).
+   * Bitta guruhlash so'rovi butun sahifaga yetadi.
+   *
+   * ponytail: MarketRequest.status bo'yicha alohida indeks yo'q, ost so'rov jadvalni
+   * to'liq ko'rib chiqadi. Jadval yuz minglab qatorga yetganda @@index([status]) qo'yiladi.
+   */
+  async doneCounts(userIds: string[]): Promise<Map<string, number>> {
+    const ids = [...new Set(userIds)];
+    if (!ids.length) return new Map();
+    const rows = await this.prisma.marketOffer.groupBy({
+      by: ['providerUserId'],
+      where: { providerUserId: { in: ids }, status: 'AWARDED', request: { status: 'DONE' } },
+      _count: { _all: true },
+    });
+    return new Map(rows.map((r) => [r.providerUserId, r._count._all]));
   }
 
   /** Odamning faol xizmat profillari turlari: xizmat so'roviga taklif berish huquqi shundan. */

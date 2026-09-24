@@ -48,6 +48,7 @@
       "phoneUnverified": "Phone not verified",
       "demo": "Sample",
       "viewsShort": "{count, plural, one {# view} other {# views}}",
+      "rating": "Rating {avg}, {count} reviews",
       "posted": "{days} days ago"
     },
     "empty": {

@@ -31,6 +31,7 @@
       "count": "{count}",
       "empty": "Nobody here yet. Be the first to list yourself, or leave a request.",
       "years": "{n} years of experience",
+      "done": "{count, plural, one {# completed job} other {# completed jobs}}",
       "regionsAll": "All of Uzbekistan",
       "noPrice": "Price negotiable",
       "hasPhone": "Phone available",

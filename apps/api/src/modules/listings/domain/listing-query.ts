@@ -11,6 +11,8 @@ export interface ListingRecord {
   truckType: string | null; tonnage: number | null; fleetSize: number | null; serviceRegions: string[]; routes: Route[];
   contactPhone: string | null; responseHours: number | null;
   premiumUntil: Date | null; publishedAt: Date | null; expiresAt: Date | null; rejectReason: string | null; views: number;
+  /** Xizmatdan foydalanganlar bahosi (ListingReview dan qayta hisoblanadi). Karta ham shu keshdan o'qiydi. */
+  ratingAvg: number | null; ratingCount: number;
   createdAt: Date; updatedAt: Date;
   org: { name: string; slug: string | null; kycStatus: KycStatus } | null;
   ownerUser: { fullName: string | null; phone: string | null } | null; // yakka haydovchi (orgId null)

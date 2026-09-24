@@ -56,6 +56,12 @@ export async function ListingCard({ l }: { l: L }) {
         <p className="mt-0.5 text-xs text-muted">{sub.filter((x) => x != null && x !== '').join(' · ')}</p>
         <p className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted">
           <span className="truncate">{regionName(l.regionCode, lang)}{l.model ? ` · ${l.model}` : ''}{l.distanceKm != null ? ` · ${Math.round(l.distanceKm)} km` : ''}</span>
+          {/* Baho faqat ko'rsatishga yetganda (3 tadan ko'p): kamida "Baho yo'q" yozuvi har kartada shovqin bo'lardi */}
+          {l.ratingAvg != null ? (
+            <span aria-label={t('rating', { avg: l.ratingAvg.toFixed(1), count: l.ratingCount })} className="inline-flex shrink-0 items-center gap-0.5 font-mono font-semibold tabular-nums text-ink/70">
+              ★ {l.ratingAvg.toFixed(1)} ({l.ratingCount})
+            </span>
+          ) : null}
           {/* Ko'rishlar alohida: matn ichida yo'qolib ketmasin */}
           {l.views > 0 ? (
             <span aria-label={t('viewsShort', { count: l.views })} className="inline-flex shrink-0 items-center gap-1 font-mono font-semibold text-ink/70 tabular-nums">

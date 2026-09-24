@@ -3,10 +3,13 @@ import { MARKET, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
 // Taklif tanlash va hudud+qo'shnilar shoshilinch so'rovlar bilan bir xil: qayta yozilmaydi
 export { awardOffers, notifyRegions } from '../urgent/urgent.rules';
 
-/** Holat o'tishlari: egasi OPEN dan taklif tanlaydi, yopadi yoki bekor qiladi; AWARDED faqat yopiladi. */
+/** Holat o'tishlari: egasi OPEN dan taklif tanlaydi, yopadi yoki bekor qiladi.
+ *  AWARDED dan ikki chiqish: ish bajarilgan bo'lsa DONE, bo'lmasa CLOSED. */
 export const MARKET_TRANSITIONS: Record<MarketStatus, readonly MarketStatus[]> = {
   OPEN: ['AWARDED', 'CLOSED', 'CANCELLED'],
-  AWARDED: ['CLOSED'],
+  AWARDED: ['DONE', 'CLOSED'],
+  // DONE yakuniy: bajarilgan ish soni shundan sanaladi, ortga qaytarilsa sanoq o'ynab ketardi
+  DONE: [],
   CLOSED: [],
   CANCELLED: [],
 };

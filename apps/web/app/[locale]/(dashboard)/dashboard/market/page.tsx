@@ -58,6 +58,8 @@ type T = ReturnType<typeof useTranslations>;
 
 function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   const locale = useLocale();
+  // Bajarilgan ish soni xizmat kartasidagi bilan bir xil matn: nomfaza ham bitta
+  const tg = useTranslations('services.grid');
   const L = useMarketLabels();
   const [items, setItems] = useState<MarketRequest[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -74,9 +76,11 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setOpen(focusId); if (focusId) document.getElementById(`mr-${focusId}`)?.scrollIntoView({ block: 'center' }); }, [focusId, items?.length]);
 
-  async function act(id: string, what: 'award' | 'close' | 'cancel', offerId?: string) {
+  async function act(id: string, what: 'award' | 'close' | 'cancel' | 'done', offerId?: string) {
     if (what === 'close' && !window.confirm(t('confirmClose'))) return;
     if (what === 'cancel' && !window.confirm(t('confirmCancel'))) return;
+    // Bajarildi yakuniy: ortga qaytarib bo'lmaydi va ijrochining hisobiga yoziladi
+    if (what === 'done' && !window.confirm(t('confirmDone'))) return;
     // Tanlash qaytarib bo'lmaydigan qadam: qolgan takliflar yopiladi va raqamlar ochiladi
     if (what === 'award' && !window.confirm(t('confirmAward'))) return;
     setBusy(offerId ?? `${id}:${what}`); setErr(null);
@@ -130,6 +134,8 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                 <div className="mt-4 border-t border-line pt-4">
                   <div className="flex flex-wrap gap-2">
                     <Link href={requestHref(r)} className={BTN_GHOST}>{t('open')}</Link>
+                    {/* Asosiy amal birinchi va to'q rangda: tanlangan so'rovning normal yakuni shu */}
+                    {r.status === 'AWARDED' ? <button type="button" onClick={() => act(r.id, 'done')} disabled={busy !== null} className={BTN_NAVY}>{busy === `${r.id}:done` ? t('markingDone') : t('markDone')}</button> : null}
                     {r.status === 'OPEN' || r.status === 'AWARDED' ? <button type="button" onClick={() => act(r.id, 'close')} disabled={busy !== null} className={BTN_GHOST}>{busy === `${r.id}:close` ? t('closing') : t('close')}</button> : null}
                     {r.status === 'OPEN' ? <button type="button" onClick={() => act(r.id, 'cancel')} disabled={busy !== null} className={BTN_GHOST}>{busy === `${r.id}:cancel` ? t('cancelling') : t('cancel')}</button> : null}
                   </div>
@@ -148,6 +154,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                     </div>
                   ) : null}
                   {r.status === 'AWARDED' ? <div className="mt-3"><Notice tone="ok">{t('awardedNote')}</Notice></div> : null}
+                  {r.status === 'DONE' ? <div className="mt-3"><Notice tone="ok">{t('doneNote')}</Notice></div> : null}
                   {r.statusUrl ? (
                     <CopyLink url={r.statusUrl} className="mt-3" />
                   ) : null}
@@ -160,14 +167,17 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                           {/* Kim ekani ko'rinsin: tashkilot bo'lsa tasdig'i, yakka odam bo'lsa raqami */}
                           {o.providerOrg ? <KycBadge kyc={o.providerOrg.kyc as KycStatus} />
                             : o.providerPhoneVerified != null ? <PhoneBadge verified={o.providerPhoneVerified} /> : null}
+                          {/* Faqat noldan katta bo'lsa: "0 ta bajarilgan ish" qaror bermaydi, shovqin qiladi */}
+                          {o.providerDoneCount ? <span className="rounded-full bg-teal-soft px-2 py-0.5 font-mono text-[11px] font-semibold tabular-nums text-teal-ink">{tg('done', { count: o.providerDoneCount })}</span> : null}
                           <OfferStatusPill status={o.status} />
                           <span className="ml-auto font-mono text-xs text-muted tabular-nums">{uzDateTime(o.createdAt, locale)}</span>
                         </div>
                         <p className="mt-1 font-mono text-sm text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin, locale) : tc('onRequest')}</p>
                         {o.message ? <p className="mt-1 whitespace-pre-line text-sm text-ink/85 wrap-anywhere">{o.message}</p> : null}
                         {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => act(r.id, 'award', o.id)} disabled={busy !== null} className={`${BTN_NAVY} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}
-                        {/* Tanlangandan keyin halqa yopiladi: g'olibning raqami shu yerda ochiladi */}
-                        {r.status === 'AWARDED' && o.status === 'AWARDED' && !r.isDemo ? (
+                        {/* Tanlangandan keyin halqa yopiladi: g'olibning raqami shu yerda ochiladi.
+                            Ish bajarilgan deb belgilangach ham qoladi: hisob-kitob keyinroq bo'ladi */}
+                        {(r.status === 'AWARDED' || r.status === 'DONE') && o.status === 'AWARDED' && !r.isDemo ? (
                           <div className="mt-2">
                             <p className="text-xs text-muted">{t('winnerPhone')}</p>
                             <MarketPhone kind="offer" targetId={o.id} next="/dashboard/market?tab=requests" />
