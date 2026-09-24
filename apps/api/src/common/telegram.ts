@@ -81,9 +81,9 @@ const TEXTS = {
   },
   // Yuk bozori va xizmatlar markazi: {where} = yo'nalish yoki viloyat, {what} = yuk yoki xizmat turi
   marketCargoNew: {
-    uz: "🚚 <b>Yangi yuk {no}</b>\n{where}\n{what}\n\n{title}\n\nTaklif berish: {url}",
-    ru: '🚚 <b>Новый груз {no}</b>\n{where}\n{what}\n\n{title}\n\nПредложить: {url}',
-    en: '🚚 <b>New cargo {no}</b>\n{where}\n{what}\n\n{title}\n\nMake an offer: {url}',
+    uz: "🚚 <b>Yangi yuk {no}</b>\n{where}\n{what}\n\nTaklif berish: {url}",
+    ru: '🚚 <b>Новый груз {no}</b>\n{where}\n{what}\n\nПредложить: {url}',
+    en: '🚚 <b>New cargo {no}</b>\n{where}\n{what}\n\nMake an offer: {url}',
   },
   marketServiceNew: {
     uz: "🧾 <b>Yangi xizmat so'rovi {no}</b>\n{what} · {where}\n\n{title}\n\nTaklif berish: {url}",

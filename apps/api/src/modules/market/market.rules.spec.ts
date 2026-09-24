@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MARKET_STATUSES } from '@yuksaroy/domain';
-import { MARKET_TRANSITIONS, canMarketTransition, formatMarketNo, offerDenial, validateRequest } from './market.rules';
+import { MARKET_TRANSITIONS, canMarketTransition, cargoTitle, formatMarketNo, offerDenial, validateRequest } from './market.rules';
 
 describe('bozor holatlari', () => {
   it("jadval to'liq, yakuniy holatdan chiqib bo'lmaydi", () => {
@@ -28,6 +28,35 @@ describe('validateRequest', () => {
     expect(validateRequest({ ...cargo, loadDate: today, truckType: null }, today)).toEqual({});
   });
 
+  // Yuk e'lonida sarlavha va tavsif so'ralmaydi: sarlavha yuk nomi va og'irligidan
+  // tuziladi, tavsif esa ixtiyoriy. Xizmat so'rovida ikkalasi ham majburiy bo'lib qoladi.
+  it("yukda sarlavha va tavsif talab qilinmaydi", () => {
+    const { title, description, ...noText } = { ...cargo, title: undefined, description: undefined };
+    expect(validateRequest(noText as never, today)).toEqual({});
+  });
+
+  it("xizmat so'rovida sarlavha va tavsif majburiy", () => {
+    const svc = { board: 'SERVICE', serviceType: 'DOCS', regionCode: 'UZ-TK' };
+    const e = validateRequest(svc as never, today);
+    expect(e.title).toBe('REQUIRED');
+    expect(e.description).toBe('REQUIRED');
+  });
+
+  it("narx aytishga yordam beradigan uch maydon tekshiriladi", () => {
+    expect(validateRequest({ ...cargo, volumeM3: -1 }, today).volumeM3).toBe('RANGE');
+    expect(validateRequest({ ...cargo, volumeM3: 2000 }, today).volumeM3).toBe('RANGE');
+    expect(validateRequest({ ...cargo, trucksCount: 0 }, today).trucksCount).toBe('RANGE');
+    expect(validateRequest({ ...cargo, trucksCount: 2.5 }, today).trucksCount).toBe('RANGE');
+    expect(validateRequest({ ...cargo, paymentTerm: 'BARTER' }, today).paymentTerm).toBe('INVALID');
+    expect(validateRequest({ ...cargo, volumeM3: 40, trucksCount: 3, paymentTerm: 'CASH' }, today)).toEqual({});
+  });
+
+  it("sarlavha yuk nomi va og'irligidan tuziladi", () => {
+    expect(cargoTitle({ cargoName: 'Sement', weightT: 20 })).toBe('Sement, 20 t');
+    expect(cargoTitle({ cargoName: "  Bug'doy  ", weightT: null })).toBe("Bug'doy");
+    expect(cargoTitle({ cargoName: 'x'.repeat(200), weightT: 5 }).length).toBeLessThanOrEqual(120);
+  });
+
   // Telefon tekshiruvi kontrollerdan shu yerga ko'chdi: endi mijoz ham xuddi shu qoidani ishlatadi
   it("telefon raqami tekshiriladi, bo'sh bo'lsa talab qilinmaydi", () => {
     expect(validateRequest({ ...cargo, contactPhone: '123' }, today).contactPhone).toBe('INVALID');
@@ -52,7 +81,11 @@ describe('validateRequest', () => {
   });
 
   it("sarlavha va tavsif chegarasi, noma'lum taxta", () => {
-    expect(validateRequest({ board: 'CARGO', title: 'a'.repeat(121), description: '' }, today)).toMatchObject({ title: 'TOO_LONG', description: 'REQUIRED' });
+    // Uzunlik chegarasi endi xizmat so'rovida: yuk sarlavhasini server o'zi tuzadi
+    expect(validateRequest({ board: 'SERVICE', serviceType: 'DOCS', regionCode: 'UZ-TK', title: 'a'.repeat(121), description: '' }, today))
+      .toMatchObject({ title: 'TOO_LONG', description: 'REQUIRED' });
+    // Yukda uzun tavsif baribir kesiladi
+    expect(validateRequest({ ...cargo, description: 'a'.repeat(2001) }, today)).toMatchObject({ description: 'TOO_LONG' });
     expect(validateRequest({ board: 'X', title: 'a', description: 'b' }, today)).toEqual({ board: 'INVALID' });
   });
 });

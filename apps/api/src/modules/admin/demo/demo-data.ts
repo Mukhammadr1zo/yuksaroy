@@ -6,7 +6,7 @@
  *
  * Shakl asl formaga mos: e'lonlar validateListing dan o'tadi (spec tekshiradi).
  */
-import {
+import { cargoTitle,
   ORG_KIND_ROLES, REGIONS, type Condition, type ListingInput, type OrgKind, type PriceUnit, type RegionCode, type Role,
   type ServiceCode, type ServiceType, type TariffUnit, type TerminalKind, type TruckType, type WagonType,
 } from '@yuksaroy/domain';
@@ -256,7 +256,7 @@ const SERVICE_REQ_ROWS: ServiceReqRow[] = [
 export const DEMO_REQUESTS: DemoRequest[] = [
   ...CARGO_ROWS.map(([fromRegion, toRegion, fromText, toText, cargoName, weightT, truckType, loadInDays, user, description], i): DemoRequest => ({
     id: DEMO_ID.request(i + 1), board: 'CARGO', createdById: DEMO_ID.user(user), orgId: DEMO_USERS[user - 1].orgId,
-    title: `${cargoName}, ${weightT} t`, description, serviceType: null, regionCode: fromRegion, fromRegion, toRegion, fromText, toText, cargoName, weightT, truckType, loadInDays,
+    title: cargoTitle({ cargoName, weightT }), description, serviceType: null, regionCode: fromRegion, fromRegion, toRegion, fromText, toText, cargoName, weightT, truckType, loadInDays,
   })),
   ...SERVICE_REQ_ROWS.map(([serviceType, regionCode, title, user, description], i): DemoRequest => ({
     id: DEMO_ID.request(CARGO_ROWS.length + i + 1), board: 'SERVICE', createdById: DEMO_ID.user(user), orgId: DEMO_USERS[user - 1].orgId,

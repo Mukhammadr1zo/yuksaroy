@@ -33,7 +33,9 @@
       "offers": "{count} offers",
       "noOffers": "No offers yet",
       "truckAny": "Body: any",
-      "more": "Details"
+      "more": "Details",
+      "volume": "{m3} m3",
+      "trucks": "{n, plural, one {# truck} other {# trucks}}"
     },
     "detail": {
       "back": "Back to cargo board",
@@ -49,7 +51,10 @@
       "created": "Posted",
       "offerTitle": "Offer a price",
       "offerLead": "If you are a carrier or a driver, write your price. The cargo owner compares offers and picks one.",
-      "closedNote": "A carrier was already chosen for this cargo, or the post is closed."
+      "closedNote": "A carrier was already chosen for this cargo, or the post is closed.",
+      "volume": "Volume",
+      "trucks": "Number of trucks",
+      "payment": "Payment terms"
     },
     "new": {
       "title": "Post cargo",
@@ -80,10 +85,8 @@
     },
     "form": {
       "title": "Short title",
-      "titlePhCargo": "e.g. 20 t of cement, Tashkent to Samarkand",
       "titlePhService": "e.g. Need an export declaration",
       "description": "Details",
-      "descriptionPhCargo": "How the cargo is packed, who loads and unloads, other terms",
       "descriptionPhService": "What needs doing, by when, which documents you have",
       "serviceType": "Which service do you need",
       "region": "Where is it needed",
@@ -112,7 +115,15 @@
       "done": "Posted: {no}",
       "doneBody": "Providers have been notified. Offers will show in your dashboard, and in Telegram if it is linked.",
       "viewMine": "See offers",
-      "viewPublic": "Open the post"
+      "viewPublic": "Open the post",
+      "volumeM3": "Volume, m3 (optional)",
+      "trucksCount": "How many trucks (optional)",
+      "paymentTerm": "Payment terms (optional)",
+      "paymentAny": "No preference",
+      "descriptionOptional": "Extra details (optional)",
+      "descriptionPhCargoShort": "Who loads, any other terms",
+      "tgHint": "Telegram is not linked: you will not get offer notifications.",
+      "tgCta": "Open the bot"
     },
     "offer": {
       "price": "Price (UZS)",

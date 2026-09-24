@@ -33,7 +33,9 @@
       "offers": "{count} ta taklif",
       "noOffers": "Hali taklif yo'q",
       "truckAny": "Kuzov: farqi yo'q",
-      "more": "Batafsil"
+      "more": "Batafsil",
+      "volume": "{m3} m3",
+      "trucks": "{n} ta mashina"
     },
     "detail": {
       "back": "Yuk bozoriga",
@@ -49,7 +51,10 @@
       "created": "E'lon qilingan",
       "offerTitle": "Narx taklif qilish",
       "offerLead": "Tashuvchi yoki haydovchi bo'lsangiz narxingizni yozing. Yuk egasi takliflarni solishtirib tanlaydi.",
-      "closedNote": "Bu yuk uchun tashuvchi tanlangan yoki e'lon yopilgan."
+      "closedNote": "Bu yuk uchun tashuvchi tanlangan yoki e'lon yopilgan.",
+      "volume": "Hajm",
+      "trucks": "Mashinalar soni",
+      "payment": "To'lov sharti"
     },
     "new": {
       "title": "Yuk e'lon qilish",
@@ -80,10 +85,8 @@
     },
     "form": {
       "title": "Qisqa sarlavha",
-      "titlePhCargo": "masalan, 20 t sement, Toshkentdan Samarqandga",
       "titlePhService": "masalan, Eksport uchun deklaratsiya kerak",
       "description": "Batafsil",
-      "descriptionPhCargo": "Yuk qanday qadoqlangan, yuklash-tushirish kim tomonidan, boshqa shartlar",
       "descriptionPhService": "Nima qilish kerak, qachonga, qanday hujjatlar bor",
       "serviceType": "Qanday xizmat kerak",
       "region": "Qayerda kerak",
@@ -112,7 +115,15 @@
       "done": "E'lon qilindi: {no}",
       "doneBody": "Ijrochilarga xabar ketdi. Takliflar kabinetingizda ko'rinadi, Telegram bog'langan bo'lsa u yerga ham keladi.",
       "viewMine": "Takliflarni ko'rish",
-      "viewPublic": "E'lonni ko'rish"
+      "viewPublic": "E'lonni ko'rish",
+      "volumeM3": "Hajm, m3 (ixtiyoriy)",
+      "trucksCount": "Nechta mashina kerak (ixtiyoriy)",
+      "paymentTerm": "To'lov sharti (ixtiyoriy)",
+      "paymentAny": "Farqi yo'q",
+      "descriptionOptional": "Qo'shimcha (ixtiyoriy)",
+      "descriptionPhCargoShort": "Yuklash kim tomonidan, boshqa shartlar",
+      "tgHint": "Telegram bog'lanmagan: takliflar haqida xabar bormaydi.",
+      "tgCta": "Botni ochish"
     },
     "offer": {
       "price": "Narx (so'm)",

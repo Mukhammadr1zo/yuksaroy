@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { REGION_LABELS, SERVICE_TYPE_LABELS, uzDateText, uzLocalDate, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
+import { PAYMENT_TERM_LABELS, REGION_LABELS, SERVICE_TYPE_LABELS, TRUCKS_WORD, uzDateText, uzLocalDate, type PaymentTerm, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
 import { env } from '../../common/env';
 import { PrismaService } from '../../common/prisma.service';
 import { esc, notifyTelegram, sendTelegram, webUrl } from '../../common/telegram';
@@ -10,6 +10,7 @@ export type RequestRow = {
   id: string; no: string; board: string; serviceType: string | null; regionCode: string | null;
   fromRegion: string | null; toRegion: string | null; fromText: string | null; toText: string | null;
   cargoName: string | null; weightT: number | null; loadDate: Date | null; truckType: string | null;
+  volumeM3: number | null; trucksCount: number | null; paymentTerm: string | null;
   title: string; description: string; contactPhone: string | null; createdById: string; orgId: string | null;
   status: string; awardedOfferId: string | null; statusToken: string; isDemo: boolean; createdAt: Date; updatedAt: Date;
 };
@@ -39,6 +40,18 @@ export const offerView = (o: OfferRow, orgs: Map<string, OrgRef> = new Map(), us
 const lang = (l: string): SearchLang => (l === 'ru' || l === 'en' ? l : 'uz');
 const region = (c: string | null) => (c ? REGION_LABELS[c as RegionCode] ?? c : '');
 const svc = (l: string, t: string | null) => (t ? SERVICE_TYPE_LABELS[lang(l)][t as ServiceType] ?? t : '');
+/**
+ * Yuk qatori: nomi, og'irligi, hajmi, nechta mashina va to'lov sharti.
+ * Oluvchining tilida yig'iladi, chunki Telegram xabari har kimga o'z tilida ketadi.
+ * Bo'sh maydonlar umuman chiqmaydi.
+ */
+const cargoLine = (r: RequestRow, l: string) => [
+  r.cargoName,
+  r.weightT ? `${r.weightT} t` : '',
+  r.volumeM3 ? `${r.volumeM3} m3` : '',
+  r.trucksCount && r.trucksCount > 1 ? `${r.trucksCount} ${TRUCKS_WORD[lang(l)]}` : '',
+  r.paymentTerm ? PAYMENT_TERM_LABELS[lang(l)][r.paymentTerm as PaymentTerm] ?? '' : '',
+].filter(Boolean).join(', ');
 const KIND: NotificationKind = 'market';
 
 /** Bozor uchun umumiy o'qishlar va bildirishnomalar. Xabar yuborish chaqiruvchini kuttirmaydi (void ... .catch). */
@@ -121,10 +134,10 @@ export class MarketService {
     if (!userIds.length) return;
     const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
     const where = r.board === 'CARGO' ? `${region(r.fromRegion)} -> ${region(r.toRegion)}` : region(r.regionCode);
-    const cargoWhat = `${r.cargoName ?? ''}${r.weightT ? `, ${r.weightT} t` : ''}`;
+
     await this.notifications.push(userIds, { kind: KIND, title: `${r.no} · ${r.title}`, body: where, href });
     await notifyTelegram(this.prisma, { userIds }, r.board === 'CARGO' ? 'marketCargoNew' : 'marketServiceNew', (l) => ({
-      no: r.no, title: r.title.slice(0, 200), where, what: r.board === 'CARGO' ? cargoWhat : svc(l, r.serviceType), url: webUrl(href),
+      no: r.no, title: r.title.slice(0, 200), where, what: r.board === 'CARGO' ? cargoLine(r, l) : svc(l, r.serviceType), url: webUrl(href),
     }));
   }
 
@@ -142,7 +155,7 @@ export class MarketService {
     const chat = env.TELEGRAM_CARGO_CHANNEL;
     if (!chat || env.NODE_ENV !== 'production' || r.board !== 'CARGO' || r.isDemo) return;
     const where = `${region(r.fromRegion)} -> ${region(r.toRegion)}`;
-    const what = `${r.cargoName ?? ''}${r.weightT ? `, ${r.weightT} t` : ''}`;
+    const what = cargoLine(r, 'uz');
     const when = r.loadDate ? uzDateText(uzLocalDate(r.loadDate)) : '';
     const lines = [
       `<b>${esc(where)}</b>`,

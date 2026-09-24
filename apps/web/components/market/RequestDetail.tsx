@@ -41,6 +41,10 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
         [t('weight'), r.weightT != null ? `${r.weightT} t` : ''],
         [t('loadDate'), r.loadDate ? uzDate(r.loadDate, locale) : ''],
         [t('truck'), r.truckType ? L.truck(r.truckType) : L.truck(null) || '-'],
+        // Uch maydon ixtiyoriy: to'ldirilmagani jadvalga umuman tushmaydi
+        ...(r.volumeM3 != null ? [[t('volume'), `${r.volumeM3} m3`] as [string, React.ReactNode]] : []),
+        ...(r.trucksCount != null && r.trucksCount > 1 ? [[t('trucks'), String(r.trucksCount)] as [string, React.ReactNode]] : []),
+        ...(r.paymentTerm ? [[t('payment'), L.payment(r.paymentTerm)] as [string, React.ReactNode]] : []),
       ]
     : [
         [t('type'), r.serviceType ? L.service[r.serviceType] : ''],
@@ -69,10 +73,13 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
       </dl>
       {cargo && (r.fromText || r.toText) ? <p className="mt-3 text-sm text-muted wrap-anywhere">{[r.fromText, r.toText].filter(Boolean).join(' - ')}</p> : null}
 
-      <section className="mt-4 rounded-card border border-line bg-white p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('description')}</h2>
-        <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{r.description}</p>
-      </section>
+      {/* Yuk e'lonida tavsif ixtiyoriy: bo'sh bo'lsa bo'sh sarlavha turmasin */}
+      {r.description.trim() ? (
+        <section className="mt-4 rounded-card border border-line bg-white p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('description')}</h2>
+          <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{r.description}</p>
+        </section>
+      ) : null}
 
       {/* Raqam serverda OPEN va AWARDED so'rovga ochiladi; AWARDED da faqat tanlangan ijrochiga ko'rsatiladi, yopiq so'rovda "yo'q" deb aldamaydi */}
       {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || (r.status === 'AWARDED' && me?.myOffer?.status === 'AWARDED')) ? (

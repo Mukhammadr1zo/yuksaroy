@@ -1,7 +1,7 @@
 'use client';
 // Bozor va xizmatlar markazi uchun mayda bo'laklar: holat pilli, Namuna yorlig'i, yorliqlar, telefon.
 import { useTranslations } from 'next-intl';
-import { LISTING_LABELS, SEARCH_LABELS, SERVICE_TYPE_LABELS, type MarketOfferStatus, type MarketStatus, type TruckType } from '@yuksaroy/domain';
+import { LISTING_LABELS, PAYMENT_TERM_LABELS, SEARCH_LABELS, SERVICE_TYPE_LABELS, type MarketOfferStatus, type MarketStatus, type PaymentTerm, type TruckType } from '@yuksaroy/domain';
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { useLang } from '@/components/kabinet/bits';
 
@@ -30,6 +30,7 @@ export function useMarketLabels() {
     service: SERVICE_TYPE_LABELS[lang],
     region: (c: string | null | undefined) => (c ? SEARCH_LABELS[lang].region[c as keyof typeof SEARCH_LABELS.uz.region] ?? c : ''),
     truck: (c: string | null | undefined) => (c ? LISTING_LABELS[lang].truckType[c as TruckType] ?? c : ''),
+    payment: (c: string | null | undefined) => (c ? PAYMENT_TERM_LABELS[lang][c as PaymentTerm] ?? c : ''),
   };
 }
 

@@ -461,6 +461,24 @@ export const SERVICE_TYPE_LABELS: Record<SearchLang, Record<ServiceType, string>
 };
 
 /**
+ * To'lov sharti: yuk egasi qanday to'laydi. Tashuvchi narxni aynan shunga qarab aytadi,
+ * shuning uchun bu maydon telefonda so'raladigan birinchi savolni yopadi.
+ *
+ * Yorliqlar JSON ga emas, shu yerga yozildi: ularni API ham (Telegram xabari oluvchining
+ * tilida ketadi), veb ham bitta manbadan oladi.
+ */
+export const PAYMENT_TERMS = ['CASH', 'TRANSFER', 'TRANSFER_VAT'] as const;
+export type PaymentTerm = (typeof PAYMENT_TERMS)[number];
+export const PAYMENT_TERM_LABELS: Record<SearchLang, Record<PaymentTerm, string>> = {
+  uz: { CASH: 'Naqd', TRANSFER: "O'tkazma", TRANSFER_VAT: "O'tkazma, qo'shilgan qiymat solig'i bilan" },
+  ru: { CASH: 'Наличные', TRANSFER: 'Перечисление', TRANSFER_VAT: 'Перечисление с НДС' },
+  en: { CASH: 'Cash', TRANSFER: 'Bank transfer', TRANSFER_VAT: 'Bank transfer with VAT' },
+};
+
+/** Telegram xabari oluvchining tilida ketadi, shuning uchun "mashina" so'zi ham shu yerda. */
+export const TRUCKS_WORD: Record<SearchLang, string> = { uz: 'ta mashina', ru: 'маш.', en: 'trucks' };
+
+/**
  * Bozor so'rovi: xizmat so'rovi (SERVICE) va yuk e'loni (CARGO) bir xil hayot siklida
  * yashaydi: ochiq -> taklif tanlandi -> yopiq. Shoshilinch so'rovlar (/urgent) bilan bir xil
  * shakl, lekin maydonlari boshqa (yo'nalish, og'irlik, sana), shuning uchun alohida jadval.

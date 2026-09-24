@@ -10,7 +10,7 @@
  */
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { REGIONS, SERVICE_TYPES, TRUCK_TYPES, validateRequest, type MarketBoard, type ServiceType } from '@yuksaroy/domain';
+import { PAYMENT_TERMS, REGIONS, SERVICE_TYPES, TRUCK_TYPES, validateRequest, type MarketBoard, type ServiceType } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, clearAuthedCache, hasSession, post } from '@/lib/api';
 import { uzToday } from '@/lib/format';
@@ -20,12 +20,19 @@ import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { BTN_GHOST, BTN_PRIMARY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { useMarketLabels } from './bits';
+import { CopyLink } from './CopyLink';
+
+const BOT = process.env.NEXT_PUBLIC_BOT_USERNAME ?? 'yuksaroy_bot';
 
 type Draft = {
   title: string; description: string; serviceType: string; regionCode: string;
-  fromRegion: string; toRegion: string; fromText: string; toText: string; cargoName: string; weightT: string; loadDate: string; truckType: string; contactPhone: string;
+  fromRegion: string; toRegion: string; fromText: string; toText: string; cargoName: string; weightT: string; loadDate: string; truckType: string;
+  volumeM3: string; trucksCount: string; paymentTerm: string; contactPhone: string;
 };
-const EMPTY: Draft = { title: '', description: '', serviceType: '', regionCode: '', fromRegion: '', toRegion: '', fromText: '', toText: '', cargoName: '', weightT: '', loadDate: '', truckType: '', contactPhone: '' };
+const EMPTY: Draft = {
+  title: '', description: '', serviceType: '', regionCode: '', fromRegion: '', toRegion: '', fromText: '', toText: '',
+  cargoName: '', weightT: '', loadDate: '', truckType: '', volumeM3: '', trucksCount: '', paymentTerm: '', contactPhone: '',
+};
 
 /**
  * Yozilgan qoralama brauzer yorlig'ida saqlanadi. Hisobi yo'q odamga kod Telegram orqali
@@ -61,8 +68,18 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   });
   const err = (k: keyof Draft) => (errors[k] ? te(errors[k]!) : undefined);
 
+  // Yuk e'lonida sarlavha yuborilmaydi: server uni yuk nomi va og'irligidan tuzadi
   const body = () => (cargo
-    ? { board, title: d.title, description: d.description, fromRegion: d.fromRegion, toRegion: d.toRegion, fromText: d.fromText, toText: d.toText, cargoName: d.cargoName, weightT: d.weightT ? Number(d.weightT) : undefined, loadDate: d.loadDate, truckType: d.truckType || undefined, contactPhone: d.contactPhone }
+    ? {
+        board, description: d.description || undefined,
+        fromRegion: d.fromRegion, toRegion: d.toRegion, fromText: d.fromText, toText: d.toText,
+        cargoName: d.cargoName, weightT: d.weightT ? Number(d.weightT) : undefined, loadDate: d.loadDate,
+        truckType: d.truckType || undefined,
+        volumeM3: d.volumeM3 ? Number(d.volumeM3) : undefined,
+        trucksCount: d.trucksCount ? Number(d.trucksCount) : undefined,
+        paymentTerm: d.paymentTerm || undefined,
+        contactPhone: d.contactPhone,
+      }
     : { board, title: d.title, description: d.description, serviceType: d.serviceType, regionCode: d.regionCode, contactPhone: d.contactPhone });
 
   async function send() {
@@ -109,6 +126,15 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
     return (
       <div className="grid gap-4">
         <Notice tone="ok"><span className="font-semibold">{t('done', { no: done.no })}</span> {t('doneBody')}</Notice>
+        {/* Havola shu yerda: odam uni haydovchiga yuborsa, u kirmasdan holatni ko'radi */}
+        {done.statusUrl ? <CopyLink url={done.statusUrl} /> : null}
+        {/* Taklif xabari Telegramga boradi: bog'lanmagan odam uni umuman ko'rmay qolardi */}
+        {done.telegramLinked === false ? (
+          <Notice tone="warn">
+            {t('tgHint')}{' '}
+            <a href={`https://t.me/${BOT}`} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-4">{t('tgCta')}</a>
+          </Notice>
+        ) : null}
         <div className="flex flex-wrap gap-2">
           <Link href={`/dashboard/market?tab=requests&id=${done.id}`} className={BTN_PRIMARY}>{t('viewMine')}</Link>
           <Link href={publicHref} className={BTN_GHOST}>{t('viewPublic')}</Link>
@@ -143,6 +169,22 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
             <Field label={t('weightT')} required error={err('weightT')}><input className={`${INPUT} font-mono`} type="number" min={0.1} max={10000} step={0.1} inputMode="decimal" value={d.weightT} onChange={(e) => set({ weightT: e.target.value })} /></Field>
             <Field label={t('loadDate')} required error={err('loadDate')}><input className={`${INPUT} font-mono`} type="date" min={uzToday()} value={d.loadDate} onChange={(e) => set({ loadDate: e.target.value })} /></Field>
           </div>
+          {/* Narx aytishga yordam beradigan uch maydon: ularsiz tashuvchi telefonda
+              aynan shu uchtasini so'raydi. Hammasi ixtiyoriy, forma og'irlashmasin. */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label={t('volumeM3')} error={err('volumeM3')}>
+              <input className={`${INPUT} font-mono`} type="number" min={0.1} max={1000} step={0.1} inputMode="decimal" value={d.volumeM3} onChange={(e) => set({ volumeM3: e.target.value })} />
+            </Field>
+            <Field label={t('trucksCount')} error={err('trucksCount')}>
+              <input className={`${INPUT} font-mono`} type="number" min={1} max={100} step={1} inputMode="numeric" value={d.trucksCount} onChange={(e) => set({ trucksCount: e.target.value })} />
+            </Field>
+            <Field label={t('paymentTerm')} error={err('paymentTerm')}>
+              <select className={INPUT} value={d.paymentTerm} onChange={(e) => set({ paymentTerm: e.target.value })}>
+                <option value="">{t('paymentAny')}</option>
+                {PAYMENT_TERMS.map((x) => <option key={x} value={x}>{L.payment(x)}</option>)}
+              </select>
+            </Field>
+          </div>
           <Field label={t('truckType')} error={err('truckType')}>
             <select className={INPUT} value={d.truckType} onChange={(e) => set({ truckType: e.target.value })}>
               <option value="">{t('truckAny')}</option>
@@ -163,11 +205,14 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
           </Field>
         </div>
       )}
-      <Field label={t('title')} required error={err('title')}>
-        <input className={INPUT} maxLength={120} placeholder={cargo ? t('titlePhCargo') : t('titlePhService')} value={d.title} onChange={(e) => set({ title: e.target.value })} />
-      </Field>
-      <Field label={t('description')} required error={err('description')}>
-        <textarea className={INPUT} rows={4} maxLength={2000} placeholder={cargo ? t('descriptionPhCargo') : t('descriptionPhService')} value={d.description} onChange={(e) => set({ description: e.target.value })} />
+      {/* Yuk e'lonida sarlavha so'ralmaydi: u yuk nomi va og'irligidan o'zi tuziladi */}
+      {cargo ? null : (
+        <Field label={t('title')} required error={err('title')}>
+          <input className={INPUT} maxLength={120} placeholder={t('titlePhService')} value={d.title} onChange={(e) => set({ title: e.target.value })} />
+        </Field>
+      )}
+      <Field label={cargo ? t('descriptionOptional') : t('description')} required={!cargo} error={err('description')}>
+        <textarea className={INPUT} rows={cargo ? 3 : 4} maxLength={2000} placeholder={cargo ? t('descriptionPhCargoShort') : t('descriptionPhService')} value={d.description} onChange={(e) => set({ description: e.target.value })} />
       </Field>
       <Field label={t('phone')} hint={t('phoneHint')} error={err('contactPhone')}>
         <PhoneField className={`${INPUT} font-mono`} value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} />

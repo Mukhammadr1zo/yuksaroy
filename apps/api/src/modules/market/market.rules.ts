@@ -21,7 +21,7 @@ export const formatMarketNo = (board: MarketBoard, seq: number): string => `${bo
 export const staleBefore = (now = new Date()): Date => new Date(now.getTime() - MARKET.staleDays * 86_400_000);
 
 // Maydon tekshiruvi domen paketida: bir xil qoida mijozda ham, serverda ham ishlaydi
-export { validateRequest, type FieldError, type RequestInput } from '@yuksaroy/domain';
+export { cargoTitle, validateRequest, type FieldError, type RequestInput } from '@yuksaroy/domain';
 
 /**
  * Kim taklif bera oladi. O'z so'roviga yo'q; yopiq so'rovga yo'q; xizmat so'roviga faqat

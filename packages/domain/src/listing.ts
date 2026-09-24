@@ -1,5 +1,5 @@
 // E'lonlar: temir yo'l texnikasi (ijara/sotuv) va avtotashuvchilar. Framework'siz, Prisma enum'lari shu bilan bir xil.
-import { MARKET, REGIONS, SERVICE_TYPES, normalizePhone, uzLocalDate, type RegionCode, type SearchLang } from './index';
+import { MARKET, PAYMENT_TERMS, REGIONS, SERVICE_TYPES, normalizePhone, uzLocalDate, type RegionCode, type SearchLang } from './index';
 import { TransitionError } from './transition';
 import { DEAL_KINDS, type DealKind } from './search';
 
@@ -232,6 +232,7 @@ export type RequestInput = {
   serviceType?: string | null; regionCode?: string | null;
   fromRegion?: string | null; toRegion?: string | null; fromText?: string | null; toText?: string | null;
   cargoName?: string | null; weightT?: number | null; loadDate?: string | null; truckType?: string | null;
+  volumeM3?: number | null; trucksCount?: number | null; paymentTerm?: string | null;
   contactPhone?: string | null;
 };
 export type FieldError = 'REQUIRED' | 'INVALID' | 'RANGE' | 'PAST' | 'TOO_LONG';
@@ -246,10 +247,17 @@ const isBlank = (v: string | null | undefined) => !v || !v.trim();
  */
 export function validateRequest(i: RequestInput, today = uzLocalDate(new Date())): Record<string, FieldError> {
   const e: Record<string, FieldError> = {};
-  if (isBlank(i.title)) e.title = 'REQUIRED';
-  else if (i.title!.trim().length > MARKET.titleMax) e.title = 'TOO_LONG';
-  if (isBlank(i.description)) e.description = 'REQUIRED';
-  else if (i.description!.trim().length > MARKET.descriptionMax) e.description = 'TOO_LONG';
+  // Yuk e'lonining sarlavhasi yuk nomi va og'irligidan o'zi tuziladi, tavsif ham ixtiyoriy:
+  // yo'nalish, yuk va og'irlik yozilgandan keyin yana ikki matn so'rash formani og'irlashtiradi.
+  // Xizmat so'rovida esa ikkalasi ham qoladi: u yerda mazmun aynan matnda.
+  if (i.board === 'CARGO') {
+    if (i.description && i.description.trim().length > MARKET.descriptionMax) e.description = 'TOO_LONG';
+  } else {
+    if (isBlank(i.title)) e.title = 'REQUIRED';
+    else if (i.title!.trim().length > MARKET.titleMax) e.title = 'TOO_LONG';
+    if (isBlank(i.description)) e.description = 'REQUIRED';
+    else if (i.description!.trim().length > MARKET.descriptionMax) e.description = 'TOO_LONG';
+  }
   if (i.fromText && i.fromText.length > 200) e.fromText = 'TOO_LONG';
   if (i.toText && i.toText.length > 200) e.toText = 'TOO_LONG';
   // Telefon SERVICE shoxidan oldin: u shox erta qaytadi va raqam ikkala taxtada ham bor
@@ -272,5 +280,21 @@ export function validateRequest(i: RequestInput, today = uzLocalDate(new Date())
   if (!i.loadDate || !d || Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== i.loadDate) e.loadDate = i.loadDate ? 'INVALID' : 'REQUIRED';
   else if (i.loadDate < today) e.loadDate = 'PAST';
   if (i.truckType && !inList(TRUCK_TYPES, i.truckType)) e.truckType = 'INVALID';
+  if (i.volumeM3 != null && (!Number.isFinite(i.volumeM3) || i.volumeM3 <= 0 || i.volumeM3 > 1000)) e.volumeM3 = 'RANGE';
+  if (i.trucksCount != null && (!Number.isInteger(i.trucksCount) || i.trucksCount < 1 || i.trucksCount > 100)) e.trucksCount = 'RANGE';
+  if (i.paymentTerm && !inList(PAYMENT_TERMS, i.paymentTerm)) e.paymentTerm = 'INVALID';
   return e;
 }
+
+/**
+ * Yuk e'loni sarlavhasi: "Sement, 20 t".
+ *
+ * Yo'nalishdan tuzilmaydi: viloyat nomlari domenda bitta tilda, veb esa ularni
+ * foydalanuvchi tilida ko'rsatadi, ya'ni ruscha sahifada sarlavha o'zbekcha bo'lib,
+ * o'z tagidagi "Yo'nalish" fakti bilan ikki xil yozilardi.
+ */
+export const cargoTitle = (i: Pick<RequestInput, 'cargoName' | 'weightT'>): string =>
+  [i.cargoName?.trim(), i.weightT ? `${i.weightT} t` : '']
+    .filter(Boolean)
+    .join(', ')
+    .slice(0, MARKET.titleMax);

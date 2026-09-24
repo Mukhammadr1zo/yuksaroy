@@ -11,6 +11,7 @@ import type { MarketOffer, MarketRequest, Paged, ServiceProfileCard } from '@/li
 import { Pager } from '@/components/admin/kit';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, INPUT, Notice } from '@/components/kabinet/bits';
 import { KycBadge, PhoneBadge } from '@/components/catalog/KycBadge';
+import { CopyLink } from '@/components/market/CopyLink';
 import { DemoBadge, MarketPhone, MarketStatusPill, OfferStatusPill, useMarketLabels } from '@/components/market/bits';
 import { ProfileForm } from '@/components/market/ProfileForm';
 import { requestHref } from '@/components/market/RequestCard';
@@ -148,14 +149,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                   ) : null}
                   {r.status === 'AWARDED' ? <div className="mt-3"><Notice tone="ok">{t('awardedNote')}</Notice></div> : null}
                   {r.statusUrl ? (
-                    <div className="mt-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t('statusLink')}</p>
-                      <div className="mt-1 flex flex-wrap gap-2">
-                        <input readOnly value={r.statusUrl} onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 rounded-xl border border-line bg-sand px-3 py-2 font-mono text-xs" />
-                        <button type="button" onClick={() => copy(r.id, r.statusUrl!)} className={BTN_NAVY}>{copied === r.id ? t('copied') : t('copy')}</button>
-                      </div>
-                      <p className="mt-1 text-xs text-muted">{t('statusLinkHint')}</p>
-                    </div>
+                    <CopyLink url={r.statusUrl} className="mt-3" />
                   ) : null}
                   {offers.length === 0 ? <p className="mt-3 rounded-card border border-dashed border-line p-4 text-sm text-muted">{t('noOffers')}</p> : null}
                   <ul className="mt-3 space-y-2">

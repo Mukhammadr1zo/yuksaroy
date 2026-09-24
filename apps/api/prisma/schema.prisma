@@ -991,6 +991,9 @@ model MarketRequest {
   weightT        Float? // CARGO, tonna
   loadDate       DateTime?     @db.Date // CARGO: yuklash sanasi
   truckType      String? // CARGO: domain TRUCK_TYPES
+  volumeM3       Float? // CARGO: hajm, m3
+  trucksCount    Int? // CARGO: nechta mashina kerak
+  paymentTerm    String? // CARGO: domain PAYMENT_TERMS
   title          String
   description    String
   contactPhone   String? // raqamning o'zi obunachiga GET /contacts orqali

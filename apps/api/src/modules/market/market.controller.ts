@@ -14,7 +14,7 @@ import { clampInt } from '../catalog/presentation/catalog.controller';
 import { CurrentUserId, JwtGuard, optionalUserId, readAccessToken } from '../identity/presentation/jwt.guard';
 import { TokenService } from '../identity/application/token.service';
 import { SESSION_STORE, USER_REPOSITORY, type SessionStore, type UserRepository } from '../identity/domain/ports';
-import { canMarketTransition, formatMarketNo, offerDenial, staleBefore, validateRequest } from './market.rules';
+import { canMarketTransition, cargoTitle, formatMarketNo, offerDenial, staleBefore, validateRequest } from './market.rules';
 import { MarketService, offerView, requestView } from './market.service';
 
 class CreateRequestDto {
@@ -31,6 +31,9 @@ class CreateRequestDto {
   @IsOptional() @IsNumber() weightT?: number;
   @IsOptional() @IsString() @MaxLength(10) loadDate?: string;
   @IsOptional() @IsString() @MaxLength(20) truckType?: string;
+  @IsOptional() @IsNumber() volumeM3?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(100) trucksCount?: number;
+  @IsOptional() @IsString() @MaxLength(20) paymentTerm?: string;
   @IsOptional() @IsString() @MaxLength(20) contactPhone?: string;
   @IsOptional() @IsString() orgId?: string;
 }
@@ -177,7 +180,11 @@ export class MarketController {
       return tx.marketRequest.create({
         data: {
           no: formatMarketNo(dto.board, Number(nextval)), board: dto.board,
-          title: dto.title!.trim(), description: dto.description!.trim(), contactPhone, createdById: userId, orgId,
+          // Yuk sarlavhasi yuk nomi va og'irligidan o'zi tuziladi: formada u so'ralmaydi
+          title: cargo ? cargoTitle(dto) : dto.title!.trim(),
+          // Ustun NOT NULL: tavsif yuk e'lonida ixtiyoriy bo'lgani uchun bo'sh satr yoziladi
+          description: dto.description?.trim() ?? '',
+          contactPhone, createdById: userId, orgId,
           statusToken: randomBytes(16).toString('hex'),
           // SERVICE: tur + viloyat; CARGO: yo'nalish (regionCode = yuklash viloyati, bitta filtr bilan qidirish uchun)
           serviceType: cargo ? null : dto.serviceType!, regionCode: cargo ? dto.fromRegion! : dto.regionCode!,
@@ -185,6 +192,9 @@ export class MarketController {
           fromText: cargo ? dto.fromText?.trim() || null : null, toText: cargo ? dto.toText?.trim() || null : null,
           cargoName: cargo ? dto.cargoName!.trim() : null, weightT: cargo ? dto.weightT! : null,
           loadDate: cargo ? new Date(`${dto.loadDate}T00:00:00Z`) : null, truckType: cargo ? dto.truckType || null : null,
+          volumeM3: cargo ? dto.volumeM3 ?? null : null,
+          trucksCount: cargo ? dto.trucksCount ?? null : null,
+          paymentTerm: cargo ? dto.paymentTerm || null : null,
         },
       });
     });
@@ -192,7 +202,10 @@ export class MarketController {
     void this.market.notifyNew(r).catch(() => {});
     // Kanal posti alohida: notifyNew mos odamlarga ketadi, kanal esa ochiq ro'yxat
     void this.market.postChannel(r).catch(() => {}); // javobni kutmaydi
-    return { ...requestView(r, 0, true), offers: [] };
+    // Telegram bog'lanmagan bo'lsa formadagi yakuniy ekran buni bir marta eslatadi:
+    // taklif xabari aynan Telegramga boradi va odam uni umuman ko'rmay qolardi
+    const telegramLinked = !!(await this.prisma.telegramLink.findUnique({ where: { userId }, select: { userId: true } }));
+    return { ...requestView(r, 0, true), offers: [], telegramLinked };
   }
 
   @Post('requests/:id/offers') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)

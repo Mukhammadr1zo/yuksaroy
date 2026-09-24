@@ -34,8 +34,12 @@ export function RequestCard({ r, cta }: { r: MarketRequest; cta?: string }) {
           <p className="mt-1 text-sm text-ink wrap-anywhere">{r.cargoName}{r.fromText || r.toText ? <span className="text-muted"> · {[r.fromText, r.toText].filter(Boolean).join(' - ')}</span> : null}</p>
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-sm tabular-nums text-ink/85">
             {r.weightT != null ? <span>{tc('weight', { t: r.weightT })}</span> : null}
+            {/* Hajm va mashinalar soni faqat yozilgan bo'lsa: bo'sh qiymat qaror bermaydi */}
+            {r.volumeM3 != null ? <span>{tc('volume', { m3: r.volumeM3 })}</span> : null}
+            {r.trucksCount != null && r.trucksCount > 1 ? <span>{tc('trucks', { n: r.trucksCount })}</span> : null}
             {r.loadDate ? <span>{tc('load', { date: uzDate(r.loadDate, locale) })}</span> : null}
             <span className="text-muted">{r.truckType ? L.truck(r.truckType) : tc('truckAny')}</span>
+            {r.paymentTerm ? <span className="text-muted">{L.payment(r.paymentTerm)}</span> : null}
           </p>
         </>
       ) : (

@@ -1,5 +1,5 @@
 // Xizmatlar markazi (/v1/services/profiles) va bozor (/v1/market) javob shakllari.
-import type { MarketBoard, MarketOfferStatus, MarketStatus, RegionCode, ServiceType, TruckType } from '@yuksaroy/domain';
+import type { MarketBoard, MarketOfferStatus, MarketStatus, PaymentTerm, RegionCode, ServiceType, TruckType } from '@yuksaroy/domain';
 
 export interface ServiceProfileCard {
   id: string; userId: string; orgId: string | null; serviceType: ServiceType; title: string; description: string; regions: RegionCode[];
@@ -21,12 +21,15 @@ export interface MarketRequest {
   id: string; no: string; board: MarketBoard; serviceType: ServiceType | null; regionCode: RegionCode | null;
   fromRegion: RegionCode | null; toRegion: RegionCode | null; fromText: string | null; toText: string | null;
   cargoName: string | null; weightT: number | null; loadDate: string | null; truckType: TruckType | null;
+  volumeM3: number | null; trucksCount: number | null; paymentTerm: PaymentTerm | null;
   title: string; description: string; hasPhone: boolean; createdById: string; orgId: string | null;
   status: MarketStatus; awardedOfferId: string | null; isDemo: boolean; createdAt: string; updatedAt: string; offersCount: number;
   /** Faqat egasiga */
   contactPhone?: string | null; statusUrl?: string; offers?: MarketOffer[];
   /** Taklif bergan odamga o'z taklifi */
   myOffer?: MarketOffer | null;
+  /** Faqat yaratish javobida: Telegram bog'lanmagan bo'lsa yakuniy ekranda eslatiladi */
+  telegramLinked?: boolean;
 }
 
 export type Paged<T> = { items: T[]; total: number; page: number; limit: number };
