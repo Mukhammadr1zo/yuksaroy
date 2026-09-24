@@ -50,6 +50,7 @@
         "CANCELLED": "Cancelled"
       },
       "months": "{n} months",
+      "org": "Organization",
       "user": "User",
       "created": "Requested",
       "confirm": "Confirm payment",

@@ -257,9 +257,14 @@ function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string
 }
 
 /**
- * Obuna to'lovi (qo'lda): foydalanuvchi, oylar, summa. Tasdiq -> ACTIVE va muddat
- * boshlanadi (faol obuna bo'lsa uzayadi). Bekor -> CANCELLED, obuna berilmaydi.
- * Premium qatori bilan bir xil shakl: operator ikkalasini bir xil o'qiydi.
+ * Obuna to'lovi (qo'lda): foydalanuvchi, tashkilot, oylar, summa. Tasdiq -> ACTIVE va
+ * muddat boshlanadi (faol obuna bo'lsa uzayadi). Bekor -> CANCELLED, obuna berilmaydi.
+ * Premium qatori bilan bir xil shakl: operator ikkalasini bir xil o'qiydi, tashkilot
+ * u yerda ham sarlavhada emas, tana paragrafida turadi.
+ *
+ * Tashkilot kerak, chunki jamoa bitta o'tkazma qiladi: operator ko'chirmadagi bitta
+ * summani qaysi qatorlarga taqsimlashini shu bo'yicha ko'radi. Qatorlar serverda
+ * tashkilot id si bo'yicha guruhlab keladi.
  */
 function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: string) => void }) {
   const lang = useLang();
@@ -297,7 +302,7 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
         <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(s.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
-        {t('user')}: <span className="font-mono text-ink">{s.user.phone ?? s.user.email ?? '·'}</span> · <span className="font-mono">{t('months', { n: s.months })}</span> · <span className="font-mono font-semibold text-navy">{som(s.amountTiyin, lang)}</span>
+        {t('org')}: <span className="text-ink">{s.orgName ?? '·'}</span> · {t('user')}: <span className="font-mono text-ink">{s.user.phone ?? s.user.email ?? '·'}</span> · <span className="font-mono">{t('months', { n: s.months })}</span> · <span className="font-mono font-semibold text-navy">{som(s.amountTiyin, lang)}</span>
       </p>
       <p className="mt-1 font-mono text-xs text-muted">{s.no}</p>
       <div className="mt-3">

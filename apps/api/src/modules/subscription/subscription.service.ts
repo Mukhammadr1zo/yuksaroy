@@ -28,6 +28,35 @@ type Row = { id: string; no: string; userId: string; months: number; amountTiyin
 /** BigInt -> Number (JSON). */
 export const subscriptionView = (s: Row) => ({ ...s, amountTiyin: Number(s.amountTiyin) });
 
+/**
+ * Bir tashkilotning buyurtmalarini navbatda yonma-yon qo'yadi.
+ *
+ * Jamoa bitta o'tkazma qiladi, operator esa uni ko'chirmaning bitta qatoriga
+ * solishtiradi: qatorlar sana bo'yicha aralashib yotsa u har bir xodimni
+ * alohida qidirishga majbur bo'ladi va summani jamlay olmaydi.
+ *
+ * Guruhning o'rni uning eng eski qatoriga teng, ya'ni "eski birinchi" tartibi
+ * saqlanadi: eng uzoq kutgan buyurtma baribir tepada turadi.
+ *
+ * Kalit id bo'yicha, nom bo'yicha emas: tashkilot nomi unikal emas, ya'ni bir xil
+ * nomli ikki BOSHQA tashkilot bitta guruhga tushib ketardi va operator bitta
+ * o'tkazmani begona qatorlarga taqsimlardi.
+ *
+ * Tashkilotsiz qator hech kim bilan guruhlanmaydi (kalit sifatida indeks olinadi):
+ * ikki notanish odam bitta o'tkazma qilgandek ko'rinmasin.
+ */
+export function groupByOrg<T extends { orgId: string | null }>(rows: T[]): T[] {
+  const groups = new Map<string | number, T[]>();
+  rows.forEach((r, i) => {
+    // Son va satr kaliti Map da hech qachon to'qnashmaydi
+    const key = r.orgId ?? i;
+    const g = groups.get(key);
+    if (g) g.push(r);
+    else groups.set(key, [r]);
+  });
+  return [...groups.values()].flat();
+}
+
 /** Obunachining e'lonlari: o'zinikilari va a'zo bo'lgan tashkilotlarniki. */
 export async function subscriberListingFilter(tx: Pick<PrismaService, 'membership'>, userId: string) {
   const orgIds = (await tx.membership.findMany({ where: { userId }, select: { orgId: true } })).map((m) => m.orgId);
@@ -164,15 +193,34 @@ export class SubscriptionService {
     }
   }
 
-  /** Admin navbati: berilgan holat, eski birinchi. */
+  /**
+   * Admin navbati: berilgan holat, eski birinchi, bir tashkilotniki yonma-yon.
+   *
+   * Tashkilot a'zolikdan olinadi, buyurtmada saqlanmaydi: jamoa uchun alohida hisob
+   * qurilmagan, bu ustun faqat operator bitta o'tkazmani bir necha qatorga
+   * taqsimlayotganda kerak.
+   *
+   * Xodim bir necha tashkilotda a'zo bo'lsa a'zoliklardan biri tanlanadi (eng eskisi).
+   * Bu uning ish beruvchisi ekanini kafolatlamaydi va kafolatlay ham olmaydi, shuning
+   * uchun ustun qaror bermaydi: operator baribir to'lov izohidagi PAY raqamiga qaraydi.
+   */
   async list(status: string) {
     const rows = await this.prisma.subscription.findMany({
       where: { status },
-      include: { user: { select: { fullName: true, phone: true, email: true } } },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            phone: true,
+            email: true,
+            memberships: { select: { orgId: true, org: { select: { name: true } } }, orderBy: { createdAt: 'asc' }, take: 1 },
+          },
+        },
+      },
       orderBy: { createdAt: 'asc' },
       take: 200,
     });
-    return rows.map(({ user, ...s }) => ({ ...subscriptionView(s), user }));
+    return groupByOrg(rows.map(({ user: { memberships, ...user }, ...s }) => ({ ...subscriptionView(s), user, orgId: memberships[0]?.orgId ?? null, orgName: memberships[0]?.org.name ?? null })));
   }
 
   /**

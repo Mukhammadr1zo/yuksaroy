@@ -50,6 +50,7 @@
         "CANCELLED": "Bekor qilingan"
       },
       "months": "{n} oy",
+      "org": "Tashkilot",
       "user": "Foydalanuvchi",
       "created": "So'ralgan",
       "confirm": "To'lovni tasdiqlash",

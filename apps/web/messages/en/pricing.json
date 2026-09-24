@@ -30,14 +30,14 @@
       "cta": "Subscribe",
       "hint": "The catalogue, map, chat and requests stay open without one. A subscription does not renew itself: you extend it when it runs out."
     },
-    "deal": {
-      "name": "Contract",
+    "team": {
+      "name": "Team",
       "price": "Negotiated",
-      "note": "for organizations with many listings",
-      "f1": "Many listings under one account",
-      "f2": "Company storefront page: /k/your-name",
-      "f3": "Price depends on the number of listings",
-      "cta": "Contact us"
+      "note": "for staff of one organization",
+      "f1": "Every employee orders their own subscription",
+      "f2": "The organization makes one transfer with one receipt",
+      "f3": "From 3 people the discount is negotiated",
+      "cta": "Ask for a discount"
     },
     "commission": {
       "heading": "Booking commission",
@@ -51,13 +51,15 @@
       "q2": "What does the subscription give me?",
       "a2": "Only the position and the badge: the listing comes first in its category within the chosen sort, stands out on the map, and analytics open up. The number of views or inquiries is not guaranteed.",
       "q3": "What if I have several listings?",
-      "a3": "A subscription belongs to a person and covers all of their listings; it does not grow with the number of them. With a very large number of listings the Deal plan is easier: get in touch.",
+      "a3": "A subscription belongs to a person and covers all of their listings; it does not grow with the number of them. The number of listings is not limited.",
       "q4": "When does the commission start?",
       "a4": "When more than 100 orders a month go through the platform. Once the threshold is reached we announce it at least 30 days ahead; the rate will be 2 to 3 %.",
       "q5": "Do terminal and siding owners pay?",
       "a5": "No. The terminal page, tariffs, spots and accepting bookings are free. Claiming a rail terminal from the catalog is free as well.",
       "q6": "Are prices hidden from guests?",
-      "a6": "No. Tariffs and listing prices are open without login. An account is needed only to see the phone number and send an inquiry."
+      "a6": "No. Tariffs and listing prices are open without login. An account is needed only to see the phone number and send an inquiry.",
+      "q7": "How do we pay as a team?",
+      "a7": "Every employee places their own order on the subscription page and gets a PAY number. The organization makes one transfer and lists all those numbers, separated by commas, in the payment note. We confirm each order separately and the subscriptions switch on the same day. For the discount from 3 people get in touch first: the transfer is made once the amount is agreed."
     }
   }
 }

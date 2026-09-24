@@ -30,14 +30,14 @@
       "cta": "Obuna bo'lish",
       "hint": "Katalog, xarita, chat va so'rovlar obunasiz ham ochiq. Obuna avtomatik yangilanmaydi: muddati tugasa o'zingiz uzaytirasiz."
     },
-    "deal": {
-      "name": "Kelishuv",
+    "team": {
+      "name": "Jamoa",
       "price": "Kelishiladi",
-      "note": "ko'p e'lonli tashkilotlarga",
-      "f1": "Ko'p e'lon bitta hisobda",
-      "f2": "Kompaniya do'koni sahifasi: /k/nomingiz",
-      "f3": "Narx e'lonlar soniga qarab kelishiladi",
-      "cta": "Bog'lanish"
+      "note": "bitta tashkilotning xodimlariga",
+      "f1": "Har bir xodim o'z obunasiga buyurtma beradi",
+      "f2": "Tashkilot bitta o'tkazma qiladi, kvitansiya ham bitta",
+      "f3": "3 kishidan boshlab chegirma kelishiladi",
+      "cta": "Chegirma so'rash"
     },
     "commission": {
       "heading": "Bron komissiyasi",
@@ -51,13 +51,15 @@
       "q2": "Obuna nimani beradi?",
       "a2": "Faqat joylashuv va belgini: e'lon o'z turkumida tanlangan tartib ichida birinchi chiqadi, xaritada ajralib turadi, ko'rsatkichlar ochiladi. Ko'rishlar yoki so'rovlar soni kafolatlanmaydi.",
       "q3": "Bir nechta e'lonim bo'lsa?",
-      "a3": "Obuna odamga beriladi va uning barcha e'lonlarini qamraydi, e'lon soniga qarab ko'paymaydi. Juda ko'p e'lon bo'lsa Kelishuv rejasi qulayroq: bog'laning.",
+      "a3": "Obuna odamga beriladi va uning barcha e'lonlarini qamraydi, e'lon soniga qarab ko'paymaydi. E'lon soni cheklanmagan.",
       "q4": "Komissiya qachon paydo bo'ladi?",
       "a4": "Platforma orqali oyiga 100 tadan ortiq buyurtma o'tganda. Chegara aniqlangach kamida 30 kun oldin e'lon qilamiz, foiz 2 dan 3 gacha bo'ladi.",
       "q5": "Terminal va shahobcha yo'l egalari uchun to'lov bormi?",
       "a5": "Yo'q. Terminal sahifasi, tariflar, joylar va bronlarni qabul qilish bepul. Katalogdagi temir yo'l terminaliga egalik da'vosi ham bepul.",
       "q6": "Narxlar mehmonlardan yashiriladimi?",
-      "a6": "Yo'q. Tariflar va e'lon narxlari login'siz ochiq. Faqat telefon raqamini ko'rish va so'rov yuborish uchun kabinet kerak."
+      "a6": "Yo'q. Tariflar va e'lon narxlari login'siz ochiq. Faqat telefon raqamini ko'rish va so'rov yuborish uchun kabinet kerak.",
+      "q7": "Jamoa bo'lib qanday to'laymiz?",
+      "a7": "Har bir xodim obuna sahifasida o'z buyurtmasini beradi va PAY raqamini oladi. Tashkilot bitta o'tkazma qiladi, to'lov izohiga shu raqamlarning hammasini vergul bilan yozadi. Biz har bir buyurtmani alohida tasdiqlaymiz, obunalar bir kunda yoqiladi. 3 kishidan boshlab chegirma uchun oldin bog'laning: summa kelishilgandan keyin o'tkazma qilinadi."
     }
   }
 }

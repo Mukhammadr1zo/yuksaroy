@@ -22,6 +22,8 @@ export interface AdminSubscription {
   id: string; no: string; userId: string; months: number; amountTiyin: number; status: 'PENDING' | 'ACTIVE' | 'CANCELLED';
   startsAt: string | null; endsAt: string | null; paidAt: string | null; createdAt: string;
   user: { fullName: string | null; phone: string | null; email: string | null };
+  /** Buyurtmachining tashkiloti. Jamoa bitta o'tkazma qilganda qatorlar shu bo'yicha yonma-yon keladi. */
+  orgName: string | null;
 }
 
 export interface ContactMessage {

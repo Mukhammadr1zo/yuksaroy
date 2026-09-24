@@ -17,15 +17,21 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 /**
- * Uch reja: Bepul, Obuna (narxi admin sozlamasidan), Kelishuv. Komissiya qatori va 6 savol.
+ * Uch reja: Bepul, Obuna (narxi admin sozlamasidan), Jamoa. Komissiya qatori va 7 savol.
  * Ilgari o'rtada Premium turardi va obuna pastda alohida blok edi: mijoz ikki xil pullik
  * mahsulotni ko'rib, ikki marta to'lashi kerakdek tushunardi. Endi bitta obuna hammasini
  * qamraydi, shuning uchun bitta karta.
+ *
+ * Uchinchi karta ilgari "Kelishuv" edi va e'lon soni bilan do'kon sahifasini sotardi.
+ * Ikkalasi ham bepul (e'lon soni chegarasi kodda yo'q, do'kon sahifasi faqat egalikni
+ * so'raydi), ustiga bu sahifaning o'z javobi buni rad etardi. Endi karta faqat jamoa
+ * to'lovini tushuntiradi: har kim o'zi buyurtma beradi, tashkilot bitta o'tkazma qiladi.
+ * O'rin yoki jamoa hisobi qurilmagan, shuning uchun karta matndan iborat.
  */
 const PLANS = [
   { key: 'free', n: 4, href: '/dashboard/listings/new', hot: false },
   { key: 'subscription', n: 5, href: '/dashboard/subscription', hot: true },
-  { key: 'deal', n: 3, href: '/contact?topic=partner', hot: false },
+  { key: 'team', n: 3, href: '/contact?topic=partner', hot: false },
 ] as const;
 
 
@@ -74,7 +80,7 @@ export default async function PricingPage({ params }: Params) {
         </div>
       </section>
 
-      <Faq ns="pricing.faq" count={6} />
+      <Faq ns="pricing.faq" count={7} />
     </>
   );
 }
