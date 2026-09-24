@@ -21,8 +21,6 @@
     "submit": "Send claim",
     "sending": "Sending",
     "sent": "Claim sent. The operator will review it; the result appears in your dashboard under My sidings.",
-    "noOrg": "Create an organization in the dashboard first.",
-    "toOrg": "Create an organization",
     "already": "This siding has already been claimed.",
     "err": "Not sent, please try again.",
     "how": "How a claim works",
@@ -68,6 +66,7 @@
     "whyPlaceholder": "For example: certificate 12-34 is issued to our company, the track is on our plant site.",
     "whyShort": "The note must be at least 10 characters.",
     "docs": "Document (optional)",
-    "docsHint": "A document that shows ownership: a certificate, a contract or an act."
+    "docsHint": "A document that shows ownership: a certificate, a contract or an act.",
+    "noOrgAuto": "Your company is created together with the claim; you can rename it later in the dashboard."
   }
 }

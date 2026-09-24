@@ -21,8 +21,6 @@
     "submit": "Da'vo yuborish",
     "sending": "Yuborilmoqda",
     "sent": "Da'vo yuborildi. Operator tekshiradi, natija kabinetdagi Shahobchalarim bo'limida ko'rinadi.",
-    "noOrg": "Avval kabinetda tashkilot yarating.",
-    "toOrg": "Tashkilot yaratish",
     "already": "Bu yo'lga da'vo allaqachon berilgan.",
     "err": "Yuborilmadi, qayta urinib ko'ring.",
     "how": "Da'vo qanday ishlaydi",
@@ -68,6 +66,7 @@
     "whyPlaceholder": "Masalan: guvohnoma 12-34 korxonamiz nomida, yo'l zavod hududida.",
     "whyShort": "Izoh kamida 10 belgi bo'lsin.",
     "docs": "Hujjat (ixtiyoriy)",
-    "docsHint": "Egalikni ko'rsatadigan hujjat: guvohnoma, shartnoma yoki dalolatnoma."
+    "docsHint": "Egalikni ko'rsatadigan hujjat: guvohnoma, shartnoma yoki dalolatnoma.",
+    "noOrgAuto": "Tashkilotingiz da'vo bilan birga ochiladi, nomini keyin kabinetda o'zgartirasiz."
   }
 }

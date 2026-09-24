@@ -14,10 +14,13 @@ export function SidingRegistry({ orgs, onClaimed }: { orgs: Membership[]; onClai
   const t = useTranslations('kabinet.sidings.registry');
   const tr = useTranslations('region');
   const tc = useTranslations('kabinet.common');
+  const tcl = useTranslations('claim');
   const locale = useLocale();
   const [q, setQ] = useState('');
   const [rows, setRows] = useState<Row[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  // Qaysi qatorning izoh maydoni ochiq: moderator dalilsiz qaror qila olmaydi
+  const [open, setOpen] = useState<{ id: string; note: string } | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const orgId = orgs[0]?.orgId;
 
@@ -29,12 +32,12 @@ export function SidingRegistry({ orgs, onClaimed }: { orgs: Membership[]; onClai
     catch { setNote({ tone: 'err', text: tc('failed') }); } finally { setBusy(null); }
   }
 
-  async function claim(id: string) {
-    if (!orgId) return;
+  async function claim(id: string, why: string) {
     setBusy(id); setNote(null);
     try {
-      await post(`/sidings/${id}/claim`, { orgId });
+      await post(`/sidings/${id}/claim`, { ...(orgId ? { orgId } : {}), note: why.trim() });
       setRows((x) => (x ? x.filter((r) => r.id !== id) : x));
+      setOpen(null);
       setNote({ tone: 'ok', text: t('claimed') });
       onClaimed();
     } catch { setNote({ tone: 'err', text: tc('failed') }); } finally { setBusy(null); }
@@ -53,12 +56,24 @@ export function SidingRegistry({ orgs, onClaimed }: { orgs: Membership[]; onClai
       {rows && rows.length ? (
         <ul className="mt-3 divide-y divide-line text-sm">
           {rows.map((r) => (
-            <li key={r.id} className="flex flex-wrap items-center gap-3 py-2">
-              <span className="font-mono text-xs text-muted">#{r.registryNo}</span>
-              <span className="font-semibold">{r.stationNameRaw}</span>
-              {r.regionCode && tr.has(r.regionCode) ? <span className="text-muted">{tr(r.regionCode)}</span> : null}
-              {r.lengthM != null ? <span className="font-mono text-xs text-muted tabular-nums">{num(r.lengthM, locale)} m</span> : null}
-              <button type="button" disabled={!orgId || busy === r.id} onClick={() => void claim(r.id)} className={`${BTN_GHOST} ml-auto`}>{t('claim')}</button>
+            <li key={r.id} className="py-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="font-mono text-xs text-muted">#{r.registryNo}</span>
+                <span className="font-semibold">{r.stationNameRaw}</span>
+                {r.regionCode && tr.has(r.regionCode) ? <span className="text-muted">{tr(r.regionCode)}</span> : null}
+                {r.lengthM != null ? <span className="font-mono text-xs text-muted tabular-nums">{num(r.lengthM, locale)} m</span> : null}
+                {open?.id === r.id ? null : <button type="button" disabled={busy === r.id} onClick={() => setOpen({ id: r.id, note: '' })} className={`${BTN_GHOST} ml-auto`}>{t('claim')}</button>}
+              </div>
+              {open?.id === r.id ? (
+                <div className="mt-2 space-y-2">
+                  <textarea autoFocus rows={2} maxLength={500} value={open.note} onChange={(e) => setOpen({ id: r.id, note: e.target.value })}
+                    placeholder={tcl('whyPlaceholder')} className={INPUT} />
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" disabled={busy === r.id || open.note.trim().length < 10} onClick={() => void claim(r.id, open.note)} className={BTN_NAVY}>{busy === r.id ? tc('saving') : t('claim')}</button>
+                    <button type="button" onClick={() => setOpen(null)} className={BTN_GHOST}>{tc('cancel')}</button>
+                  </div>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>

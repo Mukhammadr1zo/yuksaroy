@@ -40,7 +40,7 @@ export class UpsertTerminalUseCase {
     const t = await this.repo.findTerminalById(terminalId, new Date());
     if (!t) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     if (!t.orgId) throw new ForbiddenException({ code: 'TERMINAL_UNCLAIMED' }); // claim oqimi - admin navbati (S7)
-    await this.access.assertTerminalAdmin(userId, t.orgId);
+    await this.access.assertObjectAdmin(userId, t.orgId);
     return t;
   }
 

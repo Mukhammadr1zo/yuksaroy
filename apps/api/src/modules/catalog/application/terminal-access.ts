@@ -21,6 +21,29 @@ export class TerminalAccess {
     if (!m || !(m.isOwner || m.roles.includes('ASSET_OWNER'))) throw new ForbiddenException({ code: 'NOT_ORG_OWNER' });
   }
 
+  /**
+   * O'z obyektiga yozish: tashkilot turi ahamiyatsiz, qator allaqachon shu tashkilotniki
+   * (uni yo turi tekshirilgan create bergan, yo admin tasdiqlagan da'vo). Aks holda
+   * da'vosi tasdiqlangan ASSET_OWNER yoki CARRIER korxona o'z yo'liga na narx, na
+   * rasm qo'ya olardi. Tur faqat yangi terminal ochish yo'lida talab qilinadi.
+   */
+  async assertObjectAdmin(userId: string, orgId: string) {
+    const m = await this.orgs.findMembership(userId, orgId);
+    if (!m || !(m.isOwner || m.roles.includes('TERMINAL_ADMIN') || m.roles.includes('ASSET_OWNER'))) {
+      throw new ForbiddenException({ code: 'NOT_TERMINAL_ADMIN' });
+    }
+  }
+
+  /**
+   * Da'vo kimning nomidan ketadi: oddiy a'zolik yetarli emas, egasi yoki ASSET_OWNER kerak.
+   * orgIdsOf ishlatilmaydi, chunki u hamma a'zolikni beradi va begona korxona nomidan
+   * da'vo qilishga yo'l ochardi.
+   */
+  async firstClaimantOrgId(userId: string): Promise<string | null> {
+    const ms = await this.orgs.listForUser(userId);
+    return ms.find((m) => m.isOwner || m.roles.includes('ASSET_OWNER'))?.orgId ?? null;
+  }
+
   async orgIdsOf(userId: string) {
     return (await this.orgs.listForUser(userId)).map((m) => m.orgId);
   }

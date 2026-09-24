@@ -211,10 +211,13 @@ export class PrismaCatalogRepository implements CatalogRepository {
   async decideTerminalClaim(id: string, approve: boolean, now: Date) {
     const t = await this.prisma.terminal.findUnique({ where: { id }, select: { claimStatus: true, claimOrgId: true } });
     if (!t || t.claimStatus !== 'PENDING') return null;
-    await this.prisma.terminal.update({
-      where: { id },
+    // Shart UPDATE ning ichida: ikki admin bir vaqtda tasdiqlasa ikkovi ham o'tib,
+    // egasiga ikki xabar ketardi. Endi ikkinchisi nol qator yangilaydi.
+    const r = await this.prisma.terminal.updateMany({
+      where: { id, claimStatus: 'PENDING' },
       data: approve ? { orgId: t.claimOrgId, claimedAt: now, claimStatus: 'APPROVED' } : { claimStatus: 'REJECTED' },
     });
+    if (r.count === 0) return null;
     return this.findTerminalById(id, now);
   }
   async createTerminal(d: TerminalWrite, now: Date) {
@@ -279,6 +282,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       // Egasi o'z kabinetida ko'radi, u yerda ownerOrgIds bilan alohida so'rov ketadi.
       status: f.ownerOrgIds ? { not: 'DRAFT' } : 'ACTIVE',
       stationId: f.stationId,
+      isDemo: f.isDemo,
       claimStatus: Array.isArray(f.claimStatus) ? { in: f.claimStatus } : f.claimStatus,
       regionCode: f.region,
       // Kabinet ro'yxati: egalik tasdiqlanganlar (orgId) ham, hali hal bo'lmagan da'vo (claimOrgId) ham.
@@ -305,7 +309,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
   // pasport, tarif va bron bo'limlarini chizadi. Ilgari u PENDING da qo'yilib, rad etilganda ham qolib ketardi.
   async claimSiding(id: string, orgId: string, _now: Date, evidence: ClaimEvidence) {
     const r = await this.prisma.terminal.updateMany({
-      where: { id, kind: 'RAIL', orgId: null, claimStatus: { in: ['NONE', 'REJECTED'] } },
+      where: { id, kind: 'RAIL', isDemo: false, orgId: null, claimStatus: { in: ['NONE', 'REJECTED'] } },
       data: { claimOrgId: orgId, claimStatus: 'PENDING', claimEvidence: json(evidence) },
     });
     if (r.count === 0) throw new SidingClaimedError();

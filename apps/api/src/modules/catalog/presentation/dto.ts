@@ -56,7 +56,8 @@ export class PublishTariffDto {
 }
 
 export class ClaimSidingDto {
-  @IsString() orgId!: string;
+  /** Ixtiyoriy: tashkiloti yo'q odam da'vo qilsa, tashkilot da'vo bilan birga ochiladi. */
+  @IsOptional() @IsString() orgId?: string;
   /** Izoh majburiy: operator "meniki" degan gapni nimaga qarab tekshirishini bilishi kerak. */
   @IsString() @Length(10, 500) note!: string;
   /** Hujjat ixtiyoriy; manzil va shakl tekshiruvi filesOrThrow da (faqat o'z domenimizdagi fayl). */

@@ -2,7 +2,6 @@
 // "Egasi bo'lsangiz da'vo qiling": tashkilot tanlanadi va POST /sidings/:id/claim yuboriladi. Faqat kirganlarga chiziladi.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { AttachmentButton, AttachmentChips, useAttachments } from '@/components/chat/Attachments';
 
@@ -26,20 +25,23 @@ export function ClaimSiding({ sidingId }: { sidingId: string }) {
     e.preventDefault();
     setState('busy');
     try {
-      await post(`/sidings/${sidingId}/claim`, { orgId, note: note.trim(), files: at.files });
+      await post(`/sidings/${sidingId}/claim`, { ...(orgId ? { orgId } : {}), note: note.trim(), files: at.files });
       setState('sent');
     } catch (err: any) { setState(err?.body?.code === 'SIDING_ALREADY_CLAIMED' ? 'already' : 'err'); }
   }
 
   if (!orgs) return <p className="text-sm text-muted">...</p>;
-  if (!orgs.length) return <p className="text-sm text-muted">{t('noOrg')} <Link href="/dashboard/organization" className="font-semibold text-teal-ink underline">{t('toOrg')}</Link></p>;
   if (state === 'sent') return <p className="rounded-xl bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{t('sent')}</p>;
   return (
     <form onSubmit={submit} className="space-y-2">
-      <label className="block text-xs text-muted" htmlFor="claim-org">{t('org')}</label>
-      <select id="claim-org" value={orgId} onChange={(e) => setOrgId(e.target.value)} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm">
-        {orgs.map((o) => <option key={o.orgId} value={o.orgId}>{o.org.name}</option>)}
-      </select>
+      {orgs.length ? (
+        <>
+          <label className="block text-xs text-muted" htmlFor="claim-org">{t('org')}</label>
+          <select id="claim-org" value={orgId} onChange={(e) => setOrgId(e.target.value)} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm">
+            {orgs.map((o) => <option key={o.orgId} value={o.orgId}>{o.org.name}</option>)}
+          </select>
+        </>
+      ) : <p className="text-xs text-muted">{t('noOrgAuto')}</p>}
       <label className="block text-xs text-muted" htmlFor="claim-why">{t('why')}</label>
       <textarea id="claim-why" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} required
         placeholder={t('whyPlaceholder')} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm" />

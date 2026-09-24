@@ -52,6 +52,8 @@ export class TerminalAdminController {
   /** Katalogdagi egasiz terminalga da'vo: TERMINAL tashkiloti admini; PENDING -> platforma admini hal qiladi. */
   @Post('terminals/:id/claim')
   async claimTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
+    // Bu yo'lda obyekt katalogda o'zi ochilgan, shuning uchun tashkilot majburiy
+    if (!dto.orgId) throw new BadRequestException({ code: 'ORG_REQUIRED' });
     await this.access.assertTerminalAdmin(userId, dto.orgId);
     if (!(await this.repo.findTerminalById(id, new Date()))) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     // Dalil da'vo yozuvi bilan bitta UPDATE da saqlanadi: audit yiqilsa ham izoh yo'qolmaydi
@@ -153,7 +155,7 @@ export class TerminalAdminController {
     const text = q?.trim();
     if (!text && !region && !station) return { items: [], total: 0, page: 1, limit: 20 };
     const r = await this.repo.listSidings(
-      { q: text || undefined, region: pickIn(region, REGIONS), stationId: station || undefined, claimStatus: ['NONE', 'REJECTED'] },
+      { q: text || undefined, region: pickIn(region, REGIONS), stationId: station || undefined, claimStatus: ['NONE', 'REJECTED'], isDemo: false },
       1, 20,
     );
     return { ...r, items: r.items.map((x) => publicSiding(x)) };
@@ -162,12 +164,13 @@ export class TerminalAdminController {
   @Post('sidings/:id/claim')
   async claim(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
     const evidence = { note: dto.note.trim(), files: filesOrThrow(dto.files) };
-    const s = await this.claimSiding.execute(userId, id, dto.orgId, evidence);
-    // Obyekt nomi bitta: shahobcha yo'l Terminal jadvalining qatori, alohida jadval emas
-    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId, files: evidence.files.length } });
+    const { siding, orgId } = await this.claimSiding.execute(userId, id, dto.orgId, evidence);
+    // Obyekt nomi bitta: shahobcha yo'l Terminal jadvalining qatori, alohida jadval emas.
+    // orgId use-case dan olinadi: avtomatik ochilgan tashkilot ham auditda qolsin
+    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Terminal', entityId: id, meta: { orgId, files: evidence.files.length } });
     // Navbat bitta: shahobcha ham temir yo'l terminali, moderatsiyada bir yorliqda turadi
-    void this.adminNotify.queued('terminalClaimsPending', s.name ?? s.stationNameRaw, id, userId).catch(() => {});
-    return s;
+    void this.adminNotify.queued('terminalClaimsPending', siding.name ?? siding.stationNameRaw, id, userId).catch(() => {});
+    return siding;
   }
 
   /**
@@ -177,8 +180,12 @@ export class TerminalAdminController {
    */
   @Patch('sidings/:id')
   async updateSiding(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: UpdateSidingDto) {
-    const orgIds = await this.access.orgIdsOf(userId);
-    const s = orgIds.length ? await this.repo.updateSidingByOwner(id, orgIds, { photos: dto.photos }) : null;
+    // Rol tekshiruvi: ilgari faqat a'zolik qaralardi, ya'ni tashkilotning oddiy xodimi
+    // ochiq sahifadagi rasmni almashtira olardi. Egalik sharti hamon UPDATE ichida qoladi.
+    const owner = (await this.repo.findSidingById(id))?.ownerOrgId;
+    if (!owner) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
+    await this.access.assertObjectAdmin(userId, owner);
+    const s = await this.repo.updateSidingByOwner(id, [owner], { photos: dto.photos });
     if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
     await this.audit.log({ actorId: userId, action: 'siding.update', entity: 'Terminal', entityId: id, meta: { fields: Object.keys(dto), photos: dto.photos?.length } });
     return s;

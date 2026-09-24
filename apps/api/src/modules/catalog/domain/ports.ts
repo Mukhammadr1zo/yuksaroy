@@ -120,6 +120,8 @@ export interface SidingRecord extends SidingPassport {
 
 export interface SidingFilter {
   stationId?: string; q?: string; ownerOrgIds?: string[]; region?: string;
+  /** Namuna qatorlar: da'vo qilib bo'lmaydi, shuning uchun reestr qidiruvida ham ko'rinmaydi. */
+  isDemo?: boolean;
   /** Bitta holat yoki holatlar ro'yxati (masalan da'vo qilish mumkin bo'lganlar: NONE va REJECTED). */
   claimStatus?: ClaimStatus | ClaimStatus[];
 }
