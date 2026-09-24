@@ -201,7 +201,13 @@
       "activityEmpty": "Nothing has happened yet.",
       "waitingDays": "oldest has waited {days} d",
       "pendingSubscription": "Subscription payments",
-      "queueDays": "waited {days} d"
+      "queueDays": "waited {days} d",
+      "commission": "Commission threshold",
+      "commissionThisMonth": "completed this month",
+      "commissionPrevMonth": "last month",
+      "commissionThreshold": "Threshold: {n} a month. Above it the commission is announced at least 30 days ahead.",
+      "commissionNear": "close to threshold",
+      "commissionOver": "threshold passed"
     },
     "terminals": {
       "lead": "Terminals and rail sidings, registry records included.",
@@ -439,7 +445,8 @@
         "phoneRevealDaily": "Phone reveals per day",
         "wagonSearchFree": "Free wagon searches",
         "helpAskDaily": "Help chat: questions per day",
-        "payDetails": "Payment details"
+        "payDetails": "Payment details",
+        "commissionThresholdOrders": "Commission threshold"
       },
       "hint": {
         "commissionPct": "In basis points: 300 = 3.00%.",
@@ -450,7 +457,8 @@
         "phoneRevealDaily": "How many phone numbers a subscriber can reveal per day.",
         "wagonSearchFree": "Free searches per user without a subscription (lifetime). 0 = subscription required at once.",
         "helpAskDaily": "How many questions a person can send to the AI per day.",
-        "payDetails": "Card or account number and recipient for the subscription payment. This text is shown to the user. If empty, the person is sent to the contact form."
+        "payDetails": "Card or account number and recipient for the subscription payment. This text is shown to the user. If empty, the person is sent to the contact form.",
+        "commissionThresholdOrders": "How many completed orders a month switch the commission on. The pricing and questions pages say 100: update those texts if you change it."
       }
     },
     "listings": {

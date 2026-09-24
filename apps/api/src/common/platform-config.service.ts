@@ -5,6 +5,8 @@ import { PrismaService } from './prisma.service';
 export interface PlatformConfigValues {
   commissionPct: number; // 300 = 3,00 %
   commissionPayer: 'TERMINAL' | 'CLIENT';
+  /** Oyiga nechta bajarilgan buyurtmadan keyin komissiya kiritiladi. */
+  commissionThresholdOrders: number;
   slotHoldTtlMin: number;
   terminalConfirmMin: number;
   subscriptionMonthSom: number;

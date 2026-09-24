@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { ...{ title: t('title'), description: t('description') }, ...alt(locale, '/for-providers') };
 }
 
-/** Xizmat ko'rsatuvchilarga: qiymat kartalari, daromad hisoblagichi (PRICING dan Premium narxi), FAQ, CTA. Kabinet havolalari proxy orqali /login?next= ga tushadi. */
+/** Xizmat ko'rsatuvchilarga: qiymat kartalari, daromad hisoblagichi (obuna narxi sozlamadan), FAQ, CTA. Kabinet havolalari proxy orqali /login?next= ga tushadi. */
 export default async function ForProvidersPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);

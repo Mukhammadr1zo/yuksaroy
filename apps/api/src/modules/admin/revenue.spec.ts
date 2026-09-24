@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { monthBack, monthKey, monthlyRevenue } from './revenue';
+import { monthBack, monthKey, monthWindow, monthlyRevenue } from './revenue';
 
 const NOW = new Date('2026-09-15T00:00:00Z');
 const sub = (paidAt: string, som: number, startsAt?: string) => ({
@@ -52,5 +52,18 @@ describe('oylik tushum', () => {
       { paidAt: null, startsAt: null, amountTiyin: 999n },
     ], [], NOW);
     expect(rows.map((r) => r.month)).toEqual(['2026-09', '2026-07']);
+  });
+});
+
+/** Oy chegarasi Toshkent yarim tunida: UTC da kesilsa oyning oxirgi besh soati keyingi oyga ketardi. */
+describe('oy oynasi', () => {
+  it('oy boshi Toshkent yarim tuniga tushadi', () => {
+    const w = monthWindow(new Date('2026-09-15T00:00:00Z'));
+    expect(w.start.toISOString()).toBe('2026-08-31T19:00:00.000Z');
+    expect(w.prevStart.toISOString()).toBe('2026-07-31T19:00:00.000Z');
+  });
+
+  it("yil chegarasida ham to'g'ri", () => {
+    expect(monthWindow(new Date('2026-01-10T00:00:00Z')).prevStart.toISOString()).toBe('2025-11-30T19:00:00.000Z');
   });
 });

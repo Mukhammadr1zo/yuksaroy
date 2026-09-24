@@ -1,3 +1,5 @@
+import { uzLocalToUtc } from '@yuksaroy/domain';
+
 /**
  * Oylik tushum: ikki jadvaldagi tasdiqlangan to'lovlar bitta varaqqa yig'iladi.
  *
@@ -14,6 +16,17 @@ export const monthKey = (d: Date) => {
   const g = (t: string) => p.find((x) => x.type === t)!.value;
   return `${g('year')}-${g('month')}`;
 };
+
+/**
+ * Shu oy va o'tgan oy boshlanishi, TOSHKENT bo'yicha.
+ *
+ * UTC da kesilsa oyning oxirgi besh soati keyingi oyga tushib ketardi va oy yakuni
+ * odam ko'rgan kalendar bilan to'g'ri kelmasdi.
+ */
+export function monthWindow(now = new Date()) {
+  const k = monthKey(now);
+  return { start: uzLocalToUtc(`${k}-01`, '00:00'), prevStart: uzLocalToUtc(`${monthBack(k, 1)}-01`, '00:00') };
+}
 
 /** `back` oy orqadagi kalit: "2026-09" dan 11 orqada "2025-10". */
 export function monthBack(key: string, back: number) {

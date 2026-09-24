@@ -1,20 +1,15 @@
 import { Body, Controller, ConflictException, Get, HttpCode, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { BadRequestException } from '@nestjs/common';
-import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { notifyBoth } from '../../common/telegram';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
-import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { pickIn } from '../catalog/presentation/catalog.controller';
 import { extendPremium } from './extend-premium';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
-
-class PremiumDto {
-  @IsInt() @Min(1) @Max(12) months!: number;
-}
 
 /** Bekor qilish sababi majburiy: u auditga yoziladi va egasiga aytiladi. */
 class CancelDto {
@@ -39,7 +34,6 @@ const orderView = (o: OrderRow) => ({ ...o, amountTiyin: Number(o.amountTiyin) }
 export class PremiumController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly listings: ListingsUseCase,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
   ) {}

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckIcon } from '@phosphor-icons/react/dist/ssr';
-import { PRICING } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { DashLink } from '@/components/site/DashLink';
 import { num } from '@/lib/format';

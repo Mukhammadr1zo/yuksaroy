@@ -10,7 +10,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
-import { monthlyRevenue } from './revenue';
+import { monthWindow, monthlyRevenue } from './revenue';
 
 class SettingsDto {
   // { commissionPct: 300, commissionPayer: 'CLIENT' } - faqat o'zgartiriladigan kalitlar
@@ -24,6 +24,7 @@ const posInt = (v: unknown) => Number.isInteger(v) && (v as number) > 0;
 const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   commissionPct: (v) => Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 10000, // bazis punkt: 300 = 3,00 %
   commissionPayer: (v) => v === 'TERMINAL' || v === 'CLIENT',
+  commissionThresholdOrders: posInt, // 0 chegara ma'nosiz: komissiya birinchi kundanoq kerak bo'lib qolardi
   slotHoldTtlMin: posInt,
   terminalConfirmMin: posInt,
   subscriptionMonthSom: posInt,
@@ -248,12 +249,28 @@ export class AdminSystemController {
       }
     };
 
-    const [db, queues, users, orders, listings] = await Promise.all([
+    // Komissiya chegarasi: va'da bo'yicha komissiya faqat oyiga N ta bajarilgan
+    // buyurtmadan oshgach kiritiladi va kamida 30 kun oldin e'lon qilinadi. Demak ega
+    // chegaraga YETGUNCHA qaror qilishi kerak; shu ikki son aynan shu qaror uchun.
+    const [db, queues, users, orders, listings, commission] = await Promise.all([
       this.pingDb(),
       safe('queues', () => queueStats(this.prisma, withAge)),
       safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
       safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
       safe('recentListings', () => this.prisma.listing.count({ where: { createdAt: { gte: since } } })),
+      withAge
+        ? safe('commission', async () => {
+            const { start, prevStart } = monthWindow();
+            // status DONE shart: closedAt rad etilgan, bekor qilingan va muddati o'tgan
+            // buyurtmaga ham yoziladi, ular esa chegaraga sanalmasligi kerak
+            const [cfg, thisMonth, prevMonth] = await Promise.all([
+              this.config.get(),
+              this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: start } } }),
+              this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: prevStart, lt: start } } }),
+            ]);
+            return { thisMonth, prevMonth, threshold: cfg.commissionThresholdOrders };
+          })
+        : null,
     ]);
     const count = (k: QueueKey) => queues?.[k].count ?? 0;
     return {
@@ -272,6 +289,9 @@ export class AdminSystemController {
       oldest: withAge && queues
         ? Object.fromEntries(QUEUE_KEYS.map((k) => [k, queues[k].oldest])) as Record<QueueKey, Date | null>
         : undefined,
+      // Uch oylik tarix ataylab yo'q: qaror ikkita songa qaraydi
+      // ponytail: sana kaliti va tashkilot kesimi keyinroq, chegara yarmiga yetganda
+      commission: commission ?? undefined,
       failed, // bo'sh bo'lsa hammasi joyida
     };
   }

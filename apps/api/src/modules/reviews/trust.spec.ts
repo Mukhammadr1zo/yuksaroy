@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { IMPRESSION_SURFACES, PRICING, REVIEW, maskOrderNo, premiumAmountTiyin, ratingDisplay, recomputeRating } from '@yuksaroy/domain';
+import { IMPRESSION_SURFACES, REVIEW, maskOrderNo, ratingDisplay, recomputeRating } from '@yuksaroy/domain';
 import { isRelatedParty } from './arms-length';
 
 describe('recomputeRating', () => {
@@ -16,13 +16,6 @@ describe('recomputeRating', () => {
     const prev = { avg: 4.5, count: 2 };
     expect(recomputeRating(prev, 3)).toEqual({ avg: 4, count: 3 });
     expect(prev).toEqual({ avg: 4.5, count: 2 });
-  });
-});
-
-describe('premiumAmountTiyin', () => {
-  it('oy * narx * 100', () => {
-    expect(premiumAmountTiyin(1)).toBe(PRICING.premiumPerListingPerMonthSom * 100);
-    expect(premiumAmountTiyin(3)).toBe(44_700_000);
   });
 });
 

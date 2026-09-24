@@ -22,6 +22,8 @@ type Health = {
   recent: { users: number; orders: number; listings: number };
   /** Har navbatning eng eskisi; faqat ?full=1 bilan keladi */
   oldest?: Partial<Record<string, string | null>>;
+  /** Komissiya chegarasi: shu oy va o'tgan oy bajarilgan buyurtma, hamda sozlamadagi chegara. Faqat ?full=1 bilan. */
+  commission?: { thisMonth: number; prevMonth: number; threshold: number };
   /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
   failed?: string[];
 };
@@ -69,6 +71,13 @@ export default function AdminHomePage() {
   const waited = health?.oldest
     ? Math.max(0, ...Object.values(health.oldest).filter((v): v is string => !!v).map(daysWaiting))
     : null;
+  const c = health?.commission ?? null;
+  // Belgi ikki oyning kattasi bo'yicha: e'lon 30 kun oldin chiqishi kerak, ya'ni
+  // qaror chegaraga yetgunga qadar qabul qilinadi. Ommaviy matn "100 tadan ortiq"
+  // deydi, shuning uchun o'tganini qat'iy > bilan sanaymiz.
+  const peak = c ? Math.max(c.thisMonth, c.prevMonth) : 0;
+  const over = !!c && peak > c.threshold;
+  const near = !!c && peak >= c.threshold * 0.8;
 
   return (
     <>
@@ -160,6 +169,28 @@ export default function AdminHomePage() {
                 ))}
               </dl>
             </section>
+
+            {/* Komissiya chegarasi. O'tgan oy yagona to'liq son, shu oy esa tendensiya:
+                e'lon 30 kun oldin chiqishi kerak, ya'ni qaror chegaradan oldin qabul qilinadi. */}
+            {c ? (
+              <section className={`${CARD} min-w-0 p-4`}>
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('commission')}</h2>
+                  {near ? <Pill tone={over ? 'bad' : 'warn'}>{th(over ? 'commissionOver' : 'commissionNear')}</Pill> : null}
+                </div>
+                <dl className="mt-1 grid grid-cols-2 gap-2">
+                  <div>
+                    <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(c.thisMonth, locale)}</dd>
+                    <dt className="text-xs text-muted">{th('commissionThisMonth')}</dt>
+                  </div>
+                  <div>
+                    <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(c.prevMonth, locale)}</dd>
+                    <dt className="text-xs text-muted">{th('commissionPrevMonth')}</dt>
+                  </div>
+                </dl>
+                <p className="mt-2 text-xs text-muted">{th('commissionThreshold', { n: c.threshold })}</p>
+              </section>
+            ) : null}
           </div>
         </>
       ) : null}

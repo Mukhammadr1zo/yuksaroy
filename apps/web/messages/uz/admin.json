@@ -201,7 +201,13 @@
       "activityEmpty": "Hali amal qilinmagan.",
       "waitingDays": "eng uzog'i {days} kundan beri kutmoqda",
       "pendingSubscription": "Obuna to'lovlari",
-      "queueDays": "{days} kun kutdi"
+      "queueDays": "{days} kun kutdi",
+      "commission": "Komissiya chegarasi",
+      "commissionThisMonth": "shu oy bajarilgan",
+      "commissionPrevMonth": "o'tgan oy",
+      "commissionThreshold": "Chegara: oyiga {n} ta. Undan oshsa komissiya kamida 30 kun oldin e'lon qilinadi.",
+      "commissionNear": "chegaraga yaqin",
+      "commissionOver": "chegara o'tdi"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",
@@ -439,7 +445,8 @@
         "phoneRevealDaily": "Kuniga raqam ochish chegarasi",
         "wagonSearchFree": "Bepul vagon qidiruvi",
         "helpAskDaily": "Yordam chati: kunlik savol",
-        "payDetails": "To'lov rekvizitlari"
+        "payDetails": "To'lov rekvizitlari",
+        "commissionThresholdOrders": "Komissiya chegarasi"
       },
       "hint": {
         "commissionPct": "Bazis punktda: 300 = 3,00 %.",
@@ -450,7 +457,8 @@
         "phoneRevealDaily": "Obunachi kuniga nechta telefon raqamini ocha oladi.",
         "wagonSearchFree": "Obunasiz odamga nechta qidiruv bepul (umrbod). 0 = darhol obuna so'raladi.",
         "helpAskDaily": "Bir odam kuniga nechta savolni sun'iy intellektga yubora oladi.",
-        "payDetails": "Obuna to'lovi uchun karta yoki hisob raqami va qabul qiluvchi. Shu matn odamga ko'rsatiladi. Bo'sh bo'lsa odam murojaat formasiga yuboriladi."
+        "payDetails": "Obuna to'lovi uchun karta yoki hisob raqami va qabul qiluvchi. Shu matn odamga ko'rsatiladi. Bo'sh bo'lsa odam murojaat formasiga yuboriladi.",
+        "commissionThresholdOrders": "Oyiga nechta bajarilgan buyurtmadan keyin komissiya kiritiladi. Narxlar va savollar sahifalarida 100 raqami yozilgan: o'zgartirsangiz o'sha matnlarni ham yangilang."
       }
     },
     "listings": {

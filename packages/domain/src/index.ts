@@ -128,14 +128,6 @@ export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
 /** Terminal va shahobcha da'vosi uchun bir xil holatlar: shu massiv, alohida nom. */
 export const TERMINAL_CLAIM_STATUSES = CLAIM_STATUSES;
 
-/** Premium narxi (so'm, oyiga, bitta e'lon): marketing ROI kalkulyatori uchun; keyin PlatformConfig ga ko'chadi. */
-export const PRICING = { premiumPerListingPerMonthSom: 149000, currency: 'UZS' } as const;
-
-/** Premium: oylar soni -> tiyin (bitta e'lon). */
-export function premiumAmountTiyin(months: number): number {
-  return months * PRICING.premiumPerListingPerMonthSom * 100;
-}
-
 /** Baho chegaralari: 1..5, matn 1000 belgigacha, terminal javobi 30 kun ichida, o'rtacha minToShow bahodan keyin ko'rsatiladi. */
 export const REVIEW = { min: 1, max: 5, maxText: 1000, maxReplyDays: 30, minToShow: 3 } as const;
 
@@ -159,6 +151,12 @@ export function recomputeRating(prev: { avg: number; count: number }, newRating:
 export const PLATFORM_DEFAULTS = {
   commissionPct: 0,
   commissionPayer: 'TERMINAL' as 'TERMINAL' | 'CLIENT',
+  /**
+   * Komissiya va'dasidagi chegara: oyiga shuncha bajarilgan buyurtmadan oshganda
+   * komissiya kiritiladi. Ommaviy sahifalarda ham shu son yozilgan, shuning uchun
+   * sukut aynan 100: matnlar bilan zid ketmasin.
+   */
+  commissionThresholdOrders: 100,
   slotHoldTtlMin: 10,
   terminalConfirmMin: 30,
   /** Obuna narxi, so'm/oy. Telefon raqami va vagon qidiruvi obunachiga ochiladi; narxni admin qo'yadi. */

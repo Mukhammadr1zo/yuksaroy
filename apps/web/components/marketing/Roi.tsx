@@ -2,7 +2,7 @@
 // ROI hisoblagichlar: faqat brauzerda, formula ochiq. Raqamlar foydalanuvchiniki, platforma hech narsani kafolatlamaydi.
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { PRICING, formatSom } from '@yuksaroy/domain';
+import { formatSom } from '@yuksaroy/domain';
 
 const som = (v: number) => formatSom(Math.round(v) * 100);
 const INPUT = 'mt-1 w-full rounded-xl border border-line bg-white px-4 py-3 font-mono text-base font-normal text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
