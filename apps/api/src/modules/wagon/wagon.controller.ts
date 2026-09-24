@@ -22,8 +22,10 @@ class SearchDto {
  */
 type Stored = { current: WagonEvent | null; fetchedAt: string };
 
-// Har qidiruv upstream ga so'rov: foydalanuvchi bo'yicha soatiga 30 ta
+// Upstream ga chindan boradigan qidiruv: foydalanuvchi bo'yicha soatiga 30 ta
 const searchBucket = new IpBucket(30, 3_600_000);
+// Keshdan javob beradigan so'rov ham baza ishi va audit qatori: bo'ron uchun keng chegara
+const floodBucket = new IpBucket(120, 3_600_000);
 
 /**
  * Vagon qidiruvi. Egasining qoidasi: birinchi qidiruv(lar) hammaga bepul, keyin obuna.
@@ -48,8 +50,16 @@ export class WagonController {
 
   @Get('me')
   async me(@CurrentUserId() userId: string) {
-    const q = await this.quota(userId);
-    return { configured: this.upstream.configured, ...q, remainingFree: Math.max(0, q.freeTotal - q.freeUsed) };
+    const [q, rows] = await Promise.all([
+      this.quota(userId),
+      // Oxirgi qidirganlarim: yangi ustun yo'q, [userId, createdAt] indeksi so'rovni qoplaydi
+      this.prisma.wagonSearch.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, take: 20, select: { wagonNo: true, found: true } }),
+    ]);
+    // Bir vagon 6 soatdan keyin qayta qidirilsa ikkita qator bo'ladi: ro'yxatda faqat
+    // ENG YANGISI qolsin, aks holda kecha topilmagan vagon bugun ham "topilmadi" ko'rinardi
+    const seen = new Set<string>();
+    const recent = rows.filter((r) => !seen.has(r.wagonNo) && seen.add(r.wagonNo)).slice(0, 10);
+    return { configured: this.upstream.configured, ...q, remainingFree: Math.max(0, q.freeTotal - q.freeUsed), recent };
   }
 
   @Post('search') @HttpCode(200)
@@ -59,7 +69,7 @@ export class WagonController {
     // Kalit upstream bilan bir xil: "01234567" va "1234567" bitta vagon, bitta kesh, bitta kvota
     const wagonNo = upstreamNo(digits);
     if (!this.upstream.configured) throw new ServiceUnavailableException({ code: 'WAGON_NOT_CONFIGURED' });
-    if (!searchBucket.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
+    if (!floodBucket.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
     // Bir foydalanuvchi navbat bilan: kvota tekshiruvi va qator yozuvi orasiga ikkinchi oynadagi so'rov kirmasin
     return serialize(userId, () => this.lookup(userId, wagonNo));
   }
@@ -83,6 +93,10 @@ export class WagonController {
     if (cached) {
       found = cached.found; result = cached.result as unknown as Stored;
     } else {
+      // Chegara kesh tekshiruvidan KEYIN: keshdagi raqam upstream ni bezovta qilmagani
+      // uchun chegarani ham yemaydi, ya'ni bitta partiyani soatiga bir necha marta
+      // yangilab bo'ladi
+      if (!searchBucket.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
       let h: Awaited<ReturnType<DRailwayClient['history']>>;
       try { h = await this.upstream.history(wagonNo); }
       catch (e) {

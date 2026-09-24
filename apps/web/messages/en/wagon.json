@@ -7,11 +7,22 @@
     },
     "eyebrow": "Where is the wagon",
     "lead": "Enter a wagon number: its last known location, which station it is at, loaded or empty.",
-    "label": "Wagon number",
-    "placeholder": "For example 24567890",
-    "hint": "7 or 8 digits, written on the side of the wagon.",
+    "label": "Wagon numbers",
+    "placeholder": "For example 24567890, 24567891",
+    "hint": "One number per line or separated by commas, up to 20. Each has 7 or 8 digits.",
     "submit": "Search",
+    "submitMany": "Search {n} numbers",
     "searching": "Searching",
+    "progress": "{done} / {total} checked",
+    "stop": "Stop",
+    "tooMany": "At most {n} numbers are taken, the rest are dropped.",
+    "costNote": "Each number counts as a separate search.",
+    "freeRepeat": "Searching a found wagon again within 6 hours is free.",
+    "notEnoughFree": "You entered {n} numbers and have {left} free searches. The rest need a subscription.",
+    "rowWait": "Queued",
+    "rowNotFound": "Not found",
+    "rowSkipped": "Not searched",
+    "rowInvalid": "Invalid number",
     "guest": "Sign in to search. The first search is free.",
     "loginCta": "Sign in",
     "quotaFree": "Free searches left: {left}",
@@ -35,6 +46,11 @@
       "RATE_LIMITED": "Too many searches. You can continue in an hour.",
       "generic": "Search failed. Try again."
     },
-    "price": "{price} som a month."
+    "price": "{price} som a month.",
+    "recent": {
+      "title": "My recent searches",
+      "addAll": "Add all",
+      "notFound": "not found"
+    }
   }
 }

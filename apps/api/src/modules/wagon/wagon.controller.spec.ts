@@ -27,6 +27,12 @@ function fakePrisma() {
       if (orderBy) hit.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       return hit[0] ?? null;
     },
+    findMany: async ({ where, orderBy, take }: { where: Where; orderBy?: { createdAt: 'desc' }; take?: number }) => {
+      const hit = rows.filter((r) => match(r, where));
+      // Tartib va kesish haqiqatan bajariladi: aks holda "eng yangisi qoladi" testi bo'sh o'tardi
+      if (orderBy) hit.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return take ? hit.slice(0, take) : hit;
+    },
     count: async ({ where }: { where: Where }) => rows.filter((r) => match(r, where)).length,
     create: async ({ data }: { data: { userId: string; wagonNo: string; found: boolean; result: unknown } }) => {
       // Prisma.DbNull bazada NULL bo'ladi: bu yerda null. Haqiqiy natijani `fetchedAt` bo'yicha ajratamiz
@@ -39,12 +45,18 @@ function fakePrisma() {
   return { rows, prisma: { wagonSearch } as unknown as PrismaService };
 }
 
-function setup(opts: { freeTotal?: number; subscriber?: boolean } = {}) {
+function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set<string> } = {}) {
   const db = fakePrisma();
   const upstreamCalls: string[] = [];
   const upstream = {
     configured: true,
-    history: async (no: string) => { upstreamCalls.push(no); return { count: 1, events: [{ event_date: '2026-09-01', station: 'A' }] }; },
+    history: async (no: string) => {
+      upstreamCalls.push(no);
+      // Faqat BIRINCHI qidiruvda topilmaydi: keyingi qidiruv topadi. Shu bilan
+      // "ro'yxat eng yangi qatorni ko'rsatadi" qoidasi sinovdan o'tadi
+      if (opts.missFirst?.delete(no)) return null;
+      return { count: 1, events: [{ event_date: '2026-09-01', station: 'A' }] };
+    },
   } as unknown as DRailwayClient;
   const c = new WagonController(
     db.prisma,
@@ -119,5 +131,51 @@ describe('WagonController.search', () => {
     expect(await status(c.search('s', { no: '1234567' }))).toBe(200);
     expect(await status(c.search('s', { no: '7654321' }))).toBe(200);
     expect(rows).toHaveLength(2);
+  });
+});
+
+/**
+ * Soatlik chegara IKKI xil: upstream ga boradigan qidiruv (30) va umumiy bo'ron (120).
+ * Ilgari bitta chelak edi va keshdagi raqam ham uni yeb qo'yardi, ya'ni bir partiyani
+ * soatiga ikki marta yangilab bo'lmasdi.
+ *
+ * DIQQAT: chelaklar modul darajasida va setup() ularni tozalamaydi. Shuning uchun har
+ * test o'zining noyob foydalanuvchi nomini oladi.
+ */
+describe('vagon qidiruvi: partiya va chegara', () => {
+  beforeEach(() => vi.useFakeTimers({ toFake: ['Date'] }));
+  afterEach(() => vi.useRealTimers());
+
+  it('keshdan kelgan javob soatlik chegarani yemaydi', async () => {
+    const { c, upstreamCalls } = setup({ subscriber: true });
+    vi.setSystemTime(new Date('2026-09-22T09:00:00Z'));
+    const nos = Array.from({ length: 20 }, (_, i) => String(3000000 + i));
+    for (const no of nos) expect(await status(c.search('r6-cache-a', { no }))).toBe(200);
+    expect(upstreamCalls).toHaveLength(20);
+    // Ikkinchi odam o'sha 20 tasini oladi: hammasi keshdan, upstream tinch
+    for (const no of nos) expect(await status(c.search('r6-cache-b', { no }))).toBe(200);
+    expect(upstreamCalls).toHaveLength(20);
+    // Va uning upstream chegarasi hali butun: 11 ta yangi raqam ham o'tadi
+    for (let i = 0; i < 11; i++) expect(await status(c.search('r6-cache-b', { no: String(3100000 + i) }))).toBe(200);
+  });
+
+  it('upstream ga soatiga 30 ta yangi raqam, 31-si rad etiladi', async () => {
+    const { c } = setup({ subscriber: true });
+    vi.setSystemTime(new Date('2026-09-22T09:00:00Z'));
+    for (let i = 0; i < 30; i++) expect(await status(c.search('r6-limit', { no: String(3200000 + i) }))).toBe(200);
+    expect(await status(c.search('r6-limit', { no: '3299999' }))).toBe(429);
+  });
+
+  it('oxirgi qidirganlarim: takrorsiz, yangisidan eskisiga, holati eng yangi qatordan', async () => {
+    const { c } = setup({ subscriber: true, missFirst: new Set(['3300001']) });
+    vi.setSystemTime(new Date('2026-09-22T09:00:00Z'));
+    await c.search('r6-recent', { no: '3300001' }); // topilmadi
+    await c.search('r6-recent', { no: '3300002' });
+    // 6 soatdan keyin o'sha vagon qayta qidiriladi va endi topiladi
+    vi.setSystemTime(new Date('2026-09-22T16:00:00Z'));
+    const me = await c.search('r6-recent', { no: '3300001' }).then(() => c.me('r6-recent'));
+    expect(me.recent.map((r) => r.wagonNo)).toEqual(['3300001', '3300002']);
+    // Map bilan yig'ilsa bu yerda eski (false) qator qolardi
+    expect(me.recent[0].found).toBe(true);
   });
 });

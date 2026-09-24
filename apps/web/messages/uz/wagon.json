@@ -7,11 +7,22 @@
     },
     "eyebrow": "Vagon qayerda",
     "lead": "Vagon raqamini kiriting: oxirgi joylashuvi, qaysi stansiyada turgani, yuklangan yoki bo'shligi.",
-    "label": "Vagon raqami",
-    "placeholder": "Masalan 24567890",
-    "hint": "7 yoki 8 ta raqam, vagonning yon tomonida yozilgan.",
+    "label": "Vagon raqamlari",
+    "placeholder": "Masalan 24567890, 24567891",
+    "hint": "Har qatorga yoki vergul bilan bitta raqam, 20 tagacha. Har biri 7 yoki 8 ta raqam.",
     "submit": "Qidirish",
+    "submitMany": "{n} ta raqamni qidirish",
     "searching": "Qidirilmoqda",
+    "progress": "{done} / {total} tekshirildi",
+    "stop": "To'xtatish",
+    "tooMany": "Eng ko'pi {n} ta raqam olinadi, ortiqchasi tashlandi.",
+    "costNote": "Har bir raqam alohida qidiruv sifatida sanaladi.",
+    "freeRepeat": "Topilgan vagonni 6 soat ichida qayta qidirish bepul.",
+    "notEnoughFree": "Kiritilgan raqam {n} ta, bepul qidiruv {left} ta. Qolganlari uchun obuna kerak.",
+    "rowWait": "Navbatda",
+    "rowNotFound": "Topilmadi",
+    "rowSkipped": "Qidirilmadi",
+    "rowInvalid": "Raqam noto'g'ri",
     "guest": "Qidirish uchun kirish kerak. Birinchi qidiruv bepul.",
     "loginCta": "Kirish",
     "quotaFree": "Bepul qidiruv qoldi: {left} ta",
@@ -35,6 +46,11 @@
       "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
       "generic": "Qidirilmadi. Qayta urinib ko'ring."
     },
-    "price": "Oyiga {price} so'm."
+    "price": "Oyiga {price} so'm.",
+    "recent": {
+      "title": "Oxirgi qidirganlarim",
+      "addAll": "Hammasini qo'shish",
+      "notFound": "topilmadi"
+    }
   }
 }

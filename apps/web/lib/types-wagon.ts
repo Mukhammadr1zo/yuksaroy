@@ -8,7 +8,15 @@ export interface WagonEvent {
 
 export interface WagonQuota { subscriber: boolean; freeUsed: number; freeTotal: number }
 
-export interface WagonMe extends WagonQuota { configured: boolean; remainingFree: number }
+/** Oxirgi qidirganlarim: takrorsiz, yangisidan eskisiga, eng ko'pi 10 ta. */
+export interface WagonRecent { wagonNo: string; found: boolean }
+export interface WagonMe extends WagonQuota { configured: boolean; remainingFree: number; recent: WagonRecent[] }
+
+/** Partiyadagi bitta qator: kutmoqda, qidirilmoqda, natija, o'tkazib yuborilgan yoki noto'g'ri raqam. */
+export type WagonRow = { no: string } & (
+  | { s: 'wait' | 'busy' | 'skipped' | 'invalid' }
+  | { s: 'done'; r: WagonResult }
+);
 
 export interface WagonResult {
   wagonNo: string;

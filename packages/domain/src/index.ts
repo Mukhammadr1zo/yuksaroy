@@ -509,3 +509,24 @@ export function normalizeWagonNo(value: string): string | null {
   const digits = value.replace(/\D/g, '');
   return digits.length >= WAGON.noMinDigits && digits.length <= WAGON.noMaxDigits ? digits : null;
 }
+
+/**
+ * Matndan vagon raqamlari: har qanday raqam bo'lmagan belgi ajratadi (vergul, yangi
+ * qator, probel), shuning uchun odam ro'yxatni qayerdan nusxalasa ham ishlaydi.
+ * Noto'g'rilari alohida qaytadi: ular qidirilmaydi, lekin odam nimasi tushib
+ * qolganini ko'rishi kerak.
+ */
+export function parseWagonNos(text: string): { ok: string[]; bad: string[] } {
+  const ok: string[] = [];
+  const bad: string[] = [];
+  const seen = new Set<string>();
+  for (const part of text.split(/\D+/)) {
+    if (!part) continue;
+    // "01234567" va "1234567" serverda bitta vagon: ro'yxatda ham bitta bo'lsin
+    const key = part.replace(/^0+(?=\d)/, '');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    (normalizeWagonNo(part) ? ok : bad).push(part);
+  }
+  return { ok, bad };
+}
