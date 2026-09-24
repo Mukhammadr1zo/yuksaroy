@@ -589,7 +589,8 @@
       "countries": "By country",
       "mapAria": "Map of visits by region",
       "unknown": "Not determined",
-      "accuracy": "Location comes from the IP address. Inside Uzbekistan this is rough: carriers route traffic through Tashkent address blocks, so the regional split leans towards Tashkent. The country level is reliable."
+      "accuracy": "Location comes from the IP address. Inside Uzbekistan this is rough: carriers route traffic through Tashkent address blocks, so the regional split leans towards Tashkent. The country level is reliable.",
+      "noGeo": "Location is not being determined yet: visits are counted, but not where they come from."
     }
   }
 }

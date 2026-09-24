@@ -26,11 +26,14 @@ export async function VisitMap({ total, regions, lang }: {
   const max = regions.length ? Math.max(...regions.map((r) => r.count)) : 0;
   const label = (code: string) => SEARCH_LABELS[lang].region[code as RegionCode] ?? code;
   const top = regions.slice(0, 5);
+  // Joy hali aniqlanmagan bo'lsa xarita chizilmaydi: bo'sh chizma hech qanday
+  // qaror bermaydi va sahifada "nimadir buzilgan" degan taassurot qoldiradi
+  const hasMap = regions.length > 0 && max > 0;
 
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-6xl px-6 py-12 md:py-16">
-        <div className="grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-center">
+        <div className={`grid gap-8 ${hasMap ? 'md:grid-cols-[1.3fr_1fr] md:items-center' : ''}`}>
           <div className="min-w-0">
             <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-teal-ink">{t('heading')}</h2>
             <p className="mt-3 font-display text-4xl font-bold tabular-nums text-navy md:text-5xl">{num(total, lang)}</p>
@@ -51,10 +54,11 @@ export async function VisitMap({ total, regions, lang }: {
             ) : null}
           </div>
 
+          {hasMap ? (
           <div className="min-w-0">
             <svg viewBox={`0 0 ${MAP_BOX.w} ${MAP_BOX.h}`} role="img" aria-label={t('mapAria')} className="h-auto w-full">
               {UZ_REGION_PATHS.map((r) => (
-                <path key={r.code} d={r.d} className="fill-line/30 stroke-white" strokeWidth={2} />
+                <path key={r.code} d={r.d} className="fill-line/60 stroke-white" strokeWidth={2} />
               ))}
               {/* Qiymat doira bilan: Toshkent shahri xaritada eng kichik, lekin son
                   ko'pincha aynan unga tushadi va faqat bo'yash bilan u ko'rinmay qolardi */}
@@ -70,6 +74,7 @@ export async function VisitMap({ total, regions, lang }: {
               })}
             </svg>
           </div>
+          ) : null}
         </div>
       </div>
     </section>

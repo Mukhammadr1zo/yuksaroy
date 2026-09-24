@@ -589,7 +589,8 @@
       "countries": "Davlatlar bo'yicha",
       "mapAria": "Viloyatlar bo'yicha tashriflar xaritasi",
       "unknown": "Aniqlanmadi",
-      "accuracy": "Joy IP manzilidan aniqlanadi. O'zbekiston ichida bu qo'pol: aloqa operatorlari trafikni Toshkentdagi manzillardan chiqaradi, shuning uchun viloyat kesimi Toshkentga og'adi. Davlat darajasi ishonchli."
+      "accuracy": "Joy IP manzilidan aniqlanadi. O'zbekiston ichida bu qo'pol: aloqa operatorlari trafikni Toshkentdagi manzillardan chiqaradi, shuning uchun viloyat kesimi Toshkentga og'adi. Davlat darajasi ishonchli.",
+      "noGeo": "Joy hali aniqlanmadi: tashriflar sanalyapti, lekin qayerdan kelgani yozilmayapti."
     }
   }
 }

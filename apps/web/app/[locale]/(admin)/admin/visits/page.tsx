@@ -77,9 +77,11 @@ export default function AdminVisitsPage() {
           <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_minmax(0,380px)]">
             <section className={`${CARD} min-w-0 p-4`}>
               <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{tv('regions')}</h2>
+              {/* Joy aniqlanmagan bo'lsa xarita chizilmaydi: bo'sh chizma emas, sababi yoziladi */}
+              {maxRegion ? (
               <svg viewBox={`0 0 ${MAP_BOX.w} ${MAP_BOX.h}`} role="img" aria-label={tv('mapAria')} className="mt-3 h-auto w-full">
                 {UZ_REGION_PATHS.map((r) => (
-                  <path key={r.code} d={r.d} className="fill-line/30 stroke-white" strokeWidth={2} />
+                  <path key={r.code} d={r.d} className="fill-line/60 stroke-white" strokeWidth={2} />
                 ))}
                 {/* Qiymat doira bilan: Toshkent shahri xaritada eng kichik, lekin son
                     ko'pincha aynan unga tushadi va faqat bo'yash bilan u ko'rinmay qolardi */}
@@ -94,6 +96,7 @@ export default function AdminVisitsPage() {
                   );
                 })}
               </svg>
+              ) : <p className="mt-3 rounded-card border border-dashed border-line p-6 text-center text-sm text-muted">{tv('noGeo')}</p>}
               <p className="mt-3 text-xs text-muted">{tv('accuracy')}</p>
             </section>
 
