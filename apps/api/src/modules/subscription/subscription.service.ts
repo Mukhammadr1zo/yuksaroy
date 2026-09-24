@@ -43,6 +43,9 @@ async function raiseListings(tx: Pick<PrismaService, 'membership' | 'listing'>, 
  */
 @Injectable()
 export class SubscriptionService {
+  /** Tugagan obuna shuncha kungacha kartada ko'rsatiladi: undan eskisi qaror uchun ishlamaydi. */
+  private static readonly LAPSED_DAYS = 90;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: PlatformConfigService,
@@ -77,17 +80,42 @@ export class SubscriptionService {
   }
 
   async me(userId: string) {
+    const now = new Date();
     const [act, pending, cfg] = await Promise.all([
-      this.active(userId),
+      this.active(userId, now),
       this.prisma.subscription.findFirst({ where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
       this.config.get(),
     ]);
     return {
       active: act !== null,
       endsAt: act?.endsAt ?? null,
+      // Faol obunachiga ortiqcha so'rov ketmaydi: tugagani faqat obunasizga qaraladi
+      expired: act ? null : await this.lapsed(userId, now),
       pricePerMonthSom: cfg.subscriptionMonthSom,
       pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions() } : null,
     };
+  }
+
+  /**
+   * Yaqinda tugagan obuna: qachon tugagani va shu muddatda necha marta raqam ochilgani.
+   *
+   * Raqam soni bezak emas: odam yangilash haqida qaror qilayotganda obuna unga nima
+   * berganini ko'rsatadi va nol bo'lsa ekranga umuman chiqmaydi. Uch oydan eski obuna
+   * ko'rsatilmaydi, chunki eski son bugungi qaror uchun hech narsa bermaydi.
+   * Qator ACTIVE bo'lib qolaveradi: tugagani endsAt dan bilinadi, holat o'zgarmaydi.
+   */
+  private async lapsed(userId: string, now: Date) {
+    const from = new Date(now.getTime() - SubscriptionService.LAPSED_DAYS * 86_400_000);
+    const s = await this.prisma.subscription.findFirst({
+      where: { userId, status: 'ACTIVE', endsAt: { lte: now, gt: from } },
+      orderBy: { endsAt: 'desc' },
+      select: { startsAt: true, endsAt: true, createdAt: true },
+    });
+    if (!s?.endsAt) return null;
+    const reveals = await this.prisma.auditLog.count({
+      where: { actorId: userId, action: 'contact.reveal', createdAt: { gte: s.startsAt ?? s.createdAt, lt: s.endsAt } },
+    });
+    return { endsAt: s.endsAt, reveals };
   }
 
   /**

@@ -7,11 +7,11 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircleIcon, LockSimpleOpenIcon } from '@phosphor-icons/react';
 import { api, post } from '@/lib/api';
-import { som, uzDateTime } from '@/lib/format';
+import { som, uzDate, uzDateTime } from '@/lib/format';
 import { BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 
 type Pending = { id: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string } };
-type Me = { active: boolean; endsAt: string | null; pricePerMonthSom: number; pending: Pending | null };
+type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; pending: Pending | null };
 type Created = { order: { id: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -51,8 +51,14 @@ export function SubscriptionCard() {
       <section className={`mt-6 flex items-center gap-3 rounded-card border p-5 ${me.active ? 'border-teal bg-teal-soft' : 'border-line bg-white'}`}>
         {me.active ? <CheckCircleIcon size={28} weight="fill" className="shrink-0 text-teal" aria-hidden="true" /> : <LockSimpleOpenIcon size={28} className="shrink-0 text-muted" aria-hidden="true" />}
         <div>
-          <p className="font-semibold">{me.active ? t('active') : t('inactive')}</p>
+          <p className="font-semibold">{me.active ? t('active') : me.expired ? t('expiredTitle') : t('inactive')}</p>
           {me.active && me.endsAt ? <p className="font-mono text-sm text-muted">{t('activeUntil', { until: uzDateTime(me.endsAt, locale) })}</p> : null}
+          {!me.active && me.expired ? (
+            <p className="font-mono text-sm text-muted">
+              {t('expiredOn', { date: uzDate(me.expired.endsAt, locale) })}
+              {me.expired.reveals ? ` · ${t('expiredReveals', { count: me.expired.reveals })}` : ''}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -80,7 +86,7 @@ export function SubscriptionCard() {
             <span className="font-mono text-lg font-bold text-navy tabular-nums">{t('total')}: {som(months * me.pricePerMonthSom * 100, locale)}</span>
           </div>
           {err ? <Notice tone="err">{t('failed')}</Notice> : null}
-          <button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('sending') : me.active ? t('extend') : t('submit')}</button>
+          <button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('sending') : me.active || me.expired ? t('extend') : t('submit')}</button>
         </form>
       )}
     </>

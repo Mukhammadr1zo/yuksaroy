@@ -58,6 +58,9 @@
       "login": "Sign in",
       "later": "Later",
       "close": "Close"
-    }
+    },
+    "expiredTitle": "Subscription ended",
+    "expiredOn": "Ended on {date}",
+    "expiredReveals": "you opened numbers {count} times"
   }
 }

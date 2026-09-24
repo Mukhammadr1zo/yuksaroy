@@ -58,6 +58,9 @@
       "login": "Kirish",
       "later": "Keyinroq",
       "close": "Yopish"
-    }
+    },
+    "expiredTitle": "Obuna tugagan",
+    "expiredOn": "{date} da tugagan",
+    "expiredReveals": "shu muddatda {count} marta raqam ochgansiz"
   }
 }

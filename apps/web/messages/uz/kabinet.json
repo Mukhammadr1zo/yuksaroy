@@ -496,6 +496,14 @@
         "stir": {
           "title": "Tashkilotda STIR yo'q",
           "body": "Hisob-fakturada ko'rsatiladi"
+        },
+        "rejected": {
+          "title": "{count} ta e'lon qaytarilgan",
+          "body": "E'lonni ochib sababini ko'ring va qayta yuboring"
+        },
+        "subscription": {
+          "title": "Obuna tez orada tugaydi",
+          "body": "Uzaytirilmasa telefon raqamlari yopiladi"
         }
       },
       "clear": {

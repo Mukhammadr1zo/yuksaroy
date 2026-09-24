@@ -10,6 +10,7 @@ import type { IdempotencyService } from '../../../common/idempotency.service';
 import type { BookingRepository } from '../../booking/domain/ports';
 import type { OrderRepository } from '../domain/ports';
 import type { AdminNotify } from '../../organizations/application/admin-notify';
+import type { NotificationsService } from '../../notifications/notifications.service';
 import type { OrderActionsUseCase } from './order-actions.usecase';
 import { SlaSweeperService } from './sla-sweeper.service';
 
@@ -33,7 +34,9 @@ function setup() {
   const actions = { expire: async () => {} } as unknown as OrderActionsUseCase;
   // Adminlarga eslatma alohida tekshiriladi: bu yerda faqat tozalash
   const adminNotify = { stale: async () => {} } as unknown as AdminNotify;
-  return { svc: new SlaSweeperService(bookings, orders, actions, prisma, idempotency, adminNotify), calls, purged };
+  // Obuna eslatmasi alohida spec da: soxta prisma da remindExpiring yiqiladi va yutiladi
+  const notifications = { recipients: async () => [], push: async () => {} } as unknown as NotificationsService;
+  return { svc: new SlaSweeperService(bookings, orders, actions, prisma, idempotency, adminNotify, notifications), calls, purged };
 }
 
 const DAY = 86_400_000;

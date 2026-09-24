@@ -496,6 +496,14 @@
         "stir": {
           "title": "The organization has no tax ID",
           "body": "It is printed on the invoice"
+        },
+        "rejected": {
+          "title": "{count} listings were returned",
+          "body": "Open the listing, read the reason and send it again"
+        },
+        "subscription": {
+          "title": "Subscription ends soon",
+          "body": "Without renewal phone numbers close again"
         }
       },
       "clear": {

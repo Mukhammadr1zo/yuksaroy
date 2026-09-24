@@ -888,6 +888,9 @@ model Subscription {
   startsAt    DateTime? @db.Timestamptz(3)
   endsAt      DateTime? @db.Timestamptz(3)
   paidAt      DateTime? @db.Timestamptz(3)
+  /// Tugash eslatmasi yuborilgan vaqt. Bo'sh = hali yuborilmagan. Belgi yuborishdan
+  /// oldin qo'yiladi: sikl qayta ishga tushsa ham odamga ikkinchi xabar ketmaydi.
+  remindedAt  DateTime? @db.Timestamptz(3)
   createdAt   DateTime  @default(now()) @db.Timestamptz(3)
 
   @@index([userId, endsAt])

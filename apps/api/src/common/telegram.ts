@@ -148,6 +148,12 @@ const TEXTS = {
     ru: '❌ <b>Заказ на оплату отменён</b>\n{title}\nПричина: {reason}\n\n{url}',
     en: '❌ <b>Payment order cancelled</b>\n{title}\nReason: {reason}\n\n{url}',
   },
+  // Obunachiga: muddat tugashiga uch kun qoldi
+  subscriptionExpiring: {
+    uz: '⏳ <b>Obuna tugayapti</b>\n{date} gacha amal qiladi.\n\nUzaytirish: {url}',
+    ru: '⏳ <b>Подписка заканчивается</b>\nДействует до {date}.\n\nПродлить: {url}',
+    en: '⏳ <b>Subscription is ending</b>\nValid until {date}.\n\nRenew: {url}',
+  },
   // Adminlarga: navbatga yangi ish tushdi
   adminQueue: {
     uz: '🔔 <b>{queue}</b>\n{what}\n\n{url}',

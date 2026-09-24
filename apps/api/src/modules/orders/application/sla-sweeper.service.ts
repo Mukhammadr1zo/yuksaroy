@@ -4,6 +4,8 @@ import { IdempotencyService } from '../../../common/idempotency.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
 import { ORDER_REPOSITORY, type OrderRepository } from '../domain/ports';
+import { NotificationsService } from '../../notifications/notifications.service';
+import { remindExpiring } from '../../subscription/expiry-reminder';
 import { AdminNotify } from '../../organizations/application/admin-notify';
 import { OrderActionsUseCase } from './order-actions.usecase';
 
@@ -35,6 +37,7 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
     private readonly adminNotify: AdminNotify,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /**
@@ -98,6 +101,9 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
     const notes = await this.prisma.notification.deleteMany({
       where: { readAt: { not: null, lt: ago(KEEP_READ_NOTIFICATIONS_DAYS) } },
     });
+    // Obuna tugashiga uch kun qolganlarga eslatma; takrorlanishni obuna qatoridagi belgi to'sadi
+    const reminded = await remindExpiring(this.prisma, this.notifications, now).catch(() => 0);
+    if (reminded) this.log.log(`obuna eslatmasi: ${reminded}`);
     // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
     await this.adminNotify.stale(staleQueues(await queueStats(this.prisma, true), now, STALE_DAYS)).catch(() => {});
     const total = keys + sessions.count + codes.count + notes.count;

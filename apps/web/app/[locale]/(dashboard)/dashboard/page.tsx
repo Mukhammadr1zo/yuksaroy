@@ -12,9 +12,12 @@ import type { MineDocs } from '@/lib/types-dashboard';
 import { useMe } from '@/components/site/useMe';
 
 type Summary = { terminals: number; byStatus: Record<string, number> };
+type Subs = { active: boolean; endsAt: string | null };
 type Task = { key: string; count?: number; href: string; tone?: 'warn' };
 
 const WEEK = 7 * 86_400_000;
+// Serverdagi eslatma oynasi bilan bir xil: uch kun
+const SUB_WARN = 3 * 86_400_000;
 
 export default function NowPage() {
   const t = useTranslations('kabinet.now');
@@ -28,11 +31,12 @@ export default function NowPage() {
     if (!me) return;
     let alive = true;
     (async () => {
-      const [ms, inq, docs, listings] = await Promise.all([
+      const [ms, inq, docs, listings, sub] = await Promise.all([
         api<Membership[]>('/orgs/mine').catch(() => [] as Membership[]),
         api<Inquiry[]>('/inquiries?scope=owner').catch(() => [] as Inquiry[]),
         api<MineDocs>('/documents/mine?scope=client&limit=100').catch(() => ({ items: [], total: 0, page: 1, limit: 0 }) as MineDocs),
         api<OwnerListing[]>('/listings/mine').catch(() => [] as OwnerListing[]),
+        api<Subs>('/subscription/me').catch(() => null),
       ]);
       if (!alive) return;
       setOrgs(ms);
@@ -52,7 +56,12 @@ export default function NowPage() {
       const drafts = listings.filter((l) => l.status === 'DRAFT').length;
       if (drafts) list.push({ key: 'drafts', count: drafts, href: '/dashboard/objects' });
       if (me.phone === null) list.push({ key: 'phone', href: '/login?attach=1&next=/dashboard', tone: 'warn' });
+      const rejected = listings.filter((l) => l.status === 'REJECTED').length;
+      if (rejected) list.push({ key: 'rejected', count: rejected, href: '/dashboard/objects', tone: 'warn' });
       if (ms.some((m) => m.isOwner && !m.org.stir)) list.push({ key: 'stir', href: '/dashboard/organization' });
+      // count berilmaydi: yumaloq belgidagi son qolgan bandlarda narsalar sonini bildiradi, kun sonini emas
+      const left = sub?.active && sub.endsAt ? new Date(sub.endsAt).getTime() - now : null;
+      if (left !== null && left < SUB_WARN) list.push({ key: 'subscription', href: '/dashboard/subscription', tone: 'warn' });
       setTasks(list);
     })();
     return () => { alive = false; };
