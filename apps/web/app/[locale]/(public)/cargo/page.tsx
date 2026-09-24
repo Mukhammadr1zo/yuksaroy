@@ -8,6 +8,7 @@ import { alt } from '@/lib/seo';
 import { Sel } from '@/components/catalog/Sel';
 import { Pagination } from '@/components/catalog/Pagination';
 import { RequestCard } from '@/components/market/RequestCard';
+import { WatchButton } from '@/components/catalog/WatchButton';
 
 export const revalidate = 60;
 type Params = { params: Promise<{ locale: string }> };
@@ -69,7 +70,14 @@ export default async function CargoPage({ params, searchParams }: Params & { sea
           <span className="font-mono text-sm text-muted tabular-nums">{t('board.count', { count: data.total })}</span>
         </div>
         {data.items.length === 0 ? (
-          <p className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center text-muted">{t('board.empty')}</p>
+          <div className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center">
+            <p className="mx-auto max-w-[52ch] text-muted">{t('board.empty')}</p>
+            {/* Uchala filtr ham oq ro'yxatda va tekshirilgan (pick), shuning uchun bu
+                sahifada qo'shimcha shart kerak emas */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <WatchButton kind="CARGO" params={{ fromRegion: from, toRegion: to, truckType }} next={`/cargo${qs({ from, to, truckType })}`} />
+            </div>
+          </div>
         ) : (
           <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.items.map((r) => <RequestCard key={r.id} r={r} />)}

@@ -5,6 +5,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { esc, notifyBoth, sendTelegram, webUrl } from '../../common/telegram';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
 import { notifyRegions } from './market.rules';
+import { watchers } from '../watch/watchers';
 
 export type RequestRow = {
   id: string; no: string; board: string; serviceType: string | null; regionCode: string | null;
@@ -152,6 +153,18 @@ export class MarketService {
         orgIds: trucks.map((l) => l.orgId),
       });
       userIds = userIds.filter((id) => id !== r.createdById);
+      // Mashinasi ham, tashuvchi tashkiloti ham yo'q, lekin shu yo'nalishni kutayotgan
+      // odam (ekspeditor, dispetcher) ham shu ro'yxatga qo'shiladi. Alohida xabar EMAS,
+      // aynan shu ro'yxat: pastdagi new Set bitta odamga bitta xabar qoldiradi.
+      //
+      // skipUserIds ga allaqachon oluvchilar ham kiradi: ularga xabar baribir ketyapti,
+      // kuzatuvining bugungi yagona o'qi esa shunga sarflanmasin.
+      userIds.push(...await watchers(this.prisma, {
+        kind: 'CARGO',
+        isDemo: r.isDemo,
+        skipUserIds: [r.createdById, ...userIds],
+        values: { fromRegion: r.fromRegion ?? r.regionCode, toRegion: r.toRegion, truckType: r.truckType },
+      }));
     } else {
       const ps = await this.prisma.serviceProfile.findMany({ where: { status: 'ACTIVE', serviceType: r.serviceType ?? '', userId: { not: r.createdById } }, select: { userId: true }, take: 500 });
       userIds = ps.map((p) => p.userId);

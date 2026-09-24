@@ -41,8 +41,11 @@ function setup(l: ListingRecord, activeCount = 0, kyc: string | null = null) {
   } as unknown as ListingAccess;
   const prisma = {
     listing: { count: async (a: { where: Record<string, unknown> }) => { counts.push(a.where); return activeCount; } },
+    // Kuzatuv yo'li activate() ichida void bilan chaqiriladi: xato yutilardi va
+    // haqiqiy xatoni ham yashirardi, shuning uchun soxtasi to'liq
+    watch: { findMany: async () => [], updateMany: async () => ({ count: 0 }) },
   } as unknown as PrismaService;
-  const notifications = {} as unknown as NotificationsService;
+  const notifications = { recipients: async () => [] } as unknown as NotificationsService;
   const subs = { raiseListing: async () => {} } as unknown as SubscriptionService;
   const adminNotify = { queued: async () => {} } as unknown as AdminNotify;
   const svc = new ListingsUseCase(repo, access, prisma, notifications, subs, adminNotify);

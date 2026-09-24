@@ -10,15 +10,22 @@ import { MarketService } from './market.service';
 
 type Where = Record<string, unknown>;
 
-function setup(opts: { members?: string[]; trucks?: { ownerUserId: string | null; orgId: string | null }[] } = {}) {
+function setup(opts: { members?: string[]; trucks?: { ownerUserId: string | null; orgId: string | null }[];
+  watches?: { id: string; userId: string; kind: string; params: Record<string, string> }[] } = {}) {
   const listingWhere: Where[] = [];
   const memberWhere: Where[] = [];
+  const marked: string[][] = [];
   const prisma = {
     membership: { findMany: async (a: { where: Where }) => { memberWhere.push(a.where); return (opts.members ?? []).map((userId) => ({ userId })); } },
     listing: { findMany: async (a: { where: Where }) => { listingWhere.push(a.where); return opts.trucks ?? []; } },
     serviceProfile: { findMany: async () => [] },
     // notifyTelegram bazaga boradi: bo'sh ro'yxat qaytaramiz, xabar yuborilmaydi
     telegramLink: { findMany: async () => [] },
+    // Kuzatuv: notifyNew uni to'g'ridan-to'g'ri await qiladi, ya'ni soxta shart
+    watch: {
+      findMany: async () => opts.watches ?? [],
+      updateMany: async (a: { where: { id: { in: string[] } } }) => { marked.push([...a.where.id.in]); return { count: a.where.id.in.length }; },
+    },
   } as unknown as PrismaService;
   const pushed: string[][] = [];
   const notifications = {
@@ -29,7 +36,7 @@ function setup(opts: { members?: string[]; trucks?: { ownerUserId: string | null
       return [...new Set([...direct, ...fromOrgs])];
     },
   } as unknown as NotificationsService;
-  return { svc: new MarketService(prisma, notifications), pushed, listingWhere, memberWhere };
+  return { svc: new MarketService(prisma, notifications), pushed, listingWhere, memberWhere, marked };
 }
 
 const cargo = (extra: Record<string, unknown> = {}) => ({
@@ -81,5 +88,46 @@ describe('yangi yuk xabari', () => {
     const { svc, listingWhere } = setup({ trucks: [] });
     await svc.notifyNew(cargo());
     expect(listingWhere[0]).toMatchObject({ kind: 'TRUCK', status: 'ACTIVE', isDemo: false });
+  });
+});
+
+/**
+ * Kuzatuv yangi tarqatish emas, mavjud ro'yxatning kengaytmasi: mashinasi ham,
+ * tashuvchi tashkiloti ham yo'q, lekin shu yo'nalishni kutayotgan odam qo'shiladi.
+ * Allaqachon oluvchilarning kuzatuvi kuymaydi: xabar ularga baribir ketadi.
+ */
+describe('kuzatuvchilar ham oladi', () => {
+  const w = (id: string, userId: string, params: Record<string, string> = {}) => ({ id, userId, kind: 'CARGO', params });
+
+  it("mashinasiz kuzatuvchi ro'yxatga qo'shiladi", async () => {
+    const { svc, pushed } = setup({ watches: [w('w1', 'expeditor', { fromRegion: 'UZ-TK', toRegion: 'UZ-SA' })] });
+    await svc.notifyNew(cargo());
+    expect(pushed[0]).toContain('expeditor');
+  });
+
+  it("allaqachon oluvchining kuzatuvi kuymaydi va xabar takrorlanmaydi", async () => {
+    const { svc, pushed, marked } = setup({ trucks: [{ ownerUserId: 'driver', orgId: null }], watches: [w('w1', 'driver')] });
+    await svc.notifyNew(cargo());
+    expect(pushed[0]!.filter((id) => id === 'driver')).toHaveLength(1);
+    // Kuzatuv hisobga olinmadi: uning bugungi yagona o'qi saqlanib qoldi
+    expect(marked).toEqual([]);
+  });
+
+  it("yuk egasining o'ziga kuzatuv orqali ham bormaydi", async () => {
+    const { svc, pushed } = setup({ watches: [w('w1', 'shipper')] });
+    await svc.notifyNew(cargo());
+    expect(pushed).toHaveLength(0);
+  });
+
+  it("yo'nalish mos kelmasa qo'shilmaydi", async () => {
+    const { svc, pushed } = setup({ watches: [w('w1', 'expeditor', { toRegion: 'UZ-QA' })] });
+    await svc.notifyNew(cargo());
+    expect(pushed).toHaveLength(0);
+  });
+
+  it("yukda kuzov turi yo'q bo'lsa kuzov kutgan odam ham oladi", async () => {
+    const { svc, pushed } = setup({ watches: [w('w1', 'expeditor', { truckType: 'TENT' })] });
+    await svc.notifyNew(cargo({ truckType: null }));
+    expect(pushed[0]).toContain('expeditor');
   });
 });

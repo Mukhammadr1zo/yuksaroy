@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { LISTING, REGION_CENTERS, TransitionError, assertListingTransition, slugify, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
+import { LISTING, REGION_CENTERS, SEARCH_LABELS, TransitionError, assertListingTransition, slugify, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
 import { uniqueSlug, type ListingRecord } from '../domain/listing-query';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { AdminNotify } from '../../organizations/application/admin-notify';
@@ -8,6 +8,7 @@ import { PrismaService } from '../../../common/prisma.service';
 import { notifyBoth } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { ListingAccess } from './listing-access';
+import { watchers } from '../../watch/watchers';
 import { filesOrThrow } from '../../../common/attachments';
 
 /** Saqlangan yozuvdan domen kiritmasi (PATCH da birlashtirish va qayta tekshirish uchun). */
@@ -74,10 +75,51 @@ export class ListingsUseCase {
       void this.adminNotify.queued('listingsPendingReview', l.title, l.id, userId).catch(() => {});
       return out;
     }
-    const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
+    return this.activate(l, userId, now);
+  }
+
+  /**
+   * E'lon faol bo'ladigan YAGONA joy: egasi yuborganda ham, admin tasdiqlaganda ham
+   * shu yerdan o'tadi.
+   *
+   * Nega bitta joyga yig'ildi: holat yozuvi va obunaga ko'tarish ikki nusxa edi va
+   * yangi hodisa (kuzatuv xabari) faqat bittasiga qo'shilib qolishi mumkin edi.
+   */
+  private async activate(l: ListingRecord, ownerUserId: string, now: Date) {
+    const out = await this.repo.setStatus(l.id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
     // Obuna e'lonni ham ko'taradi: alohida Premium sotib olish yo'q
-    await this.subs.raiseListing(userId, id);
+    await this.subs.raiseListing(ownerUserId, l.id);
+    // Kuzatuvchilar xabarini kutmaymiz: e'lon chiqishi xabar yo'liga bog'liq emas
+    void this.notifyWatchers(l, now).catch(() => {});
     return out;
+  }
+
+  /**
+   * Kutayotgan odamlarga: e'lon endi katalogda.
+   *
+   * Namuna e'lon va egasining o'zi chetda qoladi - qoida matchWatches ichida, shu
+   * yerda takrorlanmaydi. Egalar ro'yxati tashkilot a'zolarigacha yoyiladi, aks holda
+   * bitta tashkilotning ikkinchi xodimi o'z e'loni haqida xabar olardi.
+   */
+  private async notifyWatchers(l: ListingRecord, now: Date) {
+    const owners = await this.notifications.recipients({ orgIds: [l.orgId], userIds: [l.ownerUserId, l.createdById] });
+    const userIds = await watchers(this.prisma, {
+      kind: 'LISTING',
+      isDemo: l.isDemo,
+      skipUserIds: owners,
+      // Hudud ro'yxat: avtotashuvchi o'z viloyatidan tashqarida ham ishlaydi va
+      // katalog filtri ham aynan shu ikki maydonga qaraydi
+      values: { listingKind: l.kind, regionCode: [l.regionCode, ...l.serviceRegions], truckType: l.truckType, deal: l.deal },
+    }, now);
+    if (!userIds.length) return;
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds },
+      kind: 'watchListingNew',
+      inApp: 'listing',
+      href: l.kind === 'TRUCK' ? `/carriers/${l.slug}` : `/equipment/${l.slug}`,
+      // card berilmaydi: qo'ng'iroq matni ham shablondan, har kimning tilida chiqsin
+      vars: (lg) => ({ title: l.title.slice(0, 200), where: SEARCH_LABELS[lg].region[l.regionCode as RegionCode] ?? l.regionCode }),
+    });
   }
 
   /**
@@ -131,15 +173,14 @@ export class ListingsUseCase {
     this.transition(l, to, 'ADMIN');
     const now = new Date();
     // Namuna e'lon egasi faol hisob emas: unga yozilgan xabarni hech kim o'qimaydi
-    const who = (l as { isDemo?: boolean }).isDemo ? null : { orgIds: [l.orgId], userIds: [l.ownerUserId ?? l.createdById] };
+    const who = l.isDemo ? null : { orgIds: [l.orgId], userIds: [l.ownerUserId ?? l.createdById] };
     if (!approve) {
       const out = await this.repo.setStatus(id, { status: to, rejectReason: reason });
       if (who) void this.notify(who, 'listingRejected', { title: l.title, reason: reason ?? '' });
       return out;
     }
-    const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
     // Tekshiruvdan o'tgan e'lon egasi obunachi bo'lsa darhol yuqoriga chiqadi
-    await this.subs.raiseListing(l.ownerUserId ?? l.createdById, id);
+    const out = await this.activate(l, l.ownerUserId ?? l.createdById, now);
     if (who) void this.notify(who, 'listingApproved', { title: l.title });
     return out;
   }
@@ -148,7 +189,7 @@ export class ListingsUseCase {
     const l = await this.repo.findById(listingId);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
     // Namuna e'lon haqiqiy taklif emas: unga yozilgan xabar hech kimga bormaydi, shuning uchun qabul qilinmaydi
-    if ((l as { isDemo?: boolean }).isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
+    if (l.isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
     if (orgId && !(await this.access.membership(userId, orgId))) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     const text = message.trim();
     // Bitta e'longa bitta yozishma: takroriy murojaat eskisiga qo'shiladi. Ilgari har

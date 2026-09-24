@@ -123,6 +123,12 @@ const TEXTS = {
     ru: '⌛ <b>Срок объявления истёк</b>\n{title}{more}\nОно ушло из каталога. Отправьте снова, и оно провисит ещё {days} дней.\n\nОтправить снова: {url}',
     en: '⌛ <b>Listing has expired</b>\n{title}{more}\nIt is out of the catalogue. Resubmit it and it stays for another {days} days.\n\nResubmit: {url}',
   },
+  // Kuzatuv: odam bo'sh natija ekranida "chiqqanda xabar bering" degan edi
+  watchListingNew: {
+    uz: "🔎 <b>Kutgan narsangiz chiqdi: {title}</b>\n{where}\n\nKo'rish: {url}",
+    ru: '🔎 <b>Появилось то, чего вы ждали: {title}</b>\n{where}\n\nПосмотреть: {url}',
+    en: '🔎 <b>What you were waiting for: {title}</b>\n{where}\n\nView: {url}',
+  },
   orgVerified: {
     uz: "✅ <b>Tashkilot tasdiqlandi</b>\n{name}\nEndi e'lonlaringiz tekshiruvsiz chiqadi.\n\n{url}",
     ru: '✅ <b>Организация подтверждена</b>\n{name}\nТеперь ваши объявления выходят без проверки.\n\n{url}',

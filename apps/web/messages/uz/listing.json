@@ -58,6 +58,25 @@
       "reset": "Filtrni tozalash",
       "standard": "E'lon standarti"
     },
+    "watch": {
+      "cta": "Chiqqanda menga xabar bering",
+      "busy": "Saqlanyapti...",
+      "done": "Yozib qo'ydik. Mos narsa chiqsa xabar beramiz.",
+      "guest": "Kiring va xabar oling",
+      "title": "Nimani kutyapman",
+      "lead": "Mos narsa chiqsa xabar keladi. Bittasidan kuniga bitta xabar; hozir {n} ta, jami {max} tagacha.",
+      "any": "Hammasi",
+      "remove": "O'chirish",
+      "kind": {
+        "CARGO": "Yuk",
+        "LISTING": "E'lon"
+      },
+      "err": {
+        "WATCH_LIMIT": "Ko'pi bilan {max} ta. Profilda bittasini o'chiring va qaytadan qo'shing.",
+        "RATE_LIMITED": "Juda ko'p urinish. Bir ozdan keyin qayta urinib ko'ring.",
+        "FAILED": "Saqlanmadi. Qayta urinib ko'ring."
+      }
+    },
     "detail": {
       "specs": "Xususiyatlar",
       "year": "Ishlab chiqarilgan yil",

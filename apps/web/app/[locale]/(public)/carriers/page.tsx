@@ -6,6 +6,7 @@ import { sapi, qs } from '@/lib/server-api';
 import type { ListingCard as L, ListingPage, ListingSummary } from '@/lib/types-listing';
 import { ListingCard, listingPrice } from '@/components/catalog/ListingCard';
 import { AuthOnly } from '@/components/site/AuthOnly';
+import { WatchButton } from '@/components/catalog/WatchButton';
 import { RegionFilter } from '@/components/catalog/RegionFilter';
 import { NearMeButton } from '@/components/catalog/NearMeButton';
 import { Sel } from '@/components/catalog/Sel';
@@ -65,6 +66,11 @@ export default async function AvtotransportPage({ params, searchParams }: Params
   const near = raw.near || (p?.near ? `${p.near.lng},${p.near.lat}` : '');
   const radius = raw.radius || (p?.near ? String(p.near.radiusKm) : '');
 
+  const watchRegions = region.split(',').filter(isRegion);
+  // Kuzatuv faqat oq ro'yxatdagi shartlarni saqlay oladi. Koridor, yechilmagan erkin matn,
+  // xaritadagi nuqta, tonnaj yoki bir nechta viloyat bo'lsa tugma chizilmaydi: aks holda
+  // "siz kutgan narsa" deb va'da berib, butunlay boshqa narsadan xabar berardik.
+  const watchable = !corridor && !raw.q && !near && !tonnage && watchRegions.length < 2;
   const chips: SearchChip[] = [
     ...(corridor ? [chip('corridor', corridor)] : region.split(',').filter(Boolean).map((v) => chip('region', v))),
     ...(p?.qty ? Object.entries(p.qty).map(([k, v]) => chip('qty', `${k}=${v}`)) : []),
@@ -143,6 +149,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
           <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.body')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <DashLink href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink>
+            {watchable ? <WatchButton kind="LISTING" params={{ listingKind: 'TRUCK', regionCode: watchRegions[0], truckType }} next={href({})} /> : null}
             {filtered ? <Link href="/carriers" className="text-sm font-semibold text-teal-ink underline">{t('empty.reset')}</Link> : null}
           </div>
         </div>

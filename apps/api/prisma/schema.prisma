@@ -66,6 +66,7 @@ model User {
   serviceProfiles ServiceProfile[]
   marketRequests  MarketRequest[]
   wagonSearches   WagonSearch[]
+  watches         Watch[]
 }
 
 /// Telefon ↔ Telegram chat bog'lanishi. OTP shu chatga yuboriladi (SMS yo'q).
@@ -1059,4 +1060,29 @@ model WagonSearch {
 
   @@index([userId, createdAt])
   @@index([wagonNo, createdAt])
+}
+
+/// Kuzatuv: odam qidirganini topmasa shartni saqlab qo'yadi va mos narsa chiqqanda
+/// xabar oladi. Bir odamda WATCH_MAX (10) tadan ko'p emas.
+///
+/// params oq ro'yxat bo'yicha yoziladi va oq ro'yxat bo'yicha o'qiladi (domen
+/// paketidagi WATCH_FIELDS): qatorga qo'lda qo'shilgan begona shart mosligni
+/// o'zgartira olmaydi. Terminal joyi bo'yicha kuzatuv yo'q.
+model Watch {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// CARGO | LISTING
+  kind       String
+  /// CARGO: { fromRegion?, toRegion?, truckType? }
+  /// LISTING: { listingKind?, regionCode?, truckType?, deal? }
+  params     Json
+  /// Oxirgi yuborilgan payt. Bitta kuzatuvga kuniga bitta xabar shu bilan cheklanadi:
+  /// bugun yuborilgan qator umuman o'qilmaydi.
+  lastSentAt DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  /// Hodisa bo'yicha o'qish: tur + bugun yuborilmaganlar
+  @@index([kind, lastSentAt])
+  @@index([userId])
 }

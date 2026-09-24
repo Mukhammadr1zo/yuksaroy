@@ -15,6 +15,7 @@ import { alt } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
 import { MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
 import { Pagination } from '@/components/catalog/Pagination';
+import { WatchButton } from '@/components/catalog/WatchButton';
 
 export const revalidate = 60;
 type Params = { params: Promise<{ locale: string }> };
@@ -59,6 +60,9 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
     ...(p?.qty ? Object.entries(p.qty).map(([k, v]) => chip('qty', `${k}=${v}`)) : []),
     ...(near ? [chip('near', radius || '25')] : []),
   ];
+  const watchRegions = region.split(',').filter(isRegion);
+  // Oq ro'yxatga sig'maydigan filtr bo'lsa tugma chizilmaydi (carriers dagi qoida)
+  const watchable = !corridor && !raw.q && !near && watchRegions.length < 2;
   const base = { region, kind, deal, near, radius, corridor, sort: raw.sort, q: chips.length ? '' : raw.q };
   const href = (over: Partial<typeof base> & { page?: number }) => `/equipment${qs({ ...base, ...over })}`;
   const mapHref = `/map${qs({ cat: 'equipment', region, corridor, near, radius, q: base.q })}`;
@@ -137,6 +141,7 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
           <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.body')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <DashLink href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink>
+            {watchable ? <WatchButton kind="LISTING" params={{ listingKind: kind || undefined, regionCode: watchRegions[0], deal: deal || undefined }} next={href({})} /> : null}
             {filtered ? <Link href="/equipment" className="text-sm font-semibold text-teal-ink underline">{t('empty.reset')}</Link> : null}
           </div>
         </div>

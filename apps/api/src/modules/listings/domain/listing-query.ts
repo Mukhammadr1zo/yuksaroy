@@ -11,6 +11,8 @@ export interface ListingRecord {
   truckType: string | null; tonnage: number | null; fleetSize: number | null; serviceRegions: string[]; routes: Route[];
   contactPhone: string | null;
   premiumUntil: Date | null; publishedAt: Date | null; expiresAt: Date | null; rejectReason: string | null; views: number;
+  /** Namuna e'lon: haqiqiy taklif emas, unga hech qachon xabar bormaydi. */
+  isDemo: boolean;
   /** Xizmatdan foydalanganlar bahosi (ListingReview dan qayta hisoblanadi). Karta ham shu keshdan o'qiydi. */
   ratingAvg: number | null; ratingCount: number;
   createdAt: Date; updatedAt: Date;

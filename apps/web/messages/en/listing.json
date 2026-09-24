@@ -58,6 +58,25 @@
       "reset": "Clear filters",
       "standard": "Listing standard"
     },
+    "watch": {
+      "cta": "Tell me when it appears",
+      "busy": "Saving...",
+      "done": "Noted. We will tell you as soon as something matching appears.",
+      "guest": "Sign in to get messages",
+      "title": "What I am waiting for",
+      "lead": "When something matching appears you get a message. One a day for each; {n} now, up to {max} in total.",
+      "any": "All",
+      "remove": "Remove",
+      "kind": {
+        "CARGO": "Cargo",
+        "LISTING": "Listing"
+      },
+      "err": {
+        "WATCH_LIMIT": "No more than {max}. Remove one in your profile and add it again.",
+        "RATE_LIMITED": "Too many attempts. Try again a little later.",
+        "FAILED": "Not saved. Try again."
+      }
+    },
     "detail": {
       "specs": "Specifications",
       "year": "Year built",

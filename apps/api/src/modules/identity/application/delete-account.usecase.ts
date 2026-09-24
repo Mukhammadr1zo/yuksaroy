@@ -34,6 +34,10 @@ export class DeleteAccountUseCase {
       await tx.membership.deleteMany({ where: { userId } });
       await tx.listing.updateMany({ where: { ownerUserId: userId, NOT: { status: 'ARCHIVED' } }, data: { status: 'ARCHIVED' } });
       await tx.telegramLink.deleteMany({ where: { userId } });
+      // Kuzatuv shartlari ham shaxsiy ma'lumot ("bu odam Toshkent -> Samarqand tent
+      // kutyapti"): hisob anonimlashtirilganda ular ham ketishi kerak. Qator o'chmaydi,
+      // shuning uchun bazadagi Cascade bu yerda ishlamaydi.
+      await tx.watch.deleteMany({ where: { userId } });
       await tx.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
       await tx.user.update({ where: { id: userId }, data: anonymizedUser() });
       return report;

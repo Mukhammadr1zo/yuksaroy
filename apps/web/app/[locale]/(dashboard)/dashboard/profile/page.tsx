@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { GoogleLogoIcon, TelegramLogoIcon } from '@phosphor-icons/react';
-import { PASSWORD } from '@yuksaroy/domain';
+import { LISTING_LABELS, PASSWORD, SEARCH_LABELS, WATCH_FIELDS, WATCH_MAX, type DealKind, type ListingKind, type RegionCode, type TruckType } from '@yuksaroy/domain';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { routing, type Locale } from '@/i18n/routing';
 import { api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import type { OtpRequestResponse } from '@/lib/types-auth';
 import type { Me, Membership } from '@/lib/types-kabinet';
-import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, Field, INPUT, Notice, errText } from '@/components/kabinet/bits';
+import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, Field, INPUT, Notice, errText, useLang } from '@/components/kabinet/bits';
 import { uploadOne } from '@/components/kabinet/PhotoUpload';
 import { PasswordField, PhoneField, phoneDisplay } from '@/components/ui/fields';
 
@@ -55,6 +55,7 @@ export default function ProfilePage() {
           <Phone me={me} onChange={setMe} />
           <Password me={me} onChange={setMe} />
           <Linked me={me} />
+          <Watches />
           <Danger me={me} />
         </div>
       ) : null}
@@ -352,5 +353,62 @@ function Danger({ me }: { me: Me }) {
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
       <button type="submit" disabled={busy || !ready} className="rounded-full bg-red-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-800 disabled:opacity-60">{busy ? t('busy') : t('button')}</button>
     </form>
+  );
+}
+
+type WatchRow = { id: string; kind: 'CARGO' | 'LISTING'; params: Record<string, string> };
+
+/**
+ * Kuzatuvlarim. Qo'shish faqat bo'sh natija ekranida, o'chirish shu yerda:
+ * odam kuzatuvni qayerda ochganini eslamasligi mumkin, lekin profilni topadi.
+ *
+ * Kuzatuvi bo'lmasa bo'lim UMUMAN chizilmaydi: bo'sh quti hech qanday qarorni
+ * qo'llab-quvvatlamaydi.
+ */
+function Watches() {
+  const t = useTranslations('listing.watch');
+  const lang = useLang();
+  const [items, setItems] = useState<WatchRow[] | null>(null);
+  useEffect(() => { api<{ items: WatchRow[] }>('/watches').then((r) => setItems(r.items)).catch(() => setItems([])); }, []);
+
+  if (!items?.length) return null;
+  const name = (f: string, v: string) =>
+    f === 'listingKind' ? LISTING_LABELS[lang].kind[v as ListingKind]
+      : f === 'truckType' ? LISTING_LABELS[lang].truckType[v as TruckType]
+        : f === 'deal' ? SEARCH_LABELS[lang].deal[v as DealKind]
+          : SEARCH_LABELS[lang].region[v as RegionCode] ?? v;
+  /**
+   * CARGO da yo'nalish O'Q bilan chiziladi: "Toshkent, Samarqand" da qaysi biri yuklash,
+   * qaysi biri tushirish ekani bilinmasdi. Sayt bu juftlikni hamma joyda A -> B deb chizadi.
+   */
+  const label = (w: WatchRow) => {
+    if (w.kind === 'CARGO') {
+      const route = w.params.fromRegion && w.params.toRegion
+        ? `${name('fromRegion', w.params.fromRegion)} -> ${name('toRegion', w.params.toRegion)}`
+        : [w.params.fromRegion, w.params.toRegion].filter(Boolean).map((v) => name('fromRegion', v!)).join(' ');
+      return [route, w.params.truckType ? name('truckType', w.params.truckType) : ''].filter(Boolean).join(' · ') || t('any');
+    }
+    return WATCH_FIELDS.LISTING.map((f) => (w.params[f] ? name(f, w.params[f]!) : '')).filter(Boolean).join(' · ') || t('any');
+  };
+  const del = async (id: string) => {
+    setItems((v) => v?.filter((w) => w.id !== id) ?? null);
+    await api(`/watches/${id}`, { method: 'DELETE' }).catch(() => {});
+  };
+
+  return (
+    <section className="space-y-3 rounded-card border border-line bg-white p-5">
+      <h2 className="font-semibold">{t('title')}</h2>
+      {/* Hozirgi son ham ko'rsatiladi: chegaraga yaqinlashganini xatodan oldin bilsin */}
+      <p className="text-sm text-muted">{t('lead', { n: items.length, max: WATCH_MAX })}</p>
+      <ul className="divide-y divide-line text-sm">
+        {items.map((w) => (
+          <li key={w.id} className="flex flex-wrap items-center gap-3 py-3">
+            <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{t(`kind.${w.kind}`)}</span>
+            <span className="min-w-0 flex-1 wrap-anywhere">{label(w)}</span>
+            <button type="button" onClick={() => void del(w.id)} className="text-sm text-red-700 underline">{t('remove')}</button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
