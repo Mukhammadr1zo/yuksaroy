@@ -30,7 +30,9 @@
       "limit": "Daily limit reached. Try again tomorrow.",
       "none": "No number provided.",
       "err": "Could not load.",
-      "retry": "Retry"
+      "retry": "Retry",
+      "badPhone": "Number did not work? Tell us",
+      "badPhoneText": "The number did not work. Object: {ref}. Tell us what happened:"
     },
     "admin": {
       "tab": "Subscriptions",

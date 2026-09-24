@@ -30,7 +30,9 @@
       "limit": "Bugungi chegara tugadi. Ertaga davom etadi.",
       "none": "Raqam ko'rsatilmagan.",
       "err": "Olinmadi.",
-      "retry": "Qayta"
+      "retry": "Qayta",
+      "badPhone": "Raqam ishlamadimi? Ayting",
+      "badPhoneText": "Raqam ishlamadi. Obyekt: {ref}. Nima bo'lganini yozing:"
     },
     "admin": {
       "tab": "Obunalar",

@@ -31,7 +31,9 @@
         "demo": "Demo",
         "question": "Savol",
         "tech": "Texnik",
-        "partner": "Hamkorlik"
+        "partner": "Hamkorlik",
+        "badphone": "Raqam",
+        "phone": "Raqam"
       },
       "shown": "{n} / {total}",
       "empty": "Murojaat yo'q."

@@ -4,6 +4,7 @@ import { AuditService } from '../../common/audit.service';
 import { DailyBucket } from '../../common/ip-bucket';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
+import { ImpressionsService } from '../impressions/impressions.service';
 import { visibleCompany } from '../catalog/infrastructure/prisma-catalog.repository';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { SubscriptionService } from './subscription.service';
@@ -11,8 +12,13 @@ import { SubscriptionService } from './subscription.service';
 const KINDS = ['listing', 'terminal', 'org', 'service', 'request', 'offer'] as const;
 type Kind = (typeof KINDS)[number];
 
-/** Topilgan raqam va u obuna ortidami. */
-type Found = { phone: string | null; free: boolean };
+/**
+ * Topilgan raqam va u obuna ortidami.
+ *
+ * `id` topilgan obyektning haqiqiy id si: chaqiruvchi slug yoki buyurtma raqamini
+ * yuborishi mumkin, sanoq esa bitta belgiga o'tirishi kerak.
+ */
+type Found = { id: string; phone: string | null; free: boolean };
 
 /** Bo'sh satr ham "raqam yo'q": forma tozalanganda '' saqlanib qoladi. */
 const some = (v: string | null | undefined) => (v && v.trim() ? v.trim() : null);
@@ -28,6 +34,9 @@ const some = (v: string | null | undefined) => (v && v.trim() ? v.trim() : null)
  *
  * Ko'rinish qoidasi ochiq katalog bilan bir xil: katalogda 404 bo'lgan obyektning
  * raqami bu yerdan ham olinmaydi.
+ *
+ * Ochilgani serverda sanaladi: audit qatori bilan 'contact' mayog'i bitta shart
+ * ostida yoziladi, ya'ni ikki son hech qachon bir-biriga zid ketmaydi.
  *
  * `id` slug ham bo'lishi mumkin: ochiq sahifalar slug bilan ishlaydi.
  */
@@ -46,6 +55,7 @@ export class ContactsController {
     private readonly config: PlatformConfigService,
     private readonly audit: AuditService,
     private readonly subs: SubscriptionService,
+    private readonly impressions: ImpressionsService,
   ) {}
 
   @Get(':kind/:id')
@@ -70,11 +80,24 @@ export class ContactsController {
     const cfg = await this.config.get();
     let quota = { used: 0, limit: cfg.phoneRevealDaily };
     if (phone !== null) {
-      const first = this.seen.take(`${userId}:${kind}:${id}`, 1).ok;
+      // Kalit va audit xom parametrdan emas, topilgan obyekt id sidan: bir odam bitta
+      // terminalni slug bilan ham, id bilan ham ochsa bu BITTA ochilish
+      const key = `${userId}:${kind}:${found.id}`;
+      const first = !this.seen.has(key);
       const q = first ? this.daily.take(userId, cfg.phoneRevealDaily) : { ok: true, used: 0, limit: cfg.phoneRevealDaily };
       if (!q.ok) throw new HttpException({ code: 'RATE_LIMITED', used: q.used, limit: q.limit }, 429);
+      // Belgi kvotadan KEYIN qo'yiladi: ilgari 429 olgan odam o'sha obyektni qayta
+      // so'rab raqamni izsiz olardi, chunki belgi allaqachon qo'yilgan bo'lardi
+      if (first) {
+        this.seen.take(key, 1);
+        await this.audit.log({ actorId: userId, action: 'contact.reveal', entity: kind, entityId: found.id });
+        // Sanoq serverda: bu yerda raqam haqiqatan berilgani aniq. Xatosi ochilishni
+        // yiqitmasin, aks holda baza tirsillaganda kvota yeyilib foydalanuvchi 500 oladi
+        if (kind === 'listing' || kind === 'terminal' || kind === 'org') {
+          await this.impressions.record([{ kind, targetId: found.id, surface: 'contact' }]).catch(() => {});
+        }
+      }
       quota = { used: q.used, limit: q.limit };
-      if (first) await this.audit.log({ actorId: userId, action: 'contact.reveal', entity: kind, entityId: id });
     }
     return { phone, quota };
   }
@@ -85,17 +108,17 @@ export class ContactsController {
     const now = new Date();
     // Namuna qatorlar (isDemo) hech qachon raqam bermaydi: ular haqiqiy taklif emas
     if (kind === 'listing') {
-      const l = await this.prisma.listing.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] }, select: { contactPhone: true, isDemo: true } });
-      return l ? { phone: l.isDemo ? null : some(l.contactPhone), free: false } : undefined;
+      const l = await this.prisma.listing.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] }, select: { id: true, contactPhone: true, isDemo: true } });
+      return l ? { id: l.id, phone: l.isDemo ? null : some(l.contactPhone), free: false } : undefined;
     }
     if (kind === 'org') {
       // Katalogdagi kompaniya sahifasi bilan bir xil shart: ko'rinmagan tashkilot raqami ham berilmaydi
-      const o = await this.prisma.organization.findFirst({ where: { AND: [byIdOrSlug, visibleCompany(now)] }, select: { phone: true, isDemo: true } });
-      return o ? { phone: o.isDemo ? null : some(o.phone), free: false } : undefined;
+      const o = await this.prisma.organization.findFirst({ where: { AND: [byIdOrSlug, visibleCompany(now)] }, select: { id: true, phone: true, isDemo: true } });
+      return o ? { id: o.id, phone: o.isDemo ? null : some(o.phone), free: false } : undefined;
     }
     if (kind === 'service') {
-      const sp = await this.prisma.serviceProfile.findFirst({ where: { id, status: 'ACTIVE' }, select: { contactPhone: true, isDemo: true } });
-      return sp ? { phone: sp.isDemo ? null : some(sp.contactPhone), free: false } : undefined;
+      const sp = await this.prisma.serviceProfile.findFirst({ where: { id, status: 'ACTIVE' }, select: { id: true, contactPhone: true, isDemo: true } });
+      return sp ? { id: sp.id, phone: sp.isDemo ? null : some(sp.contactPhone), free: false } : undefined;
     }
     if (kind === 'request') {
       /*
@@ -113,11 +136,11 @@ export class ContactsController {
             { OR: [{ status: 'OPEN' }, { status: 'AWARDED', offers: { some: { status: 'AWARDED', providerUserId: userId } } }] },
           ],
         },
-        select: { contactPhone: true, isDemo: true, status: true },
+        select: { id: true, contactPhone: true, isDemo: true, status: true },
       });
       if (!r) return undefined;
       // Tanlangan so'rov: bitim tuzilgan, raqam obunasiz beriladi
-      return { phone: r.isDemo ? null : some(r.contactPhone), free: r.status === 'AWARDED' };
+      return { id: r.id, phone: r.isDemo ? null : some(r.contactPhone), free: r.status === 'AWARDED' };
     }
     if (kind === 'offer') {
       /*
@@ -128,19 +151,19 @@ export class ContactsController {
        */
       const o = await this.prisma.marketOffer.findFirst({
         where: { id, status: 'AWARDED', request: { createdById: userId } },
-        select: { providerUserId: true, providerOrgId: true, request: { select: { isDemo: true } } },
+        select: { id: true, providerUserId: true, providerOrgId: true, request: { select: { isDemo: true } } },
       });
       if (!o) return undefined;
-      if (o.request.isDemo) return { phone: null, free: true };
+      if (o.request.isDemo) return { id: o.id, phone: null, free: true };
       const [org, u] = await Promise.all([
         o.providerOrgId ? this.prisma.organization.findUnique({ where: { id: o.providerOrgId }, select: { phone: true } }) : null,
         this.prisma.user.findUnique({ where: { id: o.providerUserId }, select: { phone: true } }),
       ]);
-      return { phone: some(org?.phone) ?? some(u?.phone), free: true };
+      return { id: o.id, phone: some(org?.phone) ?? some(u?.phone), free: true };
     }
     // Terminal va shahobcha bitta jadvalda. Ochiq sahifa sharti: ACTIVE va (egasi bor yoki reestr shahobchasi).
     // Raqam: obyektning o'z raqami, bo'lmasa reestrdagi mas'ul shaxs raqami.
-    const t = await this.prisma.terminal.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] }] }, select: { phone: true, contactPhone: true, isDemo: true } });
-    return t ? { phone: t.isDemo ? null : (some(t.phone) ?? some(t.contactPhone)), free: false } : undefined;
+    const t = await this.prisma.terminal.findFirst({ where: { AND: [byIdOrSlug, { status: 'ACTIVE' }, { OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] }] }, select: { id: true, phone: true, contactPhone: true, isDemo: true } });
+    return t ? { id: t.id, phone: t.isDemo ? null : (some(t.phone) ?? some(t.contactPhone)), free: false } : undefined;
   }
 }

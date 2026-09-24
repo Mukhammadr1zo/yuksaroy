@@ -150,7 +150,8 @@ export class AdminCatalogController {
     const p = clampInt(page, 1, 1, 100_000), l = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
     const where: Prisma.TerminalWhereInput = {
-      ...(text ? { OR: [{ name: like(text) }, { address: like(text) }, { stationNameRaw: like(text) }, { ownerNameRaw: like(text) }] } : {}),
+      // slug ham qidiriladi: murojaatdan kelgan manzilni to'g'ridan-to'g'ri qo'yib topish uchun
+      ...(text ? { OR: [{ name: like(text) }, { slug: like(text) }, { address: like(text) }, { stationNameRaw: like(text) }, { ownerNameRaw: like(text) }] } : {}),
       kind: pickIn(kind, TERMINAL_KINDS),
       regionCode: pickIn(region, REGIONS),
       status: pickIn(status, TERMINAL_STATUSES),

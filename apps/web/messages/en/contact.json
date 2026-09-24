@@ -16,7 +16,9 @@
         "demo": "Demo",
         "question": "Question",
         "tech": "Technical issue",
-        "partner": "Partnership"
+        "partner": "Partnership",
+        "badphone": "Number does not work",
+        "phone": "Close a number"
       },
       "message": "Message",
       "messageHint": "At least 10 characters",

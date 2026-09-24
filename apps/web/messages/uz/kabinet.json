@@ -317,7 +317,7 @@
       "open": "Sahifasi",
       "registry": {
         "title": "Shahobcha yo'lingizni toping",
-        "lead": "Reestr raqami, stansiya nomi yoki kod bo'yicha qidiring va o'zingiznikini biriktiring. Tasdiqdan keyin u ochiq katalogda ko'rinadi.",
+        "lead": "Stansiya nomi yoki kod bo'yicha qidiring va o'zingiznikini biriktiring. Tasdiqdan keyin u ochiq katalogda ko'rinadi.",
         "placeholder": "Stansiya nomi yoki kod",
         "search": "Qidirish",
         "claim": "Biriktirish",

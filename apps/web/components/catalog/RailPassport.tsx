@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { num } from '@/lib/format';
 import type { RailPassport } from '@/lib/types';
 
@@ -7,7 +8,7 @@ import type { RailPassport } from '@/lib/types';
  * Bo'sh maydon chizilmaydi, aks holda jadval yolg'on to'liqlik ko'rsatardi.
  * Mas'ul shaxs raqami bu yerda yo'q: u obunachiga sahifa boshidagi tugma orqali (PhoneReveal).
  */
-export async function RailPassportCard({ rail }: { rail: RailPassport }) {
+export async function RailPassportCard({ rail, mineRef }: { rail: RailPassport; mineRef?: string | null }) {
   const locale = await getLocale();
   const t = await getTranslations('claim');
   const m = (v: number | null) => (v == null ? null : t('meters', { count: num(v, locale) }));
@@ -58,6 +59,18 @@ export async function RailPassportCard({ rail }: { rail: RailPassport }) {
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('contactHeading')}</h3>
           {rail.contactName ? <p className="mt-1.5 font-semibold text-navy">{rail.contactName}</p> : null}
           <p className="mt-3 border-t border-line/70 pt-2 text-[11px] text-muted">{t('contactNote')}</p>
+          {/*
+           * Raqam egasi uni yopishni kirmasdan so'raydi: murojaat formasi mehmonga ochiq.
+           * Server raqamni o'zi yopmaydi, faqat navbatga tushadi. Aks holda havolani bilgan
+           * begona odam boshqaning raqamini o'chirib yuborardi. Moderator murojaatdagi
+           * raqamni obyektdagi raqam bilan solishtiradi.
+           */}
+          {mineRef ? (
+            <p className="mt-2 text-[11px]">
+              <Link href={`/contact?topic=phone&text=${encodeURIComponent(t('phoneMineText', { ref: mineRef }))}`} className="font-semibold text-teal-ink underline underline-offset-2">{t('phoneMine')}</Link>
+              <span className="mt-1 block text-muted">{t('phoneMineNote')}</span>
+            </p>
+          ) : null}
         </div>
       ) : null}
 

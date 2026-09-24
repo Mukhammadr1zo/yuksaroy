@@ -1,6 +1,6 @@
 {
   "claim": {
-    "registryNo": "Reestr raqami",
+    "registryNo": "Obyekt raqami",
     "station": "Stansiya",
     "region": "Viloyat",
     "length": "Uzunlik",
@@ -67,6 +67,9 @@
     "whyShort": "Izoh kamida 10 belgi bo'lsin.",
     "docs": "Hujjat (ixtiyoriy)",
     "docsHint": "Egalikni ko'rsatadigan hujjat: guvohnoma, shartnoma yoki dalolatnoma.",
-    "noOrgAuto": "Tashkilotingiz da'vo bilan birga ochiladi, nomini keyin kabinetda o'zgartirasiz."
+    "noOrgAuto": "Tashkilotingiz da'vo bilan birga ochiladi, nomini keyin kabinetda o'zgartirasiz.",
+    "phoneMine": "Bu mening raqamim, yopilsin",
+    "phoneMineNote": "Formada o'z raqamingizni yozing: obyektdagi raqam bilan solishtiramiz.",
+    "phoneMineText": "Bu raqam meniki: {ref}. Katalogda ko'rinmasin, yopishingizni so'rayman. O'z raqamim:"
   }
 }

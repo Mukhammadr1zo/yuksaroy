@@ -31,7 +31,9 @@
         "demo": "Demo",
         "question": "Question",
         "tech": "Technical",
-        "partner": "Partnership"
+        "partner": "Partnership",
+        "badphone": "Number",
+        "phone": "Phone"
       },
       "shown": "{n} / {total}",
       "empty": "No messages."

@@ -14,7 +14,10 @@ import { ImpressionsService, type ImpressionKind } from './impressions.service';
 class ImpressionItemDto {
   @IsIn(['listing', 'terminal', 'org']) kind!: ImpressionKind;
   @IsString() @Length(1, 40) targetId!: string;
-  @IsIn(IMPRESSION_SURFACES) surface!: ImpressionSurface;
+  // 'contact' bu ro'yxatda yo'q: telefon ochilgani faqat serverda, raqam haqiqatan
+  // berilganda yoziladi. Bu yo'l kirishsiz, ya'ni undan kelgan 'contact' shunchaki
+  // shishirilgan son bo'lardi.
+  @IsIn(IMPRESSION_SURFACES.filter((s) => s !== 'contact')) surface!: ImpressionSurface;
 }
 class ImpressionsDto {
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => ImpressionItemDto) items!: ImpressionItemDto[];

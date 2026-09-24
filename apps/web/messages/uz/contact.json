@@ -16,7 +16,9 @@
         "demo": "Demo",
         "question": "Savol",
         "tech": "Texnik muammo",
-        "partner": "Hamkorlik"
+        "partner": "Hamkorlik",
+        "badphone": "Raqam ishlamadi",
+        "phone": "Raqamni yopish"
       },
       "message": "Xabar",
       "messageHint": "Kamida 10 ta belgi",

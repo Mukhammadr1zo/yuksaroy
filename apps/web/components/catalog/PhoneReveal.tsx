@@ -5,9 +5,12 @@
  * orqali keladi. Sahifaning o'zi keshlangan va cookie'siz, shuning uchun raqam
  * faqat brauzerdan olinadi.
  *
- * 401: kirish kerak, 402: obuna kerak, 429: kunlik chegara tugagan. Ochilgani
- * "contact" mayog'i bilan ham yuboriladi: egasining tahlil sahifasida "nechta
- * qo'ng'iroq" qatori shundan hisoblanadi (server auditi bu qatorni bermaydi).
+ * 401: kirish kerak, 402: obuna kerak, 429: kunlik chegara tugagan. Ochilganini
+ * server o'zi sanaydi: kim ochgani auditga, soni esa egasining ko'rsatkichlariga
+ * o'sha yerda yoziladi.
+ *
+ * Raqam ochilgandan keyin "ishlamadimi" havolasi turadi: u murojaat formasini mavzu va
+ * obyekt belgisi bilan oldindan to'ldirib ochadi (forma platforma adminlariga ketadi).
  *
  * Boshlang'ich holat server va brauzerda bir xil (idle): sessiya faqat brauzerda
  * bilinadi, uni birinchi chizishda o'qish gidratsiya nomuvofiqligi berardi.
@@ -16,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LockSimpleIcon, PhoneIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
-import { ApiError, api, hasSession, post, tgTokens } from '@/lib/api';
+import { ApiError, api, hasSession, tgTokens } from '@/lib/api';
 
 type Kind = 'listing' | 'terminal' | 'org' | 'service' | 'request' | 'offer';
 type State =
@@ -34,7 +37,6 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
     try {
       const r = await api<{ phone: string | null }>(`/contacts/${kind}/${encodeURIComponent(targetId)}`);
       setSt(r.phone ? { s: 'phone', phone: r.phone } : { s: 'none' });
-      if (r.phone) void post('/events/impressions', { items: [{ kind, targetId, surface: 'contact' }] }).catch(() => {});
     } catch (e) {
       const status = e instanceof ApiError ? e.status : 0;
       setSt(status === 401 ? { s: 'login' } : status === 402 ? { s: 'subscribe' } : status === 429 ? { s: 'limit' } : status === 404 ? { s: 'none' } : { s: 'err' });
@@ -45,13 +47,20 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
   const cta = 'font-semibold text-teal-ink underline underline-offset-4 hover:text-navy';
 
   if (st.s === 'phone') {
+    // Obyekt belgisi kind va targetId dan olinadi, next dan emas: bitta chaqiruv joyida
+    // next obyekt sahifasi emas. Raqamning o'zi matnga qo'yilmaydi: u brauzer tarixida qolmasin.
+    // span, div emas: chaqiruv joylaridan biri <p> ichida turadi (tg/ListingView).
+    const report = `/contact?topic=badphone&text=${encodeURIComponent(t('badPhoneText', { ref: `${kind}/${targetId}` }))}`;
     return (
-      <a href={`tel:${st.phone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-2 font-mono text-sm font-semibold text-navy hover:text-teal-ink">
-        <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />{st.phone}
-      </a>
+      <span className="inline-flex flex-col items-start gap-1">
+        <a href={`tel:${st.phone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-2 font-mono text-sm font-semibold text-navy hover:text-teal-ink">
+          <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />{st.phone}
+        </a>
+        <Link href={report} className="text-xs text-muted underline underline-offset-4 hover:text-teal-ink">{t('badPhone')}</Link>
+      </span>
     );
   }
-  if (st.s === 'login') return <p className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('login')} <Link href={`/login?next=${next}`} className={cta}>{t('loginCta')}</Link></p>;
+  if (st.s === 'login') return <p className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('login')} <Link href={`/login?next=${encodeURIComponent(next)}`} className={cta}>{t('loginCta')}</Link></p>;
   if (st.s === 'subscribe') {
     // Telegram Mini App da kabinet cookie'si yo'q: /dashboard u yerda kirish sahifasiga qaytaradi,
     // shuning uchun Mini App o'z obuna sahifasiga boradi (karta bir xil)

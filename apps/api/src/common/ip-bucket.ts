@@ -45,6 +45,12 @@ export function tashkentDay(now = Date.now()): number {
 export class DailyBucket {
   private readonly hits = new Map<string, { n: number; day: number }>();
 
+  /** Bugun bu kalit sanalganmi (chelakni yemasdan). */
+  has(key: string, now = Date.now()): boolean {
+    const h = this.hits.get(key);
+    return !!h && h.day === tashkentDay(now);
+  }
+
   /** Sanaydi: { ok, used, limit }. Rad etilsa used o'zgarmaydi. */
   take(key: string, limit: number, now = Date.now()): { ok: boolean; used: number; limit: number } {
     const day = tashkentDay(now);

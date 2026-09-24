@@ -8,6 +8,7 @@ import type { AuditService } from '../../common/audit.service';
 import type { PlatformConfigService } from '../../common/platform-config.service';
 import type { PrismaService } from '../../common/prisma.service';
 import type { SubscriptionService } from './subscription.service';
+import type { ImpressionsService } from '../impressions/impressions.service';
 import { ContactsController } from './contacts.controller';
 
 type Where = Record<string, any>;
@@ -17,6 +18,12 @@ function setup(opts: {
   request?: { status: string; contactPhone: string | null; isDemo?: boolean; awardedTo?: string };
   offer?: { ownerId: string; providerUserId: string; providerPhone: string | null; isDemo?: boolean };
   subscriber?: boolean;
+  /** Terminal tarmog'i: slug bilan ham, id bilan ham bitta qatorga tushadi. */
+  terminal?: { id: string; phone: string | null };
+  /** Mayoq va audit yozuvlari shu massivlarga tushadi. */
+  calls?: Record<string, unknown>[];
+  auditRows?: Record<string, unknown>[];
+  dailyLimit?: number;
 } = {}) {
   const prisma = {
     marketRequest: {
@@ -43,11 +50,15 @@ function setup(opts: {
     },
     user: { findUnique: async () => ({ phone: opts.offer?.providerPhone ?? null }) },
     organization: { findUnique: async () => null },
+    terminal: {
+      findFirst: async () => (opts.terminal ? { id: opts.terminal.id, phone: opts.terminal.phone, contactPhone: null, isDemo: false } : null),
+    },
   } as unknown as PrismaService;
-  const config = { get: async () => ({ phoneRevealDaily: 50 }) } as unknown as PlatformConfigService;
-  const audit = { log: async () => {} } as unknown as AuditService;
+  const config = { get: async () => ({ phoneRevealDaily: opts.dailyLimit ?? 50 }) } as unknown as PlatformConfigService;
+  const audit = { log: async (r: Record<string, unknown>) => { opts.auditRows?.push(r); } } as unknown as AuditService;
   const subs = { isActive: async () => opts.subscriber ?? false } as unknown as SubscriptionService;
-  return new ContactsController(prisma, config, audit, subs);
+  const impressions = { record: async (items: Record<string, unknown>[]) => { opts.calls?.push(...items); } } as unknown as ImpressionsService;
+  return new ContactsController(prisma, config, audit, subs, impressions);
 }
 
 describe('raqam kimga ochiladi', () => {
@@ -89,5 +100,50 @@ describe('raqam kimga ochiladi', () => {
   it("notanish tur rad etiladi", async () => {
     const c = setup();
     await expect(c.reveal('u1', 'wagon', 'x')).rejects.toMatchObject({ status: 400 });
+  });
+});
+
+/**
+ * Ochilishni server sanaydi. Ilgari son brauzerdan kelardi: uni kirishsiz yo'ldan
+ * shishirish mumkin edi va u audit bilan zid ketardi.
+ */
+describe('telefon ochilishi qanday sanaladi', () => {
+  it('slug bilan ochilsa ham mayoq va audit obyekt id si bilan tushadi', async () => {
+    const calls: Record<string, unknown>[] = [];
+    const auditRows: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, calls, auditRows });
+    await c.reveal('u1', 'terminal', 'toshkent-1');
+    expect(calls).toEqual([{ kind: 'terminal', targetId: 't1', surface: 'contact' }]);
+    expect(auditRows[0]?.entityId).toBe('t1');
+  });
+
+  it('bir obyekt slug bilan ham, id bilan ham bitta ochilish', async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, calls });
+    await c.reveal('u1', 'terminal', 'toshkent-1');
+    await c.reveal('u1', 'terminal', 't1');
+    expect(calls).toHaveLength(1);
+  });
+
+  it("Impression jadvali bilmagan tur uchun mayoq yozilmaydi", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ request: { status: 'OPEN', contactPhone: '+998901234567' }, subscriber: true, calls });
+    expect((await c.reveal('u9', 'request', 'CR-1')).phone).toBe('+998901234567');
+    expect(calls).toHaveLength(0);
+  });
+
+  it("raqami yo'q obyektda na audit, na mayoq", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const auditRows: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't2', phone: null }, subscriber: true, calls, auditRows });
+    expect((await c.reveal('u1', 'terminal', 't2')).phone).toBe(null);
+    expect(calls).toHaveLength(0);
+    expect(auditRows).toHaveLength(0);
+  });
+
+  it('kvota tugagach qayta so\'rash ham raqam bermaydi', async () => {
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, dailyLimit: 0 });
+    await expect(c.reveal('u1', 'terminal', 't1')).rejects.toMatchObject({ status: 429 });
+    await expect(c.reveal('u1', 'terminal', 't1')).rejects.toMatchObject({ status: 429 });
   });
 });

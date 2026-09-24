@@ -6,11 +6,12 @@ import { CheckCircleIcon } from '@phosphor-icons/react';
 import { post } from '@/lib/api';
 import { BTN } from './bits';
 
-const TOPICS = ['demo', 'question', 'tech', 'partner'] as const;
+const TOPICS = ['demo', 'question', 'tech', 'badphone', 'phone', 'partner'] as const;
 type Topic = (typeof TOPICS)[number];
 const INPUT = 'mt-1 w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25';
 
-export function ContactForm({ topic }: { topic?: string }) {
+// text: ochilgan raqam ishlamaganda PhoneReveal havolasi xabarni oldindan qo'yadi
+export function ContactForm({ topic, text }: { topic?: string; text?: string }) {
   const t = useTranslations('contact');
   const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'err' | 'rate'>('idle');
   const initial: Topic = TOPICS.includes(topic as Topic) ? (topic as Topic) : 'question';
@@ -51,7 +52,7 @@ export function ContactForm({ topic }: { topic?: string }) {
         </select>
       </label>
       <label className="block text-xs font-semibold text-muted">{t('form.message')}
-        <textarea name="message" required minLength={10} maxLength={2000} rows={5} className={INPUT} />
+        <textarea name="message" defaultValue={text} required minLength={10} maxLength={2000} rows={5} className={INPUT} />
         <span className="mt-1 block text-[11px] font-normal">{t('form.messageHint')}</span>
       </label>
       {/* Honeypot: ekrandan tashqarida, tab bilan yetib bo'lmaydi */}

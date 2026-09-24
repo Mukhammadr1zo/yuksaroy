@@ -124,7 +124,8 @@ export default async function TerminalPage({ params }: Params) {
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-8">
-          {t.rail ? <RailPassportCard rail={t.rail} /> : null}
+          {/* Havola PENDING da ham qoladi: da'vo yuborilgani raqam egasining ishini to'xtatmaydi */}
+          {t.rail ? <RailPassportCard rail={t.rail} mineRef={registryOnly && t.rail.hasPhone ? t.slug : null} /> : null}
           <section hidden={registryOnly}>
             <h2 className="text-lg font-bold">{tr('tariffs.heading')}</h2>
             {t.tariffs.length === 0 ? <p className="mt-2 text-sm text-muted">{tr('tariffs.empty')}</p> : (

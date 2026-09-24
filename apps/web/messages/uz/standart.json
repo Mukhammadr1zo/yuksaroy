@@ -38,7 +38,7 @@
     },
     "siding": {
       "title": "Temir yo'l terminali (shahobcha yo'l)",
-      "must": "Reestr raqami, stansiya, viloyat",
+      "must": "Obyekt raqami, stansiya, viloyat",
       "should": "Uzunlik, tushirish va yuklash sig'imi, egasi",
       "note": "Egasi nomi faqat da'vo operator tomonidan tasdiqlangach ko'rinadi. Xaritadagi nuqta stansiya joyida turadi, aniq manzil emas.",
       "owner": "Tashkilot: da'vo operator tomonidan tasdiqlangach"

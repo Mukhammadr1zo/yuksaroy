@@ -4,7 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { ContactForm } from '@/components/marketing/ContactForm';
 import { alt } from '@/lib/seo';
 
-type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ topic?: string }> };
+type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ topic?: string; text?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -12,11 +12,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { ...{ title: t('title'), description: t('description') }, ...alt(locale, '/contact') };
 }
 
-/** Murojaat: forma (mijoz komponenti, POST /contact) va yon ustunda boshqa yo'llar. ?topic= tanlovni oldindan qo'yadi (/pricing dan). */
+/** Murojaat: forma (mijoz komponenti, POST /contact) va yon ustunda boshqa yo'llar. ?topic= tanlovni, ?text= xabar maydonini oldindan qo'yadi (/pricing va ochilgan telefondan). */
 export default async function ContactPage({ params, searchParams }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [{ topic }, t] = await Promise.all([searchParams, getTranslations('contact')]);
+  const [{ topic, text }, t] = await Promise.all([searchParams, getTranslations('contact')]);
   const links = [
     { key: 'pricing', href: '/pricing' },
   ] as const;
@@ -31,7 +31,7 @@ export default async function ContactPage({ params, searchParams }: Props) {
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-8 px-6 py-14 md:grid-cols-[1.3fr_1fr] md:py-16">
-        <ContactForm topic={topic} />
+        <ContactForm topic={topic} text={text?.slice(0, 2000)} />
         <aside>
           <h2 className="font-display text-lg font-bold text-navy">{t('aside.heading')}</h2>
           <ul className="mt-4 divide-y divide-line rounded-card border border-line bg-white">

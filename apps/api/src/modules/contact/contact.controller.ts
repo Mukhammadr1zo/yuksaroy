@@ -14,7 +14,7 @@ class ContactDto {
   @IsString() @Length(2, 100) name!: string;
   /** Telefon yoki email. */
   @IsString() @Length(3, 120) contact!: string;
-  /** Web tanlovi: demo | question | tech | partner (matn sifatida saqlanadi). */
+  /** Web tanlovi: demo | question | tech | badphone | phone | partner (matn sifatida saqlanadi). */
   @IsString() @Length(1, 40) topic!: string;
   @IsString() @Length(10, 2000) message!: string;
   /** Honeypot: odam to'ldirmaydi; to'ldirilsa jimgina qabul qilinadi, saqlanmaydi. */

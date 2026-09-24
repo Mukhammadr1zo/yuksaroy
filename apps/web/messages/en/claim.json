@@ -1,6 +1,6 @@
 {
   "claim": {
-    "registryNo": "Registry number",
+    "registryNo": "Object number",
     "station": "Station",
     "region": "Region",
     "length": "Length",
@@ -67,6 +67,9 @@
     "whyShort": "The note must be at least 10 characters.",
     "docs": "Document (optional)",
     "docsHint": "A document that shows ownership: a certificate, a contract or an act.",
-    "noOrgAuto": "Your company is created together with the claim; you can rename it later in the dashboard."
+    "noOrgAuto": "Your company is created together with the claim; you can rename it later in the dashboard.",
+    "phoneMine": "This is my number, please close it",
+    "phoneMineNote": "Give your own number in the form: we compare it with the number on the object.",
+    "phoneMineText": "This is my number: {ref}. Please close it in the catalog. My own number:"
   }
 }
