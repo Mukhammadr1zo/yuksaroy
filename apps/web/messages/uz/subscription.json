@@ -49,7 +49,10 @@
       "failed": "Tasdiqlanmadi. Sahifani yangilang.",
       "empty": "Navbat bo'sh.",
       "cancel": "Bekor qilish",
-      "cancelled": "Buyurtma bekor qilindi."
+      "cancelled": "Buyurtma bekor qilindi.",
+      "received": "Olingan summa, so'm",
+      "payRef": "Bank havolasi yoki to'lov raqami",
+      "diff": "Buyurtma summasi {expected}, kiritilgani {got}. Tasdiqlash mumkin."
     },
     "nudge": {
       "title": "Ro'yxatdan o'ting",
@@ -61,6 +64,10 @@
     },
     "expiredTitle": "Obuna tugagan",
     "expiredOn": "{date} da tugagan",
-    "expiredReveals": "shu muddatda {count} marta raqam ochgansiz"
+    "expiredReveals": "shu muddatda {count} marta raqam ochgansiz",
+    "cancelOrder": "Buyurtmani bekor qilish",
+    "cancelling": "Bekor qilinmoqda",
+    "cancelHint": "Muddatni o'zgartirish uchun shu buyurtmani bekor qiling va yangisini bering.",
+    "cancelFailed": "Buyurtma bekor qilinmadi. Qayta urinib ko'ring."
   }
 }

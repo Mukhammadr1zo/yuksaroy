@@ -91,7 +91,8 @@
       "reviews": "Reviews",
       "market": "Cargo and services",
       "team": "Team",
-      "visits": "Visits"
+      "visits": "Visits",
+      "revenue": "Revenue"
     },
     "common": {
       "search": "Search",
@@ -375,6 +376,7 @@
         "siding-update": "Updated a facility",
         "slots-capacity": "Changed intake capacity",
         "subscription-cancel": "Cancelled a subscription payment",
+        "subscription-cancel-self": "Cancelled their subscription order",
         "subscription-confirm": "Confirmed a subscription payment",
         "subscription-create": "Ordered a subscription",
         "tariff-publish": "Published prices",
@@ -593,6 +595,17 @@
       "unknown": "Not determined",
       "accuracy": "Location comes from the IP address. Inside Uzbekistan this is rough: carriers route traffic through Tashkent address blocks, so the regional split leans towards Tashkent. The country level is reliable.",
       "noGeo": "Location is not being determined yet: visits are counted, but not where they come from."
+    },
+    "revenue": {
+      "lead": "Confirmed payments by month. Months are cut by Tashkent time.",
+      "month": "Month",
+      "total": "Total",
+      "subs": "Subscriptions",
+      "premium": "Premium",
+      "payments": "Payments",
+      "renewals": "Renewals",
+      "empty": "No confirmed payments yet.",
+      "noPremium": "There were no Premium payments in this period."
     }
   }
 }

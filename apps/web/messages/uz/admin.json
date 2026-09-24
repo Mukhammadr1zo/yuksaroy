@@ -91,7 +91,8 @@
       "reviews": "Baholar",
       "market": "Yuklar va xizmatlar",
       "team": "Jamoa",
-      "visits": "Tashriflar"
+      "visits": "Tashriflar",
+      "revenue": "Tushum"
     },
     "common": {
       "search": "Qidiruv",
@@ -375,6 +376,7 @@
         "siding-update": "Obyekt ma'lumotini o'zgartirdi",
         "slots-capacity": "Qabul qilish sig'imini o'zgartirdi",
         "subscription-cancel": "Obuna to'lovini bekor qildi",
+        "subscription-cancel-self": "Obuna buyurtmasini bekor qildi",
         "subscription-confirm": "Obuna to'lovini tasdiqladi",
         "subscription-create": "Obuna buyurtmasini berdi",
         "tariff-publish": "Narxlarni chop etdi",
@@ -593,6 +595,17 @@
       "unknown": "Aniqlanmadi",
       "accuracy": "Joy IP manzilidan aniqlanadi. O'zbekiston ichida bu qo'pol: aloqa operatorlari trafikni Toshkentdagi manzillardan chiqaradi, shuning uchun viloyat kesimi Toshkentga og'adi. Davlat darajasi ishonchli.",
       "noGeo": "Joy hali aniqlanmadi: tashriflar sanalyapti, lekin qayerdan kelgani yozilmayapti."
+    },
+    "revenue": {
+      "lead": "Tasdiqlangan to'lovlar, oylar bo'yicha. Oy Toshkent vaqti bilan kesiladi.",
+      "month": "Oy",
+      "total": "Jami",
+      "subs": "Obuna",
+      "premium": "Premium",
+      "payments": "To'lovlar",
+      "renewals": "Uzaytirish",
+      "empty": "Hali tasdiqlangan to'lov yo'q.",
+      "noPremium": "Bu davrda Premium to'lovi bo'lmagan."
     }
   }
 }

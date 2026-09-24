@@ -145,10 +145,10 @@ export function Pill({ tone = 'neutral', children }: { tone?: 'ok' | 'warn' | 'b
   return <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${c}`}>{children}</span>;
 }
 
-export function Notice({ tone, children }: { tone: 'ok' | 'err'; children: React.ReactNode }) {
+export function Notice({ tone, children }: { tone: 'ok' | 'warn' | 'err'; children: React.ReactNode }) {
   return (
     <p role={tone === 'err' ? 'alert' : 'status'}
-      className={`mt-3 rounded-xl px-4 py-2.5 text-sm ${tone === 'err' ? 'bg-red-50 text-red-700' : 'bg-teal-soft text-teal-ink'}`}>
+      className={`mt-3 rounded-xl px-4 py-2.5 text-sm ${tone === 'err' ? 'bg-red-50 text-red-700' : tone === 'warn' ? 'bg-amber-soft text-amber-ink' : 'bg-teal-soft text-teal-ink'}`}>
       {children}
     </p>
   );

@@ -150,7 +150,9 @@ export class SubscriptionService {
         const s = await tx.subscription.create({
           data: { no: `PAY-${Number(nextval)}`, userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
         });
-        void this.adminNotify.queued('subscriptionPending', `${s.no}, ${months} oy`, s.id, userId).catch(() => {});
+        // Takror xabar kaliti odamga bog'langan, buyurtmaga emas: bekor qilib qayta buyurtma
+        // bergan odam har safar yangi id bilan adminlarga xabar yog'dira olmasin
+        void this.adminNotify.queued('subscriptionPending', `${s.no}, ${months} oy`, `sub:${userId}`, userId).catch(() => {});
         return { order: subscriptionView(s), payInstructions: payInstructions(cfg.payDetails), reused: false };
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     } catch (e) {
@@ -197,6 +199,23 @@ export class SubscriptionService {
     // Tranzaksiyadan keyin: o'zgarish qaytarib olinsa yolg'on xabar ketmasin
     this.tell(out.userId, 'subscriptionActive', { until: out.endsAt?.toISOString().slice(0, 10) ?? '' });
     return out;
+  }
+
+  /**
+   * Foydalanuvchi o'z kutilayotgan buyurtmasini yopadi: 1 oy tanlagan odam uni bekor
+   * qilib, 12 oyga qayta bera olsin (ochiq buyurtma turganda order() muddatni o'zgartirmaydi).
+   *
+   * Shart UPDATE ning ichida, chunki ayni damda admin tasdiqlayotgan bo'lishi mumkin:
+   * tasdiq birinchi o'tsa bu yerda nol qator yangilanadi va obuna faol qolaveradi,
+   * aksincha bo'lsa confirm() dagi shart tushmaydi va uning butun tranzaksiyasi
+   * (e'lonlarni ko'tarish ham) orqaga qaytadi.
+   */
+  async cancelOwn(userId: string, id: string) {
+    const s = await this.prisma.subscription.findFirst({ where: { id, userId }, select: { status: true } });
+    if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
+    const r = await this.prisma.subscription.updateMany({ where: { id, userId, status: 'PENDING' }, data: { status: 'CANCELLED' } });
+    if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING', status: s.status });
+    return this.me(userId); // karta yangi holatni shu javobdan oladi, ikkinchi so'rov kerak emas
   }
 
   /** To'lov kelmadi yoki buyurtma noto'g'ri: navbatdan chiqadi, obuna berilmaydi. */

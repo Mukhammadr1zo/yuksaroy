@@ -30,6 +30,8 @@ const GROUPS: { key: string; items: Item[] }[] = [
     { href: '/admin/team', key: 'team', owner: true },
   ] },
   { key: 'system', items: [
+    // Pul hisobi: server ham faqat egaga beradi
+    { href: '/admin/revenue', key: 'revenue', owner: true },
     { href: '/admin/visits', key: 'visits' },
     { href: '/admin/audit', key: 'audit' },
     // Komissiya foizi va muddatlar: operatorga ko'rinmaydi, server ham ruxsat bermaydi

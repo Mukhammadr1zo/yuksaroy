@@ -10,6 +10,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { monthlyRevenue } from './revenue';
 
 class SettingsDto {
   // { commissionPct: 300, commissionPayer: 'CLIENT' } - faqat o'zgartiriladigan kalitlar
@@ -81,6 +82,24 @@ export class AdminSystemController {
   @Get('visits')
   visits() {
     return this.impressions.visits();
+  }
+
+  /**
+   * Oylik tushum: obuna va Premium to'lovlari, tasdiqlangan sana (paidAt) bo'yicha, 12 oy.
+   * paidAt faqat tasdiqda to'ldiriladi, ya'ni bu yerga to'lanmagan buyurtma tushmaydi.
+   */
+  @Get('revenue')
+  @UseGuards(PlatformOwnerGuard)
+  async revenue() {
+    // 400 kun: 12 to'liq oy chetidan chiqmasin, ortiqchasini monthlyRevenue kesadi.
+    // orderBy majburiy: chegara ishga tushsa eng ESKI qatorlar tushib qolsin, aks holda
+    // varaqdagi oxirgi oylar jimgina kam ko'rinib, hisob ko'chirmaga to'g'ri kelmasdi
+    const gte = new Date(Date.now() - 400 * 86_400_000);
+    const [subs, prems] = await Promise.all([
+      this.prisma.subscription.findMany({ where: { paidAt: { gte } }, select: { paidAt: true, startsAt: true, amountTiyin: true }, orderBy: { paidAt: 'desc' }, take: 5000 }),
+      this.prisma.premiumOrder.findMany({ where: { paidAt: { gte } }, select: { paidAt: true, amountTiyin: true }, orderBy: { paidAt: 'desc' }, take: 5000 }),
+    ]);
+    return { months: monthlyRevenue(subs, prems) };
   }
 
   /** Audit izi: kim, nima, qachon. `action` prefiks bo'yicha ("admin." barcha admin amallarini beradi). */

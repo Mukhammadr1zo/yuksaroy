@@ -18,6 +18,15 @@ class CancelDto {
 }
 
 /**
+ * Tasdiqda operator ko'chirmadan ko'chiradi: haqiqatan qancha tushgani va qaysi o'tkazma.
+ * Ikkalasi ham ixtiyoriy va farq tasdiqni to'smaydi, faqat auditda iz qoldiradi.
+ */
+class ConfirmDto {
+  @IsOptional() @IsInt() @Min(0) @Max(1_000_000_000) receivedSom?: number;
+  @IsOptional() @IsString() @MaxLength(200) payRef?: string;
+}
+
+/**
  * Ochiq: obuna nima berishi va narxi. Kirish shart emas, chunki narxlar sahifasi mehmonga
  * ham ko'rinadi: obunani faqat devorga urilgan odam topmasin.
  */
@@ -57,6 +66,14 @@ export class SubscriptionController {
     return r;
   }
 
+  /** O'z kutilayotgan buyurtmasini bekor qilish. Sabab so'ralmaydi: pul o'tmagan va odam darhol qayta bera oladi. */
+  @Post('subscription/orders/:id/cancel') @HttpCode(200)
+  async cancelOwn(@CurrentUserId() userId: string, @Param('id') id: string) {
+    const me = await this.subs.cancelOwn(userId, id);
+    await this.audit.log({ actorId: userId, action: 'subscription.cancel.self', entity: 'Subscription', entityId: id });
+    return me;
+  }
+
   /** Admin navbati: `status` (default PENDING), eski birinchi. */
   @Get('admin/subscriptions')
   @UseGuards(PlatformAdminGuard)
@@ -66,9 +83,11 @@ export class SubscriptionController {
 
   @Post('admin/subscriptions/:id/confirm') @HttpCode(200)
   @UseGuards(PlatformAdminGuard)
-  async confirm(@CurrentUserId() userId: string, @Param('id') id: string) {
+  async confirm(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ConfirmDto) {
     const s = await this.subs.confirm(id);
-    await this.audit.log({ actorId: userId, action: 'subscription.confirm', entity: 'Subscription', entityId: id, meta: { userId: s.userId, months: s.months, endsAt: s.endsAt } });
+    const receivedTiyin = dto?.receivedSom == null ? null : dto.receivedSom * 100;
+    // Kutilgan va olingan summa yonma-yon yoziladi: keyin "qancha keldi" savoliga faqat shu javob beradi
+    await this.audit.log({ actorId: userId, action: 'subscription.confirm', entity: 'Subscription', entityId: id, meta: { userId: s.userId, months: s.months, endsAt: s.endsAt, expectedTiyin: s.amountTiyin, receivedTiyin, payRef: dto?.payRef?.trim() || null } });
     return s;
   }
 

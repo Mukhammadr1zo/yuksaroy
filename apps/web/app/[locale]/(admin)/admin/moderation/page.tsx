@@ -244,10 +244,20 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(false);
   const [reason, setReason] = useState<string | null>(null); // null = sabab maydoni yopiq
+  const [pay, setPay] = useState<{ som: string; ref: string } | null>(null); // null = tasdiq formasi yopiq
+  const expectedSom = Math.round(s.amountTiyin / 100);
+  const got = pay && pay.som.trim() !== '' ? Number(pay.som) : null;
+  // Farq faqat ogohlantiradi: pul kelgani rost, kam kelgani alohida gap
+  const diff = got != null && Number.isFinite(got) && got !== expectedSom;
   async function confirm() {
     setBusy(true); setErr(false);
-    try { const r = await post<{ endsAt: string }>(`/admin/subscriptions/${s.id}/confirm`, {}); onDone(t('confirmed', { until: uzDateTime(r.endsAt, lang) })); }
-    catch { setErr(true); setBusy(false); }
+    try {
+      const r = await post<{ endsAt: string }>(`/admin/subscriptions/${s.id}/confirm`, {
+        receivedSom: got != null && Number.isFinite(got) ? got : undefined,
+        payRef: pay?.ref.trim() || undefined,
+      });
+      onDone(t('confirmed', { until: uzDateTime(r.endsAt, lang) }));
+    } catch { setErr(true); setBusy(false); }
   }
   async function cancel() {
     setBusy(true); setErr(false);
@@ -267,19 +277,36 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
       </p>
       <p className="mt-1 font-mono text-xs text-muted">{s.no}</p>
       <div className="mt-3">
-        {reason === null ? (
+        {reason === null && pay === null ? (
           <div className="flex flex-wrap gap-2">
-            <button type="button" disabled={busy} onClick={confirm} className={BTN}>{busy ? t('confirming') : t('confirm')}</button>
+            <button type="button" disabled={busy} onClick={() => setPay({ som: String(expectedSom), ref: '' })} className={BTN}>{t('confirm')}</button>
             <button type="button" disabled={busy} onClick={() => setReason('')} className={BTN_DANGER}>{t('cancel')}</button>
           </div>
-        ) : (
+        ) : pay !== null ? (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-end gap-2">
+              <Labeled label={t('received')}>
+                {/* maxLength: server 1 000 000 000 dan oshganini 400 bilan qaytaradi */}
+                <input autoFocus inputMode="numeric" maxLength={10} value={pay.som} onChange={(e) => setPay({ ...pay, som: e.target.value.replace(/[^0-9]/g, '') })} className={`${INPUT} w-40 font-mono`} />
+              </Labeled>
+              <Labeled label={t('payRef')} className="min-w-0 flex-1">
+                <input value={pay.ref} onChange={(e) => setPay({ ...pay, ref: e.target.value })} maxLength={200} className={INPUT} />
+              </Labeled>
+            </div>
+            {diff ? <Notice tone="warn">{t('diff', { expected: som(s.amountTiyin, lang), got: som(Number(got) * 100, lang) })}</Notice> : null}
+            <div className="flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={confirm} className={BTN}>{busy ? t('confirming') : t('confirm')}</button>
+              <button type="button" onClick={() => setPay(null)} className={BTN_GHOST}>{ta('cancel')}</button>
+            </div>
+          </div>
+        ) : reason !== null ? (
           <div className="flex flex-wrap items-center gap-2">
             <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300}
               placeholder={ta('reason')} className={`${INPUT} w-full sm:w-72`} />
             <ConfirmButton label={t('cancel')} confirm={ta('confirmReject')} onRun={cancel} disabled={busy || !reason.trim()} />
             <button type="button" onClick={() => setReason(null)} className={BTN_GHOST}>{ta('cancel')}</button>
           </div>
-        )}
+        ) : null}
         {err ? <p role="alert" className="mt-2 text-sm text-red-700">{t('failed')}</p> : null}
       </div>
     </li>

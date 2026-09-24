@@ -113,6 +113,13 @@ export const uzDayShort = (d: Date | string, locale = 'uz') => {
   const p = uzParts(d);
   return `${p.day}-${UZ_MON[p.mon]}, ${p.wd}`;
 };
+/** "sentabr 2026": oylik hisobot satri uchun */
+export const uzMonthYear = (d: Date | string, locale = 'uz') => {
+  const L = lang(locale);
+  if (L !== 'uz') return intl(L, { month: 'long', year: 'numeric' }).format(toDate(d));
+  const p = uzParts(d);
+  return `${UZ_MONTHS[p.mon]} ${p.year}`;
+};
 /** "08:00" */
 export const uzTime = (d: Date | string) => uzParts(d).hm;
 /** Bugungi sana Toshkent bo'yicha, "2026-09-08" */
