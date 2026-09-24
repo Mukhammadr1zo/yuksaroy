@@ -16,7 +16,7 @@ function fake(row: { status: string } | null, count: number) {
       updateMany: async (a: { where: Record<string, unknown> }) => { updates.push(a.where); return { count }; },
     },
   } as never;
-  const config = { get: async () => ({ subscriptionMonthSom: 50000, payDetails: '' }) } as never;
+  const config = { get: async () => ({ subscriptionMonthSom: 50000, payDetails: '', phoneRevealDaily: 10, wagonSearchFree: 1 }) } as never;
   const svc = new SubscriptionService(prisma, config, { queued: async () => {} } as never, { recipients: async () => [], push: async () => {} } as never);
   return { svc, updates };
 }

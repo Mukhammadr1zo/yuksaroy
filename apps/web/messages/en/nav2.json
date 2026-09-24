@@ -5,6 +5,9 @@
     "companies": "Companies",
     "services": "Services",
     "cargo": "Cargo",
-    "wagon": "Wagon search"
+    "wagon": "Wagon search",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "consent": "By continuing you agree to the <terms>Terms</terms> and the <privacy>Privacy</privacy> page."
   }
 }

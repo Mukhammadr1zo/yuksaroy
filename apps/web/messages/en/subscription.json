@@ -2,7 +2,12 @@
   "subscription": {
     "nav": "Subscription",
     "title": "Subscription",
-    "lead": "With a subscription you see phone numbers of terminals, listings and companies, and wagon search becomes unlimited. Chat stays free without it.",
+    "lead": "Monthly subscription. What it opens:",
+    "limits": {
+      "phones": "{n} phone numbers a day",
+      "wagon": "Wagon search unlimited, {free, plural, =0 {no free tries without a subscription} other {# free without a subscription}}",
+      "chat": "Chat is free without a subscription too"
+    },
     "active": "Subscription active",
     "activeUntil": "until {until}",
     "inactive": "No subscription",

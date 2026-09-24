@@ -1,0 +1,105 @@
+{
+  "legal": {
+    "updated": "Oxirgi tahrir",
+    "other": "Ikkinchi hujjat:",
+    "terms": {
+      "meta": {
+        "title": "Shartlar · YukSaroy",
+        "description": "YukSaroy dan foydalanish shartlari: bu qanday xizmat, obuna qanday to'lanadi va pul qanday qaytariladi."
+      },
+      "eyebrow": "Hujjat",
+      "title": "Foydalanish shartlari",
+      "lead": "Bu yuridik hujjat emas, oddiy til bilan yozilgan kelishuv: biz kimmiz, nima qilamiz, pulni qanday olamiz va qanday qaytaramiz.",
+      "s1": {
+        "h": "Kim va nima xizmat",
+        "p1": "YukSaroy xususiy sayt. Davlat temir yo'l tashkiloti emas va hech qaysi idora nomidan ish yuritmaydi.",
+        "p2": "Sayt yuk logistikasi bozori: terminallar (temir yo'l terminallari ham), texnika va tashuvchilar bir joyda. Uchta toifa shu, boshqasi yo'q.",
+        "p3": "E'lonni egasi beradi: texnika va tashuvchi e'lonlarida narx va shartlarni egasi o'zi yozadi, so'rovga o'zi javob beradi. Siz unga to'g'ridan-to'g'ri murojaat qilasiz, vositachi yo'q.",
+        "p4": "Terminal sahifasi esa egasi uni o'z nomiga olmaguncha ham katalogda turishi mumkin. Egalik da'vosi tasdiqlangandan keyin tariflar, joylar va bronlarni egasining o'zi yuritadi.",
+        "p5": "Shartnoma va to'lov siz bilan egasi o'rtasida, saytdan tashqarida bo'ladi. Biz yuk tashimaymiz, saqlamaymiz va tomonlar nomidan hujjat imzolamaymiz."
+      },
+      "s2": {
+        "h": "Hisob",
+        "p1": "Hisob telefon raqami yoki Google orqali ochiladi. Kirish kodi Telegram botga keladi.",
+        "p2": "Hisob bitta odamniki. Kirish ma'lumotini boshqaga bersangiz, o'sha hisobdan qilingan ishlar ham sizniki hisoblanadi.",
+        "p3": "Kabinetga yozgan ism, tashkilot nomi va e'lon matni ochiq sahifada ko'rinadi: buni siz o'zingiz nashr qilasiz."
+      },
+      "s3": {
+        "h": "E'lon va sahifalar",
+        "p1": "E'londagi narx, hajm va shartlar uchun egasi javob beradi. Biz har bir e'lonni tekshirib chiqmaymiz.",
+        "p2": "Kompaniya sahifasidagi tasdiq belgisi STIR tekshirilganini bildiradi, sifat kafolati emas.",
+        "p3": "Namuna belgili qatorlar sayt qanday ko'rinishini ko'rsatish uchun turadi. Ularning egasi yo'q, ular haqiqiy taklif emas va ularga hech qachon xabar yuborilmaydi.",
+        "p4": "Qoidaga to'g'ri kelmaydigan e'lon olib tashlanadi. Muddati o'tgan e'lon ro'yxatdan tushadi, lekin kabinetingizda qoladi."
+      },
+      "s4": {
+        "h": "Pul: obuna va to'lov",
+        "p1": "Pullik narsa bitta: oylik obuna. Katalog, xarita, solishtirish, narx hisobi, e'lon berish va yozishma bepul. Ko'p e'lonli tashkilotlar uchun narx alohida kelishiladi: Tariflar sahifasidagi Kelishuv.",
+        "p2": "Obuna nimani ochishi va narxi Tariflar sahifasida yozilgan. Narx o'zgarsa, allaqachon to'langan muddatga ta'sir qilmaydi.",
+        "p3": "To'lov qo'lda: muddatni tanlaysiz, summa va to'lov izohi chiqadi, o'tkazmadan keyin biz tasdiqlaymiz. Tasdiq odatda 1 ish kuni ichida bo'ladi, obuna shundan keyin boshlanadi.",
+        "p4": "Bron uchun komissiya hozir yo'q. Kiritiladigan bo'lsa, kamida 30 kun oldin e'lon qilinadi."
+      },
+      "s5": {
+        "h": "Pulni qaytarish",
+        "p1": "To'lov tasdiqlanmaguncha hech narsa yechilmaydi: kutilayotgan buyurtmani obuna sahifasida o'zingiz bekor qilasiz.",
+        "p2": "Obuna yoqilganidan keyin 7 kun ichida, agar birorta telefon raqamini ochmagan va vagon qidiruvidan foydalanmagan bo'lsangiz, summa to'liq qaytariladi. Pul qaytarilganda obuna o'chadi va e'lonlaringiz ro'yxatdagi odatdagi joyiga tushadi.",
+        "p3": "Undan keyin foydalanilmagan to'liq oylar qaytariladi, boshlangan oy qaytarilmaydi. Masalan olti oylik obunaning ikkinchi oyida so'rasangiz, to'rt oylik summa qaytadi.",
+        "p4": "Saytning o'zi ishlamay qolgan kunlar obuna muddatiga qo'shib beriladi: bunda pul qaytarilmaydi, muddat uzayadi.",
+        "p5": "Qoidani buzgani uchun yopilgan obuna uchun pul qaytarilmaydi.",
+        "p6": "Qaytarish so'rovi: Murojaat sahifasidan buyurtma raqamini yozib yuboring. Pul o'zi kelgan hisobga, 5 ish kuni ichida qaytariladi."
+      },
+      "s6": {
+        "h": "Qoidalar, javobgarlik va o'zgarish",
+        "p1": "Man qilinadi: katalogni ommaviy ko'chirib olish, telefon raqamlarini yig'ib sotish, boshqaning obyekti yoki raqamini o'zinikidek ko'rsatish, chatda reklama tarqatish.",
+        "p2": "Buzilganda e'lon olib tashlanadi, hisob yopiladi va obuna bekor qilinadi.",
+        "p3": "Telefon raqami kuniga chegaralangan sonda ochiladi. Bu chegara katalogni ko'chirib olishga qarshi, va har bir ochish yozib qo'yiladi.",
+        "p4": "Biz uchrashish joyini beramiz. Egasi ko'rsatgan xizmat sifati, kechikish yoki buzilgan kelishuv uchun javob bermaymiz.",
+        "p5": "Shartlar o'zgarsa yuqoridagi sana yangilanadi. Muhim o'zgarish kamida 30 kun oldin e'lon qilinadi. Nizo bo'lsa avval bizga yozing: ish kunlari javob beramiz."
+      }
+    },
+    "privacy": {
+      "meta": {
+        "title": "Maxfiylik · YukSaroy",
+        "description": "Qanday ma'lumot olinadi, nima uchun saqlanadi, kim ko'radi va qanday o'chiriladi."
+      },
+      "eyebrow": "Hujjat",
+      "title": "Maxfiylik",
+      "lead": "Qanday ma'lumot olinadi, nima uchun saqlanadi, kim ko'radi va qanday o'chiriladi.",
+      "s1": {
+        "h": "Qanday ma'lumot olinadi",
+        "p1": "Hisob uchun: telefon raqami yoki Google hisobidagi pochta va ism, tanlangan til. Parol qo'ysangiz, parolning o'zi emas, uning shifrlangan izi saqlanadi.",
+        "p2": "Siz o'zingiz yozgan narsalar: tashkilot nomi va STIR, e'lon matni va fotolari, buyurtmalar, xabarlar, baholar.",
+        "p3": "Xizmat ishlashi uchun: kirish sessiyalari, so'rov kelgan IP manzil va hisobdan qilingan muhim amallar ro'yxati, masalan telefon raqami ochilgani.",
+        "p4": "Tashrif sanog'i: brauzer kuniga bir marta bitta bo'sh so'rov yuboradi. Unda identifikator ham, sahifa manzili ham yo'q; serverga faqat IP boradi va undan davlat bilan viloyat aniqlanadi.",
+        "p5": "Brauzeringizda saqlanadigan narsalar: tanlagan tilingiz va kirish belgisi cookie sifatida turadi. Solishtirish ro'yxati, tashrif sanasi va to'ldirilmagan forma matni esa faqat brauzeringizda qoladi, serverga yuborilmaydi."
+      },
+      "s2": {
+        "h": "Nima uchun saqlanadi",
+        "p1": "Sizni tanib, o'z hisobingizga kiritish uchun.",
+        "p2": "Siz nashr qilgan e'lon va sahifani boshqalarga ko'rsatish, so'rovingizni to'g'ri egasiga yetkazish uchun.",
+        "p3": "Kunlik chegarani hisoblash uchun: telefon ochilgani yozilmasa chegara ishlamaydi va katalog butunlay ko'chirib olinadi.",
+        "p4": "Nizoni hal qilish uchun: kim nimani qachon o'zgartirgani yozib boriladi. Ma'lumot sotilmaydi va reklama uchun berilmaydi."
+      },
+      "s3": {
+        "h": "Kim ko'radi",
+        "p1": "Ism, tashkilot va e'lon matni ochiq: ularni har kim ko'radi.",
+        "p2": "Telefon raqamingiz o'zi ko'rinmaydi. Uni obunachi Raqamni ko'rish tugmasi orqali ochadi va har bir ochish yozib qo'yiladi.",
+        "p3": "Jamoamiz murojaat yoki nizo bo'yicha kerak bo'lganda ko'radi.",
+        "p4": "Tashqi xizmatlar uchta: kirish kodi Telegram bot orqali keladi; Google bilan kirsangiz Google sizni taniydi; xarita ochilganda plitkalar tashqi xarita xizmatidan yuklanadi va brauzeringiz unga bevosita ulanadi. Reklama kuzatuvchilari yo'q."
+      },
+      "s4": {
+        "h": "Qancha saqlanadi",
+        "p1": "Hisobingiz ochiq turganda saqlanadi.",
+        "p2": "Hisobni yopsangiz u anonim holga keltiriladi: ism va aloqa ma'lumoti o'chadi. Buni qaytarib bo'lmaydi.",
+        "p3": "Buyurtma, to'lov va amallar ro'yxati hisobsiz ham qoladi: ular hisob-kitob va nizo uchun kerak.",
+        "p4": "Cookie va brauzer xotirasidagi narsalarni istagan vaqtda o'zingiz tozalashingiz mumkin: brauzer sozlamasidan sayt ma'lumotini o'chirsangiz, til tanlovi va solishtirish ro'yxati ham ketadi."
+      },
+      "s5": {
+        "h": "Sizning huquqingiz",
+        "p1": "Kabinetda o'z ma'lumotingizni ko'rasiz va o'zgartirasiz.",
+        "p2": "Telefon raqamingiz ochilishini to'xtatmoqchi bo'lsangiz, Murojaat sahifasida Raqamni yopish mavzusini tanlang.",
+        "p3": "Hisobni yopish yoki sizda nima saqlanayotganini so'rash uchun ham shu forma orqali yozing.",
+        "p4": "Savolingizga ish kunlari javob beramiz."
+      }
+    }
+  }
+}

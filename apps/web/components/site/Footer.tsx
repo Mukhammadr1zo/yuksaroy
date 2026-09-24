@@ -15,7 +15,12 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
     ['/pricing', tp('eyebrow')], ['/features', tf('eyebrow')], ['/for-shippers', tm('footer.shippers')], ['/for-providers', tm('footer.providers')],
     ['/booking', tm('footer.booking')], ['/urgent', tf('items.urgent.title')], ['/login', t('platform.login')],
   ] as const;
-  const company = [['/about', ta('eyebrow')], ['/contact', tc('eyebrow')], ['/blog', tb('eyebrow')]] as const;
+  // Huquqiy havolalar shu ustunda: alohida ustun ochilsa futer to'rttadan beshtaga o'sib,
+  // telefonda uzun ro'yxat bo'lardi, holbuki ikkita havola uchun yangi ustun keraksiz.
+  const company = [
+    ['/about', ta('eyebrow')], ['/contact', tc('eyebrow')], ['/blog', tb('eyebrow')],
+    ['/terms', n2('terms')], ['/privacy', n2('privacy')],
+  ] as const;
   return (
     <footer className={dark ? 'border-t border-white/10 bg-[#0A1626] text-white' : 'border-t border-line bg-white'}>
       <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">

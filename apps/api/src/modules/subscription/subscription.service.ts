@@ -135,6 +135,10 @@ export class SubscriptionService {
       // Faol obunachiga ortiqcha so'rov ketmaydi: tugagani faqat obunasizga qaraladi
       expired: act ? null : await this.lapsed(userId, now),
       pricePerMonthSom: cfg.subscriptionMonthSom,
+      // Kartadagi uchta chegara shu yerdan: cfg allaqachon o'qilgan, qo'shimcha so'rov yo'q.
+      // Ikkinchi chaqiruv (narx yo'li) kartaga ikkinchi yuklanish qo'shardi.
+      phoneRevealDaily: cfg.phoneRevealDaily,
+      wagonSearchFree: cfg.wagonSearchFree,
       pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions(cfg.payDetails) } : null,
     };
   }

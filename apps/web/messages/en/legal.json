@@ -1,0 +1,105 @@
+{
+  "legal": {
+    "updated": "Last edited",
+    "other": "The other document:",
+    "terms": {
+      "meta": {
+        "title": "Terms · YukSaroy",
+        "description": "YukSaroy terms of use: what the service is, how the subscription is paid and how money is refunded."
+      },
+      "eyebrow": "Document",
+      "title": "Terms of use",
+      "lead": "This is not a legal document but a plain agreement: who we are, what we do, how we take money and how we give it back.",
+      "s1": {
+        "h": "Who we are and what the service is",
+        "p1": "YukSaroy is a private site. We are not a state railway organisation and we do not act on behalf of any agency.",
+        "p2": "The site is a freight logistics marketplace: terminals (rail terminals included), equipment and carriers in one place. Those three categories, nothing else.",
+        "p3": "A listing is placed by its owner: on equipment and carrier listings the owner writes the price and terms and answers your request. You contact them directly, no middleman.",
+        "p4": "A terminal page can sit in the catalog before its owner takes it over. Once an ownership claim is confirmed, the owner runs the rates, the slots and the bookings.",
+        "p5": "The contract and the payment happen between you and the owner, outside the site. We do not carry cargo, do not store it and do not sign documents on behalf of either side."
+      },
+      "s2": {
+        "h": "Account",
+        "p1": "An account opens with a phone number or with Google. The sign-in code arrives in the Telegram bot.",
+        "p2": "An account belongs to one person. If you hand your access to someone else, what that account does counts as yours.",
+        "p3": "The name, organisation and listing text you enter are shown on a public page: you publish them yourself."
+      },
+      "s3": {
+        "h": "Listings and pages",
+        "p1": "The owner answers for the price, the volume and the terms in a listing. We do not check every listing.",
+        "p2": "The verified badge on a company page means the tax ID (STIR) was checked, it is not a quality guarantee.",
+        "p3": "Rows with the Demo badge are there to show how the site looks. They have no owner, they are not real offers and messages are never sent to them.",
+        "p4": "A listing that breaks the rules is taken down. An expired listing leaves the list but stays in your cabinet."
+      },
+      "s4": {
+        "h": "Money: subscription and payment",
+        "p1": "There is one paid thing: the monthly subscription. Catalog, map, comparison, price estimate, listing and chat are free. For organisations with many listings the price is agreed separately: the Contract plan on the Pricing page.",
+        "p2": "What the subscription opens and what it costs is written on the Pricing page. A price change does not affect a period you already paid for.",
+        "p3": "Payment is manual: you pick the term, the amount and the payment note appear, and we confirm after the transfer. Confirmation usually takes 1 business day, and the subscription starts after it.",
+        "p4": "There is no booking commission right now. If one is introduced, it will be announced at least 30 days in advance."
+      },
+      "s5": {
+        "h": "Refunds",
+        "p1": "Nothing is charged until a payment is confirmed: you cancel a pending order yourself on the subscription page.",
+        "p2": "Within 7 days of the subscription being switched on, if you have not opened a single phone number and have not used the wagon search, the full amount is returned. On a refund the subscription is switched off and your listings drop back to their usual place in the list.",
+        "p3": "After that the unused whole months are returned and the month already started is not. For example, if you ask in the second month of a six month subscription, four months come back.",
+        "p4": "Days when the site itself was down are added to the subscription term: in that case the term is extended rather than money returned.",
+        "p5": "A subscription closed for breaking the rules is not refunded.",
+        "p6": "To ask for a refund, write through the Contact page and give the order number. The money goes back to the account it came from within 5 business days."
+      },
+      "s6": {
+        "h": "Rules, responsibility and changes",
+        "p1": "Not allowed: copying the catalog in bulk, collecting and reselling phone numbers, presenting someone else's object or number as your own, sending adverts in chat.",
+        "p2": "When a rule is broken the listing is taken down, the account is closed and the subscription is cancelled.",
+        "p3": "Phone numbers open with a daily limit. That limit is there against catalog copying, and every opening is recorded.",
+        "p4": "We give a place to meet. We do not answer for the quality of the owner's service, for a delay or for a deal that fell through.",
+        "p5": "If the terms change, the date at the top is updated. Important changes are announced at least 30 days in advance. If there is a dispute, write to us first: we answer on business days."
+      }
+    },
+    "privacy": {
+      "meta": {
+        "title": "Privacy · YukSaroy",
+        "description": "What data is collected, why it is kept, who sees it and how it is removed."
+      },
+      "eyebrow": "Document",
+      "title": "Privacy",
+      "lead": "What data is collected, why it is kept, who sees it and how it is removed.",
+      "s1": {
+        "h": "What data is collected",
+        "p1": "For the account: a phone number, or the email and name from your Google account, and the language you picked. If you set a password, what is kept is not the password itself but its encrypted trace.",
+        "p2": "What you write yourself: organisation name and tax ID (STIR), listing text and photos, orders, messages, reviews.",
+        "p3": "For the service to work: sign-in sessions, the IP address a request came from, and a list of important actions on the account, for example that a phone number was opened.",
+        "p4": "Visit count: the browser sends one empty request once a day. It carries no identifier and no page address; only the IP reaches the server, and the country and region are worked out from it.",
+        "p5": "What stays in your browser: the language you picked and a sign-in marker live in cookies. The comparison list, the visit date and unfinished form text stay in your browser only and are not sent to the server."
+      },
+      "s2": {
+        "h": "Why it is kept",
+        "p1": "To recognise you and let you into your own account.",
+        "p2": "To show others the listing and page you published, and to deliver your request to the right owner.",
+        "p3": "To count the daily limit: without a record of a phone number being opened the limit does not work and the catalog gets copied whole.",
+        "p4": "To settle disputes: who changed what and when is written down. Data is not sold and not handed to advertising."
+      },
+      "s3": {
+        "h": "Who sees it",
+        "p1": "Your name, organisation and listing text are public: anyone sees them.",
+        "p2": "Your phone number is not shown on its own. A subscriber opens it with the Show number button, and every opening is recorded.",
+        "p3": "Our team sees the data when a request or a dispute needs it.",
+        "p4": "There are three outside services: the sign-in code arrives through the Telegram bot; if you sign in with Google, Google recognises you; when the map opens the tiles load from an outside map service and your browser connects to it directly. There are no advertising trackers."
+      },
+      "s4": {
+        "h": "How long it is kept",
+        "p1": "While your account is open.",
+        "p2": "If you close the account it is made anonymous: the name and contact details are removed. This cannot be undone.",
+        "p3": "Orders, payments and the action list remain without the account: they are needed for accounting and disputes.",
+        "p4": "You can clear cookies and browser storage yourself: removing the site data in your browser settings also removes the language choice and the comparison list."
+      },
+      "s5": {
+        "h": "Your rights",
+        "p1": "In the cabinet you see and change your own data.",
+        "p2": "If you want your phone number to stop being opened, pick the Close a number topic on the Contact page.",
+        "p3": "Use the same form to close the account or to ask what is kept about you.",
+        "p4": "We answer on business days."
+      }
+    }
+  }
+}

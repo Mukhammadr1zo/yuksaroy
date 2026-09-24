@@ -2,7 +2,12 @@
   "subscription": {
     "nav": "Obuna",
     "title": "Obuna",
-    "lead": "Obuna bilan terminal, e'lon va kompaniya telefon raqamlarini ko'rasiz, vagon qidiruvi cheksiz bo'ladi. Chat obunasiz ham bepul.",
+    "lead": "Oylik obuna. Nimani ochadi:",
+    "limits": {
+      "phones": "Kuniga {n} ta telefon raqami",
+      "wagon": "Vagon qidiruvi cheksiz, {free, plural, =0 {obunasiz bepul urinish yo'q} other {obunasiz # tasi bepul}}",
+      "chat": "Yozishma obunasiz ham bepul"
+    },
     "active": "Obuna faol",
     "activeUntil": "{until} gacha",
     "inactive": "Obuna yo'q",

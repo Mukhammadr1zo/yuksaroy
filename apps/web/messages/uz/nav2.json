@@ -5,6 +5,9 @@
     "companies": "Kompaniyalar",
     "services": "Xizmatlar",
     "cargo": "Yuklar",
-    "wagon": "Vagon qidiruvi"
+    "wagon": "Vagon qidiruvi",
+    "terms": "Shartlar",
+    "privacy": "Maxfiylik",
+    "consent": "Davom etsangiz <terms>Shartlar</terms> va <privacy>Maxfiylik</privacy> bilan rozi bo'lasiz."
   }
 }

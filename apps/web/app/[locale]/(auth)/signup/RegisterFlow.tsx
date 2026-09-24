@@ -13,6 +13,7 @@ import { PasswordFields } from '@/components/auth/PasswordFields';
 import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { input, primary } from '@/components/auth/styles';
 import { stripLocale } from '../login/LoginCard';
+import { ConsentLine } from '@/components/site/ConsentLine';
 
 const KINDS = ORG_KINDS.filter((k) => k !== 'PLATFORM');
 const STEPS = ['phone', 'password', 'profile', 'done'] as const;
@@ -158,6 +159,8 @@ export function RegisterFlow({ next }: { next: string | null }) {
         <div key="s1" className="ys-step mt-6">
           <PhoneOtp submitLabel={t('continue')} onDone={(r: LoginResponse) => loggedIn(r.user)} />
           <GoogleButton onLogin={(r) => loggedIn(r.user)} />
+          {/* Rozilik bitta qator: hisob shu qadamda ochiladi, telefon ham Google ham shu yerdan o'tadi */}
+          <ConsentLine className="mt-5" />
           <p className="mt-6 border-t border-line pt-5 text-center text-sm text-muted">
             {t('hasAccount')}{' '}
             <Link href={next ? { pathname: '/login', query: { next } } : '/login'} className="font-semibold text-teal-ink hover:underline">{t('login')}</Link>

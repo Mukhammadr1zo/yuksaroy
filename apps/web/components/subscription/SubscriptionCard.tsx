@@ -9,9 +9,10 @@ import { CheckCircleIcon, LockSimpleOpenIcon } from '@phosphor-icons/react';
 import { api, post } from '@/lib/api';
 import { som, uzDate, uzDateTime } from '@/lib/format';
 import { BTN_GHOST, BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
+import { ConsentLine } from '@/components/site/ConsentLine';
 
 type Pending = { id: string; no: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string } };
-type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; pending: Pending | null };
+type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; pending: Pending | null };
 type Created = { order: { id: string; no: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -58,6 +59,13 @@ export function SubscriptionCard() {
     <>
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 max-w-2xl text-muted">{t('lead')}</p>
+      {/* Uchta chegara: odam "to'laymanmi" degan qarorni aynan shu uch qator bilan qabul qiladi.
+          Qamrov sanog'i (nechta terminal bor) bu yerda emas - u qarorga hech narsa bermaydi. */}
+      <ul className="mt-3 max-w-md space-y-1.5 text-sm text-ink/85">
+        <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.phones', { n: me.phoneRevealDaily })}</li>
+        <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.wagon', { free: me.wagonSearchFree })}</li>
+        <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.chat')}</li>
+      </ul>
 
       <section className={`mt-6 flex items-center gap-3 rounded-card border p-5 ${me.active ? 'border-teal bg-teal-soft' : 'border-line bg-white'}`}>
         {me.active ? <CheckCircleIcon size={28} weight="fill" className="shrink-0 text-teal" aria-hidden="true" /> : <LockSimpleOpenIcon size={28} className="shrink-0 text-muted" aria-hidden="true" />}
@@ -104,6 +112,7 @@ export function SubscriptionCard() {
           </div>
           {err ? <Notice tone="err">{t('failed')}</Notice> : null}
           <button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('sending') : me.active || me.expired ? t('extend') : t('submit')}</button>
+          <ConsentLine />
         </form>
       )}
     </>
