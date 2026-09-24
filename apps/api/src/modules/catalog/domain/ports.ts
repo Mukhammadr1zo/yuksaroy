@@ -81,6 +81,13 @@ export interface TerminalFilter {
   /** default ACTIVE; 'ANY': egasi/admin ro'yxati uchun */
   status?: TerminalStatus | 'ANY';
   orgIds?: string[];
+  /**
+   * Kabinet ro'yxati: EGALIK qilingan obyektlar VA hali hal bo'lmagan da'volar.
+   * `orgIds` ning o'rniga beriladi, ikkovi birga emas. Faqat orgId ga qaralsa,
+   * da'vo yuborgan odam o'z ro'yxatida hech narsa ko'rmasdi va da'vosi qayerda
+   * turganini bilmasdi. Buyurtma tomoni `orgIds` da qoladi: da'vogar hali egasi emas.
+   */
+  claimOrgIds?: string[];
   claimStatus?: ClaimStatus;
   /**
    * Terminalni faqat egasi qo'shadi: ochiq katalogda egasiz obyekt ko'rinmaydi.
@@ -157,7 +164,7 @@ export interface CatalogRepository {
   listTariffs(terminalId: string, history: boolean, now: Date): Promise<TariffRecord[]>;
   /** Tranzaksiya: oldingi versiya validTo = validFrom, yangi versiya +1. Kesishsa TariffOverlapError. */
   publishTariff(t: PublishTariffInput): Promise<TariffRecord>;
-  /** orgId bo'sh va da'vo PENDING bo'lmasa PENDING ga o'tkazadi; aks holda TerminalClaimedError. */
+  /** Egasiz va hal bo'lmagan qatorni PENDING ga o'tkazadi; aks holda TerminalClaimedError. Namuna qator da'vo qilinmaydi. */
   claimTerminal(id: string, orgId: string, evidence: ClaimEvidence): Promise<TerminalRecord>;
   /** Faqat PENDING hal qilinadi: tasdiqlansa orgId = claimOrgId, claimedAt = now; aks holda null. */
   decideTerminalClaim(id: string, approve: boolean, now: Date): Promise<TerminalRecord | null>;
@@ -165,8 +172,6 @@ export interface CatalogRepository {
   listSidings(f: SidingFilter, page: number, limit: number): Promise<Page<SidingRecord>>;
   /** `publicOnly`: ochiq yo'l uchun faqat ACTIVE. */
   findSidingById(id: string, publicOnly?: boolean): Promise<SidingRecord | null>;
-  /** claimStatus NONE/REJECTED bo'lsa PENDING ga o'tkazadi; aks holda SidingClaimedError. */
-  claimSiding(id: string, orgId: string, now: Date, evidence: ClaimEvidence): Promise<SidingRecord>;
   /**
    * Egasi tahrir qiladi (hozircha faqat rasmlar): reestr ma'lumotiga tegilmaydi.
    * Shart qatorida orgId va APPROVED bor, ya'ni begona yoki hali tasdiqlanmagan
@@ -198,5 +203,4 @@ export const CATALOG_REPOSITORY = Symbol('CatalogRepository');
 
 export class TariffOverlapError extends Error { constructor() { super('TARIFF_OVERLAP'); } }
 export class TariffValidFromError extends Error { constructor() { super('TARIFF_VALID_FROM_BEFORE_CURRENT'); } }
-export class SidingClaimedError extends Error { constructor() { super('SIDING_ALREADY_CLAIMED'); } }
 export class TerminalClaimedError extends Error { constructor() { super('TERMINAL_CLAIMED'); } }

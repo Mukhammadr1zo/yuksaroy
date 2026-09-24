@@ -4,6 +4,16 @@ import type { GeoNear, SidingRecord, TariffRecord, TerminalRecord } from '../dom
 
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
+/**
+ * Kabinet ro'yxatidagi da'vo qatori: qator hali da'vogarniki EMAS (orgId bo'sh),
+ * shuning uchun undagi telefon raqami obuna devori ortida qoladi. Aks holda kirgan
+ * har qanday odam egasiz qatorga da'vo yuborib, kabinet ro'yxati orqali mas'ul shaxs
+ * raqamini bepul o'qib olardi (mingdan ortiq qator).
+ * Egalik qilingan qator o'zgarmaydi: u allaqachon o'ziniki.
+ */
+export const hideClaimPhone = (t: TerminalRecord): TerminalRecord =>
+  (t.orgId ? t : { ...t, phone: null, rail: t.rail && { ...t.rail, contactPhone: null } });
+
 export function publicTariff(t: TariffRecord) {
   return { id: t.id, serviceCode: t.serviceCode, cargoGroupCode: t.cargoGroupCode, priceTiyin: t.priceTiyin, unit: t.unit, minTiyin: t.minTiyin, validFrom: t.validFrom, validTo: t.validTo, version: t.version, note: t.note };
 }

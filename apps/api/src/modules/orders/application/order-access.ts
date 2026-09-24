@@ -4,6 +4,7 @@ import { ORG_REPOSITORY, type OrganizationRepository } from '../../organizations
 import { CreateOrgUseCase } from '../../organizations/application/create-org.usecase';
 import { PlatformAdmin } from '../../organizations/application/platform-admin';
 import { PrismaService } from '../../../common/prisma.service';
+import { terminalSideOrgIds } from '../domain/terminal-staff';
 
 /** Buyurtmani kim ko'radi va kim o'zgartiradi: mijoz (o'z tashkiloti) va terminal (o'z obyekti). */
 @Injectable()
@@ -47,10 +48,10 @@ export class OrderAccess {
     return m;
   }
 
-  /** Foydalanuvchi boshqaradigan terminallar (TERMINAL tashkilotlari orqali). */
+  /** Foydalanuvchi boshqaradigan terminallar: tashkiloti EGALIK qilgan obyektlar (turi ahamiyatsiz). */
   async terminalIds(userId: string): Promise<string[]> {
     const ms = await this.orgs.listForUser(userId);
-    const orgIds = ms.filter((m) => m.org.kinds.includes('TERMINAL') && (m.isOwner || m.roles.includes('TERMINAL_ADMIN') || m.roles.includes('TERMINAL_OPERATOR'))).map((m) => m.orgId);
+    const orgIds = terminalSideOrgIds(ms);
     if (!orgIds.length) return [];
     const terminals = await this.catalog.listTerminals({ orgIds, status: 'ANY' }, new Date());
     return terminals.map((t) => t.id);

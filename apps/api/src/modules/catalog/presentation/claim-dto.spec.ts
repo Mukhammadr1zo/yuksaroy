@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { ClaimSidingDto } from './dto';
+import { ClaimDto } from './dto';
 
 /**
  * Izoh ishonch chegarasida: moderator "meniki" degan gapni nimaga qarab tekshirishini
  * bilishi kerak. Brauzer tugmani o'chiradi, lekin qoida shu yerda turadi.
  */
 const codes = (body: Record<string, unknown>) =>
-  validateSync(plainToInstance(ClaimSidingDto, body)).flatMap((e) => Object.keys(e.constraints ?? {}));
+  validateSync(plainToInstance(ClaimDto, body)).flatMap((e) => Object.keys(e.constraints ?? {}));
 
 describe("da'vo formasi", () => {
   it('izohsiz yuborilmaydi', () => {

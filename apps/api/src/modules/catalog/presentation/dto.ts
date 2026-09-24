@@ -55,8 +55,8 @@ export class PublishTariffDto {
   @IsOptional() @IsString() @MaxLength(300) note?: string;
 }
 
-export class ClaimSidingDto {
-  /** Ixtiyoriy: tashkiloti yo'q odam da'vo qilsa, tashkilot da'vo bilan birga ochiladi. */
+export class ClaimDto {
+  /** Ixtiyoriy: temir yo'l qatorida tashkiloti yo'q odam da'vo qilsa, tashkilot da'vo bilan birga ochiladi. */
   @IsOptional() @IsString() orgId?: string;
   /** Izoh majburiy: operator "meniki" degan gapni nimaga qarab tekshirishini bilishi kerak. */
   @IsString() @Length(10, 500) note!: string;

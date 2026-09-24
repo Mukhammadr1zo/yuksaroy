@@ -27,7 +27,7 @@ export function ClaimSiding({ sidingId }: { sidingId: string }) {
     try {
       await post(`/sidings/${sidingId}/claim`, { ...(orgId ? { orgId } : {}), note: note.trim(), files: at.files });
       setState('sent');
-    } catch (err: any) { setState(err?.body?.code === 'SIDING_ALREADY_CLAIMED' ? 'already' : 'err'); }
+    } catch (err: any) { setState(err?.body?.code === 'TERMINAL_CLAIMED' ? 'already' : 'err'); }
   }
 
   if (!orgs) return <p className="text-sm text-muted">...</p>;

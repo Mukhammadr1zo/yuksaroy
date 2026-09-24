@@ -15,8 +15,8 @@ export class TerminalAccess {
     }
   }
 
-  /** Shahobcha claim: tashkilot egasi yoki ASSET_OWNER roli (tashkilot turi cheklanmaydi, vetvevladelets har qanday korxona bo'lishi mumkin). */
-  async assertSidingClaimant(userId: string, orgId: string) {
+  /** Da'vo: tashkilot egasi yoki ASSET_OWNER roli. Tashkilot turi cheklanmaydi: yo'l egasi har qanday korxona bo'lishi mumkin. */
+  async assertClaimant(userId: string, orgId: string) {
     const m = await this.orgs.findMembership(userId, orgId);
     if (!m || !(m.isOwner || m.roles.includes('ASSET_OWNER'))) throw new ForbiddenException({ code: 'NOT_ORG_OWNER' });
   }

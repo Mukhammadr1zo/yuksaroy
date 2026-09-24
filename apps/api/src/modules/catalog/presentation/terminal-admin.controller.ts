@@ -7,16 +7,16 @@ import { PrismaService } from '../../../common/prisma.service';
 import { AdminNotify } from '../../organizations/application/admin-notify';
 import { notifyBoth } from '../../../common/telegram';
 import { NotificationsService } from '../../notifications/notifications.service';
-import { CATALOG_REPOSITORY, TerminalClaimedError, type CatalogRepository } from '../domain/ports';
+import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
 import { ORG_REPOSITORY, type OrganizationRepository } from '../../organizations/domain/ports';
 import { UpsertTerminalUseCase } from '../application/upsert-terminal.usecase';
 import { PublishTariffUseCase } from '../application/publish-tariff.usecase';
-import { ClaimSidingUseCase } from '../application/claim-siding.usecase';
+import { ClaimTerminalUseCase } from '../application/claim-terminal.usecase';
 import { TerminalAccess } from '../application/terminal-access';
-import { ClaimDecideDto, ClaimSidingDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateSidingDto, UpdateTerminalDto } from './dto';
+import { ClaimDecideDto, ClaimDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateSidingDto, UpdateTerminalDto } from './dto';
 import { pickIn } from './catalog.controller';
 import { filesOrThrow } from '../../../common/attachments';
-import { publicSiding } from './mappers';
+import { hideClaimPhone, publicSiding } from './mappers';
 import { PlatformAdminGuard } from '../../organizations/presentation/platform-admin.guard';
 
 /** Terminal kabineti va shahobcha claim: faqat kirgan foydalanuvchi; ruxsat use-case ichida (TerminalAccess), moderatsiya PlatformAdmin. */
@@ -30,7 +30,7 @@ export class TerminalAdminController {
     @Inject(ORG_REPOSITORY) private readonly orgs: OrganizationRepository,
     private readonly upsert: UpsertTerminalUseCase,
     private readonly publishTariff: PublishTariffUseCase,
-    private readonly claimSiding: ClaimSidingUseCase,
+    private readonly claim: ClaimTerminalUseCase,
     private readonly access: TerminalAccess,
     private readonly audit: AuditService,
     private readonly prisma: PrismaService,
@@ -38,36 +38,45 @@ export class TerminalAdminController {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Foydalanuvchi tashkilotlariga tegishli terminallar (har qanday holat) + bugungi bo'sh slotlar. */
+  /**
+   * Foydalanuvchi tashkilotlariga tegishli terminallar (har qanday holat) + bugungi bo'sh slotlar.
+   * `?claims=1` bo'lsa hali hal bo'lmagan da'volar ham kiradi: birlashgan kabinet ro'yxati uchun.
+   * Sukut bo'yicha yo'q, chunki qolgan chaqiruvchilar (terminal jadvali, e'lonni obyektga
+   * bog'lash) faqat o'z obyektini kutadi va da'vo qatorida yozish huquqi yo'q.
+   */
   @Get('terminals/mine')
-  async mine(@CurrentUserId() userId: string) {
+  async mine(@CurrentUserId() userId: string, @Query('claims') claims?: string) {
     const orgIds = await this.access.orgIdsOf(userId);
     if (!orgIds.length) return [];
     const now = new Date();
-    const items = await this.repo.listTerminals({ orgIds, status: 'ANY' }, now);
+    const scope = claims === '1' ? { claimOrgIds: orgIds } : { orgIds };
+    const items = await this.repo.listTerminals({ ...scope, status: 'ANY' }, now);
     const free = await this.repo.freeTodayByTerminal(items.map((t) => t.id), now);
-    return items.map((t) => ({ ...t, freeToday: free[t.id] ?? 0 }));
+    // hideClaimPhone shartsiz qo'llanadi: egalik qilingan qatorda u hech narsa qilmaydi,
+    // ya'ni bayroqni ikki joyda tekshirib o'tirishning hojati yo'q.
+    return items.map((t) => ({ ...hideClaimPhone(t), freeToday: free[t.id] ?? 0 }));
   }
 
-  /** Katalogdagi egasiz terminalga da'vo: TERMINAL tashkiloti admini; PENDING -> platforma admini hal qiladi. */
+  /**
+   * Katalogdagi egasiz obyektga da'vo -> PENDING, platforma admini hal qiladi.
+   * Qoida obyekt turiga qarab ikki xil, sababi use-case izohida.
+   */
   @Post('terminals/:id/claim')
-  async claimTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
-    // Bu yo'lda obyekt katalogda o'zi ochilgan, shuning uchun tashkilot majburiy
-    if (!dto.orgId) throw new BadRequestException({ code: 'ORG_REQUIRED' });
-    await this.access.assertTerminalAdmin(userId, dto.orgId);
-    if (!(await this.repo.findTerminalById(id, new Date()))) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+  async claimTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDto) {
     // Dalil da'vo yozuvi bilan bitta UPDATE da saqlanadi: audit yiqilsa ham izoh yo'qolmaydi
     const evidence = { note: dto.note.trim(), files: filesOrThrow(dto.files) };
-    try {
-      const t = await this.repo.claimTerminal(id, dto.orgId, evidence);
-      void this.adminNotify.queued('terminalClaimsPending', t.name, id, userId).catch(() => {});
-      // Auditga faqat fayl SONI: audit iz, manba emas
-      await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId, files: evidence.files.length } });
-      return t;
-    } catch (e) {
-      if (e instanceof TerminalClaimedError) throw new ConflictException({ code: e.message });
-      throw e;
-    }
+    const { terminal, orgId } = await this.claim.execute(userId, id, dto.orgId, evidence);
+    // Auditga faqat fayl SONI: audit iz, manba emas. orgId use-case dan olinadi,
+    // shunda avtomatik ochilgan tashkilot ham izda qoladi.
+    await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId, files: evidence.files.length } });
+    void this.adminNotify.queued('terminalClaimsPending', terminal.name, id, userId).catch(() => {});
+    return terminal;
+  }
+
+  /** Eski manzil: ochiq sahifadagi forma hali shu yerga yozadi. B3 da o'chadi. */
+  @Post('sidings/:id/claim')
+  claimSidingAlias(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDto) {
+    return this.claimTerminal(userId, id, dto);
   }
 
   @Post('terminals/:id/claim/decide')
@@ -79,7 +88,8 @@ export class TerminalAdminController {
     const t = await this.repo.decideTerminalClaim(id, dto.approve, new Date());
     if (!t) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
     await this.audit.log({ actorId: userId, action: 'terminal.claim.decide', entity: 'Terminal', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: t.claimOrgId } });
-    this.notifyClaim(t.claimOrgId, t.name, dto.approve, '/dashboard/terminals', dto.reason?.trim());
+    // Rad etishda orgId qo'yilmaydi, ya'ni qator faqat birlashgan ro'yxatda ko'rinadi
+    this.notifyClaim(t.claimOrgId, t.name, dto.approve, '/dashboard/objects', dto.reason?.trim());
     return t;
   }
 
@@ -159,18 +169,6 @@ export class TerminalAdminController {
       1, 20,
     );
     return { ...r, items: r.items.map((x) => publicSiding(x)) };
-  }
-
-  @Post('sidings/:id/claim')
-  async claim(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
-    const evidence = { note: dto.note.trim(), files: filesOrThrow(dto.files) };
-    const { siding, orgId } = await this.claimSiding.execute(userId, id, dto.orgId, evidence);
-    // Obyekt nomi bitta: shahobcha yo'l Terminal jadvalining qatori, alohida jadval emas.
-    // orgId use-case dan olinadi: avtomatik ochilgan tashkilot ham auditda qolsin
-    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Terminal', entityId: id, meta: { orgId, files: evidence.files.length } });
-    // Navbat bitta: shahobcha ham temir yo'l terminali, moderatsiyada bir yorliqda turadi
-    void this.adminNotify.queued('terminalClaimsPending', siding.name ?? siding.stationNameRaw, id, userId).catch(() => {});
-    return siding;
   }
 
   /**

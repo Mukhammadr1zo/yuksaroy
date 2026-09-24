@@ -4,7 +4,7 @@
 // Bu qoida bir nechta funksiyada takrorlanadi, shuning uchun hammasi tekshiriladi. DB kerak emas.
 import { describe, expect, it } from 'vitest';
 import type { SidingRecord, TerminalRecord } from '../domain/ports';
-import { publicSiding, publicTerminal, publicTerminalCard } from './mappers';
+import { hideClaimPhone, publicSiding, publicTerminal, publicTerminalCard } from './mappers';
 
 const PHONE = '+998901234567';
 const OWN_PHONE = '+998712000000';
@@ -115,5 +115,30 @@ describe("da'vo dalili ochiq javobda yo'q", () => {
       expect(json).not.toContain('claimEvidence');
       expect(json).not.toContain('guvohnoma');
     }
+  });
+});
+
+/**
+ * Kabinet ro'yxatidagi da'vo qatori: qator hali da'vogarniki emas, shuning uchun
+ * undagi raqam obuna devori ortida qoladi. Aks holda kirgan har qanday odam egasiz
+ * qatorga da'vo yuborib, mas'ul shaxs raqamini bepul o'qib olardi.
+ */
+describe("da'vo qatorida raqam berilmaydi", () => {
+  it("egasiz qatorda ikkala raqam ham yopiladi", () => {
+    const t = hideClaimPhone(railTerminal(PHONE, OWN_PHONE));
+    expect(t.phone).toBe(null);
+    expect(t.rail?.contactPhone).toBe(null);
+    // Qolgan pasport ma'lumoti ochiq katalogda ham bor: yangi hech narsa yopilmaydi
+    expect(t.rail?.contactName).toBe(railTerminal().rail?.contactName);
+  });
+
+  it("egalik qilingan qator o'zgarmaydi", () => {
+    const own = { ...railTerminal(PHONE, OWN_PHONE), orgId: 'o1' };
+    expect(hideClaimPhone(own)).toBe(own);
+  });
+
+  it("temir yo'l qismi yo'q qatorda ham yiqilmaydi", () => {
+    const plain = { ...railTerminal(null, OWN_PHONE), rail: null };
+    expect(hideClaimPhone(plain).phone).toBe(null);
   });
 });

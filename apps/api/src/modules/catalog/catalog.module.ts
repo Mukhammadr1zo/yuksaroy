@@ -7,7 +7,7 @@ import { PrismaCatalogRepository } from './infrastructure/prisma-catalog.reposit
 import { TerminalAccess } from './application/terminal-access';
 import { UpsertTerminalUseCase } from './application/upsert-terminal.usecase';
 import { PublishTariffUseCase } from './application/publish-tariff.usecase';
-import { ClaimSidingUseCase } from './application/claim-siding.usecase';
+import { ClaimTerminalUseCase } from './application/claim-terminal.usecase';
 import { TerminalAdminController } from './presentation/terminal-admin.controller';
 import { CatalogController } from './presentation/catalog.controller';
 import { CompaniesController } from './presentation/companies.controller';
@@ -16,7 +16,7 @@ import { CompaniesController } from './presentation/companies.controller';
   imports: [IdentityModule, OrganizationsModule, ListingsModule], // ListingsModule: xarita GeoJSON e'lon nuqtalari uchun
   // Tartib muhim: `terminals/mine`, `sidings/mine` statik yo'llari `:slug`/`:id` dan oldin ro'yxatga olinadi.
   controllers: [TerminalAdminController, CatalogController, CompaniesController],
-  providers: [{ provide: CATALOG_REPOSITORY, useClass: PrismaCatalogRepository }, TerminalAccess, UpsertTerminalUseCase, PublishTariffUseCase, ClaimSidingUseCase],
+  providers: [{ provide: CATALOG_REPOSITORY, useClass: PrismaCatalogRepository }, TerminalAccess, UpsertTerminalUseCase, PublishTariffUseCase, ClaimTerminalUseCase],
   exports: [CATALOG_REPOSITORY, TerminalAccess, UpsertTerminalUseCase],
 })
 export class CatalogModule {}

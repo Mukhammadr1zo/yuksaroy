@@ -5,7 +5,7 @@ import type { Rju, ServiceCode } from '@yuksaroy/domain';
 import { PrismaService } from '../../../common/prisma.service';
 import { sumFreeToday } from '../domain/free-today';
 import {
-  SidingClaimedError, TariffOverlapError, TariffValidFromError, TerminalClaimedError,
+  TariffOverlapError, TariffValidFromError, TerminalClaimedError,
   type CargoTypeRecord, type CatalogRepository, type ClaimEvidence, type Page, type PublishTariffInput, type SidingFilter, type SidingRecord,
   type StationRecord, type TariffRecord, type TerminalFilter, type TerminalRecord, type TerminalServiceRecord, type TerminalWrite, type WeekHours,
 } from '../domain/ports';
@@ -96,6 +96,37 @@ export const visibleCompany = (now: Date): Prisma.OrganizationWhereInput => ({
   OR: [{ kycStatus: 'VERIFIED' }, { terminals: { some: { OR: [{ status: 'ACTIVE' }, { claimStatus: 'APPROVED' }] } } }, { listings: { some: activeListing(now) } }],
 });
 
+/** Filtr shartlari: ro'yxat ham, sanoq ham shu bitta manbadan quriladi. Sof funksiya: DB'siz sinaladi. */
+export function terminalWhere(f: TerminalFilter): Prisma.TerminalWhereInput {
+  const q = f.q ? apos(f.q) : undefined;
+  // Bo'sh ro'yxat = filtr yo'q
+  const regions = f.region === undefined ? [] : ([] as string[]).concat(f.region);
+  const services = f.service === undefined ? [] : ([] as ServiceCode[]).concat(f.service);
+  return {
+    status: f.status === 'ANY' ? undefined : (f.status ?? 'ACTIVE'),
+    stationId: f.stationId,
+    station: f.stationEsr ? { esrCode: f.stationEsr } : f.rju ? { rju: f.rju } : undefined,
+    kind: f.kind,
+    orgId: f.orgIds ? { in: f.orgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
+    claimStatus: f.claimStatus,
+    regionCode: regions.length ? { in: regions } : undefined,
+    // Radius bo'yicha qidiruvda avval to'rtburchak bilan qisqartiramiz, aniq masofa keyin
+    ...(f.near ? bbox(f.near) : {}),
+    // Hamma OR shartlari AND ichida: bitta obyektda ikkita OR kaliti bo'lsa biri ikkinchisini yeb qo'yadi
+    AND: [
+      // Kabinet: egalik ham, hali hal bo'lmagan da'vo ham. Rad etilgan da'vo ham shu
+      // yerga tushadi (claimOrgId tozalanmaydi) va bu ataylab: odam "rad etildi" ni
+      // ko'rib qayta da'vo qila oladi.
+      ...(f.claimOrgIds ? [{ OR: [{ orgId: { in: f.claimOrgIds } }, { claimOrgId: { in: f.claimOrgIds } }] }] : []),
+      // Har bir so'ralgan xizmat yoqilgan bo'lishi shart
+      ...services.map((s) => ({ services: { some: { serviceCode: s, isEnabled: true } } })),
+      // Ochiq katalog: egasi bor obyekt yoki reestrdan kelgan temir yo'l terminali
+      ...(f.publicCatalog ? [{ OR: [{ orgId: { not: null } }, { kind: 'RAIL' as const }] }] : []),
+      ...(q ? [{ OR: [{ name: ci(q) }, { address: ci(q) }, { station: { nameUz: ci(q) } }, { stationNameRaw: ci(q) }] }] : []),
+    ],
+  };
+}
+
 @Injectable()
 export class PrismaCatalogRepository implements CatalogRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -119,35 +150,9 @@ export class PrismaCatalogRepository implements CatalogRepository {
   findCargoTypeByCode(code: string) { return this.prisma.cargoType.findUnique({ where: { code } }); }
 
   // ── terminal ──
-  /** Filtr shartlari: ro'yxat ham, sanoq ham shu bitta manbadan quriladi. */
-  private terminalWhere(f: TerminalFilter): Prisma.TerminalWhereInput {
-    const q = f.q ? apos(f.q) : undefined;
-    // Bo'sh ro'yxat = filtr yo'q
-    const regions = f.region === undefined ? [] : ([] as string[]).concat(f.region);
-    const services = f.service === undefined ? [] : ([] as ServiceCode[]).concat(f.service);
-    return {
-      status: f.status === 'ANY' ? undefined : (f.status ?? 'ACTIVE'),
-      stationId: f.stationId,
-      station: f.stationEsr ? { esrCode: f.stationEsr } : f.rju ? { rju: f.rju } : undefined,
-      kind: f.kind,
-      orgId: f.orgIds ? { in: f.orgIds } : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
-      claimStatus: f.claimStatus,
-      regionCode: regions.length ? { in: regions } : undefined,
-      // Radius bo'yicha qidiruvda avval to'rtburchak bilan qisqartiramiz, aniq masofa keyin
-      ...(f.near ? bbox(f.near) : {}),
-      // Hamma OR shartlari AND ichida: bitta obyektda ikkita OR kaliti bo'lsa biri ikkinchisini yeb qo'yadi
-      AND: [
-        // Har bir so'ralgan xizmat yoqilgan bo'lishi shart
-        ...services.map((s) => ({ services: { some: { serviceCode: s, isEnabled: true } } })),
-        // Ochiq katalog: egasi bor obyekt yoki reestrdan kelgan temir yo'l terminali
-        ...(f.publicCatalog ? [{ OR: [{ orgId: { not: null } }, { kind: 'RAIL' as const }] }] : []),
-        ...(q ? [{ OR: [{ name: ci(q) }, { address: ci(q) }, { station: { nameUz: ci(q) } }, { stationNameRaw: ci(q) }] }] : []),
-      ],
-    };
-  }
 
   countTerminals(f: TerminalFilter) {
-    return this.prisma.terminal.count({ where: this.terminalWhere(f) });
+    return this.prisma.terminal.count({ where: terminalWhere(f) });
   }
 
   async listTerminals(f: TerminalFilter, now: Date) {
@@ -172,7 +177,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
     const take = f.take ?? (f.near ? undefined : 500);
     const skip = f.skip ?? 0;
     const rows = await this.prisma.terminal.findMany({
-      where: this.terminalWhere(f),
+      where: terminalWhere(f),
       include: terminalInclude(now),
       orderBy,
       skip,
@@ -203,8 +208,16 @@ export class PrismaCatalogRepository implements CatalogRepository {
     return t ? toTerminal(t) : null;
   }
   async slugExists(slug: string) { return (await this.prisma.terminal.count({ where: { slug } })) > 0; }
+  /**
+   * Da'vo faqat egasiz va hal bo'lmagan qatorga tushadi; shart UPDATE ning ichida,
+   * ya'ni ikki odam bir vaqtda yuborsa ikkinchisi nol qator yangilaydi.
+   * isDemo: namuna qatorning egasi yo'q va unga hech qachon xabar ketmaydi.
+   */
   async claimTerminal(id: string, orgId: string, evidence: ClaimEvidence) {
-    const r = await this.prisma.terminal.updateMany({ where: { id, orgId: null, claimStatus: { not: 'PENDING' } }, data: { claimOrgId: orgId, claimStatus: 'PENDING', claimEvidence: json(evidence) } });
+    const r = await this.prisma.terminal.updateMany({
+      where: { id, isDemo: false, orgId: null, claimStatus: { in: ['NONE', 'REJECTED'] } },
+      data: { claimOrgId: orgId, claimStatus: 'PENDING', claimEvidence: json(evidence) },
+    });
     if (r.count === 0) throw new TerminalClaimedError();
     return (await this.findTerminalById(id, new Date()))!;
   }
@@ -307,14 +320,6 @@ export class PrismaCatalogRepository implements CatalogRepository {
   }
   // claimedAt faqat TASDIQLANGANDA qo'yiladi: u "egasi bor" degani va ochiq sahifa shunga qarab
   // pasport, tarif va bron bo'limlarini chizadi. Ilgari u PENDING da qo'yilib, rad etilganda ham qolib ketardi.
-  async claimSiding(id: string, orgId: string, _now: Date, evidence: ClaimEvidence) {
-    const r = await this.prisma.terminal.updateMany({
-      where: { id, kind: 'RAIL', isDemo: false, orgId: null, claimStatus: { in: ['NONE', 'REJECTED'] } },
-      data: { claimOrgId: orgId, claimStatus: 'PENDING', claimEvidence: json(evidence) },
-    });
-    if (r.count === 0) throw new SidingClaimedError();
-    return (await this.findSidingById(id))!;
-  }
   async updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }) {
     // Egalik tekshiruvi shart qatorida: alohida o'qib keyin yozilsa, oradagi vaqtda egasi o'zgarishi mumkin
     const r = await this.prisma.terminal.updateMany({ where: { id, kind: 'RAIL', claimStatus: 'APPROVED', orgId: { in: orgIds } }, data });

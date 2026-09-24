@@ -2,12 +2,13 @@
 // Mening obyektlarim: terminal (shahobcha yo'l ham terminal), texnika va avtotransport e'lonlari BITTA ro'yxatda.
 // Ilgari uch xil sahifa edi (E'lonlarim, Terminallar, Shahobchalarim) va qaysi biri qaerdaligini topish qiyin edi.
 import { useEffect, useMemo, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
+import { CLAIM_STATUS_LABELS, type ClaimStatus } from '@yuksaroy/domain';
 import type { MyTerminal, OwnerListing } from '@/lib/types-kabinet';
-import { BTN_PRIMARY, CHIP, ListingStatusPill } from '@/components/kabinet/bits';
+import { BTN_PRIMARY, CHIP, ListingStatusPill, useLang } from '@/components/kabinet/bits';
 
 type Kind = 'terminal' | 'equipment' | 'truck';
 const ICON: Record<Kind, Icon> = { terminal: ShippingContainerIcon, equipment: TrainIcon, truck: TruckIcon };
@@ -16,6 +17,12 @@ const TONE: Record<Kind, string> = {
   equipment: 'bg-navy text-white', truck: 'border-2 border-[#FD7B03] bg-white text-[#FD7B03]',
 };
 const FILTERS: (Kind | 'all')[] = ['all', 'terminal', 'equipment', 'truck'];
+// Da'vo holati rangi: kutilayotgan sariq, rad etilgan qizil. Terminal holati bilan
+// adashmasin, chunki ikkovi bir ustunda turadi.
+const CLAIM_TONE: Record<ClaimStatus, string> = {
+  NONE: 'bg-line text-ink/70', PENDING: 'bg-amber-soft text-amber-ink',
+  APPROVED: 'bg-teal text-white', REJECTED: 'bg-red-50 text-red-700',
+};
 
 type Row = {
   key: string; kind: Kind; title: string; sub: string; href: string; publicHref: string | null;
@@ -27,7 +34,7 @@ export default function ObjectsPage() {
   const tc = useTranslations('kabinet.common');
   const tr = useTranslations('region');
   const tk = useTranslations('kind');
-  const locale = useLocale();
+  const lang = useLang();
   const [terminals, setTerminals] = useState<MyTerminal[] | null>(null);
   const [listings, setListings] = useState<OwnerListing[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -36,7 +43,7 @@ export default function ObjectsPage() {
   useEffect(() => {
     let alive = true;
     const fail = () => { if (alive) setFailed(true); };
-    api<MyTerminal[]>('/terminals/mine').then((r) => alive && setTerminals(r)).catch(() => { setTerminals([]); fail(); });
+    api<MyTerminal[]>('/terminals/mine?claims=1').then((r) => alive && setTerminals(r)).catch(() => { setTerminals([]); fail(); });
     api<OwnerListing[]>('/listings/mine').then((r) => alive && setListings(r)).catch(() => { setListings([]); fail(); });
     return () => { alive = false; };
   }, []);
@@ -46,13 +53,23 @@ export default function ObjectsPage() {
   const rows: Row[] | null = useMemo(() => {
     if (!terminals || !listings) return null;
     const out: Row[] = [];
-    for (const x of terminals) out.push({
-      key: `t:${x.id}`, kind: 'terminal', title: x.name,
-      sub: [tk(x.kind), x.station?.nameUz, region(x.regionCode)].filter(Boolean).join(' · '),
-      href: `/dashboard/terminals/${x.id}`, publicHref: x.status === 'ACTIVE' ? `/terminals/${x.slug}` : null,
-      status: <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${x.status === 'ACTIVE' ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{t(`terminalStatus.${x.status}`)}</span>,
-      fact: x.freeToday !== undefined ? t('freeToday', { count: x.freeToday }) : null,
-    });
+    for (const x of terminals) {
+      // Da'vosi hal bo'lmagan obyekt hali meniki emas: tahrirlagich ham, holat ham
+      // boshqacha. Ro'yxatda ko'rinmasa, odam da'vosi qayerda turganini bilmaydi.
+      const mine = x.orgId !== null;
+      out.push({
+        key: `t:${x.id}`, kind: 'terminal', title: x.name,
+        // Reestrdan kelgan qatorda stansiya bog'lanmagan bo'lishi mumkin: xom nom qoladi
+        sub: [tk(x.kind), x.station?.nameUz ?? x.rail?.stationNameRaw, region(x.regionCode)].filter(Boolean).join(' · '),
+        href: mine ? `/dashboard/terminals/${x.id}` : `/terminals/${x.slug}`,
+        publicHref: x.status === 'ACTIVE' ? `/terminals/${x.slug}` : null,
+        status: mine
+          ? <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${x.status === 'ACTIVE' ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{t(`terminalStatus.${x.status}`)}</span>
+          : <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${CLAIM_TONE[x.claimStatus]}`}>{CLAIM_STATUS_LABELS[lang][x.claimStatus]}</span>,
+        // Bo'sh joy soni faqat o'z obyektida ma'noli: da'vo qatorida slot bo'lmaydi
+        fact: mine && x.freeToday !== undefined ? t('freeToday', { count: x.freeToday }) : null,
+      });
+    }
     for (const x of listings) out.push({
       key: `l:${x.id}`, kind: x.kind === 'TRUCK' ? 'truck' : 'equipment', title: x.title,
       sub: [region(x.regionCode), x.model].filter(Boolean).join(' · '),
