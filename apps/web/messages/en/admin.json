@@ -240,7 +240,13 @@
         "registryNo": "Registry No"
       },
       "deleteImpact": "Also deleted: {tariffs} tariffs, {reviews} reviews, {services} services, {slots} time windows, {inquiries} conversations.",
-      "deleteAnyway": "Delete anyway"
+      "deleteAnyway": "Delete anyway",
+      "sort": "Order",
+      "sortNew": "Newest first",
+      "sortDemand": "By demand",
+      "views30": "Opens, 30 days",
+      "openInquiries": "Unanswered",
+      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means no reply has been sent yet. Call from the top down."
     },
     "stations": {
       "lead": "The official station registry. Fix coordinates here and the map picks them up.",

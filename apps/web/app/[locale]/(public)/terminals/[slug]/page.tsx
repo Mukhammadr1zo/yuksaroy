@@ -115,7 +115,7 @@ export default async function TerminalPage({ params }: Params) {
             </>
           )}
           {/* Raqam obunachiga, bosilganda: sahifa keshlangan, raqam brauzerdan olinadi (PhoneReveal) */}
-          {t.hasPhone ? <span className="text-center"><PhoneReveal kind="terminal" targetId={t.slug} next={`/terminals/${t.slug}`} /></span> : null}
+          {t.hasPhone ? <span className="text-center"><PhoneReveal kind="terminal" targetId={t.id} next={`/terminals/${t.slug}`} /></span> : null}
           {/* Yozishma ham kerak: hujjat yuboriladi va kelishuv izi qoladi.
               Egasi tasdiqlanmagan obyektda javobni platforma beradi. */}
           <ChatLauncher target={{ kind: 'terminal', slug: t.slug, title: t.name, ownerless: registryOnly }} next={`/terminals/${t.slug}`} />

@@ -13,6 +13,7 @@ import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { regionOfPoint } from '../catalog/domain/region-of-point';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { ImpressionsService } from '../impressions/impressions.service';
 
 /** Terminal (shahobcha yo'l ham shu jadvalda): nom va tur majburiy, qolgani pasport ustunlari. */
 class TerminalCreateDto {
@@ -111,6 +112,15 @@ const like = (text: string) => ({ contains: text, mode: 'insensitive' as const }
  * va rasmiy stansiya ro'yxati (284). Import qilingan ma'lumotdagi xatoni (nom, koordinata,
  * stansiyaga bog'lanish) admin shu yerdan to'g'rilaydi; ommaviy katalog o'sha zahoti yangilanadi.
  */
+/** Ro'yxat proyeksiyasi: sukut tartib ham, talab tartibi ham shu ustunlarni beradi. */
+const LIST_SELECT = {
+  id: true, slug: true, name: true, kind: true, status: true, regionCode: true, orgId: true,
+  claimStatus: true, lat: true, lng: true, registryNo: true, stationNameRaw: true, ownerNameRaw: true,
+  contactName: true, createdAt: true,
+  station: { select: { id: true, nameUz: true, esrCode: true } },
+  org: { select: { id: true, name: true } },
+};
+
 @ApiTags('admin')
 @Controller('admin')
 @UseGuards(JwtGuard, PlatformAdminGuard)
@@ -119,6 +129,7 @@ export class AdminCatalogController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly impressions: ImpressionsService,
   ) {}
 
   // ───────────────────────── Terminallar ─────────────────────────
@@ -132,6 +143,7 @@ export class AdminCatalogController {
     @Query('status') status?: string,
     @Query('claim') claim?: string,
     @Query('owned') owned?: string,
+    @Query('sort') sort?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -145,21 +157,46 @@ export class AdminCatalogController {
       claimStatus: pickIn(claim, CLAIM_STATUSES),
       orgId: owned === '1' ? { not: null } : owned === '0' ? null : undefined,
     };
+    /*
+     * sort=demand: qaysi obyektga birinchi qo'ng'iroq qilish kerakligi.
+     *
+     * Ikki son, ikkalasi ham qaror uchun: 30 kunda sahifa necha marta ochilgani (talab
+     * bor-yo'qligi) va javobsiz yozishmalar soni (odam allaqachon yozgan, javob yo'q).
+     * Viloyat kesimidagi ochiq so'rovlar ustuni qo'shilmaydi: u bitta viloyatdagi hamma
+     * qatorda bir xil chiqadi, ya'ni qatorlarni bir-biridan ajratmaydi.
+     *
+     * ponytail: avval umumiy top 100, keyin filtr. Ya'ni bu "filtr ichidagi top 100" emas,
+     * "umumiy top 100 ning filtrga tushgani". Filtr ichida kerak bo'lsa Impression bilan
+     * Terminal $queryRaw da birlashtiriladi.
+     */
+    if (sort === 'demand') {
+      const top = await this.impressions.topDetailViews('terminal', 100);
+      if (!top.length) return { items: [], total: 0, page: p, limit: l };
+      const rank = new Map(top.map((x, i) => [x.id, { i, views: x.views }] as const));
+      // Namunaning egasi ham, telefoni ham yo'q: unga qo'ng'iroq qilinmaydi
+      const ranked = (await this.prisma.terminal.findMany({
+        where: { ...where, id: { in: [...rank.keys()] }, isDemo: false },
+        select: LIST_SELECT,
+      })).sort((a, b) => rank.get(a.id)!.i - rank.get(b.id)!.i); // Prisma IN tartibini saqlamaydi
+      const pageRows = ranked.slice((p - 1) * l, p * l);
+      // Javobsiz = hech javob berilmagan yozishma: obyekt tarafi bir marta yozsa
+      // status ANSWERED bo'ladi va bu yerga tushmaydi
+      const open = pageRows.length
+        ? await this.prisma.inquiry.groupBy({
+            by: ['terminalId'],
+            where: { terminalId: { in: pageRows.map((r) => r.id) }, status: 'OPEN' },
+            _count: { _all: true },
+          })
+        : [];
+      const unanswered = new Map(open.map((o) => [o.terminalId!, o._count._all] as const));
+      return {
+        items: pageRows.map((r) => ({ ...r, views30: rank.get(r.id)!.views, openInquiries: unanswered.get(r.id) ?? 0 })),
+        total: ranked.length, page: p, limit: l,
+      };
+    }
     const [total, items] = await Promise.all([
       this.prisma.terminal.count({ where }),
-      this.prisma.terminal.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (p - 1) * l,
-        take: l,
-        select: {
-          id: true, slug: true, name: true, kind: true, status: true, regionCode: true, orgId: true,
-          claimStatus: true, lat: true, lng: true, registryNo: true, stationNameRaw: true, ownerNameRaw: true,
-          contactName: true, createdAt: true,
-          station: { select: { id: true, nameUz: true, esrCode: true } },
-          org: { select: { id: true, name: true } },
-        },
-      }),
+      this.prisma.terminal.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (p - 1) * l, take: l, select: LIST_SELECT }),
     ]);
     return { items, total, page: p, limit: l };
   }

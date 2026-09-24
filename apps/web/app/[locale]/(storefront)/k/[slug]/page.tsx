@@ -98,7 +98,7 @@ export default async function ShopPage({ params }: Params) {
               <div className="mt-3 flex flex-col gap-2">
                 {tg ? <a href={`https://t.me/${tg}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-teal px-5 py-2.5 font-semibold text-white transition hover:bg-teal-ink"><TelegramLogoIcon size={18} aria-hidden="true" />{t('telegram')}</a> : null}
                 {/* Raqam obunachiga, bosilganda: do'kon sahifasi ham umumiy qoidaga bo'ysunadi */}
-                {o.hasPhone ? <PhoneReveal kind="org" targetId={slug} next={`/k/${slug}`} /> : null}
+                {o.hasPhone ? <PhoneReveal kind="org" targetId={o.id} next={`/k/${slug}`} /> : null}
                 {site ? <a href={site} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-navy hover:text-teal-ink"><GlobeIcon size={16} aria-hidden="true" />{site.replace(/^https?:\/\//, '')}</a> : null}
                 {!tg && !o.hasPhone && !site ? <p className="text-sm text-muted">{t('noContact')}</p> : null}
               </div>

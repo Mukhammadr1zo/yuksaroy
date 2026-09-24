@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { PrismaService } from '../../common/prisma.service';
 import { ImpressionsService } from './impressions.service';
 
-type GroupArgs = { by: string[]; where: Record<string, unknown>; _sum: { count: boolean } };
+type GroupArgs = { by: string[]; where: Record<string, unknown>; _sum: { count: boolean }; orderBy?: unknown; take?: number };
 
 function fake(rows: { targetId: string; sum: number | null }[]) {
   const calls: GroupArgs[] = [];
@@ -39,5 +39,26 @@ describe("ko'rishlar soni", () => {
     const { svc, calls } = fake([]);
     expect(await svc.detailViews('listing', [])).toEqual({});
     expect(calls).toHaveLength(0);
+  });
+});
+
+/**
+ * Chaqiruv navbati: saralash ham, chegara ham bazada bo'lishi SHART.
+ * Kimdir uni xotiraga ko'chirsa mingdan ortiq qator xotiraga kelardi.
+ */
+describe("talab bo'yicha tartib", () => {
+  it('oyna 30 kun, saralash va chegara bazada', async () => {
+    const { svc, calls } = fake([{ targetId: 't1', sum: 40 }, { targetId: 't2', sum: 12 }]);
+    const out = await svc.topDetailViews('terminal', 100, new Date('2026-09-24T09:00:00Z'));
+    expect(out).toEqual([{ id: 't1', views: 40 }, { id: 't2', views: 12 }]);
+    expect(calls[0].where).toMatchObject({ kind: 'terminal', surface: 'detail' });
+    expect((calls[0].where.day as { gte: Date }).gte).toBeInstanceOf(Date);
+    expect(calls[0].orderBy).toEqual([{ _sum: { count: 'desc' } }, { targetId: 'asc' }]);
+    expect(calls[0].take).toBe(100);
+  });
+
+  it("hisoblanmagan yig'indi 0 beradi", async () => {
+    const { svc } = fake([{ targetId: 't1', sum: null }]);
+    expect(await svc.topDetailViews('terminal', 10)).toEqual([{ id: 't1', views: 0 }]);
   });
 });

@@ -21,11 +21,13 @@ type Row = {
   ownerNameRaw: string | null; contactName: string | null; createdAt: string;
   station: { id: string; nameUz: string; esrCode: string | null } | null;
   org: { id: string; name: string } | null;
+  /** Faqat talab tartibida hisoblanadi, shuning uchun ustunlar ham o'sha tartibda chiziladi. */
+  views30?: number; openInquiries?: number;
 };
 /** Yon varaq: id=null yaratish; d=null to'liq qator hali yuklanmoqda. */
 type Sheet = { id: string | null; base: Draft | null; d: Draft | null };
 
-const F0 = { q: '', kind: '', region: '', status: '', claim: '', owned: '', page: 1 };
+const F0 = { q: '', kind: '', region: '', status: '', claim: '', owned: '', sort: '', page: 1 };
 const CLAIM_TONE: Record<ClaimStatus, 'ok' | 'warn' | 'bad' | 'neutral'> = { APPROVED: 'ok', PENDING: 'warn', REJECTED: 'bad', NONE: 'neutral' };
 const STATUS_TONE: Record<TerminalStatus, 'ok' | 'warn' | 'neutral'> = { ACTIVE: 'ok', DRAFT: 'warn', HIDDEN: 'neutral' };
 const NEW: Draft = { kind: 'RAIL', status: 'DRAFT', is24h: false, claimStatus: 'NONE' };
@@ -114,6 +116,12 @@ export default function TerminalsPage() {
     { key: 'owner', head: tt('owner'), cell: (r) => (r.org ? r.org.name : <Pill>{tt('noOwner')}</Pill>) },
     { key: 'claim', head: tt('claim'), cell: (r) => <Pill tone={CLAIM_TONE[r.claimStatus]}>{tcl(r.claimStatus)}</Pill> },
     { key: 'status', head: tc('status'), cell: (r) => <Pill tone={STATUS_TONE[r.status]}>{ts(r.status)}</Pill> },
+    ...(f.sort === 'demand'
+      ? [
+          { key: 'views30', head: tt('views30'), num: true, cell: (r: Row) => r.views30 ?? 0 },
+          { key: 'openInquiries', head: tt('openInquiries'), num: true, cell: (r: Row) => r.openInquiries ?? 0 },
+        ]
+      : []),
     { key: 'registryNo', head: t('claim.registry'), num: true, cell: (r) => r.registryNo ?? '' },
   ];
 
@@ -155,6 +163,11 @@ export default function TerminalsPage() {
             {opt('', tc('all'))}{opt('1', tt('ownedOnly'))}{opt('0', tt('freeOnly'))}
           </select>
         </Labeled>
+        <Labeled label={tt('sort')} className={selectCls}>
+          <select className={INPUT} value={form.sort} onChange={(e) => setForm({ ...form, sort: e.target.value })}>
+            {opt('', tt('sortNew'))}{opt('demand', tt('sortDemand'))}
+          </select>
+        </Labeled>
         <button type="submit" className={BTN}>{tc('apply')}</button>
         <button type="button" className={BTN_GHOST} onClick={() => { setForm(F0); setF(F0); }}>{tc('reset')}</button>
       </Toolbar>
@@ -162,6 +175,7 @@ export default function TerminalsPage() {
       {err ? <Notice tone="err">{errText(err, t, t.has, tc('loadFailed'))}</Notice> : null}
       {!sheet && notice ? <Notice tone={notice.tone}>{notice.text}</Notice> : null}
       <p className="mt-4 font-mono text-xs text-muted">{loading || !data ? tc('loading') : tc('total', { count: data.total })}</p>
+      {f.sort === 'demand' ? <p className="mt-1 text-xs text-muted">{tt('demandNote')}</p> : null}
 
       <DataTable cols={cols} rows={data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} onRow={(r) => openRow(r.id)} />
       <Pager page={f.page} pages={pages} onPage={(p) => { setF({ ...f, page: p }); setForm({ ...form, page: p }); }} />

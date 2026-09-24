@@ -81,7 +81,7 @@ export default async function CompanyPage({ params }: Params) {
               {tg ? <li className="flex items-center gap-2"><TelegramLogoIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><a href={`https://t.me/${tg}`} target="_blank" rel="noreferrer" className="font-semibold text-navy hover:text-teal-ink">@{tg}</a></li> : null}
               {site ? <li className="flex items-center gap-2"><GlobeIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><a href={site} target="_blank" rel="noreferrer" className="font-semibold text-navy hover:text-teal-ink">{site.replace(/^https?:\/\//, '')}</a></li> : null}
               <li className="flex items-center gap-2">
-                {o.hasPhone ? <PhoneReveal kind="org" targetId={slug} next={`/companies/${slug}`} /> : <><PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><span className="text-muted">{t('detail.noPhone')}</span></>}
+                {o.hasPhone ? <PhoneReveal kind="org" targetId={o.id} next={`/companies/${slug}`} /> : <><PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" /><span className="text-muted">{t('detail.noPhone')}</span></>}
               </li>
             </ul>
             {!tg && !site ? <p className="mt-3 text-xs text-muted">{t('detail.noContact')}</p> : null}

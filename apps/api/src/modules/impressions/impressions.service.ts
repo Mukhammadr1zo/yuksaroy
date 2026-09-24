@@ -50,6 +50,25 @@ export class ImpressionsService {
   }
 
   /**
+   * Oxirgi 30 kunda eng ko'p ochilgan obyektlar, ko'pidan kamiga.
+   *
+   * 'detail' yuzasi: ro'yxatda ko'ringani qiziqish emas, sahifani OCHGANI qiziqish.
+   * Saralash ham, chegara ham bazada: xotiraga faqat `take` ta qator keladi.
+   * Ikkinchi kalit targetId: teng sonli qatorlar sahifadan sahifaga sakramaydi.
+   * Nol ochilgan obyekt umuman qaytmaydi: chaqiruv navbati faqat talab bor obyektdan tuziladi.
+   */
+  async topDetailViews(kind: ImpressionKind, take: number, now = new Date()): Promise<{ id: string; views: number }[]> {
+    const rows = await this.prisma.impression.groupBy({
+      by: ['targetId'],
+      where: { kind, surface: 'detail', day: { gte: new Date(dayKeys(now)[0]!) } },
+      _sum: { count: true },
+      orderBy: [{ _sum: { count: 'desc' } }, { targetId: 'asc' }],
+      take,
+    });
+    return rows.map((r) => ({ id: r.targetId, views: r._sum.count ?? 0 }));
+  }
+
+  /**
    * Bitta tashrif: kun va joy bo'yicha yig'iladi.
    *
    * Xom yozuv saqlanmaydi: na IP, na sessiya, na sahifa manzili. Ya'ni bu jadvaldan
