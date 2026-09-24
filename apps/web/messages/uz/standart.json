@@ -33,12 +33,12 @@
       "title": "Terminal",
       "must": "Nomi, stansiya, turi, ish vaqti, kamida bitta xizmat",
       "should": "Tariflar, pasport (yo'llar, kran, ombor, tarozi), rasm, telefon",
-      "note": "Egasi tasdiqlamagan pasport ochiq ma'lumotlardan tuziladi va shunday belgilanadi.",
+      "note": "Egasi tasdiqlamagan pasport shunday belgilanadi.",
       "owner": "Tashkilot (turi: Terminal): pasportni operator biriktiradi"
     },
     "siding": {
       "title": "Temir yo'l terminali (shahobcha yo'l)",
-      "must": "Reestr raqami, stansiya, viloyat (davlat reestridan)",
+      "must": "Reestr raqami, stansiya, viloyat",
       "should": "Uzunlik, tushirish va yuklash sig'imi, egasi",
       "note": "Egasi nomi faqat da'vo operator tomonidan tasdiqlangach ko'rinadi. Xaritadagi nuqta stansiya joyida turadi, aniq manzil emas.",
       "owner": "Tashkilot: da'vo operator tomonidan tasdiqlangach"

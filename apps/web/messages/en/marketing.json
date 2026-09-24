@@ -47,8 +47,8 @@
           "body": "Arrived, weighed, loaded, departed: the terminal marks it, you see it on the order page. No room for disputes."
         },
         "registry": {
-          "title": "One place: registry, equipment, trucks",
-          "body": "The terminal and siding registry, shunting locomotive and wagon rental, road carriers from the terminal to the warehouse. Each with its owner's page."
+          "title": "One place: terminals, equipment, trucks",
+          "body": "Freight and rail terminals, shunting locomotive and wagon rental, road carriers from the terminal to the warehouse. Each with its owner's page."
         }
       },
       "roi": {
@@ -73,7 +73,7 @@
         "q3": "What if the terminal does not confirm?",
         "a3": "If the order is not confirmed within 30 minutes it expires, the spot is released and you turn to another terminal. A rejection reason is shown on the order page.",
         "q4": "How reliable are the tariffs?",
-        "a4": "A tariff of an owner-confirmed terminal is published by the terminal itself. A tariff from an unconfirmed passport is compiled from open data and marked as an estimate.",
+        "a4": "A tariff of an owner-confirmed terminal is published by the terminal itself. A tariff from an unconfirmed passport is marked as an estimate.",
         "q5": "Where do I get the documents?",
         "a5": "Once the order is done, the act and invoice PDFs sit in the Documents section of the cabinet. Each document shows the frozen tariff and the weighing result."
       },
@@ -120,7 +120,7 @@
         },
         "claim": {
           "title": "Claim your object",
-          "body": "If your terminal or siding is already in the registry, claim it as the owner: you manage the passport."
+          "body": "If your terminal is already in the catalog, claim it as the owner: you manage the passport."
         }
       },
       "roi": {
@@ -152,7 +152,7 @@
         "a3": "A listing from an organization with verified documents goes live immediately. Others pass moderation; if rejected, the reason is shown and the listing can be resubmitted.",
         "q4": "How does a terminal receive orders?",
         "a4": "On the board in the cabinet: a new order arrives with a timer to respond, you confirm or reject, then mark the states. Every step is visible to the client.",
-        "q5": "My object is already in the registry",
+        "q5": "My object is already in the catalog",
         "a5": "The object page has a claim button. Once the operator approves, you manage the passport, tariffs and spots."
       },
       "band": {

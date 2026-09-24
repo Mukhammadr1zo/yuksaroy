@@ -54,9 +54,9 @@
         "title": "Terminal or freight yard",
         "body": "Services, tariffs, hours, spots"
       },
-      "siding": {
-        "title": "Attach my siding",
-        "body": "Find it in the registry and manage it as your terminal"
+      "claim": {
+        "title": "Attach my rail terminal",
+        "body": "Find it in the catalog and manage it as your terminal"
       },
       "equipment": {
         "title": "Equipment listing",
@@ -95,7 +95,7 @@
     }
   },
   "footer": {
-    "tagline": "Freight logistics marketplace: terminal services, private sidings, rail equipment and road transport.",
+    "tagline": "Freight logistics marketplace: terminal services, rail equipment and road transport.",
     "catalog": {
       "heading": "Catalog",
       "customsWarehouses": "Bonded warehouses"
@@ -119,7 +119,7 @@
     "subtitle": "Find. Compare. Connect.",
     "lead": "Finding a terminal service, a private siding, a shunting locomotive or a truck should not take days of phone calls. Find what you need in one place and contact the owner directly.",
     "search": {
-      "placeholder": "Terminal, siding or equipment",
+      "placeholder": "Terminal, equipment or truck",
       "aria": "What are you looking for",
       "submit": "Search",
       "note": "Browse without signing up, search is free"
@@ -162,10 +162,6 @@
     "road": {
       "label": "Road transport",
       "note": "Trucks and carriers: delivery from the terminal to the warehouse"
-    },
-    "container": {
-      "label": "Container yards",
-      "note": "Container receipt and storage"
     },
     "services": {
       "heading": "Search by service"
@@ -258,10 +254,6 @@
     "cta": {
       "quote": "Calculate price",
       "bookSlot": "Book a spot"
-    },
-    "claim": {
-      "title": "Is this your terminal?",
-      "body": "The facility profile is compiled from public sources, so the rates are indicative. Create a TERMINAL organization in your account: the operator links the profile to you, and you manage rates and spots yourself."
     },
     "tariffs": {
       "heading": "Rates",

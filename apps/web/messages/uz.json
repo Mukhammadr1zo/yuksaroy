@@ -54,9 +54,9 @@
         "title": "Terminal yoki yuk saroyi",
         "body": "Xizmatlar, tariflar, ish vaqti, joylar"
       },
-      "siding": {
-        "title": "Shahobcha yo'limni biriktirish",
-        "body": "Reestrdan topib, o'z terminalingiz sifatida boshqarasiz"
+      "claim": {
+        "title": "Temir yo'l terminalimni biriktirish",
+        "body": "Katalogdan topib, o'z terminalingiz sifatida boshqarasiz"
       },
       "equipment": {
         "title": "Texnika e'loni",
@@ -95,7 +95,7 @@
     }
   },
   "footer": {
-    "tagline": "Yuk logistikasi bozori: terminal xizmatlari, shahobcha yo'llar, temir yo'l texnikasi va avtotransport.",
+    "tagline": "Yuk logistikasi bozori: terminal xizmatlari, temir yo'l texnikasi va avtotransport.",
     "catalog": {
       "heading": "Katalog",
       "customsWarehouses": "Bojxona omborlari"
@@ -119,7 +119,7 @@
     "subtitle": "Toping. Solishtiring. Bog'laning.",
     "lead": "Terminal xizmati, shahobcha yo'l, teplovoz yoki yuk mashinasi izlash kunlab qo'ng'iroq qilishni talab qilmasligi kerak. Keraklisini bir joyda toping va egasiga to'g'ridan-to'g'ri murojaat qiling.",
     "search": {
-      "placeholder": "Terminal, shahobcha yo'l yoki texnika",
+      "placeholder": "Terminal, texnika yoki yuk mashinasi",
       "aria": "Nima qidiryapsiz",
       "submit": "Qidirish",
       "note": "Ro'yxatdan o'tmasdan ko'rish mumkin, izlash bepul"
@@ -162,10 +162,6 @@
     "road": {
       "label": "Avtotransport",
       "note": "Yuk mashinalari va tashuvchilar: terminaldan omborgacha yetkazib berish"
-    },
-    "container": {
-      "label": "Konteyner maydonlari",
-      "note": "Konteyner qabul qilish va saqlash"
     },
     "services": {
       "heading": "Xizmat bo'yicha qidirish"
@@ -258,10 +254,6 @@
     "cta": {
       "quote": "Narxni hisoblash",
       "bookSlot": "Joy band qilish"
-    },
-    "claim": {
-      "title": "Bu sizning terminalingizmi?",
-      "body": "Pasport ochiq ma'lumotlardan tuzilgan, tariflar taxminiy. Kabinetda TERMINAL tashkiloti yarating: operator pasportni sizga biriktiradi va siz tarif hamda joylarni o'zingiz boshqarasiz."
     },
     "tariffs": {
       "heading": "Tariflar",

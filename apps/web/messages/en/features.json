@@ -22,7 +22,7 @@
       },
       "data": {
         "title": "Data",
-        "lead": "Registry, standard and companies."
+        "lead": "Rail terminals, the standard and companies."
       }
     },
     "items": {
@@ -54,10 +54,6 @@
         "title": "Terminal page",
         "body": "Services, tariffs, hours, spots. The owner runs it from the dashboard."
       },
-      "siding": {
-        "title": "Claim a siding",
-        "body": "Find your siding in the registry, send an ownership claim, the page becomes yours."
-      },
       "premium": {
         "title": "Subscriber badge",
         "body": "A subscriber listing ranks higher in the list and on the map, with a badge. One subscription covers all your listings."
@@ -87,8 +83,8 @@
         "body": "Locomotive call, wagon repair, crane: providers in the region send offers."
       },
       "registry": {
-        "title": "Rail terminal registry",
-        "body": "Sidings across the country grouped by station, each with its own terminal page. The map pin sits at the station, not at an exact address."
+        "title": "Rail terminals",
+        "body": "Rail terminals grouped by station, each with its own page. If one is yours, find it and send an ownership claim. The map pin sits at the station, not at an exact address."
       },
       "standards": {
         "title": "Listing standard",

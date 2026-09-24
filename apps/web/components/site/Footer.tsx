@@ -30,6 +30,8 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
             {/* SVX endi tur emas, xizmat: eski ?kind=SVX filtri jimgina e'tiborsiz qolardi */}
             <li><Link className={hover} href="/terminals?service=SVX">{t('catalog.customsWarehouses')}</Link></li>
             {/* Yangi bo'limlar: header bilan bir xil yorliqlar (nav2) */}
+            <li><Link className={hover} href="/equipment">{n2('equipment')}</Link></li>
+            <li><Link className={hover} href="/carriers">{n2('carriers')}</Link></li>
             <li><Link className={hover} href="/cargo">{n2('cargo')}</Link></li>
             <li><Link className={hover} href="/services">{n2('services')}</Link></li>
             <li><Link className={hover} href="/wagon">{n2('wagon')}</Link></li>

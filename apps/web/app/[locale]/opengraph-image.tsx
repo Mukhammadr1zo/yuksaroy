@@ -27,7 +27,7 @@ export default function Image() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', fontSize: 52, fontWeight: 700, lineHeight: 1.15 }}>
-            Yuk terminallari, shahobcha yo'llar, texnika va avtotransport
+            Yuk terminallari, texnika va avtotransport
           </div>
           <div style={{ display: 'flex', fontSize: 30, color: '#8FB3D9' }}>
             Egasini toping, to'g'ridan-to'g'ri bog'laning

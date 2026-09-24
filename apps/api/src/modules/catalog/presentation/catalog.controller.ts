@@ -164,20 +164,6 @@ export class CatalogController {
     return publicTerminal(t, free[t.id] ?? 0);
   }
 
-  @Get('sidings')
-  async sidings(
-    @Query('station') station?: string, @Query('rju') rju?: string, @Query('q') q?: string,
-    @Query('page') page?: string, @Query('limit') limit?: string,
-    @Query('region') region?: string, @Query('near') near?: string, @Query('radius') radius?: string,
-  ) {
-    const r = await this.repo.listSidings(
-      // hozircha egasiz reestr shahobchalari ham ochiq katalogda: egalar o'z yo'lini topib da'vo qilsin
-      { ...stationParam(station), rju: pickIn(rju, RJUS), q: q?.trim() || undefined, region: pickIn(region, REGIONS), near: geoNear(near, radius) },
-      clampInt(page, 1, 1, 10000), clampInt(limit, 30, 1, 100),
-    );
-    return { ...r, items: r.items.map((x) => publicSiding(x)) };
-  }
-
   @Get('sidings/:id')
   async siding(@Param('id') id: string) {
     const s = await this.repo.findSidingById(id, true);
@@ -215,7 +201,7 @@ export class CatalogController {
   }
 
   /**
-   * Xarita sahifasi: to'rt kategoriya bitta FeatureCollection'da (accuracy: exact / station / region).
+   * Xarita sahifasi: uch kategoriya bitta FeatureCollection'da (accuracy: exact / station / region).
    * `cat` vergulli (default hammasi), `bbox=W,S,E,N`, `region` vergulli, `corridor=A>B`. Eski `map-objects` o'zgarmagan.
    */
   @Get('map-objects.geojson')

@@ -134,7 +134,6 @@
         "priceTiyin": "Narx",
         "priceUnit": "Birlik",
         "terminalId": "Terminal yoki shahobcha yo'l",
-        "sidingId": "Shahobcha yo'l",
         "responseHours": "Javob muddati, soat",
         "contactPhone": "Aloqa telefoni",
         "ownerType": "Kim nomidan"
@@ -162,7 +161,7 @@
       "priceSom": "Narx, so'm",
       "objectNone": "Bog'lanmagan",
       "objectTerminals": "Terminallarim",
-      "objectSidings": "Shahobchalarim",
+      "objectSidings": "Temir yo'l terminallari",
       "routeFrom": "Qayerdan",
       "routeTo": "Qayerga",
       "addRoute": "Yo'nalish qo'shish",
@@ -186,7 +185,6 @@
         "INVALID": "Noto'g'ri qiymat",
         "RANGE": "Diapazondan tashqari",
         "DEAL_NOT_ALLOWED": "Avtotransport uchun bitim tanlanmaydi",
-        "ONE_OBJECT_ONLY": "Faqat bittasi: terminal yoki shahobcha yo'l",
         "PRICE_UNIT_REQUIRED": "Narx birligini tanlang",
         "UNIT_NOT_FOR_DEAL": "Bu birlik tanlangan bitimga mos emas",
         "SERVICE_REGIONS_MUST_INCLUDE_BASE": "Bazaviy viloyat xizmat hududlariga kirishi shart",
@@ -302,11 +300,11 @@
     },
     "sidings": {
       "title": "Shahobchalarim",
-      "lead": "Reestrdan da'vo qilgan shahobcha yo'llaringiz va da'vo holati.",
+      "lead": "Siz da'vo qilgan temir yo'l terminallari va da'vo holati.",
       "empty": "Sizga biriktirilgan shahobcha yo'l yo'q.",
-      "emptyCta": "Reestrdan topib da'vo qiling",
+      "emptyCta": "Katalogdan topib da'vo qiling",
       "col": {
-        "no": "Reestr",
+        "no": "Raqam",
         "station": "Stansiya",
         "region": "Viloyat",
         "length": "Uzunlik",
@@ -332,8 +330,8 @@
         "needApproval": "Rasm qo'shish da'vongiz tasdiqlangandan keyin ochiladi.",
         "photosHint": "Yo'lning o'zi, rampa, kirish yo'li va kran. Mijoz raqamdan ko'ra rasmga qarab qaror qiladi.",
         "photosSection": "Rasmlar",
-        "registryNote": "Bu qatorlar rasmiy reestrdan keladi va tahrirlanmaydi. Xato bo'lsa qo'llab-quvvatlashga yozing.",
-        "registrySection": "Reestr ma'lumoti",
+        "registryNote": "Bu qatorlar tahrir qilinmaydi. Xato bo'lsa qo'llab-quvvatlashga yozing.",
+        "registrySection": "Terminal ma'lumotlari",
         "title": "{station} No {no}"
       }
     },
@@ -453,7 +451,6 @@
       "filter": {
         "all": "Hammasi",
         "terminal": "Terminal",
-        "siding": "Shahobcha yo'l",
         "equipment": "Texnika",
         "truck": "Avtotransport"
       },

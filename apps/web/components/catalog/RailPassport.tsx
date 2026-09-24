@@ -3,8 +3,8 @@ import { num } from '@/lib/format';
 import type { RailPassport } from '@/lib/types';
 
 /**
- * Temir yo'l terminalining (shahobcha yo'lining) texnik pasporti: O'TY Taminot reestridagi
- * hamma maydon. Bo'sh maydon chizilmaydi, aks holda jadval yolg'on to'liqlik ko'rsatardi.
+ * Temir yo'l terminalining texnik pasporti: hamma maydon bir jadvalda.
+ * Bo'sh maydon chizilmaydi, aks holda jadval yolg'on to'liqlik ko'rsatardi.
  * Mas'ul shaxs raqami bu yerda yo'q: u obunachiga sahifa boshidagi tugma orqali (PhoneReveal).
  */
 export async function RailPassportCard({ rail }: { rail: RailPassport }) {
@@ -43,7 +43,6 @@ export async function RailPassportCard({ rail }: { rail: RailPassport }) {
   return (
     <section>
       <h2 className="text-lg font-bold">{t('passport')}</h2>
-      <p className="mt-1 text-sm text-muted">{t('source')}</p>
       <dl className="mt-3 overflow-hidden rounded-card border border-line bg-white">
         {rows.map(([k, v]) => (
           <div key={k} className="flex items-start justify-between gap-4 border-t border-line/70 px-4 py-2.5 text-sm first:border-t-0">

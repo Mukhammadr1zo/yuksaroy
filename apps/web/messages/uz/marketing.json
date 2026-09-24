@@ -47,8 +47,8 @@
           "body": "Yetib keldi, tortildi, yuklandi, jo'nadi: terminal belgilaydi, siz buyurtma sahifasida ko'rasiz. Kelishmovchilikka joy qolmaydi."
         },
         "registry": {
-          "title": "Bir joyda: reestr, texnika, avtotransport",
-          "body": "Terminal va shahobcha yo'llar reestri, manevr teplovozi va vagon ijarasi, terminaldan omborgacha yetkazib beradigan avtotashuvchilar. Har biri egasining sahifasi bilan."
+          "title": "Bir joyda: terminal, texnika, avtotransport",
+          "body": "Yuk terminallari va temir yo'l terminallari, manevr teplovozi va vagon ijarasi, terminaldan omborgacha yetkazib beradigan avtotashuvchilar. Har biri egasining sahifasi bilan."
         }
       },
       "roi": {
@@ -73,7 +73,7 @@
         "q3": "Terminal tasdiqlamasa nima bo'ladi?",
         "a3": "Buyurtma 30 daqiqa ichida tasdiqlanmasa muddati o'tadi, joy bo'shaydi va siz boshqa terminalga murojaat qilasiz. Rad etish sababi buyurtma sahifasida ko'rinadi.",
         "q4": "Tariflar qanchalik ishonchli?",
-        "a4": "Egasi tasdiqlagan terminal tarifini terminalning o'zi e'lon qiladi. Tasdiqlanmagan pasport tarifi ochiq ma'lumotlardan yig'ilgan va taxminiy deb belgilanadi.",
+        "a4": "Egasi tasdiqlagan terminal tarifini terminalning o'zi e'lon qiladi. Tasdiqlanmagan pasport tarifi taxminiy deb belgilanadi.",
         "q5": "Hujjatlarni qayerdan olaman?",
         "a5": "Buyurtma yakunlangach akt va hisob-faktura PDF kabinetdagi Hujjatlar bo'limida turadi. Har hujjatda muzlatilgan tarif va tarozi natijasi ko'rsatiladi."
       },
@@ -120,7 +120,7 @@
         },
         "claim": {
           "title": "O'z obyektingizni da'vo qiling",
-          "body": "Terminal yoki shahobcha yo'l reestrda allaqachon bo'lsa, egasi sifatida da'vo qiling: pasportni siz boshqarasiz."
+          "body": "Terminalingiz katalogda allaqachon bo'lsa, egasi sifatida da'vo qiling: pasportni siz boshqarasiz."
         }
       },
       "roi": {
@@ -152,7 +152,7 @@
         "a3": "Hujjatlari tasdiqlangan tashkilot e'loni darhol chiqadi. Qolganlari moderatsiyadan o'tadi; rad etilsa sabab ko'rsatiladi va qayta yuboriladi.",
         "q4": "Terminal buyurtmalarni qanday oladi?",
         "a4": "Kabinetdagi taxtada: yangi buyurtma javob berish taymeri bilan keladi, tasdiqlaysiz yoki rad etasiz, keyin holatlarni belgilaysiz. Har qadam mijozga ko'rinadi.",
-        "q5": "Mening obyektim reestrda allaqachon bor",
+        "q5": "Mening obyektim katalogda allaqachon bor",
         "a5": "Obyekt sahifasida da'vo tugmasi bor. Operator tasdiqlagach pasport, tarif va joylarni siz boshqarasiz."
       },
       "band": {

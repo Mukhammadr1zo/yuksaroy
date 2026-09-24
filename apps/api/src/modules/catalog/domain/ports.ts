@@ -118,14 +118,9 @@ export interface SidingRecord extends SidingPassport {
 }
 
 export interface SidingFilter {
-  stationEsr?: string; stationId?: string; rju?: Rju; q?: string; ownerOrgIds?: string[]; region?: string; near?: GeoNear;
+  stationId?: string; q?: string; ownerOrgIds?: string[]; region?: string;
   /** Bitta holat yoki holatlar ro'yxati (masalan da'vo qilish mumkin bo'lganlar: NONE va REJECTED). */
   claimStatus?: ClaimStatus | ClaimStatus[];
-  /**
-   * Shahobcha reestri ochiq: egasiz yo'llar ham katalogda turadi (egasi topib da'vo qiladi).
-   * true = faqat egali, false = faqat egasiz, undefined = hammasi (ochiq katalog shuni ishlatadi).
-   */
-  owned?: boolean;
 }
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number }
@@ -166,8 +161,6 @@ export interface CatalogRepository {
   findSidingById(id: string, publicOnly?: boolean): Promise<SidingRecord | null>;
   /** claimStatus NONE/REJECTED bo'lsa PENDING ga o'tkazadi; aks holda SidingClaimedError. */
   claimSiding(id: string, orgId: string, now: Date): Promise<SidingRecord>;
-  /** Faqat PENDING hal qilinadi (APPROVED yoki REJECTED); aks holda null. Rad etilganda egasi saqlanadi, ochiq sahifada ko'rinmaydi. */
-  decideSidingClaim(id: string, approve: boolean): Promise<SidingRecord | null>;
   /**
    * Egasi tahrir qiladi (hozircha faqat rasmlar): reestr ma'lumotiga tegilmaydi.
    * Shart qatorida orgId va APPROVED bor, ya'ni begona yoki hali tasdiqlanmagan

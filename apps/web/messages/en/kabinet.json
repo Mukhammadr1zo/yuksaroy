@@ -134,7 +134,6 @@
         "priceTiyin": "Price",
         "priceUnit": "Unit",
         "terminalId": "Terminal or siding",
-        "sidingId": "Siding",
         "responseHours": "Response time, hours",
         "contactPhone": "Contact phone",
         "ownerType": "Post as"
@@ -162,7 +161,7 @@
       "priceSom": "Price, UZS",
       "objectNone": "Not linked",
       "objectTerminals": "My terminals",
-      "objectSidings": "My sidings",
+      "objectSidings": "Rail terminals",
       "routeFrom": "From",
       "routeTo": "To",
       "addRoute": "Add route",
@@ -186,7 +185,6 @@
         "INVALID": "Invalid value",
         "RANGE": "Out of range",
         "DEAL_NOT_ALLOWED": "Trucks have no deal type",
-        "ONE_OBJECT_ONLY": "Only one: terminal or siding",
         "PRICE_UNIT_REQUIRED": "Pick a price unit",
         "UNIT_NOT_FOR_DEAL": "This unit does not match the deal",
         "SERVICE_REGIONS_MUST_INCLUDE_BASE": "The base region must be among the service regions",
@@ -302,11 +300,11 @@
     },
     "sidings": {
       "title": "My sidings",
-      "lead": "Sidings you claimed from the registry and the claim status.",
+      "lead": "Rail terminals you claimed and the claim status.",
       "empty": "No siding is assigned to you.",
-      "emptyCta": "Find one in the registry and claim it",
+      "emptyCta": "Find one in the catalog and claim it",
       "col": {
-        "no": "Registry",
+        "no": "Number",
         "station": "Station",
         "region": "Region",
         "length": "Length",
@@ -332,8 +330,8 @@
         "needApproval": "Adding photos opens once your claim is approved.",
         "photosHint": "The track itself, the ramp, the access road and the crane. Clients decide by the photo, not by the numbers.",
         "photosSection": "Photos",
-        "registryNote": "These rows come from the official registry and cannot be edited. Write to support if something is wrong.",
-        "registrySection": "Registry data",
+        "registryNote": "These rows cannot be edited. Write to support if something is wrong.",
+        "registrySection": "Terminal data",
         "title": "{station} No {no}"
       }
     },
@@ -453,7 +451,6 @@
       "filter": {
         "all": "All",
         "terminal": "Terminal",
-        "siding": "Siding",
         "equipment": "Equipment",
         "truck": "Road transport"
       },

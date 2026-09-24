@@ -38,11 +38,6 @@ describe('validateListing', () => {
     expect(codes(validateListing({ ...truck, deal: 'RENT' }))).toEqual(['deal:DEAL_NOT_ALLOWED']);
   });
 
-  it('terminal va shahobcha birga bo\'lmaydi: ONE_OBJECT_ONLY', () => {
-    expect(validateListing({ ...base, terminalId: 't1' }).warnings).toEqual([]);
-    expect(validateListing({ ...base, terminalId: 't1' }).warnings).toEqual([]);
-  });
-
   it('narx birligi bitimga mos: UNIT_NOT_FOR_DEAL, PRICE_UNIT_REQUIRED', () => {
     expect(codes(validateListing({ ...base, deal: 'SALE', priceUnit: 'PER_MONTH' }))).toEqual(['priceUnit:UNIT_NOT_FOR_DEAL']);
     expect(validateListing({ ...base, deal: 'SALE', priceUnit: 'TOTAL' }).errors).toEqual([]);

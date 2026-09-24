@@ -154,7 +154,8 @@ export class TerminalAdminController {
   @Post('sidings/:id/claim')
   async claim(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
     const s = await this.claimSiding.execute(userId, id, dto.orgId);
-    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Siding', entityId: id, meta: { orgId: dto.orgId } });
+    // Obyekt nomi bitta: shahobcha yo'l Terminal jadvalining qatori, alohida jadval emas
+    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId } });
     // Navbat bitta: shahobcha ham temir yo'l terminali, moderatsiyada bir yorliqda turadi
     void this.adminNotify.queued('terminalClaimsPending', s.name ?? s.stationNameRaw, id, userId).catch(() => {});
     return s;
@@ -170,21 +171,7 @@ export class TerminalAdminController {
     const orgIds = await this.access.orgIdsOf(userId);
     const s = orgIds.length ? await this.repo.updateSidingByOwner(id, orgIds, { photos: dto.photos }) : null;
     if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
-    await this.audit.log({ actorId: userId, action: 'siding.update', entity: 'Siding', entityId: id, meta: { fields: Object.keys(dto), photos: dto.photos?.length } });
-    return s;
-  }
-
-  /** Moderatsiya: da'vo tasdiqlanadi yoki rad etiladi (sabab faqat auditda). */
-  @Post('sidings/:id/claim/decide')
-  @UseGuards(PlatformAdminGuard)
-  async claimDecide(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDecideDto) {
-    // Rad etish sababi egasiga yetib boradi va auditda qoladi: sababsiz rad etilsa
-    // tashkilot nima qilishini bilmaydi va qo'llab-quvvatlashga qo'ng'iroq qiladi.
-    if (!dto.approve && !dto.reason?.trim()) throw new BadRequestException({ code: 'REASON_REQUIRED' });
-    const s = await this.repo.decideSidingClaim(id, dto.approve);
-    if (!s) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
-    await this.audit.log({ actorId: userId, action: 'siding.claim.decide', entity: 'Siding', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: s.ownerOrgId } });
-    this.notifyClaim(s.ownerOrgId, `#${s.registryNo} · ${s.stationNameRaw}`, dto.approve, '/dashboard/objects');
+    await this.audit.log({ actorId: userId, action: 'siding.update', entity: 'Terminal', entityId: id, meta: { fields: Object.keys(dto), photos: dto.photos?.length } });
     return s;
   }
 
@@ -193,10 +180,4 @@ export class TerminalAdminController {
     void notifyTelegram(this.prisma, { orgIds: [orgId] }, approve ? 'claimApproved' : 'claimRejected', { object, url: webUrl(path) }).catch(() => {});
   }
 
-  /** Moderatsiya navbati: default PENDING; egasi nomi (ownerOrgName) admin uchun ochiq. */
-  @Get('admin/sidings')
-  @UseGuards(PlatformAdminGuard)
-  async adminSidings(@CurrentUserId() userId: string, @Query('claim') claim?: string) {
-    return this.repo.listSidings({ claimStatus: pickIn(claim, CLAIM_STATUSES) ?? 'PENDING' }, 1, 200);
-  }
 }

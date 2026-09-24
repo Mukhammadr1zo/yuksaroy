@@ -73,7 +73,7 @@ export async function ListingCard({ l }: { l: L }) {
           </span>
           <span className="font-mono text-sm font-semibold text-navy tabular-nums">{l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : t('onRequest')}</span>
         </div>
-        {l.object ? <p className="mt-1 truncate text-[11px] text-teal-ink">{t(l.object.type === 'terminal' ? 'atTerminal' : 'atSiding', { name: l.object.name })}</p> : null}
+        {l.object ? <p className="mt-1 truncate text-[11px] text-teal-ink">{t('atTerminal', { name: l.object.name })}</p> : null}
       </div>
     </Link>
     <CompareCheck cat={truck ? 'carriers' : 'equipment'} slug={l.slug} name={l.title} className="absolute bottom-3 right-3" />

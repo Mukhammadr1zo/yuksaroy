@@ -38,7 +38,6 @@
     "card": {
       "onRequest": "Цена по запросу",
       "atTerminal": "стоит на терминале: {name}",
-      "atSiding": "стоит на подъездном пути: {name}",
       "qty": "{count} шт.",
       "fleet": "{count} машин",
       "routes": "{count} направл.",

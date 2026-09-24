@@ -1,15 +1,15 @@
 'use client';
-// Bitta "Qo'shish" nuqtasi: ilgari e'lon, terminal, shahobcha, buyurtma va shoshilinch so'rov
+// Bitta "Qo'shish" nuqtasi: ilgari e'lon, terminal, biriktirish, buyurtma va shoshilinch so'rov
 // bir-biridan uzoq sahifalardan boshlanardi. Formalar o'zgarmadi, faqat kirish yo'li bitta bo'ldi.
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { PlusIcon, ShippingContainerIcon, PathIcon, TrainIcon, TruckIcon, PackageIcon, LightningIcon, BriefcaseIcon, HandshakeIcon } from '@phosphor-icons/react';
+import { PlusIcon, ShippingContainerIcon, MagnifyingGlassIcon, TrainIcon, TruckIcon, PackageIcon, LightningIcon, BriefcaseIcon, HandshakeIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { useMe } from './useMe';
 
 const OFFER = [
   { key: 'terminal', href: '/dashboard/terminals/new', Icon: ShippingContainerIcon },
-  { key: 'siding', href: '/dashboard/sidings', Icon: PathIcon },
+  { key: 'claim', href: '/terminals?kind=RAIL', Icon: MagnifyingGlassIcon },
   { key: 'equipment', href: '/dashboard/listings/new', Icon: TrainIcon },
   { key: 'truck', href: '/dashboard/listings/new?kind=TRUCK', Icon: TruckIcon },
   { key: 'service', href: '/dashboard/market?tab=profile', Icon: BriefcaseIcon },

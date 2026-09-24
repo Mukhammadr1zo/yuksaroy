@@ -19,9 +19,9 @@ interface MapObjects {
   features: { type: 'Feature'; geometry: { type: 'Point'; coordinates: [number, number] }; properties: { kind?: string } & Record<string, unknown> }[];
 }
 
-/** Hero qatlamlari: shahobcha oldin qo'shiladi, terminal ustida chiziladi. */
+/** Hero qatlamlari: ikkalasi ham terminal, shuning uchun bir xil pin. Temir yo'l qatori ostida turadi. */
 const LAYERS = [
-  { id: 'sidings', kind: 'siding', opts: { color: PIN.siding, hollow: true, label: true } },
+  { id: 'sidings', kind: 'siding', opts: { color: PIN.terminal, halo: true, label: true } },
   { id: 'terminals', kind: 'terminal', opts: { color: PIN.terminal, halo: true } },
 ];
 

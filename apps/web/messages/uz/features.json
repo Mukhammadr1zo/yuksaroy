@@ -22,7 +22,7 @@
       },
       "data": {
         "title": "Ma'lumot",
-        "lead": "Reestr, standart va kompaniyalar."
+        "lead": "Temir yo'l terminallari, standart va kompaniyalar."
       }
     },
     "items": {
@@ -54,10 +54,6 @@
         "title": "Terminal sahifasi",
         "body": "Xizmatlar, tariflar, ish vaqti, joylar. Egasi kabinetda yuritadi."
       },
-      "siding": {
-        "title": "Shahobcha yo'lga da'vo",
-        "body": "Reestrdagi yo'lingizni toping, egalik da'vosini yuboring, sahifa sizniki bo'ladi."
-      },
       "premium": {
         "title": "Obuna belgisi",
         "body": "Obunachining e'loni ro'yxatda va xaritada yuqorida, belgi bilan. Bitta obuna barcha e'lonlarni qamraydi."
@@ -87,8 +83,8 @@
         "body": "Teplovoz chaqiruv, vagon ta'miri, kran: viloyatdagi xizmatchilar taklif yuboradi."
       },
       "registry": {
-        "title": "Temir yo'l terminallari reestri",
-        "body": "Respublikadagi shahobcha yo'llar stansiyalar bo'yicha, har birining terminal sahifasi bor. Xaritadagi nuqta stansiya joyida turadi, aniq manzil emas."
+        "title": "Temir yo'l terminallari",
+        "body": "Stansiyalar bo'yicha temir yo'l terminallari, har birining o'z sahifasi bor. Sizniki bo'lsa, topib egalik da'vosini yuborasiz. Xaritadagi nuqta stansiya joyida turadi, aniq manzil emas."
       },
       "standards": {
         "title": "E'lon standarti",

@@ -31,7 +31,6 @@ const GROUPS: { key: 'find' | 'list' | 'book' | 'data'; items: Item[] }[] = [
   { key: 'list', items: [
     { key: 'listing', href: '/dashboard/listings/new', Icon: TrainIcon },
     { key: 'terminal', href: '/dashboard/terminals/new', Icon: WarehouseIcon },
-    { key: 'siding', href: '/dashboard/sidings', Icon: PathIcon },
     { key: 'premium', href: '/pricing', Icon: TagIcon },
     { key: 'analytics', href: '/dashboard/listings', Icon: ChartBarIcon },
   ] },

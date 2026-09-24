@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { REGIONS } from '@yuksaroy/domain';
 
-/** "Viloyatlar" chip qatori: kategoriya sahifasi pastida 14 ta hub havolasi. base: /terminals, /sidings, /equipment, /carriers. */
+/** "Viloyatlar" chip qatori: kategoriya sahifasi pastida 14 ta hub havolasi. base: /terminals, /equipment, /carriers. */
 export async function RegionChips({ base, current }: { base: string; current?: string }) {
   const [t, tr] = await Promise.all([getTranslations('hubs'), getTranslations('region')]);
   return (

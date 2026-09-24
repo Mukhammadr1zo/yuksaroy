@@ -33,12 +33,12 @@
       "title": "Terminal",
       "must": "Name, station, type, working hours, at least one service",
       "should": "Tariffs, passport (tracks, crane, warehouse, scale), photos, phone",
-      "note": "A passport not confirmed by the owner is compiled from open data and marked as such.",
+      "note": "A passport not confirmed by the owner is marked as unconfirmed.",
       "owner": "Organization (type: Terminal): the operator links the profile"
     },
     "siding": {
       "title": "Rail terminal (private siding)",
-      "must": "Registry number, station, region (from the state registry)",
+      "must": "Registry number, station, region",
       "should": "Length, unloading and loading capacity, owner",
       "note": "The owner name appears only after the operator approves the claim. The map pin sits at the station, not at an exact address.",
       "owner": "Organization: after the operator approves the claim"

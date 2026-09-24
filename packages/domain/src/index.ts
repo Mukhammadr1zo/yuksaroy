@@ -397,9 +397,9 @@ export * from './search';
 // ── Tashkilot yorliqlari (uch tilda) va slug ──
 
 export const ORG_KIND_LABELS: Record<SearchLang, Record<OrgKind, string>> = {
-  uz: { SHIPPER: 'Yuk egasi', FORWARDER: 'Ekspeditor', DECLARANT: 'Deklarant', CARRIER: 'Avtotashuvchi', TERMINAL: 'Terminal', ASSET_OWNER: 'Texnika yoki shahobcha egasi', LOCO_SERVICE: 'Lokomotiv xizmati', PLATFORM: 'Platforma' },
-  ru: { SHIPPER: 'Грузовладелец', FORWARDER: 'Экспедитор', DECLARANT: 'Декларант', CARRIER: 'Автоперевозчик', TERMINAL: 'Терминал', ASSET_OWNER: 'Владелец техники или пути', LOCO_SERVICE: 'Локомотивный сервис', PLATFORM: 'Платформа' },
-  en: { SHIPPER: 'Shipper', FORWARDER: 'Forwarder', DECLARANT: 'Customs broker', CARRIER: 'Road carrier', TERMINAL: 'Terminal', ASSET_OWNER: 'Equipment or siding owner', LOCO_SERVICE: 'Locomotive service', PLATFORM: 'Platform' },
+  uz: { SHIPPER: 'Yuk egasi', FORWARDER: 'Ekspeditor', DECLARANT: 'Deklarant', CARRIER: 'Avtotashuvchi', TERMINAL: 'Terminal', ASSET_OWNER: 'Texnika egasi', LOCO_SERVICE: 'Lokomotiv xizmati', PLATFORM: 'Platforma' },
+  ru: { SHIPPER: 'Грузовладелец', FORWARDER: 'Экспедитор', DECLARANT: 'Декларант', CARRIER: 'Автоперевозчик', TERMINAL: 'Терминал', ASSET_OWNER: 'Владелец техники', LOCO_SERVICE: 'Локомотивный сервис', PLATFORM: 'Платформа' },
+  en: { SHIPPER: 'Shipper', FORWARDER: 'Forwarder', DECLARANT: 'Customs broker', CARRIER: 'Road carrier', TERMINAL: 'Terminal', ASSET_OWNER: 'Equipment owner', LOCO_SERVICE: 'Locomotive service', PLATFORM: 'Platform' },
 };
 
 export const KYC_STATUS_LABELS: Record<SearchLang, Record<KycStatus, string>> = {

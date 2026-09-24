@@ -38,7 +38,6 @@
     "card": {
       "onRequest": "Narx so'rov bo'yicha",
       "atTerminal": "shu terminalda turibdi: {name}",
-      "atSiding": "shu shahobcha yo'lda turibdi: {name}",
       "qty": "{count} dona",
       "fleet": "{count} ta mashina",
       "routes": "{count} yo'nalish",

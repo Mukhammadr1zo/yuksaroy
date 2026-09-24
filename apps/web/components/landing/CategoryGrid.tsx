@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { ShippingContainerIcon, TrainIcon, TruckIcon, WarehouseIcon } from '@phosphor-icons/react/dist/ssr';
+import { TrainIcon, TruckIcon, WarehouseIcon } from '@phosphor-icons/react/dist/ssr';
 import { SERVICE_CODES } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 
@@ -9,11 +9,9 @@ import { Link } from '@/i18n/navigation';
  * Texnika va avtotransport bo'limlari hozircha bo'sh: e'lonlar egalari qo'shgach paydo bo'ladi.
  */
 const CATS = [
-  { href: '/terminals', key: 'terminals', Icon: WarehouseIcon, wide: true },
-  { href: '/equipment', key: 'rail', Icon: TrainIcon, wide: false },
-  { href: '/carriers', key: 'road', Icon: TruckIcon, wide: false },
-  // Konteyner endi tur emas, xizmat: eski ?kind=CONTAINER filtri hech narsani filtrlamasdi
-  { href: '/terminals?service=CONTAINER', key: 'container', Icon: ShippingContainerIcon, wide: false },
+  { href: '/terminals', key: 'terminals', Icon: WarehouseIcon },
+  { href: '/equipment', key: 'rail', Icon: TrainIcon },
+  { href: '/carriers', key: 'road', Icon: TruckIcon },
 ] as const;
 
 export async function CategoryGrid() {
@@ -25,8 +23,8 @@ export async function CategoryGrid() {
       <p className="mt-2 max-w-[62ch] text-muted">{t('lead')}</p>
 
       <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {CATS.map(({ href, key, Icon, wide }) => (
-          <li key={href} className={wide ? 'lg:col-span-2' : ''}>
+        {CATS.map(({ href, key, Icon }) => (
+          <li key={href}>
             <Link
               href={href}
               className="flex h-full items-start gap-4 rounded-card border border-line bg-white p-5 transition duration-200 hover:border-teal/50 hover:shadow-sm"

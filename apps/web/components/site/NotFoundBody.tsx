@@ -16,7 +16,7 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
     tabTitle: 'Sahifa topilmadi · YukSaroy',
     title: "Bu manzilda hech narsa yo'q",
     lead: "Havola eskirgan yoki manzil noto'g'ri yozilgan bo'lishi mumkin. Kerakli narsani qidiruv orqali toping yoki kategoriyadan boshlang.",
-    search: "Terminal, shahobcha yo'l yoki texnika",
+    search: 'Terminal, texnika yoki yuk mashinasi',
     submit: 'Qidirish',
     browse: 'Kategoriyalar',
     home: 'Bosh sahifaga',
@@ -29,7 +29,7 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
     tabTitle: 'Страница не найдена · YukSaroy',
     title: 'По этому адресу ничего нет',
     lead: 'Ссылка устарела или адрес написан с ошибкой. Найдите нужное через поиск или начните с категории.',
-    search: 'Терминал, подъездной путь или техника',
+    search: 'Терминал, техника или грузовик',
     submit: 'Найти',
     browse: 'Категории',
     home: 'На главную',
@@ -42,7 +42,7 @@ const T: Record<Lang, { code: string; tabTitle: string; title: string; lead: str
     tabTitle: 'Page not found · YukSaroy',
     title: 'There is nothing at this address',
     lead: 'The link may be outdated or the address mistyped. Search for what you need or start from a category.',
-    search: 'Terminal, siding or equipment',
+    search: 'Terminal, equipment or truck',
     submit: 'Search',
     browse: 'Categories',
     home: 'Back to home',
@@ -93,7 +93,7 @@ export function NotFoundBody() {
         </form>
 
         <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">{t.browse}</p>
-        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {CATS.map(({ key, route, Icon }) => (
             <li key={key}>
               <a href={href(route)} className="group flex h-full flex-col gap-3 rounded-card border border-line bg-white p-4 transition duration-200 hover:border-teal">

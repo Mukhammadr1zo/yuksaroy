@@ -278,12 +278,8 @@ export class PrismaCatalogRepository implements CatalogRepository {
       // Egasi o'z kabinetida ko'radi, u yerda ownerOrgIds bilan alohida so'rov ketadi.
       status: f.ownerOrgIds ? { not: 'DRAFT' } : 'ACTIVE',
       stationId: f.stationId,
-      esrCode: f.stationEsr,
-      rju: f.rju,
-      orgId: f.ownerOrgIds ? undefined : f.owned === undefined ? undefined : f.owned ? { not: null } : null,
       claimStatus: Array.isArray(f.claimStatus) ? { in: f.claimStatus } : f.claimStatus,
       regionCode: f.region,
-      ...(f.near ? bbox(f.near) : {}),
       // Kabinet ro'yxati: egalik tasdiqlanganlar (orgId) ham, hali hal bo'lmagan da'vo (claimOrgId) ham.
       // Faqat orgId ga qaralsa, da'vo yuborgan odam o'z kabinetida hech narsa ko'rmasdi.
       AND: f.ownerOrgIds ? [{ OR: [{ orgId: { in: f.ownerOrgIds } }, { claimOrgId: { in: f.ownerOrgIds } }] }] : undefined,
@@ -313,19 +309,6 @@ export class PrismaCatalogRepository implements CatalogRepository {
     });
     if (r.count === 0) throw new SidingClaimedError();
     return (await this.findSidingById(id))!;
-  }
-  async decideSidingClaim(id: string, approve: boolean) {
-    // Tasdiqlansa da'vo qilgan tashkilot haqiqiy egaga aylanadi
-    const row = await this.prisma.terminal.findFirst({ where: { id, kind: 'RAIL', claimStatus: 'PENDING' }, select: { claimOrgId: true } });
-    if (!row) return null;
-    await this.prisma.terminal.update({
-      where: { id },
-      data: approve
-        ? { claimStatus: 'APPROVED', orgId: row.claimOrgId, claimedAt: new Date() }
-        // claimOrgId saqlanadi: xabar shu tashkilotga ketadi va keyin qayta da'vo qilsa tarixi ko'rinadi
-        : { claimStatus: 'REJECTED', claimedAt: null },
-    });
-    return this.findSidingById(id);
   }
   async updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }) {
     // Egalik tekshiruvi shart qatorida: alohida o'qib keyin yozilsa, oradagi vaqtda egasi o'zgarishi mumkin

@@ -5,7 +5,7 @@
     "DECLARANT": "Customs broker",
     "CARRIER": "Road carrier",
     "TERMINAL": "Terminal",
-    "ASSET_OWNER": "Equipment or siding owner",
+    "ASSET_OWNER": "Equipment owner",
     "LOCO_SERVICE": "Locomotive service",
     "PLATFORM": "Platform"
   }

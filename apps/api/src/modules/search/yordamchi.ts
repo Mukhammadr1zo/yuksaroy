@@ -20,7 +20,7 @@ export const SET_SEARCH_FILTERS: Anthropic.Tool = {
   input_schema: {
     type: 'object',
     properties: {
-      category: enumOf(SEARCH_CATEGORIES, 'terminal = freight yard or terminal services; siding = private rail siding; equipment = rail equipment to rent or buy; truck = road transport'),
+      category: enumOf(SEARCH_CATEGORIES, 'terminal = freight terminal, including rail terminals (private sidings); equipment = rail equipment to rent or buy; truck = road transport'),
       regions: { type: 'array', items: REGION_ENUM, description: 'Regions of Uzbekistan mentioned (codes from the enum only)' },
       corridor: { type: 'object', properties: { from: REGION_ENUM, to: REGION_ENUM }, required: ['from', 'to'], description: 'Route from one region to another ("from X to Y")' },
       services: { type: 'array', items: enumOf(SERVICE_CODES, 'Terminal service'), description: 'Terminal services requested' },

@@ -42,7 +42,7 @@ export interface Inquiry {
   lastMessageAt: string | null; unread: number;
 }
 
-/** GET /sidings/mine va /admin/sidings (repo yozuvi, xaritalanmagan). */
+/** GET /sidings/mine (repo yozuvi, xaritalanmagan). */
 export interface MySiding {
   /** Ochiq sahifasining manzili: shahobcha ham terminal. */
   slug: string;
