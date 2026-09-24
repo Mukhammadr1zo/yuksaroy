@@ -69,6 +69,9 @@ const BOUNDS: Record<string, { min: number; max?: number }> = {
   commissionPct: { min: 0, max: 10000 },
   slotHoldTtlMin: { min: 1 },
   terminalConfirmMin: { min: 1 },
+  // 0 ruxsat etilgan sozlamalar: sukut min 1 bo'lgani uchun brauzer ularni saqlatmasdi
+  phoneRevealFree: { min: 0 },
+  wagonSearchFree: { min: 0 },
 };
 
 export default function SettingsPage() {

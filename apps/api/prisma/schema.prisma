@@ -172,6 +172,8 @@ model AuditLog {
 
   @@index([entity, entityId])
   @@index([actorId, createdAt])
+  /// Admin voronkasi: bitta amal turi bo'yicha oxirgi 30 kun
+  @@index([action, createdAt])
 }
 
 // ───────────────────────── Katalog (S2) ─────────────────────────

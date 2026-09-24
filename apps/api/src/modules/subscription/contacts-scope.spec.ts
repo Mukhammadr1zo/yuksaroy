@@ -3,7 +3,8 @@
 // Nega alohida test: bu yerda ilgari teshik bor edi. Tanlangan so'rovning raqamini
 // TANLANMAGAN ijrochi ham olaverardi, chunki shart faqat holatni tekshirardi. Shu
 // sababli har bir qoida alohida qator bilan qotirib qo'yiladi.
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { HttpException } from '@nestjs/common';
 import type { AuditService } from '../../common/audit.service';
 import type { PlatformConfigService } from '../../common/platform-config.service';
 import type { PrismaService } from '../../common/prisma.service';
@@ -22,9 +23,19 @@ function setup(opts: {
   terminal?: { id: string; phone: string | null };
   /** Mayoq va audit yozuvlari shu massivlarga tushadi. */
   calls?: Record<string, unknown>[];
+  /** Audit jadvali: kvota shundan o'qiladi, ya'ni oldindan qator qo'yish mumkin. */
   auditRows?: Record<string, unknown>[];
   dailyLimit?: number;
+  /** Obunasiz odamga nechta raqam bepul. */
+  free?: number;
+  /** Audit yozuvi yiqilgan holat: kvota qatori yozilmasa raqam ham berilmaydi. */
+  auditFails?: boolean;
+  /** Umrbod sanoq so'ralganda bu massivga bitta element tushadi. */
+  countProbe?: number[];
 } = {}) {
+  // Bitta massiv: soxta audit.log yozadi, soxta auditLog o'qiydi. Ikkita bo'lsa
+  // deduplikatsiya testi yolg'ondan o'tib ketardi.
+  const rows: Record<string, unknown>[] = opts.auditRows ?? [];
   const prisma = {
     marketRequest: {
       findFirst: async ({ where }: { where: Where }) => {
@@ -53,9 +64,28 @@ function setup(opts: {
     terminal: {
       findFirst: async () => (opts.terminal ? { id: opts.terminal.id, phone: opts.terminal.phone, contactPhone: null, isDemo: false } : null),
     },
+    auditLog: {
+      // Kunlik sanoq: shu odamning bugungi ochilishlari
+      findMany: async ({ where }: { where: Where }) => rows.filter((r) =>
+        r.actorId === where.actorId
+        && (where.action.in as string[]).includes(r.action as string)
+        && (r.createdAt as Date) >= (where.createdAt.gte as Date)),
+      // Umrbod sanoq: faqat qidiruvda ochilgan raqamlar
+      count: async ({ where }: { where: Where }) => {
+        opts.countProbe?.push(1);
+        return rows.filter((r) => r.actorId === where.actorId && r.action === where.action).length;
+      },
+    },
   } as unknown as PrismaService;
-  const config = { get: async () => ({ phoneRevealDaily: opts.dailyLimit ?? 50 }) } as unknown as PlatformConfigService;
-  const audit = { log: async (r: Record<string, unknown>) => { opts.auditRows?.push(r); } } as unknown as AuditService;
+  const config = {
+    get: async () => ({ phoneRevealDaily: opts.dailyLimit ?? 50, phoneRevealFree: opts.free ?? 0, subscriptionMonthSom: 99000 }),
+  } as unknown as PlatformConfigService;
+  const audit = {
+    log: async (r: Record<string, unknown>) => {
+      if (opts.auditFails) throw new Error('baza yiqildi');
+      rows.push({ ...r, createdAt: new Date() });
+    },
+  } as unknown as AuditService;
   const subs = { isActive: async () => opts.subscriber ?? false } as unknown as SubscriptionService;
   const impressions = { record: async (items: Record<string, unknown>[]) => { opts.calls?.push(...items); } } as unknown as ImpressionsService;
   return new ContactsController(prisma, config, audit, subs, impressions);
@@ -145,5 +175,94 @@ describe('telefon ochilishi qanday sanaladi', () => {
     const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, dailyLimit: 0 });
     await expect(c.reveal('u1', 'terminal', 't1')).rejects.toMatchObject({ status: 429 });
     await expect(c.reveal('u1', 'terminal', 't1')).rejects.toMatchObject({ status: 429 });
+  });
+});
+
+/** Tashlangan xatoning holati va tanasi bitta obyektda: tana xususiy maydonda turadi. */
+async function refusal(fn: () => Promise<unknown>) {
+  try {
+    await fn();
+  } catch (e) {
+    const x = e as HttpException;
+    return { status: x.getStatus(), ...(x.getResponse() as Record<string, unknown>) };
+  }
+  throw new Error('xato kutilgan edi');
+}
+
+/**
+ * Bepul oyna: obunasiz odamga umrbod birinchi N ta raqam. Sukut N = 0, ya'ni
+ * bugungi devor o'zgarmaydi va qo'shimcha so'rov ham bajarilmaydi.
+ */
+describe('bepul raqam oynasi', () => {
+  it("oyna 0 bo'lsa umrbod sanoq umuman o'qilmaydi", async () => {
+    const countProbe: number[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, countProbe });
+    expect(await refusal(() => c.reveal('u1', 'terminal', 't1'))).toMatchObject({ status: 402, code: 'SUBSCRIPTION_REQUIRED' });
+    expect(countProbe).toHaveLength(0);
+  });
+
+  it("oyna 2 bo'lsa ikkita raqam ochiladi, uchinchisida devor", async () => {
+    const rows: Record<string, unknown>[] = [];
+    const mk = (id: string) => setup({ terminal: { id, phone: '+998901234' + id }, subscriber: false, free: 2, auditRows: rows });
+    expect((await mk('t1').reveal('u1', 'terminal', 't1')).phone).toBe('+998901234t1');
+    expect((await mk('t2').reveal('u1', 'terminal', 't2')).phone).toBe('+998901234t2');
+    expect(await refusal(() => mk('t3').reveal('u1', 'terminal', 't3'))).toMatchObject({ status: 402, freeTotal: 2 });
+  });
+
+  it('bitim raqami bepul oynani yemaydi', async () => {
+    const rows: Record<string, unknown>[] = [];
+    const deal = setup({ request: { status: 'AWARDED', contactPhone: '+998901234567', awardedTo: 'w' }, subscriber: false, free: 1, auditRows: rows });
+    await deal.reveal('w', 'request', 'CR-1');
+    expect(rows[0]?.action).toBe('contact.deal');
+    // Oyna hamon butun: qidiruvda ochilgan raqam nol
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, free: 1, auditRows: rows });
+    expect((await c.reveal('w', 'terminal', 't1')).phone).toBe('+998901234567');
+  });
+});
+
+/**
+ * Sanoq auditdan o'qiladi. Ilgari u xotira chelagida edi: har deployda nolga
+ * qaytardi va chegara amalda ishlamasdi.
+ */
+describe('kunlik kvota auditdan', () => {
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('jarayon qayta ishga tushsa ham bugungi sanoq joyida qoladi', async () => {
+    const now = new Date();
+    const rows = Array.from({ length: 3 }, (_, i) => ({ actorId: 'u1', action: 'contact.reveal', entity: 'terminal', entityId: 'old' + i, createdAt: now }));
+    // Yangi nusxa = qayta ishga tushgan jarayon
+    const c = setup({ terminal: { id: 't9', phone: '+998901234567' }, subscriber: true, dailyLimit: 3, auditRows: rows });
+    expect(await refusal(() => c.reveal('u1', 'terminal', 't9'))).toMatchObject({ status: 429, used: 3, limit: 3 });
+  });
+
+  it('bugun ochilgan obyekt yangi nusxada ham qayta sanalmaydi', async () => {
+    const rows: Record<string, unknown>[] = [];
+    const calls: Record<string, unknown>[] = [];
+    const mk = () => setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, dailyLimit: 1, auditRows: rows, calls });
+    await mk().reveal('u1', 'terminal', 'toshkent-1');
+    // Chegara 1 ta, lekin ayni o'sha obyekt: kvota yeyilmaydi
+    expect((await mk().reveal('u1', 'terminal', 't1')).phone).toBe('+998901234567');
+    expect(rows).toHaveLength(1);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('Toshkent yarim tuni: kechagi ochilish bugungi kvotaga sanalmaydi', async () => {
+    vi.useFakeTimers();
+    // Toshkent 00:30 = UTC 19:30 (oldingi kun)
+    vi.setSystemTime(new Date('2026-09-23T19:30:00Z'));
+    const rows = [
+      { actorId: 'u1', action: 'contact.reveal', entity: 'terminal', entityId: 'a', createdAt: new Date('2026-09-23T18:30:00Z') }, // kecha 23:30
+      { actorId: 'u1', action: 'contact.reveal', entity: 'terminal', entityId: 'b', createdAt: new Date('2026-09-23T19:10:00Z') }, // bugun 00:10
+    ];
+    // Bugungi sanoq 1 ta, ya'ni chegara 2 da yana bitta ochiladi
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, dailyLimit: 2, auditRows: rows });
+    expect((await c.reveal('u1', 'terminal', 't1')).phone).toBe('+998901234567');
+  });
+
+  it('audit yiqilsa raqam berilmaydi', async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, auditFails: true, calls });
+    expect(await refusal(() => c.reveal('u1', 'terminal', 't1'))).toMatchObject({ status: 503, code: 'RETRY' });
+    expect(calls).toHaveLength(0);
   });
 });

@@ -163,6 +163,8 @@ export const PLATFORM_DEFAULTS = {
   subscriptionMonthSom: 99000,
   /** Obunachi kuniga nechta raqam ocha oladi: bazani ko'chirib olishga qarshi chegara. */
   phoneRevealDaily: 50,
+  /** Obunasiz odamga nechta raqam bepul (umrbod, kunlik emas). 0 = bepul yo'q, ya'ni hozirgi tartib. */
+  phoneRevealFree: 0,
   /** Obunasiz odamga nechta vagon qidiruvi bepul (umrbod, kunlik emas): "birinchisi tekin". */
   wagonSearchFree: 1,
   /** Yordam chatida kuniga nechta savol LLM ga ketadi (tez-tez so'raladigan savollar bepul va cheksiz). */

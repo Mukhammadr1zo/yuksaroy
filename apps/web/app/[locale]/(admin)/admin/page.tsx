@@ -24,6 +24,8 @@ type Health = {
   oldest?: Partial<Record<string, string | null>>;
   /** Komissiya chegarasi: shu oy va o'tgan oy bajarilgan buyurtma, hamda sozlamadagi chegara. Faqat ?full=1 bilan. */
   commission?: { thisMonth: number; prevMonth: number; threshold: number };
+  /** Raqam ochish voronkasi, 30 kun. Faqat ?full=1 bilan. */
+  reveals?: { people: number; reveals: number; subscribers: number; freeReveals: number; freeTotal: number };
   /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
   failed?: string[];
 };
@@ -190,6 +192,25 @@ export default function AdminHomePage() {
                   </div>
                 </dl>
                 <p className="mt-2 text-xs text-muted">{th('commissionThreshold', { n: c.threshold })}</p>
+              </section>
+            ) : null}
+
+            {/* Bepul oyna o'chiq ekan (freeTotal = 0) bu yerda to'rtta nol turardi va hech qanday
+                qarorni o'zgartirmasdi, shuning uchun karta faqat oyna yoqilganda chiziladi.
+                Yuqori qator ODAM, past qator OCHILISH: birliklari aralashib ketmasin. */}
+            {health.reveals && health.reveals.freeTotal > 0 ? (
+              <section className={`${CARD} min-w-0 p-4`}>
+                <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('reveals')}</h2>
+                <dl className="mt-1 grid grid-cols-2 gap-2">
+                  {([['revealPeople', health.reveals.people], ['revealSubscribers', health.reveals.subscribers],
+                     ['revealCount', health.reveals.reveals], ['revealFree', health.reveals.freeReveals]] as const).map(([k, v]) => (
+                    <div key={k} className="min-w-0">
+                      <dd className="font-display text-xl font-bold tabular-nums text-navy">{num(v, locale)}</dd>
+                      <dt className="text-xs text-muted">{th(k)}</dt>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-2 text-xs text-muted">{th('revealWindow', { n: health.reveals.freeTotal })}</p>
               </section>
             ) : null}
           </div>

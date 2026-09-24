@@ -27,7 +27,7 @@ type Kind = 'listing' | 'terminal' | 'org' | 'service' | 'request' | 'offer';
 type State =
   | { s: 'idle' } | { s: 'busy' } | { s: 'phone'; phone: string }
   // 429 da used va limit har doim teng, shuning uchun bitta son saqlanadi
-  | { s: 'login' } | { s: 'subscribe'; priceSom: number; dailyLimit: number } | { s: 'limit'; limit: number } | { s: 'none' } | { s: 'err' };
+  | { s: 'login' } | { s: 'subscribe'; priceSom: number; dailyLimit: number; freeTotal: number } | { s: 'limit'; limit: number } | { s: 'none' } | { s: 'err' };
 
 export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: string; next: string }) {
   const t = useTranslations('subscription.reveal');
@@ -47,10 +47,10 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
       const status = e instanceof ApiError ? e.status : 0;
       // JSON bo'lmagan javobda tana null keladi: sonlar sukut sozlamaga tayanadi,
       // devor raqamsiz qolib komponent yiqilmasin
-      const b = (e instanceof ApiError ? (e.body as { priceSom?: number; dailyLimit?: number; limit?: number } | null) : null) ?? {};
+      const b = (e instanceof ApiError ? (e.body as { priceSom?: number; dailyLimit?: number; limit?: number; freeTotal?: number } | null) : null) ?? {};
       setSt(
         status === 401 ? { s: 'login' }
-          : status === 402 ? { s: 'subscribe', priceSom: b.priceSom ?? PLATFORM_DEFAULTS.subscriptionMonthSom, dailyLimit: b.dailyLimit ?? PLATFORM_DEFAULTS.phoneRevealDaily }
+          : status === 402 ? { s: 'subscribe', priceSom: b.priceSom ?? PLATFORM_DEFAULTS.subscriptionMonthSom, dailyLimit: b.dailyLimit ?? PLATFORM_DEFAULTS.phoneRevealDaily, freeTotal: b.freeTotal ?? 0 }
             : status === 429 ? { s: 'limit', limit: b.limit ?? PLATFORM_DEFAULTS.phoneRevealDaily }
               : status === 404 ? { s: 'none' } : { s: 'err' });
     }
@@ -86,10 +86,12 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
   if (st.s === 'subscribe') {
     // Telegram Mini App da kabinet cookie'si yo'q: /dashboard u yerda kirish sahifasiga qaytaradi,
     // shuning uchun Mini App o'z obuna sahifasiga boradi (karta bir xil)
-    // Uch qator: nima ochiladi, qancha turadi, nimasi bepul. Bitta qator bilan
-    // odam qaror qila olmasdi va narxni izlab ketardi.
+    // To'rt qator: nima ochiladi, qancha turadi, nimasi bepul, va bepul oyna
+    // tugagani (oyna yoqilgan bo'lsa). Bitta qator bilan odam qaror qila olmasdi
+    // va narxni izlab ketardi.
     return (
       <span className="block text-sm text-muted">
+        {st.freeTotal > 0 ? <span className="mb-0.5 block">{t('subscribeFreeUsed', { n: st.freeTotal })}</span> : null}
         <span className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('subscribeWhat')}</span>
         <span className="mt-0.5 block">{t('subscribePrice', { price: num(st.priceSom, locale), n: st.dailyLimit })}</span>
         <span className="mt-0.5 block">{t('subscribeChat')}</span>

@@ -11,6 +11,8 @@ export interface PlatformConfigValues {
   terminalConfirmMin: number;
   subscriptionMonthSom: number;
   phoneRevealDaily: number;
+  /** Obunasiz odamga nechta raqam bepul (umrbod). 0 = bepul yo'q. */
+  phoneRevealFree: number;
   wagonSearchFree: number;
   helpAskDaily: number;
   /** Qo'lda to'lov rekvizitlari (matn); bo'sh bo'lishi mumkin. */

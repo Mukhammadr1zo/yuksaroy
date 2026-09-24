@@ -1,12 +1,14 @@
 import { BadRequestException, Controller, Get, HttpException, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { uzLocalDate, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
-import { DailyBucket } from '../../common/ip-bucket';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { REVEAL_ACTIONS } from '../../common/reveal-actions';
 import { PrismaService } from '../../common/prisma.service';
 import { ImpressionsService } from '../impressions/impressions.service';
 import { visibleCompany } from '../catalog/infrastructure/prisma-catalog.repository';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { canSearch, serialize } from '../wagon/wagon.rules';
 import { SubscriptionService } from './subscription.service';
 
 const KINDS = ['listing', 'terminal', 'org', 'service', 'request', 'offer'] as const;
@@ -38,6 +40,9 @@ const some = (v: string | null | undefined) => (v && v.trim() ? v.trim() : null)
  * Ochilgani serverda sanaladi: audit qatori bilan 'contact' mayog'i bitta shart
  * ostida yoziladi, ya'ni ikki son hech qachon bir-biriga zid ketmaydi.
  *
+ * Sanoq auditdan o'qiladi, xotiradan emas: jarayon qayta ishga tushsa ham kunlik
+ * chegara joyida qoladi.
+ *
  * `id` slug ham bo'lishi mumkin: ochiq sahifalar slug bilan ishlaydi.
  */
 @ApiTags('contacts')
@@ -45,11 +50,6 @@ const some = (v: string | null | undefined) => (v && v.trim() ? v.trim() : null)
 @Controller('contacts')
 @UseGuards(JwtGuard)
 export class ContactsController {
-  // ponytail: bitta jarayon uchun; replica bo'lsa Redis
-  private readonly daily = new DailyBucket();
-  /** Bugun shu odam shu obyektni ochganmi: limit 1, ikkinchi take rad etiladi = allaqachon ochilgan */
-  private readonly seen = new DailyBucket();
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: PlatformConfigService,
@@ -63,46 +63,96 @@ export class ContactsController {
     if (!(KINDS as readonly string[]).includes(kind)) throw new BadRequestException({ code: 'KIND', allowed: KINDS });
     const found = await this.lookup(kind as Kind, id, userId);
     if (found === undefined) throw new NotFoundException({ code: 'NOT_FOUND' });
+    // Bitta odam navbat bilan: sanoq o'qilishi va audit qatori orasiga uning ikkinchi
+    // oynasidagi so'rovi kirmasin, aks holda bepul oyna chegaradan oshib ketardi.
+    // Kalit nomlangan: vagon qidiruvi ham shu funksiyani BARE userId bilan chaqiradi,
+    // nomsiz kalit raqamni upstream so'rovi ortida kuttirardi.
+    return serialize(`reveal:${userId}`, () => this.give(userId, kind as Kind, found));
+  }
+
+  /*
+   * Obuna qorovuli sinf darajasidan shu yerga ko'chdi.
+   *
+   * Bitim tuzilgandan keyin, ya'ni yuk egasi ijrochini tanlaganda, ikki taraf
+   * bir-birining raqamini obunasiz oladi. Sabab: o'sha lahzada to'lov devori
+   * qo'yilsa ikkalasi ham bitimni platformadan tashqariga olib chiqadi, chunki
+   * ular allaqachon bir-birini tanlab bo'lgan. Obuna esa oldingi bosqichda,
+   * raqamni QIDIRISH paytida (katalog, e'lon, ochiq so'rov) o'z kuchida qoladi.
+   *
+   * Bu qoidani teskari qilish uchun `free` ni hisoblaydigan ikki joyni
+   * false ga o'zgartirish yetadi.
+   */
+  private async give(userId: string, kind: Kind, found: Found) {
     const { phone, free } = found;
-    /*
-     * Obuna qorovuli sinf darajasidan shu yerga ko'chdi.
-     *
-     * Bitim tuzilgandan keyin, ya'ni yuk egasi ijrochini tanlaganda, ikki taraf
-     * bir-birining raqamini obunasiz oladi. Sabab: o'sha lahzada to'lov devori
-     * qo'yilsa ikkalasi ham bitimni platformadan tashqariga olib chiqadi, chunki
-     * ular allaqachon bir-birini tanlab bo'lgan. Obuna esa oldingi bosqichda,
-     * raqamni QIDIRISH paytida (katalog, e'lon, ochiq so'rov) o'z kuchida qoladi.
-     *
-     * Bu qoidani teskari qilish uchun `free` ni hisoblaydigan ikki joyni
-     * false ga o'zgartirish yetadi.
-     */
     const cfg = await this.config.get();
-    // Devor javobida narx va kunlik chegara ham bor: odam nima ochilishini, qancha
-    // turishini va kuniga nechta ochilishini shu yerdan biladi. Ikkalasi ham ochiq
-    // ma'lumot, narxlar sahifasida yozilgan.
-    if (!free && !(await this.subs.isActive(userId))) throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: cfg.subscriptionMonthSom, dailyLimit: cfg.phoneRevealDaily }, 402);
-    let quota = { used: 0, limit: cfg.phoneRevealDaily };
-    if (phone !== null) {
-      // Kalit va audit xom parametrdan emas, topilgan obyekt id sidan: bir odam bitta
-      // terminalni slug bilan ham, id bilan ham ochsa bu BITTA ochilish
-      const key = `${userId}:${kind}:${found.id}`;
-      const first = !this.seen.has(key);
-      const q = first ? this.daily.take(userId, cfg.phoneRevealDaily) : { ok: true, used: 0, limit: cfg.phoneRevealDaily };
-      if (!q.ok) throw new HttpException({ code: 'RATE_LIMITED', used: q.used, limit: q.limit }, 429);
-      // Belgi kvotadan KEYIN qo'yiladi: ilgari 429 olgan odam o'sha obyektni qayta
-      // so'rab raqamni izsiz olardi, chunki belgi allaqachon qo'yilgan bo'lardi
-      if (first) {
-        this.seen.take(key, 1);
-        await this.audit.log({ actorId: userId, action: 'contact.reveal', entity: kind, entityId: found.id });
-        // Sanoq serverda: bu yerda raqam haqiqatan berilgani aniq. Xatosi ochilishni
-        // yiqitmasin, aks holda baza tirsillaganda kvota yeyilib foydalanuvchi 500 oladi
-        if (kind === 'listing' || kind === 'terminal' || kind === 'org') {
-          await this.impressions.record([{ kind, targetId: found.id, surface: 'contact' }]).catch(() => {});
-        }
+    if (!free) {
+      const subscriber = await this.subs.isActive(userId);
+      /*
+       * Bepul oyna: obunasiz odamga umrbod birinchi N ta raqam. Qoida vagon
+       * qidiruvinikidan (canSearch): obunachi cheksiz, qolganiga N ta.
+       *
+       * N = 0 (sukut) bo'lsa sanoq umuman O'QILMAYDI: qo'shimcha so'rov yo'q va
+       * shart bugungi shart bilan aynan bir xil bo'lib qoladi.
+       */
+      const freeUsed = !subscriber && cfg.phoneRevealFree > 0 ? await this.freeUsed(userId) : 0;
+      // Devor javobida narx, kunlik chegara va bepul oyna ham bor: odam nima
+      // ochilishini, qancha turishini va nimasi bepulligini shu yerdan biladi.
+      if (!canSearch(subscriber, freeUsed, cfg.phoneRevealFree)) {
+        throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: cfg.subscriptionMonthSom, dailyLimit: cfg.phoneRevealDaily, freeTotal: cfg.phoneRevealFree }, 402);
       }
-      quota = { used: q.used, limit: q.limit };
     }
-    return { phone, quota };
+    if (phone === null) return { phone };
+    const today = await this.todayReveals(userId, cfg.phoneRevealDaily);
+    // Dedup topilgan obyekt id si bo'yicha: bir odam bitta terminalni slug bilan ham,
+    // id bilan ham ochsa bu BITTA ochilish
+    const first = !today.some((r) => r.entity === kind && r.entityId === found.id);
+    if (first) {
+      if (today.length >= cfg.phoneRevealDaily) throw new HttpException({ code: 'RATE_LIMITED', used: today.length, limit: cfg.phoneRevealDaily }, 429);
+      /*
+       * Bu qator KVOTANING O'ZI: yozilmasa raqam ham berilmaydi. Xom Prisma xatosi
+       * global filtrda 400/404 ga aylanib "raqam yo'q" bo'lib ko'rinardi, shuning
+       * uchun o'z kodimizga o'raymiz, odam qayta urinadi.
+       *
+       * Bitim raqami alohida nom bilan: u qidiruvda ochilgan raqam emas va bepul
+       * oynani yemaydi (kunlik chegaraga esa bugungidek sanaladi).
+       */
+      try {
+        await this.audit.log({ actorId: userId, action: free ? 'contact.deal' : 'contact.reveal', entity: kind, entityId: found.id }, true);
+      } catch {
+        throw new HttpException({ code: 'RETRY' }, 503);
+      }
+      // Sanoq serverda: bu yerda raqam haqiqatan berilgani aniq. Mayoq xatosi
+      // ochilishni yiqitmasin, u kvota emas.
+      if (kind === 'listing' || kind === 'terminal' || kind === 'org') {
+        await this.impressions.record([{ kind, targetId: found.id, surface: 'contact' }]).catch(() => {});
+      }
+    }
+    return { phone };
+  }
+
+  /**
+   * Bugun ochilgan obyektlar, TOSHKENT kuni bo'yicha. Xotira chelagi emas, audit:
+   * jarayon qayta ishga tushsa ham sanoq nolga qaytmaydi.
+   *
+   * Bitta so'rovdan ikki javob: nechta ochilgan (uzunlik) va shu obyekt allaqachon
+   * ochilganmi (ro'yxatda bormi).
+   * ponytail: take chegaradan sal ortiq. 100 pol: egasi chegarani kun o'rtasida
+   * tushirsa ham ertalab ochilgan obyekt ro'yxatda qolsin, aks holda to'lagan odam
+   * o'zi ochgan raqamni qayta ko'ra olmasdi.
+   */
+  private todayReveals(userId: string, limit: number) {
+    const dayStart = uzLocalToUtc(uzLocalDate(new Date()), '00:00');
+    return this.prisma.auditLog.findMany({
+      where: { actorId: userId, action: { in: [...REVEAL_ACTIONS] }, createdAt: { gte: dayStart } },
+      select: { entity: true, entityId: true },
+      orderBy: { createdAt: 'desc' },
+      take: Math.max(limit, 100) + 1,
+    });
+  }
+
+  /** Umrbod nechta raqam ochgan (bitim raqamlari sanalmaydi): bepul oyna shu songa qaraydi. */
+  private freeUsed(userId: string) {
+    return this.prisma.auditLog.count({ where: { actorId: userId, action: 'contact.reveal' } });
   }
 
   /** undefined: obyekt yo'q yoki katalogda ko'rinmaydi; phone null: obyekt bor, raqami yo'q. */

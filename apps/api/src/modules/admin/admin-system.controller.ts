@@ -29,11 +29,30 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   terminalConfirmMin: posInt,
   subscriptionMonthSom: posInt,
   phoneRevealDaily: posInt,
+  phoneRevealFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul raqam yo'q (sukut)
   wagonSearchFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul urinish yo'q
   helpAskDaily: posInt,
   // Rekvizit: bo'sh saqlanmaydi (bo'shatish uchun qator o'chiriladi), 500 belgi yetarli
   payDetails: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 500,
 };
+
+/**
+ * Voronka: guruhlangan qatorlardan to'rtta son.
+ *
+ * "Obunachi" HOZIR faol obunasi borlar: ochilish paytidagi holat audit qatorida yo'q.
+ * Bu 30 kunlik tendensiya uchun yetarli, hisob-kitob uchun emas.
+ */
+export function revealFunnel(by: readonly { actorId: string | null; _count: { _all: number } }[], paid: ReadonlySet<string>) {
+  let reveals = 0;
+  let freeReveals = 0;
+  let subscribers = 0;
+  for (const r of by) {
+    reveals += r._count._all;
+    if (r.actorId && paid.has(r.actorId)) subscribers += 1;
+    else freeReveals += r._count._all;
+  }
+  return { people: by.length, reveals, subscribers, freeReveals };
+}
 
 /**
  * Audit filtridagi sana. Faqat kun berilsa (YYYY-MM-DD) u TOSHKENT kuni deb olinadi.
@@ -252,7 +271,7 @@ export class AdminSystemController {
     // Komissiya chegarasi: va'da bo'yicha komissiya faqat oyiga N ta bajarilgan
     // buyurtmadan oshgach kiritiladi va kamida 30 kun oldin e'lon qilinadi. Demak ega
     // chegaraga YETGUNCHA qaror qilishi kerak; shu ikki son aynan shu qaror uchun.
-    const [db, queues, users, orders, listings, commission] = await Promise.all([
+    const [db, queues, users, orders, listings, commission, reveals] = await Promise.all([
       this.pingDb(),
       safe('queues', () => queueStats(this.prisma, withAge)),
       safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
@@ -269,6 +288,28 @@ export class AdminSystemController {
               this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: prevStart, lt: start } } }),
             ]);
             return { thisMonth, prevMonth, threshold: cfg.commissionThresholdOrders };
+          })
+        : null,
+      withAge
+        ? safe('reveals', async () => {
+            const from = new Date(Date.now() - 30 * 86_400_000);
+            // ponytail: guruhlash bazada, qo'shish xotirada; oyiga minglab ochuvchi
+            // bo'lsa bitta SQL ga (COUNT ... FILTER) ko'chiriladi
+            const by = await this.prisma.auditLog.groupBy({
+              by: ['actorId'],
+              where: { action: 'contact.reveal', createdAt: { gte: from }, actorId: { not: null } },
+              _count: { _all: true },
+            });
+            const ids = by.map((r) => r.actorId!).filter(Boolean);
+            const [subs, cfg] = await Promise.all([
+              ids.length
+                ? this.prisma.subscription.findMany({ where: { userId: { in: ids }, status: 'ACTIVE', endsAt: { gt: new Date() } }, select: { userId: true }, distinct: ['userId'] })
+                : Promise.resolve([] as { userId: string }[]),
+              this.config.get(),
+            ]);
+            // freeTotal sonlar YONIDA: qaror "N ni oshiraymi" degan savol, hozirgi N
+            // ko'rinmasa to'rt son bilan javob berib bo'lmaydi
+            return { ...revealFunnel(by, new Set(subs.map((sb) => sb.userId))), freeTotal: cfg.phoneRevealFree };
           })
         : null,
     ]);
@@ -293,6 +334,8 @@ export class AdminSystemController {
       // Uch oylik tarix ataylab yo'q: qaror ikkita songa qaraydi
       // ponytail: sana kaliti va tashkilot kesimi keyinroq, chegara yarmiga yetganda
       commission: commission ?? undefined,
+      // Raqam ochish voronkasi, 30 kun. Bepul oyna o'chiq ekan brauzer kartani chizmaydi.
+      reveals: reveals ?? undefined,
       failed, // bo'sh bo'lsa hammasi joyida
     };
   }

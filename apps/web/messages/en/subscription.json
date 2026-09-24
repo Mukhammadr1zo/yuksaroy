@@ -36,6 +36,7 @@
       "subscribeWhat": "The number opens with a subscription.",
       "subscribePrice": "{price} som a month, {n} numbers a day.",
       "subscribeChat": "Messages are free: you can write without a subscription.",
+      "subscribeFreeUsed": "Your {n} free numbers are used up.",
       "limitCount": "You opened {n} numbers today, that is the daily limit. It continues tomorrow.",
       "copy": "Copy",
       "copied": "Copied"

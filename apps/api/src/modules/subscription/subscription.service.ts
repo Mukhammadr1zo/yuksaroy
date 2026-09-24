@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { REVEAL_ACTIONS } from '../../common/reveal-actions';
 import { notifyBoth } from '../../common/telegram';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AdminNotify } from '../organizations/application/admin-notify';
@@ -126,7 +127,7 @@ export class SubscriptionService {
     });
     if (!s?.endsAt) return null;
     const reveals = await this.prisma.auditLog.count({
-      where: { actorId: userId, action: 'contact.reveal', createdAt: { gte: s.startsAt ?? s.createdAt, lt: s.endsAt } },
+      where: { actorId: userId, action: { in: [...REVEAL_ACTIONS] }, createdAt: { gte: s.startsAt ?? s.createdAt, lt: s.endsAt } },
     });
     return { endsAt: s.endsAt, reveals };
   }
