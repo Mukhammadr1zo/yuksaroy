@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { PrismaService } from '../../common/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdmin } from '../organizations/application/platform-admin';
-import { esc, notifyTelegram, webUrl } from '../../common/telegram';
+import { notifyBoth } from '../../common/telegram';
 import { FILE_URL } from '../../common/file-url';
 import { AttachmentError, parseAttachments, type Attachment } from './domain/attachments';
 import { threadRole, type ThreadRole } from './domain/access';
@@ -205,8 +205,14 @@ export class ChatService {
     if (!to.length) return;
     const from = await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true, phone: true } }).then((u) => u?.fullName || u?.phone || '');
     const href = `/dashboard/inquiries/${inquiryId}`;
-    await this.notifications.push(to, { kind: 'inquiry', title: terminal.name, body: text.slice(0, 200), href });
-    await notifyTelegram(this.prisma, { userIds: to }, 'inquiry', { title: esc(terminal.name), from: esc(from), message: esc(text.slice(0, 500)), url: webUrl(href) });
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: to },
+      kind: 'inquiry',
+      inApp: 'inquiry',
+      href,
+      vars: { title: terminal.name, from, message: text.slice(0, 500) },
+      card: { title: terminal.name, body: text.slice(0, 200) },
+    });
   }
 
   async get(userId: string, inquiryId: string) {
@@ -261,8 +267,14 @@ export class ChatService {
     if (!others.length) return;
     const title = inq.listing?.title ?? inq.terminal?.name ?? '';
     const href = `/dashboard/inquiries/${inq.id}`;
-    await this.notifications.push(others, { kind: 'message', title, body: text.slice(0, 200), href });
-    await notifyTelegram(this.prisma, { userIds: others }, 'inquiryMessage', { title: esc(title), message: esc(text.slice(0, 500)), url: webUrl(href) });
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: others },
+      kind: 'inquiryMessage',
+      inApp: 'message',
+      href,
+      vars: { title, message: text.slice(0, 500) },
+      card: { title, body: text.slice(0, 200) },
+    });
   }
 
   /** Qabul qiluvchi tomon: tashkilot a'zolari, shaxsiy egasi yoki platforma. */

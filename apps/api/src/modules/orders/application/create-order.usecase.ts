@@ -3,7 +3,7 @@ import type { Direction, Operation, ServiceCode } from '@yuksaroy/domain';
 import { PlatformConfigService } from '../../../common/platform-config.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../../common/prisma.service';
-import { notifyTelegram, webUrl } from '../../../common/telegram';
+import { notifyBoth } from '../../../common/telegram';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../../catalog/domain/ports';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
 import { HoldSlotUseCase } from '../../booking/application/hold-slot.usecase';
@@ -93,12 +93,14 @@ export class CreateOrderUseCase {
       items: quote.lines.map((l) => ({ serviceCode: l.serviceCode, tariffId: l.tariffId, qty: l.qty, unit: l.unit, unitPriceTiyin: l.unitPriceTiyin, amountTiyin: l.amountTiyin, minApplied: l.minApplied })),
       bookingId: booking.id,
     });
-    // Terminal egalariga xabar: 30 daqiqalik SLA shu yerdan boshlanadi. Saytdagi qo'ng'iroq va Telegram birga.
-    void this.notifications.recipients({ orgIds: [terminal.orgId], ownersOnly: true })
-      .then((to) => this.notifications.push(to, { kind: 'orderNew', title: `${order.no} - ${terminal.name}`, body: order.shipperOrgName, href: '/dashboard/orders' }))
-      .catch(() => {});
-    void notifyTelegram(this.prisma, { orgIds: [terminal.orgId], ownersOnly: true }, 'orderNew', {
-      no: order.no, terminal: terminal.name, shipper: order.shipperOrgName, minutes: cfg.terminalConfirmMin, url: webUrl('/dashboard/terminal'),
+    // Terminal egalariga xabar: tasdiqlash muddati shu yerdan boshlanadi
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { orgIds: [terminal.orgId], ownersOnly: true },
+      kind: 'orderNew',
+      inApp: 'orderNew',
+      href: '/dashboard/terminal',
+      vars: { no: order.no, terminal: terminal.name, shipper: order.shipperOrgName, minutes: cfg.terminalConfirmMin },
+      card: { title: `${order.no} - ${terminal.name}`, body: order.shipperOrgName },
     }).catch(() => {});
     return order;
   }

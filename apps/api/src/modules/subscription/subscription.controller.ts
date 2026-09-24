@@ -77,7 +77,7 @@ export class SubscriptionController {
   async cancel(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: CancelDto) {
     const reason = dto?.reason?.trim();
     if (!reason) throw new BadRequestException({ code: 'REASON_REQUIRED' });
-    const s = await this.subs.cancel(id);
+    const s = await this.subs.cancel(id, reason);
     await this.audit.log({ actorId: userId, action: 'subscription.cancel', entity: 'Subscription', entityId: id, meta: { userId: s.userId, reason } });
     return s;
   }

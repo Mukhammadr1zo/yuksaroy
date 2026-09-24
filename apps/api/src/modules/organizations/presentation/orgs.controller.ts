@@ -10,6 +10,9 @@ import { CreateOrgUseCase } from '../application/create-org.usecase';
 import { ORG_REPOSITORY, type OrganizationRepository, type Storefront } from '../domain/ports';
 import { filterRoles, rolesForKinds } from '../domain/rules';
 import { AuditService } from '../../../common/audit.service';
+import { PrismaService } from '../../../common/prisma.service';
+import { NotificationsService } from '../../notifications/notifications.service';
+import { notifyBoth } from '../../../common/telegram';
 import { PlatformAdminGuard } from './platform-admin.guard';
 
 class CreateOrgDto {
@@ -59,6 +62,8 @@ export class OrgsController {
     @Inject(ORG_REPOSITORY) private readonly orgs: OrganizationRepository,
     private readonly audit: AuditService,
     private readonly adminNotify: AdminNotify,
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   @Get('orgs/mine')
@@ -127,8 +132,17 @@ export class OrgsController {
     const org = await this.orgs.findById(id);
     if (!org) throw new NotFoundException({ code: 'ORG_NOT_FOUND' });
     if (org.kycStatus !== 'PENDING') throw new BadRequestException({ code: 'KYC_NOT_PENDING', status: org.kycStatus });
+    // Sabab majburiy: tasdiqlanmagan tashkilot nima tuzatishini bilmasa qo'llab-quvvatlashga qo'ng'iroq qiladi
+    if (!dto.approve && !dto.note?.trim()) throw new BadRequestException({ code: 'REASON_REQUIRED' });
     const r = await this.orgs.update(id, { kycStatus: dto.approve ? 'VERIFIED' : 'REJECTED', kycNote: dto.note ?? null });
     await this.audit.log({ actorId: userId, action: 'org.kyc.decide', entity: 'Organization', entityId: id, meta: { approve: dto.approve, note: dto.note } });
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { orgIds: [id] },
+      kind: dto.approve ? 'orgVerified' : 'orgRejected',
+      inApp: 'kyc',
+      href: '/dashboard/organization',
+      vars: { name: org.name, reason: dto.note ?? '' },
+    }).catch(() => {});
     return r;
   }
 

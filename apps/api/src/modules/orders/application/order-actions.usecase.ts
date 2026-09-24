@@ -1,7 +1,8 @@
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { BOOKING, ORDER_EVENT_STATUSES, TransitionError, assertOrderTransition, type Actor, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
 import { PrismaService } from '../../../common/prisma.service';
-import { notifyTelegram, webUrl, type NotifyKind } from '../../../common/telegram';
+import { notifyBoth, type NotifyKind } from '../../../common/telegram';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
 import { ORDER_REPOSITORY, OrderStaleError, type OrderRecord, type OrderRepository } from '../domain/ports';
 import { OrderAccess } from './order-access';
@@ -16,6 +17,7 @@ export class OrderActionsUseCase {
     private readonly access: OrderAccess,
     private readonly documents: IssueDocumentsUseCase,
     private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ── terminal ──
@@ -89,10 +91,14 @@ export class OrderActionsUseCase {
   }
 
   // ── yordamchilar ──
-  /** Buyurtmani yaratgan mijozga Telegram xabari (bog'lanmagan bo'lsa hech narsa); tranzaksiyani to'xtatmaydi. */
+  /** Buyurtmani yaratgan mijozga: saytdagi qo'ng'iroq va Telegram; o'tishni to'xtatmaydi. */
   private notifyClient(o: OrderRecord, kind: NotifyKind, reason?: string) {
-    void notifyTelegram(this.prisma, { userIds: [o.createdById] }, kind, {
-      no: o.no, terminal: o.terminalName, reason: reason ?? '', url: webUrl(`/dashboard/orders/${o.no}`),
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [o.createdById] },
+      kind,
+      inApp: 'orderStatus',
+      href: `/dashboard/orders/${o.no}`,
+      vars: { no: o.no, terminal: o.terminalName, reason: reason ?? '' },
     }).catch(() => {});
   }
 

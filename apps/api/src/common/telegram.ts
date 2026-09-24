@@ -2,6 +2,8 @@ import type { SearchLang } from '@yuksaroy/domain';
 import { env } from './env';
 import { IpBucket } from './ip-bucket';
 import type { PrismaService } from './prisma.service';
+// Faqat tur: qurilishda yo'qoladi, shuning uchun modul aylanishi paydo bo'lmaydi
+import type { NotificationKind, NotificationsService } from '../modules/notifications/notifications.service';
 
 /** Telegram matn chegarasi 4096; sarlavha va havola uchun zaxira qoldiramiz. */
 export const TG_MAX = 3500;
@@ -31,11 +33,11 @@ export async function sendTelegram(chatIds: readonly (bigint | string)[], text: 
 }
 
 const LANGS: readonly string[] = ['uz', 'ru', 'en'];
-const lang = (v: string | null | undefined): SearchLang => (LANGS.includes(v ?? '') ? (v as SearchLang) : 'uz');
+export const lang = (v: string | null | undefined): SearchLang => (LANGS.includes(v ?? '') ? (v as SearchLang) : 'uz');
 
 type Vars = Record<string, string | number>;
-/** {kalit} o'rniga qiymat; har bir qiymat HTML uchun tozalanadi. */
-const fill = (t: string, v: Vars) => t.replace(/\{(\w+)\}/g, (_, k: string) => esc(String(v[k] ?? '')));
+/** {kalit} o'rniga qiymat. Telegram HTML o'qiydi, sayt qo'ng'irog'i esa oddiy matn: tozalash tashqaridan beriladi. */
+const fill = (t: string, v: Vars, clean: (s: string) => string) => t.replace(/\{(\w+)\}/g, (_, k: string) => clean(String(v[k] ?? '')));
 
 /** Bildirishnoma shablonlari. Oxirgi qator - sayt havolasi. */
 const TEXTS = {
@@ -75,9 +77,9 @@ const TEXTS = {
     en: '✅ <b>Ownership claim approved</b>\n{object}\n\n{url}',
   },
   claimRejected: {
-    uz: "❌ <b>Da'vo rad etildi</b>\n{object}\n\n{url}",
-    ru: '❌ <b>Заявка на объект отклонена</b>\n{object}\n\n{url}',
-    en: '❌ <b>Ownership claim rejected</b>\n{object}\n\n{url}',
+    uz: "❌ <b>Da'vo rad etildi</b>\n{object}\nSabab: {reason}\n\n{url}",
+    ru: '❌ <b>Заявка на объект отклонена</b>\n{object}\nПричина: {reason}\n\n{url}',
+    en: '❌ <b>Ownership claim rejected</b>\n{object}\nReason: {reason}\n\n{url}',
   },
   // Yuk bozori va xizmatlar markazi: {where} = yo'nalish yoki viloyat, {what} = yuk yoki xizmat turi
   marketCargoNew: {
@@ -100,6 +102,52 @@ const TEXTS = {
     ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nНомера открыты друг для друга.\n\n{url}',
     en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nYou can now see each other\'s numbers.\n\n{url}',
   },
+  reviewNew: {
+    uz: "⭐ <b>Yangi baho</b>\n{title}\n{rating}\n\n{text}\n\nKo'rish: {url}",
+    ru: '⭐ <b>Новый отзыв</b>\n{title}\n{rating}\n\n{text}\n\nПосмотреть: {url}',
+    en: '⭐ <b>New review</b>\n{title}\n{rating}\n\n{text}\n\nView: {url}',
+  },
+  // Qaror xabarlari: ilgari bu hodisalar faqat auditda qolardi va egasi hech narsa ko'rmasdi
+  listingApproved: {
+    uz: "✅ <b>E'loningiz tasdiqlandi</b>\n{title}\nEndi katalogda ko'rinadi.\n\n{url}",
+    ru: '✅ <b>Ваше объявление одобрено</b>\n{title}\nТеперь оно видно в каталоге.\n\n{url}',
+    en: '✅ <b>Your listing is approved</b>\n{title}\nIt is now visible in the catalogue.\n\n{url}',
+  },
+  listingRejected: {
+    uz: "❌ <b>E'loningiz qaytarildi</b>\n{title}\nSabab: {reason}\n\n{url}",
+    ru: '❌ <b>Ваше объявление отклонено</b>\n{title}\nПричина: {reason}\n\n{url}',
+    en: '❌ <b>Your listing was rejected</b>\n{title}\nReason: {reason}\n\n{url}',
+  },
+  orgVerified: {
+    uz: "✅ <b>Tashkilot tasdiqlandi</b>\n{name}\nEndi e'lonlaringiz tekshiruvsiz chiqadi.\n\n{url}",
+    ru: '✅ <b>Организация подтверждена</b>\n{name}\nТеперь ваши объявления выходят без проверки.\n\n{url}',
+    en: '✅ <b>Organisation confirmed</b>\n{name}\nYour listings now go live without review.\n\n{url}',
+  },
+  orgRejected: {
+    uz: "❌ <b>Tashkilot tasdiqlanmadi</b>\n{name}\nSabab: {reason}\n\n{url}",
+    ru: '❌ <b>Организация не подтверждена</b>\n{name}\nПричина: {reason}\n\n{url}',
+    en: '❌ <b>Organisation was not confirmed</b>\n{name}\nReason: {reason}\n\n{url}',
+  },
+  subscriptionActive: {
+    uz: '✅ <b>Obuna yoqildi</b>\n{until} gacha amal qiladi.\n\n{url}',
+    ru: '✅ <b>Подписка включена</b>\nДействует до {until}.\n\n{url}',
+    en: '✅ <b>Subscription is active</b>\nValid until {until}.\n\n{url}',
+  },
+  subscriptionCancelled: {
+    uz: '❌ <b>Obuna buyurtmasi bekor qilindi</b>\nSabab: {reason}\n\n{url}',
+    ru: '❌ <b>Заказ на подписку отменён</b>\nПричина: {reason}\n\n{url}',
+    en: '❌ <b>Subscription order cancelled</b>\nReason: {reason}\n\n{url}',
+  },
+  premiumActive: {
+    uz: "⬆️ <b>E'lon yuqoriga chiqdi</b>\n{title}\n{until} gacha.\n\n{url}",
+    ru: '⬆️ <b>Объявление поднято</b>\n{title}\nДо {until}.\n\n{url}',
+    en: '⬆️ <b>Listing moved to the top</b>\n{title}\nUntil {until}.\n\n{url}',
+  },
+  premiumCancelled: {
+    uz: "❌ <b>To'lov buyurtmasi bekor qilindi</b>\n{title}\nSabab: {reason}\n\n{url}",
+    ru: '❌ <b>Заказ на оплату отменён</b>\n{title}\nПричина: {reason}\n\n{url}',
+    en: '❌ <b>Payment order cancelled</b>\n{title}\nReason: {reason}\n\n{url}',
+  },
   // Adminlarga: navbatga yangi ish tushdi
   adminQueue: {
     uz: '🔔 <b>{queue}</b>\n{what}\n\n{url}',
@@ -115,10 +163,12 @@ const TEXTS = {
 } as const;
 
 export type NotifyKind = keyof typeof TEXTS;
+/** Jadvaldagi barcha turlar: test har biriga shakl shartini qo'yadi (birinchi qator sarlavha, oxirgisi havola). */
+export const NOTIFY_KINDS = Object.keys(TEXTS) as NotifyKind[];
 
 /** Foydalanuvchi tili bo'yicha matn (noma'lum til = uz), qiymatlar tozalanadi va 3500 belgigacha qisqaradi. */
 export function notifyText(kind: NotifyKind, locale: string | null | undefined, vars: Vars): string {
-  return clip(fill(TEXTS[kind][lang(locale)], vars));
+  return clip(fill(TEXTS[kind][lang(locale)], vars, esc));
 }
 
 /** Sayt havolasi (WEB_ORIGIN + yo'l). */
@@ -166,4 +216,57 @@ export async function notifyTelegram(prisma: PrismaService, target: NotifyTarget
     sent += await sendTelegram(chats, notifyText(kind, locale, typeof vars === 'function' ? vars(locale) : vars));
   }
   return sent;
+}
+
+/**
+ * Shu shablondan sayt qo'ng'irog'i uchun sarlavha va tana.
+ *
+ * Jadvaldagi har bir yozuvning birinchi qatori sarlavha, oxirgisi havola. Havola href
+ * ustunida turadi, shuning uchun tanaga ikkinchi marta tushmaydi. Oraliq qatorlar nuqta
+ * bilan birlashadi: qo'ng'iroq ro'yxati tanani ikki qatorga qisqartiradi va u yerda
+ * qator ko'chirish baribir ko'rinmaydi.
+ */
+export function notifyParts(kind: NotifyKind, locale: string | null | undefined, vars: Vars): { title: string; body: string | null } {
+  const lines = fill(TEXTS[kind][lang(locale)], vars, (s) => s).split(String.fromCharCode(10));
+  const body = lines.slice(1, -1).map((s) => s.trim()).filter(Boolean).join(' \u00b7 ');
+  return { title: clip(lines[0].replace(/<\/?b>/g, '').trim(), 200), body: clip(body, 500) || null };
+}
+
+/**
+ * Bitta hodisa, ikkita yo'l: saytdagi qo'ng'iroq va Telegram, ikkalasi ham bitta shablondan
+ * va oluvchining tilida.
+ *
+ * Nega bitta joyda: bu juftlik har bir chaqiruv nuqtasida qo'lda yozilardi va yarmida faqat
+ * bittasi qolgandi, ya'ni botni bog'lamagan odam hodisani umuman ko'rmasdi. Ikki yo'l alohida
+ * yutiladi: biri yiqilsa ikkinchisi baribir ketishi kerak.
+ *
+ * `card` berilsa qo'ng'iroq sarlavhasi va tanasi shundan olinadi (obyekt nomi turgan joylarda
+ * shablondagi umumiy sarlavhadan foydaliroq); berilmasa shablondan chiqariladi.
+ */
+export async function notifyBoth(
+  prisma: PrismaService,
+  notifications: NotificationsService,
+  o: {
+    target: NotifyTarget;
+    kind: NotifyKind;
+    inApp: NotificationKind;
+    href: string;
+    vars: Vars | ((l: SearchLang) => Vars);
+    card?: { title: string; body?: string | null };
+  },
+): Promise<void> {
+  const userIds = [...new Set(await notifications.recipients(o.target))].filter((id) => id !== o.target.exceptUserId);
+  if (!userIds.length) return;
+  const varsOf = (l: SearchLang) => ({ ...(typeof o.vars === 'function' ? o.vars(l) : o.vars), url: webUrl(o.href) });
+  const bell = (async () => {
+    if (o.card) return notifications.push(userIds, { kind: o.inApp, href: o.href, title: clip(o.card.title, 200), body: o.card.body ?? null });
+    const rows = await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, locale: true } });
+    const byLocale = new Map<SearchLang, string[]>();
+    for (const r of rows) { const l = lang(r.locale); byLocale.set(l, [...(byLocale.get(l) ?? []), r.id]); }
+    // Har til uchun bitta yozuv: tillar ko'pi bilan uchta
+    for (const [l, ids] of byLocale) await notifications.push(ids, { kind: o.inApp, href: o.href, ...notifyParts(o.kind, l, varsOf(l)) });
+  })().catch(() => {});
+  // Oluvchilar yuqorida aniqlangan: bu yerda ulardan Telegram bog'laganlari qoladi
+  const tg = notifyTelegram(prisma, { userIds }, o.kind, (l) => varsOf(lang(l))).catch(() => 0);
+  await Promise.all([bell, tg]);
 }

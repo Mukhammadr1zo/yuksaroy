@@ -5,7 +5,7 @@ import { NotificationsService } from '../../notifications/notifications.service'
 import { AdminNotify } from '../../organizations/application/admin-notify';
 import { SubscriptionService } from '../../subscription/subscription.service';
 import { PrismaService } from '../../../common/prisma.service';
-import { notifyTelegram, webUrl } from '../../../common/telegram';
+import { notifyBoth } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { ListingAccess } from './listing-access';
 import { FILE_URL } from '../../../common/file-url';
@@ -130,10 +130,17 @@ export class ListingsUseCase {
     const to: ListingStatus = approve ? 'ACTIVE' : l.status === 'ACTIVE' ? 'ARCHIVED' : 'REJECTED';
     this.transition(l, to, 'ADMIN');
     const now = new Date();
-    if (!approve) return this.repo.setStatus(id, { status: to, rejectReason: reason });
+    // Namuna e'lon egasi faol hisob emas: unga yozilgan xabarni hech kim o'qimaydi
+    const who = (l as { isDemo?: boolean }).isDemo ? null : { orgIds: [l.orgId], userIds: [l.ownerUserId ?? l.createdById] };
+    if (!approve) {
+      const out = await this.repo.setStatus(id, { status: to, rejectReason: reason });
+      if (who) void this.notify(who, 'listingRejected', { title: l.title, reason: reason ?? '' });
+      return out;
+    }
     const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
     // Tekshiruvdan o'tgan e'lon egasi obunachi bo'lsa darhol yuqoriga chiqadi
     await this.subs.raiseListing(l.ownerUserId ?? l.createdById, id);
+    if (who) void this.notify(who, 'listingApproved', { title: l.title });
     return out;
   }
 
@@ -174,15 +181,23 @@ export class ListingsUseCase {
     return inquiry;
   }
 
+  /** Admin qarori egasiga: kabinetdagi qo'ng'iroq va Telegram. Xato qarorni to'xtatmaydi. */
+  private notify(target: { orgIds: (string | null)[]; userIds: (string | null)[] }, kind: 'listingApproved' | 'listingRejected', vars: Record<string, string>) {
+    void notifyBoth(this.prisma, this.notifications, { target, kind, inApp: 'listing', href: '/dashboard/listings', vars }).catch(() => {});
+  }
+
   /** E'lon egasiga (tashkilot a'zolari yoki shaxsiy egasi) Telegram xabari; bog'lanmagan bo'lsa hech narsa. */
   private async notifyOwner(l: ListingRecord, fromUserId: string, fromOrgId: string | null, message: string, inquiryId: string) {
     const from = fromOrgId
       ? ((await this.prisma.organization.findUnique({ where: { id: fromOrgId }, select: { name: true } }))?.name ?? '')
       : await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true, phone: true } }).then((u) => u?.fullName || u?.phone || '');
-    const to = (await this.notifications.recipients({ orgIds: [l.orgId], userIds: [l.ownerUserId] })).filter((id) => id !== fromUserId);
-    await this.notifications.push(to, { kind: 'inquiry', title: l.title, body: message.slice(0, 200), href: `/dashboard/inquiries/${inquiryId}` });
-    await notifyTelegram(this.prisma, { orgIds: [l.orgId], userIds: [l.ownerUserId], exceptUserId: fromUserId }, 'inquiry', {
-      title: l.title, from, message: message.slice(0, 500), url: webUrl(`/dashboard/inquiries/${inquiryId}`),
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { orgIds: [l.orgId], userIds: [l.ownerUserId], exceptUserId: fromUserId },
+      kind: 'inquiry',
+      inApp: 'inquiry',
+      href: `/dashboard/inquiries/${inquiryId}`,
+      vars: { title: l.title, from, message: message.slice(0, 500) },
+      card: { title: l.title, body: message.slice(0, 200) },
     });
   }
 

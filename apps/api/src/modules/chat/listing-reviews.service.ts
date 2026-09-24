@@ -2,6 +2,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException } 
 import { REVIEW, ratingDisplay, recomputeRating } from '@yuksaroy/domain';
 import { PrismaService } from '../../common/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { notifyBoth } from '../../common/telegram';
 
 /**
  * E'lon izohlari: xizmatdan foydalangan odam baho va izoh qoldiradi.
@@ -66,8 +67,14 @@ export class ListingReviewsService {
       return tx.listingReview.create({ data: { listingId, userId, rating, text } });
     });
 
-    const to = (await this.notifications.recipients({ orgIds: [l.orgId], userIds: [l.ownerUserId] })).filter((x) => x !== userId);
-    void this.notifications.push(to, { kind: 'message', title: l.title, body: `${rating}/5${text ? ` - ${text.slice(0, 120)}` : ''}`, href: `/${l.kind === 'TRUCK' ? 'carriers' : 'equipment'}/${l.slug}` }).catch(() => {});
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { orgIds: [l.orgId], userIds: [l.ownerUserId], exceptUserId: userId },
+      kind: 'reviewNew',
+      inApp: 'message',
+      href: `/${l.kind === 'TRUCK' ? 'carriers' : 'equipment'}/${l.slug}`,
+      vars: { title: l.title, rating: `${rating}/5`, text: text?.slice(0, 300) ?? '' },
+      card: { title: l.title, body: `${rating}/5${text ? ` - ${text.slice(0, 120)}` : ''}` },
+    }).catch(() => {});
     return { id: r.id, rating: r.rating, text: r.text, createdAt: r.createdAt };
   }
 

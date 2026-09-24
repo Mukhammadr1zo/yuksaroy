@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PAYMENT_TERM_LABELS, REGION_LABELS, SERVICE_TYPE_LABELS, TRUCKS_WORD, uzDateText, uzLocalDate, type PaymentTerm, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
 import { env } from '../../common/env';
 import { PrismaService } from '../../common/prisma.service';
-import { esc, notifyTelegram, sendTelegram, webUrl } from '../../common/telegram';
+import { esc, notifyBoth, sendTelegram, webUrl } from '../../common/telegram';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
 import { notifyRegions } from './market.rules';
 
@@ -135,10 +135,14 @@ export class MarketService {
     const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
     const where = r.board === 'CARGO' ? `${region(r.fromRegion)} -> ${region(r.toRegion)}` : region(r.regionCode);
 
-    await this.notifications.push(userIds, { kind: KIND, title: `${r.no} · ${r.title}`, body: where, href });
-    await notifyTelegram(this.prisma, { userIds }, r.board === 'CARGO' ? 'marketCargoNew' : 'marketServiceNew', (l) => ({
-      no: r.no, title: r.title.slice(0, 200), where, what: r.board === 'CARGO' ? cargoLine(r, l) : svc(l, r.serviceType), url: webUrl(href),
-    }));
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds },
+      kind: r.board === 'CARGO' ? 'marketCargoNew' : 'marketServiceNew',
+      inApp: KIND,
+      href,
+      vars: (l) => ({ no: r.no, title: r.title.slice(0, 200), where, what: r.board === 'CARGO' ? cargoLine(r, l) : svc(l, r.serviceType) }),
+      card: { title: `${r.no} · ${r.title}`, body: where },
+    });
   }
 
   /**
@@ -169,8 +173,14 @@ export class MarketService {
   /** Yangi taklif: so'rov egasiga. */
   async notifyOffer(r: RequestRow, from: string | null): Promise<void> {
     const href = `/dashboard/market?tab=requests&id=${r.id}`;
-    await this.notifications.push([r.createdById], { kind: KIND, title: `${r.no} · ${r.title}`, body: from, href });
-    await notifyTelegram(this.prisma, { userIds: [r.createdById] }, 'marketOffer', { no: r.no, title: r.title.slice(0, 200), from: from ?? '', url: webUrl(href) });
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [r.createdById] },
+      kind: 'marketOffer',
+      inApp: KIND,
+      href,
+      vars: { no: r.no, title: r.title.slice(0, 200), from: from ?? '' },
+      card: { title: `${r.no} · ${r.title}`, body: from },
+    });
   }
 
   /**
@@ -179,7 +189,12 @@ export class MarketService {
    */
   async notifyAward(r: RequestRow, providerUserId: string): Promise<void> {
     const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
-    await this.notifications.push([providerUserId], { kind: KIND, title: `${r.no} · ${r.title}`, body: null, href });
-    await notifyTelegram(this.prisma, { userIds: [providerUserId] }, 'marketAward', { no: r.no, title: r.title.slice(0, 200), url: webUrl(href) });
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [providerUserId] },
+      kind: 'marketAward',
+      inApp: KIND,
+      href,
+      vars: { no: r.no, title: r.title.slice(0, 200) },
+    });
   }
 }

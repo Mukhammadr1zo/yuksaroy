@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 
-export type NotificationKind = 'inquiry' | 'message' | 'orderNew' | 'orderStatus' | 'claim' | 'kyc' | 'premium' | 'market';
+export type NotificationKind = 'inquiry' | 'message' | 'orderNew' | 'orderStatus' | 'claim' | 'kyc' | 'premium' | 'market' | 'listing' | 'subscription';
 export interface NotificationInput { kind: NotificationKind; title: string; body?: string | null; href?: string | null }
 
 /**
@@ -22,7 +22,7 @@ export class NotificationsService {
   }
 
   /** Tashkilot a'zolari (ownersOnly: faqat egasi) va shaxsiy egasi uchun foydalanuvchi ro'yxati. */
-  async recipients(where: { orgIds?: (string | null)[]; userIds?: (string | null)[]; ownersOnly?: boolean }): Promise<string[]> {
+  async recipients(where: { orgIds?: (string | null | undefined)[]; userIds?: (string | null | undefined)[]; ownersOnly?: boolean }): Promise<string[]> {
     const orgIds = (where.orgIds ?? []).filter((x): x is string => !!x);
     const direct = (where.userIds ?? []).filter((x): x is string => !!x);
     if (!orgIds.length) return direct;

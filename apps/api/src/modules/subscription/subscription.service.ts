@@ -2,6 +2,8 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { notifyBoth } from '../../common/telegram';
+import { NotificationsService } from '../notifications/notifications.service';
 import { AdminNotify } from '../organizations/application/admin-notify';
 import { extendPremium } from '../premium/extend-premium';
 import { payInstructions } from '../premium/pay-instructions';
@@ -45,6 +47,7 @@ export class SubscriptionService {
     private readonly prisma: PrismaService,
     private readonly config: PlatformConfigService,
     private readonly adminNotify: AdminNotify,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /** Faol obuna: ACTIVE va muddati o'tmagan. Bir nechta bo'lsa eng kechi. */
@@ -130,7 +133,7 @@ export class SubscriptionService {
    * bo'lmasa hozirdan: erta to'lagan odam kunlarini yo'qotmaydi.
    */
   async confirm(id: string, now = new Date()) {
-    return this.prisma.$transaction(async (tx) => {
+    const out = await this.prisma.$transaction(async (tx) => {
       const s = await tx.subscription.findUnique({ where: { id } });
       if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
       if (s.status !== 'PENDING') throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING', status: s.status });
@@ -147,14 +150,29 @@ export class SubscriptionService {
       await raiseListings(tx, s.userId, endsAt);
       return subscriptionView({ ...s, status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' });
     });
+    // Tranzaksiyadan keyin: o'zgarish qaytarib olinsa yolg'on xabar ketmasin
+    this.tell(out.userId, 'subscriptionActive', { until: out.endsAt?.toISOString().slice(0, 10) ?? '' });
+    return out;
   }
 
   /** To'lov kelmadi yoki buyurtma noto'g'ri: navbatdan chiqadi, obuna berilmaydi. */
-  async cancel(id: string) {
+  async cancel(id: string, reason: string) {
     const s = await this.prisma.subscription.findUnique({ where: { id } });
     if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
     const r = await this.prisma.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'CANCELLED' } });
     if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING', status: s.status });
+    this.tell(s.userId, 'subscriptionCancelled', { reason });
     return subscriptionView({ ...s, status: 'CANCELLED' });
+  }
+
+  /** Obunachiga qaror xabari: kabinetdagi qo'ng'iroq va Telegram; to'lov oqimini to'xtatmaydi. */
+  private tell(userId: string, kind: 'subscriptionActive' | 'subscriptionCancelled', vars: Record<string, string>) {
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [userId] },
+      kind,
+      inApp: 'subscription',
+      href: '/dashboard/subscription',
+      vars,
+    }).catch(() => {});
   }
 }

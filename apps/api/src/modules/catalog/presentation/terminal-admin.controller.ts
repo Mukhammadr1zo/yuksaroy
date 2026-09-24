@@ -5,7 +5,8 @@ import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { AdminNotify } from '../../organizations/application/admin-notify';
-import { notifyTelegram, webUrl } from '../../../common/telegram';
+import { notifyBoth } from '../../../common/telegram';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { CATALOG_REPOSITORY, TerminalClaimedError, type CatalogRepository } from '../domain/ports';
 import { ORG_REPOSITORY, type OrganizationRepository } from '../../organizations/domain/ports';
 import { UpsertTerminalUseCase } from '../application/upsert-terminal.usecase';
@@ -33,6 +34,7 @@ export class TerminalAdminController {
     private readonly audit: AuditService,
     private readonly prisma: PrismaService,
     private readonly adminNotify: AdminNotify,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /** Foydalanuvchi tashkilotlariga tegishli terminallar (har qanday holat) + bugungi bo'sh slotlar. */
@@ -71,7 +73,7 @@ export class TerminalAdminController {
     const t = await this.repo.decideTerminalClaim(id, dto.approve, new Date());
     if (!t) throw new ConflictException({ code: 'CLAIM_NOT_PENDING' });
     await this.audit.log({ actorId: userId, action: 'terminal.claim.decide', entity: 'Terminal', entityId: id, meta: { approve: dto.approve, reason: dto.reason, orgId: t.claimOrgId } });
-    this.notifyClaim(t.claimOrgId, t.name, dto.approve, '/dashboard/terminals');
+    this.notifyClaim(t.claimOrgId, t.name, dto.approve, '/dashboard/terminals', dto.reason?.trim());
     return t;
   }
 
@@ -176,8 +178,15 @@ export class TerminalAdminController {
   }
 
   /** Da'vogar tashkilot a'zolariga qaror haqida Telegram xabari; bog'lanmagan bo'lsa hech narsa. */
-  private notifyClaim(orgId: string | null, object: string, approve: boolean, path: string) {
-    void notifyTelegram(this.prisma, { orgIds: [orgId] }, approve ? 'claimApproved' : 'claimRejected', { object, url: webUrl(path) }).catch(() => {});
+  private notifyClaim(orgId: string | null, object: string, approve: boolean, path: string, reason?: string) {
+    if (!orgId) return;
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { orgIds: [orgId] },
+      kind: approve ? 'claimApproved' : 'claimRejected',
+      inApp: 'claim',
+      href: path,
+      vars: { object, reason: reason ?? '' },
+    }).catch(() => {});
   }
 
 }

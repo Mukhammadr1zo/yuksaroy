@@ -4,6 +4,8 @@ import { BadRequestException } from '@nestjs/common';
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
+import { notifyBoth } from '../../common/telegram';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { pickIn } from '../catalog/presentation/catalog.controller';
@@ -40,6 +42,7 @@ export class PremiumController {
     private readonly prisma: PrismaService,
     private readonly listings: ListingsUseCase,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /** Admin navbati: `status` (default PENDING), eski birinchi. */
@@ -60,15 +63,16 @@ export class PremiumController {
   async confirm(@CurrentUserId() userId: string, @Param('id') id: string) {
     const now = new Date();
     const r = await this.prisma.$transaction(async (tx) => {
-      const o = await tx.premiumOrder.findUnique({ where: { id }, include: { listing: { select: { premiumUntil: true } } } });
+      const o = await tx.premiumOrder.findUnique({ where: { id }, include: { listing: { select: { premiumUntil: true, title: true } } } });
       if (!o) throw new NotFoundException({ code: 'PREMIUM_ORDER_NOT_FOUND' });
       if (o.status !== 'PENDING') throw new ConflictException({ code: 'PREMIUM_NOT_PENDING', status: o.status });
       const premiumUntil = extendPremium(o.listing.premiumUntil, o.months, now);
       await tx.listing.update({ where: { id: o.listingId }, data: { premiumUntil } });
       const paid = await tx.premiumOrder.update({ where: { id }, data: { status: 'PAID', paidAt: now, provider: o.provider ?? 'manual' } });
-      return { order: orderView(paid), premiumUntil };
+      return { order: orderView(paid), premiumUntil, title: o.listing.title };
     });
     await this.audit.log({ actorId: userId, action: 'premium.confirm', entity: 'PremiumOrder', entityId: id, meta: { listingId: r.order.listingId, months: r.order.months, premiumUntil: r.premiumUntil } });
+    this.tell(r.order.userId, 'premiumActive', { title: r.title, until: r.premiumUntil.toISOString().slice(0, 10) });
     return r;
   }
 
@@ -85,11 +89,23 @@ export class PremiumController {
   async cancel(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: CancelDto) {
     const reason = dto?.reason?.trim();
     if (!reason) throw new BadRequestException({ code: 'REASON_REQUIRED' });
-    const o = await this.prisma.premiumOrder.findUnique({ where: { id }, select: { status: true, listingId: true, months: true } });
+    const o = await this.prisma.premiumOrder.findUnique({ where: { id }, select: { status: true, listingId: true, months: true, userId: true, listing: { select: { title: true } } } });
     if (!o) throw new NotFoundException({ code: 'PREMIUM_ORDER_NOT_FOUND' });
     if (o.status !== 'PENDING') throw new ConflictException({ code: 'PREMIUM_NOT_PENDING', status: o.status });
     const row = await this.prisma.premiumOrder.update({ where: { id }, data: { status: 'CANCELLED' } });
     await this.audit.log({ actorId: userId, action: 'premium.cancel', entity: 'PremiumOrder', entityId: id, meta: { listingId: o.listingId, months: o.months, reason } });
+    this.tell(o.userId, 'premiumCancelled', { title: o.listing.title, reason });
     return orderView(row);
+  }
+
+  /** E'lon egasiga qaror xabari: kabinetdagi qo'ng'iroq va Telegram; to'lov oqimini to'xtatmaydi. */
+  private tell(userId: string, kind: 'premiumActive' | 'premiumCancelled', vars: Record<string, string>) {
+    void notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [userId] },
+      kind,
+      inApp: 'premium',
+      href: '/dashboard/listings',
+      vars,
+    }).catch(() => {});
   }
 }
