@@ -40,6 +40,15 @@ export const num = (n: number, locale = "uz") => {
 export const som = (tiyin: number, locale = 'uz') => `${num(Math.round(tiyin / 100), locale)} ${CURRENCY[lang(locale)]}`;
 /** "18 500 so'm / t" */
 export const pricePer = (tiyin: number, unit: TariffUnit, locale = 'uz') => `${som(tiyin, locale)} / ${UNIT_SHORT[lang(locale)][unit]}`;
+// "km" ru da "км": masofa har uch tilda ko'rinadi, shuning uchun bitta joyda
+const KM: Record<Lang, string> = { uz: 'km', ru: 'км', en: 'km' };
+/** "312 km" */
+export const km = (n: number, locale = 'uz') => `${num(Math.round(n), locale)} ${KM[lang(locale)]}`;
+/**
+ * "13 158 so'm / km": taklif narxi yo'l uzunligiga bo'linadi.
+ * Nega kerak: bitta reysning jami narxi boshqa reys bilan solishtirilmaydi, km narxi solishtiriladi.
+ */
+export const somPerKm = (tiyin: number, dist: number, locale = 'uz') => `${som(tiyin / dist, locale)} / ${KM[lang(locale)]}`;
 
 export const DAYS: WeekDay[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAY_LABELS: Record<Lang, Record<WeekDay, string>> = {

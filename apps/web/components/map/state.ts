@@ -16,6 +16,8 @@ export interface MapState {
   radius: number; // km, 0 = berilmagan
   q: string;
   area?: Area; // ixtiyoriy: eski literal holatlar (MapHero NO_STATE) o'zgarmasin
+  /** Faqat bugun bo'sh joyi borlar. Ixtiyoriy: NO_STATE literal holatlari o'zgarmasin. */
+  free?: boolean;
   c: [number, number] | null; // kamera markazi lng, lat
   z: number | null;
 }
@@ -29,6 +31,8 @@ export interface Effective {
   near: [number, number] | null;
   radius: number;
   area: Area;
+  /** Faqat bugun bo'sh joyi borlar (aniq param yoki q dagi "bugun bo'sh" so'zi). */
+  free: boolean;
   chips: SearchChip[];
   unresolved: string[];
 }
@@ -74,6 +78,7 @@ export function parseState(get: (k: string) => string): MapState {
     radius: Number(get('radius')) || 0,
     q: get('q').trim(),
     area: decodeArea(get('area')),
+    free: get('free') === '1',
     c: pair(get('c')),
     z: Number.isFinite(z) && z > 0 ? z : null,
   };
@@ -91,6 +96,7 @@ export function toParams(s: MapState): string {
     if (s.radius) p.set('radius', String(s.radius));
   }
   if (s.area && s.area.length >= 3) p.set('area', encodeArea(s.area));
+  if (s.free) p.set('free', '1');
   if (s.c) p.set('c', `${s.c[0].toFixed(4)},${s.c[1].toFixed(4)}`);
   if (s.z != null) p.set('z', s.z.toFixed(2));
   const str = p.toString().replace(/%2C/g, ',').replace(/%3E/g, '>');
@@ -98,6 +104,8 @@ export function toParams(s: MapState): string {
 }
 
 const chip = (type: SearchChip['type'], value: string): SearchChip => ({ type, key: `${type}:${value}`, value });
+/** "Bugun bo'sh" chipi: yorliq domen lug'atida (chipLabel), shuning uchun tugmada ham, chiplar qatorida ham, katalogda ham bitta manba. */
+export const FREE_CHIP: SearchChip = chip('bookable', '1');
 
 export function effective(s: MapState, lang: SearchLang): Effective {
   const p = s.q ? parseQuery(s.q, { lang, near: s.near ? { lng: s.near[0], lat: s.near[1] } : undefined }) : null;
@@ -109,21 +117,25 @@ export function effective(s: MapState, lang: SearchLang): Effective {
   const near = s.near ?? (p?.near ? ([p.near.lng, p.near.lat] as [number, number]) : null);
   const radius = near ? s.radius || p?.near?.radiusKm || 25 : 0;
   const cat = s.cat.length ? s.cat : p?.category ? [p.category] : [...KINDS];
+  // Aniq param yoki q dagi so'z ("bugun bo'sh"): katalogdagi bookable=1 bilan bir xil ma'no
+  const free = s.free === true || p?.bookable === true;
   const chips: SearchChip[] = [
     ...(corridorKey ? [chip('corridor', corridorKey)] : regions.map((r) => chip('region', r))),
     ...(near ? [chip('near', String(radius))] : []),
+    ...(free ? [FREE_CHIP] : []),
   ];
-  return { cat, regions, corridor, corridorKey, near, radius, area: s.area && s.area.length >= 3 ? s.area : [], chips, unresolved: p?.unresolved ?? [] };
+  return { cat, regions, corridor, corridorKey, near, radius, area: s.area && s.area.length >= 3 ? s.area : [], free, chips, unresolved: p?.unresolved ?? [] };
 }
 
 /** Samarali filtrlar aniq paramga aylanadi, q tashlanadi (keyingi o'zgarishlar deterministik bo'lsin, katalog naqshi). */
 export function materialize(s: MapState, e: Effective): MapState {
-  return { ...s, q: '', cat: e.cat.length === KINDS.length ? [] : e.cat, region: e.regions.join(','), corridor: e.corridorKey, near: e.near, radius: e.radius };
+  return { ...s, q: '', cat: e.cat.length === KINDS.length ? [] : e.cat, region: e.regions.join(','), corridor: e.corridorKey, near: e.near, radius: e.radius, free: e.free };
 }
 
 export function withoutChip(s: MapState, e: Effective, c: SearchChip): MapState {
   const base = materialize(s, e);
   if (c.type === 'corridor') return { ...base, corridor: '' };
   if (c.type === 'region') return { ...base, region: e.regions.filter((r) => r !== c.value).join(',') };
+  if (c.type === 'bookable') return { ...base, free: false };
   return { ...base, near: null, radius: 0 };
 }

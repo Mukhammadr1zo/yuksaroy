@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ApiError, hasSession, post } from '@/lib/api';
-import { som, uzDateTime } from '@/lib/format';
+import { regionRouteKm } from '@yuksaroy/domain';
+import { som, somPerKm, uzDateTime } from '@/lib/format';
 import type { MarketOffer, MarketRequest } from '@/lib/types-market';
 import { BTN_NAVY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { OfferStatusPill } from './bits';
@@ -29,6 +30,14 @@ export function OfferForm({ request, next, preview = false, me = null }: {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [justSent, setJustSent] = useState(false);
+  /**
+   * Yo'l uzunligi viloyat markazlaridan. Narx yozilganda maslahat satri so'm/km ga aylanadi:
+   * tashuvchi o'z narxini odatdagi km narxi bilan solishtira oladi. Xizmat so'rovida yo'nalish
+   * yo'q, shuning uchun null bo'ladi va hech narsa ko'rsatilmaydi.
+   */
+  const routeKm = regionRouteKm(request.fromRegion, request.toRegion);
+  const priceNum = Number(price);
+  const perKm = routeKm != null && Number.isFinite(priceNum) && priceNum > 0 ? somPerKm(priceNum * 100, routeKm, locale) : null;
 
   useEffect(() => { if (!preview) setAuthed(hasSession()); }, [preview]);
 
@@ -63,7 +72,10 @@ export function OfferForm({ request, next, preview = false, me = null }: {
     return (
       <div className="rounded-card border border-teal bg-teal-soft/40 p-4 text-sm">
         <div className="flex flex-wrap items-center gap-2"><span className="font-semibold">{t('mine')}</span><OfferStatusPill status={mine.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(mine.createdAt, locale)}</span></div>
-        <p className="mt-1 font-mono text-navy tabular-nums">{mine.priceTiyin != null ? som(mine.priceTiyin, locale) : t('onRequest')}</p>
+        <p className="mt-1 font-mono text-navy tabular-nums">
+          {mine.priceTiyin != null ? som(mine.priceTiyin, locale) : t('onRequest')}
+          {mine.priceTiyin != null && routeKm != null ? ` · ${somPerKm(mine.priceTiyin, routeKm, locale)}` : ''}
+        </p>
         {mine.message ? <p className="mt-1 whitespace-pre-line text-ink/85">{mine.message}</p> : null}
         {justSent ? <p className="mt-2 text-teal-ink">{t('sent')}. {t('sentBody')}</p> : null}
       </div>
@@ -73,7 +85,8 @@ export function OfferForm({ request, next, preview = false, me = null }: {
 
   return (
     <form onSubmit={send} className="grid gap-3">
-      <Field label={t('price')} hint={t('priceHint')}>
+      {/* Maslahat slotining o'zi ishlatiladi: narx yozilishi bilan so'm/km chiqadi, bo'shatilsa eski matn qaytadi */}
+      <Field label={t('price')} hint={perKm ?? t('priceHint')}>
         <input className={`${INPUT} font-mono`} type="number" min={0} step={1000} inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} />
       </Field>
       <Field label={t('message')}>

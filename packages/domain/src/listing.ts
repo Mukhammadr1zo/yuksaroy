@@ -25,6 +25,25 @@ export const PRICE_UNITS_FOR: { RENT: readonly PriceUnit[]; SALE: readonly Price
   TRUCK: ['PER_KM', 'PER_TON', 'PER_TRIP'],
 };
 
+/**
+ * Ro'yxatdagi eng arzon narx, birlik bilan.
+ *
+ * Nega birlik: avtotashuvchida narx km uchun ham, reys uchun ham, tonna uchun ham bo'ladi.
+ * Ularni bitta minimumga solsak, 2 500 so'm/km reys narxidan "arzonroq" ko'rinadi va qaror
+ * satri yolg'on gapiradi. Shuning uchun avval ko'pchilik birligi tanlanadi, so'ng eng arzoni
+ * faqat shu birlik ichidan olinadi. Teng bo'lsa birinchi uchragani qoladi, ya'ni eski xulq saqlanadi.
+ */
+export function cheapestByUnit(
+  all: readonly { priceTiyin: number | null; priceUnit: PriceUnit | null }[],
+): { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null } {
+  const count = new Map<PriceUnit, number>();
+  for (const l of all) if (l.priceTiyin != null && l.priceUnit != null) count.set(l.priceUnit, (count.get(l.priceUnit) ?? 0) + 1);
+  const unit = [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  if (!unit) return { cheapestTiyin: null, cheapestUnit: null };
+  const prices = all.filter((l) => l.priceUnit === unit && l.priceTiyin != null).map((l) => l.priceTiyin!);
+  return { cheapestTiyin: Math.min(...prices), cheapestUnit: unit };
+}
+
 // ───────────────────────── Holat-mashinasi ─────────────────────────
 
 export type ListingActor = 'OWNER' | 'ADMIN' | 'SYSTEM';

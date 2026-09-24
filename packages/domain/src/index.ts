@@ -1,5 +1,5 @@
 // YukSaroy domen lug'ati: framework'siz. Prisma enum'lari shu bilan bir xil bo'lishi shart.
-import { normalizeQuery, type SearchLang } from './search';
+import { normalizeQuery, REGION_CENTERS, type SearchLang } from './search';
 import { TransitionError } from './transition';
 
 /** Tashkilot ichidagi rollar (Membership.roles). Shaxsiy rollar tashkilotsiz ham bo'ladi (DRIVER, JOB_SEEKER). */
@@ -391,6 +391,19 @@ export function distanceKm(aLat: number, aLng: number, bLat: number, bLng: numbe
     Math.sin(dLat / 2) ** 2 +
     Math.cos((aLat * Math.PI) / 180) * Math.cos((bLat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+/**
+ * Ikki viloyat markazi orasidagi taxminiy masofa, km.
+ *
+ * Nega markaz: yuk so'rovida faqat "qaysi viloyatdan qaysi viloyatga" beriladi, aniq manzil yo'q.
+ * Yo'lning haqiqiy uzunligi emas, taqqoslash uchun asos: taklif narxini km ga bo'lib ko'rish
+ * shu songa tayanadi. Bir viloyat ichidagi yo'nalish yoki noma'lum kod = null, chunki
+ * "0 km" hech qanday qarorni qo'llab-quvvatlamaydi va so'm/km ni cheksizga aylantiradi.
+ */
+export function regionRouteKm(from: string | null | undefined, to: string | null | undefined): number | null {
+  const a = REGION_CENTERS[from as RegionCode], b = REGION_CENTERS[to as RegionCode];
+  return a && b && from !== to ? Math.round(distanceKm(a.lat, a.lng, b.lat, b.lng)) : null;
 }
 
 // ── Yordamchi qidiruv (lug'at asosidagi tahlil) ──

@@ -32,7 +32,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
   const { locale } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [sp, t, tf, tt, tn, tk, ts, th, tb, tl] = await Promise.all([searchParams, getTranslations('catalog'), getTranslations('filter'), getTranslations('terminals'), getTranslations('nav'), getTranslations('kind'), getTranslations('service'), getTranslations('hubs'), getTranslations('booking'), getTranslations('listing')]);
+  const [sp, t, tf, tt, tn, tk, ts, th, tl] = await Promise.all([searchParams, getTranslations('catalog'), getTranslations('filter'), getTranslations('terminals'), getTranslations('nav'), getTranslations('kind'), getTranslations('service'), getTranslations('hubs'), getTranslations('listing')]);
   const raw = { region: one(sp.region), kind: one(sp.kind), service: one(sp.service), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), corridor: one(sp.corridor), sort: one(sp.sort), bookable: one(sp.bookable) === '1' ? '1' : '' };
 
   // Yordamchi: q lug'at orqali filtrlarga aylanadi; aniq URL parametrlari parse natijasidan ustun
@@ -56,7 +56,8 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
   const base = { region: corridor ? '' : region, service, kind, near, radius, corridor, bookable: raw.bookable, sort: raw.sort, q: chips.length ? '' : raw.q };
   const href = (over: Partial<typeof base> & { page?: number }) => `/terminals${qs({ ...base, ...over })}`;
   // Xarita sahifasiga joriy filtrlar bilan
-  const mapHref = `/map${qs({ cat: 'terminal', region: base.region, service, corridor, near, radius, q: base.q })}`;
+  // free=1: bookable filtri xaritada ham saqlanadi (xaritadagi "Shu hududda ro'yxat" ning teskarisi)
+  const mapHref = `/map${qs({ cat: 'terminal', region: base.region, service, corridor, near, radius, free: raw.bookable ? '1' : '', q: base.q })}`;
   const remove = (c: SearchChip) =>
     c.type === 'corridor' ? href({ corridor: '' })
     : c.type === 'region' ? href({ region: without(region, c.value) })
@@ -125,8 +126,8 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
           {/* bookable=1: /booking sahifasidan; chip kabi olib tashlanadi */}
           {raw.bookable ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-teal-soft py-1 pl-3 pr-1.5 text-sm font-semibold text-teal-ink">
-              {tb('chip')}
-              <Link href={href({ bookable: '' })} aria-label={t('chips.remove', { label: tb('chip') })} className="rounded-full px-1.5 leading-none hover:bg-teal/15">×</Link>
+              {chipLabel(chip('bookable', '1'), lang)}
+              <Link href={href({ bookable: '' })} aria-label={t('chips.remove', { label: chipLabel(chip('bookable', '1'), lang) })} className="rounded-full px-1.5 leading-none hover:bg-teal/15">×</Link>
             </span>
           ) : null}
           {p?.unresolved.length ? <span className="text-xs text-muted">{t('chips.unresolved', { words: p.unresolved.join(', ') })}</span> : null}

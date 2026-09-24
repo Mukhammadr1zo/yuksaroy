@@ -7,13 +7,13 @@ import { LngLatBounds, Map as MLMap, NavigationControl, setWorkerUrl, type GeoJS
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { CrosshairIcon, MagnifyingGlassIcon, PolygonIcon, ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
+import { CalendarCheckIcon, CrosshairIcon, ListBulletsIcon, MagnifyingGlassIcon, PolygonIcon, ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { LISTING_LABELS, REGIONS, REGION_CENTERS, SEARCH_LABELS, chipLabel, distanceKm, formatSom, type PriceUnit, type RegionCode, type SearchLang, type TerminalKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { pricePer } from '@/lib/format';
 import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers, z } from './mapStyle';
 import { addPinIcons } from './pinIcons';
-import { KINDS, effective, inArea, materialize, parseState, toParams, withoutChip, type Area, type Kind, type MapState } from './state';
+import { FREE_CHIP, KINDS, effective, inArea, materialize, parseState, toParams, withoutChip, type Area, type Kind, type MapState } from './state';
 
 setWorkerUrl(WORKER_URL);
 
@@ -39,6 +39,8 @@ const EMPTY: FC = { type: 'FeatureCollection', features: [] };
 const FEAT_KINDS = [...KINDS, 'siding'] as const;
 type FeatKind = (typeof FEAT_KINDS)[number];
 const catOf = (k: FeatKind): Kind => (k === 'siding' ? 'terminal' : k);
+/** Xaritadan katalogga qaytish: har toifaning o'z ochiq sahifasi. */
+const CAT_PATH: Record<Kind, string> = { terminal: '/terminals', equipment: '/equipment', truck: '/carriers' };
 /** Stansiya yozuvi sayt tiliga ergashadi; nomi yo'q bo'lsa o'zbekchasi qoladi. */
 const STATION_NAME: Record<string, string> = { uz: 'name', ru: 'nameRu', en: 'nameEn' };
 const SNAP = { peek: '96px', half: '45%', full: '85%' } as const;
@@ -91,6 +93,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   const tc = useTranslations('catalog');
   const tr = useTranslations('region');
   const tf = useTranslations('filter');
+  const th = useTranslations('hubs');
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const [ready, setReady] = useState(false);
@@ -289,7 +292,11 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
     const focus: Obj[] = [];
     const per: Record<FeatKind, Feat[]> = { terminal: [], siding: [], equipment: [], truck: [] };
     for (const o of objs) {
+      // Bugungi bo'sh joy faqat terminalda bo'ladi: chip yoqilganda texnika, avtotransport
+      // va stansiya guruhlari tushib qoladi. Bu xiralashtirish emas, yashirish: "bugun bo'sh"
+      // toifa kabi qat'iy filtr
       if (!eff.cat.includes(catOf(o.p.kind)) || !inRegion(o, eff.regions)) continue;
+      if (eff.free && !(o.p.freeToday ?? 0)) continue;
       const dim = (eff.corridor.length > 0 && !inRegion(o, eff.corridor)) || (eff.near != null && distanceKm(eff.near[1], eff.near[0], o.lat, o.lng) > eff.radius) || (eff.area.length > 0 && !inArea([o.lng, o.lat], eff.area));
       if (!dim) focus.push(o);
       per[o.p.kind].push(point(o.lng, o.lat, { id: o.p.id, kind: o.p.kind, count: o.p.count, dim }));
@@ -348,6 +355,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
     if (!objs || !bounds) return { listed, counts };
     for (const o of objs) {
       if (!inRegion(o, eff.regions) || !bounds.contains([o.lng, o.lat])) continue;
+      if (eff.free && !(o.p.freeToday ?? 0)) continue;
       const km = eff.near ? distanceKm(eff.near[1], eff.near[0], o.lat, o.lng) : null;
       if ((eff.corridor.length && !inRegion(o, eff.corridor)) || (km != null && km > eff.radius) || (eff.area.length && !inArea([o.lng, o.lat], eff.area))) continue;
       counts[catOf(o.p.kind)]++;
@@ -360,10 +368,37 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   const cheapest = Math.min(...terms.map((o) => o.p.fromPriceTiyin).filter((n): n is number => n != null));
   const decision = [
     t('decision.objects', { count: listed.length }),
-    terms.length ? tc('decision.freeToday', { count: terms.filter((o) => (o.p.freeToday ?? 0) > 0).length }) : null,
+    // Chip yoqilganda bu bo'lak chiqmaydi: filtr allaqachon faqat bo'sh joyi borlarni qoldirgan,
+    // ya'ni bu son yuqoridagi "N obyekt ko'rinishda" bilan aynan teng bo'lardi
+    !eff.free && terms.length ? tc('decision.freeToday', { count: terms.filter((o) => (o.p.freeToday ?? 0) > 0).length }) : null,
     Number.isFinite(cheapest) ? tc('decision.cheapest', { price: pricePer(cheapest, 'PER_TON', locale) }) : null,
     eff.near && listed[0]?.km != null ? tc('decision.nearest', { km: Math.round(listed[0].km) }) : null,
   ].filter(Boolean).join(tc('decision.separator'));
+
+  /**
+   * Katalogga qaytish havolasi: /terminals dagi "Xaritada ko'rish" ning aksi, bir xil paramlar bilan.
+   *
+   * Ikki holatda havola umuman ko'rsatilmaydi, chunki katalog xaritadagidan boshqa javob berardi:
+   *  - chizilgan hudud bor (katalogda ko'pburchak filtri yo'q, ro'yxat jimgina kengayib ketardi);
+   *  - "Bugun bo'sh" yoqilgan, lekin terminal toifasi o'chirilgan (xaritada 0 obyekt, katalog esa
+   *    to'la ro'yxat ochardi). "bookable" faqat terminal katalogida bor.
+   * ponytail: bir nechta toifa yoqilganda terminal katalogi ochiladi (eng katta ro'yxat);
+   * har toifaga alohida havola kerak bo'lsa keyin qo'shiladi.
+   */
+  const listHref = (() => {
+    if (eff.area.length) return null;
+    if (eff.free && !eff.cat.includes('terminal')) return null;
+    // free yoqilganda xaritada ham faqat terminal qoladi, demak havola ham terminal katalogiga
+    const path = eff.free || eff.cat.length !== 1 ? '/terminals' : CAT_PATH[eff.cat[0]!];
+    const p = new URLSearchParams();
+    if (eff.corridorKey) p.set('corridor', eff.corridorKey);
+    else if (eff.regions.length) p.set('region', eff.regions.join(','));
+    if (eff.near) { p.set('near', `${eff.near[0].toFixed(5)},${eff.near[1].toFixed(5)}`); p.set('radius', String(eff.radius)); }
+    if (eff.free) p.set('bookable', '1');
+    if (s.q) p.set('q', s.q);
+    const q = p.toString().replace(/%2C/g, ',').replace(/%3E/g, '>');
+    return q ? `${path}?${q}` : path;
+  })();
 
   const L = SEARCH_LABELS[lang];
   const region = (o: Obj) => L.region[o.p.regionCode as RegionCode] ?? o.p.regionCode;
@@ -427,6 +462,8 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   };
 
   const popObj = (sel ?? hov) ? byKey.get((sel ?? hov)!) : null;
+  // "Mening yonimda" yoqilgan bo'lsa popupda ham masofa turadi: ro'yxatdagi bilan bir xil hisob
+  const popKm = popObj && eff.near ? distanceKm(eff.near[1], eff.near[0], popObj.lat, popObj.lng) : null;
   const pos = popObj && mapRef.current ? mapRef.current.project([popObj.lng, popObj.lat]) : null;
   const fade = `transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`;
 
@@ -476,7 +513,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
           <form
-            onSubmit={(e) => { e.preventDefault(); apply({ ...s, q: String(new FormData(e.currentTarget).get('q') ?? '').trim(), region: '', corridor: '', near: null, radius: 0, cat: [] }, true); }}
+            onSubmit={(e) => { e.preventDefault(); apply({ ...s, q: String(new FormData(e.currentTarget).get('q') ?? '').trim(), region: '', corridor: '', near: null, radius: 0, free: false, cat: [] }, true); }}
             className="mx-4 mt-4 flex items-center gap-2 rounded-full border border-line bg-white p-1 focus-within:border-teal focus-within:ring-2 focus-within:ring-teal/25"
           >
             <MagnifyingGlassIcon size={18} weight="regular" className="ml-2 shrink-0 text-muted" />
@@ -512,7 +549,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
             })}
           </div>
 
-          <div className="flex gap-2 px-4 pt-3">
+          <div className="flex flex-wrap gap-2 px-4 pt-3">
             <select
               value={eff.regions.length === 1 ? eff.regions[0] : ''}
               onChange={(e) => apply({ ...materialize(s, eff), region: e.target.value, corridor: '' }, true)}
@@ -529,10 +566,27 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               <CrosshairIcon size={16} weight="regular" />
               {busy ? tc('nearMe.busy') : eff.near ? tc('nearMe.active', { radius: eff.radius }) : tc('nearMe.idle')}
             </button>
+            {/* Yorliq domen lug'atidan (chipLabel): chiplar qatori ham, katalog ham shu matnni ko'rsatadi */}
+            <button
+              type="button" aria-pressed={eff.free}
+              onClick={() => apply({ ...materialize(s, eff), free: !eff.free })}
+              className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${eff.free ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
+            >
+              <CalendarCheckIcon size={16} weight="regular" />
+              {chipLabel(FREE_CHIP, lang)}
+            </button>
           </div>
           {geoErr ? <p className="px-4 pt-1 text-xs text-amber-ink">{geoErr}</p> : null}
 
-          <p className="hidden px-4 pt-4 font-mono text-sm text-navy tabular-nums lg:block">{decision}</p>
+          {/* Qaror satri va katalogga qaytish havolasi bitta qatorda: katalogdagi tartibning aksi */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pt-4">
+            <p className="hidden font-mono text-sm text-navy tabular-nums lg:block">{decision}</p>
+            {listHref ? (
+              <Link href={listHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink">
+                <ListBulletsIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewList')}
+              </Link>
+            ) : null}
+          </div>
 
           {!objs ? <p className="px-4 pt-4 text-sm text-muted">{t('loading')}</p>
           : listed.length === 0 ? (
@@ -598,6 +652,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               <p className="truncate font-bold">{popObj.p.name}</p>
               <p className="mt-0.5 text-xs text-muted">{kindLabel(popObj)} · {region(popObj)}</p>
               {priceLine(popObj) ? <p className="mt-1 font-mono text-xs text-navy tabular-nums">{priceLine(popObj)}</p> : null}
+              {popKm != null ? <p className="mt-1 font-mono text-xs tabular-nums text-muted">{t('popup.distance', { km: Math.round(popKm) })}</p> : null}
               {popObj.p.accuracy !== 'exact' ? <p className="mt-1 text-[11px] text-amber-ink">{popObj.p.accuracy === 'station' ? t('siding.approx') : t('approxRegion')}</p> : null}
               {sel ? <Link href={href(popObj)} className="mt-2 inline-block text-sm font-semibold text-teal-ink hover:text-navy">{popObj.p.kind === 'siding' ? t('siding.open') : t('popup.open')} →</Link> : null}
             </div>

@@ -2,6 +2,7 @@
   "hubs": {
     "regions": "Viloyatlar",
     "viewOnMap": "Xaritada ko'rish",
+    "viewList": "Shu hududda ro'yxat",
     "openMap": "Xaritada ochish",
     "neighbours": "Qo'shni viloyatlar",
     "emptyNeighbours": "Bu viloyatda hozircha yo'q, qo'shni viloyatlar",

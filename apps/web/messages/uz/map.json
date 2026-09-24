@@ -41,7 +41,8 @@
       "freeToday": "bugun {count} bo'sh joy",
       "noSlots": "bugun bo'sh joy yo'q",
       "onRequest": "narx so'rov bo'yicha",
-      "from": "{price} dan"
+      "from": "{price} dan",
+      "distance": "sizdan {km} km"
     },
     "legend": {
       "aria": "Xarita legendasi",

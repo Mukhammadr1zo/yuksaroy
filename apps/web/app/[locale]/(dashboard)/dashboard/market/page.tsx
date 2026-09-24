@@ -3,10 +3,10 @@
 // Tab ?tab= dan o'qiladi (window orqali: useSearchParams statik sahifada Suspense talab qiladi), ?id= so'rovni ajratadi.
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import type { KycStatus } from '@yuksaroy/domain';
+import { regionRouteKm, type KycStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
-import { som, uzDateTime, uzToday } from '@/lib/format';
+import { km, som, somPerKm, uzDateTime, uzToday } from '@/lib/format';
 import type { MarketOffer, MarketRequest, Paged, ServiceProfileCard } from '@/lib/types-market';
 import { Pager } from '@/components/admin/kit';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, INPUT, Notice } from '@/components/kabinet/bits';
@@ -116,6 +116,8 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
       <ul className="mt-6 space-y-3">
         {items?.map((r) => {
           const offers = r.offers ?? [];
+          // Yo'l uzunligi: takliflar narxini km ga bo'lib solishtirish uchun
+          const routeKm = r.board === 'CARGO' ? regionRouteKm(r.fromRegion, r.toRegion) : null;
           const isOpen = open === r.id;
           return (
             <li key={r.id} id={`mr-${r.id}`} className={`min-w-0 rounded-card border bg-white p-4 ${focusId === r.id ? 'border-teal' : 'border-line'}`}>
@@ -127,7 +129,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                 <span className={`font-mono text-xs tabular-nums ${offers.length ? 'text-teal-ink' : 'text-muted'}`}>{t('offersCount', { count: offers.length })}</span>
               </button>
               <p className="mt-1 text-xs text-muted">
-                {r.board === 'CARGO' ? `${L.region(r.fromRegion)} -> ${L.region(r.toRegion)} · ${r.cargoName ?? ''}${r.weightT ? `, ${r.weightT} t` : ''}` : `${r.serviceType ? L.service[r.serviceType] : ''} · ${L.region(r.regionCode)}`}
+                {r.board === 'CARGO' ? `${L.region(r.fromRegion)} -> ${L.region(r.toRegion)}${routeKm != null ? ` · ${km(routeKm, locale)}` : ''} · ${r.cargoName ?? ''}${r.weightT ? `, ${r.weightT} t` : ''}` : `${r.serviceType ? L.service[r.serviceType] : ''} · ${L.region(r.regionCode)}`}
                 {' · '}{uzDateTime(r.createdAt, locale)}
               </p>
               {isOpen ? (
@@ -172,7 +174,10 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                           <OfferStatusPill status={o.status} />
                           <span className="ml-auto font-mono text-xs text-muted tabular-nums">{uzDateTime(o.createdAt, locale)}</span>
                         </div>
-                        <p className="mt-1 font-mono text-sm text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin, locale) : tc('onRequest')}</p>
+                        <p className="mt-1 font-mono text-sm text-navy tabular-nums">
+                          {o.priceTiyin != null ? som(o.priceTiyin, locale) : tc('onRequest')}
+                          {o.priceTiyin != null && routeKm != null ? ` · ${somPerKm(o.priceTiyin, routeKm, locale)}` : ''}
+                        </p>
                         {o.message ? <p className="mt-1 whitespace-pre-line text-sm text-ink/85 wrap-anywhere">{o.message}</p> : null}
                         {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => act(r.id, 'award', o.id)} disabled={busy !== null} className={`${BTN_NAVY} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}
                         {/* Tanlangandan keyin halqa yopiladi: g'olibning raqami shu yerda ochiladi.
@@ -218,7 +223,10 @@ function Offers({ t, tc }: { t: T; tc: T }) {
         </div>
       ) : null}
       <ul className="space-y-3">
-        {items?.map((o) => (
+        {items?.map((o) => {
+          // Yo'l uzunligi: o'z narximni km bo'yicha ko'rish uchun
+          const routeKm = o.request.board === 'CARGO' ? regionRouteKm(o.request.fromRegion, o.request.toRegion) : null;
+          return (
           <li key={o.id} className="min-w-0 rounded-card border border-line bg-white p-4">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-mono text-sm font-semibold text-navy">{o.request.no}</span>
@@ -227,12 +235,19 @@ function Offers({ t, tc }: { t: T; tc: T }) {
               <span className="ml-auto font-mono text-xs text-muted tabular-nums">{uzDateTime(o.createdAt, locale)}</span>
             </div>
             <p className="mt-2 font-semibold wrap-anywhere">{o.request.title}</p>
-            <p className="text-xs text-muted">{o.request.board === 'CARGO' ? `${L.region(o.request.fromRegion)} -> ${L.region(o.request.toRegion)}` : `${o.request.serviceType ? L.service[o.request.serviceType] : ''} · ${L.region(o.request.regionCode)}`}</p>
-            <p className="mt-2 text-sm"><span className="text-muted">{t('myPrice')}: </span><span className="font-mono text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin, locale) : tc('onRequest')}</span></p>
+            <p className="text-xs text-muted">{o.request.board === 'CARGO' ? `${L.region(o.request.fromRegion)} -> ${L.region(o.request.toRegion)}${routeKm != null ? ` · ${km(routeKm, locale)}` : ''}` : `${o.request.serviceType ? L.service[o.request.serviceType] : ''} · ${L.region(o.request.regionCode)}`}</p>
+            <p className="mt-2 text-sm">
+              <span className="text-muted">{t('myPrice')}: </span>
+              <span className="font-mono text-navy tabular-nums">
+                {o.priceTiyin != null ? som(o.priceTiyin, locale) : tc('onRequest')}
+                {o.priceTiyin != null && routeKm != null ? ` · ${somPerKm(o.priceTiyin, routeKm, locale)}` : ''}
+              </span>
+            </p>
             {o.message ? <p className="mt-1 whitespace-pre-line text-sm text-ink/85 wrap-anywhere">{o.message}</p> : null}
             <Link href={requestHref(o.request)} className="mt-3 inline-block text-sm font-semibold text-teal-ink hover:text-navy">{t('open')}</Link>
           </li>
-        ))}
+          );
+        })}
       </ul>
       <Pager page={page} pages={Math.ceil(total / PAGE)} onPage={setPage} />
     </>

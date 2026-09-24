@@ -41,7 +41,8 @@
       "freeToday": "{count} free spots today",
       "noSlots": "no free spots today",
       "onRequest": "price on request",
-      "from": "from {price}"
+      "from": "from {price}",
+      "distance": "{km} km from you"
     },
     "legend": {
       "aria": "Map legend",

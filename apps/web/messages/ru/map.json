@@ -41,7 +41,8 @@
       "freeToday": "сегодня свободно: {count}",
       "noSlots": "сегодня свободных мест нет",
       "onRequest": "цена по запросу",
-      "from": "от {price}"
+      "from": "от {price}",
+      "distance": "{km} км от вас"
     },
     "legend": {
       "aria": "Легенда карты",

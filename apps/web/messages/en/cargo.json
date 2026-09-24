@@ -54,7 +54,8 @@
       "closedNote": "A carrier was already chosen for this cargo, or the post is closed.",
       "volume": "Volume",
       "trucks": "Number of trucks",
-      "payment": "Payment terms"
+      "payment": "Payment terms",
+      "distance": "Distance (approximate)"
     },
     "new": {
       "title": "Post cargo",

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LISTING_LABELS, REGIONS, TRUCK_TYPES, chipLabel, corridorRegions, parseQuery, type RegionCode, type SearchChip, type SearchLang } from '@yuksaroy/domain';
+import { LISTING_LABELS, REGIONS, TRUCK_TYPES, cheapestByUnit, chipLabel, corridorRegions, parseQuery, type RegionCode, type SearchChip, type SearchLang } from '@yuksaroy/domain';
 import { sapi, qs } from '@/lib/server-api';
 import type { ListingCard as L, ListingPage, ListingSummary } from '@/lib/types-listing';
 import { ListingCard, listingPrice } from '@/components/catalog/ListingCard';
@@ -31,11 +31,19 @@ const isRegion = (s: string): s is RegionCode => (REGIONS as readonly string[]).
 const without = (list: string, v: string) => list.split(',').filter((x) => x !== v).join(',');
 const chip = (type: SearchChip['type'], value: string): SearchChip => ({ type, key: `${type}:${value}`, value });
 
-/** Kuzov va tonnaj filtri sahifa ichida: API'da bu paramlar yo'q. Xulosa satri ham shu to'plamdan qayta hisoblanadi. */
+/**
+ * Kuzov va tonnaj filtri sahifa ichida: API'da bu paramlar yo'q. Xulosa satri ham shu to'plamdan
+ * qayta hisoblanadi. Narx qismi domendagi cheapestByUnit bilan: ilgari bu yerda birlik
+ * hisobga olinmas edi va km narxi reys narxidan "arzonroq" bo'lib chiqardi, ya'ni bitta
+ * qator API dan kelganida bir xil, sahifada hisoblanganida boshqacha son ko'rsatardi.
+ */
 function summarize(items: L[]): ListingSummary {
-  const priced = items.filter((x) => x.priceTiyin != null).sort((a, b) => a.priceTiyin! - b.priceTiyin!);
   const near = items.filter((x) => x.distanceKm != null).sort((a, b) => a.distanceKm! - b.distanceKm!);
-  return { cheapestTiyin: priced[0]?.priceTiyin ?? null, cheapestUnit: priced[0]?.priceUnit ?? null, onRequest: items.length - priced.length, nearestKm: near[0]?.distanceKm ?? null };
+  return {
+    ...cheapestByUnit(items),
+    onRequest: items.filter((x) => x.priceTiyin == null || x.priceUnit == null).length,
+    nearestKm: near[0]?.distanceKm ?? null,
+  };
 }
 
 /** Avtotransport: kind=TRUCK; viloyat xizmat hududlariga ham mos keladi, koridor q orqali. */

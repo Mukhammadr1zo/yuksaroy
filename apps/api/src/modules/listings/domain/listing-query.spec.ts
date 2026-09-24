@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { corridorRegions } from '@yuksaroy/domain';
+import { cheapestByUnit, corridorRegions, regionRouteKm } from '@yuksaroy/domain';
 import { corridorMatch, listingOwner, parseCorridor, summarizeListings, uniqueSlug } from './listing-query';
 
 describe('uniqueSlug', () => {
@@ -49,5 +49,71 @@ describe('listingOwner', () => {
       .toEqual({ type: 'person', name: 'Akmal', phoneVerified: true });
     expect(listingOwner({ org: null, ownerUser: { fullName: null, phone: null } }))
       .toEqual({ type: 'person', name: 'Yakka haydovchi', phoneVerified: false });
+  });
+});
+
+/**
+ * Birlik aralash bo'lganda "eng arzon" qaror qatori yolg'on gapirmasligi kerak:
+ * 2 500 so'm/km reys narxidan raqam sifatida kichik, lekin u javob emas.
+ */
+describe('cheapestByUnit', () => {
+  it("birlik aralash bo'lsa ko'pchilik birligi olinadi", () => {
+    expect(cheapestByUnit([
+      { priceTiyin: 300_000_000, priceUnit: 'PER_TRIP' },
+      { priceTiyin: 250_000_000, priceUnit: 'PER_TRIP' },
+      { priceTiyin: 250_000, priceUnit: 'PER_KM' },
+    ])).toEqual({ cheapestTiyin: 250_000_000, cheapestUnit: 'PER_TRIP' });
+  });
+
+  it("narxsiz qatorlar hisobga olinmaydi, umuman narx bo'lmasa null", () => {
+    expect(cheapestByUnit([
+      { priceTiyin: null, priceUnit: null },
+      { priceTiyin: 5_000, priceUnit: 'PER_KM' },
+    ])).toEqual({ cheapestTiyin: 5_000, cheapestUnit: 'PER_KM' });
+    expect(cheapestByUnit([])).toEqual({ cheapestTiyin: null, cheapestUnit: null });
+    expect(cheapestByUnit([{ priceTiyin: 100, priceUnit: null }])).toEqual({ cheapestTiyin: null, cheapestUnit: null });
+  });
+
+  it('teng sonli birliklarda birinchi uchragani qoladi', () => {
+    expect(cheapestByUnit([
+      { priceTiyin: 900, priceUnit: 'PER_TON' },
+      { priceTiyin: 100, priceUnit: 'PER_KM' },
+    ]).cheapestUnit).toBe('PER_TON');
+  });
+
+  it("summarizeListings ham shu qoidadan foydalanadi", () => {
+    const s = summarizeListings([
+      { priceTiyin: 300_000_000, priceUnit: 'PER_TRIP', lat: null, lng: null },
+      { priceTiyin: 250_000_000, priceUnit: 'PER_TRIP', lat: null, lng: null },
+      { priceTiyin: 250_000, priceUnit: 'PER_KM', lat: null, lng: null },
+    ]);
+    expect(s.cheapestTiyin).toBe(250_000_000);
+    expect(s.cheapestUnit).toBe('PER_TRIP');
+    expect(s.onRequest).toBe(0);
+  });
+});
+
+/**
+ * Yo'l uzunligi viloyat markazlaridan: yuk so'rovida aniq manzil yo'q, shuning uchun
+ * bu taqqoslash uchun asos, marshrut emas.
+ */
+describe('regionRouteKm', () => {
+  it('ikki viloyat markazi orasidagi masofa, butun km', () => {
+    const d = regionRouteKm('UZ-TK', 'UZ-SA');
+    expect(d).not.toBeNull();
+    expect(d).toBeGreaterThan(200);
+    expect(d).toBeLessThan(350);
+    expect(Number.isInteger(d)).toBe(true);
+  });
+
+  it("qaysi tomondan bo'lsa ham bir xil", () => {
+    expect(regionRouteKm('UZ-TK', 'UZ-QR')).toBe(regionRouteKm('UZ-QR', 'UZ-TK'));
+  });
+
+  it("bir viloyat, noma'lum kod yoki bo'sh qiymat = null", () => {
+    expect(regionRouteKm('UZ-TK', 'UZ-TK')).toBeNull();
+    expect(regionRouteKm('UZ-XX', 'UZ-TK')).toBeNull();
+    expect(regionRouteKm(null, 'UZ-TK')).toBeNull();
+    expect(regionRouteKm('UZ-TK', undefined)).toBeNull();
   });
 });

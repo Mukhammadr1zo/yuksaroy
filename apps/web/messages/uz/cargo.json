@@ -54,7 +54,8 @@
       "closedNote": "Bu yuk uchun tashuvchi tanlangan yoki e'lon yopilgan.",
       "volume": "Hajm",
       "trucks": "Mashinalar soni",
-      "payment": "To'lov sharti"
+      "payment": "To'lov sharti",
+      "distance": "Masofa (taxminan)"
     },
     "new": {
       "title": "Yuk e'lon qilish",

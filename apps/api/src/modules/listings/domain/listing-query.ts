@@ -1,5 +1,5 @@
 // E'lon domeni: yozuv shakli va sof yordamchilar (slug, koridor, qaror qatori). Framework va Prisma yo'q.
-import { LISTING_OWNER_LABELS, REGIONS, corridorRegions, distanceKm, type Condition, type DealKind, type KycStatus, type ListingKind, type ListingStatus, type PriceUnit, type RegionCode } from '@yuksaroy/domain';
+import { LISTING_OWNER_LABELS, REGIONS, cheapestByUnit, corridorRegions, distanceKm, type Condition, type DealKind, type KycStatus, type ListingKind, type ListingStatus, type PriceUnit, type RegionCode } from '@yuksaroy/domain';
 
 export interface Route { from: RegionCode; to: RegionCode }
 
@@ -53,19 +53,15 @@ export async function uniqueSlug(base: string, exists: (slug: string) => Promise
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
 /**
- * Ro'yxat ustidagi qaror qatori: eng arzon (eng ko'p uchraydigan birlikda), narxsizlar soni, eng yaqini.
- * ponytail: birliklar aralash bo'lsa ko'pchilik birligi olinadi; birlikni tenglashtirish kerak bo'lsa keyin
+ * Ro'yxat ustidagi qaror qatori: eng arzon (birlik bilan), narxsizlar soni, eng yaqini.
+ * Narx qismi domenda (cheapestByUnit): webdagi mahalliy xulosa ham aynan shundan oladi,
+ * aks holda bir xil qator ikki joyda ikki xil son ko'rsatardi.
  */
 export function summarizeListings(all: Pick<ListingRecord, 'priceTiyin' | 'priceUnit' | 'lat' | 'lng'>[], near?: { lat: number; lng: number }) {
-  const priced = all.filter((l): l is typeof l & { priceTiyin: number; priceUnit: PriceUnit } => l.priceTiyin != null && l.priceUnit != null);
-  const count = new Map<PriceUnit, number>();
-  for (const l of priced) count.set(l.priceUnit, (count.get(l.priceUnit) ?? 0) + 1);
-  const unit = [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-  const cheapest = unit ? Math.min(...priced.filter((l) => l.priceUnit === unit).map((l) => l.priceTiyin)) : null;
   const dists = near ? all.filter((l) => l.lat != null && l.lng != null).map((l) => distanceKm(near.lat, near.lng, l.lat!, l.lng!)) : [];
   return {
-    cheapestTiyin: cheapest, cheapestUnit: unit,
-    onRequest: all.length - priced.length,
+    ...cheapestByUnit(all),
+    onRequest: all.filter((l) => l.priceTiyin == null || l.priceUnit == null).length,
     nearestKm: dists.length ? round1(Math.min(...dists)) : null,
   };
 }

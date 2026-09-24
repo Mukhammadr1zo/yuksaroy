@@ -2,6 +2,7 @@
   "hubs": {
     "regions": "Regions",
     "viewOnMap": "View on map",
+    "viewList": "List for this area",
     "openMap": "Open on map",
     "neighbours": "Neighbouring regions",
     "emptyNeighbours": "Nothing here yet, try neighbouring regions",

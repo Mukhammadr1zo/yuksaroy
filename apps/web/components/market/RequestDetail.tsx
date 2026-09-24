@@ -5,7 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { api, hasSession } from '@/lib/api';
-import { uzDate, uzDateTime } from '@/lib/format';
+import { regionRouteKm } from '@yuksaroy/domain';
+import { km, uzDate, uzDateTime } from '@/lib/format';
 import type { MarketRequest } from '@/lib/types-market';
 import { Notice } from '@/components/kabinet/bits';
 import { DemoBadge, MarketPhone, MarketStatusPill, useMarketLabels } from './bits';
@@ -34,6 +35,8 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
       .catch(() => {});
     return () => { alive = false; };
   }, [r.no, r.isDemo]);
+  // Faqat yuk so'rovida: xizmat so'rovida yo'nalish yo'q
+  const routeKm = cargo ? regionRouteKm(r.fromRegion, r.toRegion) : null;
   const facts: [string, React.ReactNode][] = cargo
     ? [
         [t('route'), <span key="r" className="inline-flex flex-wrap items-center gap-1">{L.region(r.fromRegion)}<ArrowRightIcon size={14} className="text-teal" aria-hidden="true" />{L.region(r.toRegion)}</span>],
@@ -45,6 +48,9 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
         ...(r.volumeM3 != null ? [[t('volume'), `${r.volumeM3} m3`] as [string, React.ReactNode]] : []),
         ...(r.trucksCount != null && r.trucksCount > 1 ? [[t('trucks'), String(r.trucksCount)] as [string, React.ReactNode]] : []),
         ...(r.paymentTerm ? [[t('payment'), L.payment(r.paymentTerm)] as [string, React.ReactNode]] : []),
+        // Viloyat markazlari orasidagi masofa: taklif narxini km ga bo'lib ko'rish uchun asos.
+        // Bir viloyat ichidagi yo'nalishda katak umuman chiqmaydi (0 km qaror bermaydi)
+        ...(routeKm != null ? [[t('distance'), km(routeKm, locale)] as [string, React.ReactNode]] : []),
       ]
     : [
         [t('type'), r.serviceType ? L.service[r.serviceType] : ''],
