@@ -8,19 +8,19 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { LISTING_OWNER_LABELS, ORG_KIND_LABELS } from '@yuksaroy/domain';
+import { LISTING_OWNER_LABELS, ORG_KIND_LABELS, REPORT_REASON_LABELS, REPORT_STATUSES, REPORT_STATUS_LABELS, REPORT_TARGET_LABELS } from '@yuksaroy/domain';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, stationName, uzDateTime } from '@/lib/format';
 import { listingHref, type AdminTerminal, type OrgRecord, type OwnerListing } from '@/lib/types-kabinet';
-import type { AdminPremiumOrder, AdminSubscription, ContactPage } from '@/lib/types-trust';
+import type { AdminPremiumOrder, AdminSubscription, ContactPage, ReportPage } from '@/lib/types-trust';
 import { useLang, useListingLabels } from '@/components/kabinet/bits';
 import { BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
 import { Decide, type Decision } from '@/components/admin/Decide';
 import { MessageFiles } from '@/components/chat/Attachments';
 
-type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'subscription' | 'contact';
-const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'subscription', 'contact'];
+type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'subscription' | 'contact' | 'reports';
+const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'subscription', 'contact', 'reports'];
 const isTab = (v: string | null): v is Tab => TABS.includes(v as Tab);
 
 type Flash = { text: string; tone: 'ok' | 'bad' } | null;
@@ -47,6 +47,7 @@ function Moderation() {
   const [prem, setPrem] = useState<AdminPremiumOrder[] | null>(null);
   const [subs, setSubs] = useState<AdminSubscription[] | null>(null);
   const [msgs, setMsgs] = useState<ContactPage | null>(null);
+  const [reports, setReports] = useState<ReportPage | null>(null);
   const [err, setErr] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
 
@@ -54,6 +55,10 @@ function Moderation() {
   // qayta chaqiradi, aks holda yorliq filtrlangan sonni ko'rsatib qolardi.
   const loadContactCount = useCallback(() => {
     void api<ContactPage>('/admin/contact/all?limit=1&handled=0').then(setMsgs).catch(() => setErr(true));
+  }, []);
+  // Yorliqdagi son faqat yangilarniki: ReportsTab amaldan keyin uni qayta chaqiradi
+  const loadReportCount = useCallback(() => {
+    void api<ReportPage>('/admin/reports?limit=1&status=NEW').then(setReports).catch(() => setErr(true));
   }, []);
 
   useEffect(() => {
@@ -67,9 +72,10 @@ function Moderation() {
     void api<AdminSubscription[]>('/admin/subscriptions?status=PENDING').then(setSubs).catch(fail);
     // Faqat yorliqdagi son uchun: to'liq ro'yxat, qidiruv va sahifalash ContactTab da.
     loadContactCount();
-  }, [loadContactCount]);
+    loadReportCount();
+  }, [loadContactCount, loadReportCount]);
 
-  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, subscription: subs?.length ?? null, contact: msgs?.total ?? null };
+  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, subscription: subs?.length ?? null, contact: msgs?.total ?? null, reports: reports?.total ?? null };
   const tabLabel = (k: Tab) => (k === 'premium' ? tp('admin.tab') : k === 'subscription' ? tsb('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
   const emptyText = tab === 'premium' ? tp('admin.empty') : tab === 'subscription' ? tsb('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty');
 
@@ -103,11 +109,13 @@ function Moderation() {
       {flash ? <p role="status" className={`mt-3 text-sm font-semibold ${flash.tone === 'ok' ? 'text-teal-ink' : 'text-red-700'}`}>{flash.text}</p> : null}
 
       {tab === 'contact' ? <ContactTab onChanged={loadContactCount} />
+        : tab === 'reports' ? <ReportsTab onChanged={loadReportCount} />
         : !loaded ? <p className="mt-5 text-sm text-muted">{err ? tc('loadFailed') : tc('loading')}</p>
         : counts[tab] === 0 ? <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{emptyText}</div>
         : <ul className="mt-5 space-y-3">{rows}</ul>}
       {tab === 'premium' || tab === 'contact' ? <p className="mt-3 text-xs text-muted">{tp(tab === 'premium' ? 'admin.lead' : 'messages.lead')}</p> : null}
       {tab === 'subscription' ? <p className="mt-3 text-xs text-muted">{tsb('admin.lead')}</p> : null}
+      {tab === 'reports' ? <p className="mt-3 text-xs text-muted">{t('reports.lead')}</p> : null}
     </>
   );
 }
@@ -445,6 +453,89 @@ function ContactRow({ m, onDelete, onMark }: {
         )}
         <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => onDelete(m.id)} className={`${BTN_DANGER} px-3 py-1 text-xs`} />
       </div>
+    </li>
+  );
+}
+
+/**
+ * Shikoyatlar: obyekt, sabab, matn va qaror.
+ *
+ * Sukut filtr yangilar; yorliqdagi son ham shuni sanaydi. Saralash tanlovi ataylab
+ * yo'q: bu navbat, jadval emas - tartib doim yangisidan eskisiga.
+ *
+ * Obyektni yashirish tugmasi bu yerda YO'Q: har turning o'z ekrani va o'z amali bor.
+ * Qator obyekt sahifasiga havola qiladi, qaror esa shikoyatning o'ziga tegishli.
+ */
+function ReportsTab({ onChanged }: { onChanged: () => void }) {
+  const t = useTranslations('admin');
+  const tc = useTranslations('admin.common');
+  const tr = useTranslations('admin.reports');
+  const lang = useLang();
+  const [status, setStatus] = useState('NEW');
+  const [page, setPage] = useState(1);
+  const [flash, setFlash] = useState<Flash>(null);
+  const list = useAdminList<ReportPage['items'][number]>('/admin/reports', { status, page });
+
+  return (
+    <>
+      <Toolbar onSubmit={() => setPage(1)}>
+        <Labeled label={tc('status')} className="w-48">
+          <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className={INPUT}>
+            {REPORT_STATUSES.map((s) => <option key={s} value={s}>{REPORT_STATUS_LABELS[lang][s]}</option>)}
+            <option value="">{tc('all')}</option>
+          </select>
+        </Labeled>
+        {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
+      </Toolbar>
+      {flash ? <p role="status" className={`mt-3 text-sm font-semibold ${flash.tone === 'ok' ? 'text-teal-ink' : 'text-red-700'}`}>{flash.text}</p> : null}
+      {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
+      {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
+      {list.data && !list.loading ? (
+        list.data.items.length
+          ? <ul className="mt-4 space-y-3">{list.data.items.map((r) => (
+              <ReportRow key={r.id} r={r} onDone={(d) => {
+                setFlash({ text: tr(d === 'approved' ? 'doneResolved' : 'doneDismissed'), tone: d === 'approved' ? 'ok' : 'bad' });
+                void list.reload();
+                onChanged();
+              }} />
+            ))}</ul>
+          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tr('empty')}</div>
+      ) : null}
+      <Pager page={page} pages={list.pages} onPage={setPage} />
+    </>
+  );
+}
+
+/** Bitta shikoyat: nima ustidan, nega, kim yozgan va qaror. */
+function ReportRow({ r, onDone }: { r: ReportPage['items'][number]; onDone: (d: Decision) => void }) {
+  const lang = useLang();
+  const tr = useTranslations('admin.reports');
+  return (
+    <li className={`${CARD} p-4`}>
+      <div className="flex flex-wrap items-center gap-3">
+        <Pill tone={r.status === 'NEW' ? 'warn' : r.status === 'RESOLVED' ? 'ok' : 'neutral'}>{REPORT_STATUS_LABELS[lang][r.status]}</Pill>
+        <span className="text-xs font-semibold text-muted">{REPORT_TARGET_LABELS[lang][r.targetKind]}</span>
+        {/* Nom va havola shikoyat yuborilgan paytdagi holicha: obyekt o'chsa ham qator o'qiladi */}
+        <Link href={r.targetHref} className="min-w-0 break-words font-semibold text-teal-ink underline">{r.targetTitle}</Link>
+        <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(r.createdAt, lang)}</span>
+      </div>
+      <p className="mt-2 text-sm font-semibold">{REPORT_REASON_LABELS[lang][r.reason]}</p>
+      <p className="mt-1 whitespace-pre-line break-words text-sm">{r.text}</p>
+      {/* Yuborgan odam: takroriy shikoyatchi ko'rinib tursin va kerak bo'lsa bog'lanish mumkin */}
+      <p className="mt-2 text-xs text-muted">
+        {tr('reporter')}:{' '}
+        <Link href={`/admin/users?q=${encodeURIComponent(r.reporter?.phone ?? r.reporterId)}`} className="text-teal-ink underline">
+          {r.reporter?.fullName || r.reporter?.phone || r.reporterId}
+        </Link>
+      </p>
+      {r.status === 'NEW' ? (
+        <Decide path={`/admin/reports/${r.id}/decide`} reasonKey="note" requireReason={false} yes={tr('decideYes')} no={tr('decideNo')} onDone={onDone} />
+      ) : (
+        <p className="mt-2 text-xs text-muted">
+          {tr('resolvedBy')}: {r.resolvedBy?.fullName || r.resolvedBy?.phone || ''} {r.resolvedAt ? uzDateTime(r.resolvedAt, lang) : ''}
+          {r.resolveNote ? ` · ${r.resolveNote}` : ''}
+        </p>
+      )}
     </li>
   );
 }

@@ -15,6 +15,7 @@ import { PhotoGallery } from './PhotoGallery';
 import { PremiumBadge } from './PremiumBadge';
 import { Impressions } from './Impressions';
 import { ListingReviews } from '@/components/reviews/ListingReviews';
+import { ReportButton } from '@/components/site/ReportButton';
 
 type Section = 'equipment' | 'carriers';
 
@@ -165,6 +166,8 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
 
       <div className="mt-10 max-w-3xl">
         <ListingReviews listingId={l.id} slug={l.slug} />
+        {/* Namuna e'lon haqiqiy taklif emas: unga shikoyat ham yozilmaydi */}
+        {l.isDemo ? null : <div className="mt-8"><ReportButton kind="listing" targetId={l.id} /></div>}
       </div>
     </div>
   );

@@ -550,3 +550,43 @@ export function parseWagonNos(text: string): { ok: string[]; bad: string[] } {
 
 // Kuzatuv qoidalari.
 export * from './watch';
+
+/**
+ * Shikoyat qilinadigan obyektlar.
+ *
+ * Nomlash: umumiy to'rttasi (listing, terminal, service, request) telefon ochish
+ * yo'lidagi turlar bilan ataylab bir xil atalgan, ya'ni bitta tushuncha ikki joyda
+ * ikki xil atalmaydi. Farq ikkitomonlama: 'order' faqat shu yerda bor (telefon ochish
+ * yo'lida buyurtma yo'q), 'org' va 'offer' esa faqat u yerda - ular ustida shikoyat
+ * tugmasi chizilmaydi.
+ */
+export const REPORT_TARGETS = ['listing', 'terminal', 'service', 'request', 'order'] as const;
+export type ReportTarget = (typeof REPORT_TARGETS)[number];
+
+export const REPORT_TARGET_LABELS: Record<SearchLang, Record<ReportTarget, string>> = {
+  uz: { listing: "E'lon", terminal: 'Terminal', service: 'Xizmat sahifasi', request: "So'rov", order: 'Buyurtma' },
+  ru: { listing: 'Объявление', terminal: 'Терминал', service: 'Страница услуги', request: 'Запрос', order: 'Заказ' },
+  en: { listing: 'Listing', terminal: 'Terminal', service: 'Service page', request: 'Request', order: 'Order' },
+};
+
+/** Sabab kodi. Ro'yxat qisqa: uzun ro'yxatdan odam baribir "Boshqa" ni tanlaydi. */
+export const REPORT_REASONS = ['SPAM', 'WRONG', 'PHONE', 'FRAUD', 'OTHER'] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+
+export const REPORT_REASON_LABELS: Record<SearchLang, Record<ReportReason, string>> = {
+  uz: { SPAM: 'Reklama yoki takroriy', WRONG: "Ma'lumot noto'g'ri", PHONE: 'Telefon javob bermaydi', FRAUD: "Aldov yoki oldindan pul so'rash", OTHER: 'Boshqa' },
+  ru: { SPAM: 'Реклама или дубль', WRONG: 'Неверные данные', PHONE: 'Телефон не отвечает', FRAUD: 'Обман или предоплата', OTHER: 'Другое' },
+  en: { SPAM: 'Spam or duplicate', WRONG: 'Wrong details', PHONE: 'Phone does not answer', FRAUD: 'Scam or upfront payment', OTHER: 'Other' },
+};
+
+export const REPORT_STATUSES = ['NEW', 'RESOLVED', 'DISMISSED'] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
+
+export const REPORT_STATUS_LABELS: Record<SearchLang, Record<ReportStatus, string>> = {
+  uz: { NEW: 'Yangi', RESOLVED: 'Hal qilindi', DISMISSED: "O'rinsiz" },
+  ru: { NEW: 'Новая', RESOLVED: 'Решена', DISMISSED: 'Отклонена' },
+  en: { NEW: 'New', RESOLVED: 'Resolved', DISMISSED: 'Dismissed' },
+};
+
+/** Matn chegaralari va bitta odamning bir soatdagi eng ko'p shikoyati. */
+export const REPORT = { textMin: 10, textMax: 1000, perHour: 5 } as const;

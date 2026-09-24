@@ -538,5 +538,22 @@
     "UZ-AN": "Andijon viloyati",
     "UZ-NG": "Namangan viloyati",
     "UZ-FA": "Farg'ona viloyati"
+  },
+  "report": {
+    "open": "Shikoyat qilish",
+    "title": "Nimasi noto'g'ri?",
+    "lead": "Biz tekshiramiz. Sizga javob kerak bo'lsa aloqa sahifasiga yozing.",
+    "text": "Nima bo'ldi",
+    "textHint": "Kamida 10 ta belgi. Aniq yozing: nimasi noto'g'ri va qachon bo'ldi.",
+    "submit": "Yuborish",
+    "sending": "Yuborilmoqda",
+    "cancel": "Bekor qilish",
+    "sent": "Shikoyat yuborildi. Tekshiramiz.",
+    "already": "Siz bunga allaqachon shikoyat yuborgansiz.",
+    "login": "Shikoyat yuborish uchun kiring.",
+    "loginCta": "Kirish",
+    "limit": "Juda ko'p shikoyat yubordingiz. Bir soatdan keyin urinib ko'ring.",
+    "gone": "Bu sahifa endi mavjud emas.",
+    "err": "Yuborilmadi. Qayta urinib ko'ring."
   }
 }

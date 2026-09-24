@@ -37,8 +37,9 @@ function Orders() {
   const lang = useLang();
   const sp = useSearchParams();
   // Bosh sahifadagi "tasdiq kutayotgan" havolasi ?status=PENDING bilan keladi; noto'g'ri qiymat "hammasi" bo'lib qoladi
-  const [f, setF] = useState({ q: '', status: isStatus(sp.get('status')) ? sp.get('status')! : '', page: 1 });
-  const [q, setQ] = useState('');
+  // ?q= shikoyat qatoridan keladi: buyurtma raqami bilan to'g'ridan-to'g'ri ochilsin
+  const [f, setF] = useState({ q: sp.get('q') ?? '', status: isStatus(sp.get('status')) ? sp.get('status')! : '', page: 1 });
+  const [q, setQ] = useState(sp.get('q') ?? '');
   const [open, setOpen] = useState<string | null>(null);
   const { data, pages, loading, err, reload } = useAdminList<Row>('/admin/orders', { ...f, limit: 30 });
 

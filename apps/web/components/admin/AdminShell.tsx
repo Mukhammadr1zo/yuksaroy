@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         const c = h.counts ?? {};
         // Murojaat ham moderatsiya sahifasining yorlig'i: aks holda menyu va sahifa
         // ikki xil raqam ko'rsatardi
-        setCounts({ pending: (c.listingsPendingReview ?? 0) + (c.orgsPendingKyc ?? 0) + (c.terminalClaimsPending ?? 0) + (c.premiumPending ?? 0) + (c.subscriptionPending ?? 0) + (c.contactNew ?? 0) });
+        setCounts({ pending: (c.listingsPendingReview ?? 0) + (c.orgsPendingKyc ?? 0) + (c.terminalClaimsPending ?? 0) + (c.premiumPending ?? 0) + (c.subscriptionPending ?? 0) + (c.contactNew ?? 0) + (c.reportsNew ?? 0) });
       })
       .catch(() => {});
   }, [me?.isPlatformAdmin, path]);

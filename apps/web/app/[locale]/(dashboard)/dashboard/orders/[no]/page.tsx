@@ -12,6 +12,7 @@ import { useLang } from '@/components/kabinet/bits';
 import { PriceLines, StatusPill, dateTime, slotLabel } from '@/components/order/bits';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { OrderReview } from '@/components/reviews/OrderReview';
+import { ReportButton } from '@/components/site/ReportButton';
 
 type OrderDoc = { id: string; no: string; kindLabel: string };
 
@@ -157,6 +158,9 @@ export default function OrderPage() {
           </section>
         </aside>
       </div>
+      {/* Buyurtmada namuna qator yo'q. Server baribir tekshiradi: shikoyat faqat
+          buyurtma tomonlaridan qabul qilinadi. */}
+      <div className="mt-8"><ReportButton kind="order" targetId={o.no} /></div>
     </main>
   );
 }

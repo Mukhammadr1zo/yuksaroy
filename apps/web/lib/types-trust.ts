@@ -1,5 +1,5 @@
 // 5-bosqich (ishonch va Premium) javob shakllari: baholar, ko'rsatishlar analitikasi, Premium buyurtmalar, murojaatlar. lib/types.ts ga tegilmaydi.
-import type { ImpressionSurface } from '@yuksaroy/domain';
+import type { ImpressionSurface, ReportReason, ReportStatus, ReportTarget } from '@yuksaroy/domain';
 
 /** GET /terminals/:slug/reviews qatori (buyurtma raqami yashirin: YS-10**). */
 export interface Review { id: string; rating: number; text: string | null; reply: string | null; repliedAt: string | null; createdAt: string; orgName: string; orderNo: string }
@@ -33,3 +33,13 @@ export interface ContactMessage {
   handledBy: { id: string; phone: string | null; fullName: string | null } | null;
 }
 export interface ContactPage { items: ContactMessage[]; total: number; page: number; limit: number }
+
+/** GET /admin/reports qatori. Obyekt nomi va sahifasi shikoyat yuborilgan paytdagi holicha. */
+export interface AdminReport {
+  id: string; reporterId: string; targetKind: ReportTarget; targetId: string;
+  targetTitle: string; targetHref: string; reason: ReportReason; text: string; status: ReportStatus;
+  resolvedById: string | null; resolvedAt: string | null; resolveNote: string | null; createdAt: string;
+  reporter: { id: string; phone: string | null; fullName: string | null } | null;
+  resolvedBy: { id: string; phone: string | null; fullName: string | null } | null;
+}
+export interface ReportPage { items: AdminReport[]; total: number; page: number; limit: number }

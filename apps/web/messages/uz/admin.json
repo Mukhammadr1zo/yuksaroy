@@ -6,7 +6,8 @@
     "tabs": {
       "listings": "E'lonlar",
       "kyc": "Tashkilot tasdig'i",
-      "claims": "Obyekt da'volari"
+      "claims": "Obyekt da'volari",
+      "reports": "Shikoyatlar"
     },
     "empty": "Navbat bo'sh.",
     "approve": "Tasdiqlash",
@@ -214,7 +215,8 @@
       "revealCount": "jami ochilish",
       "revealFree": "obunasiz ochilish",
       "revealWindow": "Bepul oyna: {n} ta.",
-      "pendingContact": "Javobsiz murojaat"
+      "pendingContact": "Javobsiz murojaat",
+      "pendingReports": "Yangi shikoyat"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",
@@ -413,7 +415,9 @@
         "urgent-close": "Shoshilinch so'rovni yopdi",
         "urgent-create": "Shoshilinch so'rov qo'ydi",
         "urgent-offer": "Shoshilinch so'rovga taklif berdi",
-        "wagon-search": "Vagon qidirdi"
+        "wagon-search": "Vagon qidirdi",
+        "admin-report-decide": "Shikoyat bo'yicha qaror qabul qildi",
+        "report-create": "Shikoyat yubordi"
       },
       "ent": {
         "ContactMessage": "Murojaat",
@@ -438,7 +442,8 @@
         "UrgentRequest": "Shoshilinch so'rov",
         "User": "Foydalanuvchi",
         "Wagon": "Vagon",
-        "demo": "Namuna ma'lumot"
+        "demo": "Namuna ma'lumot",
+        "Report": "Shikoyat"
       }
     },
     "settings": {
@@ -633,6 +638,16 @@
       "renewals": "Uzaytirish",
       "empty": "Hali tasdiqlangan to'lov yo'q.",
       "noPremium": "Bu davrda Premium to'lovi bo'lmagan."
+    },
+    "reports": {
+      "lead": "Obyektni ochib tekshiring. Yashirish yoki o'chirish o'sha obyektning o'z ekranida.",
+      "empty": "Shikoyat yo'q.",
+      "reporter": "Yuborgan",
+      "resolvedBy": "Hal qildi",
+      "decideYes": "Hal qilindi",
+      "decideNo": "O'rinsiz",
+      "doneResolved": "Shikoyat hal qilindi deb belgilandi.",
+      "doneDismissed": "Shikoyat o'rinsiz deb belgilandi."
     }
   }
 }

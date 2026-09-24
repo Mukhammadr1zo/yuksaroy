@@ -12,6 +12,7 @@ import { Notice } from '@/components/kabinet/bits';
 import { DemoBadge, MarketPhone, MarketStatusPill, useMarketLabels } from './bits';
 import { OfferForm } from './OfferForm';
 import { requestHref } from './RequestCard';
+import { ReportButton } from '@/components/site/ReportButton';
 
 export function RequestDetail({ r }: { r: MarketRequest }) {
   const locale = useLocale();
@@ -105,6 +106,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
             : <OfferForm request={r} next={next} me={me} />}
         </div>
       </section>
+      {r.isDemo ? null : <div className="mt-8"><ReportButton kind="request" targetId={r.id} /></div>}
     </div>
   );
 }

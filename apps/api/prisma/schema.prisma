@@ -1086,3 +1086,37 @@ model Watch {
   @@index([kind, lastSentAt])
   @@index([userId])
 }
+
+/// Foydalanuvchi shikoyati: e'lon, terminal, xizmat sahifasi, bozor so'rovi yoki buyurtma ustidan.
+///
+/// Nega ContactMessage emas: murojaat ochiq forma (kirmagan odam ham yuboradi) va unda
+/// obyekt yo'q. Shikoyat esa aniq obyektga tegishli va kirgan odamdan keladi.
+///
+/// Bir odam bir obyektga bir marta: qoida BAZADA (@@unique), ya'ni ikki oyna barobar
+/// yuborsa ham ikkinchisi yozilmaydi va oyna hisoblaydigan kod kerak emas.
+///
+/// User ga bog'lanish yo'q (ContactMessage.handledById va AuditLog.actorId kabi):
+/// hisob o'chirilsa shikoyat qatori qolsin.
+model Report {
+  id           String    @id @default(cuid())
+  reporterId   String
+  targetKind   String // REPORT_TARGETS: listing | terminal | service | request | order
+  targetId     String
+  /// Obyekt nomi va sahifasi yuborilgan paytdagi holicha. Nega nusxa: obyekt o'chsa yoki
+  /// yashirilsa ham admin nima haqida gap ketayotganini ko'radi, ro'yxat esa beshta
+  /// jadvalga qayta bormaydi.
+  targetTitle  String
+  targetHref   String
+  reason       String // REPORT_REASONS
+  text         String
+  status       String    @default("NEW") // REPORT_STATUSES: NEW | RESOLVED | DISMISSED
+  /// Kim hal qildi va yakun izohi. Alohida holat ustuni kerak, chunki holat uchta:
+  /// sana bo'sh yoki to'la ikkitasini ajrata olmaydi.
+  resolvedById String?
+  resolvedAt   DateTime? @db.Timestamptz(3)
+  resolveNote  String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([reporterId, targetKind, targetId])
+  @@index([status, createdAt])
+}

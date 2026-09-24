@@ -12,8 +12,10 @@ import { BTN, BTN_DANGER, BTN_GHOST, INPUT } from '@/components/admin/kit';
 
 export type Decision = 'approved' | 'rejected';
 
-export function Decide({ path, reasonKey, requireReason, onDone }: {
+export function Decide({ path, reasonKey, requireReason, onDone, yes, no }: {
   path: string; reasonKey: 'reason' | 'note'; requireReason: boolean; onDone?: (d: Decision) => void;
+  /** Tugma nomlari. Berilmasa moderatsiyaning "Tasdiqlash / Rad etish" i; shikoyatda boshqa so'z kerak. */
+  yes?: string; no?: string;
 }) {
   const t = useTranslations('admin');
   const [rejecting, setRejecting] = useState(false);
@@ -49,8 +51,8 @@ export function Decide({ path, reasonKey, requireReason, onDone }: {
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={busy} onClick={() => send(true)} className={BTN}>{busy ? t('busy') : t('approve')}</button>
-          <button type="button" disabled={busy} onClick={() => setRejecting(true)} className={BTN_DANGER}>{t('reject')}</button>
+          <button type="button" disabled={busy} onClick={() => send(true)} className={BTN}>{busy ? t('busy') : yes ?? t('approve')}</button>
+          <button type="button" disabled={busy} onClick={() => setRejecting(true)} className={BTN_DANGER}>{no ?? t('reject')}</button>
         </div>
       )}
       {err ? <p role="alert" className="mt-2 text-sm text-red-700">{err}</p> : null}

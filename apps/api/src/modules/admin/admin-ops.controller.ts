@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Inject, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ORDER_STATUSES, type OrderStatus } from '@yuksaroy/domain';
@@ -8,6 +8,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt } from '../catalog/presentation/catalog.controller';
+import { reportWhere, resolveData } from './report-status';
 
 class StatusDto {
   @IsString() @MaxLength(30) status!: string;
@@ -21,6 +22,12 @@ class ReasonDto {
 class ContactHandledDto {
   @IsBoolean() handled!: boolean;
   @IsOptional() @IsString() @MaxLength(300) note?: string;
+}
+
+class ReportDecideDto {
+  /** true: shikoyat o'rinli (RESOLVED), false: o'rinsiz (DISMISSED). */
+  @IsBoolean() approve!: boolean;
+  @IsOptional() @IsString() @MaxLength(500) note?: string;
 }
 
 /** Erkin matn qidiruvi uchun qisqartma: bo'sh bo'lsa filtr qo'shilmaydi. */
@@ -307,6 +314,50 @@ export class AdminOpsController {
     await this.prisma.contactMessage.delete({ where: { id } });
     await this.audit.log({ actorId: userId, action: 'admin.contact.delete', entity: 'ContactMessage', entityId: id, meta: m });
     return { id, deleted: true };
+  }
+
+  // ──────────────────────── Shikoyatlar ────────────────────────
+
+  /**
+   * Ro'yxat: holat filtri (bo'sh = hammasi; panel NEW bilan so'raydi).
+   *
+   * Tartib qat'iy: yangisidan eskisiga, tenglik id bilan buziladi. Saralash tanlovi
+   * ataylab yo'q - bu navbat, jadval emas.
+   */
+  @Get('reports')
+  async reports(@Query('status') status?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+    const p = clampInt(page, 1, 1, 10_000);
+    const take = clampInt(limit, 30, 1, 100);
+    const where = reportWhere(status);
+    const [total, items] = await Promise.all([
+      this.prisma.report.count({ where }),
+      this.prisma.report.findMany({ where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
+    ]);
+    // Report da User ga bog'lanish yo'q (hisob o'chsa qator qolsin): ismlar alohida
+    // so'rov bilan olinadi, murojaat qutisidagi bilan aynan bir xil usul
+    const ids = [...new Set(items.flatMap((r) => [r.reporterId, r.resolvedById]).filter((x): x is string => !!x))];
+    const users = ids.length
+      ? await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, phone: true, fullName: true } })
+      : [];
+    const byId = new Map(users.map((u) => [u.id, u]));
+    return {
+      items: items.map((r) => ({ ...r, reporter: byId.get(r.reporterId) ?? null, resolvedBy: (r.resolvedById && byId.get(r.resolvedById)) || null })),
+      total, page: p, limit: take,
+    };
+  }
+
+  /**
+   * Qaror: o'rinli yoki o'rinsiz. Obyektning O'ZINI yashirish bu yerda emas - har
+   * turning o'z ekrani va o'z amali bor, ikkinchi nusxa ikkita qoida bo'lib qolardi.
+   *
+   * Faqat NEW dan: ikki operator barobar bossa ikkinchisi 404 oladi.
+   */
+  @Post('reports/:id/decide') @HttpCode(200)
+  async decideReport(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ReportDecideDto) {
+    const { count } = await this.prisma.report.updateMany({ where: { id, status: 'NEW' }, data: resolveData(dto.approve, userId, dto.note) });
+    if (!count) throw new NotFoundException({ code: 'REPORT_NOT_FOUND' });
+    await this.audit.log({ actorId: userId, action: 'admin.report.decide', entity: 'Report', entityId: id, meta: { approve: dto.approve } });
+    return { id, status: dto.approve ? 'RESOLVED' : 'DISMISSED' };
   }
 
   // ───────────────────────── Shoshilinch so'rovlar ─────────────────────────

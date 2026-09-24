@@ -7,6 +7,7 @@ import { uzDate } from '@/lib/format';
 import type { ServiceProfileCard } from '@/lib/types-market';
 import { KycBadge } from '@/components/catalog/KycBadge';
 import { MarketPhone } from '@/components/market/bits';
+import { ReportButton } from '@/components/site/ReportButton';
 
 type Params = { params: Promise<{ locale: string; id: string }> };
 const load = (id: string) => sapiOrNull<ServiceProfileCard>(`/services/profiles/${encodeURIComponent(id)}`, 120);
@@ -69,6 +70,7 @@ export default async function ServiceProfilePage({ params }: Params) {
         <p className="mt-1 max-w-[62ch] text-sm text-muted">{t('askBody')}</p>
         <Link href={`/services/request?type=${p.serviceType}`} className="mt-4 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('askCta')}</Link>
       </section>
+      {p.isDemo ? null : <div className="mt-8"><ReportButton kind="service" targetId={p.id} /></div>}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import type { PrismaService } from './prisma.service';
 export const QUEUE_KEYS = [
   'listingsPendingReview', 'orgsPendingKyc', 'terminalClaimsPending',
   'premiumPending', 'subscriptionPending', 'ordersPending', 'urgentOpen', 'contactNew',
+  'reportsNew',
 ] as const;
 export type QueueKey = (typeof QUEUE_KEYS)[number];
 
@@ -21,17 +22,17 @@ export const QUEUE_LABEL: Record<SearchLang, Record<QueueKey, string>> = {
   uz: {
     listingsPendingReview: "Tekshiruvdagi e'lon", orgsPendingKyc: 'Tashkilot tasdig\'i', terminalClaimsPending: 'Obyekt da\'vosi',
     premiumPending: 'Premium to\'lovi', subscriptionPending: 'Obuna to\'lovi', ordersPending: 'Kutayotgan buyurtma', urgentOpen: 'Shoshilinch so\'rov',
-    contactNew: 'Javobsiz murojaat',
+    contactNew: 'Javobsiz murojaat', reportsNew: 'Yangi shikoyat',
   },
   ru: {
     listingsPendingReview: 'Объявление на проверке', orgsPendingKyc: 'Подтверждение организации', terminalClaimsPending: 'Заявка на объект',
     premiumPending: 'Оплата Premium', subscriptionPending: 'Оплата подписки', ordersPending: 'Заказ в ожидании', urgentOpen: 'Срочная заявка',
-    contactNew: 'Обращение без ответа',
+    contactNew: 'Обращение без ответа', reportsNew: 'Новая жалоба',
   },
   en: {
     listingsPendingReview: 'Listing under review', orgsPendingKyc: 'Organisation check', terminalClaimsPending: 'Ownership claim',
     premiumPending: 'Premium payment', subscriptionPending: 'Subscription payment', ordersPending: 'Pending order', urgentOpen: 'Urgent request',
-    contactNew: 'Unanswered message',
+    contactNew: 'Unanswered message', reportsNew: 'New report',
   },
 };
 
@@ -45,6 +46,7 @@ export const QUEUE_HREF: Record<QueueKey, string> = {
   ordersPending: '/admin/orders?status=PENDING',
   urgentOpen: '/admin/urgent?status=OPEN',
   contactNew: '/admin/moderation?tab=contact',
+  reportsNew: '/admin/moderation?tab=reports',
 };
 
 export type QueueStat = { count: number; oldest: Date | null };
@@ -61,7 +63,7 @@ export async function queueStats(prisma: PrismaService, oldest: boolean): Promis
   const first = async <T extends { [k: string]: unknown }>(p: Promise<T | null>, field: string): Promise<Date | null> =>
     oldest ? (((await p) as Record<string, unknown> | null)?.[field] as Date | undefined) ?? null : null;
 
-  const [lc, lo, oc, oo, tc, to, pc, po, sc, so, rc, ro, uc, uo, cc, co] = await Promise.all([
+  const [lc, lo, oc, oo, tc, to, pc, po, sc, so, rc, ro, uc, uo, cc, co, rpc, rpo] = await Promise.all([
     prisma.listing.count({ where: { status: 'PENDING_REVIEW' } }),
     first(oldest ? prisma.listing.findFirst({ where: { status: 'PENDING_REVIEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
     prisma.organization.count({ where: { kycStatus: 'PENDING' } }),
@@ -78,6 +80,8 @@ export async function queueStats(prisma: PrismaService, oldest: boolean): Promis
     first(oldest ? prisma.urgentRequest.findFirst({ where: { status: 'OPEN' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
     prisma.contactMessage.count({ where: { handledAt: null } }),
     first(oldest ? prisma.contactMessage.findFirst({ where: { handledAt: null }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
+    prisma.report.count({ where: { status: 'NEW' } }),
+    first(oldest ? prisma.report.findFirst({ where: { status: 'NEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
   ]);
 
   return {
@@ -89,6 +93,7 @@ export async function queueStats(prisma: PrismaService, oldest: boolean): Promis
     ordersPending: { count: rc, oldest: ro },
     urgentOpen: { count: uc, oldest: uo },
     contactNew: { count: cc, oldest: co },
+    reportsNew: { count: rpc, oldest: rpo },
   };
 }
 

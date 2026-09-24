@@ -18,7 +18,7 @@ import { CARD, Notice, PageHead, Pill, errText, useActionText } from '@/componen
 
 type Health = {
   db: { ok: boolean; ms?: number; error?: string };
-  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number; urgentOpen: number; contactNew: number };
+  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number; urgentOpen: number; contactNew: number; reportsNew: number };
   recent: { users: number; orders: number; listings: number };
   /** Har navbatning eng eskisi; faqat ?full=1 bilan keladi */
   oldest?: Partial<Record<string, string | null>>;
@@ -43,6 +43,7 @@ const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
   // qaragan operator ochiq so'rov borligini bilmasdi
   { key: 'urgentOpen', label: 'pendingUrgent', href: '/admin/urgent?status=OPEN' },
   { key: 'contactNew', label: 'pendingContact', href: '/admin/moderation?tab=contact' },
+  { key: 'reportsNew', label: 'pendingReports', href: '/admin/moderation?tab=reports' },
 ];
 const RECENT: { key: keyof Health['recent']; label: string }[] = [
   { key: 'users', label: 'newUsers' }, { key: 'orders', label: 'newOrders' }, { key: 'listings', label: 'newListings' },

@@ -18,6 +18,7 @@ import { CardPhoto } from '@/components/catalog/CardPhoto';
 import { PhotoGallery } from '@/components/catalog/PhotoGallery';
 import { ClaimSiding } from '@/components/catalog/ClaimSiding';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
+import { ReportButton } from '@/components/site/ReportButton';
 
 export const revalidate = 300;
 
@@ -236,6 +237,7 @@ export default async function TerminalPage({ params }: Params) {
           ) : null}
         </aside>
       </div>
+      {t.isDemo ? null : <div className="mt-10"><ReportButton kind="terminal" targetId={t.id} /></div>}
     </div>
   );
 }

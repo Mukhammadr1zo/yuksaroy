@@ -538,5 +538,22 @@
     "UZ-AN": "Andijan region",
     "UZ-NG": "Namangan region",
     "UZ-FA": "Fergana region"
+  },
+  "report": {
+    "open": "Report a problem",
+    "title": "What is wrong?",
+    "lead": "We will check it. If you need a reply, write to us from the contact page.",
+    "text": "What happened",
+    "textHint": "At least 10 characters. Be specific: what is wrong and when it happened.",
+    "submit": "Send",
+    "sending": "Sending",
+    "cancel": "Cancel",
+    "sent": "Report sent. We will check it.",
+    "already": "You have already reported this.",
+    "login": "Sign in to send a report.",
+    "loginCta": "Sign in",
+    "limit": "Too many reports. Try again in an hour.",
+    "gone": "This page no longer exists.",
+    "err": "Not sent. Please try again."
   }
 }

@@ -6,7 +6,8 @@
     "tabs": {
       "listings": "Listings",
       "kyc": "Company checks",
-      "claims": "Object claims"
+      "claims": "Object claims",
+      "reports": "Reports"
     },
     "empty": "The queue is empty.",
     "approve": "Approve",
@@ -214,7 +215,8 @@
       "revealCount": "reveals in total",
       "revealFree": "reveals without a subscription",
       "revealWindow": "Free window: {n}.",
-      "pendingContact": "Unanswered message"
+      "pendingContact": "Unanswered message",
+      "pendingReports": "New report"
     },
     "terminals": {
       "lead": "Terminals and rail sidings, registry records included.",
@@ -413,7 +415,9 @@
         "urgent-close": "Closed an urgent request",
         "urgent-create": "Posted an urgent request",
         "urgent-offer": "Offered on an urgent request",
-        "wagon-search": "Searched for a wagon"
+        "wagon-search": "Searched for a wagon",
+        "admin-report-decide": "Decided on a report",
+        "report-create": "Sent a report"
       },
       "ent": {
         "ContactMessage": "Message",
@@ -438,7 +442,8 @@
         "UrgentRequest": "Urgent request",
         "User": "User",
         "Wagon": "Wagon",
-        "demo": "Sample data"
+        "demo": "Sample data",
+        "Report": "Report"
       }
     },
     "settings": {
@@ -633,6 +638,16 @@
       "renewals": "Renewals",
       "empty": "No confirmed payments yet.",
       "noPremium": "There were no Premium payments in this period."
+    },
+    "reports": {
+      "lead": "Open the object and check it. Hiding or deleting is done on that object's own screen.",
+      "empty": "No reports.",
+      "reporter": "Sent by",
+      "resolvedBy": "Handled by",
+      "decideYes": "Resolved",
+      "decideNo": "Dismiss",
+      "doneResolved": "Report marked as resolved.",
+      "doneDismissed": "Report marked as dismissed."
     }
   }
 }
