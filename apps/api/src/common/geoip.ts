@@ -31,8 +31,23 @@ function reader(): Promise<Reader<CityResponse> | null> {
   }));
 }
 
+/**
+ * Ichki tarmoq manzili. Bunday manzil kelishi proksi zanjiri haqiqiy IP ni
+ * uzatmayotganini bildiradi: o'shanda joy bazasi bo'lsa ham hamma tashrif
+ * "ZZ" bo'lib yoziladi va xarita bo'sh qoladi, sababi esa hech qayerda ko'rinmaydi.
+ */
+const PRIVATE = /^(10\.|127\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|::1$|f[cd])/i;
+let warned = false;
+
 export async function locate(ip: string | null | undefined): Promise<Geo> {
   if (!env.GEOIP_DB || !ip) return UNKNOWN;
+  if (PRIVATE.test(ip)) {
+    if (!warned) {
+      warned = true;
+      console.warn(`tashrif ichki manzildan keldi (${ip}): nginx yoki web konteyneri haqiqiy IP ni uzatmayapti, xarita bo'sh qoladi`);
+    }
+    return UNKNOWN;
+  }
   const r = await reader();
   if (!r) return UNKNOWN;
   const rec = r.get(ip);

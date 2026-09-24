@@ -12,6 +12,13 @@ describe('joy aniqlash', () => {
     await expect(locate('8.8.8.8')).resolves.toEqual({ country: 'ZZ', region: '' });
   });
 
+  it('ichki tarmoq manzili joy bermaydi', async () => {
+    // Bu holat proksi zanjiri buzilganini bildiradi: logga bir marta ogohlantirish yoziladi
+    for (const ip of ['10.0.0.5', '172.18.0.3', '192.168.1.10', '127.0.0.1']) {
+      await expect(locate(ip)).resolves.toEqual({ country: 'ZZ', region: '' });
+    }
+  });
+
   it("IP bo'lmasa ham yiqilmaydi", async () => {
     await expect(locate(null)).resolves.toEqual({ country: 'ZZ', region: '' });
     await expect(locate('')).resolves.toEqual({ country: 'ZZ', region: '' });
