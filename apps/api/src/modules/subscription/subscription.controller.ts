@@ -53,7 +53,7 @@ export class SubscriptionController {
   @Post('subscription/orders') @HttpCode(201)
   async order(@CurrentUserId() userId: string, @Body() dto: OrderDto) {
     const r = await this.subs.order(userId, dto.months);
-    if (!r.reused) await this.audit.log({ actorId: userId, action: 'subscription.create', entity: 'Subscription', entityId: r.order.id, meta: { months: dto.months, amountTiyin: r.order.amountTiyin } });
+    if (!r.reused) await this.audit.log({ actorId: userId, action: 'subscription.create', entity: 'Subscription', entityId: r.order.id, meta: { no: r.order.no, months: dto.months, amountTiyin: r.order.amountTiyin } });
     return r;
   }
 

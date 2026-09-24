@@ -19,6 +19,9 @@ type CargoJson = { code: string; codeTo: string; name: string; groupCode: string
 
 async function seedConfig() {
   for (const [k, v] of Object.entries(PLATFORM_DEFAULTS)) {
+    // Bo'sh sukut qiymat yozilmasin: yozilsa sozlama "standart" belgisini yo'qotadi va
+    // admin hech narsa kiritmagan bo'lsa ham kiritilgan bo'lib ko'rinadi
+    if (v === '') continue;
     await prisma.platformConfig.upsert({ where: { key: k }, create: { key: k, value: v as Prisma.InputJsonValue }, update: {} }); // admin qiymati saqlanadi
   }
   console.log('PlatformConfig: ok');

@@ -169,6 +169,8 @@ export const PLATFORM_DEFAULTS = {
   wagonSearchFree: 1,
   /** Yordam chatida kuniga nechta savol LLM ga ketadi (tez-tez so'raladigan savollar bepul va cheksiz). */
   helpAskDaily: 30,
+  /** Qo'lda to'lov rekvizitlari: karta yoki hisob raqami va qabul qiluvchi. Bo'sh bo'lsa odam murojaat formasiga yuboriladi. */
+  payDetails: '' as string,
 } as const;
 export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
 

@@ -11,6 +11,8 @@ export interface PlatformConfigValues {
   phoneRevealDaily: number;
   wagonSearchFree: number;
   helpAskDaily: number;
+  /** Qo'lda to'lov rekvizitlari (matn); bo'sh bo'lishi mumkin. */
+  payDetails: string;
 }
 
 /** PlatformConfig jadvali + PLATFORM_DEFAULTS. 60 s kesh - sozlama admin tomonidan kamdan-kam o'zgaradi. */

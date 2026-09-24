@@ -6,11 +6,24 @@ import { notifyBoth } from '../../common/telegram';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AdminNotify } from '../organizations/application/admin-notify';
 import { extendPremium } from '../premium/extend-premium';
-import { payInstructions } from '../premium/pay-instructions';
+import { env } from '../../common/env';
 
 export const SUBSCRIPTION_STATUSES = ['PENDING', 'ACTIVE', 'CANCELLED'] as const;
 
-type Row = { id: string; userId: string; months: number; amountTiyin: bigint; status: string; provider: string | null; startsAt: Date | null; endsAt: Date | null; paidAt: Date | null; createdAt: Date };
+/** Rekvizit hali kiritilmagan bo'lsa odam murojaat formasiga yuboriladi. */
+const PAY_PLACEHOLDER = "To'lov rekvizitlari hali kiritilmagan. Buyurtma raqamini ko'rsatib /contact orqali yozing, to'lov tasdiqlangach xizmat yoqiladi.";
+
+/**
+ * Qo'lda to'lov ko'rsatmasi. Rekvizit endi admin sozlamasida: uni o'zgartirish uchun
+ * VPS ga kirib .env ni tahrirlash va idishni qayta ishga tushirish shart emas.
+ * ponytail: env tarmog'i faqat eski prod qiymati uchun; sozlama to'ldirilgach olinadi.
+ */
+const payInstructions = (details: string) => ({
+  method: 'manual' as const,
+  details: details.trim() || env.PREMIUM_PAY_DETAILS?.trim() || PAY_PLACEHOLDER,
+});
+
+type Row = { id: string; no: string; userId: string; months: number; amountTiyin: bigint; status: string; provider: string | null; startsAt: Date | null; endsAt: Date | null; paidAt: Date | null; createdAt: Date };
 /** BigInt -> Number (JSON). */
 export const subscriptionView = (s: Row) => ({ ...s, amountTiyin: Number(s.amountTiyin) });
 
@@ -92,7 +105,7 @@ export class SubscriptionService {
       // Faol obunachiga ortiqcha so'rov ketmaydi: tugagani faqat obunasizga qaraladi
       expired: act ? null : await this.lapsed(userId, now),
       pricePerMonthSom: cfg.subscriptionMonthSom,
-      pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions() } : null,
+      pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions(cfg.payDetails) } : null,
     };
   }
 
@@ -130,18 +143,21 @@ export class SubscriptionService {
       // yiqiladi va pastda mavjud buyurtma qaytariladi; aks holda navbatda ikki qator bo'lardi
       return await this.prisma.$transaction(async (tx) => {
         const open = await tx.subscription.findFirst(openWhere);
-        if (open) return { order: subscriptionView(open), payInstructions: payInstructions(), reused: true };
+        if (open) return { order: subscriptionView(open), payInstructions: payInstructions(cfg.payDetails), reused: true };
+        // Ketma-ketlik tranzaksiyaga bo'ysunmaydi: qayta urinishda raqam tushib qoladi,
+        // lekin hech qachon takrorlanmaydi. Buyurtmadagi yo'l bilan bir xil
+        const [{ nextval }] = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('pay_no_seq')`;
         const s = await tx.subscription.create({
-          data: { userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
+          data: { no: `PAY-${Number(nextval)}`, userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
         });
-        void this.adminNotify.queued('subscriptionPending', `${months} oy`, s.id, userId).catch(() => {});
-        return { order: subscriptionView(s), payInstructions: payInstructions(), reused: false };
+        void this.adminNotify.queued('subscriptionPending', `${s.no}, ${months} oy`, s.id, userId).catch(() => {});
+        return { order: subscriptionView(s), payInstructions: payInstructions(cfg.payDetails), reused: false };
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     } catch (e) {
       if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2034')) throw e;
       const open = await this.prisma.subscription.findFirst(openWhere);
       if (!open) throw e;
-      return { order: subscriptionView(open), payInstructions: payInstructions(), reused: true };
+      return { order: subscriptionView(open), payInstructions: payInstructions(cfg.payDetails), reused: true };
     }
   }
 

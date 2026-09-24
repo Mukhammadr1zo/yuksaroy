@@ -29,6 +29,8 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   phoneRevealDaily: posInt,
   wagonSearchFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul urinish yo'q
   helpAskDaily: posInt,
+  // Rekvizit: bo'sh saqlanmaydi (bo'shatish uchun qator o'chiriladi), 500 belgi yetarli
+  payDetails: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 500,
 };
 
 /**

@@ -19,7 +19,7 @@ export type AdminPremiumOrder = PremiumOrder & { listing: { slug: string; title:
 
 /** GET /admin/subscriptions: foydalanuvchi obunasi, admin navbati uchun. */
 export interface AdminSubscription {
-  id: string; userId: string; months: number; amountTiyin: number; status: 'PENDING' | 'ACTIVE' | 'CANCELLED';
+  id: string; no: string; userId: string; months: number; amountTiyin: number; status: 'PENDING' | 'ACTIVE' | 'CANCELLED';
   startsAt: string | null; endsAt: string | null; paidAt: string | null; createdAt: string;
   user: { fullName: string | null; phone: string | null; email: string | null };
 }

@@ -10,7 +10,6 @@ import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { pickIn } from '../catalog/presentation/catalog.controller';
 import { extendPremium } from './extend-premium';
-import { payInstructions } from './pay-instructions';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 
 class PremiumDto {

@@ -112,7 +112,10 @@ export default function SettingsPage() {
       {items === null && !err ? <p className="mt-5 text-sm text-muted">{tc('loading')}</p> : null}
 
       <form className="mt-5" onSubmit={(e) => { e.preventDefault(); if (dirty && !busy) void save(); }}>
-        {(items ?? []).map((it) => (
+        {(items ?? []).map((it) => {
+          // Matnli sozlama ko'p qatorli maydonga tushadi; commissionPayer matn bo'lsa ham o'z ro'yxati bor
+          const isText = typeof it.default === 'string' && it.key !== 'commissionPayer';
+          return (
           <div key={it.key} className={`${CARD} mt-3 flex flex-wrap items-start justify-between gap-3 p-4`}>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -120,15 +123,19 @@ export default function SettingsPage() {
                 {it.isDefault ? <Pill>{ts('isDefault')}</Pill> : null}
               </div>
               <p className="mt-0.5 text-xs text-muted">{ts(`hint.${it.key}`)}</p>
-              <p className="mt-1 font-mono text-xs text-muted">{ts('default', { value: String(it.default) })}</p>
+              {it.default === '' ? null : <p className="mt-1 font-mono text-xs text-muted">{ts('default', { value: String(it.default) })}</p>}
             </div>
-            <label className="w-full sm:w-56">
+            <label className={`w-full ${isText ? '' : 'sm:w-56'}`}>
               <span className={`mb-1 block ${LABEL}`}>{it.key}</span>
               {it.key === 'commissionPayer' ? (
                 <select className={INPUT} value={vals[it.key] ?? ''} onChange={(e) => setVals((v) => ({ ...v, [it.key]: e.target.value }))}>
                   <option value="TERMINAL">TERMINAL</option>
                   <option value="CLIENT">CLIENT</option>
                 </select>
+              ) : isText ? (
+                /* Rekvizit ko'p qatorli: karta raqami, hisob raqami, qabul qiluvchi nomi */
+                <textarea rows={4} maxLength={500} className={`${INPUT} min-h-24`} value={vals[it.key] ?? ''}
+                  onChange={(e) => setVals((v) => ({ ...v, [it.key]: e.target.value }))} />
               ) : (
                 <input type="number" min={BOUNDS[it.key]?.min ?? 1} max={BOUNDS[it.key]?.max} step={1}
                   className={`${INPUT} font-mono tabular-nums`} value={vals[it.key] ?? ''}
@@ -138,7 +145,8 @@ export default function SettingsPage() {
               {it.key === 'commissionPct' ? <span className="mt-1 block font-mono text-xs text-teal-ink">= {(Number(vals[it.key]) / 100).toFixed(2)} %</span> : null}
             </label>
           </div>
-        ))}
+          );
+        })}
 
         {err ? <Notice tone="err">{errText(err, (k) => t(k), t.has, items ? tc('saveFailed') : tc('loadFailed'))}</Notice> : null}
         {ok ? <Notice tone="ok">{tc('saved')}</Notice> : null}

@@ -429,7 +429,8 @@
         "subscriptionMonthSom": "Obuna narxi",
         "phoneRevealDaily": "Kuniga raqam ochish chegarasi",
         "wagonSearchFree": "Bepul vagon qidiruvi",
-        "helpAskDaily": "Yordam chati: kunlik savol"
+        "helpAskDaily": "Yordam chati: kunlik savol",
+        "payDetails": "To'lov rekvizitlari"
       },
       "hint": {
         "commissionPct": "Bazis punktda: 300 = 3,00 %.",
@@ -439,7 +440,8 @@
         "subscriptionMonthSom": "So'm, bir oy uchun. Telefon raqami va vagon qidiruvi obunachiga ochiladi.",
         "phoneRevealDaily": "Obunachi kuniga nechta telefon raqamini ocha oladi.",
         "wagonSearchFree": "Obunasiz odamga nechta qidiruv bepul (umrbod). 0 = darhol obuna so'raladi.",
-        "helpAskDaily": "Bir odam kuniga nechta savolni sun'iy intellektga yubora oladi."
+        "helpAskDaily": "Bir odam kuniga nechta savolni sun'iy intellektga yubora oladi.",
+        "payDetails": "Obuna to'lovi uchun karta yoki hisob raqami va qabul qiluvchi. Shu matn odamga ko'rsatiladi. Bo'sh bo'lsa odam murojaat formasiga yuboriladi."
       }
     },
     "listings": {

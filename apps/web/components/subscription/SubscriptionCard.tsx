@@ -10,9 +10,9 @@ import { api, post } from '@/lib/api';
 import { som, uzDate, uzDateTime } from '@/lib/format';
 import { BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 
-type Pending = { id: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string } };
+type Pending = { id: string; no: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string } };
 type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; pending: Pending | null };
-type Created = { order: { id: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
+type Created = { order: { id: string; no: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -40,8 +40,8 @@ export function SubscriptionCard() {
 
   // Kutilayotgan buyurtma: hozir yaratilgani yoki oldingi safar yaratilib to'lanmagani
   const pending = created
-    ? { id: created.order.id, months: created.order.months, amountTiyin: created.order.amountTiyin, details: created.payInstructions.details }
-    : me.pending ? { id: me.pending.id, months: me.pending.months, amountTiyin: me.pending.amountTiyin, details: me.pending.payInstructions.details } : null;
+    ? { no: created.order.no, months: created.order.months, amountTiyin: created.order.amountTiyin, details: created.payInstructions.details }
+    : me.pending ? { no: me.pending.no, months: me.pending.months, amountTiyin: me.pending.amountTiyin, details: me.pending.payInstructions.details } : null;
 
   return (
     <>
@@ -66,7 +66,7 @@ export function SubscriptionCard() {
         <section className="mt-6 max-w-md rounded-card border border-line bg-white p-5 text-sm">
           <Notice tone="ok">{t('pending')}</Notice>
           <dl className="mt-3 space-y-1">
-            <div className="flex justify-between gap-4"><dt className="text-muted">{t('orderNo')}</dt><dd className="font-mono">{pending.id}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-muted">{t('orderNo')}</dt><dd className="font-mono">{pending.no}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-muted">{t('months')}</dt><dd className="font-mono">{t('month', { n: pending.months })}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-muted">{t('amount')}</dt><dd className="font-mono font-semibold tabular-nums">{som(pending.amountTiyin, locale)}</dd></div>
           </dl>

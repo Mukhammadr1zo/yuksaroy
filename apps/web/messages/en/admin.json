@@ -429,7 +429,8 @@
         "subscriptionMonthSom": "Subscription price",
         "phoneRevealDaily": "Phone reveals per day",
         "wagonSearchFree": "Free wagon searches",
-        "helpAskDaily": "Help chat: questions per day"
+        "helpAskDaily": "Help chat: questions per day",
+        "payDetails": "Payment details"
       },
       "hint": {
         "commissionPct": "In basis points: 300 = 3.00%.",
@@ -439,7 +440,8 @@
         "subscriptionMonthSom": "UZS per month. Phone numbers and wagon search unlock for subscribers.",
         "phoneRevealDaily": "How many phone numbers a subscriber can reveal per day.",
         "wagonSearchFree": "Free searches per user without a subscription (lifetime). 0 = subscription required at once.",
-        "helpAskDaily": "How many questions a person can send to the AI per day."
+        "helpAskDaily": "How many questions a person can send to the AI per day.",
+        "payDetails": "Card or account number and recipient for the subscription payment. This text is shown to the user. If empty, the person is sent to the contact form."
       }
     },
     "listings": {

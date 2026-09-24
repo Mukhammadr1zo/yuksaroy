@@ -265,7 +265,7 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
       <p className="mt-1 text-sm text-muted">
         {t('user')}: <span className="font-mono text-ink">{s.user.phone ?? s.user.email ?? '·'}</span> · <span className="font-mono">{t('months', { n: s.months })}</span> · <span className="font-mono font-semibold text-navy">{som(s.amountTiyin, lang)}</span>
       </p>
-      <p className="mt-1 font-mono text-xs text-muted">{s.id}</p>
+      <p className="mt-1 font-mono text-xs text-muted">{s.no}</p>
       <div className="mt-3">
         {reason === null ? (
           <div className="flex flex-wrap gap-2">
