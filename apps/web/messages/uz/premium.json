@@ -36,7 +36,15 @@
         "phone": "Raqam"
       },
       "shown": "{n} / {total}",
-      "empty": "Murojaat yo'q."
+      "empty": "Murojaat yo'q.",
+      "handle": "Javob berildi",
+      "handled": "Hal qilindi",
+      "undo": "Javobsizga qaytarish",
+      "note": "Nima qilindi",
+      "filter": "Ko'rsatish",
+      "filterNew": "Javobsiz",
+      "filterHandled": "Hal qilingan",
+      "emptyNew": "Javobsiz murojaat yo'q."
     },
     "viaSub": "Obuna bilan",
     "getSub": "Obuna bo'lish"

@@ -907,12 +907,18 @@ model Subscription {
 
 /// /contact formasi xabari.
 model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  contact   String
-  topic     String
-  message   String
-  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  id          String    @id @default(cuid())
+  name        String
+  contact     String
+  topic       String
+  message     String
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  /// Hal qilingani uchta ustun bilan: kim, qachon, nima qilingan.
+  /// Alohida holat ustuni ataylab yo'q: handledAt bo'sh bo'lsa murojaat javobsiz.
+  /// User ga bog'lanish yo'q (AuditLog.actorId kabi): hisob o'chirilsa qator qolsin.
+  handledById String?
+  handledAt   DateTime? @db.Timestamptz(3)
+  handledNote String?
 }
 
 // ── Shoshilinch xizmat so'rovlari (/urgent) ──

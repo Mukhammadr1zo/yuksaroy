@@ -207,7 +207,8 @@
       "commissionPrevMonth": "last month",
       "commissionThreshold": "Threshold: {n} a month. Above it the commission is announced at least 30 days ahead.",
       "commissionNear": "close to threshold",
-      "commissionOver": "threshold passed"
+      "commissionOver": "threshold passed",
+      "pendingContact": "Unanswered message"
     },
     "terminals": {
       "lead": "Terminals and rail sidings, registry records included.",
@@ -320,6 +321,7 @@
       "ip": "IP",
       "act": {
         "admin-contact-delete": "Deleted a message",
+        "admin-contact-handled": "Changed a message status",
         "admin-demo-remove": "Removed sample data",
         "admin-demo-seed": "Added sample data",
         "admin-listingReview-delete": "Deleted a listing comment",

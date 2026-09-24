@@ -36,7 +36,15 @@
         "phone": "Phone"
       },
       "shown": "{n} / {total}",
-      "empty": "No messages."
+      "empty": "No messages.",
+      "handle": "Answered",
+      "handled": "Handled",
+      "undo": "Move back to unanswered",
+      "note": "What was done",
+      "filter": "Show",
+      "filterNew": "Unanswered",
+      "filterHandled": "Handled",
+      "emptyNew": "No unanswered messages."
     },
     "viaSub": "With subscription",
     "getSub": "Subscribe"

@@ -1,14 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpException, Ip, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpException, Ip, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
 import { env } from '../../common/env';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
-import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { parseAdminPhones } from '../organizations/domain/rules';
-import { clampInt } from '../catalog/presentation/catalog.controller';
-import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 
 class ContactDto {
   @IsString() @Length(2, 100) name!: string;
@@ -39,16 +36,6 @@ export class ContactController {
     await this.audit.log({ action: 'contact.create', entity: 'ContactMessage', entityId: m.id, meta: { topic: m.topic }, ip });
     void this.notify(m).catch(() => {}); // javobni kutmaydi
     return { ok: true, id: m.id };
-  }
-
-  @Get('admin/contact') @UseGuards(JwtGuard, PlatformAdminGuard) @ApiCookieAuth('ys_access')
-  async list(@CurrentUserId() userId: string, @Query('page') page?: string) {
-    const p = clampInt(page, 1, 1, 10_000), limit = 30;
-    const [items, total] = await Promise.all([
-      this.prisma.contactMessage.findMany({ orderBy: { createdAt: 'desc' }, skip: (p - 1) * limit, take: limit }),
-      this.prisma.contactMessage.count(),
-    ]);
-    return { items, total, page: p, limit };
   }
 
   /** Platforma adminlari (rol yoki PLATFORM_ADMIN_PHONES) ning bog'langan Telegram chatlariga sendMessage. */

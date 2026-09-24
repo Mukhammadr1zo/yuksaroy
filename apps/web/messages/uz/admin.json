@@ -207,7 +207,8 @@
       "commissionPrevMonth": "o'tgan oy",
       "commissionThreshold": "Chegara: oyiga {n} ta. Undan oshsa komissiya kamida 30 kun oldin e'lon qilinadi.",
       "commissionNear": "chegaraga yaqin",
-      "commissionOver": "chegara o'tdi"
+      "commissionOver": "chegara o'tdi",
+      "pendingContact": "Javobsiz murojaat"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",
@@ -320,6 +321,7 @@
       "ip": "IP",
       "act": {
         "admin-contact-delete": "Murojaatni o'chirdi",
+        "admin-contact-handled": "Murojaat holatini o'zgartirdi",
         "admin-demo-remove": "Namuna ma'lumotni o'chirdi",
         "admin-demo-seed": "Namuna ma'lumot qo'shdi",
         "admin-listingReview-delete": "E'lon izohini o'chirdi",

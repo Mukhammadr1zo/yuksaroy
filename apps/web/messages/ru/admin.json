@@ -207,7 +207,8 @@
       "commissionPrevMonth": "в прошлом месяце",
       "commissionThreshold": "Порог: {n} заказов в месяц. Выше порога о комиссии объявляем минимум за 30 дней.",
       "commissionNear": "близко к порогу",
-      "commissionOver": "порог пройден"
+      "commissionOver": "порог пройден",
+      "pendingContact": "Обращение без ответа"
     },
     "terminals": {
       "lead": "Терминалы и подъездные пути: записи реестра тоже здесь.",
@@ -320,6 +321,7 @@
       "ip": "IP",
       "act": {
         "admin-contact-delete": "Удалил обращение",
+        "admin-contact-handled": "Изменил статус обращения",
         "admin-demo-remove": "Удалил образцы данных",
         "admin-demo-seed": "Добавил образцы данных",
         "admin-listingReview-delete": "Удалил отзыв к объявлению",

@@ -5,7 +5,7 @@
  * qatorlarni ko'rsatib, qarorni ikki xil endpointga yuborardi.
  * Faol bo'lim URL da (?tab=), shunda bosh sahifadagi "kutilmoqda" havolalari to'g'ri bo'limga olib keladi.
  */
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { LISTING_OWNER_LABELS, ORG_KIND_LABELS } from '@yuksaroy/domain';
@@ -50,6 +50,12 @@ function Moderation() {
   const [err, setErr] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
 
+  // Yorliqdagi son javobsizlarniki. Alohida funksiya: ContactTab amaldan keyin uni
+  // qayta chaqiradi, aks holda yorliq filtrlangan sonni ko'rsatib qolardi.
+  const loadContactCount = useCallback(() => {
+    void api<ContactPage>('/admin/contact/all?limit=1&handled=0').then(setMsgs).catch(() => setErr(true));
+  }, []);
+
   useEffect(() => {
     // Har navbat alohida: biri yiqilsa qolgan bo'limlar ko'rinaveradi, xato esa bir marta e'lon qilinadi
     const fail = () => setErr(true);
@@ -60,8 +66,8 @@ function Moderation() {
     void api<AdminPremiumOrder[]>('/admin/premium?status=PENDING').then(setPrem).catch(fail);
     void api<AdminSubscription[]>('/admin/subscriptions?status=PENDING').then(setSubs).catch(fail);
     // Faqat yorliqdagi son uchun: to'liq ro'yxat, qidiruv va sahifalash ContactTab da.
-    void api<ContactPage>('/admin/contact/all?limit=1').then(setMsgs).catch(fail);
-  }, []);
+    loadContactCount();
+  }, [loadContactCount]);
 
   const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, subscription: subs?.length ?? null, contact: msgs?.total ?? null };
   const tabLabel = (k: Tab) => (k === 'premium' ? tp('admin.tab') : k === 'subscription' ? tsb('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
@@ -96,7 +102,7 @@ function Moderation() {
       {err ? <Notice tone="err">{tc('loadFailed')}</Notice> : null}
       {flash ? <p role="status" className={`mt-3 text-sm font-semibold ${flash.tone === 'ok' ? 'text-teal-ink' : 'text-red-700'}`}>{flash.text}</p> : null}
 
-      {tab === 'contact' ? <ContactTab onChanged={(total) => setMsgs((m) => (m ? { ...m, total } : m))} />
+      {tab === 'contact' ? <ContactTab onChanged={loadContactCount} />
         : !loaded ? <p className="mt-5 text-sm text-muted">{err ? tc('loadFailed') : tc('loading')}</p>
         : counts[tab] === 0 ? <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{emptyText}</div>
         : <ul className="mt-5 space-y-3">{rows}</ul>}
@@ -334,11 +340,11 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
 /**
  * Murojaat qutisi: qidiruv, sahifalash va o'chirish.
  *
- * Ilgari bu yorliq /admin/contact ni sahifasiz chaqirardi va faqat eng yangi 30 tasini
- * ko'rsatardi: yorliqda "412" deb tursa ham 31-xabarga yetib borish mumkin emas edi.
- * Spamni o'chirish tugmasi ham yo'q edi, garchi API da o'chirish allaqachon bor.
+ * Hal qilingani uchta ustun bilan belgilanadi: kim, qachon, nima qilingan. Alohida
+ * holat maydoni yo'q, sana bo'sh bo'lishi "yangi" degani. Sukut filtr javobsizlar:
+ * yorliqdagi son ham shuni sanaydi.
  */
-function ContactTab({ onChanged }: { onChanged: (total: number) => void }) {
+function ContactTab({ onChanged }: { onChanged: () => void }) {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tm = useTranslations('premium.messages');
@@ -346,15 +352,25 @@ function ContactTab({ onChanged }: { onChanged: (total: number) => void }) {
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
-  const list = useAdminList<ContactPage['items'][number]>('/admin/contact/all', { q, page });
-
-  useEffect(() => { if (list.data) onChanged(list.data.total); }, [list.data, onChanged]);
+  // Sukut: javobsizlar. Bo'sh qiymat useAdminList da tashlab yuboriladi, ya'ni filtrsiz
+  const [handled, setHandled] = useState('0');
+  const list = useAdminList<ContactPage['items'][number]>('/admin/contact/all', { q, handled, page });
 
   async function remove(id: string) {
     setNote(null);
     try {
       await api(`/admin/contact/${id}`, { method: 'DELETE' });
       await list.reload();
+      onChanged();
+    } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); }
+  }
+
+  async function mark(id: string, on: boolean, why?: string) {
+    setNote(null);
+    try {
+      await post(`/admin/contact/${id}/handled`, { handled: on, note: why });
+      await list.reload();
+      onChanged();
     } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); }
   }
 
@@ -364,6 +380,13 @@ function ContactTab({ onChanged }: { onChanged: (total: number) => void }) {
         <Labeled label={tc('search')} className="w-72">
           <input value={qInput} onChange={(e) => setQInput(e.target.value)} className={INPUT} />
         </Labeled>
+        <Labeled label={tm('filter')} className="w-48">
+          <select value={handled} onChange={(e) => { setHandled(e.target.value); setPage(1); }} className={INPUT}>
+            <option value="0">{tm('filterNew')}</option>
+            <option value="1">{tm('filterHandled')}</option>
+            <option value="">{tc('all')}</option>
+          </select>
+        </Labeled>
         <button type="submit" className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal">{tc('apply')}</button>
         {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
       </Toolbar>
@@ -372,8 +395,8 @@ function ContactTab({ onChanged }: { onChanged: (total: number) => void }) {
       {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
       {list.data && !list.loading ? (
         list.data.items.length
-          ? <ul className="mt-4 space-y-3">{list.data.items.map((m) => <ContactRow key={m.id} m={m} onDelete={remove} />)}</ul>
-          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tm('empty')}</div>
+          ? <ul className="mt-4 space-y-3">{list.data.items.map((m) => <ContactRow key={m.id} m={m} onDelete={remove} onMark={mark} />)}</ul>
+          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tm(handled === '0' ? 'emptyNew' : 'empty')}</div>
       ) : null}
       <Pager page={page} pages={list.pages} onPage={setPage} />
     </>
@@ -381,20 +404,40 @@ function ContactTab({ onChanged }: { onChanged: (total: number) => void }) {
 }
 
 /** Aloqa formasidan kelgan murojaat: javob telefon yoki email orqali, spam o'chiriladi. */
-function ContactRow({ m, onDelete }: { m: ContactPage['items'][number]; onDelete: (id: string) => Promise<void> }) {
+function ContactRow({ m, onDelete, onMark }: {
+  m: ContactPage['items'][number];
+  onDelete: (id: string) => Promise<void>;
+  onMark: (id: string, on: boolean, why?: string) => Promise<void>;
+}) {
   const lang = useLang();
   const tc = useTranslations('admin.common');
   const t = useTranslations('premium.messages');
+  const [why, setWhy] = useState('');
   return (
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{t.has(`topic.${m.topic}`) ? t(`topic.${m.topic}`) : m.topic}</Pill>
         <span className="font-semibold">{m.name}</span>
-        <span className="min-w-0 break-all font-mono text-sm">{m.contact}</span>
+        {/* Raqam ham, pochta ham foydalanuvchilar qidiruviga tushadi: u uchalasi bo'yicha qidiradi */}
+        <Link href={`/admin/users?q=${encodeURIComponent(m.contact)}`} className="min-w-0 break-all font-mono text-sm text-teal-ink underline">{m.contact}</Link>
         <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(m.createdAt, lang)}</span>
       </div>
       <p className="mt-2 whitespace-pre-line break-words text-sm">{m.message}</p>
-      <div className="mt-3">
+      {m.handledNote ? <p className="mt-2 rounded-xl bg-sand p-3 text-sm">{m.handledNote}</p> : null}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {m.handledAt ? (
+          <>
+            <Pill tone="ok">{t('handled')}</Pill>
+            {/* Admin hisobi o'chirilgan bo'lsa ism topilmaydi, faqat sana qoladi */}
+            <span className="text-xs text-muted">{m.handledBy?.fullName || m.handledBy?.phone || ''} {uzDateTime(m.handledAt, lang)}</span>
+            <button type="button" className={`${BTN_GHOST} px-3 py-1 text-xs`} onClick={() => void onMark(m.id, false)}>{t('undo')}</button>
+          </>
+        ) : (
+          <>
+            <input value={why} onChange={(e) => setWhy(e.target.value)} maxLength={300} placeholder={t('note')} className={`${INPUT} w-full sm:w-72`} />
+            <button type="button" className={`${BTN} px-3 py-1 text-xs`} onClick={() => void onMark(m.id, true, why.trim())}>{t('handle')}</button>
+          </>
+        )}
         <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={() => onDelete(m.id)} className={`${BTN_DANGER} px-3 py-1 text-xs`} />
       </div>
     </li>

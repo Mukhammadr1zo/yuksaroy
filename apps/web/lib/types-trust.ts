@@ -24,5 +24,10 @@ export interface AdminSubscription {
   user: { fullName: string | null; phone: string | null; email: string | null };
 }
 
-export interface ContactMessage { id: string; name: string; contact: string; topic: string; message: string; createdAt: string }
+export interface ContactMessage {
+  id: string; name: string; contact: string; topic: string; message: string; createdAt: string;
+  /** Bo'sh bo'lsa murojaat javobsiz: alohida holat maydoni yo'q. */
+  handledAt: string | null; handledById: string | null; handledNote: string | null;
+  handledBy: { id: string; phone: string | null; fullName: string | null } | null;
+}
 export interface ContactPage { items: ContactMessage[]; total: number; page: number; limit: number }

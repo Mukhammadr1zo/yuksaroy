@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, Inject, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ORDER_STATUSES, type OrderStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../booking/domain/ports';
@@ -18,10 +18,28 @@ class ReasonDto {
   @IsOptional() @IsString() @MaxLength(300) reason?: string;
 }
 
+class ContactHandledDto {
+  @IsBoolean() handled!: boolean;
+  @IsOptional() @IsString() @MaxLength(300) note?: string;
+}
+
 /** Erkin matn qidiruvi uchun qisqartma: bo'sh bo'lsa filtr qo'shilmaydi. */
 const like = (v: string) => ({ contains: v, mode: 'insensitive' as const });
 /** Ikki xonagacha yaxlitlash: recomputeRating bilan bir xil ko'rinish. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** handled: '0' javobsiz, '1' hal qilingan, boshqasi filtrsiz. Sana bo'sh bo'lishi "yangi" degani. */
+export const handledWhere = (v?: string) =>
+  (v === '0' ? { handledAt: null } : v === '1' ? { handledAt: { not: null } } : {});
+
+/**
+ * Belgilash ham, qaytarish ham shu yerda: qaytarishda uchala ustun birga tozalanadi,
+ * aks holda qatorda egasiz izoh qolib ketardi.
+ */
+export const handledData = (on: boolean, userId: string, note?: string) =>
+  (on
+    ? { handledAt: new Date(), handledById: userId, handledNote: note?.trim() || null }
+    : { handledAt: null, handledById: null, handledNote: null });
 
 /**
  * Platforma egasi uchun kundalik ish paneli: buyurtmani qo'lda qimirlatish,
@@ -245,21 +263,40 @@ export class AdminOpsController {
   // ───────────────────────── Murojaat qutisi ─────────────────────────
 
   /**
-   * Yo'l 'contact/all': GET /v1/admin/contact ContactController da allaqachon bor,
-   * takrorlansa ikki handler bitta yo'lga tushib qolardi.
+   * Yo'l 'contact/all', chunki 'contact/:id' bilan bitta segmentda to'qnashmasin:
+   * Nest uni dinamik parametr deb olib, ro'yxat so'rovini o'chirish yo'liga tushirardi.
    */
   @Get('contact/all')
-  async contact(@Query('q') q?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+  async contact(@Query('q') q?: string, @Query('handled') handled?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
     const p = clampInt(page, 1, 1, 10_000);
     const take = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
     // Modelda alohida email maydoni yo'q: telefon ham, email ham 'contact' ustunida turadi
-    const where = text ? { OR: [{ name: like(text) }, { contact: like(text) }, { topic: like(text) }, { message: like(text) }] } : {};
+    const where = {
+      ...handledWhere(handled),
+      ...(text ? { OR: [{ name: like(text) }, { contact: like(text) }, { topic: like(text) }, { message: like(text) }] } : {}),
+    };
     const [total, items] = await Promise.all([
       this.prisma.contactMessage.count({ where }),
       this.prisma.contactMessage.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (p - 1) * take, take }),
     ]);
-    return { items, total, page: p, limit: take };
+    // ContactMessage da User ga bog'lanish yo'q: ismni alohida so'rov bilan olamiz
+    const ids = [...new Set(items.map((m) => m.handledById).filter((x): x is string => !!x))];
+    const users = ids.length
+      ? await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, phone: true, fullName: true } })
+      : [];
+    const byId = new Map(users.map((u) => [u.id, u]));
+    return { items: items.map((m) => ({ ...m, handledBy: (m.handledById && byId.get(m.handledById)) || null })), total, page: p, limit: take };
+  }
+
+  /** Belgilash va qaytarish bitta yo'lda: ikki yo'l bo'lsa ular bir-biridan ayrilib ketardi. */
+  @Post('contact/:id/handled')
+  async setContactHandled(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ContactHandledDto) {
+    // updateMany: yo'q qator uchun update P2025 tashlardi va u 500 bo'lib chiqardi
+    const { count } = await this.prisma.contactMessage.updateMany({ where: { id }, data: handledData(dto.handled, userId, dto.note) });
+    if (!count) throw new NotFoundException({ code: 'MESSAGE_NOT_FOUND' });
+    await this.audit.log({ actorId: userId, action: 'admin.contact.handled', entity: 'ContactMessage', entityId: id, meta: { handled: dto.handled } });
+    return { id, handled: dto.handled };
   }
 
   /** Spam yoki haqoratli murojaatni o'chirish. */

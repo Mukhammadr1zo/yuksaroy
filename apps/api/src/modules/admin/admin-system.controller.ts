@@ -283,6 +283,7 @@ export class AdminSystemController {
         subscriptionPending: count('subscriptionPending'),
         ordersPending: count('ordersPending'),
         urgentOpen: count('urgentOpen'),
+        contactNew: count('contactNew'),
       },
       recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },
       // Har navbatning eng eskisi: faqat ?full=1 bilan, ya'ni faqat bosh sahifaga

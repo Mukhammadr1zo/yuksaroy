@@ -11,6 +11,7 @@ import { post } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
 import { phoneDisplay } from '@/components/ui/fields';
 import { BTN, BTN_DANGER, BTN_GHOST, CARD, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { useSearchParams } from 'next/navigation';
 
 type Row = {
   id: string; phone: string | null; email: string | null; fullName: string | null; isActive: boolean;
@@ -22,8 +23,11 @@ export default function AdminUsersPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const locale = useLocale();
-  const [f, setF] = useState({ q: '', blocked: false, page: 1 });
-  const [q, setQ] = useState('');
+  // Murojaat qutisidagi raqam shu yerga havola qiladi: qidiruv URL dan boshlanadi.
+  // Suspense shart emas: AdminShell huquq tasdiqlanguncha bolalarni chizmaydi.
+  const init = useSearchParams().get('q') ?? '';
+  const [f, setF] = useState({ q: init, blocked: false, page: 1 });
+  const [q, setQ] = useState(init);
   const { data, pages, loading, err } = useAdminList<Row>('/admin/users', { q: f.q, blocked: f.blocked ? 1 : undefined, page: f.page });
   // Jadvalning mahalliy nusxasi: blok/o'chirishdan keyin butun ro'yxatni qayta so'ramaymiz, qatorni o'zi o'zgaradi
   const [rows, setRows] = useState<Row[]>([]);
