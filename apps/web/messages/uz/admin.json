@@ -38,7 +38,8 @@
       "requestedAt": "So'ralgan",
       "region": "Viloyat",
       "contact": "Aloqa",
-      "noStir": "STIR yo'q"
+      "noStir": "STIR yo'q",
+      "docs": "Biriktirilgan hujjatlar"
     },
     "claim": {
       "registry": "Reestr"

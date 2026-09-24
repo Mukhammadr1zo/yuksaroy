@@ -1,3 +1,4 @@
+import type { Attachment } from '../../../common/attachments';
 // catalog: domen portlari. Framework va Prisma bu faylda yo'q.
 import type { ClaimStatus, Rju, ServiceCode, TariffUnit, TerminalKind, TerminalStatus } from '@yuksaroy/domain';
 
@@ -54,7 +55,7 @@ export interface TerminalRecord {
   photos: string[]; status: TerminalStatus; claimedAt: Date | null;
   isDemo: boolean; ratingAvg: number; ratingCount: number;
   /** Egasiz terminalga da'vo: PENDING -> admin hal qiladi; claimOrgId da'vogar tashkilot. */
-  claimStatus: ClaimStatus; claimOrgId: string | null;
+  claimStatus: ClaimStatus; claimOrgId: string | null; claimEvidence: ClaimEvidence | null;
   services: TerminalServiceRecord[];
   /** Faqat amaldagi tariflar (validFrom <= now < validTo). */
   tariffs: TariffRecord[];
@@ -110,7 +111,7 @@ export interface SidingRecord extends SidingPassport {
   /** Terminal sahifasining manzili: shahobcha ham terminal. */
   slug: string;
   ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
-  claimStatus: ClaimStatus; claimedAt: Date | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
+  claimStatus: ClaimStatus; claimEvidence: ClaimEvidence | null; claimedAt: Date | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
   /** Egasi yuklagan rasmlar; reestrda rasm yo'q. */
   photos: string[];
   /** Reestrda koordinata yo'q: tutashgan joy nuqtasi, taqribiy. */
@@ -122,6 +123,9 @@ export interface SidingFilter {
   /** Bitta holat yoki holatlar ro'yxati (masalan da'vo qilish mumkin bo'lganlar: NONE va REJECTED). */
   claimStatus?: ClaimStatus | ClaimStatus[];
 }
+
+/** Da'vo dalili: majburiy izoh va ixtiyoriy hujjatlar. Ochiq javobga hech qachon chiqmaydi. */
+export type ClaimEvidence = { note: string; files: Attachment[] };
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number }
 
@@ -152,7 +156,7 @@ export interface CatalogRepository {
   /** Tranzaksiya: oldingi versiya validTo = validFrom, yangi versiya +1. Kesishsa TariffOverlapError. */
   publishTariff(t: PublishTariffInput): Promise<TariffRecord>;
   /** orgId bo'sh va da'vo PENDING bo'lmasa PENDING ga o'tkazadi; aks holda TerminalClaimedError. */
-  claimTerminal(id: string, orgId: string): Promise<TerminalRecord>;
+  claimTerminal(id: string, orgId: string, evidence: ClaimEvidence): Promise<TerminalRecord>;
   /** Faqat PENDING hal qilinadi: tasdiqlansa orgId = claimOrgId, claimedAt = now; aks holda null. */
   decideTerminalClaim(id: string, approve: boolean, now: Date): Promise<TerminalRecord | null>;
 
@@ -160,7 +164,7 @@ export interface CatalogRepository {
   /** `publicOnly`: ochiq yo'l uchun faqat ACTIVE. */
   findSidingById(id: string, publicOnly?: boolean): Promise<SidingRecord | null>;
   /** claimStatus NONE/REJECTED bo'lsa PENDING ga o'tkazadi; aks holda SidingClaimedError. */
-  claimSiding(id: string, orgId: string, now: Date): Promise<SidingRecord>;
+  claimSiding(id: string, orgId: string, now: Date, evidence: ClaimEvidence): Promise<SidingRecord>;
   /**
    * Egasi tahrir qiladi (hozircha faqat rasmlar): reestr ma'lumotiga tegilmaydi.
    * Shart qatorida orgId va APPROVED bor, ya'ni begona yoki hali tasdiqlanmagan

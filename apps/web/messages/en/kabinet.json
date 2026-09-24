@@ -263,7 +263,10 @@
           "PENDING": "A moderator is reviewing the request.",
           "VERIFIED": "Listings go live immediately, without moderation.",
           "REJECTED": "Rejected. Fix the details and submit again."
-        }
+        },
+        "docs": "Supporting document",
+        "docsRequired": "Attach at least one document.",
+        "docsHint": "A certificate or a registration document. Only the operator sees it."
       },
       "members": {
         "title": "Add member",
@@ -295,7 +298,8 @@
         "STIR_REQUIRED": "A STIR is required for verification.",
         "KYC_ALREADY": "The request was already sent or the organization is verified.",
         "ROLES_NOT_ALLOWED": "The selected roles do not match the organization kinds.",
-        "INVALID_PHONE": "Invalid phone number."
+        "INVALID_PHONE": "Invalid phone number.",
+        "DOC_REQUIRED": "At least one document is required for verification."
       }
     },
     "sidings": {

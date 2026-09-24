@@ -15,6 +15,7 @@ import { ClaimSidingUseCase } from '../application/claim-siding.usecase';
 import { TerminalAccess } from '../application/terminal-access';
 import { ClaimDecideDto, ClaimSidingDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateSidingDto, UpdateTerminalDto } from './dto';
 import { pickIn } from './catalog.controller';
+import { filesOrThrow } from '../../../common/attachments';
 import { publicSiding } from './mappers';
 import { PlatformAdminGuard } from '../../organizations/presentation/platform-admin.guard';
 
@@ -53,10 +54,13 @@ export class TerminalAdminController {
   async claimTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
     await this.access.assertTerminalAdmin(userId, dto.orgId);
     if (!(await this.repo.findTerminalById(id, new Date()))) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    // Dalil da'vo yozuvi bilan bitta UPDATE da saqlanadi: audit yiqilsa ham izoh yo'qolmaydi
+    const evidence = { note: dto.note.trim(), files: filesOrThrow(dto.files) };
     try {
-      const t = await this.repo.claimTerminal(id, dto.orgId);
+      const t = await this.repo.claimTerminal(id, dto.orgId, evidence);
       void this.adminNotify.queued('terminalClaimsPending', t.name, id, userId).catch(() => {});
-      await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId } });
+      // Auditga faqat fayl SONI: audit iz, manba emas
+      await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId, files: evidence.files.length } });
       return t;
     } catch (e) {
       if (e instanceof TerminalClaimedError) throw new ConflictException({ code: e.message });
@@ -79,6 +83,8 @@ export class TerminalAdminController {
 
   /**
    * Moderatsiya navbati: default PENDING; da'vogar nomi (claimOrgName) admin uchun.
+   * Qator XOM qaytadi (ochiq mapperga o'ralmaydi): moderator obyektda ko'rsatilgan egasi
+   * va mas'ul shaxs raqamini ko'rib qaror qiladi, publicTerminal esa raqamni yashiradi.
    * `pool=1`: ochiq ma'lumotdan yig'ilgan egasiz terminallar reestri (katalogda ko'rinmaydi, murojaat uchun).
    */
   @Get('admin/terminals')
@@ -155,9 +161,10 @@ export class TerminalAdminController {
 
   @Post('sidings/:id/claim')
   async claim(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
-    const s = await this.claimSiding.execute(userId, id, dto.orgId);
+    const evidence = { note: dto.note.trim(), files: filesOrThrow(dto.files) };
+    const s = await this.claimSiding.execute(userId, id, dto.orgId, evidence);
     // Obyekt nomi bitta: shahobcha yo'l Terminal jadvalining qatori, alohida jadval emas
-    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId } });
+    await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId, files: evidence.files.length } });
     // Navbat bitta: shahobcha ham temir yo'l terminali, moderatsiyada bir yorliqda turadi
     void this.adminNotify.queued('terminalClaimsPending', s.name ?? s.stationNameRaw, id, userId).catch(() => {});
     return s;

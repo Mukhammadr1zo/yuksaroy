@@ -220,7 +220,9 @@
     "admin": {
       "station": "Station",
       "claimant": "Claimant",
-      "open": "Page"
+      "open": "Page",
+      "claimNote": "Claim note",
+      "claimDocs": "Attached documents"
     }
   }
 }

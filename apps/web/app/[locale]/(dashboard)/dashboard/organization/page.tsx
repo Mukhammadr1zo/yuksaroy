@@ -9,6 +9,7 @@ import type { Membership, OrgRecord } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, Field, INPUT, Notice, errText, useLang } from '@/components/kabinet/bits';
 import { StorefrontForm } from '@/components/kabinet/StorefrontForm';
 import { PhoneField, phoneDisplay } from '@/components/ui/fields';
+import { AttachmentButton, AttachmentChips, useAttachments } from '@/components/chat/Attachments';
 
 const KINDS = ORG_KINDS.filter((k) => k !== 'PLATFORM');
 const KYC_TONE: Record<KycStatus, string> = { NONE: 'bg-line text-ink/70', PENDING: 'bg-amber-soft text-amber-ink', VERIFIED: 'bg-teal text-white', REJECTED: 'bg-red-50 text-red-700' };
@@ -115,9 +116,10 @@ function OrgCard({ m, onChange }: { m: Membership; onChange: () => void }) {
     try { await api(`/orgs/${o.id}`, { method: 'PATCH', body: JSON.stringify(toBody(d)) }); setNote({ tone: 'ok', text: tc('saved') }); onChange(); }
     catch (er) { fail(er); } finally { setBusy(null); }
   }
+  const at = useAttachments();
   async function kycRequest() {
     setBusy('kyc'); setNote(null);
-    try { await post(`/orgs/${o.id}/kyc/request`, {}); onChange(); }
+    try { await post(`/orgs/${o.id}/kyc/request`, { files: at.files }); at.clear(); onChange(); }
     catch (er) { fail(er); } finally { setBusy(null); }
   }
   async function addMember(e: React.FormEvent) {
@@ -157,10 +159,21 @@ function OrgCard({ m, onChange }: { m: Membership; onChange: () => void }) {
         {o.kycRequestedAt ? <p className="mt-1 font-mono text-xs text-muted">{t('kyc.requestedAt')}: {uzDateTime(o.kycRequestedAt, lang)}</p> : null}
         {o.kycNote ? <p className="mt-2 rounded-xl bg-sand p-3 text-sm"><span className="text-muted">{t('kyc.note')}: </span>{o.kycNote}</p> : null}
         {canKyc ? (
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <button type="button" disabled={busy !== null || !o.stir} onClick={kycRequest} className={BTN_PRIMARY}>{busy === 'kyc' ? tc('saving') : t('kyc.request')}</button>
-            {!o.stir ? <span className="text-sm text-amber-ink">{t('kyc.needStir')}</span> : null}
-          </div>
+          <>
+            {/* Hujjatsiz tasdiq bo'lmaydi: operator nimaga qarab tasdiqlashini bilishi kerak */}
+            <div className="mt-3 space-y-2">
+              <p className="text-sm font-semibold">{t('kyc.docs')}</p>
+              <p className="text-xs text-muted">{t('kyc.docsHint')}</p>
+              <AttachmentChips files={at.files} onRemove={at.remove} />
+              <AttachmentButton busy={at.busy} disabled={busy !== null} onPick={at.add} />
+              {at.err ? <p role="alert" className="text-xs text-amber-ink">{at.err}</p> : null}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button type="button" disabled={busy !== null || !o.stir || at.busy > 0 || !at.files.length} onClick={kycRequest} className={BTN_PRIMARY}>{busy === 'kyc' ? tc('saving') : t('kyc.request')}</button>
+              {!o.stir ? <span className="text-sm text-amber-ink">{t('kyc.needStir')}</span> : null}
+              {o.stir && !at.files.length ? <span className="text-sm text-amber-ink">{t('kyc.docsRequired')}</span> : null}
+            </div>
+          </>
         ) : null}
       </div>
 

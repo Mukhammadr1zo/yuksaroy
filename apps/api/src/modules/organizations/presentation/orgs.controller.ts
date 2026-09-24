@@ -12,6 +12,7 @@ import { filterRoles, rolesForKinds } from '../domain/rules';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { filesOrThrow } from '../../../common/attachments';
 import { notifyBoth } from '../../../common/telegram';
 import { PlatformAdminGuard } from './platform-admin.guard';
 
@@ -36,6 +37,11 @@ class InviteDto {
   @IsString() phone!: string;
   @IsArray() @IsIn(ROLES, { each: true }) roles!: Role[];
 }
+/** Tasdiqqa yuborilgan hujjatlar: kamida bittasi kerak, shart kontrollerda. */
+class KycRequestDto {
+  @IsOptional() @IsArray() files?: unknown[];
+}
+
 class KycDecideDto {
   @IsBoolean() approve!: boolean;
   @IsOptional() @IsString() @MaxLength(500) note?: string;
@@ -114,12 +120,16 @@ export class OrgsController {
 
   /** Egasi tasdiqlashga yuboradi; STIR shart. */
   @Post('orgs/:id/kyc/request')
-  async kycRequest(@CurrentUserId() userId: string, @Param('id') id: string) {
+  async kycRequest(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: KycRequestDto) {
     const m = await this.orgs.findMembership(userId, id);
     if (!m?.isOwner) throw new ForbiddenException({ code: 'NOT_OWNER' });
     if (!m.org.stir) throw new BadRequestException({ code: 'STIR_REQUIRED' });
     if (m.org.kycStatus === 'VERIFIED' || m.org.kycStatus === 'PENDING') throw new BadRequestException({ code: 'KYC_ALREADY', status: m.org.kycStatus });
-    const org = await this.orgs.update(id, { kycStatus: 'PENDING', kycRequestedAt: new Date(), kycNote: null });
+    // Hujjatsiz tasdiq bo'lmaydi: operator nimaga qarab tasdiqlashini bilishi kerak.
+    // Shart serverda, chunki mijozga ishonilmaydi; brauzer faqat tugmani o'chiradi.
+    const files = filesOrThrow(dto.files);
+    if (!files.length) throw new BadRequestException({ code: 'DOC_REQUIRED' });
+    const org = await this.orgs.update(id, { kycStatus: 'PENDING', kycRequestedAt: new Date(), kycNote: null, kycDocs: files });
     await this.audit.log({ actorId: userId, action: 'org.kyc.request', entity: 'Organization', entityId: id });
     // Namuna tashkilot bu yerga tusha olmaydi: uning egasi faol emas va JwtGuard uni kiritmaydi
     void this.adminNotify.queued('orgsPendingKyc', org.name, id, userId).catch(() => {});

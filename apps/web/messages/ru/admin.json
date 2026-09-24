@@ -38,7 +38,8 @@
       "requestedAt": "Запрошено",
       "region": "Область",
       "contact": "Контакт",
-      "noStir": "STIR не указан"
+      "noStir": "STIR не указан",
+      "docs": "Приложенные документы"
     },
     "claim": {
       "registry": "Реестр"

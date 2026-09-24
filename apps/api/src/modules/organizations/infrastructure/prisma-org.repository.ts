@@ -41,6 +41,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return { userId: user.id };
   }
   listByKyc(kycStatus: KycStatus) {
-    return this.prisma.organization.findMany({ where: { kycStatus }, select: orgSelect, orderBy: [{ kycRequestedAt: 'asc' }, { createdAt: 'asc' }], take: 200 }) as Promise<OrgRecord[]>;
+    // kycDocs faqat shu yerda: qaror shu navbatda beriladi. orgSelect ga qo'shilsa hujjat
+    // manzillari /orgs/mine orqali ochiq sahifadagi har bir kirgan odamga tushib ketardi.
+    return this.prisma.organization.findMany({ where: { kycStatus }, select: { ...orgSelect, kycDocs: true }, orderBy: [{ kycRequestedAt: 'asc' }, { createdAt: 'asc' }], take: 200 }) as Promise<OrgRecord[]>;
   }
 }

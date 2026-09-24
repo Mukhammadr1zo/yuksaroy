@@ -63,6 +63,11 @@
     "cardLoadUnload": "Tushirish / yuklash",
     "cardContact": "Mas'ul shaxs",
     "cardUnclaimed": "egasi tasdiqlamagan, meniki",
-    "openFull": "To'liq sahifani ochish"
+    "openFull": "To'liq sahifani ochish",
+    "why": "Nima uchun bu obyekt sizniki",
+    "whyPlaceholder": "Masalan: guvohnoma 12-34 korxonamiz nomida, yo'l zavod hududida.",
+    "whyShort": "Izoh kamida 10 belgi bo'lsin.",
+    "docs": "Hujjat (ixtiyoriy)",
+    "docsHint": "Egalikni ko'rsatadigan hujjat: guvohnoma, shartnoma yoki dalolatnoma."
   }
 }

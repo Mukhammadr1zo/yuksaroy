@@ -8,8 +8,7 @@ import { PrismaService } from '../../../common/prisma.service';
 import { notifyBoth } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { ListingAccess } from './listing-access';
-import { FILE_URL } from '../../../common/file-url';
-import { AttachmentError, parseAttachments, type Attachment } from '../../chat/domain/attachments';
+import { filesOrThrow } from '../../../common/attachments';
 
 /** Saqlangan yozuvdan domen kiritmasi (PATCH da birlashtirish va qayta tekshirish uchun). */
 export function inputOf(l: ListingRecord): ListingInput {
@@ -160,11 +159,7 @@ export class ListingsUseCase {
       orderBy: { createdAt: 'desc' },
     });
     // Ilovalar birinchi xabarga ham ilashadi: narx so'rayotgan odam hujjatni o'sha zahoti yuboradi
-    let files: Attachment[];
-    try { files = parseAttachments(rawAttachments, FILE_URL); } catch (e) {
-      if (e instanceof AttachmentError) throw new BadRequestException({ code: e.code });
-      throw e;
-    }
+    const files = filesOrThrow(rawAttachments);
     if (open) {
       await this.prisma.inquiryMessage.create({ data: { inquiryId: open.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
       await this.prisma.inquiry.update({ where: { id: open.id }, data: { lastMessageAt: new Date() } });

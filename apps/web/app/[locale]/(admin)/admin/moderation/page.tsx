@@ -17,6 +17,7 @@ import type { AdminPremiumOrder, AdminSubscription, ContactPage } from '@/lib/ty
 import { useLang, useListingLabels } from '@/components/kabinet/bits';
 import { BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
 import { Decide, type Decision } from '@/components/admin/Decide';
+import { MessageFiles } from '@/components/chat/Attachments';
 
 type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'subscription' | 'contact';
 const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'subscription', 'contact'];
@@ -152,16 +153,20 @@ function OrgRow({ o, onDone }: { o: OrgRecord; onDone: (d: Decision) => void }) 
       </p>
       <p className="mt-1 break-words text-sm text-muted">{[o.phone, o.telegram, o.website, o.address].filter(Boolean).join(' · ') || '·'}</p>
       {o.description ? <p className="mt-2 text-sm">{o.description}</p> : null}
+      {o.kycDocs?.length ? (<><p className="mt-2 text-xs text-muted">{t('docs')}</p><MessageFiles files={o.kycDocs} mine={false} /></>) : null}
       <Decide path={`/orgs/${o.id}/kyc/decide`} reasonKey="note" requireReason onDone={onDone} />
     </li>
   );
 }
 
-/** Terminal da'vosi: da'vogar tashkilot (claimOrgName), stansiya, ochiq sahifa; qaror POST /terminals/:id/claim/decide. */
+/** Terminal da'vosi: da'vogar tashkilot, obyektda ko'rsatilgan egasi va mas'ul shaxs, stansiya, ochiq sahifa; qaror POST /terminals/:id/claim/decide. */
 function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decision) => void }) {
   const t = useTranslations('terminalsAdmin.admin');
   const tk = useTranslations('kind');
   const tr = useTranslations('region');
+  const tcl = useTranslations('claim');
+  // Temir yo'l bo'lmagan obyektda (ROAD, MULTI) pasport yo'q: obyektning o'z raqami olinadi
+  const contact = [x.rail?.contactName, x.rail?.contactPhone ?? x.phone].filter(Boolean).join(' · ');
   return (
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
@@ -170,6 +175,19 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
         <span className="text-sm text-muted">{t('station')}: {stationName({ station: x.station, stationNameRaw: x.rail?.stationNameRaw ?? null })}{x.regionCode && tr.has(x.regionCode) ? ` · ${tr(x.regionCode)}` : ''}</span>
       </div>
       <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></p>
+      {/*
+       * Moderator javob beradigan savol bitta: da'vogar haqiqatan shu obyektning egasimi.
+       * Shuning uchun obyektda ko'rsatilgan egasi va mas'ul shaxs raqami da'vogar yonida
+       * turadi. Bu yo'l xom qatorni qaytaradi, ya'ni maydonlar javobda bor edi, chizilmasdi.
+       */}
+      {x.rail?.ownerNameRaw ? <p className="mt-1 text-sm"><span className="text-muted">{tcl('registryOwner')}:</span> <span className="font-semibold">{x.rail.ownerNameRaw}</span></p> : null}
+      {contact ? <p className="mt-1 text-sm"><span className="text-muted">{tcl('cardContact')}:</span> <span className="font-mono font-semibold">{contact}</span></p> : null}
+      {x.claimEvidence ? (
+        <>
+          <p className="mt-2 whitespace-pre-line break-words text-sm"><span className="text-muted">{t('claimNote')}: </span>{x.claimEvidence.note}</p>
+          {x.claimEvidence.files.length ? (<><p className="mt-2 text-xs text-muted">{t('claimDocs')}</p><MessageFiles files={x.claimEvidence.files} mine={false} /></>) : null}
+        </>
+      ) : null}
       <Link href={`/terminals/${x.slug}`} className="mt-1 inline-block text-sm text-teal-ink underline">{t('open')}</Link>
       <Decide path={`/terminals/${x.id}/claim/decide`} reasonKey="reason" requireReason onDone={onDone} />
     </li>

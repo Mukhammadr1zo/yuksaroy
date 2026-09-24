@@ -6,7 +6,7 @@ import { AuditService } from '../../common/audit.service';
 import { ChatService } from './chat.service';
 
 class MessageDto {
-  // Fayl biriktirilsa matn bo'sh bo'lishi mumkin; shakl tekshiruvi domain/attachments.ts da
+  // Fayl biriktirilsa matn bo'sh bo'lishi mumkin; shakl tekshiruvi common/attachments.ts da
   @IsOptional() @IsString() @MaxLength(2000) text?: string;
   @IsOptional() @IsArray() attachments?: unknown[];
 }

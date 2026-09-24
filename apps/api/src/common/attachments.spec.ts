@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FILE_EXT, fileUrlPattern } from '../../../common/security';
+import { FILE_EXT, fileUrlPattern } from './security';
 import { AttachmentError, isImageUrl, parseAttachments } from './attachments';
 
 /**

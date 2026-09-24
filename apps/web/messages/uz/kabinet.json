@@ -263,7 +263,10 @@
           "PENDING": "Moderator ko'rib chiqmoqda.",
           "VERIFIED": "E'lonlar moderatsiyasiz darhol faol bo'ladi.",
           "REJECTED": "Rad etildi. Ma'lumotlarni tuzatib qayta yuborishingiz mumkin."
-        }
+        },
+        "docs": "Tasdiqlovchi hujjat",
+        "docsRequired": "Kamida bitta hujjat biriktiring.",
+        "docsHint": "Guvohnoma yoki ro'yxatdan o'tganlik haqidagi hujjat. Hujjatni faqat operator ko'radi."
       },
       "members": {
         "title": "A'zo qo'shish",
@@ -295,7 +298,8 @@
         "STIR_REQUIRED": "Tasdiqlash uchun STIR shart.",
         "KYC_ALREADY": "So'rov allaqachon yuborilgan yoki tashkilot tasdiqlangan.",
         "ROLES_NOT_ALLOWED": "Tanlangan rollar tashkilot turlariga mos emas.",
-        "INVALID_PHONE": "Telefon raqam noto'g'ri."
+        "INVALID_PHONE": "Telefon raqam noto'g'ri.",
+        "DOC_REQUIRED": "Tasdiqlash uchun kamida bitta hujjat kerak."
       }
     },
     "sidings": {

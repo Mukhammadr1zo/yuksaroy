@@ -3,8 +3,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { notifyBoth } from '../../common/telegram';
-import { FILE_URL } from '../../common/file-url';
-import { AttachmentError, parseAttachments, type Attachment } from './domain/attachments';
+import { filesOrThrow, type Attachment } from '../../common/attachments';
 import { threadRole, type ThreadRole } from './domain/access';
 
 const MAX = 2000;
@@ -165,7 +164,7 @@ export class ChatService {
       const member = await this.prisma.membership.findFirst({ where: { userId, orgId }, select: { id: true } });
       if (!member) throw new ForbiddenException({ code: 'NOT_ORG_MEMBER' });
     }
-    const files = this.files(rawAttachments);
+    const files = filesOrThrow(rawAttachments);
     const text = message.trim();
     const existing = await this.prisma.inquiry.findFirst({
       where: ChatService.mine(userId, terminal.id, terminal.orgId),
@@ -190,14 +189,6 @@ export class ChatService {
     await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
     void this.notifyNew(userId, inquiry.id, terminal, text).catch(() => {});
     return { id: inquiry.id };
-  }
-
-  /** Mijoz yuborgan ilovalarni tekshirish. Xato kodi mijozga o'qiladigan holda qaytadi. */
-  private files(raw: unknown): Attachment[] {
-    try { return parseAttachments(raw, FILE_URL); } catch (e) {
-      if (e instanceof AttachmentError) throw new BadRequestException({ code: e.code });
-      throw e;
-    }
   }
 
   private async notifyNew(fromUserId: string, inquiryId: string, terminal: { name: string; orgId: string | null }, text: string) {
@@ -242,7 +233,7 @@ export class ChatService {
   }
 
   async send(userId: string, inquiryId: string, text: string, rawAttachments?: unknown) {
-    const files = this.files(rawAttachments);
+    const files = filesOrThrow(rawAttachments);
     const body = text.trim().slice(0, MAX);
     // Faqat fayl yuborish ham xabar: matn majburiy emas
     if (!body && !files.length) throw new BadRequestException({ code: 'MESSAGE_EMPTY' });

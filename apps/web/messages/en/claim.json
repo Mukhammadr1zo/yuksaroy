@@ -63,6 +63,11 @@
     "cardLoadUnload": "Unload / load",
     "cardContact": "Contact person",
     "cardUnclaimed": "owner not confirmed, this is mine",
-    "openFull": "Open the full page"
+    "openFull": "Open the full page",
+    "why": "Why this object is yours",
+    "whyPlaceholder": "For example: certificate 12-34 is issued to our company, the track is on our plant site.",
+    "whyShort": "The note must be at least 10 characters.",
+    "docs": "Document (optional)",
+    "docsHint": "A document that shows ownership: a certificate, a contract or an act."
   }
 }

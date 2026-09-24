@@ -6,7 +6,7 @@ import { PrismaService } from '../../../common/prisma.service';
 import { sumFreeToday } from '../domain/free-today';
 import {
   SidingClaimedError, TariffOverlapError, TariffValidFromError, TerminalClaimedError,
-  type CargoTypeRecord, type CatalogRepository, type Page, type PublishTariffInput, type SidingFilter, type SidingRecord,
+  type CargoTypeRecord, type CatalogRepository, type ClaimEvidence, type Page, type PublishTariffInput, type SidingFilter, type SidingRecord,
   type StationRecord, type TariffRecord, type TerminalFilter, type TerminalRecord, type TerminalServiceRecord, type TerminalWrite, type WeekHours,
 } from '../domain/ports';
 
@@ -37,7 +37,7 @@ const toTerminal = (t: TerminalRow): TerminalRecord => ({
   kind: t.kind, slug: t.slug, name: t.name, description: t.description, address: t.address, phone: t.phone, lat: t.lat, lng: t.lng,
   is24h: t.is24h, hours: (t.hours as WeekHours | null) ?? null, passport: (t.passport as Record<string, unknown> | null) ?? null,
   photos: t.photos, status: t.status, claimedAt: t.claimedAt, isDemo: t.isDemo, ratingAvg: t.ratingAvg, ratingCount: t.ratingCount,
-  claimStatus: t.claimStatus, claimOrgId: t.claimOrgId,
+  claimStatus: t.claimStatus, claimOrgId: t.claimOrgId, claimEvidence: (t.claimEvidence as ClaimEvidence | null) ?? null,
   services: t.services.map((s) => ({ serviceCode: s.serviceCode, isEnabled: s.isEnabled, leadTimeMin: s.leadTimeMin })),
   tariffs: t.tariffs.map(toTariff),
   // Temir yo'l pasporti faqat RAIL turida to'ladi; avto terminalda null
@@ -70,7 +70,8 @@ const passportOf = (t: {
 const toSiding = (s: RailRow): SidingRecord => ({
   id: s.id, registryNo: s.registryNo, stationId: s.stationId, station: s.station, stationNameRaw: s.stationNameRaw ?? '', esrCode: s.esrCode, rju: s.rju,
   regionCode: s.regionCode, lat: s.lat, lng: s.lng, slug: s.slug,
-  ownerNameRaw: s.ownerNameRaw ?? '', ownerOrgId: s.orgId, ownerOrgName: s.org?.name ?? null, claimStatus: s.claimStatus, claimedAt: s.claimedAt,
+  ownerNameRaw: s.ownerNameRaw ?? '', ownerOrgId: s.orgId, ownerOrgName: s.org?.name ?? null, claimStatus: s.claimStatus,
+  claimEvidence: (s.claimEvidence as ClaimEvidence | null) ?? null, claimedAt: s.claimedAt,
   lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity, photos: s.photos,
   // Texnik pasport (Taminot reestridan), mas'ul shaxs bilan birga.
   // Telefonni ochiq javobga chiqarish/chiqarmaslikni mapper hal qiladi (publicSiding/publicTerminal).
@@ -202,8 +203,8 @@ export class PrismaCatalogRepository implements CatalogRepository {
     return t ? toTerminal(t) : null;
   }
   async slugExists(slug: string) { return (await this.prisma.terminal.count({ where: { slug } })) > 0; }
-  async claimTerminal(id: string, orgId: string) {
-    const r = await this.prisma.terminal.updateMany({ where: { id, orgId: null, claimStatus: { not: 'PENDING' } }, data: { claimOrgId: orgId, claimStatus: 'PENDING' } });
+  async claimTerminal(id: string, orgId: string, evidence: ClaimEvidence) {
+    const r = await this.prisma.terminal.updateMany({ where: { id, orgId: null, claimStatus: { not: 'PENDING' } }, data: { claimOrgId: orgId, claimStatus: 'PENDING', claimEvidence: json(evidence) } });
     if (r.count === 0) throw new TerminalClaimedError();
     return (await this.findTerminalById(id, new Date()))!;
   }
@@ -302,10 +303,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
   }
   // claimedAt faqat TASDIQLANGANDA qo'yiladi: u "egasi bor" degani va ochiq sahifa shunga qarab
   // pasport, tarif va bron bo'limlarini chizadi. Ilgari u PENDING da qo'yilib, rad etilganda ham qolib ketardi.
-  async claimSiding(id: string, orgId: string, _now: Date) {
+  async claimSiding(id: string, orgId: string, _now: Date, evidence: ClaimEvidence) {
     const r = await this.prisma.terminal.updateMany({
       where: { id, kind: 'RAIL', orgId: null, claimStatus: { in: ['NONE', 'REJECTED'] } },
-      data: { claimOrgId: orgId, claimStatus: 'PENDING' },
+      data: { claimOrgId: orgId, claimStatus: 'PENDING', claimEvidence: json(evidence) },
     });
     if (r.count === 0) throw new SidingClaimedError();
     return (await this.findSidingById(id))!;

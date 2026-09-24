@@ -90,3 +90,30 @@ describe('telefon raqami ochiq javobda', () => {
     expect(publicTerminalCard(road).rail).toBeNull();
   });
 });
+
+/**
+ * Dalil ochiq javobga chiqib ketmasin: yuklash papkasi hozir himoyasiz beriladi,
+ * ya'ni manzilni bilgan har kim hujjatni ochadi. Bu test yangi Json ustun kelajakda
+ * ochiq mapperga qo'shilib ketishini to'sadi.
+ */
+describe("da'vo dalili ochiq javobda yo'q", () => {
+  const EV = {
+    note: 'guvohnoma 12-34 korxonamiz nomida',
+    files: [{ url: 'https://yuksaroy.uz/v1/files/2026/09/0123456789abcdef01234567.pdf', name: 'g.pdf', size: 10, mime: 'application/pdf' }],
+  };
+
+  it("shahobcha javobida yo'q", () => {
+    const json = JSON.stringify(publicSiding({ ...siding(), claimEvidence: EV } as unknown as SidingRecord));
+    expect(json).not.toContain('claimEvidence');
+    expect(json).not.toContain('guvohnoma');
+    expect(json).not.toContain('g.pdf');
+  });
+
+  it("terminal javobida va kartada ham yo'q", () => {
+    const t = { ...railTerminal(), claimEvidence: EV } as unknown as TerminalRecord;
+    for (const json of [JSON.stringify(publicTerminal(t, 0)), JSON.stringify(publicTerminalCard(t))]) {
+      expect(json).not.toContain('claimEvidence');
+      expect(json).not.toContain('guvohnoma');
+    }
+  });
+});

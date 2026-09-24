@@ -38,7 +38,8 @@
       "requestedAt": "Requested",
       "region": "Region",
       "contact": "Contact",
-      "noStir": "No STIR"
+      "noStir": "No STIR",
+      "docs": "Attached documents"
     },
     "claim": {
       "registry": "Registry"

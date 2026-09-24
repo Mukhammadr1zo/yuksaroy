@@ -121,6 +121,9 @@ model Organization {
   kycStatus      KycStatus    @default(NONE)
   kycRequestedAt DateTime?    @db.Timestamptz(3)
   kycNote        String?
+  /// Tasdiqlash uchun yuborilgan hujjatlar: [{ url, name, size, mime }]. Kamida bittasi shart.
+  /// Faqat moderatsiya navbatida o'qiladi, umumiy orgSelect ga kirmaydi.
+  kycDocs        Json?
   phone          String?
   address        String?
   regionCode     String? // viloyat kodi (ESR/SOATO): katalog filtrlari uchun
@@ -290,6 +293,9 @@ model Terminal {
   claimStatus ClaimStatus       @default(NONE) // terminal da'vosi: PENDING -> admin hal qiladi
   claimOrgId  String? // da'vo qilgan tashkilot; tasdiqlansa orgId ga ko'chadi
   claimedAt   DateTime?         @db.Timestamptz(3)
+  /// Da'vo dalili: { note, files: [{ url, name, size, mime }] }. Faqat admin va da'vogar
+  /// ko'radi, ochiq mapperlarda yo'q. Alohida jadval emas: dalil da'vodan ajralib yashamaydi.
+  claimEvidence Json?
   regionCode  String? // viloyat (UZ-TK, UZ-TO, ...), koordinatadan hisoblanadi
   ratingAvg   Float             @default(0)
   ratingCount Int               @default(0)

@@ -57,6 +57,10 @@ export class PublishTariffDto {
 
 export class ClaimSidingDto {
   @IsString() orgId!: string;
+  /** Izoh majburiy: operator "meniki" degan gapni nimaga qarab tekshirishini bilishi kerak. */
+  @IsString() @Length(10, 500) note!: string;
+  /** Hujjat ixtiyoriy; manzil va shakl tekshiruvi filesOrThrow da (faqat o'z domenimizdagi fayl). */
+  @IsOptional() @IsArray() files?: unknown[];
 }
 export class ClaimDecideDto {
   @IsBoolean() approve!: boolean;

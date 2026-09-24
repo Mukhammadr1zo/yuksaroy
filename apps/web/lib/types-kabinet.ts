@@ -10,6 +10,8 @@ export type { Me } from './types-auth';
 export interface OrgRecord {
   id: string; kind: OrgKind; kinds: OrgKind[]; slug: string | null; name: string; stir: string | null; kycStatus: KycStatus;
   kycRequestedAt: string | null; kycNote: string | null;
+  /** Tasdiqqa yuborilgan hujjatlar: faqat moderatsiya navbati javobida bo'ladi. */
+  kycDocs?: ClaimFile[] | null;
   description: string | null; telegram: string | null; website: string | null;
   phone: string | null; address: string | null; regionCode: string | null;
   storefront?: Storefront | null;
@@ -55,6 +57,9 @@ export interface MySiding {
 }
 
 /** GET /terminals/mine: repo yozuvi (TerminalRecord, sanalar ISO satr) + bugungi bo'sh slotlar. Tariflar faqat amaldagi. */
+/** Yuklangan fayl: POST /uploads javobi. */
+export type ClaimFile = { url: string; name: string; size: number; mime: string };
+
 export interface MyTerminal {
   id: string; name: string; slug: string; status: TerminalStatus; kind: TerminalKind; orgId: string | null; orgName: string | null;
   /** Reestrdan kelgan shahobchada stansiya bog'lanmagan bo'lishi mumkin. */
@@ -63,9 +68,11 @@ export interface MyTerminal {
    * Temir yo'l pasporti (kind RAIL da). Bu xaritalanmagan repo yozuvi, ya'ni egasining
    * o'z obyekti: mas'ul shaxs raqami ham shu yerda (ochiq katalogdan farqli).
    */
-  rail?: { stationNameRaw: string | null; registryNo: number | null; lengthM: number | null; contactName: string | null } | null; description: string | null; address: string | null; phone: string | null;
+  rail?: { stationNameRaw: string | null; registryNo: number | null; lengthM: number | null; ownerNameRaw: string | null; contactName: string | null; contactPhone: string | null } | null; description: string | null; address: string | null; phone: string | null;
   lat: number | null; lng: number | null; is24h: boolean; hours: WeekHours | null; passport: Passport | null; photos: string[];
   claimedAt: string | null; claimStatus: ClaimStatus; claimOrgId: string | null;
+  /** Da'vo dalili: faqat egasi va admin javobida bo'ladi, ochiq katalogda yo'q. */
+  claimEvidence?: { note: string; files: ClaimFile[] } | null;
   services: { serviceCode: ServiceCode; isEnabled: boolean; leadTimeMin: number }[]; tariffs: Tariff[]; freeToday?: number;
 }
 /** GET /admin/terminals: da'vogar tashkilot nomi bilan. */
