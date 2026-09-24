@@ -189,7 +189,6 @@
       "newUsers": "Новых пользователей",
       "newOrders": "Новых заказов",
       "newListings": "Новых объявлений",
-      "oldestPending": "Самое старое объявление в очереди",
       "pendingListings": "Модерация объявлений",
       "pendingKyc": "Подтверждение организаций",
       "pendingClaims": "Заявки на объекты",
@@ -199,7 +198,8 @@
       "activity": "Последние действия",
       "activityEmpty": "Действий пока нет.",
       "waitingDays": "самое старое ждёт {days} дн.",
-      "pendingSubscription": "Оплаты подписок"
+      "pendingSubscription": "Оплаты подписок",
+      "queueDays": "ждёт {days} дн."
     },
     "terminals": {
       "lead": "Терминалы и подъездные пути: записи реестра тоже здесь.",

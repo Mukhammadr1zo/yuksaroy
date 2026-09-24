@@ -189,7 +189,6 @@
       "newUsers": "New users",
       "newOrders": "New orders",
       "newListings": "New listings",
-      "oldestPending": "Oldest listing waiting",
       "pendingListings": "Listings to review",
       "pendingKyc": "Company checks",
       "pendingClaims": "Object claims",
@@ -199,7 +198,8 @@
       "activity": "Recent actions",
       "activityEmpty": "Nothing has happened yet.",
       "waitingDays": "oldest has waited {days} d",
-      "pendingSubscription": "Subscription payments"
+      "pendingSubscription": "Subscription payments",
+      "queueDays": "waited {days} d"
     },
     "terminals": {
       "lead": "Terminals and rail sidings, registry records included.",

@@ -189,7 +189,6 @@
       "newUsers": "Yangi foydalanuvchi",
       "newOrders": "Yangi buyurtma",
       "newListings": "Yangi e'lon",
-      "oldestPending": "Eng eski kutayotgan e'lon",
       "pendingListings": "E'lon moderatsiyasi",
       "pendingKyc": "Tashkilot tasdig'i",
       "pendingClaims": "Obyekt da'volari",
@@ -199,7 +198,8 @@
       "activity": "Oxirgi amallar",
       "activityEmpty": "Hali amal qilinmagan.",
       "waitingDays": "eng uzog'i {days} kundan beri kutmoqda",
-      "pendingSubscription": "Obuna to'lovlari"
+      "pendingSubscription": "Obuna to'lovlari",
+      "queueDays": "{days} kun kutdi"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",

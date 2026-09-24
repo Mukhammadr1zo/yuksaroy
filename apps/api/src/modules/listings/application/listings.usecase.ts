@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { LISTING, REGION_CENTERS, TransitionError, assertListingTransition, slugify, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
 import { uniqueSlug, type ListingRecord } from '../domain/listing-query';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { AdminNotify } from '../../organizations/application/admin-notify';
 import { SubscriptionService } from '../../subscription/subscription.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { notifyTelegram, webUrl } from '../../../common/telegram';
@@ -38,6 +39,7 @@ export class ListingsUseCase {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly subs: SubscriptionService,
+    private readonly adminNotify: AdminNotify,
   ) {}
 
   /** orgId bo'lsa tashkilot nomidan (ruxsat tekshiriladi), bo'lmasa shaxsan (faqat TRUCK; validateListing ORG_REQUIRED). */
@@ -68,7 +70,11 @@ export class ListingsUseCase {
     const l = await this.owned(userId, id);
     this.transition(l, 'PENDING_REVIEW', 'OWNER');
     const now = new Date();
-    if (!(await this.instant(l, userId, now))) return this.repo.setStatus(id, { status: 'PENDING_REVIEW', rejectReason: null });
+    if (!(await this.instant(l, userId, now))) {
+      const out = await this.repo.setStatus(id, { status: 'PENDING_REVIEW', rejectReason: null });
+      void this.adminNotify.queued('listingsPendingReview', l.title, l.id, userId).catch(() => {});
+      return out;
+    }
     const out = await this.repo.setStatus(id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
     // Obuna e'lonni ham ko'taradi: alohida Premium sotib olish yo'q
     await this.subs.raiseListing(userId, id);

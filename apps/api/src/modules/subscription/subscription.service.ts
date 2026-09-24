@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { AdminNotify } from '../organizations/application/admin-notify';
 import { extendPremium } from '../premium/extend-premium';
 import { payInstructions } from '../premium/pay-instructions';
 
@@ -43,6 +44,7 @@ export class SubscriptionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: PlatformConfigService,
+    private readonly adminNotify: AdminNotify,
   ) {}
 
   /** Faol obuna: ACTIVE va muddati o'tmagan. Bir nechta bo'lsa eng kechi. */
@@ -101,6 +103,7 @@ export class SubscriptionService {
         const s = await tx.subscription.create({
           data: { userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
         });
+        void this.adminNotify.queued('subscriptionPending', `${months} oy`, s.id, userId).catch(() => {});
         return { order: subscriptionView(s), payInstructions: payInstructions(), reused: false };
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     } catch (e) {

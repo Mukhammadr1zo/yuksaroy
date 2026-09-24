@@ -5,6 +5,7 @@ import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsStr
 import { PHOTO_URL } from '../../../common/file-url';
 import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizePhone, type KycStatus, type OrgKind, type RegionCode, type Role } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
+import { AdminNotify } from '../application/admin-notify';
 import { CreateOrgUseCase } from '../application/create-org.usecase';
 import { ORG_REPOSITORY, type OrganizationRepository, type Storefront } from '../domain/ports';
 import { filterRoles, rolesForKinds } from '../domain/rules';
@@ -57,6 +58,7 @@ export class OrgsController {
     private readonly createOrg: CreateOrgUseCase,
     @Inject(ORG_REPOSITORY) private readonly orgs: OrganizationRepository,
     private readonly audit: AuditService,
+    private readonly adminNotify: AdminNotify,
   ) {}
 
   @Get('orgs/mine')
@@ -114,6 +116,8 @@ export class OrgsController {
     if (m.org.kycStatus === 'VERIFIED' || m.org.kycStatus === 'PENDING') throw new BadRequestException({ code: 'KYC_ALREADY', status: m.org.kycStatus });
     const org = await this.orgs.update(id, { kycStatus: 'PENDING', kycRequestedAt: new Date(), kycNote: null });
     await this.audit.log({ actorId: userId, action: 'org.kyc.request', entity: 'Organization', entityId: id });
+    // Namuna tashkilot bu yerga tusha olmaydi: uning egasi faol emas va JwtGuard uni kiritmaydi
+    void this.adminNotify.queued('orgsPendingKyc', org.name, id, userId).catch(() => {});
     return org;
   }
 

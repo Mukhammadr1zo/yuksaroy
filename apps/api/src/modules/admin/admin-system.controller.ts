@@ -4,6 +4,7 @@ import { IsObject } from 'class-validator';
 import { PLATFORM_DEFAULTS, type PlatformConfigKey, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { QUEUE_KEYS, queueStats, type QueueKey } from '../../common/admin-queues';
 import { ImpressionsService } from '../impressions/impressions.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
@@ -209,7 +210,11 @@ export class AdminSystemController {
    * null bo'lib qoladi va `failed` ro'yxatida nomi bilan qaytadi.
    */
   @Get('health')
-  async health() {
+  async health(@Query('full') full?: string) {
+    // Navbat yoshi faqat bosh sahifaga kerak, u esa bir marta ochiladi. Panelning
+    // qolgan ekranlari har o'tishda shu yo'lni qayta so'raydi va ulardan faqat
+    // sonlar o'qiladi, ya'ni yetti qo'shimcha so'rov behuda bo'lardi.
+    const withAge = full === '1';
     const since = new Date(Date.now() - 86400000);
     const failed: string[] = [];
     const safe = async <T>(name: string, fn: () => Promise<T>): Promise<T | null> => {
@@ -222,35 +227,30 @@ export class AdminSystemController {
       }
     };
 
-    const [db, listingsPendingReview, orgsPendingKyc, terminalClaimsPending, premiumPending, subscriptionPending, ordersPending, urgentOpen, users, orders, listings, oldest] =
-      await Promise.all([
-        this.pingDb(),
-        safe('listingsPendingReview', () => this.prisma.listing.count({ where: { status: 'PENDING_REVIEW' } })),
-        safe('orgsPendingKyc', () => this.prisma.organization.count({ where: { kycStatus: 'PENDING' } })),
-        safe('terminalClaimsPending', () => this.prisma.terminal.count({ where: { claimStatus: 'PENDING' } })),
-        safe('premiumPending', () => this.prisma.premiumOrder.count({ where: { status: 'PENDING' } })), // PremiumOrder.status - String
-        safe('subscriptionPending', () => this.prisma.subscription.count({ where: { status: 'PENDING' } })),
-        safe('ordersPending', () => this.prisma.order.count({ where: { status: 'PENDING' } })),
-        // Shoshilinch so'rov ham navbat: ichida mijozning telefoni turadi va u javob kutadi
-        safe('urgentOpen', () => this.prisma.urgentRequest.count({ where: { status: 'OPEN' } })),
-        safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
-        safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
-        safe('recentListings', () => this.prisma.listing.count({ where: { createdAt: { gte: since } } })),
-        safe('oldestPending', () => this.prisma.listing.findFirst({ where: { status: 'PENDING_REVIEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } })),
-      ]);
+    const [db, queues, users, orders, listings] = await Promise.all([
+      this.pingDb(),
+      safe('queues', () => queueStats(this.prisma, withAge)),
+      safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
+      safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
+      safe('recentListings', () => this.prisma.listing.count({ where: { createdAt: { gte: since } } })),
+    ]);
+    const count = (k: QueueKey) => queues?.[k].count ?? 0;
     return {
       db,
       counts: {
-        listingsPendingReview: listingsPendingReview ?? 0,
-        orgsPendingKyc: orgsPendingKyc ?? 0,
-        terminalClaimsPending: terminalClaimsPending ?? 0,
-        premiumPending: premiumPending ?? 0,
-        subscriptionPending: subscriptionPending ?? 0,
-        ordersPending: ordersPending ?? 0,
-        urgentOpen: urgentOpen ?? 0,
+        listingsPendingReview: count('listingsPendingReview'),
+        orgsPendingKyc: count('orgsPendingKyc'),
+        terminalClaimsPending: count('terminalClaimsPending'),
+        premiumPending: count('premiumPending'),
+        subscriptionPending: count('subscriptionPending'),
+        ordersPending: count('ordersPending'),
+        urgentOpen: count('urgentOpen'),
       },
       recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },
-      oldestPending: oldest?.createdAt ?? null, // eng uzoq kutayotgan e'lon
+      // Har navbatning eng eskisi: faqat ?full=1 bilan, ya'ni faqat bosh sahifaga
+      oldest: withAge && queues
+        ? Object.fromEntries(QUEUE_KEYS.map((k) => [k, queues[k].oldest])) as Record<QueueKey, Date | null>
+        : undefined,
       failed, // bo'sh bo'lsa hammasi joyida
     };
   }

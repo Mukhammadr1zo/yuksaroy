@@ -1,8 +1,10 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { queueStats, staleQueues } from '../../../common/admin-queues';
 import { IdempotencyService } from '../../../common/idempotency.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
 import { ORDER_REPOSITORY, type OrderRepository } from '../domain/ports';
+import { AdminNotify } from '../../organizations/application/admin-notify';
 import { OrderActionsUseCase } from './order-actions.usecase';
 
 const TICK_MS = 30_000;
@@ -12,6 +14,8 @@ const DAY_MS = 86_400_000;
 const KEEP_SESSIONS_DAYS = 30;
 const KEEP_OTP_DAYS = 1;
 const KEEP_READ_NOTIFICATIONS_DAYS = 90;
+/** Navbatdagi ish shuncha kundan oshsa adminlarga eslatiladi. */
+const STALE_DAYS = 2;
 
 /**
  * Muddatlar: 10 daqiqalik band qilishlar bo'shatiladi, 30 daqiqada tasdiqlanmagan
@@ -30,6 +34,7 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
     private readonly actions: OrderActionsUseCase,
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
+    private readonly adminNotify: AdminNotify,
   ) {}
 
   /**
@@ -93,6 +98,8 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
     const notes = await this.prisma.notification.deleteMany({
       where: { readAt: { not: null, lt: ago(KEEP_READ_NOTIFICATIONS_DAYS) } },
     });
+    // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
+    await this.adminNotify.stale(staleQueues(await queueStats(this.prisma, true), now, STALE_DAYS)).catch(() => {});
     const total = keys + sessions.count + codes.count + notes.count;
     if (total) {
       this.log.log(`kunlik tozalash: kalit ${keys}, sessiya ${sessions.count}, kod ${codes.count}, bildirishnoma ${notes.count}`);

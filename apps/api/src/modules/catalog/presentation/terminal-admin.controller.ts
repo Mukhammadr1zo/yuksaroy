@@ -4,6 +4,7 @@ import { CLAIM_STATUSES, REGIONS } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
+import { AdminNotify } from '../../organizations/application/admin-notify';
 import { notifyTelegram, webUrl } from '../../../common/telegram';
 import { CATALOG_REPOSITORY, TerminalClaimedError, type CatalogRepository } from '../domain/ports';
 import { ORG_REPOSITORY, type OrganizationRepository } from '../../organizations/domain/ports';
@@ -31,6 +32,7 @@ export class TerminalAdminController {
     private readonly access: TerminalAccess,
     private readonly audit: AuditService,
     private readonly prisma: PrismaService,
+    private readonly adminNotify: AdminNotify,
   ) {}
 
   /** Foydalanuvchi tashkilotlariga tegishli terminallar (har qanday holat) + bugungi bo'sh slotlar. */
@@ -51,6 +53,7 @@ export class TerminalAdminController {
     if (!(await this.repo.findTerminalById(id, new Date()))) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
     try {
       const t = await this.repo.claimTerminal(id, dto.orgId);
+      void this.adminNotify.queued('terminalClaimsPending', t.name, id, userId).catch(() => {});
       await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId: dto.orgId } });
       return t;
     } catch (e) {
@@ -152,6 +155,8 @@ export class TerminalAdminController {
   async claim(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimSidingDto) {
     const s = await this.claimSiding.execute(userId, id, dto.orgId);
     await this.audit.log({ actorId: userId, action: 'siding.claim', entity: 'Siding', entityId: id, meta: { orgId: dto.orgId } });
+    // Navbat bitta: shahobcha ham temir yo'l terminali, moderatsiyada bir yorliqda turadi
+    void this.adminNotify.queued('terminalClaimsPending', s.name ?? s.stationNameRaw, id, userId).catch(() => {});
     return s;
   }
 

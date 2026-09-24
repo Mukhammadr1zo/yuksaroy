@@ -100,6 +100,18 @@ const TEXTS = {
     ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nНомера открыты друг для друга.\n\n{url}',
     en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nYou can now see each other\'s numbers.\n\n{url}',
   },
+  // Adminlarga: navbatga yangi ish tushdi
+  adminQueue: {
+    uz: '🔔 <b>{queue}</b>\n{what}\n\n{url}',
+    ru: '🔔 <b>{queue}</b>\n{what}\n\n{url}',
+    en: '🔔 <b>{queue}</b>\n{what}\n\n{url}',
+  },
+  // Adminlarga: navbat kutib qolgan (kuniga bir marta, kunlarda)
+  adminStale: {
+    uz: "⏳ <b>Navbat kutib qolgan</b>\n{list}\n\n{url}",
+    ru: '⏳ <b>Очередь ждёт</b>\n{list}\n\n{url}',
+    en: '⏳ <b>Queue is waiting</b>\n{list}\n\n{url}',
+  },
 } as const;
 
 export type NotifyKind = keyof typeof TEXTS;

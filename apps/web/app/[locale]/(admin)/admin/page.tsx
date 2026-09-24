@@ -20,7 +20,8 @@ type Health = {
   db: { ok: boolean; ms?: number; error?: string };
   counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number; urgentOpen: number };
   recent: { users: number; orders: number; listings: number };
-  oldestPending: string | null;
+  /** Har navbatning eng eskisi; faqat ?full=1 bilan keladi */
+  oldest?: Partial<Record<string, string | null>>;
   /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
   failed?: string[];
 };
@@ -57,13 +58,17 @@ export default function AdminHomePage() {
   const actionText = useActionText();
 
   useEffect(() => {
-    api<Health>('/admin/health').then(setHealth).catch(setErr);
+    // full=1: navbat yoshi faqat shu sahifaga kerak, panelning boshqa ekranlari uni so'ramaydi
+    api<Health>('/admin/health?full=1').then(setHealth).catch(setErr);
     // Tasma yiqilsa sahifa buzilmasin: navbat muhimroq
     api<{ items: AuditRow[] }>('/admin/audit?limit=8').then((r) => setFeed(r.items)).catch(() => setFeed([]));
   }, []);
 
   const total = health ? Object.values(health.counts).reduce((a, b) => a + b, 0) : 0;
-  const waited = health?.oldestPending ? daysWaiting(health.oldestPending) : null;
+  // Eng uzoq kutgan ish qaysi navbatda bo'lsa ham, uning yoshi sarlavhada turadi
+  const waited = health?.oldest
+    ? Math.max(0, ...Object.values(health.oldest).filter((v): v is string => !!v).map(daysWaiting))
+    : null;
 
   return (
     <>
@@ -90,10 +95,14 @@ export default function AdminHomePage() {
               <ul className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {QUEUE.map(({ key, label, href }) => {
                   const n = health.counts[key];
+                  const at = health.oldest?.[key];
+                  const age = n && at ? daysWaiting(at) : null;
                   const body = (
                     <>
                       <span className={`font-display text-3xl font-bold tabular-nums ${n ? 'text-navy' : 'text-muted/50'}`}>{num(n, locale)}</span>
                       <span className={`mt-0.5 block text-sm ${n ? 'text-ink' : 'text-muted'}`}>{th(label)}</span>
+                      {/* Yosh aynan shu navbatniki: qaysi biri unutilib qolganini son emas, kun aytadi */}
+                      {age != null && age >= 1 ? <span className="mt-1 inline-block font-mono text-[11px] text-amber-ink">{th('queueDays', { days: age })}</span> : null}
                     </>
                   );
                   return (
@@ -109,9 +118,7 @@ export default function AdminHomePage() {
                 })}
               </ul>
             )}
-            {health.oldestPending ? (
-              <p className="mt-2 text-xs text-muted">{th('oldestPending')}: <span className="font-mono">{uzDateTime(health.oldestPending, locale)}</span></p>
-            ) : null}
+
           </section>
 
           <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_minmax(0,320px)]">

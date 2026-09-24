@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PrismaService } from '../../common/prisma.service';
 import type { NotificationsService } from '../notifications/notifications.service';
+import type { AdminNotify } from '../organizations/application/admin-notify';
 import type { SubscriptionService } from '../subscription/subscription.service';
 import type { ListingRecord } from './domain/listing-query';
 import type { PrismaListingRepository } from './infrastructure/prisma-listing.repository';
@@ -43,7 +44,8 @@ function setup(l: ListingRecord, activeCount = 0, kyc: string | null = null) {
   } as unknown as PrismaService;
   const notifications = {} as unknown as NotificationsService;
   const subs = { raiseListing: async () => {} } as unknown as SubscriptionService;
-  const svc = new ListingsUseCase(repo, access, prisma, notifications, subs);
+  const adminNotify = { queued: async () => {} } as unknown as AdminNotify;
+  const svc = new ListingsUseCase(repo, access, prisma, notifications, subs, adminNotify);
   return { svc, saved, counts };
 }
 
