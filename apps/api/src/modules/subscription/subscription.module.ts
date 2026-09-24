@@ -4,13 +4,12 @@ import { OrganizationsModule } from '../organizations/organizations.module';
 import { SubscriptionController, SubscriptionPublicController } from './subscription.controller';
 import { ContactsController } from './contacts.controller';
 import { SubscriptionService } from './subscription.service';
-import { SubscriberGuard } from './subscriber.guard';
 
 @Module({
   imports: [IdentityModule, OrganizationsModule], // JwtGuard; PlatformAdmin (tasdiqlash)
   controllers: [SubscriptionPublicController, SubscriptionController, ContactsController],
-  providers: [SubscriptionService, SubscriberGuard],
+  providers: [SubscriptionService],
   // Telefon va vagon qidiruvi boshqa modullarda: guard va xizmat shularga eksport qilinadi
-  exports: [SubscriptionService, SubscriberGuard],
+  exports: [SubscriptionService],
 })
 export class SubscriptionModule {}

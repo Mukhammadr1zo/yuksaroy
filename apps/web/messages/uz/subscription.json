@@ -32,7 +32,13 @@
       "err": "Olinmadi.",
       "retry": "Qayta",
       "badPhone": "Raqam ishlamadimi? Ayting",
-      "badPhoneText": "Raqam ishlamadi. Obyekt: {ref}. Nima bo'lganini yozing:"
+      "badPhoneText": "Raqam ishlamadi. Obyekt: {ref}. Nima bo'lganini yozing:",
+      "subscribeWhat": "Raqamni ko'rish obuna bilan ochiladi.",
+      "subscribePrice": "Oyiga {price} so'm, kuniga {n} ta raqam.",
+      "subscribeChat": "Yozishma bepul: obunasiz ham yozib bo'ladi.",
+      "limitCount": "Bugun {n} ta raqam ochdingiz, kunlik chegara shuncha. Ertaga davom etadi.",
+      "copy": "Nusxa",
+      "copied": "Nusxalandi"
     },
     "admin": {
       "tab": "Obunalar",

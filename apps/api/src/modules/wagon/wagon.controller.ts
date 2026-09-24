@@ -105,6 +105,7 @@ export class WagonController {
 
   private async quota(userId: string) {
     const [subscriber, cfg, freeUsed] = await Promise.all([this.subs.isActive(userId), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } })]);
-    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree };
+    // Narx kvota bilan birga: 402 tanasi ham, /wagon/me ham shu yerdan oladi
+    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom: cfg.subscriptionMonthSom };
   }
 }

@@ -32,7 +32,13 @@
       "err": "Could not load.",
       "retry": "Retry",
       "badPhone": "Number did not work? Tell us",
-      "badPhoneText": "The number did not work. Object: {ref}. Tell us what happened:"
+      "badPhoneText": "The number did not work. Object: {ref}. Tell us what happened:",
+      "subscribeWhat": "The number opens with a subscription.",
+      "subscribePrice": "{price} som a month, {n} numbers a day.",
+      "subscribeChat": "Messages are free: you can write without a subscription.",
+      "limitCount": "You opened {n} numbers today, that is the daily limit. It continues tomorrow.",
+      "copy": "Copy",
+      "copied": "Copied"
     },
     "admin": {
       "tab": "Subscriptions",

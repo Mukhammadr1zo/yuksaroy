@@ -7,7 +7,7 @@ import { HelpLlm } from './help.llm';
 
 /** Yordam chati: tez-tez so'raladigan savollar, keyin LLM. */
 @Module({
-  imports: [IdentityModule, OrganizationsModule, SubscriptionModule], // JwtGuard; PlatformAdmin; SubscriberGuard
+  imports: [IdentityModule, OrganizationsModule, SubscriptionModule], // JwtGuard; PlatformAdmin; obuna tekshiruvi usul ichida
   controllers: [HelpController],
   providers: [{ provide: HelpLlm, useFactory: () => new HelpLlm() }], // env dan kalit va model
 })

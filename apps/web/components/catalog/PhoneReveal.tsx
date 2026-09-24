@@ -16,19 +16,25 @@
  * bilinadi, uni birinchi chizishda o'qish gidratsiya nomuvofiqligi berardi.
  */
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { LockSimpleIcon, PhoneIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
+import { PLATFORM_DEFAULTS } from '@yuksaroy/domain';
 import { ApiError, api, hasSession, tgTokens } from '@/lib/api';
+import { num } from '@/lib/format';
 
 type Kind = 'listing' | 'terminal' | 'org' | 'service' | 'request' | 'offer';
 type State =
   | { s: 'idle' } | { s: 'busy' } | { s: 'phone'; phone: string }
-  | { s: 'login' } | { s: 'subscribe' } | { s: 'limit' } | { s: 'none' } | { s: 'err' };
+  // 429 da used va limit har doim teng, shuning uchun bitta son saqlanadi
+  | { s: 'login' } | { s: 'subscribe'; priceSom: number; dailyLimit: number } | { s: 'limit'; limit: number } | { s: 'none' } | { s: 'err' };
 
 export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: string; next: string }) {
   const t = useTranslations('subscription.reveal');
+  const locale = useLocale();
   const [st, setSt] = useState<State>({ s: 'idle' });
+  // Nusxalash holati shu yerda: hook shox ichida chaqirilmaydi
+  const [copied, setCopied] = useState(false);
   // Mehmonga darrov nima qilish kerakligi ko'rinsin: bosib, keyin bilib o'tirmasin
   useEffect(() => { if (!hasSession()) setSt({ s: 'login' }); }, []);
 
@@ -39,7 +45,14 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
       setSt(r.phone ? { s: 'phone', phone: r.phone } : { s: 'none' });
     } catch (e) {
       const status = e instanceof ApiError ? e.status : 0;
-      setSt(status === 401 ? { s: 'login' } : status === 402 ? { s: 'subscribe' } : status === 429 ? { s: 'limit' } : status === 404 ? { s: 'none' } : { s: 'err' });
+      // JSON bo'lmagan javobda tana null keladi: sonlar sukut sozlamaga tayanadi,
+      // devor raqamsiz qolib komponent yiqilmasin
+      const b = (e instanceof ApiError ? (e.body as { priceSom?: number; dailyLimit?: number; limit?: number } | null) : null) ?? {};
+      setSt(
+        status === 401 ? { s: 'login' }
+          : status === 402 ? { s: 'subscribe', priceSom: b.priceSom ?? PLATFORM_DEFAULTS.subscriptionMonthSom, dailyLimit: b.dailyLimit ?? PLATFORM_DEFAULTS.phoneRevealDaily }
+            : status === 429 ? { s: 'limit', limit: b.limit ?? PLATFORM_DEFAULTS.phoneRevealDaily }
+              : status === 404 ? { s: 'none' } : { s: 'err' });
     }
   }
 
@@ -53,9 +66,18 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
     const report = `/contact?topic=badphone&text=${encodeURIComponent(t('badPhoneText', { ref: `${kind}/${targetId}` }))}`;
     return (
       <span className="inline-flex flex-col items-start gap-1">
-        <a href={`tel:${st.phone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-2 font-mono text-sm font-semibold text-navy hover:text-teal-ink">
-          <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />{st.phone}
-        </a>
+        {/* flex-wrap: tor ustunlarda (kompaniya kartasi, do'kon yon ustuni) raqam va tugma bir qatorga sig'maydi */}
+        <span className="inline-flex flex-wrap items-center gap-2">
+          <a href={`tel:${st.phone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-2 font-mono text-sm font-semibold text-navy hover:text-teal-ink">
+            <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />{st.phone}
+          </a>
+          {/* Xavfsiz bo'lmagan ulanishda nusxalash ishlamaydi: raqamning o'zi ko'rinib turaveradi */}
+          <button
+            type="button"
+            onClick={async () => { try { await navigator.clipboard.writeText(st.phone); setCopied(true); window.setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); } }}
+            className="rounded-full border border-line px-2 py-0.5 text-xs text-muted transition hover:border-teal hover:text-teal-ink"
+          >{copied ? t('copied') : t('copy')}</button>
+        </span>
         <Link href={report} className="text-xs text-muted underline underline-offset-4 hover:text-teal-ink">{t('badPhone')}</Link>
       </span>
     );
@@ -64,14 +86,18 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
   if (st.s === 'subscribe') {
     // Telegram Mini App da kabinet cookie'si yo'q: /dashboard u yerda kirish sahifasiga qaytaradi,
     // shuning uchun Mini App o'z obuna sahifasiga boradi (karta bir xil)
+    // Uch qator: nima ochiladi, qancha turadi, nimasi bepul. Bitta qator bilan
+    // odam qaror qila olmasdi va narxni izlab ketardi.
     return (
-      <p className={hint}>
-        <LockSimpleIcon size={14} aria-hidden="true" />{t('subscribe')}{' '}
-        <Link href={tgTokens() !== null ? '/tg/subscription' : '/dashboard/subscription'} className={cta}>{t('subscribeCta')}</Link>
-      </p>
+      <span className="block text-sm text-muted">
+        <span className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('subscribeWhat')}</span>
+        <span className="mt-0.5 block">{t('subscribePrice', { price: num(st.priceSom, locale), n: st.dailyLimit })}</span>
+        <span className="mt-0.5 block">{t('subscribeChat')}</span>
+        <Link href={tgTokens() !== null ? '/tg/subscription' : '/dashboard/subscription'} className={`${cta} mt-1 inline-block`}>{t('subscribeCta')}</Link>
+      </span>
     );
   }
-  if (st.s === 'limit') return <p className={hint}>{t('limit')}</p>;
+  if (st.s === 'limit') return <p className={hint}>{t('limitCount', { n: st.limit })}</p>;
   if (st.s === 'none') return <p className={hint}>{t('none')}</p>;
   if (st.s === 'err') return <p className={hint}>{t('err')} <button type="button" onClick={reveal} className={cta}>{t('retry')}</button></p>;
   return (

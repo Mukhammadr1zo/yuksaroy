@@ -34,6 +34,7 @@
       "WAGON_UPSTREAM": "The search did not go through. Try again in a little while.",
       "RATE_LIMITED": "Too many searches. You can continue in an hour.",
       "generic": "Search failed. Try again."
-    }
+    },
+    "price": "{price} som a month."
   }
 }

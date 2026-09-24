@@ -7,7 +7,7 @@ import { WagonController } from './wagon.controller';
 
 /** Vagon qidiruvi: d-railway.uz API orqali, birinchisi bepul, keyin obuna. */
 @Module({
-  imports: [IdentityModule, OrganizationsModule, SubscriptionModule], // JwtGuard; PlatformAdmin; SubscriberGuard
+  imports: [IdentityModule, OrganizationsModule, SubscriptionModule], // JwtGuard; PlatformAdmin; obuna tekshiruvi usul ichida
   controllers: [WagonController],
   // useFactory: konstruktor parametrlari (sozlama obyekti, fetch) Nest uchun token emas, oddiy class provider ishga tushmaydi
   providers: [{ provide: DRailwayClient, useFactory: () => new DRailwayClient() }], // env dan manzil, login, parol

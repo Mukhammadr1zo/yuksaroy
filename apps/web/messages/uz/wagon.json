@@ -34,6 +34,7 @@
       "WAGON_UPSTREAM": "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
       "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
       "generic": "Qidirilmadi. Qayta urinib ko'ring."
-    }
+    },
+    "price": "Oyiga {price} so'm."
   }
 }

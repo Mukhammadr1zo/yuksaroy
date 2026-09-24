@@ -76,8 +76,11 @@ export class ContactsController {
      * Bu qoidani teskari qilish uchun `free` ni hisoblaydigan ikki joyni
      * false ga o'zgartirish yetadi.
      */
-    if (!free && !(await this.subs.isActive(userId))) throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED' }, 402);
     const cfg = await this.config.get();
+    // Devor javobida narx va kunlik chegara ham bor: odam nima ochilishini, qancha
+    // turishini va kuniga nechta ochilishini shu yerdan biladi. Ikkalasi ham ochiq
+    // ma'lumot, narxlar sahifasida yozilgan.
+    if (!free && !(await this.subs.isActive(userId))) throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: cfg.subscriptionMonthSom, dailyLimit: cfg.phoneRevealDaily }, 402);
     let quota = { used: 0, limit: cfg.phoneRevealDaily };
     if (phone !== null) {
       // Kalit va audit xom parametrdan emas, topilgan obyekt id sidan: bir odam bitta

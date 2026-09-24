@@ -12,14 +12,15 @@ import { LockSimpleIcon, MagnifyingGlassIcon, TrainIcon } from '@phosphor-icons/
 import { WAGON } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, hasSession } from '@/lib/api';
-import { uzDate, uzDateTime, uzToday } from '@/lib/format';
+import { num, uzDate, uzDateTime, uzToday } from '@/lib/format';
 import { BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 import type { WagonEvent, WagonMe, WagonQuota, WagonResult } from '@/lib/types-wagon';
 
 type Err = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'generic';
 type State =
   | { s: 'idle' } | { s: 'guest' } | { s: 'busy' }
-  | { s: 'result'; r: WagonResult } | { s: 'subscribe' } | { s: 'err'; code: Err };
+  // Narx devor javobidan keladi: odam uni izlab boshqa sahifaga ketmasin
+  | { s: 'result'; r: WagonResult } | { s: 'subscribe'; priceSom?: number } | { s: 'err'; code: Err };
 
 const ERRS: Record<number, Err> = { 400: 'WAGON_NO_INVALID', 429: 'RATE_LIMITED', 502: 'WAGON_UPSTREAM', 503: 'WAGON_NOT_CONFIGURED' };
 const STATE_TONE: Record<WagonEvent['state'], string> = { loaded: 'bg-teal text-white', empty: 'bg-line text-ink', unknown: 'bg-sand text-muted' };
@@ -60,7 +61,7 @@ export function WagonSearch() {
       if (e instanceof DOMException && e.name === 'TimeoutError') { setSt({ s: 'err', code: 'WAGON_UPSTREAM' }); return; }
       const status = e instanceof ApiError ? e.status : 0;
       if (status === 401) { setSt({ s: 'guest' }); return; }
-      if (status === 402) { setSt({ s: 'subscribe' }); return; }
+      if (status === 402) { setSt({ s: 'subscribe', priceSom: (e as ApiError).body?.priceSom }); return; }
       setSt({ s: 'err', code: ERRS[status] ?? 'generic' });
     }
   }
@@ -99,7 +100,7 @@ export function WagonSearch() {
 
       <div className="mt-5">
         {st.s === 'subscribe' ? (
-          <Notice tone="warn">{t('subscribe')} <Link href="/dashboard/subscription" className={cta}>{t('subscribeCta')}</Link></Notice>
+          <Notice tone="warn">{t('subscribe')}{st.priceSom ? ` ${t('price', { price: num(st.priceSom, locale) })}` : ''} <Link href="/dashboard/subscription" className={cta}>{t('subscribeCta')}</Link></Notice>
         ) : st.s === 'err' ? (
           <Notice tone={st.code === 'WAGON_NOT_CONFIGURED' ? 'warn' : 'err'}>{t(`errors.${st.code}`)}</Notice>
         ) : st.s === 'result' ? (
