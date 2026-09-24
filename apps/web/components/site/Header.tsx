@@ -6,12 +6,13 @@ import { AuthArea } from './AuthArea';
 
 // nav: asosiy JSON'dagi kalitlar; nav2: katalog qo'shimchalari (messages/<locale>/nav2.json); map: xarita nomfazosi (map.json)
 const NAV = [
+  // Vagon qidiruvi birinchi: odam saytga ko'pincha aynan shu savol bilan keladi
+  { href: '/wagon', ns: 'nav2', key: 'wagon' },
   { href: '/terminals', ns: 'nav', key: 'terminals' },
   { href: '/equipment', ns: 'nav2', key: 'equipment' },
   { href: '/carriers', ns: 'nav2', key: 'carriers' },
   { href: '/cargo', ns: 'nav2', key: 'cargo' },
   { href: '/services', ns: 'nav2', key: 'services' },
-  { href: '/wagon', ns: 'nav2', key: 'wagon' },
   { href: '/map', ns: 'map', key: 'nav' },
 ] as const;
 
