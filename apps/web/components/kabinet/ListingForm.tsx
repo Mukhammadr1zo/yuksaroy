@@ -22,7 +22,7 @@ const KIND_ICON = { SHUNTING_LOCO: Train, WAGON: TrainSimple, TRUCK: Truck } as 
 const EMPTY: Omit<ListingInput, 'kind'> = {
   deal: null, title: '', description: null, regionCode: 'UZ-TK', terminalId: null, priceTiyin: null, priceUnit: null, photos: [],
   year: null, condition: null, model: null, qty: 1, wagonType: null, capacityT: null, truckType: null, tonnage: null, fleetSize: null,
-  serviceRegions: [], routes: [], contactPhone: null, responseHours: null,
+  serviceRegions: [], routes: [], contactPhone: null,
 };
 
 const fromListing = (l: OwnerListing): ListingInput => ({
@@ -30,7 +30,7 @@ const fromListing = (l: OwnerListing): ListingInput => ({
   kind: l.kind, deal: l.deal, title: l.title, description: l.description, regionCode: l.regionCode, terminalId: l.object?.id ?? null,
   priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, photos: l.photos, year: l.year,
   condition: l.condition, model: l.model, qty: l.qty, wagonType: l.wagonType, capacityT: l.capacityT, truckType: l.truckType, tonnage: l.tonnage,
-  fleetSize: l.fleetSize, serviceRegions: l.serviceRegions, routes: l.routes ?? [], contactPhone: l.contactPhone, responseHours: l.responseHours,
+  fleetSize: l.fleetSize, serviceRegions: l.serviceRegions, routes: l.routes ?? [], contactPhone: l.contactPhone,
 });
 
 const numOr = (v: string) => (v.trim() === '' ? null : Number(v));
@@ -353,9 +353,6 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('field.contactPhone')} hint={t('hint.contactPhone')} error={fieldErr('contactPhone')}>
             <PhoneField className={`${INPUT} font-mono`} value={input.contactPhone ?? ''} placeholder={t('placeholder.contactPhone')} onChange={(v) => set({ contactPhone: strOr(v) })} />
-          </Field>
-          <Field label={t('field.responseHours')} recommended={rec('responseHours')} hint={t('hint.responseHours')} error={fieldErr('responseHours')}>
-            <input type="number" min={1} className={`${INPUT} font-mono`} value={input.responseHours ?? ''} onChange={(e) => set({ responseHours: numOr(e.target.value) })} />
           </Field>
         </div>
       </section>

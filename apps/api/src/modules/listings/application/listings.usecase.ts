@@ -17,7 +17,7 @@ export function inputOf(l: ListingRecord): ListingInput {
     terminalId: l.terminalId, priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, photos: l.photos,
     year: l.year, condition: l.condition, model: l.model, qty: l.qty, wagonType: l.wagonType, capacityT: l.capacityT,
     truckType: l.truckType, tonnage: l.tonnage, fleetSize: l.fleetSize, serviceRegions: l.serviceRegions as RegionCode[], routes: l.routes,
-    contactPhone: l.contactPhone, responseHours: l.responseHours,
+    contactPhone: l.contactPhone,
   };
 }
 

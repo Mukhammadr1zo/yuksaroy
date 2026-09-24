@@ -32,7 +32,6 @@ export class ListingBodyDto {
   @IsOptional() @IsArray() @IsString({ each: true }) serviceRegions?: RegionCode[];
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => RouteDto) routes?: RouteDto[];
   @IsOptional() @IsString() @MaxLength(40) contactPhone?: string | null;
-  @IsOptional() @IsInt() responseHours?: number | null;
 }
 
 /** orgId bo'sh bo'lsa shaxsiy e'lon (yakka haydovchi, faqat TRUCK). */
@@ -55,7 +54,7 @@ export class DecideDto {
 const EMPTY: Omit<ListingInput, 'kind' | 'title' | 'regionCode'> = {
   deal: null, description: null, terminalId: null, priceTiyin: null, priceUnit: null, photos: [], year: null, condition: null,
   model: null, qty: 1, wagonType: null, capacityT: null, truckType: null, tonnage: null, fleetSize: null, serviceRegions: [], routes: [],
-  contactPhone: null, responseHours: null,
+  contactPhone: null,
 };
 
 /** PATCH: faqat kelgan maydonlar (null = tozalash, undefined = tegilmaydi). */

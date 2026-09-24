@@ -21,7 +21,7 @@ const listing = (over: Partial<ListingRecord> = {}): ListingRecord => ({
   lat: null, lng: null, priceTiyin: null, priceUnit: null, photos: [],
   year: null, condition: null, model: null, qty: 1, wagonType: null, capacityT: null,
   truckType: 'TENT', tonnage: 5, fleetSize: null, serviceRegions: [], routes: [],
-  contactPhone: null, responseHours: null,
+  contactPhone: null,
   premiumUntil: null, publishedAt: null, expiresAt: null, rejectReason: null, views: 0,
   createdAt: new Date(), updatedAt: new Date(),
   org: null, ownerUser: { fullName: 'Akmal', phone: '+998901234567' }, terminal: null,

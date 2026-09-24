@@ -119,7 +119,22 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
                 <ChatLauncher target={{ kind: 'listing', id: l.id, title: l.title }} next={listingHref(l)} />
               </div>
             )}
-            {l.responseHours ? <p className="mt-3 text-xs text-muted"><span className="font-mono text-ink">{t('response', { hours: l.responseHours })}</span> · {t('responseNote')}</p> : null}
+            {/* Egasi o'zi yozgan javob muddati emas, o'lchangani: qachon kirgani va
+                kelgan yozishmalarning nechtasiga javob bergani. Ikkalasi ham bo'lmasa
+                (yangi egada shunday) qator umuman chizilmaydi */}
+            {l.signal?.seen || l.signal?.replied ? (
+              <div className="mt-4 space-y-1.5 border-t border-line/70 pt-3 text-xs">
+                {l.signal?.seen ? (
+                  <p className="flex items-center gap-2 text-muted">
+                    <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${l.signal.seen === 'away' ? 'bg-line' : 'bg-teal'}`} />
+                    {t(`signal.${l.signal.seen}`)}
+                  </p>
+                ) : null}
+                {l.signal?.replied ? (
+                  <p className="font-mono tabular-nums text-ink">{t('signal.replied', l.signal.replied)}</p>
+                ) : null}
+              </div>
+            ) : null}
           </section>
 
           <section className="rounded-card border border-line bg-white p-5">

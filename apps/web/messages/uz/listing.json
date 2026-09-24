@@ -80,8 +80,12 @@
       "loginNote": "Telefon hammaga ochiq, so'rov esa ro'yxatdan o'tganlarga.",
       "phone": "Telefon",
       "noPhone": "Egasi telefon ko'rsatmagan, so'rov yuboring",
-      "response": "Javob {hours} soat ichida",
-      "responseNote": "egasi aytgan, o'lchanmagan",
+      "signal": {
+        "today": "Bugun faol",
+        "week": "Oxirgi bir haftada faol",
+        "away": "Ikki haftadan beri kirmagan",
+        "replied": "So'rovlarning {of} tasidan {answered} tasiga javob bergan"
+      },
       "owner": "Egasi",
       "companyPage": "Kompaniya sahifasi",
       "object": "Qayerda turibdi",

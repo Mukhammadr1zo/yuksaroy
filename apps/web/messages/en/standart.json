@@ -20,7 +20,6 @@
       "capacityT": "Load capacity, t",
       "priceTiyin": "Price and unit",
       "terminalId": "Terminal or siding",
-      "responseHours": "Reply time, hours",
       "wagonType": "Wagon type",
       "qty": "Quantity",
       "truckType": "Body type",

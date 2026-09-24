@@ -80,8 +80,12 @@
       "loginNote": "The phone is open to everyone; sending an inquiry needs an account.",
       "phone": "Phone",
       "noPhone": "The owner did not list a phone, send an inquiry",
-      "response": "Reply within {hours} h",
-      "responseNote": "as stated by the owner, not measured",
+      "signal": {
+        "today": "Active today",
+        "week": "Active in the last week",
+        "away": "Away for more than two weeks",
+        "replied": "Replied to {answered} of {of} requests"
+      },
       "owner": "Owner",
       "companyPage": "Company page",
       "object": "Location",

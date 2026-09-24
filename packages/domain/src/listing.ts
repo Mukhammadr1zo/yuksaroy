@@ -99,7 +99,6 @@ export interface ListingInput {
   serviceRegions: RegionCode[];
   routes: { from: RegionCode; to: RegionCode }[];
   contactPhone: string | null;
-  responseHours: number | null;
 }
 
 /**
@@ -110,7 +109,7 @@ export interface ListingInput {
 export const LISTING_RULES: Record<ListingKind, { must: (keyof ListingInput)[]; should: (keyof ListingInput)[] }> = {
   SHUNTING_LOCO: {
     must: ['title', 'deal', 'year', 'condition', 'regionCode', 'photos'],
-    should: ['model', 'capacityT', 'priceTiyin', 'terminalId', 'responseHours'],
+    should: ['model', 'capacityT', 'priceTiyin', 'terminalId'],
   },
   WAGON: {
     must: ['title', 'deal', 'wagonType', 'year', 'condition', 'regionCode', 'photos'],
@@ -118,7 +117,7 @@ export const LISTING_RULES: Record<ListingKind, { must: (keyof ListingInput)[]; 
   },
   TRUCK: {
     must: ['title', 'truckType', 'tonnage', 'regionCode', 'serviceRegions'],
-    should: ['routes', 'fleetSize', 'priceTiyin', 'photos', 'responseHours'],
+    should: ['routes', 'fleetSize', 'priceTiyin', 'photos'],
   },
 };
 
@@ -175,7 +174,6 @@ export function validateListing(input: ListingInput): { errors: ListingIssue[]; 
   if (input.tonnage != null && (!int(input.tonnage) || input.tonnage < 1 || input.tonnage > 100)) err('tonnage', 'RANGE');
   if (input.capacityT != null && (!int(input.capacityT) || input.capacityT < 1)) err('capacityT', 'RANGE');
   if (input.fleetSize != null && (!int(input.fleetSize) || input.fleetSize < 1)) err('fleetSize', 'RANGE');
-  if (input.responseHours != null && (!int(input.responseHours) || input.responseHours < 1)) err('responseHours', 'RANGE');
   if (input.priceTiyin != null && (!int(input.priceTiyin) || input.priceTiyin < 1)) err('priceTiyin', 'RANGE');
 
   // Narx birligi: narx bo'lsa birlik shart; birlik bitimga mos bo'lsin

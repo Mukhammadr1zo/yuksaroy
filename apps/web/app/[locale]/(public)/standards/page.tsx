@@ -8,7 +8,7 @@ import { AuthOnly } from '@/components/site/AuthOnly';
 import { DashLink } from '@/components/site/DashLink';
 
 type Params = { params: Promise<{ locale: string }> };
-const FIELD = ['title', 'deal', 'year', 'condition', 'regionCode', 'photos', 'model', 'capacityT', 'priceTiyin', 'terminalId', 'responseHours', 'wagonType', 'qty', 'truckType', 'tonnage', 'serviceRegions', 'routes', 'fleetSize'] as const;
+const FIELD = ['title', 'deal', 'year', 'condition', 'regionCode', 'photos', 'model', 'capacityT', 'priceTiyin', 'terminalId', 'wagonType', 'qty', 'truckType', 'tonnage', 'serviceRegions', 'routes', 'fleetSize'] as const;
 type Field = (typeof FIELD)[number];
 const RULES = ['year', 'qty', 'tonnage', 'rentUnits', 'saleUnits', 'truckUnits', 'priceUnit', 'oneObject', 'serviceRegions', 'routes', 'photos', 'expire', 'review'] as const;
 

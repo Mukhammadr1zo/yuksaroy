@@ -42,7 +42,6 @@ export async function ListingCompare({ cat, slugs, lang }: { cat: 'equipment' | 
   rows.push(
     { label: t('row.owner'), values: v((l) => <span className="font-body">{l.owner.name}</span>) },
     { label: t('row.kyc'), values: v((l) => <span className={`font-body text-xs ${(l.owner.type === 'org' ? l.owner.kyc === 'VERIFIED' : l.owner.phoneVerified) ? 'font-semibold text-teal-ink' : 'text-muted'}`}>{l.owner.type === 'org' ? KYC_STATUS_LABELS[lang][l.owner.kyc] : tc(l.owner.phoneVerified ? 'phoneVerified' : 'phoneUnverified')}</span>) },
-    { label: t('row.response'), values: v((l) => (l.responseHours ? t('unit.hours', { n: l.responseHours }) : none)) },
   );
   const cols = items.map((l) => ({ slug: l.slug, name: l.title, href: listingHref(l), sub: truck ? [l.truckType ? L.truckType[l.truckType as keyof typeof L.truckType] : null, l.tonnage ? t('unit.t', { n: l.tonnage }) : null].filter(Boolean).join(' · ') : [L.kind[l.kind], l.year].filter(Boolean).join(' · ') }));
   return <><Impressions kind="listing" ids={items.map((l) => l.id)} surface="compare" /><CompareTable cat={cat} cols={cols} rows={rows} missing={slugs.length - items.length} /></>;

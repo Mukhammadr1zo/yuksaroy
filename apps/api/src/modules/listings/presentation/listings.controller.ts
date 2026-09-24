@@ -1,24 +1,23 @@
-import { Controller, Get, NotFoundException, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { FastifyRequest } from 'fastify';
 import { DEAL_KINDS, LISTING_KINDS, REGIONS, distanceKm } from '@yuksaroy/domain';
-import { TokenService } from '../../identity/application/token.service';
+import { PrismaService } from '../../../common/prisma.service';
 import { ImpressionsService } from '../../impressions/impressions.service';
-import { ACCESS_COOKIE } from '../../identity/presentation/jwt.guard';
 import { clampInt, geoNear, listIn, pickIn } from '../../catalog/presentation/catalog.controller';
 import { corridorMatch, parseCorridor, summarizeListings } from '../domain/listing-query';
+import { ownerSignal } from '../application/owner-signal';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { listingCard, listingDetail } from './mappers';
 
 const SORTS = ['new', 'price', 'nearest'] as const;
 
-/** Ochiq e'lonlar: narx hammaga, telefon faqat kirganlarga (cookie yoki Bearer bo'lsa). */
+/** Ochiq e'lonlar: hamma ko'radi, telefon raqami javobda yo'q (u /contacts orqali). */
 @ApiTags('listings')
 @Controller('listings')
 export class ListingsController {
   constructor(
     private readonly repo: PrismaListingRepository,
-    private readonly tokens: TokenService,
+    private readonly prisma: PrismaService,
     private readonly impressions: ImpressionsService,
   ) {}
 
@@ -51,18 +50,15 @@ export class ListingsController {
   }
 
   @Get(':slug')
-  async detail(@Param('slug') slug: string, @Req() req: FastifyRequest) {
+  async detail(@Param('slug') slug: string) {
     const l = await this.repo.findBySlug(slug);
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
-    const views = await this.impressions.detailViews('listing', [l.id]);
-    return { ...listingDetail(l), views: views[l.id] ?? 0 };
-  }
-
-  /** Ixtiyoriy kirish: token bo'lsa va to'g'ri bo'lsa foydalanuvchi, aks holda mehmon. */
-  private userIdOf(req: FastifyRequest): string | null {
-    const bearer = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : undefined;
-    const token = bearer ?? (req as any).cookies?.[ACCESS_COOKIE];
-    if (!token) return null;
-    try { return this.tokens.verifyAccess(token).sub; } catch { return null; }
+    // Signal faqat tafsilotda: kartaga ham qo'yilsa har ro'yxat uchun o'nlab
+    // qo'shimcha so'rov bo'lardi va karta bu gap uchun baribir juda tor
+    const [views, signal] = await Promise.all([
+      this.impressions.detailViews('listing', [l.id]),
+      ownerSignal(this.prisma, l),
+    ]);
+    return { ...listingDetail(l), views: views[l.id] ?? 0, signal };
   }
 }

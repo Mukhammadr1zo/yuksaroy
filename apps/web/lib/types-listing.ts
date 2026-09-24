@@ -25,9 +25,17 @@ export interface ListingCard {
   isDemo: boolean;
 }
 export interface ListingDetail extends ListingCard {
-  description: string | null; photos: string[]; responseHours: number | null;
+  description: string | null; photos: string[];
   /** Raqam ochiq javobda yo'q; hasPhone tugma ko'rsatish uchun, raqam obunachiga GET /contacts orqali. */
   hasPhone: boolean; status: ListingStatus; createdAt: string;
+  /**
+   * O'lchangan javob signali: faqat tafsilot javobida bo'ladi, kartada yo'q.
+   * Ixtiyoriy (`?`) ataylab: veb va API alohida konteynerda turadi va api qo'lda
+   * eski obrazga tushirilsa javob tanasida `signal` bo'lmaydi. Ixtiyoriy bo'lgani
+   * uchun TypeScript o'qiydigan joyda `?.` ni majburlaydi: qator jim tushadi,
+   * sahifa esa yiqilmaydi.
+   */
+  signal?: { seen: 'today' | 'week' | 'away' | null; replied: { of: number; answered: number } | null };
 }
 export interface ListingSummary { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null; onRequest: number; nearestKm: number | null }
 export interface ListingPage { items: ListingCard[]; total: number; page: number; limit: number; summary: ListingSummary }

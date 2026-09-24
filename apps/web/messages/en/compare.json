@@ -3,11 +3,28 @@
     "check": "Compare",
     "checked": "Selected",
     "full": "Up to 3",
-    "tray": { "aria": "Compare tray", "go": "Compare", "clear": "Clear", "count": "{count} / 3" },
-    "cat": { "terminals": "Terminals", "equipment": "Equipment", "carriers": "Road carriers" },
-    "title": { "terminals": "Compare terminals", "equipment": "Compare equipment", "carriers": "Compare road carriers" },
+    "tray": {
+      "aria": "Compare tray",
+      "go": "Compare",
+      "clear": "Clear",
+      "count": "{count} / 3"
+    },
+    "cat": {
+      "terminals": "Terminals",
+      "equipment": "Equipment",
+      "carriers": "Road carriers"
+    },
+    "title": {
+      "terminals": "Compare terminals",
+      "equipment": "Compare equipment",
+      "carriers": "Compare road carriers"
+    },
     "lead": "Columns side by side: numbers come from published rates and listings, nothing is recalculated.",
-    "empty": { "title": "Nothing selected to compare", "body": "In the catalog tick \"Compare\" at the bottom of a card, up to 3.", "back": "Back to the catalog" },
+    "empty": {
+      "title": "Nothing selected to compare",
+      "body": "In the catalog tick \"Compare\" at the bottom of a card, up to 3.",
+      "back": "Back to the catalog"
+    },
     "remove": "Remove",
     "open": "Open page",
     "share": "Copy link",
@@ -17,12 +34,40 @@
     "onRequest": "on request",
     "noRating": "no rating",
     "row": {
-      "kind": "Type", "region": "Region", "station": "Station", "hours": "Opening hours", "tariffs": "Rates", "freeToday": "Free spots today",
-      "services": "Services", "distance": "Distance", "rating": "Rating", "passport": "Profile",
-      "deal": "Rent or sale", "price": "Price", "year": "Year", "condition": "Condition", "model": "Model", "qty": "Quantity", "wagonType": "Wagon type",
-      "capacityT": "Capacity", "truckType": "Body", "tonnage": "Tonnage", "fleetSize": "Fleet", "serviceRegions": "Service regions",
-      "routes": "Routes", "owner": "Owner", "kyc": "Verification", "object": "Located at", "response": "Response time"
+      "kind": "Type",
+      "region": "Region",
+      "station": "Station",
+      "hours": "Opening hours",
+      "tariffs": "Rates",
+      "freeToday": "Free spots today",
+      "services": "Services",
+      "distance": "Distance",
+      "rating": "Rating",
+      "passport": "Profile",
+      "deal": "Rent or sale",
+      "price": "Price",
+      "year": "Year",
+      "condition": "Condition",
+      "model": "Model",
+      "qty": "Quantity",
+      "wagonType": "Wagon type",
+      "capacityT": "Capacity",
+      "truckType": "Body",
+      "tonnage": "Tonnage",
+      "fleetSize": "Fleet",
+      "serviceRegions": "Service regions",
+      "routes": "Routes",
+      "owner": "Owner",
+      "kyc": "Verification",
+      "object": "Located at"
     },
-    "unit": { "km": "{km} km", "t": "{n} t", "pcs": "{n} pcs", "trucks": "{n} trucks", "routes": "{n} routes", "hours": "{n} h", "slots": "{n}" }
+    "unit": {
+      "km": "{km} km",
+      "t": "{n} t",
+      "pcs": "{n} pcs",
+      "trucks": "{n} trucks",
+      "routes": "{n} routes",
+      "slots": "{n}"
+    }
   }
 }

@@ -134,7 +134,6 @@
         "priceTiyin": "Price",
         "priceUnit": "Unit",
         "terminalId": "Terminal or siding",
-        "responseHours": "Response time, hours",
         "contactPhone": "Contact phone",
         "ownerType": "Post as"
       },
@@ -148,7 +147,6 @@
         "title": "Kind, model and year make the listing easy to find",
         "regionCode": "Where the equipment is now",
         "serviceRegions": "The base region must be included",
-        "responseHours": "Stated by the owner, not measured",
         "contactPhone": "Visible to signed-in users only",
         "terminalId": "A linked listing also appears on the object page",
         "photos": "JPEG, PNG or WebP, up to 5 MB each, at most {max}"

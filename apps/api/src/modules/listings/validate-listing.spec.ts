@@ -9,7 +9,7 @@ const base: ListingInput = {
   kind: 'SHUNTING_LOCO', deal: 'RENT', title: 'TEM2 manevr teplovozi', description: null, regionCode: 'UZ-TK',
   terminalId: null, priceTiyin: 150_000_000, priceUnit: 'PER_MONTH', photos: ['/v1/files/a.jpg'],
   year: 2005, condition: 'GOOD', model: 'TEM2', qty: 1, wagonType: null, capacityT: 1200, truckType: null, tonnage: null,
-  fleetSize: null, serviceRegions: [], routes: [], contactPhone: null, responseHours: 4,
+  fleetSize: null, serviceRegions: [], routes: [], contactPhone: null,
 };
 const truck: ListingInput = {
   ...base, kind: 'TRUCK', deal: null, title: 'Tentli fura 20 t', year: null, condition: null, model: null, capacityT: null,
@@ -51,7 +51,7 @@ describe('validateListing', () => {
   });
 
   it("should maydonlar yo'q bo'lsa faqat ogohlantirish", () => {
-    const r = validateListing({ ...base, model: null, capacityT: null, priceTiyin: null, priceUnit: null, responseHours: null });
+    const r = validateListing({ ...base, model: null, capacityT: null, priceTiyin: null, priceUnit: null });
     expect(r.errors).toEqual([]);
     expect(r.warnings.every((w) => w.code === 'MISSING_SHOULD')).toBe(true);
     expect(r.warnings.map((w) => w.field).sort()).toEqual([...LISTING_RULES.SHUNTING_LOCO.should].sort());

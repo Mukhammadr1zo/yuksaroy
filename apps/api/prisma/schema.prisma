@@ -702,7 +702,6 @@ model Listing {
   serviceRegions String[]       @default([])
   routes         Json? // [{ from, to }] viloyat kodlari
   contactPhone   String?
-  responseHours  Int?
   premiumUntil   DateTime?      @db.Timestamptz(3)
   publishedAt    DateTime?      @db.Timestamptz(3)
   expiresAt      DateTime?      @db.Timestamptz(3)

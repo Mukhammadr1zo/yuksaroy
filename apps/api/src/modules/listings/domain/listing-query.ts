@@ -9,7 +9,7 @@ export interface ListingRecord {
   lat: number | null; lng: number | null; priceTiyin: number | null; priceUnit: PriceUnit | null; photos: string[];
   year: number | null; condition: Condition | null; model: string | null; qty: number; wagonType: string | null; capacityT: number | null;
   truckType: string | null; tonnage: number | null; fleetSize: number | null; serviceRegions: string[]; routes: Route[];
-  contactPhone: string | null; responseHours: number | null;
+  contactPhone: string | null;
   premiumUntil: Date | null; publishedAt: Date | null; expiresAt: Date | null; rejectReason: string | null; views: number;
   /** Xizmatdan foydalanganlar bahosi (ListingReview dan qayta hisoblanadi). Karta ham shu keshdan o'qiydi. */
   ratingAvg: number | null; ratingCount: number;

@@ -38,6 +38,11 @@ export async function TgListingView({ slug, section }: { slug: string; section: 
       ];
   specs.push([tl('region'), regionName(l.regionCode, lang)], [tl('published'), l.publishedAt ? uzDate(l.publishedAt, lang) : null]);
   const rows = specs.filter(([, v]) => v !== null && v !== undefined && v !== '');
+  // Botda joy tor: ikkala gap bitta qatorda, bo'shlari tushib qoladi
+  const sig = [
+    l.signal?.seen ? tl(`signal.${l.signal.seen}`) : null,
+    l.signal?.replied ? tl('signal.replied', l.signal.replied) : null,
+  ].filter((x): x is string => x !== null);
 
   return (
     <main className="mx-auto max-w-md px-4 pb-8 pt-4">
@@ -57,7 +62,7 @@ export async function TgListingView({ slug, section }: { slug: string; section: 
 
       <section className="mt-3 rounded-card border border-line bg-white p-4">
         <p className="font-mono text-lg font-bold text-navy tabular-nums">{l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : tc('onRequest')}</p>
-        {l.responseHours ? <p className="mt-0.5 text-xs text-muted">{tl('response', { hours: l.responseHours })} · {tl('responseNote')}</p> : null}
+        {sig.length ? <p className="mt-0.5 text-xs text-muted">{sig.join(' · ')}</p> : null}
       </section>
 
       {rows.length ? (

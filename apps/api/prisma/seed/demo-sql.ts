@@ -68,13 +68,13 @@ for (const l of DEMO_LISTINGS) {
   out.push(
     `INSERT INTO "Listing" ("id", "slug", "orgId", "createdById", "kind", "deal", "status", "title", "description", "regionCode",\n` +
       `  "lat", "lng", "priceTiyin", "priceUnit", "photos", "year", "condition", "model", "qty", "wagonType", "capacityT",\n` +
-      `  "truckType", "tonnage", "fleetSize", "serviceRegions", "routes", "contactPhone", "responseHours",\n` +
+      `  "truckType", "tonnage", "fleetSize", "serviceRegions", "routes", "contactPhone",\n` +
       `  "publishedAt", "expiresAt", "premiumUntil", "isDemo", "createdAt", "updatedAt")\n` +
       `VALUES (${s(l.id)}, ${s(l.slug)}, ${s(l.orgId)}, ${s(owner.id)}, ${s(i.kind)}::"ListingKind", ${i.deal ? `${s(i.deal)}::"DealKind"` : 'NULL'}, 'ACTIVE'::"ListingStatus",\n` +
       `  ${s(i.title)}, ${or(i.description)}, ${s(i.regionCode)}, ${n(c.lat)}, ${n(c.lng)}, ${priceTiyin == null ? 'NULL' : `${priceTiyin}::BIGINT`},\n` +
       `  ${i.priceUnit ? `${s(i.priceUnit)}::"PriceUnit"` : 'NULL'}, ${arr(i.photos ?? [])}, ${n(i.year)}, ${i.condition ? `${s(i.condition)}::"Condition"` : 'NULL'},\n` +
       `  ${or(i.model)}, ${n(i.qty ?? 1)}, ${or(i.wagonType)}, ${n(i.capacityT)}, ${or(i.truckType)}, ${n(i.tonnage)}, ${n(i.fleetSize)},\n` +
-      `  ${arr((i.serviceRegions ?? []) as string[])}, ${json(routes)}, NULL, ${n(i.responseHours)}, now(), NULL, NULL, true, now(), now())\n` +
+      `  ${arr((i.serviceRegions ?? []) as string[])}, ${json(routes)}, NULL, now(), NULL, NULL, true, now(), now())\n` +
       // Rasm yangilanadi: prodda matnli SVG bilan yozilgan qatorlar haqiqiy suratga o'tsin
       `ON CONFLICT ("id") DO UPDATE SET "photos" = EXCLUDED."photos";`,
   );

@@ -105,7 +105,7 @@ const orgOf = (i: number) => DEMO_ORGS[i - 1].id;
 const base: ListingInput = {
   kind: 'WAGON', deal: null, title: '', description: null, regionCode: 'UZ-TK', terminalId: null, priceTiyin: null, priceUnit: null, photos: [],
   year: null, condition: null, model: null, qty: 1, wagonType: null, capacityT: null, truckType: null, tonnage: null, fleetSize: null,
-  serviceRegions: [], routes: [], contactPhone: null, responseHours: null,
+  serviceRegions: [], routes: [], contactPhone: null,
 };
 const listing = (n: number, slug: string, orgIdx: number, input: Partial<ListingInput> & { kind: ListingInput['kind']; title: string }): DemoListing => ({
   id: DEMO_ID.listing(n), slug: `namuna-${slug}`, orgId: orgOf(orgIdx), input: { ...base, ...input },
@@ -141,14 +141,14 @@ const TRUCKS: TruckRow[] = [
   ['Ag\'daruvchi 15 t, Jizzax', 'agdaruvchi-15t-jizzax', 'TIPPER', 15, 4, 'UZ-SA', ['UZ-SA', 'UZ-JI'], [['UZ-SA', 'UZ-JI']], 'PER_TON', 38_000, 2, "Jizzax va Samarqand qurilishlariga qum va shag'al. Kichik ko'chalarga ham kiradi."],
 ];
 
-type LocoRow = [string, string, number, Condition, string, number, 'RENT' | 'SALE', number, RegionCode, number, number, string];
+type LocoRow = [string, string, number, Condition, string, number, 'RENT' | 'SALE', number, RegionCode, number, string];
 const LOCOS: LocoRow[] = [
-  // title, slug, yil, holat, model, ko'tarish t (tortish), bitim, narx so'm, viloyat, javob soati, org, tavsif
-  ['Manevr teplovozi TEM2 ijaraga', 'manevr-teplovozi-tem2-ijara', 2007, 'GOOD', 'TEM2', 1200, 'RENT', 95_000_000, 'UZ-TK', 4, 5, "Zavod shahobcha yo'lida manevr uchun. Mashinist bilan yoki mashinistsiz, kelishiladi."],
-  ['Manevr teplovozi TGM4 sotuvga', 'manevr-teplovozi-tgm4-sotuv', 1998, 'NEEDS_REPAIR', 'TGM4', 800, 'SALE', 1_900_000_000, 'UZ-NW', 24, 6, "Dvigatel kapital ta'mir talab qiladi, ramasi va g'ildiraklari yaxshi. Ko'rib olish mumkin."],
-  ['Manevr teplovozi TGM6 ijaraga', 'manevr-teplovozi-tgm6-ijara', 2011, 'GOOD', 'TGM6', 1000, 'RENT', 110_000_000, 'UZ-QA', 6, 7, "Qarshi tugunida turibdi. Soatlik emas, oylik ijara, yoqilg'i buyurtmachidan."],
-  ['Manevr teplovozi TEM18 ijaraga', 'manevr-teplovozi-tem18-ijara', 2015, 'GOOD', 'TEM18DM', 1300, 'RENT', 140_000_000, 'UZ-NW', 8, 6, "Yangi avlod teplovoz, kam yoqilg'i sarflaydi. Navoiy va Buxoro shahobchalariga chiqamiz."],
-  ['Manevr teplovozi TGK2 sotuvga', 'manevr-teplovozi-tgk2-sotuv', 2003, 'GOOD', 'TGK2', 400, 'SALE', 650_000_000, 'UZ-TK', 12, 5, "Kichik shahobcha va ombor yo'llari uchun yengil teplovoz. Ishlayotgan holatda, hujjatlari tartibda."],
+  // title, slug, yil, holat, model, ko'tarish t (tortish), bitim, narx so'm, viloyat, org, tavsif
+  ['Manevr teplovozi TEM2 ijaraga', 'manevr-teplovozi-tem2-ijara', 2007, 'GOOD', 'TEM2', 1200, 'RENT', 95_000_000, 'UZ-TK', 5, "Zavod shahobcha yo'lida manevr uchun. Mashinist bilan yoki mashinistsiz, kelishiladi."],
+  ['Manevr teplovozi TGM4 sotuvga', 'manevr-teplovozi-tgm4-sotuv', 1998, 'NEEDS_REPAIR', 'TGM4', 800, 'SALE', 1_900_000_000, 'UZ-NW', 6, "Dvigatel kapital ta'mir talab qiladi, ramasi va g'ildiraklari yaxshi. Ko'rib olish mumkin."],
+  ['Manevr teplovozi TGM6 ijaraga', 'manevr-teplovozi-tgm6-ijara', 2011, 'GOOD', 'TGM6', 1000, 'RENT', 110_000_000, 'UZ-QA', 7, "Qarshi tugunida turibdi. Soatlik emas, oylik ijara, yoqilg'i buyurtmachidan."],
+  ['Manevr teplovozi TEM18 ijaraga', 'manevr-teplovozi-tem18-ijara', 2015, 'GOOD', 'TEM18DM', 1300, 'RENT', 140_000_000, 'UZ-NW', 6, "Yangi avlod teplovoz, kam yoqilg'i sarflaydi. Navoiy va Buxoro shahobchalariga chiqamiz."],
+  ['Manevr teplovozi TGK2 sotuvga', 'manevr-teplovozi-tgk2-sotuv', 2003, 'GOOD', 'TGK2', 400, 'SALE', 650_000_000, 'UZ-TK', 5, "Kichik shahobcha va ombor yo'llari uchun yengil teplovoz. Ishlayotgan holatda, hujjatlari tartibda."],
 ];
 
 export const DEMO_LISTINGS: DemoListing[] = [
@@ -157,11 +157,11 @@ export const DEMO_LISTINGS: DemoListing[] = [
       priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', photos: demoPhotos(wagonType as PhotoSet, i) })),
   ...TRUCKS.map(([title, slug, truckType, tonnage, fleetSize, regionCode, serviceRegions, routes, priceUnit, price, org, description], i) =>
     listing(WAGONS.length + i + 1, slug, org, { kind: 'TRUCK', deal: null, title, description, regionCode, truckType, tonnage, fleetSize, serviceRegions,
-      routes: routes.map(([from, to]) => ({ from, to })), priceTiyin: som(price), priceUnit, responseHours: 2,
+      routes: routes.map(([from, to]) => ({ from, to })), priceTiyin: som(price), priceUnit,
       photos: demoPhotos(truckType === 'TANK' ? 'TRUCK_TANK' : (truckType as PhotoSet), i) })),
-  ...LOCOS.map(([title, slug, year, condition, model, capacityT, deal, price, regionCode, responseHours, org, description], i) =>
+  ...LOCOS.map(([title, slug, year, condition, model, capacityT, deal, price, regionCode, org, description], i) =>
     listing(WAGONS.length + TRUCKS.length + i + 1, slug, org, { kind: 'SHUNTING_LOCO', deal, title, description, regionCode, year, condition, model, capacityT,
-      priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', responseHours, photos: demoPhotos('LOCO', i) })),
+      priceTiyin: som(price), priceUnit: deal === 'RENT' ? 'PER_MONTH' : 'TOTAL', photos: demoPhotos('LOCO', i) })),
 ];
 
 // ───────────────────────── Xizmatlar markazi ─────────────────────────
