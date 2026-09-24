@@ -47,7 +47,8 @@
       "phoneVerified": "Phone verified",
       "phoneUnverified": "Phone not verified",
       "demo": "Sample",
-      "viewsShort": "{count, plural, one {# view} other {# views}}"
+      "viewsShort": "{count, plural, one {# view} other {# views}}",
+      "posted": "{days} days ago"
     },
     "empty": {
       "title": "No listings match this filter",

@@ -47,7 +47,8 @@
       "phoneVerified": "Telefon tasdiqlangan",
       "phoneUnverified": "Telefon tasdiqlanmagan",
       "demo": "Namuna",
-      "viewsShort": "{count} marta ko'rilgan"
+      "viewsShort": "{count} marta ko'rilgan",
+      "posted": "{days} kun oldin"
     },
     "empty": {
       "title": "Bu filtr bo'yicha e'lon topilmadi",

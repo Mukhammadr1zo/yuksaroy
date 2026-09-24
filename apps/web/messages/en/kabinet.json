@@ -487,7 +487,7 @@
         },
         "expiring": {
           "title": "{count} listings are about to expire",
-          "body": "They go to the archive within a week"
+          "body": "They leave the catalogue within a week"
         },
         "drafts": {
           "title": "{count} drafts",
@@ -508,6 +508,10 @@
         "subscription": {
           "title": "Subscription ends soon",
           "body": "Without renewal phone numbers close again"
+        },
+        "expired": {
+          "title": "{count} listings have expired",
+          "body": "Resubmit and they stay for another 90 days"
         }
       },
       "clear": {

@@ -6,6 +6,7 @@ import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain
 import { ORDER_REPOSITORY, type OrderRepository } from '../domain/ports';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { remindExpiring } from '../../subscription/expiry-reminder';
+import { expireListings } from '../../listings/application/expire-listings';
 import { AdminNotify } from '../../organizations/application/admin-notify';
 import { OrderActionsUseCase } from './order-actions.usecase';
 
@@ -104,8 +105,16 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
     // Obuna tugashiga uch kun qolganlarga eslatma; takrorlanishni obuna qatoridagi belgi to'sadi
     const reminded = await remindExpiring(this.prisma, this.notifications, now).catch(() => 0);
     if (reminded) this.log.log(`obuna eslatmasi: ${reminded}`);
+    // Muddati o'tgan e'lon ACTIVE bo'lib qolardi: katalogda ko'rinmasdi, lekin havola bilan
+    // ochilardi, unga xabar yozish mumkin edi va egasi uni qaytara olmasdi
+    const expired = await expireListings(this.prisma, this.notifications, now).catch(() => 0);
+    if (expired) this.log.log(`e'lon muddati o'tdi: ${expired}`);
     // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
-    await this.adminNotify.stale(staleQueues(await queueStats(this.prisma, true), now, STALE_DAYS)).catch(() => {});
+    // catch argumentni ham qamrasin: queueStats yiqilsa u .catch dan tashqarida qolib,
+    // butun kunlik siklni uzib yuborardi
+    await queueStats(this.prisma, true)
+      .then((st) => this.adminNotify.stale(staleQueues(st, now, STALE_DAYS)))
+      .catch(() => {});
     const total = keys + sessions.count + codes.count + notes.count;
     if (total) {
       this.log.log(`kunlik tozalash: kalit ${keys}, sessiya ${sessions.count}, kod ${codes.count}, bildirishnoma ${notes.count}`);

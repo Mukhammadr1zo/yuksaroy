@@ -118,6 +118,11 @@ const TEXTS = {
     ru: '❌ <b>Ваше объявление отклонено</b>\n{title}\nПричина: {reason}\n\n{url}',
     en: '❌ <b>Your listing was rejected</b>\n{title}\nReason: {reason}\n\n{url}',
   },
+  listingExpired: {
+    uz: "⌛ <b>E'lon muddati tugadi</b>\n{title}{more}\nKatalogdan tushdi. Qayta yuborsangiz yana {days} kun turadi.\n\nQayta yuborish: {url}",
+    ru: '⌛ <b>Срок объявления истёк</b>\n{title}{more}\nОно ушло из каталога. Отправьте снова, и оно провисит ещё {days} дней.\n\nОтправить снова: {url}',
+    en: '⌛ <b>Listing has expired</b>\n{title}{more}\nIt is out of the catalogue. Resubmit it and it stays for another {days} days.\n\nResubmit: {url}',
+  },
   orgVerified: {
     uz: "✅ <b>Tashkilot tasdiqlandi</b>\n{name}\nEndi e'lonlaringiz tekshiruvsiz chiqadi.\n\n{url}",
     ru: '✅ <b>Организация подтверждена</b>\n{name}\nТеперь ваши объявления выходят без проверки.\n\n{url}',

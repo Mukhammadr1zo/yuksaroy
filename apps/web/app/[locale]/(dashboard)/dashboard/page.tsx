@@ -53,6 +53,10 @@ export default function NowPage() {
       if (unpaid) list.push({ key: 'invoices', count: unpaid, href: '/dashboard/documents' });
       const expiring = listings.filter((l) => l.status === 'ACTIVE' && l.expiresAt && new Date(l.expiresAt).getTime() - now < WEEK).length;
       if (expiring) list.push({ key: 'expiring', count: expiring, href: '/dashboard/objects' });
+      // Muddati tugagan e'lon: qaytarish bitta bosish, lekin uni eslatadigan joy shu.
+      // Havola /dashboard/listings ga: "Qayta yuborish" tugmasi faqat o'sha sahifada.
+      const expired = listings.filter((l) => l.status === 'EXPIRED').length;
+      if (expired) list.push({ key: 'expired', count: expired, href: '/dashboard/listings', tone: 'warn' });
       const drafts = listings.filter((l) => l.status === 'DRAFT').length;
       if (drafts) list.push({ key: 'drafts', count: drafts, href: '/dashboard/objects' });
       if (me.phone === null) list.push({ key: 'phone', href: '/login?attach=1&next=/dashboard', tone: 'warn' });

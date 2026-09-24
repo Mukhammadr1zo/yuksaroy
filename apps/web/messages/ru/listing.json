@@ -47,7 +47,8 @@
       "phoneVerified": "Телефон подтверждён",
       "phoneUnverified": "Телефон не подтверждён",
       "demo": "Образец",
-      "viewsShort": "{count, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}"
+      "viewsShort": "{count, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}",
+      "posted": "{days} дн. назад"
     },
     "empty": {
       "title": "По этому фильтру объявлений нет",

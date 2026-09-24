@@ -21,10 +21,14 @@ function setup() {
   const del = (model: string) => ({
     deleteMany: async (a: { where: Record<string, unknown> }) => { calls.push({ model, where: a.where }); return { count: 1 }; },
   });
+  let listingReads = 0;
   const prisma = {
     session: del('session'),
     otpCode: del('otpCode'),
     notification: del('notification'),
+    // Muddati o'tgan e'lon alohida spec da: bu yerda ro'yxat bo'sh.
+    // deleteMany EMAS, shuning uchun calls ga tushmaydi
+    listing: { findMany: async () => { listingReads += 1; return []; }, updateMany: async () => ({ count: 0 }) },
     // Bular ataylab yo'q: chaqirilsa test "is not a function" bilan yiqiladi
   } as unknown as PrismaService;
   const purged: Date[] = [];
@@ -36,7 +40,7 @@ function setup() {
   const adminNotify = { stale: async () => {} } as unknown as AdminNotify;
   // Obuna eslatmasi alohida spec da: soxta prisma da remindExpiring yiqiladi va yutiladi
   const notifications = { recipients: async () => [], push: async () => {} } as unknown as NotificationsService;
-  return { svc: new SlaSweeperService(bookings, orders, actions, prisma, idempotency, adminNotify, notifications), calls, purged };
+  return { svc: new SlaSweeperService(bookings, orders, actions, prisma, idempotency, adminNotify, notifications), calls, purged, reads: () => listingReads };
 }
 
 const DAY = 86_400_000;
@@ -84,4 +88,12 @@ describe('kunlik tozalash', () => {
     // Bildirishnoma: faqat o'qilgani
     expect((by.notification.readAt as Record<string, unknown>).not).toBeNull();
   });
+});
+
+/** Faqat stub qo'shilsa, chaqiruv keyin tushib qolsa ham testlar yashil qolardi: xato tick ichida yutiladi. */
+it("kunlik sikl muddati o'tgan e'lonlarni ham ko'radi", async () => {
+  const { svc, reads } = setup();
+  await svc.tick();
+  await svc.tick();
+  expect(reads()).toBe(1); // tikda emas, sutkada bir marta
 });

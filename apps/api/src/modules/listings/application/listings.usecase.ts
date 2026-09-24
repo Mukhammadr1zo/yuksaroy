@@ -100,7 +100,8 @@ export class ListingsUseCase {
     if (l.status === 'REJECTED' || l.rejectReason) return false;
     if (l.orgId) return (await this.access.membership(userId, l.orgId))?.org.kycStatus === 'VERIFIED';
     if (l.kind !== 'TRUCK' || !l.ownerUserId || !l.ownerUser?.phone) return false;
-    // Muddati o'tgan ACTIVE qatorlar sanalmaydi: ularni hech kim EXPIRED ga surmaydi
+    // Muddati o'tgan qatorlar sanalmaydi: kunlik sikl ularni EXPIRED ga suradi,
+    // oradagi bir necha soatni esa shu shart yopadi
     const active = await this.prisma.listing.count({
       where: { ownerUserId: l.ownerUserId, status: 'ACTIVE', id: { not: l.id }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
     });

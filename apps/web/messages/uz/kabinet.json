@@ -487,7 +487,7 @@
         },
         "expiring": {
           "title": "{count} ta e'lon muddati tugayapti",
-          "body": "Bir hafta ichida arxivga tushadi"
+          "body": "Bir hafta ichida katalogdan tushadi"
         },
         "drafts": {
           "title": "{count} ta qoralama",
@@ -508,6 +508,10 @@
         "subscription": {
           "title": "Obuna tez orada tugaydi",
           "body": "Uzaytirilmasa telefon raqamlari yopiladi"
+        },
+        "expired": {
+          "title": "{count} ta e'lon muddati tugagan",
+          "body": "Qayta yuborsangiz yana 90 kun turadi"
         }
       },
       "clear": {
