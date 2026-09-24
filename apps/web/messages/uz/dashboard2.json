@@ -251,7 +251,8 @@
         "free": "{n} joy bo'sh",
         "legendFree": "bo'sh joy soni",
         "legendLast": "oxirgi joy",
-        "legendBusy": "band yoki yopiq"
+        "legendBusy": "band yoki yopiq",
+        "dayFree": "{n} joy"
       },
       "orgAuto": "Tashkilotingiz yo'q: buyurtma berilganda ismingiz bilan yuk egasi tashkiloti avtomatik ochiladi, STIR keyin hujjat kerak bo'lganda so'raladi."
     }

@@ -178,7 +178,7 @@ function Wizard() {
           <li key={s}>
             <button
               type="button" disabled={i > step} onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${i === step ? 'bg-navy text-white' : i < step ? 'bg-teal-soft text-teal-ink hover:bg-teal-soft/80' : 'bg-line/60 text-muted'}`}
+              className={`min-h-11 rounded-full px-4 py-1.5 text-sm font-semibold transition ${i === step ? 'bg-navy text-white' : i < step ? 'bg-teal-soft text-teal-ink hover:bg-teal-soft/80' : 'bg-line/60 text-muted'}`}
             >
               {i + 1}. {t(`step.${s}`)}
             </button>
@@ -323,7 +323,8 @@ function Wizard() {
             <p className="mt-3 text-xs text-muted">{t('submitHint')}</p>
           </section>
 
-          <aside className="rounded-card border border-line bg-white p-6">
+          {/* Telefonda hisob formadan yuqorida: tasdiq tugmasi jami summadan keyin ko'rinsin */}
+          <aside className="rounded-card border border-line bg-white p-6 max-md:order-first">
             <h2 className="text-lg font-bold">{offer.terminal.name}</h2>
             <dl className="mt-3 space-y-1 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-muted">{t('row.operation')}</dt><dd>{ts(operation)}</dd></div>

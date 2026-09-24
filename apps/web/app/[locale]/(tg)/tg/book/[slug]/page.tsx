@@ -139,7 +139,7 @@ export default function TgBookPage() {
       <ol className="mt-3 flex gap-1.5" aria-label={t('title')}>
         {STEPS.map((s, i) => (
           <li key={s} className="flex-1">
-            <button type="button" disabled={i > step} onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined} className={`w-full rounded-full px-2 py-1.5 text-xs font-semibold ${i === step ? 'bg-navy text-white' : i < step ? 'bg-teal-soft text-teal-ink' : 'bg-line/60 text-muted'}`}>{i + 1}. {t(`steps.${s}`)}</button>
+            <button type="button" disabled={i > step} onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined} className={`min-h-11 w-full rounded-full px-2 py-1.5 text-xs font-semibold ${i === step ? 'bg-navy text-white' : i < step ? 'bg-teal-soft text-teal-ink' : 'bg-line/60 text-muted'}`}>{i + 1}. {t(`steps.${s}`)}</button>
           </li>
         ))}
       </ol>

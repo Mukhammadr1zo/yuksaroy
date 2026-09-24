@@ -251,7 +251,8 @@
         "free": "{n} places free",
         "legendFree": "free places",
         "legendLast": "last place",
-        "legendBusy": "taken or closed"
+        "legendBusy": "taken or closed",
+        "dayFree": "{n, plural, one {# place} other {# places}}"
       },
       "orgAuto": "You have no organization: one is created automatically in your name when you place the order; the tax ID is asked later, when documents are issued."
     }

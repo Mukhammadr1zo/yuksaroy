@@ -102,12 +102,13 @@ export function SlotsTab({ terminalId }: { terminalId: string | null }) {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[560px] border-separate border-spacing-1">
               <thead>
-                <tr><th className="w-24" />{windows.map((w) => <th key={w} className="pb-1 font-mono text-[11px] font-normal text-muted">{timeOf(w)}</th>)}</tr>
+                <tr><th className="sticky left-0 z-10 w-24 bg-white" aria-hidden="true" />{windows.map((w) => <th key={w} className="pb-1 font-mono text-[11px] font-normal text-muted">{timeOf(w)}</th>)}</tr>
               </thead>
               <tbody>
                 {days.map((d) => (
                   <tr key={d}>
-                    <th scope="row" className="pr-2 text-right text-xs font-semibold text-muted">{dayLabel(d)}</th>
+                    {/* Kun ustuni yopishib turadi: o'ngga surilganda qaysi kun ekani ko'rinmay qolardi */}
+                    <th scope="row" className="sticky left-0 z-10 bg-white pr-2 text-right text-xs font-semibold text-muted">{dayLabel(d)}</th>
                     {windows.map((w) => {
                       const s = byKey.get(`${d}|${w}`);
                       if (!s) return <td key={w}><div className="h-12 rounded-lg bg-line/30" /></td>;
