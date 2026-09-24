@@ -223,6 +223,14 @@
       "open": "Page",
       "claimNote": "Claim note",
       "claimDocs": "Attached documents"
+    },
+    "quick": {
+      "title": "Your offer in two steps",
+      "lead": "Clients decide on these two lines: which work you do and how much per wagon. Everything else is in the sections below.",
+      "work": "Which work",
+      "price": "Price per wagon, som",
+      "saved": "The price is published and now shows on the public page.",
+      "slotHint": "An order also needs a free slot; add one in the Slots section below."
     }
   }
 }

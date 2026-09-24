@@ -223,6 +223,14 @@
       "open": "Sahifasi",
       "claimNote": "Da'vo izohi",
       "claimDocs": "Biriktirilgan hujjatlar"
+    },
+    "quick": {
+      "title": "Ikki qadamda taklif",
+      "lead": "Mijoz shu ikki qatorga qarab qaror qiladi: qaysi ishni qilasiz va vagon boshiga qancha. Qolgan hammasi pastdagi bo'limlarda.",
+      "work": "Qaysi ish",
+      "price": "Vagon boshiga narx, so'm",
+      "saved": "Narx e'lon qilindi, ochiq sahifada ko'rinadi.",
+      "slotHint": "Buyurtma kelishi uchun bo'sh joy ham kerak: uni pastdagi Joylar bo'limida qo'yasiz."
     }
   }
 }

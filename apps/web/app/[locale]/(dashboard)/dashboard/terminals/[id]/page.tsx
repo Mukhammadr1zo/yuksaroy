@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import type { MyTerminal } from '@/lib/types-kabinet';
 import { TerminalEditor } from '@/components/terminal/TerminalForm';
+import { QuickOffer } from '@/components/terminal/QuickOffer';
 
 export default function EditTerminalPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,7 @@ export default function EditTerminalPage() {
     <main className="mx-auto max-w-4xl">
       <nav aria-label="Yo'l" className="font-mono text-xs text-muted"><Link href="/dashboard/terminals" className="hover:text-navy">{t('backToList')}</Link></nav>
       <h1 className="mt-2 font-display text-3xl font-bold">{term?.name ?? t('titleEdit')}</h1>
+      {term ? <div className="mt-6"><QuickOffer term={term} /></div> : null}
       <div className="mt-6">
         {term === undefined ? <p className="text-sm text-muted">{tc('loading')}</p> : term === null ? <p className="text-muted">{t('notFound')}</p> : <TerminalEditor initial={term} />}
       </div>
