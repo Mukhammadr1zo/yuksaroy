@@ -235,6 +235,12 @@ export class AdminCatalogController {
       const busy = await this.prisma.terminal.findUnique({ where: { registryNo: dto.registryNo }, select: { id: true } });
       if (busy && busy.id !== id) throw new ConflictException({ code: 'REGISTRY_NO_TAKEN', registryNo: dto.registryNo });
     }
+    // Qo'lda tasdiqlashda egasi ham qo'yiladi: aks holda qator "tasdiqlangan" ko'rinadi,
+    // lekin orgId bo'sh qolib, egasi o'z obyektiga na rasm, na narx qo'ya oladi
+    if (dto.claimStatus === 'APPROVED' && dto.orgId === undefined) {
+      const owner = dto.claimOrgId ?? (await this.prisma.terminal.findUnique({ where: { id }, select: { claimOrgId: true } }))?.claimOrgId;
+      if (owner) (data as Record<string, unknown>).orgId = owner;
+    }
     const t = await this.prisma.terminal.update({ where: { id }, data: data as Prisma.TerminalUncheckedUpdateInput });
     await this.audit.log({ actorId: userId, action: 'admin.terminal.update', entity: 'Terminal', entityId: id, meta: { fields: Object.keys(data) } });
     return t;
