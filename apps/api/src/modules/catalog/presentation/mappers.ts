@@ -1,6 +1,6 @@
 // Ommaviy (login'siz) javob shakllari. Egasi nomi va ichki maydonlar shu yerda yashiriladi.
 import { distanceKm, ratingDisplay, type ServiceCode } from '@yuksaroy/domain';
-import type { GeoNear, SidingRecord, TariffRecord, TerminalRecord } from '../domain/ports';
+import type { GeoNear, TariffRecord, TerminalRecord } from '../domain/ports';
 
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
@@ -119,28 +119,6 @@ export function summarize(all: TerminalRecord[], free: Record<string, number>, n
  * Mas'ul shaxs telefoni javobda yo'q: u obunachiga GET /contacts/siding/:id orqali
  * beriladi. Bu reestrdan kelgan shaxsiy raqam, egasi uni o'zi e'lon qilmagan.
  */
-export function publicSiding(s: SidingRecord) {
-  return {
-    id: s.id, slug: s.slug, registryNo: s.registryNo, station: s.station, stationNameRaw: s.stationNameRaw, esrCode: s.esrCode, rju: s.rju,
-    regionCode: s.regionCode, lat: s.lat, lng: s.lng,
-    lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity,
-    // Rasm faqat tasdiqlangan egada ko'rinadi: da'vo hal bo'lmaguncha uni hech kim ko'rmaydi
-    photos: s.claimStatus === 'APPROVED' ? s.photos : [],
-    claimStatus: s.claimStatus, owner: s.claimStatus === 'APPROVED' ? s.ownerOrgName : null,
-    // Texnik pasport (Taminot reestri). Mas'ul shaxs ismi ochiq, telefoni obuna ortida.
-    name: s.name, registryRef: s.registryRef, trackCount: s.trackCount,
-    capacityWagons: s.capacityWagons, occupiedWagons: s.occupiedWagons,
-    deadEndDistanceM: s.deadEndDistanceM, junctionSwitch: s.junctionSwitch, brakeShoes: s.brakeShoes,
-    nogabarit: s.nogabarit, equipment: s.equipment,
-    loadNorm: s.loadNorm, unloadNorm: s.unloadNorm, loadFront: s.loadFront, unloadFront: s.unloadFront,
-    locoType: s.locoType, locoNote: s.locoNote, processingHours: s.processingHours,
-    contractNo: s.contractNo, contractStart: s.contractStart, contractEnd: s.contractEnd,
-    contractState: s.contractState, category: s.category, usageType: s.usageType, status: s.status,
-    contactName: s.contactName,
-    /** Raqam bor, lekin ko'rish uchun obuna kerak: UI shu bilan tugma ko'rsatadi. */
-    hasPhone: !!s.contactPhone?.trim(),
-  };
-}
 
 /**
  * Sukut tartib: egasi bor obyektlar oldinda, keyin (near berilgan bo'lsa) masofa, keyin nom.

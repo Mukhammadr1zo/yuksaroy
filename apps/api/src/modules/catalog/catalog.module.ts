@@ -14,7 +14,7 @@ import { CompaniesController } from './presentation/companies.controller';
 
 @Module({
   imports: [IdentityModule, OrganizationsModule, ListingsModule], // ListingsModule: xarita GeoJSON e'lon nuqtalari uchun
-  // Tartib muhim: `terminals/mine`, `sidings/mine` statik yo'llari `:slug`/`:id` dan oldin ro'yxatga olinadi.
+  // Tartib muhim: `terminals/mine` statik yo'li `:slug` dan oldin ro'yxatga olinadi.
   controllers: [TerminalAdminController, CatalogController, CompaniesController],
   providers: [{ provide: CATALOG_REPOSITORY, useClass: PrismaCatalogRepository }, TerminalAccess, UpsertTerminalUseCase, PublishTariffUseCase, ClaimTerminalUseCase],
   exports: [CATALOG_REPOSITORY, TerminalAccess, UpsertTerminalUseCase],

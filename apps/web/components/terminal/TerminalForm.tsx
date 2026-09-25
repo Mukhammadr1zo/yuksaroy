@@ -132,7 +132,11 @@ export function TerminalForm({ initial, onSaved }: { initial?: MyTerminal; onSav
     const fail = (code: string) => { setNotice({ tone: 'err', text: te(code) }); return null; };
     if (!id && !d.orgId) return fail('ORG_REQUIRED');
     if (d.name.trim().length < 2) return fail('NAME_REQUIRED');
-    if (!d.station) return fail('STATION_REQUIRED');
+    // Stansiya faqat yangi obyektda majburiy: reestrdan kelgan qatorda stansiya
+    // bog'lanmagan bo'lishi mumkin va egasi hech narsa saqlay olmasdi.
+    // Bor stansiyani bu o'chirmaydi: stansiyani faqat topilgan qiymat yozadi,
+    // topilmasa maydon UPDATE ga umuman tushmaydi.
+    if (!id && !d.station) return fail('STATION_REQUIRED');
     const body = toBody(d);
     let rec = id ? await api<MyTerminal>(`/terminals/${id}`, { method: 'PATCH', body: JSON.stringify(body) }) : await post<MyTerminal>('/terminals', { orgId: d.orgId, ...body });
     const services = SERVICE_CODES.map((c) => ({ serviceCode: c, isEnabled: d.services[c].on, leadTimeMin: d.services[c].lead }));

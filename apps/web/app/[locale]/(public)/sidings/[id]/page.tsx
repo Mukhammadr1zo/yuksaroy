@@ -1,7 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getPathname } from '@/i18n/navigation';
 import { sapiOrNull } from '@/lib/server-api';
-import type { Siding } from '@/lib/types';
 
 /**
  * Shahobcha yo'l endi alohida tur emas, temir yo'l yuk terminali.
@@ -10,7 +9,7 @@ import type { Siding } from '@/lib/types';
  */
 export default async function SidingRedirect({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
-  const s = await sapiOrNull<Siding & { slug?: string }>(`/sidings/${id}`, 300);
+  const s = await sapiOrNull<{ slug: string }>(`/sidings/${id}`, 300);
   if (!s?.slug) notFound();
   permanentRedirect(getPathname({ locale, href: `/terminals/${s.slug}` }));
 }

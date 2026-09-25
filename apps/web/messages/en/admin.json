@@ -165,7 +165,6 @@
       "REVIEW_NOT_FOUND": "Review not found.",
       "ROLES_NOT_ALLOWED": "These roles cannot be granted here.",
       "SELF_ACTION": "You cannot apply this action to your own account.",
-      "SIDING_NOT_FOUND": "Facility not found.",
       "SLUG_TAKEN": "That address is taken.",
       "STATION_IN_USE": "Terminals are linked to this station, so it cannot be deleted.",
       "STATION_NOT_FOUND": "Station not found.",

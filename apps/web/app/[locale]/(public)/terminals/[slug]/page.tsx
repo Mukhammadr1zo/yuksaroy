@@ -16,7 +16,7 @@ import { MiniMap } from '@/components/catalog/MiniMap';
 import { PIN } from '@/components/map/mapStyle';
 import { CardPhoto } from '@/components/catalog/CardPhoto';
 import { PhotoGallery } from '@/components/catalog/PhotoGallery';
-import { ClaimSiding } from '@/components/catalog/ClaimSiding';
+import { ClaimObject } from '@/components/catalog/ClaimObject';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
 import { ReportButton } from '@/components/site/ReportButton';
 
@@ -178,7 +178,7 @@ export default async function TerminalPage({ params }: Params) {
             <section className="rounded-card border border-line bg-white p-5">
               <h2 className="font-bold">{tcl('cta')}</h2>
               <div className="mt-3">
-                {authed ? <ClaimSiding sidingId={t.id} /> : <Link href={`/login?next=/terminals/${t.slug}`} className="block rounded-full bg-navy px-6 py-3 text-center font-semibold text-white transition hover:bg-navy-2 active:scale-[0.98]">{tcl('ctaLogin')}</Link>}
+                {authed ? <ClaimObject terminalId={t.id} /> : <Link href={`/login?next=/terminals/${t.slug}`} className="block rounded-full bg-navy px-6 py-3 text-center font-semibold text-white transition hover:bg-navy-2 active:scale-[0.98]">{tcl('ctaLogin')}</Link>}
               </div>
               <p className="mt-4 border-t border-line/70 pt-3 text-xs text-muted"><b className="text-ink">{tcl('how')}.</b> {tcl('howBody')}</p>
             </section>

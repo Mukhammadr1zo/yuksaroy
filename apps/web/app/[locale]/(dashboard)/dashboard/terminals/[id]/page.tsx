@@ -16,7 +16,7 @@ export default function EditTerminalPage() {
   const [term, setTerm] = useState<MyTerminal | null | undefined>(undefined);
 
   useEffect(() => {
-    api<MyTerminal[]>('/terminals/mine').then((xs) => setTerm(xs.find((x) => x.id === id) ?? null)).catch(() => setTerm(null));
+    api<MyTerminal[]>('/terminals/mine').then((xs) => setTerm(xs.find((x) => x.id === id && x.orgId) ?? null)).catch(() => setTerm(null));
   }, [id]);
 
   return (

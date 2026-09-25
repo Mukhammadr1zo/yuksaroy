@@ -1,6 +1,6 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, Inject, NotFoundException, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, Inject, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { CLAIM_STATUSES, REGIONS } from '@yuksaroy/domain';
+import { CLAIM_STATUSES } from '@yuksaroy/domain';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
@@ -13,10 +13,10 @@ import { UpsertTerminalUseCase } from '../application/upsert-terminal.usecase';
 import { PublishTariffUseCase } from '../application/publish-tariff.usecase';
 import { ClaimTerminalUseCase } from '../application/claim-terminal.usecase';
 import { TerminalAccess } from '../application/terminal-access';
-import { ClaimDecideDto, ClaimDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateSidingDto, UpdateTerminalDto } from './dto';
+import { ClaimDecideDto, ClaimDto, CreateTerminalDto, PublishTariffDto, ReplaceServicesDto, UpdateTerminalDto } from './dto';
 import { pickIn } from './catalog.controller';
 import { filesOrThrow } from '../../../common/attachments';
-import { hideClaimPhone, publicSiding } from './mappers';
+import { hideClaimPhone } from './mappers';
 import { PlatformAdminGuard } from '../../organizations/presentation/platform-admin.guard';
 
 /** Terminal kabineti va shahobcha claim: faqat kirgan foydalanuvchi; ruxsat use-case ichida (TerminalAccess), moderatsiya PlatformAdmin. */
@@ -71,12 +71,6 @@ export class TerminalAdminController {
     await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId, files: evidence.files.length } });
     void this.adminNotify.queued('terminalClaimsPending', terminal.name, id, userId).catch(() => {});
     return terminal;
-  }
-
-  /** Eski manzil: ochiq sahifadagi forma hali shu yerga yozadi. B3 da o'chadi. */
-  @Post('sidings/:id/claim')
-  claimSidingAlias(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ClaimDto) {
-    return this.claimTerminal(userId, id, dto);
   }
 
   @Post('terminals/:id/claim/decide')
@@ -145,48 +139,6 @@ export class TerminalAdminController {
     const t = await this.publishTariff.execute(userId, id, dto);
     await this.audit.log({ actorId: userId, action: 'tariff.publish', entity: 'Tariff', entityId: t.id, meta: { terminalId: id, serviceCode: t.serviceCode, version: t.version, priceTiyin: t.priceTiyin } });
     return t;
-  }
-
-  @Get('sidings/mine')
-  async mySidings(@CurrentUserId() userId: string) {
-    const orgIds = await this.access.orgIdsOf(userId);
-    return orgIds.length ? this.repo.listSidings({ ownerOrgIds: orgIds }, 1, 100) : { items: [], total: 0, page: 1, limit: 100 };
-  }
-
-  /**
-   * Reestr qidiruvi (faqat kirganlar uchun): egasi o'zinikini topib biriktira olishi uchun.
-   * Da'vo qilish mumkin bo'lgan holatlar bo'yicha filtr: NONE va REJECTED.
-   * Ilgari bu yerda owned:false turardi, ya'ni ownerOrgId IS NULL. Da'vo rad etilganda
-   * ownerOrgId tozalanmaydi, shuning uchun rad etilgan yo'l qidiruvdan butunlay yo'qolardi
-   * va haqiqiy egasi uni boshqa hech qachon topa olmasdi. Reestrdagi egasi nomi berilmaydi.
-   */
-  @Get('sidings/registry')
-  async registry(@Query('q') q?: string, @Query('region') region?: string, @Query('station') station?: string) {
-    const text = q?.trim();
-    if (!text && !region && !station) return { items: [], total: 0, page: 1, limit: 20 };
-    const r = await this.repo.listSidings(
-      { q: text || undefined, region: pickIn(region, REGIONS), stationId: station || undefined, claimStatus: ['NONE', 'REJECTED'], isDemo: false },
-      1, 20,
-    );
-    return { ...r, items: r.items.map((x) => publicSiding(x)) };
-  }
-
-  /**
-   * Egasi shahobcha yo'lini tahrir qiladi: hozircha faqat rasmlar.
-   * Reestr ma'lumotiga tegilmaydi va faqat da'vosi TASDIQLANGAN egasi yoza oladi,
-   * aks holda tasdiqlanmagan da'vogar ochiq sahifaga rasm qo'yib qo'yardi.
-   */
-  @Patch('sidings/:id')
-  async updateSiding(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: UpdateSidingDto) {
-    // Rol tekshiruvi: ilgari faqat a'zolik qaralardi, ya'ni tashkilotning oddiy xodimi
-    // ochiq sahifadagi rasmni almashtira olardi. Egalik sharti hamon UPDATE ichida qoladi.
-    const owner = (await this.repo.findSidingById(id))?.ownerOrgId;
-    if (!owner) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
-    await this.access.assertObjectAdmin(userId, owner);
-    const s = await this.repo.updateSidingByOwner(id, [owner], { photos: dto.photos });
-    if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
-    await this.audit.log({ actorId: userId, action: 'siding.update', entity: 'Terminal', entityId: id, meta: { fields: Object.keys(dto), photos: dto.photos?.length } });
-    return s;
   }
 
   /** Da'vogar tashkilot a'zolariga qaror haqida Telegram xabari; bog'lanmagan bo'lsa hech narsa. */

@@ -1,6 +1,6 @@
 // E'lon, kompaniya va shahobcha yo'l javob shakllari (apps/api listings/mappers.ts va companies.controller.ts bilan bir xil).
 import type { Condition, DealKind, KycStatus, ListingKind, ListingStatus, OrgKind, PriceUnit } from '@yuksaroy/domain';
-import type { Siding, TerminalCard } from './types';
+import type { TerminalCard } from './types';
 
 /** Egasi: tashkilot (KYC) yoki yakka haydovchi (telefon OTP orqali tasdiqlangan). */
 export type ListingOwner =
@@ -50,4 +50,3 @@ export interface CompanyDetail extends CompanyCard {
   terminals: TerminalCard[]; listings: ListingCard[];
 }
 
-export type SidingDetail = Siding;

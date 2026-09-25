@@ -300,43 +300,6 @@
         "DOC_REQUIRED": "Tasdiqlash uchun kamida bitta hujjat kerak."
       }
     },
-    "sidings": {
-      "title": "Shahobchalarim",
-      "lead": "Siz da'vo qilgan temir yo'l terminallari va da'vo holati.",
-      "empty": "Sizga biriktirilgan shahobcha yo'l yo'q.",
-      "emptyCta": "Katalogdan topib da'vo qiling",
-      "col": {
-        "no": "Raqam",
-        "station": "Stansiya",
-        "region": "Viloyat",
-        "length": "Uzunlik",
-        "status": "Da'vo holati"
-      },
-      "open": "Sahifasi",
-      "registry": {
-        "title": "Shahobcha yo'lingizni toping",
-        "lead": "Stansiya nomi yoki kod bo'yicha qidiring va o'zingiznikini biriktiring. Tasdiqdan keyin u ochiq katalogda ko'rinadi.",
-        "placeholder": "Stansiya nomi yoki kod",
-        "search": "Qidirish",
-        "claim": "Biriktirish",
-        "claimed": "Da'vo yuborildi, operator tekshiradi.",
-        "none": "Topilmadi."
-      },
-      "notFound": "Bu shahobcha yo'l topilmadi yoki sizga biriktirilmagan.",
-      "backToObjects": "Obyektlarim",
-      "unload": "Tushirish sig'imi",
-      "load": "Yuklash sig'imi",
-      "wagons": "{count} vagon",
-      "one": {
-        "claimedAt": "{date} da biriktirilgan",
-        "needApproval": "Rasm qo'shish da'vongiz tasdiqlangandan keyin ochiladi.",
-        "photosHint": "Yo'lning o'zi, rampa, kirish yo'li va kran. Mijoz raqamdan ko'ra rasmga qarab qaror qiladi.",
-        "photosSection": "Rasmlar",
-        "registryNote": "Bu qatorlar tahrir qilinmaydi. Xato bo'lsa qo'llab-quvvatlashga yozing.",
-        "registrySection": "Terminal ma'lumotlari",
-        "title": "{station} No {no}"
-      }
-    },
     "profile": {
       "title": "Profil",
       "lead": "Shaxsiy ma'lumotlar, telefon, parol va hisob sozlamalari.",

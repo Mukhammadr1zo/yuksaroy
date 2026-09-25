@@ -6,7 +6,7 @@ import { PrismaService } from '../../../common/prisma.service';
 import { sumFreeToday } from '../domain/free-today';
 import {
   TariffOverlapError, TariffValidFromError, TerminalClaimedError,
-  type CargoTypeRecord, type CatalogRepository, type ClaimEvidence, type Page, type PublishTariffInput, type SidingFilter, type SidingRecord,
+  type CargoTypeRecord, type CatalogRepository, type ClaimEvidence, type Page, type PublishTariffInput,
   type StationRecord, type TariffRecord, type TerminalFilter, type TerminalRecord, type TerminalServiceRecord, type TerminalWrite, type WeekHours,
 } from '../domain/ports';
 
@@ -24,8 +24,6 @@ const terminalInclude = (now: Date) => ({
 });
 type TerminalRow = Prisma.TerminalGetPayload<{ include: ReturnType<typeof terminalInclude> }>;
 // Shahobcha yo'l = temir yo'l terminali (kind RAIL); pasport ustunlari Terminal ichida.
-const railInclude = { station: { select: { id: true, esrCode: true, nameUz: true, rju: true } }, org: { select: { name: true } } } as const;
-type RailRow = Prisma.TerminalGetPayload<{ include: typeof railInclude }>;
 
 const toTariff = (t: Prisma.TariffGetPayload<object>): TariffRecord => ({
   id: t.id, terminalId: t.terminalId, serviceCode: t.serviceCode, cargoGroupCode: t.cargoGroupCode, version: t.version,
@@ -66,25 +64,6 @@ const passportOf = (t: {
   contractNo: t.contractNo, contractStart: t.contractStart, contractEnd: t.contractEnd,
   contractState: t.contractState, category: t.category, usageType: t.usageType,
   status: t.operStatus, note: t.note, contactName: t.contactName, contactPhone: t.contactPhone,
-});
-const toSiding = (s: RailRow): SidingRecord => ({
-  id: s.id, registryNo: s.registryNo, stationId: s.stationId, station: s.station, stationNameRaw: s.stationNameRaw ?? '', esrCode: s.esrCode, rju: s.rju,
-  regionCode: s.regionCode, lat: s.lat, lng: s.lng, slug: s.slug,
-  ownerNameRaw: s.ownerNameRaw ?? '', ownerOrgId: s.orgId, ownerOrgName: s.org?.name ?? null, claimStatus: s.claimStatus,
-  claimEvidence: (s.claimEvidence as ClaimEvidence | null) ?? null, claimedAt: s.claimedAt,
-  lengthM: s.lengthM, unloadCapacity: s.unloadCapacity, loadCapacity: s.loadCapacity, photos: s.photos,
-  // Texnik pasport (Taminot reestridan), mas'ul shaxs bilan birga.
-  // Telefonni ochiq javobga chiqarish/chiqarmaslikni mapper hal qiladi (publicSiding/publicTerminal).
-  name: s.name, registryRef: s.registryRef, trackCount: s.trackCount,
-  capacityWagons: s.capacityWagons, occupiedWagons: s.occupiedWagons,
-  deadEndDistanceM: s.deadEndDistanceM, junctionSwitch: s.junctionSwitch, brakeShoes: s.brakeShoes,
-  nogabarit: s.nogabarit, equipment: s.equipment,
-  loadNorm: s.loadNorm, unloadNorm: s.unloadNorm, loadFront: s.loadFront, unloadFront: s.unloadFront,
-  locoType: s.locoType, locoNote: s.locoNote, processingHours: s.processingHours,
-  contractNo: s.contractNo, contractStart: s.contractStart, contractEnd: s.contractEnd,
-  contractState: s.contractState, category: s.category, usageType: s.usageType,
-  status: s.operStatus, note: s.note,
-  contactName: s.contactName, contactPhone: s.contactPhone,
 });
 const json = (v: unknown) => (v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue));
 /** Ochiq e'lon: ACTIVE va muddati o'tmagan. */
@@ -284,47 +263,6 @@ export class PrismaCatalogRepository implements CatalogRepository {
     }
   }
 
-  // ── shahobcha (temir yo'l terminali) ──
-  // Shahobcha yo'l endi alohida jadval emas: u Terminal, turi RAIL. Eski /sidings
-  // manzillari ishlashda davom etadi, shunchaki manba Terminal jadvali.
-  async listSidings(f: SidingFilter, page: number, limit: number): Promise<Page<SidingRecord>> {
-    const q = f.q ? apos(f.q) : undefined;
-    const where: Prisma.TerminalWhereInput = {
-      kind: 'RAIL',
-      // Ochiq ro'yxat faqat ACTIVE: admin yashirgan (HIDDEN) yo'l ilgari ham ro'yxatda, ham sahifasida ochiq qolardi.
-      // Egasi o'z kabinetida ko'radi, u yerda ownerOrgIds bilan alohida so'rov ketadi.
-      status: f.ownerOrgIds ? { not: 'DRAFT' } : 'ACTIVE',
-      stationId: f.stationId,
-      isDemo: f.isDemo,
-      claimStatus: Array.isArray(f.claimStatus) ? { in: f.claimStatus } : f.claimStatus,
-      regionCode: f.region,
-      // Kabinet ro'yxati: egalik tasdiqlanganlar (orgId) ham, hali hal bo'lmagan da'vo (claimOrgId) ham.
-      // Faqat orgId ga qaralsa, da'vo yuborgan odam o'z kabinetida hech narsa ko'rmasdi.
-      AND: f.ownerOrgIds ? [{ OR: [{ orgId: { in: f.ownerOrgIds } }, { claimOrgId: { in: f.ownerOrgIds } }] }] : undefined,
-      OR: q ? [{ name: ci(q) }, { stationNameRaw: ci(q) }, { station: { nameUz: ci(q) } }, { esrCode: { startsWith: q } }] : undefined,
-    };
-    const [total, rows] = await this.prisma.$transaction([
-      this.prisma.terminal.count({ where }),
-      this.prisma.terminal.findMany({
-        where, include: railInclude,
-        orderBy: [{ rju: 'asc' }, { stationNameRaw: 'asc' }, { name: 'asc' }],
-        skip: (page - 1) * limit, take: limit,
-      }),
-    ]);
-    return { items: rows.map(toSiding), total, page, limit };
-  }
-  /** Ochiq tafsilot: ro'yxat kabi faqat ACTIVE (admin yashirgan yo'l pasporti ochiq qolmasin). */
-  async findSidingById(id: string, publicOnly = false) {
-    const s = await this.prisma.terminal.findFirst({ where: { id, kind: 'RAIL', ...(publicOnly ? { status: 'ACTIVE' as const } : {}) }, include: railInclude });
-    return s ? toSiding(s) : null;
-  }
-  // claimedAt faqat TASDIQLANGANDA qo'yiladi: u "egasi bor" degani va ochiq sahifa shunga qarab
-  // pasport, tarif va bron bo'limlarini chizadi. Ilgari u PENDING da qo'yilib, rad etilganda ham qolib ketardi.
-  async updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }) {
-    // Egalik tekshiruvi shart qatorida: alohida o'qib keyin yozilsa, oradagi vaqtda egasi o'zgarishi mumkin
-    const r = await this.prisma.terminal.updateMany({ where: { id, kind: 'RAIL', claimStatus: 'APPROVED', orgId: { in: orgIds } }, data });
-    return r.count === 0 ? null : this.findSidingById(id);
-  }
 
   /**
    * Xarita obyektlari: platformadagi narsalar, temir yo'l tarmog'i emas.

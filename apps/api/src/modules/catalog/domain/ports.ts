@@ -26,7 +26,7 @@ export type WeekHours = Partial<Record<WeekDay, [string, string][]>>;
  * Shahobcha texnik pasporti (Taminot reestridan). Mas'ul shaxs telefoni bu yerda bor,
  * lekin ochiq javobga chiqmaydi: mapper uni faqat ro'yxatdan o'tgan foydalanuvchiga beradi.
  */
-export interface SidingPassport {
+export interface RailPassport {
   name: string | null; registryRef: string | null;
   trackCount: number | null; capacityWagons: number | null; occupiedWagons: number | null;
   deadEndDistanceM: number | null; junctionSwitch: string | null; brakeShoes: number | null;
@@ -45,7 +45,7 @@ export interface TerminalRecord {
    * Temir yo'l pasporti: shahobcha ham terminal, reestr ma'lumoti shu yerda.
    * Avto terminalda null. Ichma-ich, chunki `name` va `status` terminalnikiga to'qnashadi.
    */
-  rail: (SidingPassport & {
+  rail: (RailPassport & {
     registryNo: number | null; stationNameRaw: string | null; esrCode: string | null; rju: Rju | null;
     ownerNameRaw: string | null; lengthM: number | null; loadCapacity: number; unloadCapacity: number;
   }) | null;
@@ -111,27 +111,7 @@ export interface TerminalFilter {
   take?: number;
 }
 
-export interface SidingRecord extends SidingPassport {
-  id: string; registryNo: number | null; stationId: string | null; regionCode: string | null;
-  station: Pick<StationRecord, 'id' | 'esrCode' | 'nameUz' | 'rju'> | null;
-  stationNameRaw: string; esrCode: string | null; rju: Rju | null;
-  /** Terminal sahifasining manzili: shahobcha ham terminal. */
-  slug: string;
-  ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
-  claimStatus: ClaimStatus; claimEvidence: ClaimEvidence | null; claimedAt: Date | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
-  /** Egasi yuklagan rasmlar; reestrda rasm yo'q. */
-  photos: string[];
-  /** Reestrda koordinata yo'q: tutashgan joy nuqtasi, taqribiy. */
-  lat: number | null; lng: number | null;
-}
 
-export interface SidingFilter {
-  stationId?: string; q?: string; ownerOrgIds?: string[]; region?: string;
-  /** Namuna qatorlar: da'vo qilib bo'lmaydi, shuning uchun reestr qidiruvida ham ko'rinmaydi. */
-  isDemo?: boolean;
-  /** Bitta holat yoki holatlar ro'yxati (masalan da'vo qilish mumkin bo'lganlar: NONE va REJECTED). */
-  claimStatus?: ClaimStatus | ClaimStatus[];
-}
 
 /** Da'vo dalili: majburiy izoh va ixtiyoriy hujjatlar. Ochiq javobga hech qachon chiqmaydi. */
 export type ClaimEvidence = { note: string; files: Attachment[] };
@@ -169,15 +149,6 @@ export interface CatalogRepository {
   /** Faqat PENDING hal qilinadi: tasdiqlansa orgId = claimOrgId, claimedAt = now; aks holda null. */
   decideTerminalClaim(id: string, approve: boolean, now: Date): Promise<TerminalRecord | null>;
 
-  listSidings(f: SidingFilter, page: number, limit: number): Promise<Page<SidingRecord>>;
-  /** `publicOnly`: ochiq yo'l uchun faqat ACTIVE. */
-  findSidingById(id: string, publicOnly?: boolean): Promise<SidingRecord | null>;
-  /**
-   * Egasi tahrir qiladi (hozircha faqat rasmlar): reestr ma'lumotiga tegilmaydi.
-   * Shart qatorida orgId va APPROVED bor, ya'ni begona yoki hali tasdiqlanmagan
-   * da'vogar hech narsa o'zgartira olmaydi. Mos kelmasa null.
-   */
-  updateSidingByOwner(id: string, orgIds: string[], data: { photos?: string[] }): Promise<SidingRecord | null>;
 
   /** Xarita uchun obyektlar: terminal nuqtalari va stansiya bo'yicha to'plangan shahobcha yo'llar. */
   mapObjects(): Promise<{

@@ -7,7 +7,7 @@ import { parseCorridor } from '../../listings/domain/listing-query';
 import { PrismaListingRepository } from '../../listings/infrastructure/prisma-listing.repository';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
 import { mapFeatures, parseBbox } from './map-geojson';
-import { byDefault, fromPriceTiyin, publicSiding, publicTerminal, publicTerminalCard, summarize } from './mappers';
+import { byDefault, fromPriceTiyin, publicTerminal, publicTerminalCard, summarize } from './mappers';
 
 /** Ro'yxatdan tanlash: noto'g'ri qiymat = filtr yo'q. */
 export const pickIn = <T extends string>(v: string | undefined, list: readonly T[]): T | undefined => (list as readonly string[]).includes(v ?? '') ? (v as T) : undefined;
@@ -164,12 +164,16 @@ export class CatalogController {
     return publicTerminal(t, free[t.id] ?? 0);
   }
 
+  /**
+   * Eski `/sidings/:id` havolalari uchun: id -> slug. Shahobcha alohida obyekt emas,
+   * shuning uchun bu yerda ochiq tafsilot yo'q: web uni 308 bilan terminal sahifasiga
+   * o'tkazadi. Ko'rinish qoidasi terminal yo'li bilan bir xil.
+   */
   @Get('sidings/:id')
-  async siding(@Param('id') id: string) {
-    const s = await this.repo.findSidingById(id, true);
-    // hozircha egasiz reestr shahobchalari ham ochiq: egasi/rasm faqat da'vo tasdiqlanganda ko'rinadi (publicSiding)
-    if (!s) throw new NotFoundException({ code: 'SIDING_NOT_FOUND' });
-    return publicSiding(s);
+  async sidingSlug(@Param('id') id: string) {
+    const t = await this.repo.findTerminalById(id, new Date());
+    if (!t || t.kind !== 'RAIL' || t.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    return { slug: t.slug };
   }
 
   /** Xarita: platformadagi obyektlar (temir yo'l tarmog'i emas). */

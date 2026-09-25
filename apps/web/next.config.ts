@@ -16,7 +16,6 @@ const OLD_ROUTES: [string, string][] = [
   ['/kabinet/elonlar/yangi', '/dashboard/listings/new'],
   ['/kabinet/elonlar', '/dashboard/listings'],
   ['/kabinet/tashkilot', '/dashboard/organization'],
-  ['/kabinet/shahobchalar', '/dashboard/sidings'],
   ['/kabinet', '/dashboard'],
   ['/kirish', '/login'],
   ['/royxat', '/signup'],
@@ -46,6 +45,10 @@ const MOVED: [string, string][] = [
   ['/dashboard/urgent', '/dashboard/orders?tab=urgent'],
   ['/dashboard/admin', '/admin'],
   ['/kabinet/sorovlar', '/dashboard/inquiries'],
+  // Shahobchalarim sahifasi yo'q: birlashgan "Mening obyektlarim" ro'yxatiga.
+  // MOVED da, OLD_ROUTES da emas: u yerda :path* qoidasi ham yasaladi va
+  // /kabinet/shahobchalar/<id> mavjud bo'lmagan sahifaga ketardi.
+  ['/kabinet/shahobchalar', '/dashboard/objects'],
   ['/kabinet/admin', '/admin'],
   ['/terminal', '/dashboard/orders?tab=incoming'],
 ];

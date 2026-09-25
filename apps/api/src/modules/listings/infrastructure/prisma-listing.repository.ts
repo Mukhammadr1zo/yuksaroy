@@ -82,16 +82,10 @@ export class PrismaListingRepository {
     return toRecord(await this.prisma.listing.update({ where: { id }, data: d, include }));
   }
   async remove(id: string) { await this.prisma.listing.delete({ where: { id } }); }
-  /** Bog'langan obyekt nuqtasi; obyekt yo'q bo'lsa null. */
-  async objectPoint(type: 'terminal' | 'siding', id: string): Promise<{ lat: number | null; lng: number | null } | null> {
-    const select = { lat: true, lng: true };
-    if (type === 'siding') {
-      // Shahobcha ham terminal (kind RAIL); e'lon faqat egasi tasdiqlangan obyektga bog'lanadi
-      const sd = await this.prisma.terminal.findFirst({ where: { id, kind: 'RAIL' }, select: { ...select, orgId: true } });
-      return sd && sd.orgId !== null ? { lat: sd.lat, lng: sd.lng } : null;
-    }
-    // Egasiz terminal ochiq mahsulotda yo'q: unga e'lon ham bog'lanmaydi
-    const t = await this.prisma.terminal.findUnique({ where: { id }, select: { ...select, orgId: true } });
+  /** Bog'langan obyekt nuqtasi; obyekt yo'q yoki egasiz bo'lsa null. */
+  async objectPoint(id: string): Promise<{ lat: number | null; lng: number | null } | null> {
+    // Egasiz obyekt ochiq mahsulotda yo'q: unga e'lon ham bog'lanmaydi
+    const t = await this.prisma.terminal.findUnique({ where: { id }, select: { lat: true, lng: true, orgId: true } });
     return t && t.orgId !== null ? { lat: t.lat, lng: t.lng } : null;
   }
 

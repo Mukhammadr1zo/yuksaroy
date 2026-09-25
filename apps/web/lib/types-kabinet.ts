@@ -1,5 +1,5 @@
 // Kabinet uchun API javob shakllari (listings ownerListing, orgs OrgRecord, inquiries, sidings/mine). lib/types.ts ga tegilmaydi.
-import type { ClaimStatus, Condition, DealKind, KycStatus, ListingKind, ListingStatus, OrgKind, PriceUnit, RegionCode, Role, Rju, ServiceCode, TerminalKind, TerminalStatus } from '@yuksaroy/domain';
+import type { ClaimStatus, Condition, DealKind, KycStatus, ListingKind, ListingStatus, OrgKind, PriceUnit, RegionCode, Role, ServiceCode, TerminalKind, TerminalStatus } from '@yuksaroy/domain';
 
 import type { Passport, Station, Tariff, WeekHours } from './types';
 import type { ListingOwner } from './types-listing';
@@ -42,18 +42,6 @@ export interface Inquiry {
   id: string; subject: InquirySubject | null;
   fromOrgName: string | null; message: string; status: string; createdAt: string;
   lastMessageAt: string | null; unread: number;
-}
-
-/** GET /sidings/mine (repo yozuvi, xaritalanmagan). */
-export interface MySiding {
-  /** Ochiq sahifasining manzili: shahobcha ham terminal. */
-  slug: string;
-  id: string; registryNo: number | null; regionCode: string | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null;
-  /** Shahobchaning o'z nomi (reestrdan); eski qatorlarda bo'lmasligi mumkin. */
-  name?: string | null;
-  stationNameRaw: string; ownerNameRaw: string; ownerOrgId: string | null; ownerOrgName: string | null;
-  claimStatus: ClaimStatus; claimedAt: string | null; lengthM: number | null; unloadCapacity: number; loadCapacity: number;
-  photos: string[];
 }
 
 /** GET /terminals/mine: repo yozuvi (TerminalRecord, sanalar ISO satr) + bugungi bo'sh slotlar. Tariflar faqat amaldagi. */

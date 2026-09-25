@@ -204,19 +204,6 @@
         "NOT_TERMINAL_ADMIN": "No access: owner or terminal admin required."
       }
     },
-    "claim": {
-      "ctaLogin": "Log in to claim",
-      "org": "On behalf of which organization",
-      "submit": "Send claim",
-      "sending": "Sending",
-      "sent": "Claim sent. The operator will review it; once approved the terminal appears in your dashboard under My terminals.",
-      "pending": "This terminal has a pending claim under review.",
-      "noOrg": "Create a TERMINAL organization in the dashboard first.",
-      "toOrg": "Create an organization",
-      "already": "This terminal has already been claimed.",
-      "forbidden": "Only the organization owner or a terminal admin can claim.",
-      "err": "Not sent, please try again."
-    },
     "admin": {
       "station": "Station",
       "claimant": "Claimant",

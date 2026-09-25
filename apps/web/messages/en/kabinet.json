@@ -300,43 +300,6 @@
         "DOC_REQUIRED": "At least one document is required for verification."
       }
     },
-    "sidings": {
-      "title": "My sidings",
-      "lead": "Rail terminals you claimed and the claim status.",
-      "empty": "No siding is assigned to you.",
-      "emptyCta": "Find one in the catalog and claim it",
-      "col": {
-        "no": "Number",
-        "station": "Station",
-        "region": "Region",
-        "length": "Length",
-        "status": "Claim status"
-      },
-      "open": "Page",
-      "registry": {
-        "title": "Find your siding",
-        "lead": "Search by station name or code and attach the one that is yours. After review it appears in the public catalog.",
-        "placeholder": "Station name or code",
-        "search": "Search",
-        "claim": "Attach",
-        "claimed": "Request sent, an operator will review it.",
-        "none": "Nothing found."
-      },
-      "notFound": "This siding was not found or is not linked to you.",
-      "backToObjects": "My objects",
-      "unload": "Unloading capacity",
-      "load": "Loading capacity",
-      "wagons": "{count, plural, one {# wagon} other {# wagons}}",
-      "one": {
-        "claimedAt": "Claimed on {date}",
-        "needApproval": "Adding photos opens once your claim is approved.",
-        "photosHint": "The track itself, the ramp, the access road and the crane. Clients decide by the photo, not by the numbers.",
-        "photosSection": "Photos",
-        "registryNote": "These rows cannot be edited. Write to support if something is wrong.",
-        "registrySection": "Terminal data",
-        "title": "{station} No {no}"
-      }
-    },
     "profile": {
       "title": "Profile",
       "lead": "Personal details, phone, password and account settings.",

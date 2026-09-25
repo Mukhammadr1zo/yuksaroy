@@ -204,19 +204,6 @@
         "NOT_TERMINAL_ADMIN": "Ruxsat yo'q: egasi yoki terminal rahbari kerak."
       }
     },
-    "claim": {
-      "ctaLogin": "Da'vo qilish uchun kiring",
-      "org": "Qaysi tashkilot nomidan",
-      "submit": "Da'vo yuborish",
-      "sending": "Yuborilmoqda",
-      "sent": "Da'vo yuborildi. Operator tekshiradi, tasdiqlangach terminal kabinetdagi Terminallarim bo'limida paydo bo'ladi.",
-      "pending": "Bu terminalga da'vo berilgan, operator tekshirmoqda.",
-      "noOrg": "Avval kabinetda TERMINAL turidagi tashkilot yarating.",
-      "toOrg": "Tashkilot yaratish",
-      "already": "Bu terminalga da'vo allaqachon berilgan.",
-      "forbidden": "Faqat tashkilot egasi yoki terminal rahbari da'vo qila oladi.",
-      "err": "Yuborilmadi, qayta urinib ko'ring."
-    },
     "admin": {
       "station": "Stansiya",
       "claimant": "Da'vogar",

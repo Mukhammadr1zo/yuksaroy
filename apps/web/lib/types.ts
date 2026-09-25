@@ -55,26 +55,6 @@ export interface Passport {
   hasSvx?: boolean; hasScale?: boolean; scaleT?: number; containerSlots?: number; customsPost?: boolean;
 }
 
-export interface Siding {
-  /** Terminal sahifasining manzili: shahobcha ham terminal. */
-  slug: string;
-  id: string; registryNo: number | null; regionCode: string | null; lat: number | null; lng: number | null; station: { id: string; esrCode: string | null; nameUz: string; rju: Rju } | null; stationNameRaw: string; esrCode: string | null; rju: Rju | null;
-  lengthM: number | null; unloadCapacity: number; loadCapacity: number; claimStatus: ClaimStatus; owner: string | null;
-  /** Egasi yuklagan rasmlar; da'vo tasdiqlanmaguncha bo'sh keladi. */
-  photos: string[];
-  /**
-   * Texnik pasport (Taminot reestri). Mas'ul shaxs ismi va telefoni bu yerda yo'q:
-   * aloqa platforma orqali ketadi.
-   */
-  name: string | null; registryRef: string | null;
-  trackCount: number | null; capacityWagons: number | null; occupiedWagons: number | null;
-  deadEndDistanceM: number | null; junctionSwitch: string | null; brakeShoes: number | null;
-  nogabarit: string | null; equipment: string | null;
-  loadNorm: string | null; unloadNorm: string | null; loadFront: string | null; unloadFront: string | null;
-  locoType: string | null; locoNote: string | null; processingHours: number | null;
-  contractNo: string | null; contractStart: string | null; contractEnd: string | null; contractState: string | null;
-  category: string | null; usageType: string | null; status: string | null;
-}
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number; summary?: ListSummary }
 /** Filtrlangan to'plam bo'yicha qaror satri (GET /terminals). */

@@ -1,5 +1,5 @@
 'use client';
-// "Egasi bo'lsangiz da'vo qiling": tashkilot tanlanadi va POST /sidings/:id/claim yuboriladi. Faqat kirganlarga chiziladi.
+// "Egasi bo'lsangiz da'vo qiling": tashkilot tanlanadi va POST /terminals/:id/claim yuboriladi. Faqat kirganlarga chiziladi.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, post } from '@/lib/api';
@@ -7,7 +7,7 @@ import { AttachmentButton, AttachmentChips, useAttachments } from '@/components/
 
 type Org = { orgId: string; org: { name: string } };
 
-export function ClaimSiding({ sidingId }: { sidingId: string }) {
+export function ClaimObject({ terminalId }: { terminalId: string }) {
   const t = useTranslations('claim');
   const [orgs, setOrgs] = useState<Org[] | null>(null);
   const [orgId, setOrgId] = useState('');
@@ -25,7 +25,7 @@ export function ClaimSiding({ sidingId }: { sidingId: string }) {
     e.preventDefault();
     setState('busy');
     try {
-      await post(`/sidings/${sidingId}/claim`, { ...(orgId ? { orgId } : {}), note: note.trim(), files: at.files });
+      await post(`/terminals/${terminalId}/claim`, { ...(orgId ? { orgId } : {}), note: note.trim(), files: at.files });
       setState('sent');
     } catch (err: any) { setState(err?.body?.code === 'TERMINAL_CLAIMED' ? 'already' : 'err'); }
   }

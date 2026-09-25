@@ -32,9 +32,6 @@ export class UpdateTerminalDto extends PartialType(OmitType(CreateTerminalDto, [
  * Shahobcha yo'lni egasi tahrir qiladi. Reestr ma'lumoti (raqam, stansiya, uzunlik,
  * sig'im) o'zgarmaydi - u rasmiy manbadan keladi. Hozircha faqat rasmlar.
  */
-export class UpdateSidingDto {
-  @ValidateIf((o: { photos?: unknown }) => o.photos !== undefined) @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @IsString({ each: true }) @MaxLength(500, { each: true }) photos?: string[];
-}
 
 export class ServiceItemDto {
   @IsIn(SERVICE_CODES) serviceCode!: ServiceCode;

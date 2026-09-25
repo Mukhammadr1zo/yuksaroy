@@ -253,12 +253,11 @@ export class ListingsUseCase {
     return r.warnings;
   }
 
-  /** Nuqta: bog'langan terminal/shahobcha, bo'lmasa viloyat markazi. Obyekt topilmasa 400. */
+  /** Nuqta: bog'langan obyekt, bo'lmasa viloyat markazi. Obyekt topilmasa 400. */
   private async point(input: ListingInput): Promise<{ lat: number | null; lng: number | null }> {
-    const link = input.terminalId ? (['terminal', input.terminalId] as const) : null;
-    if (link) {
-      const p = await this.repo.objectPoint(link[0], link[1]);
-      if (!p) throw new BadRequestException({ code: 'OBJECT_NOT_FOUND', field: link[0] === 'terminal' ? 'terminalId' : 'sidingId' });
+    if (input.terminalId) {
+      const p = await this.repo.objectPoint(input.terminalId);
+      if (!p) throw new BadRequestException({ code: 'OBJECT_NOT_FOUND', field: 'terminalId' });
       if (p.lat != null && p.lng != null) return p;
     }
     return REGION_CENTERS[input.regionCode];
