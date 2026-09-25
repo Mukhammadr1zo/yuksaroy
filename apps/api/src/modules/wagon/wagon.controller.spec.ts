@@ -42,10 +42,20 @@ function fakePrisma() {
       return row;
     },
   };
-  return { rows, prisma: { wagonSearch } as unknown as PrismaService };
+  return { rows, wagonSearch };
 }
 
-function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set<string> } = {}) {
+/** Bot yo'li uchun: chat raqami -> userId. Ro'yxatda yo'q chat bog'lanmagan hisoblanadi. */
+function fakeLinks(links: Record<string, string>) {
+  return {
+    findUnique: async ({ where }: { where: { chatId: bigint } }) => {
+      const userId = links[String(where.chatId)];
+      return userId ? { userId } : null;
+    },
+  };
+}
+
+function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set<string>; links?: Record<string, string> } = {}) {
   const db = fakePrisma();
   const upstreamCalls: string[] = [];
   const upstream = {
@@ -58,8 +68,9 @@ function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set
       return { count: 1, events: [{ event_date: '2026-09-01', station: 'A' }] };
     },
   } as unknown as DRailwayClient;
+  const prisma = { wagonSearch: db.wagonSearch, telegramLink: fakeLinks(opts.links ?? {}) } as unknown as PrismaService;
   const c = new WagonController(
-    db.prisma,
+    prisma,
     { get: async () => ({ wagonSearchFree: opts.freeTotal ?? 1 }) } as unknown as PlatformConfigService,
     { isActive: async () => opts.subscriber ?? false } as unknown as SubscriptionService,
     { log: async () => {} } as unknown as AuditService,
@@ -177,5 +188,59 @@ describe('vagon qidiruvi: partiya va chegara', () => {
     expect(me.recent.map((r) => r.wagonNo)).toEqual(['3300001', '3300002']);
     // Map bilan yig'ilsa bu yerda eski (false) qator qolardi
     expect(me.recent[0].found).toBe(true);
+  });
+});
+
+/*
+ * Bot yo'li. Eng muhimi: u qidiruvning O'ZI emas, faqat "kim so'radi" savoliga javob
+ * beradigan qobiq. Shuning uchun testlar kvota va obuna devori shu yo'lda ham
+ * ishlashini tekshiradi: aks holda telefon devori bot orqali chetlab o'tilardi.
+ */
+describe('WagonController.telegramSearch', () => {
+  beforeEach(() => vi.useFakeTimers({ toFake: ['Date'] }));
+  afterEach(() => vi.useRealTimers());
+
+  it("bog'lanmagan chat rad etiladi", async () => {
+    const { c, upstreamCalls } = setup({ links: {} });
+    expect(await status(c.telegramSearch({ chatId: '777', no: '4400001' }))).toBe(403);
+    // Upstream ga umuman bormaydi: bog'lanmagan chat pul turadigan chaqiruvni boshlamaydi
+    expect(upstreamCalls).toHaveLength(0);
+  });
+
+  it("chat raqami raqam bo'lmasa 400", async () => {
+    const { c } = setup({ links: { '777': 'u-tg-badchat' } });
+    expect(await status(c.telegramSearch({ chatId: 'salom', no: '4400001' }))).toBe(400);
+  });
+
+  it("kvota botda ham sanaladi va tugagach obuna so'raladi", async () => {
+    const { c, rows } = setup({ freeTotal: 1, links: { '777': 'u-tg-quota' } });
+    vi.setSystemTime(new Date('2026-09-25T09:00:00Z'));
+    expect(await status(c.telegramSearch({ chatId: '777', no: '4400001' }))).toBe(200);
+    // Ikkinchi vagon bepul kvotadan tashqarida: 402
+    expect(await status(c.telegramSearch({ chatId: '777', no: '4400002' }))).toBe(402);
+    expect(rows).toHaveLength(1);
+  });
+
+  it("bot va sayt bitta kvotani baham ko'radi", async () => {
+    const { c } = setup({ freeTotal: 1, links: { '777': 'u-tg-shared' } });
+    vi.setSystemTime(new Date('2026-09-25T09:00:00Z'));
+    // Saytdan qidirdi: bepul kvota tugadi
+    expect(await status(c.search('u-tg-shared', { no: '4500001' }))).toBe(200);
+    // Botdan o'sha odam yangi vagonni so'radi: kvota umumiy, ya'ni devor turadi
+    expect(await status(c.telegramSearch({ chatId: '777', no: '4500002' }))).toBe(402);
+  });
+
+  it('obunachi botdan ham cheksiz qidiradi', async () => {
+    const { c } = setup({ subscriber: true, freeTotal: 0, links: { '777': 'u-tg-sub' } });
+    vi.setSystemTime(new Date('2026-09-25T09:00:00Z'));
+    for (let i = 0; i < 3; i++) {
+      expect(await status(c.telegramSearch({ chatId: '777', no: String(4600001 + i) }))).toBe(200);
+    }
+  });
+
+  it("noto'g'ri raqam upstream ga bormaydi", async () => {
+    const { c, upstreamCalls } = setup({ subscriber: true, links: { '777': 'u-tg-badno' } });
+    expect(await status(c.telegramSearch({ chatId: '777', no: '123' }))).toBe(400);
+    expect(upstreamCalls).toHaveLength(0);
   });
 });

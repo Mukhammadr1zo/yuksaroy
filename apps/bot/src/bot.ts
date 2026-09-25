@@ -154,7 +154,7 @@ const T: Record<Lang, {
     linkedApp: "Telefon bog'landi, ilovaga qayting.",
     linkedCode: "Raqam bog'landi. Kirish kodi keyingi xabarda keladi.",
     linkedNoCode: "Raqam bog'landi. Endi platformada telefon raqamingizni kiriting, kod shu yerga keladi.",
-    help: "YukSaroy: yuk logistikasi bozori.\n\nQidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\nKirish: /start yuboring va telefon raqamingizni tasdiqlang. Platformada raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.",
+    help: "YukSaroy: yuk logistikasi bozori.\n\nQidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\nVagon qayerda: vagon raqamini yuboring yoki /vagon 24567890 deb yozing. Oxirgi joylashuvi, stansiyasi va yuklangan yo bo'shligi chiqadi. Buning uchun telefon raqamingiz tasdiqlangan bo'lishi kerak.\n\nKirish: /start yuboring va telefon raqamingizni tasdiqlang. Platformada raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.",
   },
   ru: {
     som: 'сум', filter: 'Фильтр', open: 'Открыть', inApp: 'В приложении', app: 'Открыть приложение', map: 'На карте',
@@ -173,7 +173,7 @@ const T: Record<Lang, {
     linkedApp: 'Номер привязан, вернитесь в приложение.',
     linkedCode: 'Номер привязан. Код для входа придёт следующим сообщением.',
     linkedNoCode: 'Номер привязан. Теперь введите его на платформе, код придёт сюда.',
-    help: 'YukSaroy: маркетплейс грузовой логистики.\n\nПоиск: напишите простыми словами, что нужно, или используйте /qidir. Бот покажет число терминалов, свободные места на сегодня и самый дешёвый тариф.\n\nВход: отправьте /start и подтвердите номер. Когда введёте его на платформе, код придёт сюда и будет действовать 5 минут.',
+    help: 'YukSaroy: маркетплейс грузовой логистики.\n\nПоиск: напишите простыми словами, что нужно, или используйте /qidir. Бот покажет число терминалов, свободные места на сегодня и самый дешёвый тариф.\n\nГде вагон: отправьте номер вагона или напишите /vagon 24567890. Придёт последнее местоположение, станция и гружёный или порожний. Для этого нужен подтверждённый номер телефона.\n\nВход: отправьте /start и подтвердите номер. Когда введёте его на платформе, код придёт сюда и будет действовать 5 минут.',
   },
   en: {
     som: 'UZS', filter: 'Filter', open: 'Open', inApp: 'In the app', app: 'Open the app', map: 'On map',
@@ -192,7 +192,97 @@ const T: Record<Lang, {
     linkedApp: 'Phone linked, go back to the app.',
     linkedCode: 'Phone linked. The sign-in code arrives in the next message.',
     linkedNoCode: 'Phone linked. Enter the number on the platform and the code will arrive here.',
-    help: 'YukSaroy: a freight logistics marketplace.\n\nSearch: describe what you need in plain words or use /qidir. The bot shows the number of terminals, free spots today and the cheapest tariff.\n\nSign in: send /start and confirm your phone number. When you enter it on the platform, the code arrives here and is valid for 5 minutes.',
+    help: 'YukSaroy: a freight logistics marketplace.\n\nSearch: describe what you need in plain words or use /qidir. The bot shows the number of terminals, free spots today and the cheapest tariff.\n\nWhere is my wagon: send a wagon number or write /vagon 24567890. You get its last known location, station and whether it is loaded or empty. This needs your phone number confirmed.\n\nSign in: send /start and confirm your phone number. When you enter it on the platform, the code arrives here and is valid for 5 minutes.',
+  },
+};
+
+// ── Vagon qidiruvi ──
+
+/** POST /wagon/internal/telegram/search javobi (kerakli maydonlar). */
+type WagonRes = {
+  wagonNo: string;
+  found: boolean;
+  current: { date: string; station: string | null; state: 'loaded' | 'empty' | 'unknown' } | null;
+  quota: { subscriber: boolean; freeUsed: number; freeTotal: number; priceSom: number };
+};
+
+/**
+ * Matndagi vagon raqami yoki null.
+ *
+ * Faqat raqam, probel va chiziqchadan tashkil topgan matn tekshiriladi: shunda "Andijonda
+ * tushirish" kabi so'rov xatolik bilan vagon deb qabul qilinmaydi. Raqamlar soni domain
+ * dagi WAGON bilan bir xil (7 yoki 8); bot domain paketiga bog'lanmaydi, shuning uchun
+ * shart shu yerda takrorlangan.
+ */
+const wagonNoOf = (text: string): string | null => {
+  if (!/^[\d\s-]+$/.test(text)) return null;
+  const d = text.replace(/\D/g, '');
+  return d.length >= 7 && d.length <= 8 ? d : null;
+};
+
+/** Sana hisobotdan ISO ko'rinishda keladi; vaqti bo'lsa kesiladi, boshqa shakl tegilmaydi. */
+const dayOf = (d: string) => (/^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0, 10) : d);
+
+/** Vagon matnlari: saytdagi wagon.json tarjimalari bilan bir xil so'zlar. */
+const W: Record<Lang, {
+  hint: string; notLinked: string; notFound: (no: string) => string;
+  current: string; stationUnknown: string; state: Record<'loaded' | 'empty' | 'unknown', string>;
+  date: string; subscribe: string; price: (som: string) => string; subscribeCta: string;
+  quotaFree: (left: number) => string; err: Record<string, string>;
+}> = {
+  uz: {
+    hint: "Vagon raqamini yozing, masalan: 24567890. Raqam 7 yoki 8 ta raqamdan iborat.",
+    notLinked: "Vagon qidiruvi uchun telefon raqamingizni tasdiqlash kerak.",
+    notFound: (no) => `${no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.`,
+    current: 'Oxirgi joylashuvi', stationUnknown: "Stansiya ko'rsatilmagan",
+    state: { loaded: 'Yuklangan', empty: "Bo'sh", unknown: "Holati noma'lum" },
+    date: 'Vaqti',
+    subscribe: 'Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.',
+    price: (som) => `Oyiga ${som} so'm.`, subscribeCta: "Obuna bo'lish",
+    quotaFree: (left) => `Bepul qidiruv qoldi: ${left} ta`,
+    err: {
+      WAGON_NO_INVALID: "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
+      WAGON_NOT_CONFIGURED: "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
+      WAGON_UPSTREAM: "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
+      RATE_LIMITED: "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
+      generic: "Qidirilmadi. Qayta urinib ko'ring.",
+    },
+  },
+  ru: {
+    hint: 'Напишите номер вагона, например: 24567890. Номер состоит из 7 или 8 цифр.',
+    notLinked: 'Для поиска вагона нужно подтвердить номер телефона.',
+    notFound: (no) => `Вагон ${no} не найден. Проверьте номер и попробуйте снова.`,
+    current: 'Последнее местоположение', stationUnknown: 'Станция не указана',
+    state: { loaded: 'Гружёный', empty: 'Порожний', unknown: 'Состояние неизвестно' },
+    date: 'Время',
+    subscribe: 'Бесплатный поиск закончился. Для поиска без ограничений нужна подписка.',
+    price: (som) => `${som} сум в месяц.`, subscribeCta: 'Оформить подписку',
+    quotaFree: (left) => `Осталось бесплатных поисков: ${left}`,
+    err: {
+      WAGON_NO_INVALID: 'Номер должен состоять из 7 или 8 цифр.',
+      WAGON_NOT_CONFIGURED: 'Поиск вагона пока не работает. Скоро заработает.',
+      WAGON_UPSTREAM: 'Сейчас найти не получилось. Попробуйте чуть позже.',
+      RATE_LIMITED: 'Слишком много запросов. Продолжить можно через час.',
+      generic: 'Не удалось найти. Попробуйте ещё раз.',
+    },
+  },
+  en: {
+    hint: 'Send a wagon number, for example: 24567890. The number has 7 or 8 digits.',
+    notLinked: 'Wagon search needs your phone number confirmed.',
+    notFound: (no) => `Wagon ${no} was not found. Check the number and try again.`,
+    current: 'Last known location', stationUnknown: 'Station not given',
+    state: { loaded: 'Loaded', empty: 'Empty', unknown: 'State unknown' },
+    date: 'Time',
+    subscribe: 'Your free search is used up. Unlimited searches need a subscription.',
+    price: (som) => `${som} UZS per month.`, subscribeCta: 'Subscribe',
+    quotaFree: (left) => `Free searches left: ${left}`,
+    err: {
+      WAGON_NO_INVALID: 'The number must have 7 or 8 digits.',
+      WAGON_NOT_CONFIGURED: 'Wagon search is not working yet. It will be available soon.',
+      WAGON_UPSTREAM: 'The search did not go through. Try again in a little while.',
+      RATE_LIMITED: 'Too many searches. You can continue in an hour.',
+      generic: 'Search failed. Try again.',
+    },
   },
 };
 
@@ -260,6 +350,53 @@ async function search(ctx: Context, q: string, lang: Lang) {
   return ctx.reply(text, { parse_mode: 'HTML', link_preview_options: { is_disabled: true }, ...(rows.length ? Markup.inlineKeyboard(rows) : {}) });
 }
 
+/**
+ * Vagon qayerda: qidiruvni API bajaradi, bot faqat chat raqamini beradi.
+ *
+ * Kvota, obuna devori va 6 soatlik kesh serverda: bot ularni bilmaydi va bila olmaydi.
+ * Shu tufayli botdan qidirish bilan saytdan qidirish bir xil hisoblanadi.
+ */
+async function wagon(ctx: Context, no: string, lang: Lang) {
+  const w = W[lang];
+  let res: Response;
+  try {
+    res = await api('/wagon/internal/telegram/search', {
+      method: 'POST',
+      headers: { 'x-internal-secret': env.INTERNAL_SECRET },
+      body: JSON.stringify({ chatId: String(ctx.chat?.id ?? ''), no }),
+    });
+  } catch {
+    return ctx.reply(T[lang].down);
+  }
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { code?: string; priceSom?: number } | null;
+    const code = body?.code ?? '';
+    // Telefon tasdiqlanmagan: matn bilan tushuntirmaymiz, darhol tugmani beramiz
+    if (code === 'NOT_LINKED') return askContact(ctx, lang, w.notLinked);
+    if (code === 'SUBSCRIPTION_REQUIRED') {
+      const price = body?.priceSom ? ` ${w.price(body.priceSom.toLocaleString('ru-RU').replace(/\s/g, ' '))}` : '';
+      const rows = rowsOf([[appBtn(w.subscribeCta, '/dashboard/subscription', lang)]]);
+      return ctx.reply(`${w.subscribe}${price}`, rows.length ? Markup.inlineKeyboard(rows) : undefined);
+    }
+    return ctx.reply(w.err[code] ?? w.err.generic!);
+  }
+
+  const r = (await res.json()) as WagonRes;
+  if (!r.found || !r.current) return ctx.reply(w.notFound(r.wagonNo));
+  const c = r.current;
+  const lines = [
+    `<b>${esc(c.station ?? w.stationUnknown)}</b>`,
+    `${w.current} · ${esc(r.wagonNo)}`,
+    `${w.state[c.state]} · ${w.date}: ${esc(dayOf(c.date))}`,
+  ];
+  // Obunachiga kvota satri yozilmaydi: unda cheksiz, ya'ni bu son hech qanday qarorga yaramaydi
+  if (!r.quota.subscriber) {
+    lines.push('', w.quotaFree(Math.max(0, r.quota.freeTotal - r.quota.freeUsed)));
+  }
+  return ctx.reply(lines.join('\n'), { parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+}
+
 // ── Kirish oqimi ──
 
 // Biz kontakt so'ragan chatlar; ro'yxatda yo'q kontakt = Mini App requestContact
@@ -320,6 +457,15 @@ bot.command('qidir', (ctx) => {
   return q ? search(ctx, q, lang) : ctx.reply(T[lang].hint);
 });
 
+bot.command('vagon', (ctx) => {
+  const lang = langOf(ctx.from.language_code);
+  const q = ctx.payload.trim();
+  if (!q) return ctx.reply(W[lang].hint);
+  // Raqam shakli serverda ham tekshiriladi; bu yerda tekshirish bekor chaqiruvni to'xtatadi
+  const no = wagonNoOf(q);
+  return no ? wagon(ctx, no, lang) : ctx.reply(W[lang].err.WAGON_NO_INVALID!);
+});
+
 // Erkin matn: login kutilayotgan bo'lsa kontakt so'raymiz, aks holda qidiruv
 bot.on('text', (ctx) => {
   // Bir marta so'raladi va qulf bo'shatiladi: tashlab ketilgan kirish havolasi
@@ -328,7 +474,9 @@ bot.on('text', (ctx) => {
   if (pendingToken.has(ctx.chat.id)) { pendingToken.delete(ctx.chat.id); return askContact(ctx, lang, T[lang].askPhoneLogin); }
   const q = ctx.message.text.trim();
   if (q.startsWith('/')) return ctx.reply(T[lang].help);
-  return search(ctx, q, lang);
+  // Yalang'och raqam terminal qidiruvi uchun ma'no bermaydi: u vagon raqami bo'ladi
+  const no = wagonNoOf(q);
+  return no ? wagon(ctx, no, lang) : search(ctx, q, lang);
 });
 
 bot.catch((err, ctx) => {

@@ -8,11 +8,18 @@ import { IpBucket } from '../../common/ip-bucket';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { InternalGuard } from '../identity/presentation/internal.guard';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { DRailwayClient } from './d-railway.client';
 import { CACHE_MS, canSearch, deriveCurrent, serialize, upstreamNo, type WagonEvent } from './wagon.rules';
 
 class SearchDto {
+  @IsString() @MaxLength(20) no!: string;
+}
+
+/** Bot -> API: qidiruvni kim so'raganini chat orqali aniqlaymiz. */
+class TelegramSearchDto {
+  @IsString() @MaxLength(32) chatId!: string;
   @IsString() @MaxLength(20) no!: string;
 }
 
@@ -38,7 +45,9 @@ const floodBucket = new IpBucket(120, 3_600_000);
 @ApiTags('wagon')
 @ApiCookieAuth('ys_access')
 @Controller('wagon')
-@UseGuards(JwtGuard)
+// DIQQAT: guard sinf darajasida emas, har yo'lda alohida. Sababi: botning ichki yo'li
+// sessiya bilan emas, umumiy sir bilan ishlaydi va JwtGuard uni rad etardi. Yangi yo'l
+// qo'shsangiz guardni ham qo'shing, aks holda u himoyasiz qoladi.
 export class WagonController {
   constructor(
     private readonly prisma: PrismaService,
@@ -49,6 +58,7 @@ export class WagonController {
   ) {}
 
   @Get('me')
+  @UseGuards(JwtGuard)
   async me(@CurrentUserId() userId: string) {
     const [q, rows] = await Promise.all([
       this.quota(userId),
@@ -63,8 +73,35 @@ export class WagonController {
   }
 
   @Post('search') @HttpCode(200)
+  @UseGuards(JwtGuard)
   async search(@CurrentUserId() userId: string, @Body() dto: SearchDto) {
-    const digits = normalizeWagonNo(dto.no);
+    return this.run(userId, dto.no);
+  }
+
+  /**
+   * Bot -> API: Telegram chat egasining nomidan qidiruv.
+   *
+   * Nega alohida yo'l: bot foydalanuvchi sessiyasini ushlab turmaydi, uning qo'lida
+   * faqat chat raqami bor. Chat raqami esa telefon tasdiqlanganda userId ga bog'langan
+   * (TelegramLink), ya'ni qidiruvni kim so'raganini aniq bilamiz.
+   *
+   * Nega aynan shu yo'ldan boradi: kvota, obuna devori, 6 soatlik kesh, chegaralar va
+   * audit qatori run() ichida. Bot uchun alohida yo'l yozilsa, telefon devori bot orqali
+   * chetlab o'tilardi: obunasiz odam botdan cheksiz qidirar edi.
+   */
+  @Post('internal/telegram/search') @HttpCode(200)
+  @UseGuards(InternalGuard)
+  async telegramSearch(@Body() dto: TelegramSearchDto) {
+    let chatId: bigint;
+    try { chatId = BigInt(dto.chatId); } catch { throw new BadRequestException({ code: 'CHAT_ID_INVALID' }); }
+    const link = await this.prisma.telegramLink.findUnique({ where: { chatId }, select: { userId: true } });
+    // Bog'lanmagan chat: bot odamni /start ga yuboradi, telefonini tasdiqlagach ishlaydi
+    if (!link) throw new HttpException({ code: 'NOT_LINKED' }, 403);
+    return this.run(link.userId, dto.no);
+  }
+
+  private async run(userId: string, no: string) {
+    const digits = normalizeWagonNo(no);
     if (!digits) throw new BadRequestException({ code: 'WAGON_NO_INVALID' });
     // Kalit upstream bilan bir xil: "01234567" va "1234567" bitta vagon, bitta kesh, bitta kvota
     const wagonNo = upstreamNo(digits);

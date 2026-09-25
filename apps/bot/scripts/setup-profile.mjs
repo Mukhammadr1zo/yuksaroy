@@ -21,9 +21,9 @@ const DESC = {
   en: "A freight logistics marketplace: terminal services, private sidings, rail equipment and road transport. Owners publish their services and equipment, and you find what you need.\n\nThis bot is used to sign in. You confirm your phone number and the login code arrives here. The code is valid for 5 minutes.\n\nPress the button below to start.",
 };
 const CMDS = {
-  uz: [{command:'app',description:'Mini ilovani ochish'},{command:'qidir',description:"Terminal qidirish, masalan: /qidir Andijonda tushirish"},{command:'start',description:"Boshlash va telefon raqamini tasdiqlash"},{command:'help',description:'Bot nima qiladi'}],
-  ru: [{command:'app',description:'Открыть мини-приложение'},{command:'qidir',description:'Поиск терминала, например: /qidir выгрузка в Андижане'},{command:'start',description:'Начать и подтвердить номер телефона'},{command:'help',description:'Что умеет бот'}],
-  en: [{command:'app',description:'Open the Mini App'},{command:'qidir',description:'Find a terminal, e.g. /qidir unloading in Andijan'},{command:'start',description:'Start and confirm your phone number'},{command:'help',description:'What this bot does'}],
+  uz: [{command:'app',description:'Mini ilovani ochish'},{command:'qidir',description:"Terminal qidirish, masalan: /qidir Andijonda tushirish"},{command:'vagon',description:'Vagon qayerda, masalan: /vagon 24567890'},{command:'start',description:"Boshlash va telefon raqamini tasdiqlash"},{command:'help',description:'Bot nima qiladi'}],
+  ru: [{command:'app',description:'Открыть мини-приложение'},{command:'qidir',description:'Поиск терминала, например: /qidir выгрузка в Андижане'},{command:'vagon',description:'Где вагон, например: /vagon 24567890'},{command:'start',description:'Начать и подтвердить номер телефона'},{command:'help',description:'Что умеет бот'}],
+  en: [{command:'app',description:'Open the Mini App'},{command:'qidir',description:'Find a terminal, e.g. /qidir unloading in Andijan'},{command:'vagon',description:'Where is my wagon, e.g. /vagon 24567890'},{command:'start',description:'Start and confirm your phone number'},{command:'help',description:'What this bot does'}],
 };
 
 await post('setMyName', { name: 'YukSaroy' });
