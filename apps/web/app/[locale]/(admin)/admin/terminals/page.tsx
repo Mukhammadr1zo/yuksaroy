@@ -6,7 +6,7 @@
  */
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CLAIM_STATUSES, REGIONS, TERMINAL_KINDS, TERMINAL_STATUSES, type ClaimStatus, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
+import { CLAIM_STATUSES, OWNER_KINDS, REGIONS, TERMINAL_KINDS, TERMINAL_STATUSES, type ClaimStatus, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
 import { BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, errText, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, useAdminList, type Col } from '@/components/admin/kit';
 import { diffBody, fromRow, TerminalForm, type Draft, type TerminalFull } from '@/components/admin/TerminalForm';
@@ -27,7 +27,7 @@ type Row = {
 /** Yon varaq: id=null yaratish; d=null to'liq qator hali yuklanmoqda. */
 type Sheet = { id: string | null; base: Draft | null; d: Draft | null };
 
-const F0 = { q: '', kind: '', region: '', status: '', claim: '', owned: '', sort: '', page: 1 };
+const F0 = { q: '', kind: '', region: '', status: '', claim: '', owned: '', ownerKind: '', sort: '', page: 1 };
 const CLAIM_TONE: Record<ClaimStatus, 'ok' | 'warn' | 'bad' | 'neutral'> = { APPROVED: 'ok', PENDING: 'warn', REJECTED: 'bad', NONE: 'neutral' };
 const STATUS_TONE: Record<TerminalStatus, 'ok' | 'warn' | 'neutral'> = { ACTIVE: 'ok', DRAFT: 'warn', HIDDEN: 'neutral' };
 const NEW: Draft = { kind: 'RAIL', status: 'DRAFT', is24h: false, claimStatus: 'NONE' };
@@ -49,14 +49,21 @@ export default function TerminalsPage() {
   const [sheet, setSheet] = useState<Sheet | null>(null);
   const [notice, setNotice] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  /** O'chirishda nima yo'qolishi: server to'sganda to'ladi, remove() izohiga qara. */
+  const [impact, setImpact] = useState<Impact | null>(null);
+  /** Guruh amalining natijasi yoki xatosi: ro'yxat ostida, tugmalar yonida ko'rinadi. */
+  const [bulk, setBulk] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
 
   const fail = (e: unknown, fb: string) => setNotice({ tone: 'err', text: errText(e, t, t.has, fb) });
   // Drawer effekti onClose ga bog'liq: har renderda yangi funksiya bo'lsa fokus katakdan varaqqa qochadi
-  const close = useCallback(() => { setSheet(null); setNotice(null); }, []);
+  // impact ham tozalanadi: aks holda bir qatorda to'sib qolgan ogohlantirish keyingi
+  // qatorga o'tib ketardi va u nima yo'qolishini ko'rsatmasdan force bilan o'chib ketardi
+  const close = useCallback(() => { setSheet(null); setNotice(null); setImpact(null); }, []);
   const set = (p: Draft) => setSheet((s) => (s?.d ? { ...s, d: { ...s.d, ...p } } : s));
 
   function openRow(id: string) {
     setNotice(null);
+    setImpact(null);
     setSheet({ id, base: null, d: null });
     api<TerminalFull>(`${PATH}/${id}`)
       .then((r) => { const d = fromRow(r); setSheet({ id, base: d, d }); })
@@ -91,8 +98,6 @@ export default function TerminalsPage() {
    * yo'qolishini sanab beradi; operator shuni ko'rib, ataylab ikkinchi marta tasdiqlaydi.
    * Ilgari ikki bosishlik oddiy tasdiq bilan hammasi jimgina yo'qolardi.
    */
-  const [impact, setImpact] = useState<Impact | null>(null);
-
   async function remove(force = false) {
     if (!sheet?.id) return;
     try {
@@ -104,8 +109,28 @@ export default function TerminalsPage() {
     } catch (e) {
       const body = e instanceof ApiError ? (e.body as (Impact & { code?: string }) | undefined) : undefined;
       if (body?.code === 'TERMINAL_HAS_DATA') { setImpact(body); return; }
-      fail(e, tc('saveFailed'));
+      fail(e, tc('deleteFailed'));
     }
+  }
+
+  /**
+   * Guruh amali: filtrda topilganlarning hammasiga.
+   *
+   * expect ga ekranda ko'rinib turgan jami son yuboriladi. Server uni qaytadan sanaydi
+   * va farq qilsa hech narsa qilmaydi: operator ko'rgan ro'yxat bilan o'zgaradigan
+   * ro'yxat bir xil bo'lishi kerak.
+   */
+  async function runBulk(action: 'HIDE' | 'DELETE') {
+    if (!f.ownerKind || !data?.total) return;
+    setBusy(true);
+    setBulk(null);
+    try {
+      const r = await post<{ done: number; skipped: number }>(`${PATH}/bulk-owner`, { ownerKind: f.ownerKind, action, expect: data.total });
+      setBulk({ tone: 'ok', text: tt('bulkDone', { done: r.done, skipped: r.skipped }) });
+      void reload();
+    } catch (e) {
+      setBulk({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) });
+    } finally { setBusy(false); }
   }
 
   const cols: Col<Row>[] = [
@@ -113,7 +138,18 @@ export default function TerminalsPage() {
     { key: 'kind', head: tt('kind'), cell: (r) => tk(r.kind) },
     { key: 'station', head: tt('station'), cell: (r) => r.station?.nameUz ?? r.stationNameRaw ?? '' },
     { key: 'region', head: tc('region'), cell: (r) => (r.regionCode && tr.has(r.regionCode) ? tr(r.regionCode) : r.regionCode ?? '') },
-    { key: 'owner', head: tt('owner'), cell: (r) => (r.org ? r.org.name : <Pill>{tt('noOwner')}</Pill>) },
+    {
+      // Reestrdagi ega nomi ham chiziladi: server uni allaqachon yuborardi, lekin
+      // ekranda yo'q edi. Operator qatorni aynan shu nom bo'yicha hukm qiladi.
+      key: 'owner',
+      head: tt('owner'),
+      cell: (r) => (
+        <>
+          {r.org ? <div>{r.org.name}</div> : <Pill>{tt('noOwner')}</Pill>}
+          {r.ownerNameRaw ? <div className="mt-0.5 max-w-60 truncate text-[11px] text-muted" title={r.ownerNameRaw}>{r.ownerNameRaw}</div> : null}
+        </>
+      ),
+    },
     { key: 'claim', head: tt('claim'), cell: (r) => <Pill tone={CLAIM_TONE[r.claimStatus]}>{tcl(r.claimStatus)}</Pill> },
     { key: 'status', head: tc('status'), cell: (r) => <Pill tone={STATUS_TONE[r.status]}>{ts(r.status)}</Pill> },
     ...(f.sort === 'demand'
@@ -163,6 +199,11 @@ export default function TerminalsPage() {
             {opt('', tc('all'))}{opt('1', tt('ownedOnly'))}{opt('0', tt('freeOnly'))}
           </select>
         </Labeled>
+        <Labeled label={tt('ownerKindLabel')} className={selectCls}>
+          <select className={INPUT} value={form.ownerKind} onChange={(e) => setForm({ ...form, ownerKind: e.target.value })}>
+            {opt('', tc('all'))}{OWNER_KINDS.map((k) => opt(k, tt(`ownerKinds.${k}`)))}
+          </select>
+        </Labeled>
         <Labeled label={tt('sort')} className={selectCls}>
           <select className={INPUT} value={form.sort} onChange={(e) => setForm({ ...form, sort: e.target.value })}>
             {opt('', tt('sortNew'))}{opt('demand', tt('sortDemand'))}
@@ -180,12 +221,28 @@ export default function TerminalsPage() {
       <DataTable cols={cols} rows={data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} onRow={(r) => openRow(r.id)} />
       <Pager page={f.page} pages={pages} onPage={(p) => { setF({ ...f, page: p }); setForm({ ...form, page: p }); }} />
 
+      {/* Guruh amali faqat egasining turi filtri qo'llanganda chiqadi: amal aynan
+          shu filtrga tegishli, ya'ni ekranda ko'rinib turgan ro'yxatga. */}
+      {f.ownerKind ? (
+        <div className="mt-6 rounded-2xl border border-line bg-white p-4">
+          <p className="text-sm font-semibold text-navy">{tt('bulkWarn', { count: data?.total ?? 0 })}</p>
+          <p className="mt-1 text-xs text-muted">{tt('ownerKindNote')}</p>
+          {bulk ? <div className="mt-3"><Notice tone={bulk.tone}>{bulk.text}</Notice></div> : null}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <ConfirmButton label={tt('bulkHide')} confirm={tc('confirm')} onRun={() => runBulk('HIDE')} className={BTN} disabled={busy || !data?.total} />
+            <ConfirmButton label={tt('bulkDelete')} confirm={tc('confirm')} onRun={() => runBulk('DELETE')} disabled={busy || !data?.total} />
+          </div>
+        </div>
+      ) : null}
+
       <Drawer
         open={!!sheet}
         title={sheet?.id ? sheet.d?.name ?? tc('loading') : tt('new')}
         onClose={close}
         footer={sheet ? (
           <>
+            {/* Xabar tugma bilan bitta panelda: uzun shaklning ostida qolsa ko'rinmaydi */}
+            {notice ? <div className="w-full"><Notice tone={notice.tone}>{notice.text}</Notice></div> : null}
             {sheet.id ? (
               <div className="mr-auto flex flex-col items-start gap-1">
                 <span className="text-xs text-muted">{tt('deleteWarn')}</span>
@@ -207,7 +264,6 @@ export default function TerminalsPage() {
         ) : null}
       >
         {sheet?.d ? <TerminalForm d={sheet.d} set={set} /> : <p className="text-sm text-muted">{tc('loading')}</p>}
-        {notice ? <Notice tone={notice.tone}>{notice.text}</Notice> : null}
       </Drawer>
     </div>
   );

@@ -174,7 +174,10 @@ export function ConfirmButton({ label, confirm, onRun, className = BTN_DANGER, d
       onClick={async () => {
         if (!armed) {
           setArmed(true);
-          timer.current = setTimeout(() => setArmed(false), 4000);
+          // 4 sekund kam edi: tasdiq oldidan nima yo'qolishi haqidagi ogohlantirishni
+          // o'qib chiqqan operator qaytadan birinchi bosishdan boshlashga majbur bo'lardi
+          // va tugma "ishlamayapti" deb ko'rinardi
+          timer.current = setTimeout(() => setArmed(false), 10_000);
           return;
         }
         if (timer.current) clearTimeout(timer.current);

@@ -590,3 +590,4 @@ export const REPORT_STATUS_LABELS: Record<SearchLang, Record<ReportStatus, strin
 
 /** Matn chegaralari va bitta odamning bir soatdagi eng ko'p shikoyati. */
 export const REPORT = { textMin: 10, textMax: 1000, perHour: 5 } as const;
+export * from './owner-kind';

@@ -33,8 +33,19 @@ export function setTgTokens(t: TgTokens | null) {
 /** Mini App'da Bearer sarlavhasi, oddiy saytda bo'sh (cookie yetarli). Multipart fetch'lar uchun ham. */
 export const authHeaders = (): Record<string, string> => { const t = tgTokens(); return t ? { authorization: `Bearer ${t.access}` } : {}; };
 
+/**
+ * Sarlavhada content-type FAQAT tana bo'lganda yuboriladi.
+ *
+ * Nega: Fastify DELETE ni tanasi bo'ladigan metod deb biladi va content-type
+ * qo'yilgan bo'lsa tanani majburan o'qiydi. Tana bo'sh bo'lsa JSON tahlilchisi
+ * 400 FST_ERR_CTP_EMPTY_JSON_BODY qaytaradi. Bu Nest ga yetib bormaydi: guard ham,
+ * yo'l ham, xato filtri ham ishga tushmaydi. Ya'ni ilovadagi HAR QANDAY o'chirish
+ * (terminal, stansiya, tashkilot, a'zo, murojaat, sharh, e'lon, kuzatuv) birinchi
+ * kundan beri ishlamagan: tugma bosilardi, qator joyida qolardi.
+ */
 async function raw(path: string, init: RequestInit = {}) {
-  return fetch(`/api/v1${path}`, { ...init, headers: { 'content-type': 'application/json', ...authHeaders(), ...(init.headers ?? {}) }, credentials: 'include' });
+  const ct: Record<string, string> = init.body == null ? {} : { 'content-type': 'application/json' };
+  return fetch(`/api/v1${path}`, { ...init, headers: { ...ct, ...authHeaders(), ...(init.headers as Record<string, string> | undefined) }, credentials: 'include' });
 }
 
 /**

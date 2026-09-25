@@ -114,6 +114,7 @@
       "loading": "Yuklanmoqda",
       "loadFailed": "Ma'lumot yuklanmadi.",
       "saveFailed": "Saqlanmadi.",
+      "deleteFailed": "O'chirilmadi.",
       "empty": "Hech narsa topilmadi.",
       "open": "Ochish",
       "total": "{count, number} ta",
@@ -131,6 +132,9 @@
       "BAD_ROLE": "Noto'g'ri rol.",
       "BAD_STATUS": "Noto'g'ri holat.",
       "BAD_VALUE": "Qiymat noto'g'ri.",
+      "BULK_COUNT_CHANGED": "Qatorlar soni o'zgardi. Ro'yxatni yangilab, qaytadan urinib ko'ring",
+      "BULK_HAS_DATA": "Bu qatorlarga bog'langan ma'lumot bor",
+      "BULK_TOO_MANY": "Juda ko'p qator. Filtrni aniqlashtiring",
       "CANNOT_CHANGE_SELF": "O'zingizning panel huquqingizni o'zgartira olmaysiz.",
       "CLAIM_NOT_PENDING": "Bu da'vo bo'yicha qaror allaqachon chiqqan.",
       "DEMO_TARGET": "Namuna qator bilan bu amalni bajarib bo'lmaydi.",
@@ -260,7 +264,20 @@
       "sortDemand": "Talab bo'yicha",
       "views30": "Ochilish, 30 kun",
       "openInquiries": "Javobsiz yozishma",
-      "demandNote": "Oxirgi 30 kunda sahifasi eng ko'p ochilgan 100 ta obyekt. Javobsiz yozishma - hali hech javob berilmagani. Yuqoridagisiga birinchi qo'ng'iroq qilinadi."
+      "demandNote": "Oxirgi 30 kunda sahifasi eng ko'p ochilgan 100 ta obyekt. Javobsiz yozishma - hali hech javob berilmagani. Yuqoridagisiga birinchi qo'ng'iroq qilinadi.",
+      "ownerKindLabel": "Egasining turi",
+      "ownerKindNote": "Bu filtr qatorlarni bitta ekranga yig'adi, hukm chiqarmaydi. Nomdan egani aniqlash aniq emas, shuning uchun ro'yxatni ko'zdan kechiring.",
+      "ownerKinds": {
+        "harbiy": "Harbiy va maxsus obyekt",
+        "temiryul": "Temir yo'l bo'linmasi",
+        "davlat": "Davlat korxonasi",
+        "gigant": "Yirik davlat sanoati",
+        "xususiy": "Xususiy korxona"
+      },
+      "bulkHide": "Topilganini yashirish",
+      "bulkDelete": "Topilganini o'chirish",
+      "bulkWarn": "{count} qator topildi. Yashirish tavsiya etiladi: o'chirilgan reestr qatori keyingi import bilan qaytib keladi, yashirilgani esa yashirin qoladi.",
+      "bulkDone": "{done} qator bajarildi, {skipped} o'tkazib yuborildi."
     },
     "stations": {
       "lead": "Rasmiy stansiya reestri. Koordinata shu yerda tuzatiladi va xaritaga darrov tushadi.",

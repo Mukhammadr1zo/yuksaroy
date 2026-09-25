@@ -1,10 +1,10 @@
-import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { IsBoolean, IsDateString, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, MaxLength, Min } from 'class-validator';
 import {
-  CLAIM_STATUSES, REGIONS, RJUS, TERMINAL_KINDS, TERMINAL_STATUSES, slugify,
-  type ClaimStatus, type RegionCode, type Rju, type TerminalKind, type TerminalStatus,
+  CLAIM_STATUSES, OWNER_KINDS, REGIONS, RJUS, TERMINAL_KINDS, TERMINAL_STATUSES, slugify,
+  type ClaimStatus, type OwnerKind, type RegionCode, type Rju, type TerminalKind, type TerminalStatus,
 } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
@@ -13,6 +13,7 @@ import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { regionOfPoint } from '../catalog/domain/region-of-point';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { ownerKindWhere } from './owner-kind.where';
 import { ImpressionsService } from '../impressions/impressions.service';
 
 /** Terminal (shahobcha yo'l ham shu jadvalda): nom va tur majburiy, qolgani pasport ustunlari. */
@@ -95,6 +96,19 @@ class StationCreateDto {
 
 class StationUpdateDto extends PartialType(StationCreateDto) {}
 
+/** Guruh amali: bitta chaqiruvda eng ko'p shuncha qator. Kattarog'i bo'lsa filtr aniqlashtiriladi. */
+const BULK_MAX = 500;
+
+/** Reestr tozalash uchun guruh amali. Izohi bulkByOwner ustida. */
+class BulkOwnerDto {
+  @IsIn(OWNER_KINDS) ownerKind!: OwnerKind;
+  @IsIn(['HIDE', 'DELETE']) action!: 'HIDE' | 'DELETE';
+  /** Operator ekranda ko'rgan son. Farq qilsa amal bajarilmaydi. */
+  @IsInt() @Min(0) expect!: number;
+  /** Bog'liq qatorlari bor bo'lsa ham o'chirishga ataylab berilgan tasdiq. */
+  @IsOptional() @IsBoolean() force?: boolean;
+}
+
 type Row = Record<string, unknown>;
 /** Faqat haqiqatan kelgan kalitlar: PATCH da yo'q kalit ustunni null qilib yubormasin. */
 const defined = (dto: object): Row => Object.fromEntries(Object.entries(dto).filter(([, v]) => v !== undefined));
@@ -143,6 +157,7 @@ export class AdminCatalogController {
     @Query('status') status?: string,
     @Query('claim') claim?: string,
     @Query('owned') owned?: string,
+    @Query('ownerKind') ownerKind?: string,
     @Query('sort') sort?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -157,6 +172,9 @@ export class AdminCatalogController {
       status: pickIn(status, TERMINAL_STATUSES),
       claimStatus: pickIn(claim, CLAIM_STATUSES),
       orgId: owned === '1' ? { not: null } : owned === '0' ? null : undefined,
+      // AND ichida: yuqoridagi matn qidiruvi ham OR ishlatadi, ikkisi bir sathda
+      // bo'lsa biri ikkinchisini ustidan yozib ketardi
+      ...(pickIn(ownerKind, OWNER_KINDS) ? { AND: [ownerKindWhere(ownerKind as OwnerKind)] } : {}),
     };
     /*
      * sort=demand: qaysi obyektga birinchi qo'ng'iroq qilish kerakligi.
@@ -284,6 +302,72 @@ export class AdminCatalogController {
     await this.prisma.terminal.delete({ where: { id } });
     await this.audit.log({ actorId: userId, action: 'admin.terminal.delete', entity: 'Terminal', entityId: id, meta: { name: t.name, ...impact } });
     return { id, deleted: true, ...impact };
+  }
+
+  /**
+   * Reestr tozalash: egasining turi bo'yicha guruh amali.
+   *
+   * Nega kerak: katalogdagi ~1700 qatorning bir qismi bozorga chiqmaydigan egalarga
+   * tegishli (harbiy qism, jazoni ijro etish muassasasi, temir yo'lning o'z depolari,
+   * davlat korxonalari, NGMK va AGMK kabi gigantlar). Ularni bittalab yon varaqdan
+   * o'chirish ~200 qator uchun 800 bosish degani, ya'ni amalda bajarilmaydigan ish.
+   *
+   * Nega yashirish ham bor: reestr qatorlari registryNo bo'yicha upsert qilinadi
+   * (prisma/seed/seed.ts). O'chirilgan qator keyingi import bilan qaytib keladi va
+   * create shoxi uni ACTIVE qilib qo'yadi. HIDDEN qator esa update shoxida status ga
+   * tegilmagani uchun HIDDEN bo'lib qoladi, ya'ni yashirish chidamliroq.
+   *
+   * Uch to'siq: ekranda ko'rilgan son (expect) bilan solishtirish, bitta chaqiruvdagi
+   * chegara, va bog'liq qatorlari bor bo'lsa ataylab tasdiq (force). Buyurtmasi bor
+   * terminal hech qachon o'chmaydi: o'tkazib yuboriladi va javobda sanab beriladi.
+   */
+  @Post('catalog/terminals/bulk-owner')
+  @UseGuards(PlatformOwnerGuard)
+  async bulkByOwner(@CurrentUserId() userId: string, @Body() dto: BulkOwnerDto) {
+    const rows = await this.prisma.terminal.findMany({
+      where: ownerKindWhere(dto.ownerKind),
+      select: { id: true, name: true, registryNo: true, status: true, ownerNameRaw: true },
+      orderBy: { id: 'asc' },
+      take: BULK_MAX + 1,
+    });
+    if (rows.length > BULK_MAX) throw new BadRequestException({ code: 'BULK_TOO_MANY', max: BULK_MAX });
+    // Operator ko'rgan ro'yxat bilan o'chadigan ro'yxat bir xil bo'lishi kerak
+    if (rows.length !== dto.expect) throw new ConflictException({ code: 'BULK_COUNT_CHANGED', count: rows.length, expect: dto.expect });
+    if (!rows.length) return { action: dto.action, done: 0, skipped: 0 };
+
+    const ids = rows.map((r) => r.id);
+    const meta = (t: (typeof rows)[number]) => ({ name: t.name, registryNo: t.registryNo, owner: t.ownerNameRaw, ownerKind: dto.ownerKind });
+
+    if (dto.action === 'HIDE') {
+      const res = await this.prisma.terminal.updateMany({ where: { id: { in: ids }, status: { not: 'HIDDEN' } }, data: { status: 'HIDDEN' } });
+      await this.audit.logMany(rows.map((t) => ({ actorId: userId, action: 'admin.terminal.bulkHide', entity: 'Terminal', entityId: t.id, meta: { ...meta(t), was: t.status } })));
+      return { action: 'HIDE', done: res.count, skipped: rows.length - res.count };
+    }
+
+    // Order.terminalId RESTRICT: buyurtmasi bor terminal o'chmaydi. Oldindan ajratmasak
+    // butun amal FK xatosi bilan yiqilardi va nima o'chib, nima qolgani bilinmasdi.
+    const busy = await this.prisma.order.findMany({ where: { terminalId: { in: ids } }, select: { terminalId: true }, distinct: ['terminalId'] });
+    const blocked = new Set(busy.map((o) => o.terminalId));
+    const gone = rows.filter((t) => !blocked.has(t.id));
+    const goneIds = gone.map((t) => t.id);
+    if (!goneIds.length) return { action: 'DELETE', done: 0, skipped: rows.length, orders: blocked.size };
+
+    const [tariffs, reviews, services, slots, inquiries] = await Promise.all([
+      this.prisma.tariff.count({ where: { terminalId: { in: goneIds } } }),
+      this.prisma.review.count({ where: { terminalId: { in: goneIds } } }),
+      this.prisma.terminalService.count({ where: { terminalId: { in: goneIds } } }),
+      this.prisma.timeSlot.count({ where: { terminalId: { in: goneIds } } }),
+      this.prisma.inquiry.count({ where: { terminalId: { in: goneIds } } }),
+    ]);
+    const impact = { tariffs, reviews, services, slots, inquiries };
+    if (tariffs + reviews + services + slots + inquiries > 0 && !dto.force) {
+      throw new ConflictException({ code: 'BULK_HAS_DATA', ...impact, count: goneIds.length, hint: 'force' });
+    }
+
+    // Audit o'chirishdan OLDIN: qator ketgandan keyin uning nomi ham qolmaydi
+    await this.audit.logMany(gone.map((t) => ({ actorId: userId, action: 'admin.terminal.bulkDelete', entity: 'Terminal', entityId: t.id, meta: { ...meta(t), ...impact } })));
+    const res = await this.prisma.terminal.deleteMany({ where: { id: { in: goneIds } } });
+    return { action: 'DELETE', done: res.count, skipped: rows.length - res.count, orders: blocked.size, ...impact };
   }
 
   /**

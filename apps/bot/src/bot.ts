@@ -31,9 +31,19 @@ if (!PUBLIC_LINK) console.warn(`bot: ${env.WEB_URL} ommaviy https emas, xabarlar
 const bot = new Telegraf(env.BOT_TOKEN);
 const pendingToken = new Map<number, string>(); // chatId -> login token (/start login_<token>)
 
-/** API chaqiruvi, 10 s timeout. Tarmoq xatosi chaqiruvchida ushlanadi. */
+/**
+ * API chaqiruvi, 10 s timeout. Tarmoq xatosi chaqiruvchida ushlanadi.
+ *
+ * content-type faqat tana bo'lganda: Fastify tanasi bo'sh JSON so'rovini 400 bilan
+ * rad etadi va bu guardlargacha ham yetib bormaydi. Hozir bot DELETE chaqirmaydi,
+ * lekin keyin qo'shilsa shu tuzoqqa tushmasin (web tomonda aynan shu xato bo'lgan).
+ */
 const api = (path: string, init?: RequestInit & { headers?: Record<string, string> }) =>
-  fetch(`${env.API_URL}/v1${path}`, { ...init, headers: { 'content-type': 'application/json', ...init?.headers }, signal: AbortSignal.timeout(10_000) });
+  fetch(`${env.API_URL}/v1${path}`, {
+    ...init,
+    headers: { ...(init?.body == null ? {} : { 'content-type': 'application/json' }), ...init?.headers },
+    signal: AbortSignal.timeout(10_000),
+  });
 
 type Lang = 'uz' | 'ru' | 'en';
 const langOf = (code?: string): Lang => (code?.startsWith('ru') ? 'ru' : code?.startsWith('en') ? 'en' : 'uz');

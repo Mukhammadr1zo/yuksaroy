@@ -114,6 +114,7 @@
       "loading": "Loading",
       "loadFailed": "Could not load the data.",
       "saveFailed": "Not saved.",
+      "deleteFailed": "Not deleted.",
       "empty": "Nothing found.",
       "open": "Open",
       "total": "{count, number}",
@@ -131,6 +132,9 @@
       "BAD_ROLE": "Invalid role.",
       "BAD_STATUS": "Invalid status.",
       "BAD_VALUE": "Invalid value.",
+      "BULK_COUNT_CHANGED": "The number of rows changed. Refresh the list and try again",
+      "BULK_HAS_DATA": "These rows have related data",
+      "BULK_TOO_MANY": "Too many rows. Narrow the filter",
       "CANNOT_CHANGE_SELF": "You cannot change your own panel access.",
       "CLAIM_NOT_PENDING": "This claim has already been decided.",
       "DEMO_TARGET": "This action is not available on sample data.",
@@ -260,7 +264,20 @@
       "sortDemand": "By demand",
       "views30": "Opens, 30 days",
       "openInquiries": "Unanswered",
-      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means no reply has been sent yet. Call from the top down."
+      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means no reply has been sent yet. Call from the top down.",
+      "ownerKindLabel": "Owner type",
+      "ownerKindNote": "This filter gathers the rows onto one screen; it does not decide anything. Reading the owner from the name is not exact, so look through the list.",
+      "ownerKinds": {
+        "harbiy": "Military and special",
+        "temiryul": "Railway unit",
+        "davlat": "State enterprise",
+        "gigant": "Large state industry",
+        "xususiy": "Private company"
+      },
+      "bulkHide": "Hide the matches",
+      "bulkDelete": "Delete the matches",
+      "bulkWarn": "Found {count} rows. Hiding is the safer choice: a deleted registry row returns with the next import, a hidden one stays hidden.",
+      "bulkDone": "{done} rows done, {skipped} skipped."
     },
     "stations": {
       "lead": "The official station registry. Fix coordinates here and the map picks them up.",

@@ -25,4 +25,21 @@ export class AuditService {
       if (strict) throw err;
     }
   }
+
+  /**
+   * Guruh amali: har qator uchun alohida yozuv, bitta so'rovda.
+   *
+   * Nega har qatorga alohida: audit qatorni entityId bo'yicha qidiradi. Butun guruhga
+   * bitta yozuv qoldirilsa "shu terminal nega yo'qoldi" degan savolga javob topilmaydi.
+   */
+  async logMany(rows: { actorId?: string | null; action: string; entity: string; entityId: string; meta?: unknown }[]) {
+    if (!rows.length) return;
+    try {
+      await this.prisma.auditLog.createMany({
+        data: rows.map((e) => ({ actorId: e.actorId ?? null, action: e.action, entity: e.entity, entityId: e.entityId, meta: e.meta as any })),
+      });
+    } catch (err) {
+      console.error('audit failed', err);
+    }
+  }
 }
