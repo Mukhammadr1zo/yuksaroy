@@ -33,6 +33,8 @@ const GROUPS: { key: string; items: Item[] }[] = [
     // Obunachilar reyestri: operator ham ko'radi (kim to'lagan degan savol kundalik ish),
     // lekin tasdiqlangan obunani bekor qilish faqat egada
     { href: '/admin/subscriptions', key: 'subscriptions' },
+    // Tarif yaratish operatorga ham ochiq: egasi shuni so'radi, server ham shunday
+    { href: '/admin/plans', key: 'plans' },
     // Reklamani ega sotadi, operator matnini ko'radi: server ham shunday ajratadi
     { href: '/admin/ads', key: 'ads' },
     // Pul hisobi: server ham faqat egaga beradi

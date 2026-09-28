@@ -55,6 +55,25 @@ export function detectImageExt(buf: Buffer): 'jpg' | 'png' | 'webp' | null {
 }
 
 /**
+ * Reklama uchun media imzosi: harakatlanuvchi rasm va ovozsiz video.
+ *
+ * Nega alohida: reklama bannerini brend beradi va u ko'pincha GIF yoki qisqa video
+ * bo'ladi. Katalogdagi surat uchun bu turlar ochilmaydi, chunki e'lon fotosi qimirlab
+ * turmasligi kerak.
+ *
+ * Tur mazmun imzosidan aniqlanadi, mijoz aytgan mimetype dan emas: .mp4 nomli boshqa
+ * fayl ochiq papkaga tushib qolmasin.
+ */
+export function detectAdMediaExt(buf: Buffer): 'gif' | 'mp4' | 'webm' | null {
+  if (buf.length >= 6 && ['GIF87a', 'GIF89a'].includes(buf.toString('ascii', 0, 6))) return 'gif';
+  // ISO BMFF: uzunlik (4 bayt) keyin 'ftyp'. mov va 3gp ham shunday, lekin brauzer
+  // ularni chizmaydi, shuning uchun mimetype video/mp4 bo'lishi ham shart (chaqiruvchida)
+  if (buf.length >= 12 && buf.toString('ascii', 4, 8) === 'ftyp') return 'mp4';
+  if (buf.length >= 4 && buf.subarray(0, 4).toString('hex') === '1a45dfa3') return 'webm';
+  return null;
+}
+
+/**
  * Hujjat imzosi. docx/xlsx ichida ZIP yotadi, shuning uchun ularni bir-biridan
  * mazmun bo'yicha ajratib bo'lmaydi: ZIP ekani tasdiqlanadi, aniq turni esa mijoz
  * aytgan mimetype belgilaydi. Bu xavfsiz, chunki fayl brauzerda bajarilmaydi

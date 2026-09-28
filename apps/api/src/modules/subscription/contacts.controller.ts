@@ -9,7 +9,7 @@ import { ImpressionsService } from '../impressions/impressions.service';
 import { visibleCompany } from '../catalog/infrastructure/prisma-catalog.repository';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { canSearch, serialize } from '../wagon/wagon.rules';
-import { SubscriptionService } from './subscription.service';
+import { planLimit, SubscriptionService } from './subscription.service';
 
 const KINDS = ['listing', 'terminal', 'org', 'service', 'request', 'offer'] as const;
 type Kind = (typeof KINDS)[number];
@@ -85,8 +85,11 @@ export class ContactsController {
   private async give(userId: string, kind: Kind, found: Found) {
     const { phone, free } = found;
     const cfg = await this.config.get();
+    // Qator o'zi kerak, "bormi" degan javob emas: kunlik chegara tarifning o'z sonidan olinadi
+    const act = await this.subs.active(userId, 'PHONE');
+    const daily = planLimit(act?.limits, 'phoneRevealDaily', cfg.phoneRevealDaily);
     if (!free) {
-      const subscriber = await this.subs.isActive(userId, 'PHONE');
+      const subscriber = act !== null;
       /*
        * Bepul oyna: obunasiz odamga umrbod birinchi N ta raqam. Qoida vagon
        * qidiruvinikidan (canSearch): obunachi cheksiz, qolganiga N ta.
@@ -98,16 +101,16 @@ export class ContactsController {
       // Devor javobida narx, kunlik chegara va bepul oyna ham bor: odam nima
       // ochilishini, qancha turishini va nimasi bepulligini shu yerdan biladi.
       if (!canSearch(subscriber, freeUsed, cfg.phoneRevealFree)) {
-        throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: cfg.subscriptionMonthSom, dailyLimit: cfg.phoneRevealDaily, freeTotal: cfg.phoneRevealFree }, 402);
+        throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: cfg.subscriptionMonthSom, dailyLimit: daily, freeTotal: cfg.phoneRevealFree }, 402);
       }
     }
     if (phone === null) return { phone };
-    const today = await this.todayReveals(userId, cfg.phoneRevealDaily);
+    const today = await this.todayReveals(userId, daily);
     // Dedup topilgan obyekt id si bo'yicha: bir odam bitta terminalni slug bilan ham,
     // id bilan ham ochsa bu BITTA ochilish
     const first = !today.some((r) => r.entity === kind && r.entityId === found.id);
     if (first) {
-      if (today.length >= cfg.phoneRevealDaily) throw new HttpException({ code: 'RATE_LIMITED', used: today.length, limit: cfg.phoneRevealDaily }, 429);
+      if (today.length >= daily) throw new HttpException({ code: 'RATE_LIMITED', used: today.length, limit: daily }, 429);
       /*
        * Bu qator KVOTANING O'ZI: yozilmasa raqam ham berilmaydi. Xom Prisma xatosi
        * global filtrda 400/404 ga aylanib "raqam yo'q" bo'lib ko'rinardi, shuning

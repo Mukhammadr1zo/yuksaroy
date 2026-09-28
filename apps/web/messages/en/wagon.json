@@ -1,12 +1,8 @@
 {
   "wagon": {
-    "title": "Wagon search",
-    "meta": {
-      "title": "Where is the wagon · YukSaroy",
-      "description": "Enter a wagon number: its last known location, which station it is at, loaded or empty."
-    },
+    "title": "Wagon search by number",
     "eyebrow": "Where is the wagon",
-    "lead": "Enter a wagon number: its last known location, which station it is at, loaded or empty.",
+    "lead": "Enter a wagon number: its last known location, which station it is at, loaded or empty. The first search is free.",
     "label": "Wagon numbers",
     "placeholder": "For example 24567890, 24567891",
     "hint": "One number per line or separated by commas, up to 20. Each has 7 or 8 digits.",
@@ -53,8 +49,8 @@
       "notFound": "not found"
     },
     "seo": {
-      "title": "Wagon tracking by number in Uzbekistan | YukSaroy",
-      "description": "Enter a wagon number and see its last known location: which station it is at, loaded or empty. Find a wagon by number across Uzbekistan."
+      "title": "Track a wagon by number: first search free | YukSaroy",
+      "description": "Wagon location by number in Uzbekistan: which station it is at, loaded or empty, and what time the data refers to. The first search is free, up to 20 numbers at once."
     },
     "about": {
       "h2": "How to find out where a wagon is",
@@ -98,7 +94,17 @@
       "q5": "Is route history shown?",
       "a5": "No, only the last known location.",
       "q6": "Do I need to sign in?",
-      "a6": "Yes. Free searches are counted per user, so a search is tied to an account. The sign-in code arrives in the Telegram bot."
+      "a6": "Yes. Free searches are counted per user, so a search is tied to an account. The sign-in code arrives in the Telegram bot.",
+      "q7": "How much does a wagon search cost?",
+      "a7": "The first search is free. Opening the same wagon again within 6 hours does not count either. After that you need a subscription, which opens unlimited search."
+    },
+    "free": {
+      "h2": "The first search is free",
+      "p": "The first search is free for every account: you can check a number and see the answer without paying. Opening your own wagon again within 6 hours is free too. After that, unlimited search comes with a subscription."
+    },
+    "words": {
+      "h2": "Other names for this",
+      "p": "People look for this page in different ways: track a wagon, wagon tracking by number, wagon location, where is my wagon, check a wagon by number, find the wagon station. It is all the same thing: you enter the number and see where the wagon is now."
     }
   }
 }

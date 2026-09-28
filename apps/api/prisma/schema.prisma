@@ -895,6 +895,12 @@ model Subscription {
   /// Eski qatorlar migratsiyada ikkalasini ham oladi, ya'ni bugungi obunachilar hech
   /// narsa sezmaydi va kodda "eskimi yoki yangimi" degan shart kerak bo'lmaydi.
   grants      String[]  @default([])
+  /// Qaysi tarifdan olingan. Tarif keyin o'zgarsa yoki o'chsa ham bu obuna o'z
+  /// shartida qoladi: ruxsat va chegaralar qator ichiga KO'CHIRIB yoziladi.
+  planId      String?
+  plan        Plan?     @relation(fields: [planId], references: [id], onDelete: SetNull)
+  /// Sotib olingan paytdagi chegaralar nusxasi. Bo'sh bo'lsa umumiy sozlama ishlaydi.
+  limits      Json?
   amountTiyin BigInt
   status      String    @default("PENDING") // PENDING | ACTIVE | CANCELLED
   provider    String? // 'manual'
@@ -1148,4 +1154,35 @@ model AdPlacement {
   updatedAt    DateTime @updatedAt @db.Timestamptz(3)
 
   @@index([placement, status, startsAt, endsAt])
+}
+
+/// Obuna tarifi: narxi, nimani ochishi va chegaralari. Admin yoki moderator yaratadi.
+///
+/// Nega jadval: ilgari bitta narx sozlamada turardi va "tarif" degan tushuncha umuman
+/// yo'q edi. Yangi tarif qo'shish uchun kod, uchta tarjima fayli va deploy kerak edi.
+///
+/// Tarif YO'Q bo'lsa tizim eskicha ishlaydi: sozlamadagi narx va to'liq obuna. Ya'ni bu
+/// jadval ustiga qo'yiladigan qatlam, majburiy bosqich emas.
+model Plan {
+  id            String   @id @default(cuid())
+  /// Buyurtmada shu kod ketadi; nom o'zgarsa ham havolalar buzilmaydi
+  code          String   @unique
+  /// Nom va tavsif satrlari uch tilda: { uz, ru, en } va { uz: [], ru: [], en: [] }.
+  /// Admin yozgan matnni next-intl tarjima qila olmaydi, shuning uchun bazada.
+  name          Json
+  features      Json
+  priceMonthSom Int
+  /// Nimani ochadi: SUBSCRIPTION_GRANTS ro'yxatidan
+  grants        String[] @default([])
+  /// Chegaralar: PLAN_LIMIT_KEYS dagi kalitlar. Bo'sh bo'lsa umumiy sozlama ishlaydi.
+  limits        Json?
+  maxMonths     Int      @default(12)
+  sort          Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+
+  subscriptions Subscription[]
+
+  @@index([active, sort])
 }

@@ -14,6 +14,11 @@ class OrderDto {
   @IsInt() @Min(1) @Max(12) months!: number;
   /** Qaysi tarif. Berilmasa telefon tarifi: eski mijozlar va bot shu yo'ldan keladi. */
   @IsOptional() @IsIn(SUBSCRIPTION_GRANTS) grant?: SubscriptionGrant;
+  /**
+   * Admin yaratgan tarifning kodi. Berilsa narx, ruxsat va chegara o'sha tarifdan
+   * olinadi va `grant` e'tiborga olinmaydi.
+   */
+  @IsOptional() @IsString() @MaxLength(30) planCode?: string;
 }
 
 /** Bekor qilish sababi majburiy: auditga yoziladi. */
@@ -77,8 +82,8 @@ export class SubscriptionController {
 
   @Post('subscription/orders') @HttpCode(201)
   async order(@CurrentUserId() userId: string, @Body() dto: OrderDto) {
-    const r = await this.subs.order(userId, dto.months, dto.grant);
-    if (!r.reused) await this.audit.log({ actorId: userId, action: 'subscription.create', entity: 'Subscription', entityId: r.order.id, meta: { no: r.order.no, months: dto.months, grants: r.order.grants, amountTiyin: r.order.amountTiyin } });
+    const r = await this.subs.order(userId, dto.months, dto.grant, dto.planCode);
+    if (!r.reused) await this.audit.log({ actorId: userId, action: 'subscription.create', entity: 'Subscription', entityId: r.order.id, meta: { no: r.order.no, months: dto.months, grants: r.order.grants, planCode: dto.planCode ?? null, amountTiyin: r.order.amountTiyin } });
     return r;
   }
 

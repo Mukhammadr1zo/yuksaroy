@@ -96,7 +96,8 @@
       "visits": "Visits",
       "revenue": "Revenue",
       "subscriptions": "Subscriptions",
-      "ads": "Ads"
+      "ads": "Ads",
+      "plans": "Plans"
     },
     "common": {
       "search": "Search",
@@ -705,7 +706,6 @@
       "title": "Title",
       "body": "Text",
       "href": "Link",
-      "imageUrl": "Image URL",
       "placement": "Placement",
       "range": "Period",
       "startsAt": "Starts",
@@ -714,11 +714,39 @@
       "price": "Paid, UZS",
       "place": {
         "terminal-aside": "Terminal page",
-        "listing-aside": "Listing page"
+        "listing-aside": "Listing page",
+        "site-left": "Left column (every page)",
+        "site-right": "Right column (every page)"
       },
       "st": {
         "DRAFT": "Draft",
         "ACTIVE": "Active"
+      },
+      "media": "Banner file",
+      "mediaHint": "An image, a GIF or a silent video (mp4, webm). On the page the video plays muted and loops.",
+      "mediaRemove": "Remove the file"
+    },
+    "plans": {
+      "lead": "Subscription plans: price, contents and limits. A plan created here appears on the subscription card on the site.",
+      "note": "Editing or deleting a plan does not change the terms of someone who has already paid: their terms are written into their own order.",
+      "empty": "No plans yet. In that case the subscription card shows the general price.",
+      "new": "New plan",
+      "code": "Code",
+      "name": "Name",
+      "features": "What is included",
+      "featuresHint": "One benefit per line",
+      "price": "Per month, som",
+      "grants": "What it unlocks",
+      "phoneRevealDaily": "Numbers a day",
+      "fromSettings": "As in settings",
+      "limitHint": "Leave empty to use the number from the general settings.",
+      "maxMonths": "Longest term, months",
+      "sort": "Order",
+      "onSale": "On sale",
+      "offSale": "Off sale",
+      "grant": {
+        "PHONE": "Phone number",
+        "WAGON": "Wagon search"
       }
     }
   }

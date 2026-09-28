@@ -6,10 +6,10 @@
  * egada: bu sotuv va pul. Server ham shunday, bu yerdagi yashirish faqat ishlamaydigan
  * tugmani ko'rsatmaslik uchun.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { AD_PLACEMENTS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
-import { api, post } from '@/lib/api';
+import { api, authHeaders, post } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
 import type { Me } from '@/lib/types-auth';
 import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pill, Toolbar, errText } from '@/components/admin/kit';
@@ -19,6 +19,10 @@ type Ad = {
   buyer: string | null; pricePaidSom: number; status: AdStatus; startsAt: string; endsAt: string;
 };
 type Draft = Omit<Ad, 'id'>;
+
+/** Banner fayli: rasm, harakatlanuvchi rasm va ovozsiz video. Server ham shu ro'yxatni tekshiradi. */
+const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm';
+const isVideo = (url: string) => /\.(mp4|webm)(\?|#|$)/i.test(url);
 
 const day = (d: Date) => d.toISOString().slice(0, 10);
 const NEW = (): Draft => ({
@@ -39,6 +43,8 @@ export default function AdminAdsPage() {
   const [sheet, setSheet] = useState<{ id: string | null; d: Draft } | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [upBusy, setUpBusy] = useState(false);
+  const file = useRef<HTMLInputElement>(null);
 
   const load = useCallback(() => {
     const qs = new URLSearchParams(Object.entries(f).filter(([, v]) => v) as [string, string][]);
@@ -50,6 +56,28 @@ export default function AdminAdsPage() {
   useEffect(() => { api<Me>('/auth/me').then((m) => setIsOwner(!!m.isPlatformOwner)).catch(() => {}); }, []);
 
   const set = (p: Partial<Draft>) => setSheet((s) => (s ? { ...s, d: { ...s.d, ...p } } : s));
+
+  /**
+   * Banner faylini yuklash: brend rasm yoki qisqa video beradi, havola emas.
+   *
+   * To'g'ridan-to'g'ri fetch: api() JSON yuboradi, bu yerda esa multipart kerak.
+   */
+  async function upload(f: File | undefined) {
+    if (!f) return;
+    setUpBusy(true);
+    setNote(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', f);
+      const res = await fetch('/api/v1/admin/ads/media', { method: 'POST', body: fd, credentials: 'include', headers: authHeaders() });
+      const b = await res.json().catch(() => null);
+      if (!res.ok) throw Object.assign(new Error('upload'), { code: b?.code });
+      set({ imageUrl: b.url });
+    } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); } finally {
+      setUpBusy(false);
+      if (file.current) file.current.value = '';
+    }
+  }
 
   async function save() {
     if (!sheet) return;
@@ -152,9 +180,20 @@ export default function AdminAdsPage() {
             <Labeled label={ta('href')} className="block">
               <input className={INPUT} value={sheet.d.href} maxLength={500} onChange={(e) => set({ href: e.target.value })} placeholder="https://" />
             </Labeled>
-            <Labeled label={ta('imageUrl')} className="block">
-              <input className={INPUT} value={sheet.d.imageUrl ?? ''} maxLength={500} onChange={(e) => set({ imageUrl: e.target.value })} />
+            <Labeled label={ta('media')} className="block">
+              <input ref={file} type="file" accept={ACCEPT} className={INPUT} disabled={upBusy} onChange={(e) => upload(e.target.files?.[0])} />
             </Labeled>
+            <p className="text-xs text-muted">{ta('mediaHint')}</p>
+            {upBusy ? <p className="text-xs text-muted">{tc('loading')}</p> : null}
+            {sheet.d.imageUrl ? (
+              <div className="flex items-start gap-3 rounded-xl border border-line p-3">
+                {isVideo(sheet.d.imageUrl)
+                  ? <video src={sheet.d.imageUrl} muted playsInline loop autoPlay className="h-24 w-24 rounded-lg object-cover" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  : <img src={sheet.d.imageUrl} alt="" className="h-24 w-24 rounded-lg object-cover" />}
+                <button type="button" className={BTN_GHOST} onClick={() => set({ imageUrl: '' })}>{ta('mediaRemove')}</button>
+              </div>
+            ) : null}
             <div className="grid gap-3 sm:grid-cols-2">
               <Labeled label={ta('startsAt')} className="block">
                 <input type="date" className={INPUT} value={sheet.d.startsAt.slice(0, 10)} onChange={(e) => set({ startsAt: e.target.value })} />

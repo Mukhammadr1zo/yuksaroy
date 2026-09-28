@@ -96,7 +96,8 @@
       "visits": "Tashriflar",
       "revenue": "Tushum",
       "subscriptions": "Obunalar",
-      "ads": "Reklama"
+      "ads": "Reklama",
+      "plans": "Tariflar"
     },
     "common": {
       "search": "Qidiruv",
@@ -705,7 +706,6 @@
       "title": "Sarlavha",
       "body": "Matn",
       "href": "Havola",
-      "imageUrl": "Rasm manzili",
       "placement": "Joyi",
       "range": "Muddati",
       "startsAt": "Boshlanadi",
@@ -714,11 +714,39 @@
       "price": "To'langan, so'm",
       "place": {
         "terminal-aside": "Terminal sahifasi",
-        "listing-aside": "E'lon sahifasi"
+        "listing-aside": "E'lon sahifasi",
+        "site-left": "Chap ustun (hamma sahifa)",
+        "site-right": "O'ng ustun (hamma sahifa)"
       },
       "st": {
         "DRAFT": "Qoralama",
         "ACTIVE": "Faol"
+      },
+      "media": "Banner fayli",
+      "mediaHint": "Rasm, GIF yoki ovozsiz video (mp4, webm). Video sahifada ovozsiz va o'zi aylanib turadi.",
+      "mediaRemove": "Faylni olib tashlash"
+    },
+    "plans": {
+      "lead": "Obuna tariflari: narxi, ichidagilari va chegaralari. Shu yerda yaratilgan tarif saytdagi obuna kartasida chiqadi.",
+      "note": "Tarif o'zgartirilsa yoki o'chirilsa, allaqachon to'lagan odamning sharti o'zgarmaydi: uning shartlari o'z buyurtmasiga yozilgan.",
+      "empty": "Hali tarif yaratilmagan. Bunday holatda obuna kartasi umumiy narxni ko'rsatadi.",
+      "new": "Yangi tarif",
+      "code": "Kod",
+      "name": "Nomi",
+      "features": "Ichida nima bor",
+      "featuresHint": "Har qatorda bitta imkoniyat",
+      "price": "Bir oyi, so'm",
+      "grants": "Nima ochiladi",
+      "phoneRevealDaily": "Kuniga raqam",
+      "fromSettings": "Sozlamadagidek",
+      "limitHint": "Bo'sh qoldirilsa umumiy sozlamadagi son ishlaydi.",
+      "maxMonths": "Eng uzun muddat, oy",
+      "sort": "Tartib",
+      "onSale": "Sotuvda",
+      "offSale": "Sotuvdan olingan",
+      "grant": {
+        "PHONE": "Telefon raqami",
+        "WAGON": "Vagon qidiruvi"
       }
     }
   }

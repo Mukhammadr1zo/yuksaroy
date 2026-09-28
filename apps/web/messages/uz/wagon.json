@@ -1,12 +1,8 @@
 {
   "wagon": {
-    "title": "Vagon qidiruvi",
-    "meta": {
-      "title": "Vagon qayerda · YukSaroy",
-      "description": "Vagon raqamini kiriting: oxirgi joylashuvi, qaysi stansiyada turgani, yuklangan yoki bo'shligi."
-    },
+    "title": "Vagon raqami bo'yicha qidirish",
     "eyebrow": "Vagon qayerda",
-    "lead": "Vagon raqamini kiriting: oxirgi joylashuvi, qaysi stansiyada turgani, yuklangan yoki bo'shligi.",
+    "lead": "Vagon raqamini kiriting: oxirgi joylashuvi, qaysi stansiyada turgani, yuklangan yoki bo'shligi. Birinchi qidiruv bepul.",
     "label": "Vagon raqamlari",
     "placeholder": "Masalan 24567890, 24567891",
     "hint": "Har qatorga yoki vergul bilan bitta raqam, 20 tagacha. Har biri 7 yoki 8 ta raqam.",
@@ -53,8 +49,8 @@
       "notFound": "topilmadi"
     },
     "seo": {
-      "title": "Vagon qayerda: raqami bo'yicha izlash | YukSaroy",
-      "description": "Vagon raqamini kiriting va oxirgi joylashuvini ko'ring: qaysi stansiyada turgani, yuklangan yoki bo'shligi. Vagon va konteynerlarni izlash, O'zbekiston bo'ylab."
+      "title": "Vagon qayerda: raqami bo'yicha izlash, birinchisi bepul | YukSaroy",
+      "description": "Vagon raqamini kiriting va oxirgi joylashuvini ko'ring: qaysi stansiyada turgani, yuklangan yoki bo'shligi. Birinchi qidiruv bepul, bir vaqtda 20 tagacha raqam."
     },
     "about": {
       "h2": "Vagon qayerda ekanini qanday bilish mumkin",
@@ -98,7 +94,17 @@
       "q5": "Yo'nalish tarixi ko'rsatiladimi?",
       "a5": "Yo'q, faqat oxirgi joylashuv ko'rsatiladi.",
       "q6": "Kirish kerakmi?",
-      "a6": "Ha. Bepul qidiruv soni har foydalanuvchi uchun alohida sanaladi, shuning uchun qidiruv hisobga bog'lanadi. Kirish kodi Telegram botga keladi."
+      "a6": "Ha. Bepul qidiruv soni har foydalanuvchi uchun alohida sanaladi, shuning uchun qidiruv hisobga bog'lanadi. Kirish kodi Telegram botga keladi.",
+      "q7": "Vagon qidirish qancha turadi?",
+      "a7": "Birinchi qidiruv bepul. O'sha vagonni 6 soat ichida qayta ko'rish ham sanalmaydi. Undan keyin obuna kerak, u cheksiz qidiruvni ochadi."
+    },
+    "free": {
+      "h2": "Birinchi qidiruv bepul",
+      "p": "Har bir hisob uchun birinchi qidiruv bepul: raqamni tekshirib, javobni pul to'lamasdan ko'rasiz. O'zingiz qidirgan vagonni 6 soat ichida qayta ochish ham bepul. Undan keyin cheksiz qidiruv obunaga kiradi."
+    },
+    "words": {
+      "h2": "Buni yana qanday deyishadi",
+      "p": "Bu sahifani turlicha qidirishadi: vagon qidirish, vagonni raqami bo'yicha izlash, vagon qayerda, vagon dislokatsiyasi, vagon stansiyasini bilish. Hammasi bitta narsa: raqamni kiritasiz va vagon hozir qayerdaligini ko'rasiz."
     }
   }
 }

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
+import { SUBSCRIPTION_GRANTS, type PlanLimitKey, type SubscriptionGrant } from '@yuksaroy/domain';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
@@ -24,6 +24,17 @@ const payInstructions = (details: string) => ({
   method: 'manual' as const,
   details: details.trim() || env.PREMIUM_PAY_DETAILS?.trim() || PAY_PLACEHOLDER,
 });
+
+/**
+ * Tarifning o'z soni bo'lsa o'sha, bo'lmasa umumiy sozlama.
+ *
+ * Son obunaning O'Z qatorida saqlanadi (tarifga havola emas): admin tarifni keyin
+ * o'zgartirsa yoki o'chirsa, to'lab qo'ygan odamning sharti o'zgarmaydi.
+ */
+export const planLimit = (limits: unknown, key: PlanLimitKey, fallback: number) => {
+  const n = (limits as Record<string, unknown> | null | undefined)?.[key];
+  return typeof n === 'number' && n > 0 ? n : fallback;
+};
 
 type Row = { id: string; no: string; userId: string; months: number; grants: string[]; amountTiyin: bigint; status: string; provider: string | null; startsAt: Date | null; endsAt: Date | null; paidAt: Date | null; createdAt: Date };
 /** BigInt -> Number (JSON). */
@@ -108,7 +119,8 @@ export class SubscriptionService {
     return this.prisma.subscription.findFirst({
       where: { userId, status: 'ACTIVE', endsAt: { gt: now }, ...(grant ? { grants: { has: grant } } : {}) },
       orderBy: { endsAt: 'desc' },
-      select: { id: true, endsAt: true },
+      // limits: tarifda o'z soni bo'lsa raqam chegarasi shu qatordan olinadi
+      select: { id: true, endsAt: true, limits: true },
     });
   }
 
@@ -136,19 +148,26 @@ export class SubscriptionService {
 
   async me(userId: string) {
     const now = new Date();
-    const [act, pending, cfg] = await Promise.all([
+    const [act, pending, cfg, catalog] = await Promise.all([
       this.active(userId, undefined, now),
       this.prisma.subscription.findFirst({ where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
       this.config.get(),
+      this.prisma.plan.findMany({
+        where: { active: true },
+        orderBy: [{ sort: 'asc' }, { code: 'asc' }],
+        select: { code: true, name: true, features: true, priceMonthSom: true, grants: true, maxMonths: true },
+        take: 20,
+      }),
     ]);
     // Har ruxsat turi alohida: faolmi, qachongacha, qancha turadi. Eski maydonlar
     // o'z joyida qoladi, chunki ularni oltita ekran va bot o'qiydi.
-    const plans = await Promise.all(
-      SUBSCRIPTION_GRANTS.map(async (grant) => {
-        const a = await this.active(userId, grant, now);
-        return { grant, active: a !== null, endsAt: a?.endsAt ?? null, pricePerMonthSom: this.price(cfg, grant) };
-      }),
-    );
+    const rows = await Promise.all(SUBSCRIPTION_GRANTS.map((grant) => this.active(userId, grant, now)));
+    const plans = SUBSCRIPTION_GRANTS.map((grant, i) => ({
+      grant, active: rows[i] !== null, endsAt: rows[i]?.endsAt ?? null, pricePerMonthSom: this.price(cfg, grant),
+    }));
+    // Kunlik raqam chegarasi TELEFON obunasining qatoridan: vagon tarifi bilan kelgan
+    // odamga telefon chegarasi ko'rsatilsa u yo'q huquqning sonini ko'rardi
+    const phoneRow = rows[SUBSCRIPTION_GRANTS.indexOf('PHONE')];
     return {
       active: act !== null,
       endsAt: act?.endsAt ?? null,
@@ -156,9 +175,15 @@ export class SubscriptionService {
       // Faol obunachiga ortiqcha so'rov ketmaydi: tugagani faqat obunasizga qaraladi
       expired: act ? null : await this.lapsed(userId, now),
       pricePerMonthSom: cfg.subscriptionMonthSom,
+      /*
+       * Admin yaratgan tariflar. Bo'sh bo'lsa ekran bugungidek ishlaydi: shuning uchun
+       * boshqa maydonlarning birortasi ham olib tashlanmadi.
+       */
+      catalog,
       // Kartadagi uchta chegara shu yerdan: cfg allaqachon o'qilgan, qo'shimcha so'rov yo'q.
       // Ikkinchi chaqiruv (narx yo'li) kartaga ikkinchi yuklanish qo'shardi.
-      phoneRevealDaily: cfg.phoneRevealDaily,
+      // Faol obuna tarifning o'z sonini olib kelgan bo'lsa kartada AYNAN o'sha ko'rinadi
+      phoneRevealDaily: planLimit(phoneRow?.limits, 'phoneRevealDaily', cfg.phoneRevealDaily),
       wagonSearchFree: cfg.wagonSearchFree,
       pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions(cfg.payDetails) } : null,
     };
@@ -198,13 +223,22 @@ export class SubscriptionService {
    * ya'ni bugungi mijoz uchun orqaga qadam bo'lardi. Alohida arzon tarif ataylab
    * tanlanganda sotiladi.
    */
-  async order(userId: string, months: number, plan?: SubscriptionGrant) {
+  async order(userId: string, months: number, plan?: SubscriptionGrant, planCode?: string) {
     const cfg = await this.config.get();
-    const grants = plan ? [plan] : [...SUBSCRIPTION_GRANTS];
-    const som = plan ? this.price(cfg, plan) : cfg.subscriptionMonthSom;
+    /*
+     * Admin yaratgan tarif bo'lsa narx, ruxsat va chegara SHU QATORDAN olinadi,
+     * sozlamadan emas. Yo'q yoki sotuvdan olingan kod jim o'tib ketmaydi: aks holda
+     * odam arzon tarifni tanlab, hisobida eski umumiy narxni ko'rib qolardi.
+     */
+    const p = planCode ? await this.prisma.plan.findFirst({ where: { code: planCode, active: true } }) : null;
+    if (planCode && !p) throw new NotFoundException({ code: 'PLAN_NOT_FOUND' });
+    if (p && months > p.maxMonths) throw new ConflictException({ code: 'PLAN_MAX_MONTHS', maxMonths: p.maxMonths });
+    const grants = p ? p.grants : plan ? [plan] : [...SUBSCRIPTION_GRANTS];
+    const som = p ? p.priceMonthSom : plan ? this.price(cfg, plan) : cfg.subscriptionMonthSom;
     // Ochiq buyurtma ham tur bo'yicha ajratiladi: telefon uchun ochiq buyurtmasi bor odam
-    // vagon tarifini olmoqchi bo'lsa, unga eski buyurtma va boshqa summa qaytarilardi
-    const openWhere = { where: { userId, status: 'PENDING', grants: { hasEvery: grants } }, orderBy: { createdAt: 'desc' as const } };
+    // vagon tarifini olmoqchi bo'lsa, unga eski buyurtma va boshqa summa qaytarilardi.
+    // Tarif ham shartda: bir xil ruxsatli ikki tarifning narxi boshqa bo'lishi mumkin
+    const openWhere = { where: { userId, status: 'PENDING', grants: { hasEvery: grants }, planId: p?.id ?? null }, orderBy: { createdAt: 'desc' as const } };
     try {
       // Serializable: ikki so'rov bir vaqtda kelsa (ikki marta bosish, ikki varaq) ikkinchisi
       // yiqiladi va pastda mavjud buyurtma qaytariladi; aks holda navbatda ikki qator bo'lardi
@@ -215,7 +249,8 @@ export class SubscriptionService {
         // lekin hech qachon takrorlanmaydi. Buyurtmadagi yo'l bilan bir xil
         const [{ nextval }] = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('pay_no_seq')`;
         const s = await tx.subscription.create({
-          data: { no: `PAY-${Number(nextval)}`, userId, months, grants, amountTiyin: BigInt(months * som * 100), status: 'PENDING', provider: 'manual' },
+          // limits qatorga KO'CHIRILADI: admin tarifni keyin o'zgartirsa ham shartlar o'zgarmaydi
+          data: { no: `PAY-${Number(nextval)}`, userId, months, grants, amountTiyin: BigInt(months * som * 100), status: 'PENDING', provider: 'manual', planId: p?.id ?? null, limits: p?.limits == null ? undefined : (p.limits as Prisma.InputJsonValue) },
         });
         // Takror xabar kaliti odamga bog'langan, buyurtmaga emas: bekor qilib qayta buyurtma
         // bergan odam har safar yangi id bilan adminlarga xabar yog'dira olmasin

@@ -599,16 +599,23 @@ export const REPORT = { textMin: 10, textMax: 1000, perHour: 5 } as const;
 export * from './owner-kind';
 
 /**
- * Yon tomondagi reklama joylari.
+ * Reklama joylari. Ikki xil: sahifaning ikki yonidagi ustunlar va tafsilot
+ * sahifasidagi yon blok.
  *
- * Ro'yxat qisqa va ataylab shunday: sahifalarda haqiqiy yon ustun faqat tafsilot
- * sahifalarida bor. Katalog ro'yxatlarida va bosh sahifada yon ustun yo'q, u yerga
- * reklama qo'yish yangi ustun o'ylab topishni va kartalarni siqishni talab qilardi.
+ * site-left va site-right: HAR BIR ochiq sahifada, matndan tashqarida, uzun bo'yli
+ * banner (tashqi brendlar uchun). Ular matnni siqmaydi, shuning uchun faqat keng
+ * ekranda, mazmun ustuni yonida bo'sh joy bo'lganda chiziladi. Tor ekranda
+ * chizilmaydi: mazmunni banner uchun siqish katalogni buzardi.
+ *
+ * terminal-aside va listing-aside: tafsilot sahifasidagi haqiqiy yon ustun ichida,
+ * har ekranda ko'rinadi.
  *
  * Nomi "slot" emas: bu so'z bron oynasi uchun band. Inglizcha "spot" ham o'sha bron
  * oynasining tarjimasi, shuning uchun u ham ishlatilmaydi.
  */
-export const AD_PLACEMENTS = ['terminal-aside', 'listing-aside'] as const;
+export const AD_PLACEMENTS = ['site-left', 'site-right', 'terminal-aside', 'listing-aside'] as const;
+/** Ikki yon ustun: bitta so'rovda olinadi va bitta komponent chizadi. */
+export const AD_RAILS = ['site-left', 'site-right'] as const;
 export type AdPlacement = (typeof AD_PLACEMENTS)[number];
 
 export const AD_STATUSES = ['DRAFT', 'ACTIVE'] as const;
@@ -622,3 +629,17 @@ export type AdStatus = (typeof AD_STATUSES)[number];
  */
 export const SUBSCRIPTION_GRANTS = ['PHONE', 'WAGON'] as const;
 export type SubscriptionGrant = (typeof SUBSCRIPTION_GRANTS)[number];
+
+/**
+ * Tarif ichida admin belgilay oladigan chegaralar.
+ *
+ * Oq ro'yxat: admin ixtiyoriy nom yozib yangi imkoniyat "o'ylab topa" olmaydi. Faqat
+ * kod chindan tekshiradigan chegara shu yerda turadi. Hozir bittasi: obunachining
+ * kunlik telefon ochish soni. Kod o'qimaydigan kalit qo'shilsa u ekranda son bo'lib
+ * ko'rinardi-yu hech narsani cheklamasdi.
+ */
+export const PLAN_LIMIT_KEYS = ['phoneRevealDaily'] as const;
+export type PlanLimitKey = (typeof PLAN_LIMIT_KEYS)[number];
+
+/** Tarif nomi va tavsif satrlari uch tilda: admin yozgan matnni tarjima tizimi tarjima qila olmaydi. */
+export const PLAN_LOCALES = ['uz', 'ru', 'en'] as const;

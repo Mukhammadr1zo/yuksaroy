@@ -15,6 +15,8 @@ function fake(row: { status: string } | null, count: number) {
         ('status' in a.where ? null : row), // me() ichidagi ikkinchi chaqiruvlar bo'sh
       updateMany: async (a: { where: Record<string, unknown> }) => { updates.push(a.where); return { count }; },
     },
+    // me() admin yaratgan tariflarni ham beradi; bu testda ular yo'q
+    plan: { findMany: async () => [] },
   } as never;
   const config = { get: async () => ({ subscriptionMonthSom: 50000, payDetails: '', phoneRevealDaily: 10, wagonSearchFree: 1 }) } as never;
   const svc = new SubscriptionService(prisma, config, { queued: async () => {} } as never, { recipients: async () => [], push: async () => {} } as never);

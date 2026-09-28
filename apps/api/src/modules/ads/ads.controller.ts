@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Req, UnsupportedMediaTypeException, UseGuards } from '@nestjs/common';
+import { ApiConsumes, ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { IsDateString, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
-import { AD_PLACEMENTS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
+import { AD_PLACEMENTS, AD_RAILS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { JwtGuard, CurrentUserId, optionalUserId } from '../identity/presentation/jwt.guard';
@@ -11,6 +11,8 @@ import { PlatformAdminGuard } from '../organizations/presentation/platform-admin
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { pickIn } from '../catalog/presentation/catalog.controller';
+import { detectAdMediaExt, detectImageExt } from '../../common/security';
+import { storeFile, takeFile } from '../listings/presentation/uploads.controller';
 
 class AdCreateDto {
   @IsIn(AD_PLACEMENTS) placement!: AdPlacement;
@@ -25,6 +27,17 @@ class AdCreateDto {
   @IsDateString() endsAt!: string;
 }
 class AdUpdateDto extends PartialType(AdCreateDto) {}
+
+/**
+ * Banner uchun ruxsat etilgan turlar: rasm, harakatlanuvchi rasm va ovozsiz video.
+ *
+ * Bu ro'yxat katalog fotosining ro'yxatidan boshqa: e'lon surati qimirlab turmasligi
+ * kerak, reklama banneri esa aynan shuning uchun sotiladi.
+ */
+const MEDIA_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
+  'image/gif': 'gif', 'video/mp4': 'mp4', 'video/webm': 'webm',
+};
 
 /** Ommaviy javob: sotuv ma'lumoti (kim oldi, qancha to'ladi) bu yerda yo'q. */
 const publicAd = (a: { id: string; title: string; body: string | null; imageUrl: string | null; href: string }) => ({
@@ -65,6 +78,28 @@ export class AdsPublicController {
       orderBy: [{ startsAt: 'desc' }, { id: 'asc' }],
     });
     return { ad: ad ? publicAd(ad) : null };
+  }
+
+  /**
+   * Sahifaning ikki yonidagi ustun, BITTA so'rovda.
+   *
+   * Nega alohida yo'l: bu ikki ustun har ochiq sahifada chiziladi. Har biri o'z
+   * so'rovini yuborsa har sahifa ochilishida ikki marta obuna tekshiruvi va ikki
+   * marta baza so'rovi ketardi.
+   */
+  @Get('rails')
+  async rails(@Req() req: FastifyRequest) {
+    const userId = optionalUserId(req, this.tokens);
+    if (userId && (await this.subs.isActive(userId))) return { left: null, right: null };
+    const now = new Date();
+    const rows = await this.prisma.adPlacement.findMany({
+      where: { placement: { in: [...AD_RAILS] }, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now } },
+      orderBy: [{ startsAt: 'desc' }, { id: 'asc' }],
+      take: 20,
+    });
+    // Bir ustunda bir nechta faol bo'lsa eng keyin boshlangani: `one` bilan bir xil qoida
+    const pick = (p: string) => { const a = rows.find((r) => r.placement === p); return a ? publicAd(a) : null; };
+    return { left: pick('site-left'), right: pick('site-right') };
   }
 }
 
@@ -116,6 +151,31 @@ export class AdsAdminController {
     const a = await this.prisma.adPlacement.update({ where: { id }, data: { ...dto, ...range(startsAt, endsAt) } });
     await this.audit.log({ actorId: userId, action: 'admin.ad.update', entity: 'AdPlacement', entityId: id, meta: { fields: Object.keys(dto) } });
     return a;
+  }
+
+  /**
+   * Banner faylini yuklash: rasm, GIF yoki OVOZSIZ video.
+   *
+   * Nega havola emas: brend bannerni fayl bilan beradi, uni birovning saytiga
+   * joylashtirib havola olish kerak emas. Bundan tashqari begona manzil har ochiq
+   * sahifadan brauzerni o'sha saytga murojaat qilishga majbur qilardi, ya'ni bizning
+   * "kuzatuvchi yo'q" yozuvimiz yolg'on bo'lib qolardi.
+   *
+   * Faqat platforma egasi: yaratish va o'zgartirish ham egada, bu sotuv.
+   * Tur mazmun imzosidan aniqlanadi va video ovozsiz chiziladi (chizuvchi tomonda).
+   */
+  @Post('media')
+  @UseGuards(PlatformOwnerGuard)
+  @ApiConsumes('multipart/form-data')
+  async media(@CurrentUserId() userId: string, @Req() req: FastifyRequest) {
+    const { part, buf } = await takeFile(req);
+    const ext = MEDIA_EXT[part.mimetype];
+    if (!ext) throw new BadRequestException({ code: 'FILE_TYPE', allowed: Object.keys(MEDIA_EXT) });
+    const actual = detectImageExt(buf) ?? detectAdMediaExt(buf);
+    if (actual !== ext) throw new UnsupportedMediaTypeException({ code: 'FILE_CONTENT_MISMATCH', allowed: Object.keys(MEDIA_EXT) });
+    const { url, path } = await storeFile(buf, ext, true);
+    await this.audit.log({ actorId: userId, action: 'admin.ad.media', entity: 'Upload', entityId: path, meta: { bytes: buf.length, mimetype: part.mimetype } });
+    return { url, size: buf.length, mime: part.mimetype };
   }
 
   @Delete(':id')

@@ -26,6 +26,8 @@ function setup(opts: {
   /** Audit jadvali: kvota shundan o'qiladi, ya'ni oldindan qator qo'yish mumkin. */
   auditRows?: Record<string, unknown>[];
   dailyLimit?: number;
+  /** Tarifning o'z kunlik soni: berilsa umumiy sozlama emas, shu ishlaydi */
+  planDaily?: number;
   /** Obunasiz odamga nechta raqam bepul. */
   free?: number;
   /** Audit yozuvi yiqilgan holat: kvota qatori yozilmasa raqam ham berilmaydi. */
@@ -88,7 +90,8 @@ function setup(opts: {
       rows.push({ ...r, createdAt: new Date() });
     },
   } as unknown as AuditService;
-  const subs = { isActive: async () => opts.subscriber ?? false } as unknown as SubscriptionService;
+  // active(), isActive() emas: kunlik chegara tarifning o'z qatoridan olinadi
+  const subs = { active: async () => (opts.subscriber ? { id: 's1', endsAt: new Date(), limits: opts.planDaily ? { phoneRevealDaily: opts.planDaily } : null } : null) } as unknown as SubscriptionService;
   const impressions = { record: async (items: Record<string, unknown>[]) => { opts.calls?.push(...items); } } as unknown as ImpressionsService;
   return new ContactsController(prisma, config, audit, subs, impressions);
 }
@@ -235,6 +238,18 @@ describe('kunlik kvota auditdan', () => {
     // Yangi nusxa = qayta ishga tushgan jarayon
     const c = setup({ terminal: { id: 't9', phone: '+998901234567' }, subscriber: true, dailyLimit: 3, auditRows: rows });
     expect(await refusal(() => c.reveal('u1', 'terminal', 't9'))).toMatchObject({ status: 429, used: 3, limit: 3 });
+  });
+
+  it("tarifning o'z kunlik soni umumiy sozlamadan ustun", async () => {
+    // Admin qimmatroq tarifga kuniga 3 ta yozgan, umumiy sozlama 1 ta. Chegara qatordan
+    // olinmasa to'lagan odam o'ziga sotilgan sondan kam raqam ko'rardi.
+    const now = new Date();
+    const rows = Array.from({ length: 2 }, (_, i) => ({ actorId: 'u1', action: 'contact.reveal', entity: 'terminal', entityId: 'old' + i, createdAt: now }));
+    const c = setup({ terminal: { id: 't9', phone: '+998901234567' }, subscriber: true, dailyLimit: 1, planDaily: 3, auditRows: rows });
+    expect((await c.reveal('u1', 'terminal', 't9')).phone).toBe('+998901234567');
+    // Yuqoridagi ochilish rows ga uchinchi qatorni qo'ydi: endi to'rtinchisi to'siladi
+    const d = setup({ terminal: { id: 't8', phone: '+998901234567' }, subscriber: true, dailyLimit: 1, planDaily: 3, auditRows: rows });
+    expect(await refusal(() => d.reveal('u1', 'terminal', 't8'))).toMatchObject({ status: 429, used: 3, limit: 3 });
   });
 
   it('bugun ochilgan obyekt yangi nusxada ham qayta sanalmaydi', async () => {

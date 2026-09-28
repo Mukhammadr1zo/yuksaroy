@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { WagonSearch } from '@/components/wagon/WagonSearch';
-import { Ld, breadcrumbs, pageMeta } from '@/lib/seo';
+import { Ld, breadcrumbs, pageMeta, url } from '@/lib/seo';
 
 type Params = { params: Promise<{ locale: string }> };
 
@@ -36,7 +36,7 @@ export default async function WagonPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('wagon');
-  const faq = [1, 2, 3, 4, 5, 6].map((i) => ({ q: t(`faqBlock.q${i}`), a: t(`faqBlock.a${i}`) }));
+  const faq = [1, 2, 3, 4, 5, 6, 7].map((i) => ({ q: t(`faqBlock.q${i}`), a: t(`faqBlock.a${i}`) }));
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-12 md:py-16">
@@ -50,6 +50,27 @@ export default async function WagonPage({ params }: Params) {
             name: x.q,
             acceptedAnswer: { '@type': 'Answer', text: x.a },
           })),
+        }}
+      />
+
+      {/*
+        * Asbobning o'zi: bepul narxi bilan.
+        *
+        * Nega narx sxemada: birinchi qidiruv chindan bepul va qidiruv tizimi buni
+        * faqat tuzilgan ma'lumotdan aniq o'qiy oladi. Matnda yozilgani unga taxmin,
+        * bu yerdagisi esa da'vo.
+        */}
+      <Ld
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: t('title'),
+          url: url(locale, '/wagon'),
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'Web',
+          inLanguage: locale,
+          description: t('seo.description'),
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'UZS', description: t('free.h2') },
         }}
       />
 
@@ -83,6 +104,11 @@ export default async function WagonPage({ params }: Params) {
         </ul>
         <p className={P}>{t('gives.p')}</p>
 
+        {/* Bepul birinchi qidiruv alohida sarlavha bilan: odam buni asbobga tegmasdan
+            bilishi kerak, qidiruv tizimi esa sarlavhani javob sifatida oladi */}
+        <h2 className={H2}>{t('free.h2')}</h2>
+        <p className={P}>{t('free.p')}</p>
+
         <h2 className={H2}>{t('rail.h2')}</h2>
         <p className={P}>{t('rail.p')}</p>
 
@@ -92,6 +118,10 @@ export default async function WagonPage({ params }: Params) {
           <li className={LI}>{t('who.i2')}</li>
           <li className={LI}>{t('who.i3')}</li>
         </ul>
+
+        {/* Bir narsani odamlar turli so'z bilan qidiradi: ro'yxat emas, oddiy gap */}
+        <h2 className={H2}>{t('words.h2')}</h2>
+        <p className={P}>{t('words.p')}</p>
 
         <h2 className={H2}>{t('faqBlock.h2')}</h2>
         <dl className="mt-3">
