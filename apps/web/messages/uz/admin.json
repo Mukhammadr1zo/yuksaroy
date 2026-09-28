@@ -94,7 +94,8 @@
       "market": "Yuklar va xizmatlar",
       "team": "Jamoa",
       "visits": "Tashriflar",
-      "revenue": "Tushum"
+      "revenue": "Tushum",
+      "subscriptions": "Obunalar"
     },
     "common": {
       "search": "Qidiruv",
@@ -174,6 +175,7 @@
       "STATION_NOT_FOUND": "Stansiya topilmadi.",
       "STATION_REQUIRED": "Stansiyani ko'rsating.",
       "STIR_REQUIRED": "STIR ni kiriting.",
+      "SUBSCRIPTION_NOT_ACTIVE": "Bu obuna faol emas",
       "SUBSCRIPTION_NOT_FOUND": "Obuna topilmadi.",
       "SUBSCRIPTION_NOT_PENDING": "Bu obuna to'lovi bo'yicha qaror allaqachon chiqqan.",
       "TERMINAL_HAS_DATA": "Terminalda bog'liq ma'lumot bor. Nima yo'qolishini ko'rib, tasdiqlang.",
@@ -664,6 +666,31 @@
       "decideNo": "O'rinsiz",
       "doneResolved": "Shikoyat hal qilindi deb belgilandi.",
       "doneDismissed": "Shikoyat o'rinsiz deb belgilandi."
+    },
+    "subs": {
+      "lead": "Kim to'layapti, kimniki tugayapti, kim ketdi. PAY raqami, telefon yoki ism bo'yicha qidiriladi.",
+      "no": "To'lov raqami",
+      "searchHint": "PAY-1042, telefon yoki ism",
+      "noName": "Ism yozilmagan",
+      "months": "Oy",
+      "amount": "Summa, so'm",
+      "endsAt": "Tugaydi",
+      "startsAt": "Boshlanadi",
+      "paidAt": "To'langan",
+      "createdAt": "Buyurtma sanasi",
+      "phone": "Telefon",
+      "daysLeft": "{n} kun qoldi",
+      "status": {
+        "PENDING": "Kutilmoqda",
+        "ACTIVE": "Faol",
+        "CANCELLED": "Bekor qilingan"
+      },
+      "revoke": "Obunani bekor qilish",
+      "revokeTitle": "Tasdiqlangan obunani bekor qilish",
+      "revokeHint": "Kirish shu zahoti to'xtaydi va tugash sanasi bugunga tushadi. Qaytarib bo'lmaydi.",
+      "revokeWarn": "Sabab yozilmaguncha tugma ishlamaydi",
+      "reason": "Sabab",
+      "moneyReceived": "Pul haqiqatan kelgan (belgilanmasa, bu qator daromad hisobidan chiqariladi)"
     }
   }
 }

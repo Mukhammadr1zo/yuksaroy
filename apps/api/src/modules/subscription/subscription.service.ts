@@ -271,6 +271,69 @@ export class SubscriptionService {
     return this.me(userId); // karta yangi holatni shu javobdan oladi, ikkinchi so'rov kerak emas
   }
 
+  /**
+   * Obunachilar reyestri: holat bo'yicha, PAY raqami, telefon yoki ism bo'yicha qidiruv.
+   *
+   * Navbat ro'yxatidan (list) alohida, chunki ikkisining vazifasi boshqa: navbat
+   * tashkilot bo'yicha guruhlanadi va faqat to'lanmaganini eski birinchi ko'rsatadi,
+   * reyestr esa "kim to'layapti, kimniki tugayapti, kim ketdi" degan savolga javob beradi.
+   *
+   * Filtr, tartib va sahifalash bazada: qatorlar soni o'sib boradi va xotiraga olib
+   * filtrlash jami sonini ham, oxirgi sahifani ham buzardi. Tartibda id ham bor:
+   * bir soniyada yaratilgan ikki qator sahifalar orasida takrorlanmasin.
+   */
+  async registry(f: { status?: string; q?: string; page: number; limit: number }) {
+    const text = f.q?.trim();
+    const where: Prisma.SubscriptionWhereInput = {
+      ...(f.status ? { status: f.status } : {}),
+      ...(text
+        ? {
+            OR: [
+              { no: { contains: text, mode: 'insensitive' as const } },
+              { user: { phone: { contains: text } } },
+              { user: { fullName: { contains: text, mode: 'insensitive' as const } } },
+            ],
+          }
+        : {}),
+    };
+    const [total, rows] = await Promise.all([
+      this.prisma.subscription.count({ where }),
+      this.prisma.subscription.findMany({
+        where,
+        include: { user: { select: { id: true, fullName: true, phone: true } } },
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        skip: (f.page - 1) * f.limit,
+        take: f.limit,
+      }),
+    ]);
+    return { items: rows.map(({ user, ...s }) => ({ ...subscriptionView(s), user })), total, page: f.page, limit: f.limit };
+  }
+
+  /**
+   * Tasdiqlangan obunani bekor qilish. Kirish shu zahoti to'xtaydi.
+   *
+   * Nega kerak edi: cancel() faqat to'lanmagan qatorga tegadi, ya'ni operator noto'g'ri
+   * PAY qatorini tasdiqlab yuborsa obuna 12 oygacha faol qolardi va uni qaytaradigan
+   * yo'l umuman yo'q edi.
+   *
+   * moneyReceived majburiy, sukut qiymati yo'q: pul kelmagan bo'lsa paidAt tozalanadi va
+   * daromad varag'i bu xatoni ko'rsatmaydi; pul kelgan bo'lsa qator daromadda qoladi.
+   * Ikkisini taxmin qilib bo'lmaydi, shuning uchun operator aytadi.
+   */
+  async revoke(id: string, reason: string, moneyReceived: boolean) {
+    const s = await this.prisma.subscription.findUnique({ where: { id } });
+    if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
+    const now = new Date();
+    // Holat WHERE ichida: ikki admin bir vaqtda bosса ham faqat bittasi o'tadi
+    const r = await this.prisma.subscription.updateMany({
+      where: { id, status: 'ACTIVE' },
+      data: { status: 'CANCELLED', endsAt: now, ...(moneyReceived ? {} : { paidAt: null }) },
+    });
+    if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_ACTIVE', status: s.status });
+    this.tell(s.userId, 'subscriptionCancelled', { reason });
+    return { ...subscriptionView(s), status: 'CANCELLED', endsAt: now, paidAt: moneyReceived ? s.paidAt : null, wasEndsAt: s.endsAt };
+  }
+
   /** To'lov kelmadi yoki buyurtma noto'g'ri: navbatdan chiqadi, obuna berilmaydi. */
   async cancel(id: string, reason: string) {
     const s = await this.prisma.subscription.findUnique({ where: { id } });

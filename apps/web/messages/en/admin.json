@@ -94,7 +94,8 @@
       "market": "Cargo and services",
       "team": "Team",
       "visits": "Visits",
-      "revenue": "Revenue"
+      "revenue": "Revenue",
+      "subscriptions": "Subscriptions"
     },
     "common": {
       "search": "Search",
@@ -174,6 +175,7 @@
       "STATION_NOT_FOUND": "Station not found.",
       "STATION_REQUIRED": "Choose a station.",
       "STIR_REQUIRED": "Enter the STIR.",
+      "SUBSCRIPTION_NOT_ACTIVE": "This subscription is not active",
       "SUBSCRIPTION_NOT_FOUND": "Subscription not found.",
       "SUBSCRIPTION_NOT_PENDING": "This subscription payment has already been decided.",
       "TERMINAL_HAS_DATA": "The terminal has related data. Review what will be lost, then confirm.",
@@ -664,6 +666,31 @@
       "decideNo": "Dismiss",
       "doneResolved": "Report marked as resolved.",
       "doneDismissed": "Report marked as dismissed."
+    },
+    "subs": {
+      "lead": "Who is paying, whose term is ending, who left. Search by PAY number, phone or name.",
+      "no": "Payment number",
+      "searchHint": "PAY-1042, phone or name",
+      "noName": "No name given",
+      "months": "Months",
+      "amount": "Amount, UZS",
+      "endsAt": "Ends",
+      "startsAt": "Starts",
+      "paidAt": "Paid",
+      "createdAt": "Ordered",
+      "phone": "Phone",
+      "daysLeft": "{n} days left",
+      "status": {
+        "PENDING": "Waiting",
+        "ACTIVE": "Active",
+        "CANCELLED": "Cancelled"
+      },
+      "revoke": "Revoke subscription",
+      "revokeTitle": "Revoke a confirmed subscription",
+      "revokeHint": "Access stops at once and the end date moves to today. This cannot be undone.",
+      "revokeWarn": "The button works once a reason is given",
+      "reason": "Reason",
+      "moneyReceived": "The money really arrived (if unchecked, this row leaves the revenue sheet)"
     }
   }
 }

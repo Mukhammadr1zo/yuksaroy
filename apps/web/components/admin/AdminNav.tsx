@@ -30,6 +30,9 @@ const GROUPS: { key: string; items: Item[] }[] = [
     { href: '/admin/team', key: 'team', owner: true },
   ] },
   { key: 'system', items: [
+    // Obunachilar reyestri: operator ham ko'radi (kim to'lagan degan savol kundalik ish),
+    // lekin tasdiqlangan obunani bekor qilish faqat egada
+    { href: '/admin/subscriptions', key: 'subscriptions' },
     // Pul hisobi: server ham faqat egaga beradi
     { href: '/admin/revenue', key: 'revenue', owner: true },
     { href: '/admin/visits', key: 'visits' },
