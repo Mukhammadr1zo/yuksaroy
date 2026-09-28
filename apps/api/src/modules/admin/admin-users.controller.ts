@@ -1,8 +1,9 @@
-import { Body, ConflictException, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, NotFoundException, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
+import { REVEAL_ACTIONS } from '../../common/reveal-actions';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { DeleteAccountUseCase } from '../identity/application/delete-account.usecase';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
@@ -84,6 +85,57 @@ export class AdminUsersController {
         personalRoles: u.personalRoles, listings: u._count.listings,
         orgs: u.memberships.map((m) => ({ id: m.org.id, name: m.org.name, kyc: m.org.kycStatus, isOwner: m.isOwner })),
       })),
+    };
+  }
+
+  /**
+   * Bitta foydalanuvchi: ro'yxatdagi qatordan ko'ra ko'proq.
+   *
+   * Nega kerak: operator murojaatga javob berayotganda "bu odam kim, nima qilgan,
+   * to'laganmi, oxirgi marta qachon kirgan" degan savolga ro'yxat javob bermasdi va u
+   * beshta ekranni aylanib chiqardi. Har ro'yxat chegaralangan (oxirgi 5 ta): to'liq
+   * ro'yxat o'z ekranida, bu yerda faqat rasm.
+   */
+  @Get('users/:id')
+  async user(@Param('id') id: string) {
+    const now = new Date();
+    const u = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true, phone: true, email: true, fullName: true, locale: true, isActive: true, createdAt: true, personalRoles: true,
+        passwordHash: true, googleSub: true, lockedUntil: true, failedLogins: true,
+        telegram: { select: { username: true, linkedAt: true } },
+        memberships: { select: { isOwner: true, roles: true, org: { select: { id: true, name: true, kycStatus: true } } } },
+        subscriptions: { orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, no: true, status: true, grants: true, months: true, amountTiyin: true, startsAt: true, endsAt: true, createdAt: true } },
+        listings: { orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, title: true, kind: true, status: true, createdAt: true } },
+        marketRequests: { orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, no: true, board: true, status: true, createdAt: true } },
+        serviceProfiles: { select: { id: true, serviceType: true, title: true, status: true } },
+        _count: { select: { listings: true, marketRequests: true, wagonSearches: true } },
+      },
+    });
+    if (!u) throw new NotFoundException({ code: 'USER_NOT_FOUND' });
+    const month = new Date(now.getTime() - 30 * 86_400_000);
+    const [activeListings, wagon30, reveals, lastSession, activeSessions] = await Promise.all([
+      this.prisma.listing.count({ where: { ownerUserId: id, status: 'ACTIVE' } }),
+      this.prisma.wagonSearch.count({ where: { userId: id, createdAt: { gte: month } } }),
+      // Nechta raqam ochgan: obuna qadrini va suiiste'molni bir qarashda ko'rsatadi
+      this.prisma.auditLog.count({ where: { actorId: id, action: { in: [...REVEAL_ACTIONS] } } }),
+      this.prisma.session.findFirst({ where: { userId: id }, orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
+      this.prisma.session.count({ where: { userId: id, revokedAt: null, expiresAt: { gt: now } } }),
+    ]);
+    const { passwordHash, googleSub, memberships, subscriptions, _count, ...rest } = u;
+    return {
+      ...rest,
+      hasPassword: !!passwordHash,
+      hasGoogle: !!googleSub,
+      orgs: memberships.map((m) => ({ id: m.org.id, name: m.org.name, kyc: m.org.kycStatus, isOwner: m.isOwner, roles: m.roles })),
+      subscriptions: subscriptions.map((s) => ({ ...s, amountTiyin: Number(s.amountTiyin) })),
+      listingsTotal: _count.listings, listingsActive: activeListings,
+      requestsTotal: _count.marketRequests,
+      wagonTotal: _count.wagonSearches, wagon30d: wagon30,
+      reveals,
+      lastSeenAt: lastSession?.createdAt ?? null,
+      activeSessions,
     };
   }
 

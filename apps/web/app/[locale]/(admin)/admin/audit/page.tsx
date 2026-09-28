@@ -27,7 +27,8 @@ export default function AuditPage() {
   const locale = useLocale();
   // Suspense shart emas: AdminShell huquq tasdiqlanguncha bolalarni chizmaydi, prerender bu hookga yetmaydi
   const sp = useSearchParams();
-  const init = { ...EMPTY, entity: sp.get('entity') ?? '', entityId: sp.get('entityId') ?? '' };
+  // actor ham URL dan: foydalanuvchi varag'idagi "uning amallari" havolasi shu yerga keladi
+  const init = { ...EMPTY, entity: sp.get('entity') ?? '', entityId: sp.get('entityId') ?? '', actor: sp.get('actor') ?? '' };
   // draft = maydonlardagi matn, f = qo'llangan filtr: har harfda so'rov ketmasin
   const [draft, setDraft] = useState(init);
   const [f, setF] = useState({ ...init, page: 1 });

@@ -7,16 +7,30 @@
 // o'chirilayotgani, nima bo'lishi va sabab maydoni ko'rinib turadi. Sabab auditga yoziladi.
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { post } from '@/lib/api';
-import { num, uzDate } from '@/lib/format';
+import { api, post } from '@/lib/api';
+import { num, som, uzDate, uzDateTime } from '@/lib/format';
 import { phoneDisplay } from '@/components/ui/fields';
-import { BTN, BTN_DANGER, BTN_GHOST, CARD, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { AuditLink, BTN, BTN_DANGER, BTN_GHOST, CARD, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 
 type Row = {
   id: string; phone: string | null; email: string | null; fullName: string | null; isActive: boolean;
   createdAt: string; personalRoles: string[]; listings: number;
   orgs: { id: string; name: string; kyc: string; isOwner: boolean }[];
+};
+/** GET /admin/users/:id: ro'yxat qatoridan ko'ra ko'proq, har ro'yxat oxirgi 5 ta bilan chegaralangan. */
+type Detail = Row & {
+  locale: string; hasPassword: boolean; hasGoogle: boolean; lockedUntil: string | null; failedLogins: number;
+  telegram: { username: string | null; linkedAt: string } | null;
+  lastSeenAt: string | null; activeSessions: number;
+  subscriptions: { id: string; no: string; status: string; grants: string[]; months: number; amountTiyin: number; endsAt: string | null; createdAt: string }[];
+  listings: { id: string; title: string; kind: string; status: string; createdAt: string }[];
+  listingsTotal: number; listingsActive: number;
+  marketRequests: { id: string; no: string; board: string; status: string; createdAt: string }[];
+  requestsTotal: number;
+  serviceProfiles: { id: string; serviceType: string; title: string; status: string }[];
+  wagonTotal: number; wagon30d: number; reveals: number;
 };
 
 export default function AdminUsersPage() {
@@ -123,9 +137,23 @@ function UserDrawer({ u, busy, onClose, onBlock, onDelete }: {
 }) {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
+  const td = useTranslations('admin.users.detail');
   const locale = useLocale();
   const [reason, setReason] = useState('');
   const need = !reason.trim();
+  // Tafsilot alohida so'rovda: ro'yxat yengil qoladi, varaq ochilganda to'ladi
+  const [d, setD] = useState<Detail | null>(null);
+  const [dErr, setDErr] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    setD(null); setDErr(false);
+    api<Detail>(`/admin/users/${u.id}`).then((x) => { if (alive) setD(x); }).catch(() => { if (alive) setDErr(true); });
+    return () => { alive = false; };
+  }, [u.id]);
+
+  const login = d ? [d.hasPassword ? td('password') : null, d.hasGoogle ? td('google') : null].filter(Boolean).join(', ') || td('codeOnly') : '';
+  const H = 'mb-1 mt-4 font-mono text-[11px] font-semibold uppercase tracking-wide text-muted';
+  const status = (s: string) => <Pill tone={s === 'ACTIVE' || s === 'OPEN' || s === 'DONE' ? 'ok' : s === 'PENDING' ? 'warn' : s === 'BLOCKED' || s === 'CANCELLED' ? 'bad' : 'neutral'}>{s}</Pill>;
 
   return (
     <Drawer open title={u.fullName || u.phone || t('users.noName')} onClose={onClose}>
@@ -133,9 +161,92 @@ function UserDrawer({ u, busy, onClose, onBlock, onDelete }: {
         <Fact k={tc('phone')} v={u.phone ? phoneDisplay(u.phone) : '-'} mono />
         <Fact k={tc('email')} v={u.email || '-'} />
         <Fact k={tc('status')} v={u.isActive ? tc('open') : t('users.blocked')} />
-        <Fact k={t('users.listings')} v={num(u.listings, locale)} mono />
         <Fact k={tc('createdAt')} v={uzDate(u.createdAt, locale)} mono />
+        {d ? (
+          <>
+            <Fact k={td('lastSeen')} v={d.lastSeenAt ? uzDateTime(d.lastSeenAt, locale) : td('never')} mono />
+            <Fact k={td('sessions')} v={num(d.activeSessions, locale)} mono />
+            <Fact k={td('login')} v={login} />
+            <Fact k={td('telegram')} v={d.telegram ? (d.telegram.username ? `@${d.telegram.username}` : uzDate(d.telegram.linkedAt, locale)) : td('noTelegram')} mono />
+            <Fact k={td('locale')} v={d.locale} mono />
+            {d.lockedUntil && new Date(d.lockedUntil) > new Date() ? <Fact k={td('failed', { n: d.failedLogins })} v={td('locked', { until: uzDateTime(d.lockedUntil, locale) })} mono /> : null}
+          </>
+        ) : null}
       </dl>
+      {dErr ? <Notice tone="err">{td('loadFailed')}</Notice> : null}
+      {!d && !dErr ? <p className="mt-2 text-xs text-muted">{tc('loading')}</p> : null}
+
+      {d ? (
+        <>
+          {/* Pul: obuna olganmi, nechta raqam ochgan. Bezak emas: shikoyat yoki qaytarish so'rovida shu qaraladi */}
+          <h3 className={H}>{td('money')}</h3>
+          <dl className={`${CARD} grid grid-cols-2 gap-x-4 gap-y-2 p-3 text-sm`}>
+            <Fact k={td('reveals')} v={num(d.reveals, locale)} mono />
+            <Fact k={td('wagon')} v={`${num(d.wagonTotal, locale)} (${td('wagon30', { n: num(d.wagon30d, locale) })})`} mono />
+          </dl>
+          <h3 className={H}>{td('subscriptions')}</h3>
+          {!d.subscriptions.length ? <p className={`${CARD} border-dashed p-3 text-sm text-muted`}>{td('noSubs')}</p> : (
+            <ul className={`${CARD} divide-y divide-line/70 text-sm`}>
+              {d.subscriptions.map((s) => (
+                <li key={s.id} className="flex flex-wrap items-center gap-2 px-3 py-2">
+                  <span className="font-mono text-xs">{s.no}</span>
+                  {status(s.status)}
+                  <span className="font-mono text-[11px] text-muted">{s.grants.join('+')} · {s.months}</span>
+                  <span className="ml-auto font-mono text-xs tabular-nums">{som(s.amountTiyin, locale)}</span>
+                  {s.endsAt ? <span className="w-full font-mono text-[11px] text-muted sm:w-auto">{uzDate(s.endsAt, locale)}</span> : null}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h3 className={H}>{td('activity')}</h3>
+          <dl className={`${CARD} grid grid-cols-3 gap-x-4 gap-y-2 p-3 text-sm`}>
+            <Fact k={t('users.listings')} v={`${num(d.listingsTotal, locale)} (${td('listingsActive', { n: num(d.listingsActive, locale) })})`} mono />
+            <Fact k={td('requests')} v={num(d.requestsTotal, locale)} mono />
+            <Fact k={td('services')} v={num(d.serviceProfiles.length, locale)} mono />
+          </dl>
+          {d.listings.length ? (
+            <ul className={`${CARD} mt-2 divide-y divide-line/70 text-sm`}>
+              {d.listings.map((l) => (
+                <li key={l.id} className="flex items-center gap-2 px-3 py-2">
+                  <span className="min-w-0 flex-1 truncate">{l.title}</span>
+                  <span className="font-mono text-[11px] text-muted">{l.kind}</span>
+                  {status(l.status)}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {d.marketRequests.length ? (
+            <ul className={`${CARD} mt-2 divide-y divide-line/70 text-sm`}>
+              {d.marketRequests.map((r) => (
+                <li key={r.id} className="flex items-center gap-2 px-3 py-2">
+                  <span className="font-mono text-xs">{r.no}</span>
+                  <span className="font-mono text-[11px] text-muted">{r.board}</span>
+                  {status(r.status)}
+                  <span className="ml-auto font-mono text-[11px] text-muted">{uzDate(r.createdAt, locale)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {d.serviceProfiles.length ? (
+            <ul className={`${CARD} mt-2 divide-y divide-line/70 text-sm`}>
+              {d.serviceProfiles.map((p) => (
+                <li key={p.id} className="flex items-center gap-2 px-3 py-2">
+                  <span className="min-w-0 flex-1 truncate">{p.title}</span>
+                  <span className="font-mono text-[11px] text-muted">{p.serviceType}</span>
+                  {status(p.status)}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-3 flex flex-wrap gap-3 text-xs">
+            <AuditLink entity="User" id={u.id} />
+            {/* Uning o'zi qilgan amallar: raqam ochish, e'lon, taklif. Hisob tarixi bu emas */}
+            <Link href={`/admin/audit?actor=${u.id}`} className="font-semibold text-teal-ink hover:underline">{td('actions')}</Link>
+          </div>
+        </>
+      ) : null}
 
       <section className="mt-4">
         <h3 className="mb-1 font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{t('nav.orgs')}</h3>
