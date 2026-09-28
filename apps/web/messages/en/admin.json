@@ -95,7 +95,8 @@
       "team": "Team",
       "visits": "Visits",
       "revenue": "Revenue",
-      "subscriptions": "Subscriptions"
+      "subscriptions": "Subscriptions",
+      "ads": "Ads"
     },
     "common": {
       "search": "Search",
@@ -131,6 +132,8 @@
       "history": "History"
     },
     "err": {
+      "AD_NOT_FOUND": "Ad not found",
+      "AD_RANGE": "The end date must be after the start date",
       "BAD_ROLE": "Invalid role.",
       "BAD_STATUS": "Invalid status.",
       "BAD_VALUE": "Invalid value.",
@@ -692,6 +695,29 @@
       "revokeWarn": "The button works once a reason is given",
       "reason": "Reason",
       "moneyReceived": "The money really arrived (if unchecked, this row leaves the revenue sheet)"
+    },
+    "ads": {
+      "lead": "Side advertising: the platform sells and places it itself.",
+      "note": "Subscribers see no ads. No third-party code and no trackers.",
+      "new": "New ad",
+      "title": "Title",
+      "body": "Text",
+      "href": "Link",
+      "imageUrl": "Image URL",
+      "placement": "Placement",
+      "range": "Period",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "buyer": "Buyer",
+      "price": "Paid, UZS",
+      "place": {
+        "terminal-aside": "Terminal page",
+        "listing-aside": "Listing page"
+      },
+      "st": {
+        "DRAFT": "Draft",
+        "ACTIVE": "Active"
+      }
     }
   }
 }

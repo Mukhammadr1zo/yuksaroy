@@ -19,6 +19,7 @@ import { PhotoGallery } from '@/components/catalog/PhotoGallery';
 import { ClaimObject } from '@/components/catalog/ClaimObject';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
 import { ReportButton } from '@/components/site/ReportButton';
+import { AdSlot } from '@/components/site/AdSlot';
 
 export const revalidate = 300;
 
@@ -235,6 +236,9 @@ export default async function TerminalPage({ params }: Params) {
               {t.station ? <Link href={`/terminals?station=${t.station.esrCode ?? t.station.id}&kind=RAIL`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tcl('sameStation')}</Link> : null}
             </section>
           ) : null}
+          {/* Reklama eng pastda: u hech qachon kerakli ma'lumotni pastga surmasin.
+              Obunachiga ko'rsatilmaydi, buni server hal qiladi. */}
+          <AdSlot placement="terminal-aside" />
         </aside>
       </div>
       {t.isDemo ? null : <div className="mt-10"><ReportButton kind="terminal" targetId={t.id} /></div>}

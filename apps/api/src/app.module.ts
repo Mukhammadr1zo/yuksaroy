@@ -22,6 +22,7 @@ import { MarketModule } from './modules/market/market.module';
 import { WagonModule } from './modules/wagon/wagon.module';
 import { HelpModule } from './modules/help/help.module';
 import { WatchModule } from './modules/watch/watch.module';
+import { AdsModule } from './modules/ads/ads.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -32,6 +33,7 @@ import { HealthController } from './health.controller';
     NotificationsModule, ChatModule, AdminModule, // saytdagi bildirishnoma va so'rov yozishmasi
     SubscriptionModule, // obuna: telefon raqami va vagon qidiruvi shu bilan ochiladi
     MarketModule, WagonModule, HelpModule, WatchModule, // xizmatlar markazi va yuk bozori, vagon qidiruvi, yordam chati, kuzatuv
+    AdsModule, // yon tomondagi reklama: platformaning o'zi sotadi, uchinchi tomon kodi yo'q
   ],
   controllers: [HealthController],
 })

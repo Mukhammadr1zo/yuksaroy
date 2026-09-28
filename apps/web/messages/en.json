@@ -558,5 +558,8 @@
     "limit": "Too many reports. Try again in an hour.",
     "gone": "This page no longer exists.",
     "err": "Not sent. Please try again."
+  },
+  "ads": {
+    "label": "Advertisement"
   }
 }

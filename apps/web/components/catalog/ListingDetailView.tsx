@@ -16,6 +16,7 @@ import { PremiumBadge } from './PremiumBadge';
 import { Impressions } from './Impressions';
 import { ListingReviews } from '@/components/reviews/ListingReviews';
 import { ReportButton } from '@/components/site/ReportButton';
+import { AdSlot } from '@/components/site/AdSlot';
 
 type Section = 'equipment' | 'carriers';
 
@@ -161,6 +162,9 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
               <p className="mt-1 text-[11px] text-muted">{t('mapNote')}</p>
             </section>
           ) : null}
+          {/* Reklama eng pastda: u hech qachon kerakli ma'lumotni pastga surmasin.
+              Obunachiga ko'rsatilmaydi, buni server hal qiladi. */}
+          <AdSlot placement="listing-aside" />
         </aside>
       </div>
 

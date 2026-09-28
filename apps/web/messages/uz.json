@@ -558,5 +558,8 @@
     "limit": "Juda ko'p shikoyat yubordingiz. Bir soatdan keyin urinib ko'ring.",
     "gone": "Bu sahifa endi mavjud emas.",
     "err": "Yuborilmadi. Qayta urinib ko'ring."
+  },
+  "ads": {
+    "label": "Reklama"
   }
 }

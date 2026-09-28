@@ -95,7 +95,8 @@
       "team": "Jamoa",
       "visits": "Tashriflar",
       "revenue": "Tushum",
-      "subscriptions": "Obunalar"
+      "subscriptions": "Obunalar",
+      "ads": "Reklama"
     },
     "common": {
       "search": "Qidiruv",
@@ -131,6 +132,8 @@
       "history": "Tarix"
     },
     "err": {
+      "AD_NOT_FOUND": "Reklama topilmadi",
+      "AD_RANGE": "Tugash sanasi boshlanishdan keyin bo'lishi kerak",
       "BAD_ROLE": "Noto'g'ri rol.",
       "BAD_STATUS": "Noto'g'ri holat.",
       "BAD_VALUE": "Qiymat noto'g'ri.",
@@ -692,6 +695,29 @@
       "revokeWarn": "Sabab yozilmaguncha tugma ishlamaydi",
       "reason": "Sabab",
       "moneyReceived": "Pul haqiqatan kelgan (belgilanmasa, bu qator daromad hisobidan chiqariladi)"
+    },
+    "ads": {
+      "lead": "Yon tomondagi reklama: platformaning o'zi sotadi va shu yerdan joylaydi.",
+      "note": "Obunachiga reklama ko'rsatilmaydi. Uchinchi tomon kodi va kuzatuvchi yo'q.",
+      "new": "Yangi reklama",
+      "title": "Sarlavha",
+      "body": "Matn",
+      "href": "Havola",
+      "imageUrl": "Rasm manzili",
+      "placement": "Joyi",
+      "range": "Muddati",
+      "startsAt": "Boshlanadi",
+      "endsAt": "Tugaydi",
+      "buyer": "Sotib oluvchi",
+      "price": "To'langan, so'm",
+      "place": {
+        "terminal-aside": "Terminal sahifasi",
+        "listing-aside": "E'lon sahifasi"
+      },
+      "st": {
+        "DRAFT": "Qoralama",
+        "ACTIVE": "Faol"
+      }
     }
   }
 }

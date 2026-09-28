@@ -591,3 +591,19 @@ export const REPORT_STATUS_LABELS: Record<SearchLang, Record<ReportStatus, strin
 /** Matn chegaralari va bitta odamning bir soatdagi eng ko'p shikoyati. */
 export const REPORT = { textMin: 10, textMax: 1000, perHour: 5 } as const;
 export * from './owner-kind';
+
+/**
+ * Yon tomondagi reklama joylari.
+ *
+ * Ro'yxat qisqa va ataylab shunday: sahifalarda haqiqiy yon ustun faqat tafsilot
+ * sahifalarida bor. Katalog ro'yxatlarida va bosh sahifada yon ustun yo'q, u yerga
+ * reklama qo'yish yangi ustun o'ylab topishni va kartalarni siqishni talab qilardi.
+ *
+ * Nomi "slot" emas: bu so'z bron oynasi uchun band. Inglizcha "spot" ham o'sha bron
+ * oynasining tarjimasi, shuning uchun u ham ishlatilmaydi.
+ */
+export const AD_PLACEMENTS = ['terminal-aside', 'listing-aside'] as const;
+export type AdPlacement = (typeof AD_PLACEMENTS)[number];
+
+export const AD_STATUSES = ['DRAFT', 'ACTIVE'] as const;
+export type AdStatus = (typeof AD_STATUSES)[number];

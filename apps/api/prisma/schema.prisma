@@ -1120,3 +1120,28 @@ model Report {
   @@unique([reporterId, targetKind, targetId])
   @@index([status, createdAt])
 }
+
+/// Yon tomondagi reklama: platformaning o'zi sotadi va o'zi joylaydi.
+///
+/// Uchinchi tomon kodi, pikseli va kuzatuvchisi yo'q va bo'lmaydi: maxfiylik sahifasida
+/// "reklama kuzatuvchilari yo'q" va "ma'lumot reklama uchun berilmaydi" deb yozilgan.
+/// Shu yozuvni buzmaslik uchun reklama shunchaki bizning bazamizdagi qator bo'lib qoladi.
+model AdPlacement {
+  id           String   @id @default(cuid())
+  /// Qaysi joyda chiziladi: domain dagi AD_PLACEMENTS ro'yxatidan
+  placement    String
+  title        String
+  body         String?
+  imageUrl     String?
+  href         String
+  /// Kim sotib oldi va qancha to'ladi. Faqat panelda ko'rinadi, ommaviy javobda yo'q.
+  buyer        String?
+  pricePaidSom Int      @default(0)
+  status       String   @default("DRAFT") // AD_STATUSES: DRAFT | ACTIVE
+  startsAt     DateTime @db.Timestamptz(3)
+  endsAt       DateTime @db.Timestamptz(3)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([placement, status, startsAt, endsAt])
+}
