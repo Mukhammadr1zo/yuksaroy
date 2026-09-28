@@ -37,7 +37,43 @@ describe('ownerKind', () => {
     expect(ownerKind('УП Трубодеталь')).toBe('davlat');
     expect(ownerKind('Чимбайский РДЭУП')).toBe('davlat');
     expect(ownerKind('`MADAD` Давлат муассасаси')).toBe('davlat');
-    expect(ownerKind('`35-сон манзил колонияси` ИЧК')).toBe('davlat');
+  });
+
+  /*
+   * Quyidagi qatorlar prodda FAOL holda topilgan: egasi ularni ko'rib "bunday narsa
+   * qolmasligi kerak" dedi. Har biri shu yerda turadi, chunki ikkitasi birinchi
+   * variantda o'tib ketgan edi.
+   */
+  it("jazoni ijro etish muassasasi harbiy toifada, huquqiy shakldan qat'i nazar", () => {
+    expect(ownerKind('"35-сон манзил колонияси" ИЧК')).toBe('harbiy');
+    expect(ownerKind('"Кумкурганвторчермет" ИЧК')).toBe('harbiy');
+    // Xususiy shakl ham saqlab qola olmaydi: davlat toifasida bunday qator qolib ketardi
+    expect(ownerKind('"Кумкурган" МЧЖ ИЧК')).toBe('harbiy');
+  });
+
+  it('lotin yozuvidagi koloniya NOMDAN topiladi', () => {
+    // Prodda: nomi lotincha koloniya, egasi esa butunlay boshqa nom
+    expect(ownerKind('11-sonli Jazoni Ijro Etish Koloniyasi', '"Навои Экспорт Бизнес" ДУК')).toBe('harbiy');
+    // Egasi xususiy bo'lganda ham nom o'zi yetarli bo'lishi kerak
+    expect(ownerKind('11-sonli Jazoni Ijro Etish Koloniyasi', '"Baraka" МЧЖ')).toBe('harbiy');
+  });
+
+  it('harbiy qismning hamma yozilishi topiladi', () => {
+    for (const n of ['18299-сонли харбий кисм', 'В/часть-18299', 'Войсковая часть № 53949',
+      'Воинской Части 63650', 'ЦБХТСГ МО РУ харбий кисм 26134', '№23716 ҳарбий қисм']) {
+      expect(ownerKind(n)).toBe('harbiy');
+    }
+  });
+
+  it("nom va ega nomidan qattiqrog'i olinadi", () => {
+    // Nomi harbiy, egasi xususiy: harbiy ustun
+    expect(ownerKind('Харбий қисм 53943', '"Baraka" МЧЖ')).toBe('harbiy');
+    // Nomi oddiy, egasi temir yo'l bo'linmasi
+    expect(ownerKind('Binokor yuk maydoni', 'ПЧ-12')).toBe('temiryul');
+    // Ikkalasi ham xususiy
+    expect(ownerKind('Andijon ombori', '"ANDIJON UN" МЧЖ')).toBe('xususiy');
+    // Faqat bittasi berilgan bo'lsa ham ishlaydi
+    expect(ownerKind(null, 'ПЧ-12')).toBe('temiryul');
   });
 
   it('gigantni AJ shaklida ham topadi', () => {
@@ -87,13 +123,20 @@ describe('ownerKind', () => {
 });
 
 describe('ownerKindWhere', () => {
-  it('har toifa uchun OR shartini beradi va harflarga sezgir emas', () => {
+  type Cond = { OR: [{ name: { contains: string; mode: string } }, { ownerNameRaw: { contains: string; mode: string } }] };
+
+  it('har toifa ikkala ustunni ham qidiradi va harflarga sezgir emas', () => {
     for (const k of OWNER_KINDS) {
       const w = ownerKindWhere(k);
       expect(Array.isArray(w.OR)).toBe(true);
       expect((w.OR as unknown[]).length).toBeGreaterThan(0);
-      const first = (w.OR as { ownerNameRaw: { contains: string; mode: string } }[])[0]!;
-      expect(first.ownerNameRaw.mode).toBe('insensitive');
+      // Har bo'lak nomda ham, ega nomida ham qidiriladi: bittasi tushib qolsa
+      // prodda ko'rilgan koloniya kabi qator yana o'tib ketardi
+      const first = (w.OR as Cond[])[0]!;
+      expect(first.OR).toHaveLength(2);
+      expect(first.OR[0].name.mode).toBe('insensitive');
+      expect(first.OR[1].ownerNameRaw.mode).toBe('insensitive');
+      expect(first.OR[0].name.contains).toBe(first.OR[1].ownerNameRaw.contains);
     }
   });
 

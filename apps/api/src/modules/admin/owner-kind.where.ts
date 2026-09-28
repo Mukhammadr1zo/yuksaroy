@@ -12,6 +12,10 @@ import { OWNER_MATCH, type OwnerKind } from '@yuksaroy/domain';
  */
 export function ownerKindWhere(kind: OwnerKind): Prisma.TerminalWhereInput {
   const { any, none } = OWNER_MATCH[kind];
-  const has = (w: string): Prisma.TerminalWhereInput => ({ ownerNameRaw: { contains: w, mode: 'insensitive' } });
+  // Ikkala ustun ham qaraladi: obyektning nomi va reestrdagi ega nomi boshqa-boshqa
+  // bo'lishi mumkin va belgi ularning istalganida turishi mumkin (ownerKind izohiga qara)
+  const has = (w: string): Prisma.TerminalWhereInput => ({
+    OR: [{ name: { contains: w, mode: 'insensitive' } }, { ownerNameRaw: { contains: w, mode: 'insensitive' } }],
+  });
   return { OR: any.map(has), ...(none.length ? { NOT: none.map(has) } : {}) };
 }

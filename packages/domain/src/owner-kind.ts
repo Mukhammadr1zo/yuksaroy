@@ -24,17 +24,31 @@
 export const OWNER_KINDS = ['harbiy', 'temiryul', 'davlat', 'gigant', 'xususiy'] as const;
 export type OwnerKind = (typeof OWNER_KINDS)[number];
 
-/** Harbiy, mudofaa va maxsus obyektlar. Huquqiy shakli nima bo'lsa ham chiqariladi. */
+/**
+ * Harbiy, mudofaa va jazoni ijro etish muassasalari. Huquqiy shakli nima bo'lsa ham chiqariladi.
+ *
+ * Jazoni ijro etish muassasasi shu ro'yxatda, davlat korxonalari ro'yxatida emas: u yerda
+ * xususiy huquqiy shakl qatorni saqlab qolardi, ya'ni "... МЧЖ" deb yozilgan koloniya
+ * katalogda qolib ketardi.
+ *
+ * Yozilishlar prodda ko'rilgan haqiqiy qatorlardan: lotincha ham, kirillcha ham,
+ * "воинская" ham, "войсковая" ham uchraydi.
+ */
 const HARBIY = [
-  'харбий', 'ҳарбий', 'harbiy',
-  'воинск', 'воен', 'в/ч', 'в/част',
-  'мудофа', 'Мудофаа',
+  'харбий', 'ҳарбий', 'harbiy', 'xarbiy',
+  'воинск', 'войсков', 'воен', 'в/ч', 'в/част',
+  'мудофа', 'Мудофаа', 'МО РУ',
   // Bo'sh joy bilan: "кеч" o'zbekcha so'zning ham ichida uchraydi
   ' КЭЧ', ' КЕЧ',
   'қўшинлар',
   'топогео',
   'ХУЖФК',
   'уй-жойдан фойдаланиш', 'уй жойдан фойдаланиш',
+  // Jazoni ijro etish
+  'колони', 'koloniya', 'kolonia',
+  'жазони ижро', 'jazoni ijro', 'jazoni-ijro',
+  'ИЧК', 'УЯ-',
+  'қамоқ', 'qamoq', 'турма', 'тюрьм',
 ] as const;
 
 /** Temir yo'lning o'z bo'linmalari: nomida huquqiy shakl bo'lmaydi. */
@@ -58,7 +72,6 @@ const DAVLAT = [
   'давлат муассаса', 'шўба корх',
   'бошқарма', 'бошкарма',
   'унитар', 'unitar',
-  'колони', 'ИЧК', 'УЯ-',
 ] as const;
 
 /** Nomi bilan tanilgan davlat sanoati. Shakli AJ yoki DK bo'ladi, shuning uchun ustun turadi. */
@@ -120,16 +133,36 @@ export const OWNER_MATCH: Record<OwnerKind, { any: readonly string[]; none: read
 
 const hasAny = (low: string, words: readonly string[]) => words.some((w) => low.includes(w.toLowerCase()));
 
-/**
- * Egasining turi, nomidan. Hech qaysi belgi topilmasa null: bu "bilinmadi" degani,
- * "xususiy" degani emas, shuning uchun bunday qator hech qachon guruh amaliga tushmaydi.
- */
-export function ownerKind(name: string | null | undefined): OwnerKind | null {
-  if (!name) return null;
-  const low = name.toLowerCase();
+/** Bitta matn bo'yicha toifa. */
+function kindOfText(text: string | null | undefined): OwnerKind | null {
+  if (!text) return null;
+  const low = text.toLowerCase();
   for (const k of OWNER_KINDS) {
     const { any, none } = OWNER_MATCH[k];
     if (hasAny(low, any) && !hasAny(low, none)) return k;
   }
   return null;
+}
+
+/** Qattiqroq toifa ustun turadi: harbiy topilsa, boshqa matndagi "xususiy" uni yumshatmaydi. */
+const PRIORITY: readonly OwnerKind[] = ['harbiy', 'gigant', 'temiryul', 'davlat', 'xususiy'];
+
+/**
+ * Obyektning turi: terminal NOMI va reestrdagi EGA nomi, ikkalasi ham qaraladi.
+ *
+ * Nega ikkalasi: prodda "11-sonli Jazoni Ijro Etish Koloniyasi" degan qator bor va uning
+ * egasi butunlay boshqa nom bilan yozilgan. Faqat ega nomiga qaralsa, bunday qator
+ * tasodifan (egasi davlat korxonasi bo'lgani uchun) tushardi, egasi xususiy bo'lganda esa
+ * katalogda qolib ketardi.
+ *
+ * Har matn alohida baholanadi va qattiqrog'i olinadi. Ikkovini birlashtirib bo'lmaydi:
+ * qisqartmalar oldidagi bo'sh joyga tayanadi va birlashtirish soxta moslik yasardi.
+ *
+ * Hech qaysi belgi topilmasa null: bu "bilinmadi" degani, "xususiy" degani emas, shuning
+ * uchun bunday qator hech qachon guruh amaliga tushmaydi.
+ */
+export function ownerKind(name: string | null | undefined, ownerNameRaw?: string | null): OwnerKind | null {
+  const kinds = [kindOfText(name), kindOfText(ownerNameRaw)].filter((k): k is OwnerKind => k !== null);
+  if (!kinds.length) return null;
+  return PRIORITY.find((p) => kinds.includes(p)) ?? null;
 }
