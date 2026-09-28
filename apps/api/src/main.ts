@@ -12,6 +12,9 @@ import { UPLOADS_DIR, UPLOAD_MAX_BYTES } from './modules/listings/presentation/u
 import { AppModule } from './app.module';
 import { env } from './common/env';
 import { parseTrustProxy, securityHeaders } from './common/security';
+import { isPrivateFilePath } from './common/upload-visibility';
+import { TokenService } from './modules/identity/application/token.service';
+import { optionalUserId } from './modules/identity/presentation/jwt.guard';
 
 async function bootstrap() {
   const isProd = env.NODE_ENV === 'production';
@@ -33,6 +36,26 @@ async function bootstrap() {
   }
 
   await app.register(fastifyCookie as any); // ponytail: @fastify/cookie v11 tip mosligi, ishlashga ta'sir qilmaydi
+
+  /*
+   * Maxfiy yuklamalar qorovuli. Cookie plagini ro'yxatdan o'tgandan KEYIN qo'shiladi:
+   * hooklar qo'shilish tartibida ishlaydi, aks holda req.cookies hali bo'sh bo'lardi.
+   *
+   * Nega hook, nega Nest yo'li emas: fayllarni fastifyStatic beradi va u Nest
+   * qorovullaridan o'tmaydi. Hook esa statik yo'lning oldida turadi.
+   *
+   * Nega faqat sessiya tekshiriladi, egalik emas: fayl nomi 96 bitli tasodifiy, ya'ni
+   * manzilni taxmin qilib bo'lmaydi. Xavf manzilning tarqab ketishida edi. Sessiya talabi
+   * shu xavfni yopadi: tarqagan manzil begona odamga endi hech narsa bermaydi.
+   */
+  const tokens = app.get(TokenService, { strict: false });
+  fastify.addHook('onRequest', (req: any, reply: any, done: (e?: Error) => void) => {
+    const url: string = req.url ?? '';
+    if (!url.startsWith('/v1/files/') || !isPrivateFilePath(url)) { done(); return; }
+    if (optionalUserId(req, tokens)) { done(); return; }
+    void reply.code(401).send({ code: 'NO_TOKEN' });
+  });
+
   // Yuklashlar: multipart (bitta fayl, 10 MB) va statik berish /v1/files/<yyyy>/<mm>/<nom>
   await app.register(fastifyMultipart as any, { limits: { fileSize: UPLOAD_MAX_BYTES, files: 1 } });
   mkdirSync(UPLOADS_DIR, { recursive: true });

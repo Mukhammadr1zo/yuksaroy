@@ -9,13 +9,20 @@ const ACCEPT = 'image/jpeg,image/png,image/webp';
 
 export type Uploaded = { url: string; name: string; size: number; mime: string };
 
-export async function uploadOne(file: File, retry = true): Promise<{ url?: string; file?: Uploaded; code?: string }> {
+/**
+ * `kind` fayl kimga ochiqligini belgilaydi: `photo` katalogda hammaga ko'rinadigan surat,
+ * sukut esa maxfiy (hujjat, da'vo dalili, yozishma fayli). Maxfiy fayl manzili kirmagan
+ * odamga 401 qaytaradi.
+ *
+ * Sukut ataylab maxfiy: unutilgan chaqiruv faylni ochiq qoldirmasin.
+ */
+export async function uploadOne(file: File, kind: 'photo' | 'doc' = 'doc', retry = true): Promise<{ url?: string; file?: Uploaded; code?: string }> {
   const fd = new FormData();
   fd.append('file', file);
-  const res = await fetch('/api/v1/uploads', { method: 'POST', body: fd, credentials: 'include', headers: authHeaders() }); // Mini App'da Bearer
+  const res = await fetch(`/api/v1/uploads?kind=${kind}`, { method: 'POST', body: fd, credentials: 'include', headers: authHeaders() }); // Mini App'da Bearer
   if (res.status === 401 && retry) {
     const r = await fetch('/api/v1/auth/refresh', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: '{}' });
-    if (r.ok) return uploadOne(file, false);
+    if (r.ok) return uploadOne(file, kind, false);
   }
   const body = await res.json().catch(() => null);
   if (!res.ok) return { code: body?.code ?? 'UPLOAD' };
@@ -38,7 +45,7 @@ export function PhotoUpload({ photos, onChange, max = LISTING.maxPhotos, error }
     setBusy(list.length);
     for (const f of list) {
       try {
-        const r = await uploadOne(f);
+        const r = await uploadOne(f, 'photo');
         if (r.url) urls.push(r.url);
         else setErr(t.has(`err.${r.code}`) ? t(`err.${r.code}`) : t('err.UPLOAD'));
       } catch { setErr(t('err.UPLOAD')); } finally { setBusy((n) => n - 1); }

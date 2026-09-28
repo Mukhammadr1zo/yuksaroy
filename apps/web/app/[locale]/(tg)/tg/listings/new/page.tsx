@@ -42,7 +42,7 @@ export default function TgNewListingPage() {
   async function pick(f: File | undefined) {
     if (!f) return;
     setUploading(true); setErr(null);
-    const r = await uploadOne(f).catch((): { url?: string; code?: string } => ({ code: 'UPLOAD' }));
+    const r = await uploadOne(f, 'photo').catch((): { url?: string; code?: string } => ({ code: 'UPLOAD' }));
     setUploading(false);
     if (file.current) file.current.value = '';
     if (r.url) setPhotos((p) => [...p, r.url!]); else setErr(tf('err.UPLOAD'));

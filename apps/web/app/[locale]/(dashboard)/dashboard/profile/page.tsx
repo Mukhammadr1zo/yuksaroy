@@ -73,7 +73,7 @@ function Head({ me, onChange }: Props) {
   const setAvatar = (avatarUrl: string | null) => run(async () => { onChange(await api<Me>('/auth/me', { method: 'PATCH', body: JSON.stringify({ avatarUrl }) })); });
   async function pick(f: File | undefined) {
     if (!f) return;
-    const r = await uploadOne(f).catch((): { url?: string; code?: string } => ({ code: 'UPLOAD' }));
+    const r = await uploadOne(f, 'photo').catch((): { url?: string; code?: string } => ({ code: 'UPLOAD' }));
     if (file.current) file.current.value = '';
     if (r.url) await setAvatar(r.url);
     else setNote({ tone: 'err', text: te.has(r.code ?? '') ? te(r.code ?? '') : te('UPLOAD') });
