@@ -8,6 +8,7 @@ import { DeleteAccountUseCase } from '../identity/application/delete-account.use
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { clampInt } from '../catalog/presentation/catalog.controller';
 
 class BlockDto {
   @IsBoolean() block!: boolean;
@@ -38,9 +39,17 @@ export class AdminUsersController {
 
   /** Ro'yxat: telefon, ism yoki email bo'yicha qidiruv. */
   @Get('users')
-  async users(@CurrentUserId() userId: string, @Query('q') q?: string, @Query('page') page?: string, @Query('blocked') blocked?: string) {
+  async users(
+    @CurrentUserId() userId: string,
+    @Query('q') q?: string,
+    @Query('page') page?: string,
+    @Query('blocked') blocked?: string,
+    @Query('limit') limit?: string,
+  ) {
     const p = Math.max(1, Number(page) || 1);
-    const take = 30;
+    // Ilgari 30 qattiq yozilgan edi va mijozning limit so'rovi e'tiborsiz qolardi:
+    // bu yagona admin ro'yxati edi, uni kengaytirib bo'lmasdi
+    const take = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
     const where = {
       ...(blocked === '1' ? { isActive: false, id: { not: { startsWith: 'demo-user-' } } } : {}),

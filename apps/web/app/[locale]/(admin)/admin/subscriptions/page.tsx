@@ -12,7 +12,7 @@ import { api, post } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
 import { phoneDisplay } from '@/components/ui/fields';
 import type { Me } from '@/lib/types-auth';
-import { BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
 
 const STATUSES = ['PENDING', 'ACTIVE', 'CANCELLED'] as const;
 type Status = (typeof STATUSES)[number];
@@ -132,6 +132,7 @@ export default function AdminSubscriptionsPage() {
         footer={sel ? (
           <>
             {note ? <div className="w-full"><Notice tone={note.tone}>{note.text}</Notice></div> : null}
+            <div className="w-full"><AuditLink entity="Subscription" id={sel.id} /></div>
             {isOwner && sel.status === 'ACTIVE' ? (
               <div className="mr-auto flex flex-col items-start gap-1">
                 <span className="text-xs text-muted">{ts('revokeWarn')}</span>

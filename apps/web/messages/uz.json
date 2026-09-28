@@ -232,7 +232,10 @@
   "pagination": {
     "aria": "Sahifalar",
     "prev": "← oldingi",
-    "next": "keyingi →"
+    "next": "keyingi →",
+    "first": "birinchi",
+    "last": "oxirgi",
+    "goTo": "sahifa"
   },
   "terminal": {
     "breadcrumb": {

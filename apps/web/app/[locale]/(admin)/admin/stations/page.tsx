@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type InputHTM
 import { useTranslations } from 'next-intl';
 import { RJUS, type Rju } from '@yuksaroy/domain';
 import { api, post } from '@/lib/api';
-import { BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
 
 type Row = {
   id: string; esrCode: string | null; nameUz: string; nameRu: string | null; nameEn: string | null; rju: Rju;
@@ -209,6 +209,7 @@ export default function AdminStationsPage() {
           <>
             {dr.row ? (
               <div className="mr-auto flex flex-col items-start gap-1">
+                <AuditLink entity="Station" id={dr.row.id} />
                 <span className="text-xs text-muted">{ts('deleteWarn')}</span>
                 <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={remove} />
               </div>

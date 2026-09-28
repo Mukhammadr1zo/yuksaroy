@@ -8,7 +8,7 @@ import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CLAIM_STATUSES, OWNER_KINDS, REGIONS, TERMINAL_KINDS, TERMINAL_STATUSES, type ClaimStatus, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
-import { BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, errText, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, useAdminList, type Col } from '@/components/admin/kit';
+import { AuditLink, BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, errText, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, useAdminList, type Col } from '@/components/admin/kit';
 import { diffBody, fromRow, TerminalForm, type Draft, type TerminalFull } from '@/components/admin/TerminalForm';
 
 /** O'chirishda yo'qoladigan bog'liq qatorlar soni. */
@@ -245,6 +245,7 @@ export default function TerminalsPage() {
             {notice ? <div className="w-full"><Notice tone={notice.tone}>{notice.text}</Notice></div> : null}
             {sheet.id ? (
               <div className="mr-auto flex flex-col items-start gap-1">
+                <AuditLink entity="Terminal" id={sheet.id} />
                 <span className="text-xs text-muted">{tt('deleteWarn')}</span>
                 {impact ? (
                   <span className="flex flex-wrap items-center gap-2">

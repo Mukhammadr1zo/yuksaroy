@@ -232,7 +232,10 @@
   "pagination": {
     "aria": "Pages",
     "prev": "← previous",
-    "next": "next →"
+    "next": "next →",
+    "first": "first",
+    "last": "last",
+    "goTo": "page"
   },
   "terminal": {
     "breadcrumb": {

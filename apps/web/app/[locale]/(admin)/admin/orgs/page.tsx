@@ -8,7 +8,7 @@ import { KYC_STATUSES, ORG_KINDS } from '@yuksaroy/domain';
 import { api } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
 import { phoneDisplay } from '@/components/ui/fields';
-import { BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
 
 type Row = {
   id: string; name: string; slug: string; kinds: string[]; stir: string | null; kycStatus: string; createdAt: string;
@@ -170,6 +170,7 @@ export default function AdminOrgsPage() {
         footer={detail ? (
           <>
             <p className="w-full text-xs text-muted">{t('orgs.deleteWarn')}</p>
+            <AuditLink entity="Organization" id={detail.id} />
             <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={removeOrg} />
             <span className="grow" />
             <button type="button" onClick={close} className={BTN_GHOST}>{tc('cancel')}</button>

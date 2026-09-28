@@ -127,7 +127,8 @@
       "phone": "Phone",
       "email": "Email",
       "slug": "Page address",
-      "id": "ID"
+      "id": "ID",
+      "history": "History"
     },
     "err": {
       "BAD_ROLE": "Invalid role.",

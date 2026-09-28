@@ -232,7 +232,10 @@
   "pagination": {
     "aria": "Страницы",
     "prev": "← назад",
-    "next": "вперёд →"
+    "next": "вперёд →",
+    "first": "первая",
+    "last": "последняя",
+    "goTo": "страница"
   },
   "terminal": {
     "breadcrumb": {

@@ -9,6 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { api, ApiError } from '@/lib/api';
 
 export const INPUT = 'w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand';
@@ -111,8 +112,26 @@ export function DataTable<T>({ cols, rows, keyOf, empty, onRow }: {
         </thead>
         <tbody className="block sm:table-row-group">
           {rows.map((r) => (
+            /*
+             * Qator klaviatura bilan ham ochiladi. Ilgari yon varaqqa kirishning yagona
+             * yo'li sichqoncha edi: yettita ekranda klaviatura bilan ishlaydigan operator
+             * birorta yozuvni ocha olmasdi.
+             *
+             * role qo'yilmadi: role="button" jadval semantikasini buzadi va ekran
+             * o'qiydigan dastur qatorni qator deb aytmay qo'yadi. To'liq to'g'ri yechim
+             * birinchi katakning ichiga haqiqiy tugma qo'yish, u esa har ekranning
+             * ustunlarini qayta yozishni talab qiladi.
+             */
             <tr key={keyOf(r)} onClick={onRow ? () => onRow(r) : undefined}
-              className={`block border-t border-line/70 px-3 py-3 sm:table-row sm:p-0 ${onRow ? 'cursor-pointer hover:bg-sand/60' : ''}`}>
+              {...(onRow ? {
+                tabIndex: 0,
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key !== 'Enter' && e.key !== ' ') return;
+                  e.preventDefault(); // probel sahifani pastga surmasin
+                  onRow(r);
+                },
+              } : {})}
+              className={`block border-t border-line/70 px-3 py-3 sm:table-row sm:p-0 ${onRow ? 'cursor-pointer hover:bg-sand/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal' : ''}`}>
               {/* Raqam va sana hech qachon sinmaydi: "3-" / "sentabr" ikki qatorga bo'linib o'qilmas edi */}
               {cols.map((c) => (
                 <td key={c.key} data-label={c.head}
@@ -128,15 +147,57 @@ export function DataTable<T>({ cols, rows, keyOf, empty, onRow }: {
   );
 }
 
+/**
+ * Sahifalagich: oldinga va orqaga, ustiga birinchi/oxirgi va raqam bilan o'tish.
+ *
+ * Nega: terminal reestri ~1716 qator va sahifada 30 tadan, ya'ni oxirgi sahifaga yetish
+ * uchun "keyingi" ni 57 marta bosish kerak edi. Sahifa hajmi bu yerda o'zgartirilmaydi:
+ * u har ekranning o'z holatida turadi va uni ko'chirish sakkizta ekranni qayta yozishni
+ * talab qilardi. Oxirgi sahifaga yetishning o'zi asosiy og'riq edi.
+ */
 export function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (p: number) => void }) {
   const t = useTranslations('pagination');
+  const [jump, setJump] = useState('');
   if (pages <= 1) return null;
+  const go = () => {
+    const n = Number.parseInt(jump, 10);
+    if (Number.isFinite(n)) onPage(Math.min(pages, Math.max(1, n)));
+    setJump('');
+  };
   return (
-    <nav aria-label={t('aria')} className="mt-4 flex items-center justify-center gap-2 font-mono text-sm">
+    <nav aria-label={t('aria')} className="mt-4 flex flex-wrap items-center justify-center gap-2 font-mono text-sm">
+      <button type="button" disabled={page <= 1} onClick={() => onPage(1)} className={BTN_GHOST}>{t('first')}</button>
       <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className={BTN_GHOST}>{t('prev')}</button>
       <span className="px-2 tabular-nums text-muted">{page} / {pages}</span>
       <button type="button" disabled={page >= pages} onClick={() => onPage(page + 1)} className={BTN_GHOST}>{t('next')}</button>
+      <button type="button" disabled={page >= pages} onClick={() => onPage(pages)} className={BTN_GHOST}>{t('last')}</button>
+      <label className="ml-1 flex items-center gap-1.5 text-xs text-muted">
+        <span>{t('goTo')}</span>
+        <input
+          type="number" min={1} max={pages} value={jump} inputMode="numeric"
+          onChange={(e) => setJump(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } }}
+          onBlur={() => jump && go()}
+          className="w-16 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono text-sm text-navy outline-none focus:border-teal"
+        />
+      </label>
     </nav>
+  );
+}
+
+/**
+ * Qatordan uning jurnaliga o'tish havolasi.
+ *
+ * Audit sahifasi ?entity= va ?entityId= ni qabul qilish uchun yozilgan edi, lekin hech
+ * qayerdan havola yo'q edi: "buni kim tasdiqlagan" savoliga javob qo'lda varaqlab
+ * qidirilardi.
+ */
+export function AuditLink({ entity, id }: { entity: string; id: string }) {
+  const t = useTranslations('admin.common');
+  return (
+    <Link href={`/admin/audit?entity=${entity}&entityId=${id}`} className="text-xs font-semibold text-teal-ink hover:underline">
+      {t('history')}
+    </Link>
   );
 }
 

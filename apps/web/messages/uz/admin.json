@@ -127,7 +127,8 @@
       "phone": "Telefon",
       "email": "Email",
       "slug": "Sahifa manzili",
-      "id": "ID"
+      "id": "ID",
+      "history": "Tarix"
     },
     "err": {
       "BAD_ROLE": "Noto'g'ri rol.",
