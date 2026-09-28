@@ -83,6 +83,19 @@
     "cancelOrder": "Cancel the order",
     "cancelling": "Cancelling",
     "cancelHint": "To change the term, cancel this order and place a new one.",
-    "cancelFailed": "The order was not cancelled. Try again."
+    "cancelFailed": "The order was not cancelled. Try again.",
+    "plan": {
+      "label": "Plan",
+      "full": "Full subscription",
+      "wagon": "Wagon search only",
+      "fullNote": "Phone numbers, wagon search and higher ranking for your listings",
+      "wagonNote": "Wagon search only. Phone numbers stay closed"
+    },
+    "grant": {
+      "PHONE": "Phone numbers",
+      "WAGON": "Wagon search"
+    },
+    "grantUntil": "until {until}",
+    "grantOff": "not open"
   }
 }

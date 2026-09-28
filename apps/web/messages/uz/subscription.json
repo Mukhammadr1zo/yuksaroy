@@ -83,6 +83,19 @@
     "cancelOrder": "Buyurtmani bekor qilish",
     "cancelling": "Bekor qilinmoqda",
     "cancelHint": "Muddatni o'zgartirish uchun shu buyurtmani bekor qiling va yangisini bering.",
-    "cancelFailed": "Buyurtma bekor qilinmadi. Qayta urinib ko'ring."
+    "cancelFailed": "Buyurtma bekor qilinmadi. Qayta urinib ko'ring.",
+    "plan": {
+      "label": "Tarif",
+      "full": "To'liq obuna",
+      "wagon": "Faqat vagon qidiruvi",
+      "fullNote": "Telefon raqamlari, vagon qidiruvi va e'lonlarni yuqoriga chiqarish",
+      "wagonNote": "Faqat vagon qidiruvi. Telefon raqamlari ochilmaydi"
+    },
+    "grant": {
+      "PHONE": "Telefon raqamlari",
+      "WAGON": "Vagon qidiruvi"
+    },
+    "grantUntil": "{until} gacha",
+    "grantOff": "ochiq emas"
   }
 }

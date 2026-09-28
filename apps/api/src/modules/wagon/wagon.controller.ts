@@ -158,12 +158,12 @@ export class WagonController {
     const [subscriber, cfg, freeUsed] = await Promise.all([this.subs.isActive(userId, 'WAGON'), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } })]);
     // Narx kvota bilan birga: 402 tanasi ham, /wagon/me ham shu yerdan oladi
     /*
-     * Narx to'liq obunaniki, vagon tarifiniki emas.
+     * Narx: vagon qidiruvini ochishning ENG ARZON yo'li.
      *
-     * Sababi: ekranda hali bitta karta bor va u to'liq obunani sotadi. Devor arzonroq
-     * vagon tarifining narxini ko'rsatsa, odam sotib olib bo'lmaydigan narxni ko'rardi.
-     * Vagon tarifi ekranga chiqqanda bu qator cfg.wagonMonthSom ga o'zgaradi.
+     * Ikki tarif bor va ikkalasi ham vagon qidiruvini ochadi: to'liq obuna va faqat
+     * vagon tarifi. Devor odam chindan to'laydigan summani ko'rsatishi kerak, shuning
+     * uchun kichigini oladi. Narxlar teng bo'lsa (bugungi sukut) farq bilinmaydi.
      */
-    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom: cfg.subscriptionMonthSom };
+    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom: Math.min(cfg.subscriptionMonthSom, cfg.wagonMonthSom) };
   }
 }
