@@ -4,7 +4,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { JetBrains_Mono, Manrope, Unbounded } from 'next/font/google';
 import { routing } from '@/i18n/routing';
-import { SITE, url } from '@/lib/seo';
+import { OG_LOCALE, SITE } from '@/lib/seo';
 import '../globals.css';
 import { VisitBeacon } from '@/components/site/VisitBeacon';
 
@@ -18,8 +18,10 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-// og:locale uchun til kodi; alternates bu yerda yo'q (aks holda har bir sahifa "/" ga canonical bo'lib qolardi)
-const OG_LOCALE: Record<string, string> = { uz: 'uz_UZ', ru: 'ru_RU', en: 'en_US' };
+// alternates bu yerda yo'q: aks holda har bir sahifa "/" ga canonical bo'lib qolardi.
+// og:url ham yo'q, xuddi shu sababdan: Next metadata'ni maydon bo'yicha almashtiradi,
+// shuning uchun o'z openGraph'ini bermagan ichki sahifa bosh sahifaning og:url ini
+// ko'rsatib turardi. To'g'ri og:url kerak bo'lgan sahifa lib/seo dagi pageMeta ni ishlatadi.
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(SITE),
     title: t('title'),
     description: t('description'),
-    openGraph: { type: 'website', siteName: ts('siteName'), title: t('title'), description: t('description'), url: url(locale), locale: OG_LOCALE[locale] },
+    openGraph: { type: 'website', siteName: ts('siteName'), title: t('title'), description: t('description'), locale: OG_LOCALE[locale] },
     twitter: { card: 'summary_large_image', title: t('title'), description: t('description') },
     // Search Console va Yandex Webmaster egalikni shu teg bilan tasdiqlaydi.
     // Kod o'zgartirmasdan .env ga qo'yiladi; bo'sh bo'lsa teg umuman chiqmaydi.

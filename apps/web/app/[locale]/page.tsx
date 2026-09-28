@@ -9,12 +9,15 @@ import { CategoryGrid } from '@/components/landing/CategoryGrid';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { VisitMap } from '@/components/landing/VisitMap';
 import { Footer } from '@/components/site/Footer';
-import { Ld, alt, url } from '@/lib/seo';
+import { Ld, pageMeta, url } from '@/lib/seo';
 
 export const revalidate = 60;
 
+// og:url bosh sahifada ham pageMeta dan keladi: layout endi uni bermaydi (izohi lib/seo da)
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
-  return alt((await params).locale);
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta.site' });
+  return pageMeta(locale, '', { title: t('title'), description: t('description') });
 }
 
 // Landing: standardrail.com (SIDINGS) modeli. Xarita hero, ustida qidiruv, tagida real reestr sanoqlari.

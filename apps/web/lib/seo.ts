@@ -1,5 +1,6 @@
 // SEO: mutlaq URL, canonical + hreflang, JSON-LD. Bitta manba (sitemap.ts va robots.ts ham shu yerdan oladi).
 import { createElement } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { sapiOrNull } from '@/lib/server-api';
 import type { ListingDetail } from '@/lib/types-listing';
@@ -16,6 +17,43 @@ export function alt(locale: string, path = '') {
       canonical: url(locale, path),
       languages: { ...Object.fromEntries(routing.locales.map((l) => [l, url(l, path)])), 'x-default': url(routing.defaultLocale, path) },
     },
+  };
+}
+
+/** og:locale uchun til kodi. Layout va pageMeta bir xil jadvaldan oladi. */
+export const OG_LOCALE: Record<string, string> = { uz: 'uz_UZ', ru: 'ru_RU', en: 'en_US' };
+
+/**
+ * Sahifaning o'z sarlavhasi, tavsifi, canonical/hreflang va og teglari.
+ *
+ * Nega kerak: Next metadata'ni maydon bo'yicha ALMASHTIRADI, qo'shmaydi. Sahifa faqat
+ * title va description bergan bo'lsa, openGraph layout'dan meros qoladi, ya'ni har bir
+ * ichki sahifa bosh sahifaning og:url va og:title ini ko'rsatardi. Ulashilgan havola
+ * ham, og:url ni canonical belgisi deb o'qiydigan qidiruv tizimi ham shuni ko'radi.
+ *
+ * Shuning uchun layout'da og:url umuman yo'q: noto'g'ri qiymatdan ko'ra yo'qligi yaxshi.
+ * To'g'ri qiymat kerak bo'lgan sahifa shu funksiyani ishlatadi.
+ */
+export async function pageMeta(
+  locale: string,
+  path: string,
+  m: { title: string; description: string; images?: string[] },
+) {
+  const ts = await getTranslations({ locale, namespace: 'seo2' });
+  return {
+    title: m.title,
+    description: m.description,
+    ...alt(locale, path),
+    openGraph: {
+      type: 'website' as const,
+      siteName: ts('siteName'),
+      title: m.title,
+      description: m.description,
+      url: url(locale, path),
+      locale: OG_LOCALE[locale],
+      ...(m.images ? { images: m.images } : {}),
+    },
+    twitter: { card: 'summary_large_image' as const, title: m.title, description: m.description },
   };
 }
 

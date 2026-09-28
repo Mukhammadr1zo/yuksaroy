@@ -51,6 +51,54 @@
       "title": "Oxirgi qidirganlarim",
       "addAll": "Hammasini qo'shish",
       "notFound": "topilmadi"
+    },
+    "seo": {
+      "title": "Vagon qayerda: raqami bo'yicha izlash | YukSaroy",
+      "description": "Vagon raqamini kiriting va oxirgi joylashuvini ko'ring: qaysi stansiyada turgani, yuklangan yoki bo'shligi. Vagon va konteynerlarni izlash, O'zbekiston bo'ylab."
+    },
+    "about": {
+      "h2": "Vagon qayerda ekanini qanday bilish mumkin",
+      "p1": "Vagon raqamini kiritsangiz, sahifa uning oxirgi joylashuvini ko'rsatadi: qaysi stansiyada turgani, yuklangan yoki bo'shligi va bu ma'lumot qaysi vaqtga tegishli ekani. Yo'nalish tarixi ko'rsatilmaydi, faqat hozirgi holat.",
+      "p2": "Raqam 7 yoki 8 ta raqamdan iborat. Boshidagi nol ahamiyatsiz: 01234567 va 1234567 bitta vagon. Bir vaqtda 20 tagacha raqam kiritish mumkin, har qatorga yoki vergul bilan ajratib."
+    },
+    "how": {
+      "h2": "Uch qadam",
+      "s1": "Vagon raqamini kiritasiz.",
+      "s2": "Qidirish tugmasini bosasiz.",
+      "s3": "Stansiya, holat va vaqtni ko'rasiz."
+    },
+    "gives": {
+      "h2": "Javobda nima keladi",
+      "i1": "Stansiya nomi, yoki stansiya ko'rsatilmagani.",
+      "i2": "Holati: yuklangan, bo'sh yoki noma'lum.",
+      "i3": "Ma'lumot qaysi vaqtga tegishli ekani.",
+      "i4": "Javob qachon yangilangani.",
+      "p": "Hisobotlar kuniga bir-ikki marta yangilanadi, shuning uchun bitta vagonni qayta-qayta so'rashdan foyda yo'q: bir xil javob keladi. Shu sababli o'zingiz qidirgan vagonni 6 soat ichida qayta ochish bepul."
+    },
+    "rail": {
+      "h2": "Vagon va konteynerlarni izlash",
+      "p": "Bu sahifa yo'nalishdan qat'i nazar har qanday vagonning hozirgi joylashuvini ko'rsatadi: import yukiga ham, bojxona hujjatiga ham bog'lanmagan. Raqam bo'yicha izlash, natija bitta ekranda, O'zbekiston bo'ylab."
+    },
+    "who": {
+      "h2": "Kimga kerak",
+      "i1": "Ekspeditorga: yuk qayerda va qachon yetib boradi.",
+      "i2": "Yuk egasiga: vagon bo'shadimi, qaytarish vaqti keldimi.",
+      "i3": "Terminalga: bugun nechta vagon kelishini oldindan bilish."
+    },
+    "faqBlock": {
+      "h2": "Ko'p beriladigan savollar",
+      "q1": "Vagon raqamini qayerdan olaman?",
+      "a1": "Raqam vagonning yon tomonida yozilgan va yuk hujjatlarida ko'rsatiladi. 7 yoki 8 ta raqam.",
+      "q2": "Nechta vagonni birdan izlash mumkin?",
+      "a2": "Bir vaqtda 20 tagacha. Har bir raqam alohida qidiruv sifatida sanaladi.",
+      "q3": "Ma'lumot qanchalik yangi?",
+      "a3": "Hisobotlar kuniga bir-ikki marta yangilanadi. Javobda ma'lumot qaysi vaqtga tegishli ekani yozib turadi.",
+      "q4": "Vagon topilmasa nima qilaman?",
+      "a4": "Avval raqamni tekshiring. Raqam to'g'ri bo'lsa, vagon hisobotlarda yo'q: yangi vagon yoki mamlakat tashqarisida bo'lishi mumkin.",
+      "q5": "Yo'nalish tarixi ko'rsatiladimi?",
+      "a5": "Yo'q, faqat oxirgi joylashuv ko'rsatiladi.",
+      "q6": "Kirish kerakmi?",
+      "a6": "Ha. Bepul qidiruv soni har foydalanuvchi uchun alohida sanaladi, shuning uchun qidiruv hisobga bog'lanadi. Kirish kodi Telegram botga keladi."
     }
   }
 }

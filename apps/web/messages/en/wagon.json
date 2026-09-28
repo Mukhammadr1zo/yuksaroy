@@ -51,6 +51,54 @@
       "title": "My recent searches",
       "addAll": "Add all",
       "notFound": "not found"
+    },
+    "seo": {
+      "title": "Wagon tracking by number in Uzbekistan | YukSaroy",
+      "description": "Enter a wagon number and see its last known location: which station it is at, loaded or empty. Find a wagon by number across Uzbekistan."
+    },
+    "about": {
+      "h2": "How to find out where a wagon is",
+      "p1": "Enter the wagon number and the page shows its last known location: which station it is at, whether it is loaded or empty, and what time the data refers to. Route history is not shown, only the current position.",
+      "p2": "The number has 7 or 8 digits. A leading zero does not matter: 01234567 and 1234567 are the same wagon. You can enter up to 20 numbers at once, one per line or separated by commas."
+    },
+    "how": {
+      "h2": "Three steps",
+      "s1": "Enter the wagon number.",
+      "s2": "Press the search button.",
+      "s3": "See the station, the state and the time."
+    },
+    "gives": {
+      "h2": "What comes back",
+      "i1": "The station name, or a note that no station was given.",
+      "i2": "The state: loaded, empty or unknown.",
+      "i3": "What time the data refers to.",
+      "i4": "When the answer was last refreshed.",
+      "p": "Reports are refreshed once or twice a day, so asking for the same wagon again and again gives nothing new: the answer will be the same. That is why looking at your own wagon again within 6 hours is free."
+    },
+    "rail": {
+      "h2": "Wagon and container search",
+      "p": "This page shows the current location of any wagon regardless of direction: it is tied neither to imported cargo nor to customs paperwork. Search by number, the answer on one screen, across Uzbekistan."
+    },
+    "who": {
+      "h2": "Who needs it",
+      "i1": "A forwarder: where the cargo is and when it arrives.",
+      "i2": "A cargo owner: whether the wagon is free and due back.",
+      "i3": "A terminal: how many wagons arrive today."
+    },
+    "faqBlock": {
+      "h2": "Common questions",
+      "q1": "Where do I get the wagon number?",
+      "a1": "The number is painted on the side of the wagon and written in the shipping papers. It is 7 or 8 digits.",
+      "q2": "How many wagons can I check at once?",
+      "a2": "Up to 20. Each number counts as a separate search.",
+      "q3": "How fresh is the data?",
+      "a3": "Reports are refreshed once or twice a day. The answer shows what time the data refers to.",
+      "q4": "The wagon was not found, what now?",
+      "a4": "Check the number first. If the number is right, the wagon is not in the reports: it may be new or outside the country.",
+      "q5": "Is route history shown?",
+      "a5": "No, only the last known location.",
+      "q6": "Do I need to sign in?",
+      "a6": "Yes. Free searches are counted per user, so a search is tied to an account. The sign-in code arrives in the Telegram bot."
     }
   }
 }
