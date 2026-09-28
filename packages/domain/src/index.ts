@@ -159,8 +159,14 @@ export const PLATFORM_DEFAULTS = {
   commissionThresholdOrders: 100,
   slotHoldTtlMin: 10,
   terminalConfirmMin: 30,
-  /** Obuna narxi, so'm/oy. Telefon raqami va vagon qidiruvi obunachiga ochiladi; narxni admin qo'yadi. */
+  /** Obuna narxi, so'm/oy. Telefon raqamini ochadi; narxni admin qo'yadi. */
   subscriptionMonthSom: 99000,
+  /**
+   * Vagon qidiruvi tarifi, so'm/oy. Alohida sozlama, lekin sukut qiymati telefon tarifi
+   * bilan bir xil: mexanizm chiqadi, narx qarori esa egada qoladi va hech narsa
+   * o'z-o'zidan qimmatlashmaydi yoki arzonlashmaydi.
+   */
+  wagonMonthSom: 99000,
   /** Obunachi kuniga nechta raqam ocha oladi: bazani ko'chirib olishga qarshi chegara. */
   phoneRevealDaily: 50,
   /** Obunasiz odamga nechta raqam bepul (umrbod, kunlik emas). 0 = bepul yo'q, ya'ni hozirgi tartib. */
@@ -607,3 +613,12 @@ export type AdPlacement = (typeof AD_PLACEMENTS)[number];
 
 export const AD_STATUSES = ['DRAFT', 'ACTIVE'] as const;
 export type AdStatus = (typeof AD_STATUSES)[number];
+
+/**
+ * Obuna nimani ochadi.
+ *
+ * Bitta bayroq o'rniga ro'yxat: telefon raqami va vagon qidiruvi alohida narxlanadi,
+ * lekin bitta obuna ikkalasini ham ochishi mumkin (eski obunalar aynan shunday).
+ */
+export const SUBSCRIPTION_GRANTS = ['PHONE', 'WAGON'] as const;
+export type SubscriptionGrant = (typeof SUBSCRIPTION_GRANTS)[number];

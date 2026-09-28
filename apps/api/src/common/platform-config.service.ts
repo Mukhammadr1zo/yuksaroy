@@ -10,6 +10,8 @@ export interface PlatformConfigValues {
   slotHoldTtlMin: number;
   terminalConfirmMin: number;
   subscriptionMonthSom: number;
+  /** Vagon qidiruvi tarifi, so'm/oy. Telefon tarifidan alohida. */
+  wagonMonthSom: number;
   phoneRevealDaily: number;
   /** Obunasiz odamga nechta raqam bepul (umrbod). 0 = bepul yo'q. */
   phoneRevealFree: number;

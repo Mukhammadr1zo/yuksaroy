@@ -86,7 +86,7 @@ export class ContactsController {
     const { phone, free } = found;
     const cfg = await this.config.get();
     if (!free) {
-      const subscriber = await this.subs.isActive(userId);
+      const subscriber = await this.subs.isActive(userId, 'PHONE');
       /*
        * Bepul oyna: obunasiz odamga umrbod birinchi N ta raqam. Qoida vagon
        * qidiruvinikidan (canSearch): obunachi cheksiz, qolganiga N ta.

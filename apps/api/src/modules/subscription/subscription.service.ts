@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
@@ -24,7 +25,7 @@ const payInstructions = (details: string) => ({
   details: details.trim() || env.PREMIUM_PAY_DETAILS?.trim() || PAY_PLACEHOLDER,
 });
 
-type Row = { id: string; no: string; userId: string; months: number; amountTiyin: bigint; status: string; provider: string | null; startsAt: Date | null; endsAt: Date | null; paidAt: Date | null; createdAt: Date };
+type Row = { id: string; no: string; userId: string; months: number; grants: string[]; amountTiyin: bigint; status: string; provider: string | null; startsAt: Date | null; endsAt: Date | null; paidAt: Date | null; createdAt: Date };
 /** BigInt -> Number (JSON). */
 export const subscriptionView = (s: Row) => ({ ...s, amountTiyin: Number(s.amountTiyin) });
 
@@ -96,13 +97,24 @@ export class SubscriptionService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Faol obuna: ACTIVE va muddati o'tmagan. Bir nechta bo'lsa eng kechi. */
-  async active(userId: string, now = new Date()) {
+  /**
+   * Faol obuna. `grant` berilsa faqat o'shani ochadigan qator qaraladi.
+   *
+   * Nega ro'yxat: telefon raqami va vagon qidiruvi alohida narxlanadi, lekin bitta
+   * obuna ikkalasini ham ochishi mumkin. Eski qatorlarda migratsiya ikkalasini yozib
+   * qo'ygan, shuning uchun bu yerda "eski qatormi" degan shart yo'q.
+   */
+  async active(userId: string, grant?: SubscriptionGrant, now = new Date()) {
     return this.prisma.subscription.findFirst({
-      where: { userId, status: 'ACTIVE', endsAt: { gt: now } },
+      where: { userId, status: 'ACTIVE', endsAt: { gt: now }, ...(grant ? { grants: { has: grant } } : {}) },
       orderBy: { endsAt: 'desc' },
       select: { id: true, endsAt: true },
     });
+  }
+
+  /** Tarif narxi: har ruxsat turining o'z sozlamasi bor. */
+  private price(cfg: { subscriptionMonthSom: number; wagonMonthSom: number }, grant: SubscriptionGrant) {
+    return grant === 'WAGON' ? cfg.wagonMonthSom : cfg.subscriptionMonthSom;
   }
 
   /**
@@ -118,20 +130,29 @@ export class SubscriptionService {
     });
   }
 
-  async isActive(userId: string): Promise<boolean> {
-    return (await this.active(userId)) !== null;
+  async isActive(userId: string, grant?: SubscriptionGrant): Promise<boolean> {
+    return (await this.active(userId, grant)) !== null;
   }
 
   async me(userId: string) {
     const now = new Date();
     const [act, pending, cfg] = await Promise.all([
-      this.active(userId, now),
+      this.active(userId, undefined, now),
       this.prisma.subscription.findFirst({ where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
       this.config.get(),
     ]);
+    // Har ruxsat turi alohida: faolmi, qachongacha, qancha turadi. Eski maydonlar
+    // o'z joyida qoladi, chunki ularni oltita ekran va bot o'qiydi.
+    const plans = await Promise.all(
+      SUBSCRIPTION_GRANTS.map(async (grant) => {
+        const a = await this.active(userId, grant, now);
+        return { grant, active: a !== null, endsAt: a?.endsAt ?? null, pricePerMonthSom: this.price(cfg, grant) };
+      }),
+    );
     return {
       active: act !== null,
       endsAt: act?.endsAt ?? null,
+      plans,
       // Faol obunachiga ortiqcha so'rov ketmaydi: tugagani faqat obunasizga qaraladi
       expired: act ? null : await this.lapsed(userId, now),
       pricePerMonthSom: cfg.subscriptionMonthSom,
@@ -169,9 +190,21 @@ export class SubscriptionService {
    * Buyurtma berish. Ochiq (PENDING) buyurtma bo'lsa yangisi ochilmaydi, o'sha qaytadi:
    * tugmani ikki marta bosgan odam admin navbatida ikki qator bo'lib chiqmasin.
    */
-  async order(userId: string, months: number) {
+  /**
+   * Buyurtma. `plan` berilmasa TO'LIQ obuna: ikkala ruxsat ham, telefon tarifi narxida.
+   *
+   * Nega sukut to'liq: ekranda hali bitta karta bor va u turni yubormaydi. Sukut
+   * "PHONE" bo'lsa, obuna sotib olgan yangi odamga vagon qidiruvi ochilmay qolardi,
+   * ya'ni bugungi mijoz uchun orqaga qadam bo'lardi. Alohida arzon tarif ataylab
+   * tanlanganda sotiladi.
+   */
+  async order(userId: string, months: number, plan?: SubscriptionGrant) {
     const cfg = await this.config.get();
-    const openWhere = { where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' as const } };
+    const grants = plan ? [plan] : [...SUBSCRIPTION_GRANTS];
+    const som = plan ? this.price(cfg, plan) : cfg.subscriptionMonthSom;
+    // Ochiq buyurtma ham tur bo'yicha ajratiladi: telefon uchun ochiq buyurtmasi bor odam
+    // vagon tarifini olmoqchi bo'lsa, unga eski buyurtma va boshqa summa qaytarilardi
+    const openWhere = { where: { userId, status: 'PENDING', grants: { hasEvery: grants } }, orderBy: { createdAt: 'desc' as const } };
     try {
       // Serializable: ikki so'rov bir vaqtda kelsa (ikki marta bosish, ikki varaq) ikkinchisi
       // yiqiladi va pastda mavjud buyurtma qaytariladi; aks holda navbatda ikki qator bo'lardi
@@ -182,7 +215,7 @@ export class SubscriptionService {
         // lekin hech qachon takrorlanmaydi. Buyurtmadagi yo'l bilan bir xil
         const [{ nextval }] = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('pay_no_seq')`;
         const s = await tx.subscription.create({
-          data: { no: `PAY-${Number(nextval)}`, userId, months, amountTiyin: BigInt(months * cfg.subscriptionMonthSom * 100), status: 'PENDING', provider: 'manual' },
+          data: { no: `PAY-${Number(nextval)}`, userId, months, grants, amountTiyin: BigInt(months * som * 100), status: 'PENDING', provider: 'manual' },
         });
         // Takror xabar kaliti odamga bog'langan, buyurtmaga emas: bekor qilib qayta buyurtma
         // bergan odam har safar yangi id bilan adminlarga xabar yog'dira olmasin
@@ -236,8 +269,16 @@ export class SubscriptionService {
       const s = await tx.subscription.findUnique({ where: { id } });
       if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
       if (s.status !== 'PENDING') throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING', status: s.status });
+      /*
+       * Muddat faqat BIR XIL turdagi faol obunadan davom etadi.
+       *
+       * Ilgari har qanday faol qator olinardi. Ikki xil tarif paydo bo'lganda bu xato
+       * bo'lardi: 12 oylik telefon obunasi ustidan 1 oylik vagon tarifini olgan odam
+       * bir oylik pulga 12 oyga yaqin vagon kirishini olardi, chunki kirish startsAt ga
+       * emas, endsAt ga qaraydi.
+       */
       const cur = await tx.subscription.findFirst({
-        where: { userId: s.userId, status: 'ACTIVE', endsAt: { gt: now } },
+        where: { userId: s.userId, status: 'ACTIVE', endsAt: { gt: now }, grants: { hasSome: s.grants } },
         orderBy: { endsAt: 'desc' },
         select: { endsAt: true },
       });
@@ -246,7 +287,8 @@ export class SubscriptionService {
       // Holat sharti yangilashning o'zida: ikki admin bir vaqtda bossa faqat bittasi o'tadi
       const r = await tx.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' } });
       if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING' });
-      await raiseListings(tx, s.userId, endsAt);
+      // E'lonni ko'tarish telefon obunasining imtiyozi: arzon vagon tarifi uni bepul bermasin
+      if (s.grants.includes('PHONE')) await raiseListings(tx, s.userId, endsAt);
       return subscriptionView({ ...s, status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' });
     });
     // Tranzaksiyadan keyin: o'zgarish qaytarib olinsa yolg'on xabar ketmasin

@@ -891,6 +891,10 @@ model Subscription {
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   months      Int // 1..12
+  /// Bu obuna nimani ochadi: domain dagi SUBSCRIPTION_GRANTS ro'yxatidan.
+  /// Eski qatorlar migratsiyada ikkalasini ham oladi, ya'ni bugungi obunachilar hech
+  /// narsa sezmaydi va kodda "eskimi yoki yangimi" degan shart kerak bo'lmaydi.
+  grants      String[]  @default([])
   amountTiyin BigInt
   status      String    @default("PENDING") // PENDING | ACTIVE | CANCELLED
   provider    String? // 'manual'

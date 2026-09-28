@@ -28,6 +28,7 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   slotHoldTtlMin: posInt,
   terminalConfirmMin: posInt,
   subscriptionMonthSom: posInt,
+  wagonMonthSom: posInt,
   phoneRevealDaily: posInt,
   phoneRevealFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul raqam yo'q (sukut)
   wagonSearchFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul urinish yo'q

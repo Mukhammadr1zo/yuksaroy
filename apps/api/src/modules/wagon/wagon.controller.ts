@@ -155,8 +155,15 @@ export class WagonController {
   }
 
   private async quota(userId: string) {
-    const [subscriber, cfg, freeUsed] = await Promise.all([this.subs.isActive(userId), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } })]);
+    const [subscriber, cfg, freeUsed] = await Promise.all([this.subs.isActive(userId, 'WAGON'), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } })]);
     // Narx kvota bilan birga: 402 tanasi ham, /wagon/me ham shu yerdan oladi
+    /*
+     * Narx to'liq obunaniki, vagon tarifiniki emas.
+     *
+     * Sababi: ekranda hali bitta karta bor va u to'liq obunani sotadi. Devor arzonroq
+     * vagon tarifining narxini ko'rsatsa, odam sotib olib bo'lmaydigan narxni ko'rardi.
+     * Vagon tarifi ekranga chiqqanda bu qator cfg.wagonMonthSom ga o'zgaradi.
+     */
     return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom: cfg.subscriptionMonthSom };
   }
 }

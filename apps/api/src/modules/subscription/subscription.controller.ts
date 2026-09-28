@@ -1,16 +1,19 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { AuditService } from '../../common/audit.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
 import { SUBSCRIPTION_STATUSES, SubscriptionService } from './subscription.service';
 
 class OrderDto {
   @IsInt() @Min(1) @Max(12) months!: number;
+  /** Qaysi tarif. Berilmasa telefon tarifi: eski mijozlar va bot shu yo'ldan keladi. */
+  @IsOptional() @IsIn(SUBSCRIPTION_GRANTS) grant?: SubscriptionGrant;
 }
 
 /** Bekor qilish sababi majburiy: auditga yoziladi. */
@@ -45,7 +48,13 @@ export class SubscriptionPublicController {
   @Get('price')
   async price() {
     const cfg = await this.config.get();
-    return { pricePerMonthSom: cfg.subscriptionMonthSom, phoneRevealDaily: cfg.phoneRevealDaily, wagonSearchFree: cfg.wagonSearchFree };
+    // pricePerMonthSom eski nom bo'lib qoladi: uni narxlar sahifasi va bot o'qiydi
+    return {
+      pricePerMonthSom: cfg.subscriptionMonthSom,
+      wagonPerMonthSom: cfg.wagonMonthSom,
+      phoneRevealDaily: cfg.phoneRevealDaily,
+      wagonSearchFree: cfg.wagonSearchFree,
+    };
   }
 }
 
@@ -68,8 +77,8 @@ export class SubscriptionController {
 
   @Post('subscription/orders') @HttpCode(201)
   async order(@CurrentUserId() userId: string, @Body() dto: OrderDto) {
-    const r = await this.subs.order(userId, dto.months);
-    if (!r.reused) await this.audit.log({ actorId: userId, action: 'subscription.create', entity: 'Subscription', entityId: r.order.id, meta: { no: r.order.no, months: dto.months, amountTiyin: r.order.amountTiyin } });
+    const r = await this.subs.order(userId, dto.months, dto.grant);
+    if (!r.reused) await this.audit.log({ actorId: userId, action: 'subscription.create', entity: 'Subscription', entityId: r.order.id, meta: { no: r.order.no, months: dto.months, grants: r.order.grants, amountTiyin: r.order.amountTiyin } });
     return r;
   }
 
