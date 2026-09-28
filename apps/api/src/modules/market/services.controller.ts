@@ -3,8 +3,9 @@ import {
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
-import { ArrayMaxSize, IsArray, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
-import { MARKET, REGIONS, SERVICE_TYPES, normalizePhone, type ServiceType } from '@yuksaroy/domain';
+import { ArrayMaxSize, IsArray, IsIn, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
+import { LISTING, MARKET, REGIONS, SERVICE_TYPES, normalizePhone, type ServiceType } from '@yuksaroy/domain';
+import { PHOTO_URL } from '../../common/file-url';
 import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
@@ -20,6 +21,8 @@ class ProfileDto {
   @IsOptional() @IsInt() @Min(0) @Max(60) experienceYears?: number;
   @IsOptional() @IsString() @MaxLength(120) priceNote?: string;
   @IsOptional() @IsString() @MaxLength(20) contactPhone?: string;
+  /** Faqat o'z serverimizdagi surat: begona manzil sahifada chizilmasin */
+  @IsOptional() @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
   @IsOptional() @IsString() orgId?: string;
 }
 /** Tahrirda hamma maydon ixtiyoriy; tur o'zgarmaydi (bir tur = bir profil). */
@@ -30,6 +33,7 @@ class PatchProfileDto {
   @IsOptional() @IsInt() @Min(0) @Max(60) experienceYears?: number;
   @IsOptional() @IsString() @MaxLength(120) priceNote?: string;
   @IsOptional() @IsString() @MaxLength(20) contactPhone?: string;
+  @IsOptional() @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
   @IsOptional() @IsIn(['ACTIVE', 'HIDDEN']) status?: 'ACTIVE' | 'HIDDEN';
 }
 
@@ -110,6 +114,7 @@ export class ServicesController {
         data: {
           userId, orgId: await this.market.memberOrgId(userId, dto.orgId), serviceType: dto.serviceType, title: dto.title.trim(), description: dto.description.trim(),
           regions: [...new Set(dto.regions)], experienceYears: dto.experienceYears ?? null, priceNote: clean(dto.priceNote) ?? null, contactPhone: phoneOf(dto.contactPhone),
+          photos: dto.photos ?? [],
         },
         include: INCLUDE,
       });
@@ -133,6 +138,7 @@ export class ServicesController {
       ...(dto.experienceYears !== undefined ? { experienceYears: dto.experienceYears } : {}),
       ...(dto.priceNote !== undefined ? { priceNote: clean(dto.priceNote) } : {}),
       ...(dto.contactPhone !== undefined ? { contactPhone: phoneOf(dto.contactPhone) } : {}),
+      ...(dto.photos ? { photos: dto.photos } : {}),
       ...(dto.status ? { status: dto.status } : {}),
     });
     await this.audit.log({ actorId: userId, action: 'service.profile.update', entity: 'ServiceProfile', entityId: id, meta: { status: dto.status ?? null } });

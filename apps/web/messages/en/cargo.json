@@ -125,7 +125,9 @@
       "descriptionOptional": "Extra details (optional)",
       "descriptionPhCargoShort": "Who loads, any other terms",
       "tgHint": "Telegram is not linked: you will not get offer notifications.",
-      "tgCta": "Open the bot"
+      "tgCta": "Open the bot",
+      "photos": "Cargo photos",
+      "photosHint": "The carrier sees what to move and gives an accurate offer."
     },
     "offer": {
       "price": "Price (UZS)",
@@ -232,7 +234,9 @@
         "save": "Save",
         "saving": "Saving",
         "cancel": "Cancel",
-        "PROFILE_EXISTS": "You already have a profile of this type. Edit it instead."
+        "PROFILE_EXISTS": "You already have a profile of this type. Edit it instead.",
+        "photos": "Photos",
+        "photosHint": "A licence, your office or finished work. Clients trust what they can see."
       },
       "relistHint": "The load date has passed, so this load is not on the board. Set a new date and it comes back within a few minutes.",
       "relistDate": "New load date",

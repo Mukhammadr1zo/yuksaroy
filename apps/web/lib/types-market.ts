@@ -4,6 +4,7 @@ import type { MarketBoard, MarketOfferStatus, MarketStatus, PaymentTerm, RegionC
 export interface ServiceProfileCard {
   id: string; userId: string; orgId: string | null; serviceType: ServiceType; title: string; description: string; regions: RegionCode[];
   experienceYears: number | null; priceNote: string | null; hasPhone: boolean; status: 'ACTIVE' | 'HIDDEN' | 'BLOCKED'; isDemo: boolean; createdAt: string; updatedAt: string;
+  photos: string[];
   owner: string | null; ownerOrg: { name: string; slug: string | null; kyc: string } | null;
   /** Bajarilgan ish soni: ochiq ro'yxat va profil sahifasida keladi, kabinet va adminda yo'q. */
   doneCount?: number;
@@ -26,7 +27,7 @@ export interface MarketRequest {
   fromRegion: RegionCode | null; toRegion: RegionCode | null; fromText: string | null; toText: string | null;
   cargoName: string | null; weightT: number | null; loadDate: string | null; truckType: TruckType | null;
   volumeM3: number | null; trucksCount: number | null; paymentTerm: PaymentTerm | null;
-  title: string; description: string; hasPhone: boolean; createdById: string; orgId: string | null;
+  title: string; description: string; hasPhone: boolean; createdById: string; orgId: string | null; photos: string[];
   status: MarketStatus; awardedOfferId: string | null; isDemo: boolean; createdAt: string; updatedAt: string; offersCount: number;
   /** Faqat egasiga */
   contactPhone?: string | null; statusUrl?: string; offers?: MarketOffer[];

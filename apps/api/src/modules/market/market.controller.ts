@@ -3,10 +3,11 @@ import {
 } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
-import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsIn, IsInt, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { randomBytes } from 'node:crypto';
-import { MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizePhone, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
+import { LISTING, MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizePhone, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
+import { PHOTO_URL } from '../../common/file-url';
 import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
@@ -35,6 +36,8 @@ class CreateRequestDto {
   @IsOptional() @IsInt() @Min(1) @Max(100) trucksCount?: number;
   @IsOptional() @IsString() @MaxLength(20) paymentTerm?: string;
   @IsOptional() @IsString() @MaxLength(20) contactPhone?: string;
+  /** Yukning surati. Faqat o'z serverimizdagi manzil: begona rasm sahifada chizilmasin */
+  @IsOptional() @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
   @IsOptional() @IsString() orgId?: string;
 }
 
@@ -195,6 +198,7 @@ export class MarketController {
           volumeM3: cargo ? dto.volumeM3 ?? null : null,
           trucksCount: cargo ? dto.trucksCount ?? null : null,
           paymentTerm: cargo ? dto.paymentTerm || null : null,
+          photos: dto.photos ?? [],
         },
       });
     });

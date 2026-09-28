@@ -125,7 +125,9 @@
       "descriptionOptional": "Qo'shimcha (ixtiyoriy)",
       "descriptionPhCargoShort": "Yuklash kim tomonidan, boshqa shartlar",
       "tgHint": "Telegram bog'lanmagan: takliflar haqida xabar bormaydi.",
-      "tgCta": "Botni ochish"
+      "tgCta": "Botni ochish",
+      "photos": "Yukning surati",
+      "photosHint": "Ijrochi nimani olib ketishini ko'rib, aniq taklif beradi."
     },
     "offer": {
       "price": "Narx (so'm)",
@@ -232,7 +234,9 @@
         "save": "Saqlash",
         "saving": "Saqlanmoqda",
         "cancel": "Bekor",
-        "PROFILE_EXISTS": "Bu turda profilingiz bor. Uni tahrirlang."
+        "PROFILE_EXISTS": "Bu turda profilingiz bor. Uni tahrirlang.",
+        "photos": "Suratlar",
+        "photosHint": "Guvohnoma, ofis yoki bajarilgan ish. Mijoz sizni ko'rib ishonadi."
       },
       "relistHint": "Yuklash sanasi o'tgan, shuning uchun bu yuk doskada ko'rinmaydi. Yangi sana qo'ysangiz bir necha daqiqada qaytadan chiqadi.",
       "relistDate": "Yangi yuklash sanasi",

@@ -19,6 +19,7 @@ import { PhoneField } from '@/components/ui/fields';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { BTN_GHOST, BTN_PRIMARY, Field, INPUT, Notice } from '@/components/kabinet/bits';
+import { PhotoUpload } from '@/components/kabinet/PhotoUpload';
 import { useMarketLabels } from './bits';
 import { CopyLink } from './CopyLink';
 
@@ -27,11 +28,11 @@ const BOT = process.env.NEXT_PUBLIC_BOT_USERNAME ?? 'yuksaroy_bot';
 type Draft = {
   title: string; description: string; serviceType: string; regionCode: string;
   fromRegion: string; toRegion: string; fromText: string; toText: string; cargoName: string; weightT: string; loadDate: string; truckType: string;
-  volumeM3: string; trucksCount: string; paymentTerm: string; contactPhone: string;
+  volumeM3: string; trucksCount: string; paymentTerm: string; contactPhone: string; photos: string[];
 };
 const EMPTY: Draft = {
   title: '', description: '', serviceType: '', regionCode: '', fromRegion: '', toRegion: '', fromText: '', toText: '',
-  cargoName: '', weightT: '', loadDate: '', truckType: '', volumeM3: '', trucksCount: '', paymentTerm: '', contactPhone: '',
+  cargoName: '', weightT: '', loadDate: '', truckType: '', volumeM3: '', trucksCount: '', paymentTerm: '', contactPhone: '', photos: [],
 };
 
 /**
@@ -79,6 +80,7 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
         trucksCount: d.trucksCount ? Number(d.trucksCount) : undefined,
         paymentTerm: d.paymentTerm || undefined,
         contactPhone: d.contactPhone,
+        photos: d.photos,
       }
     : { board, title: d.title, description: d.description, serviceType: d.serviceType, regionCode: d.regionCode, contactPhone: d.contactPhone });
 
@@ -217,6 +219,12 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
       <Field label={t('phone')} hint={t('phoneHint')} error={err('contactPhone')}>
         <PhoneField className={`${INPUT} font-mono`} value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} />
       </Field>
+      {/* Yukning surati: ijrochi nimani olib ketishini ko'rib taklif beradi, ko'r-ko'rona emas */}
+      {cargo ? (
+        <Field label={t('photos')} hint={t('photosHint')} error={err('photos')} group>
+          <PhotoUpload photos={d.photos} onChange={(photos) => set({ photos })} />
+        </Field>
+      ) : null}
       {top ? <Notice tone="err">{top}</Notice> : null}
       <div><button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('sending') : t('submit')}</button></div>
     </form>

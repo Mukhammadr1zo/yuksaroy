@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { PhotoStrip } from '@/components/market/PhotoStrip';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SEARCH_LABELS, SERVICE_TYPE_LABELS, type KycStatus, type RegionCode, type SearchLang } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
@@ -58,6 +59,7 @@ export default async function ServiceProfilePage({ params }: Params) {
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('about')}</h2>
         <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{p.description}</p>
       </section>
+      <PhotoStrip photos={p.photos} />
       {p.hasPhone && !p.isDemo ? (
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('phone')}</h2>

@@ -7,9 +7,10 @@ import { ApiError, api, post } from '@/lib/api';
 import type { FieldErrors, ServiceProfileCard } from '@/lib/types-market';
 import { PhoneField } from '@/components/ui/fields';
 import { BTN_GHOST, BTN_PRIMARY, CHIP, Field, INPUT, Notice } from '@/components/kabinet/bits';
+import { PhotoUpload } from '@/components/kabinet/PhotoUpload';
 import { useMarketLabels } from './bits';
 
-type Draft = { serviceType: string; title: string; description: string; regions: string[]; experienceYears: string; priceNote: string; contactPhone: string };
+type Draft = { serviceType: string; title: string; description: string; regions: string[]; experienceYears: string; priceNote: string; contactPhone: string; photos: string[] };
 
 export function ProfileForm({ initial, taken, onSaved, onCancel }: { initial?: ServiceProfileCard | null; taken: string[]; onSaved: (p: ServiceProfileCard) => void; onCancel: () => void }) {
   const t = useTranslations('market.dash.profile');
@@ -20,6 +21,7 @@ export function ProfileForm({ initial, taken, onSaved, onCancel }: { initial?: S
   const [d, setD] = useState<Draft>({
     serviceType: initial?.serviceType ?? free[0] ?? '', title: initial?.title ?? '', description: initial?.description ?? '', regions: initial?.regions ?? [],
     experienceYears: initial?.experienceYears != null ? String(initial.experienceYears) : '', priceNote: initial?.priceNote ?? '', contactPhone: initial?.contactPhone ?? '',
+    photos: initial?.photos ?? [],
   });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [top, setTop] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export function ProfileForm({ initial, taken, onSaved, onCancel }: { initial?: S
     const body = {
       title: d.title.trim(), description: d.description.trim(), regions: d.regions,
       experienceYears: d.experienceYears === '' ? null : Number(d.experienceYears), priceNote: d.priceNote, contactPhone: d.contactPhone,
+      photos: d.photos,
     };
     try {
       const saved = initial
@@ -68,6 +71,8 @@ export function ProfileForm({ initial, taken, onSaved, onCancel }: { initial?: S
         <Field label={t('priceNote')} error={err('priceNote')} className="sm:col-span-2"><input className={INPUT} maxLength={120} placeholder={t('priceNotePh')} value={d.priceNote} onChange={(e) => set({ priceNote: e.target.value })} /></Field>
       </div>
       <Field label={t('phone')} hint={t('phoneHint')} error={err('contactPhone')}><PhoneField className={`${INPUT} font-mono`} value={d.contactPhone} onChange={(contactPhone) => set({ contactPhone })} /></Field>
+      {/* Surat: guvohnoma, ofis, ish namunasi. Ishonch uchun, bezak uchun emas */}
+      <Field label={t('photos')} hint={t('photosHint')} error={err('photos')} group><PhotoUpload photos={d.photos} onChange={(photos) => set({ photos })} /></Field>
       {top ? <Notice tone="err">{top}</Notice> : null}
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('saving') : t('save')}</button>

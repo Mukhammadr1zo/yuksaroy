@@ -1,6 +1,7 @@
 'use client';
 // So'rov tafsiloti (yuk yoki xizmat): faktlar, tavsif, egasining telefoni (obunachiga), taklif formasi.
 import { useEffect, useState } from 'react';
+import { PhotoStrip } from './PhotoStrip';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
@@ -87,6 +88,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
           <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{r.description}</p>
         </section>
       ) : null}
+      <PhotoStrip photos={r.photos} />
 
       {/* Raqam serverda OPEN, AWARDED va DONE so'rovga ochiladi; oxirgi ikkisida faqat tanlangan
           ijrochiga: ish bajarilgach ham hisob-kitob uchun kerak. Yopiq so'rovda "yo'q" deb aldamaydi */}

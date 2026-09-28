@@ -994,6 +994,7 @@ model ServiceProfile {
   experienceYears Int?
   priceNote       String? // "kelishiladi", "1 hujjat 150 000 so'm" kabi erkin matn
   contactPhone    String? // raqamning o'zi obunachiga GET /contacts orqali
+  photos          String[]      @default([]) // o'z serverimizdagi suratlar (guvohnoma, ish namunasi); e'lon bilan bir xil qoida
   status          String        @default("ACTIVE") // ACTIVE | HIDDEN | BLOCKED (BLOCKED: admin yashirgan, egasi qaytara olmaydi)
   isDemo          Boolean       @default(false)
   createdAt       DateTime      @default(now()) @db.Timestamptz(3)
@@ -1026,6 +1027,7 @@ model MarketRequest {
   title          String
   description    String
   contactPhone   String? // raqamning o'zi obunachiga GET /contacts orqali
+  photos         String[]      @default([]) // yukning surati: ijrochi nimani olib ketishini ko'radi
   createdById    String
   createdBy      User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
   orgId          String?
