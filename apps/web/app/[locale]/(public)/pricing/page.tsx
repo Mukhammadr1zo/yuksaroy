@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckIcon } from '@phosphor-icons/react/dist/ssr';
-import { Link } from '@/i18n/navigation';
+import { SUBSCRIPTION_GRANTS } from '@yuksaroy/domain';
 import { DashLink } from '@/components/site/DashLink';
 import { num } from '@/lib/format';
 import { subscriptionPrice } from '@/lib/subscription-price';
@@ -17,29 +17,44 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 /**
- * Uch reja: Bepul, Obuna (narxi admin sozlamasidan), Jamoa. Komissiya qatori va 7 savol.
- * Ilgari o'rtada Premium turardi va obuna pastda alohida blok edi: mijoz ikki xil pullik
- * mahsulotni ko'rib, ikki marta to'lashi kerakdek tushunardi. Endi bitta obuna hammasini
- * qamraydi, shuning uchun bitta karta.
+ * Kartalar: Bepul, sotuvdagi har bir tarif, Jamoa. Komissiya qatori va 7 savol.
  *
- * Uchinchi karta ilgari "Kelishuv" edi va e'lon soni bilan do'kon sahifasini sotardi.
- * Ikkalasi ham bepul (e'lon soni chegarasi kodda yo'q, do'kon sahifasi faqat egalikni
- * so'raydi), ustiga bu sahifaning o'z javobi buni rad etardi. Endi karta faqat jamoa
- * to'lovini tushuntiradi: har kim o'zi buyurtma beradi, tashkilot bitta o'tkazma qiladi.
- * O'rin yoki jamoa hisobi qurilmagan, shuning uchun karta matndan iborat.
+ * O'rtadagi tarif kartalari bazadan: nom, tavsif va narxni admin "Tariflar" bo'limida
+ * belgilaydi, kod emas. Ilgari narx sozlamada, tarif esa alohida turardi va ikkisi zid
+ * ketardi: admin tarifni arzonlashtirsa bu sahifa eski narxni ko'rsatardi. Endi obuna
+ * kartasi ham, bu sahifa ham bitta ro'yxatni chizadi. Tarif hali yaratilmagan bo'lsa
+ * tarjima faylidagi umumiy "Obuna" kartasi chiqadi: sahifa bo'sh qolmasin.
+ *
+ * Bepul va Jamoa kartalari matndan iborat: e'lon soni chegarasi kodda yo'q, do'kon sahifasi
+ * faqat egalikni so'raydi, jamoa hisobi esa qurilmagan (har kim o'zi buyurtma beradi,
+ * tashkilot bitta o'tkazma qiladi).
  */
-const PLANS = [
-  { key: 'free', n: 4, href: '/dashboard/listings/new', hot: false },
-  { key: 'subscription', n: 5, href: '/dashboard/subscription', hot: true },
-  { key: 'team', n: 3, href: '/contact?topic=partner', hot: false },
-] as const;
-
+type Card = { key: string; name: string; priceSom: number | null; note: string; features: string[]; href: string; cta: string; hot: boolean };
 
 export default async function PricingPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('pricing');
   const sub = await subscriptionPrice();
+
+  const vars = { phones: sub.phoneRevealDaily, free: sub.wagonSearchFree };
+  const fromI18n = (key: 'free' | 'subscription' | 'team', n: number, href: string, priceSom: number | null): Card => ({
+    key, name: t(`${key}.name`), priceSom, note: t(`${key}.note`), href, cta: t(`${key}.cta`), hot: key === 'subscription',
+    features: Array.from({ length: n }, (_, i) => t(`${key}.f${i + 1}`, vars)),
+  });
+  // Ajratilgan karta serverdagi sukut tarif bilan bir xil: hamma ruxsatni beradigan birinchi
+  // tarif. Shunchaki birinchisi olinsa, admin arzon vagon tarifini oldinga qo'yganda unga
+  // "Hammasi ichida" yorlig'i tushardi. To'liq tarif yo'q bo'lsa birinchisi
+  const full = sub.plans.findIndex((p) => SUBSCRIPTION_GRANTS.every((g) => p.grants.includes(g)));
+  const hotIdx = full === -1 ? 0 : full;
+  const planCards: Card[] = sub.plans.length
+    ? sub.plans.map((p, i) => ({
+      key: p.code, name: p.name[locale] ?? p.name.uz ?? p.code, priceSom: p.priceMonthSom, note: t('subscription.note'),
+      features: p.features[locale] ?? p.features.uz ?? [], href: '/dashboard/subscription', cta: t('subscription.cta'), hot: i === hotIdx,
+    }))
+    : [fromI18n('subscription', 5, '/dashboard/subscription', sub.pricePerMonthSom)];
+  const cards = [fromI18n('free', 4, '/dashboard/listings/new', null), ...planCards, fromI18n('team', 3, '/contact?topic=partner', null)];
+
   return (
     <>
       <section className="border-b border-line bg-white">
@@ -52,23 +67,24 @@ export default async function PricingPage({ params }: Params) {
 
       <section className="mx-auto max-w-6xl px-6 py-14 md:py-16">
         <ul className="grid gap-4 lg:grid-cols-3">
-          {PLANS.map((p) => (
+          {cards.map((p) => (
             <li key={p.key} className={`relative flex flex-col rounded-card border bg-white p-6 ${p.hot ? 'border-navy' : 'border-line'}`}>
               {p.hot ? <span className="absolute -top-3 left-6 rounded-full bg-navy px-3 py-1 font-mono text-[11px] font-semibold text-white">{t('subscription.badge')}</span> : null}
-              <h2 className="font-display text-lg font-bold text-navy">{t(`${p.key}.name`)}</h2>
+              <h2 className="font-display text-lg font-bold text-navy">{p.name}</h2>
               <p className="mt-3 font-display text-3xl font-bold tabular-nums text-navy">
-                {p.key === 'subscription' ? <>{num(sub.pricePerMonthSom, locale)} <span className="font-mono text-base font-normal text-muted">{t('perMonth')}</span></> : t(`${p.key}.price`)}
+                {p.priceSom !== null ? <>{num(p.priceSom, locale)} <span className="font-mono text-base font-normal text-muted">{t('perMonth')}</span></> : t(`${p.key}.price`)}
               </p>
-              <p className="mt-1 text-sm text-muted">{t(`${p.key}.note`)}</p>
+              <p className="mt-1 text-sm text-muted">{p.note}</p>
               <ul className="mt-5 flex-1 space-y-2.5">
-                {Array.from({ length: p.n }, (_, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm text-ink/85">
-                    <CheckIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-teal-ink" aria-hidden="true" />{t(`${p.key}.f${i + 1}`, { phones: sub.phoneRevealDaily, free: sub.wagonSearchFree })}
+                {p.features.map((f) => (
+                  <li key={f} className="flex gap-2.5 text-sm text-ink/85">
+                    <CheckIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-teal-ink" aria-hidden="true" />{f}
                   </li>
                 ))}
               </ul>
-              <DashLink href={p.href} className={`mt-6 ${p.hot ? BTN.primary : BTN.outline}`}>{t(`${p.key}.cta`)}</DashLink>
-              {p.key === 'subscription' ? <p className="mt-3 text-xs leading-relaxed text-muted">{t('subscription.hint')}</p> : null}
+              <DashLink href={p.href} className={`mt-6 ${p.hot ? BTN.primary : BTN.outline}`}>{p.cta}</DashLink>
+              {/* Eslatma faqat asosiy kartada: har kartada takrorlansa sahifa cho'zilib ketadi */}
+              {p.hot ? <p className="mt-3 text-xs leading-relaxed text-muted">{t('subscription.hint')}</p> : null}
             </li>
           ))}
         </ul>

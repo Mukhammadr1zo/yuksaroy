@@ -159,16 +159,12 @@ export const PLATFORM_DEFAULTS = {
   commissionThresholdOrders: 100,
   slotHoldTtlMin: 10,
   terminalConfirmMin: 30,
-  /** Obuna narxi, so'm/oy. Telefon raqamini ochadi; narxni admin qo'yadi. */
-  subscriptionMonthSom: 99000,
-  /**
-   * Vagon qidiruvi tarifi, so'm/oy. Alohida sozlama, lekin sukut qiymati telefon tarifi
-   * bilan bir xil: mexanizm chiqadi, narx qarori esa egada qoladi va hech narsa
-   * o'z-o'zidan qimmatlashmaydi yoki arzonlashmaydi.
+  /*
+   * Obuna narxi va kunlik raqam soni bu yerda YO'Q: ular tarifda (Plan jadvali).
+   * Ilgari narx sozlamada, tarif esa alohida edi va ikkisi bir-biriga zid ketardi:
+   * admin tarifni arzonlashtirsa devor baribir sozlamadagi narxni ko'rsatardi.
+   * Endi bitta manba. Tarif topilmaganda ishlaydigan qiymat SUBSCRIPTION_FALLBACK da.
    */
-  wagonMonthSom: 99000,
-  /** Obunachi kuniga nechta raqam ocha oladi: bazani ko'chirib olishga qarshi chegara. */
-  phoneRevealDaily: 50,
   /** Obunasiz odamga nechta raqam bepul (umrbod, kunlik emas). 0 = bepul yo'q, ya'ni hozirgi tartib. */
   phoneRevealFree: 0,
   /** Obunasiz odamga nechta vagon qidiruvi bepul (umrbod, kunlik emas): "birinchisi tekin". */
@@ -179,6 +175,15 @@ export const PLATFORM_DEFAULTS = {
   payDetails: '' as string,
 } as const;
 export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
+
+/**
+ * Tarif topilmaganda ishlaydigan qiymatlar. Sozlama EMAS, admin o'zgartirmaydi.
+ *
+ * Qachon ishlaydi: tariflar paydo bo'lishidan oldin sotib olingan obuna qatorida
+ * kunlik son yo'q (limits null); veb API ga yeta olmaganda narxni ko'rsatishi kerak.
+ * Ikkisi ham bugungi haqiqiy qiymat, ya'ni eski mijoz uchun hech narsa o'zgarmaydi.
+ */
+export const SUBSCRIPTION_FALLBACK = { priceMonthSom: 99000, phoneRevealDaily: 50 } as const;
 
 /** Tiyin → "12 670 so'm". */
 const CURRENCY_WORD: Record<SearchLang, string> = { uz: "so'm", ru: 'сум', en: 'UZS' };

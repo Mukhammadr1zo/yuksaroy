@@ -9,7 +9,7 @@ import { ImpressionsService } from '../impressions/impressions.service';
 import { visibleCompany } from '../catalog/infrastructure/prisma-catalog.repository';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { canSearch, serialize } from '../wagon/wagon.rules';
-import { planLimit, SubscriptionService } from './subscription.service';
+import { SubscriptionService } from './subscription.service';
 
 const KINDS = ['listing', 'terminal', 'org', 'service', 'request', 'offer'] as const;
 type Kind = (typeof KINDS)[number];
@@ -87,7 +87,7 @@ export class ContactsController {
     const cfg = await this.config.get();
     // Qator o'zi kerak, "bormi" degan javob emas: kunlik chegara tarifning o'z sonidan olinadi
     const act = await this.subs.active(userId, 'PHONE');
-    const daily = planLimit(act?.limits, 'phoneRevealDaily', cfg.phoneRevealDaily);
+    const daily = await this.subs.dailyLimitFor(act?.limits);
     if (!free) {
       const subscriber = act !== null;
       /*
@@ -100,8 +100,9 @@ export class ContactsController {
       const freeUsed = !subscriber && cfg.phoneRevealFree > 0 ? await this.freeUsed(userId) : 0;
       // Devor javobida narx, kunlik chegara va bepul oyna ham bor: odam nima
       // ochilishini, qancha turishini va nimasi bepulligini shu yerdan biladi.
+      // Narx telefonni ochadigan eng arzon tarifniki: devor odam chindan to'laydigan summani ko'rsatsin
       if (!canSearch(subscriber, freeUsed, cfg.phoneRevealFree)) {
-        throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: cfg.subscriptionMonthSom, dailyLimit: daily, freeTotal: cfg.phoneRevealFree }, 402);
+        throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: await this.subs.priceFor('PHONE'), dailyLimit: daily, freeTotal: cfg.phoneRevealFree }, 402);
       }
     }
     if (phone === null) return { phone };

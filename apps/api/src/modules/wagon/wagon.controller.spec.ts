@@ -72,7 +72,8 @@ function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set
   const c = new WagonController(
     prisma,
     { get: async () => ({ wagonSearchFree: opts.freeTotal ?? 1 }) } as unknown as PlatformConfigService,
-    { isActive: async () => opts.subscriber ?? false } as unknown as SubscriptionService,
+    // Narx tarifdan: devor tanasidagi priceSom shu yerdan keladi
+    { isActive: async () => opts.subscriber ?? false, priceFor: async () => 99_000 } as unknown as SubscriptionService,
     { log: async () => {} } as unknown as AuditService,
     upstream,
   );

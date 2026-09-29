@@ -20,7 +20,7 @@ function fake(row: Row | null, count: number) {
       updateMany: async (a: { where: Record<string, unknown>; data: Record<string, unknown> }) => { updates.push(a); return { count }; },
     },
   } as never;
-  const config = { get: async () => ({ subscriptionMonthSom: 50000, payDetails: '', phoneRevealDaily: 10, wagonSearchFree: 1 }) } as never;
+  const config = { get: async () => ({ payDetails: '', wagonSearchFree: 1 }) } as never;
   const svc = new SubscriptionService(prisma, config, { queued: async () => {} } as never, { recipients: async () => [], push: async () => {} } as never);
   return { svc, updates };
 }

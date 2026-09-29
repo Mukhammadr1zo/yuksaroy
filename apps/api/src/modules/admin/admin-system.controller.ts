@@ -27,9 +27,7 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   commissionThresholdOrders: posInt, // 0 chegara ma'nosiz: komissiya birinchi kundanoq kerak bo'lib qolardi
   slotHoldTtlMin: posInt,
   terminalConfirmMin: posInt,
-  subscriptionMonthSom: posInt,
-  wagonMonthSom: posInt,
-  phoneRevealDaily: posInt,
+  // Obuna narxi va kunlik raqam soni sozlamada emas, tarifda (admin/plans)
   phoneRevealFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul raqam yo'q (sukut)
   wagonSearchFree: (v) => Number.isInteger(v) && (v as number) >= 0, // 0 = bepul urinish yo'q
   helpAskDaily: posInt,

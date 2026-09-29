@@ -7,8 +7,10 @@
  * edi. Endi admin yoki moderator tarifni shu yerda yaratadi, narxini va chegarasini
  * o'zi belgilaydi.
  *
- * Tarifsiz ham hammasi ishlaydi: ro'yxat bo'sh bo'lsa obuna kartasi bugungi umumiy
- * narxni ko'rsatadi. Ya'ni bu ekran majburiyat emas, imkoniyat.
+ * Tarif obuna narxi va kunlik raqam sonining YAGONA manbai: sozlamada bu sonlar yo'q.
+ * Shuning uchun sotuvda kamida bitta tarif turishi shart (server oxirgisini o'chirtirmaydi)
+ * va telefon raqamini ochadigan tarifda kunlik son majburiy: bo'sh qoldirsa obunachi
+ * nechta raqam ocha olishi noma'lum bo'lib qolardi.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -68,25 +70,27 @@ export default function AdminPlansPage() {
   const set = (p: Partial<Draft>) => setSheet((s) => (s ? { ...s, d: { ...s.d, ...p } } : s));
   const setLang = (k: 'name' | 'features', l: Lang, v: string) => setSheet((s) => (s ? { ...s, d: { ...s.d, [k]: { ...s.d[k], [l]: v } } } : s));
 
-  // Uch tilning hammasi va kamida bitta ruxsat: tugma shundan keyin ochiladi
+  // Kunlik son faqat telefon raqamini ochadigan tarifda ma'noli: server ham shu shartni tekshiradi
+  const needsDaily = !!sheet?.d.grants.includes('PHONE');
+  const daily = Number(sheet?.d.phoneRevealDaily);
+  // Uch tilning hammasi, kamida bitta ruxsat va (PHONE bo'lsa) kunlik son: tugma shundan keyin ochiladi
   const ready = !!sheet
     && /^[a-z0-9-]{2,30}$/.test(sheet.d.code)
     && PLAN_LOCALES.every((l) => sheet.d.name[l]?.trim() && lines(sheet.d.features[l] ?? '').length > 0)
-    && sheet.d.grants.length > 0;
+    && sheet.d.grants.length > 0
+    && (!needsDaily || daily > 0);
 
   async function save() {
     if (!sheet || !ready) return;
     setBusy(true);
     setNote(null);
     const d = sheet.d;
-    const daily = Number(d.phoneRevealDaily);
     const body = {
       code: d.code.trim(),
       name: Object.fromEntries(PLAN_LOCALES.map((l) => [l, d.name[l]!.trim()])),
       features: Object.fromEntries(PLAN_LOCALES.map((l) => [l, lines(d.features[l] ?? '')])),
       grants: d.grants,
-      // Bo'sh qoldirilsa umumiy sozlama ishlaydi: nol yuborilmaydi
-      limits: d.phoneRevealDaily.trim() && daily > 0 ? { phoneRevealDaily: daily } : {},
+      limits: needsDaily ? { phoneRevealDaily: daily } : {},
       priceMonthSom: Number(d.priceMonthSom) || 0,
       maxMonths: Number(d.maxMonths) || 12,
       sort: Number(d.sort) || 0,
@@ -115,7 +119,8 @@ export default function AdminPlansPage() {
     { key: 'name', head: tp('name'), cell: (r) => <><div className="font-semibold text-navy">{r.name?.[locale] ?? r.name?.uz ?? r.code}</div><div className="font-mono text-[11px] text-muted">{r.code}</div></> },
     { key: 'price', head: tp('price'), num: true, cell: (r) => num(r.priceMonthSom, locale) },
     { key: 'grants', head: tp('grants'), cell: (r) => r.grants.map((g) => tp(`grant.${g}`)).join(', ') },
-    { key: 'daily', head: tp('phoneRevealDaily'), num: true, cell: (r) => (r.limits?.phoneRevealDaily ? num(r.limits.phoneRevealDaily, locale) : tp('fromSettings')) },
+    // Faqat vagon tarifida kunlik son yo'q: chiziqcha, son emas
+    { key: 'daily', head: tp('phoneRevealDaily'), num: true, cell: (r) => (r.limits?.phoneRevealDaily ? num(r.limits.phoneRevealDaily, locale) : '-') },
     { key: 'maxMonths', head: tp('maxMonths'), num: true, cell: (r) => r.maxMonths },
     { key: 'active', head: tc('status'), cell: (r) => <Pill tone={r.active ? 'ok' : 'neutral'}>{r.active ? tp('onSale') : tp('offSale')}</Pill> },
   ];
@@ -186,8 +191,9 @@ export default function AdminPlansPage() {
                 <input type="number" min={1} max={12} className={INPUT} value={sheet.d.maxMonths} onChange={(e) => set({ maxMonths: Number(e.target.value) })} />
               </Labeled>
             </div>
-            <Labeled label={tp('phoneRevealDaily')} className="block">
-              <input type="number" min={0} className={INPUT} value={sheet.d.phoneRevealDaily} onChange={(e) => set({ phoneRevealDaily: e.target.value })} placeholder={tp('fromSettings')} />
+            {/* Yulduzcha: telefon ruxsati belgilanganida maydon majburiy, tugma usiz ochilmaydi */}
+            <Labeled label={`${tp('phoneRevealDaily')}${needsDaily ? ' *' : ''}`} className="block">
+              <input type="number" min={1} className={INPUT} value={sheet.d.phoneRevealDaily} disabled={!needsDaily} onChange={(e) => set({ phoneRevealDaily: e.target.value })} />
             </Labeled>
             <p className="text-xs text-muted">{tp('limitHint')}</p>
             <div className="grid gap-3 sm:grid-cols-2">

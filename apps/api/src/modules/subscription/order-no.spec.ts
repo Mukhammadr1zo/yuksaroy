@@ -19,8 +19,10 @@ function fakeOrder(payDetails: string) {
     },
     $queryRaw: async () => [{ nextval: 1001n }],
   };
-  const prisma = { $transaction: async (fn: (t: unknown) => unknown) => fn(tx) } as never;
-  const config = { get: async () => ({ subscriptionMonthSom: 99000, payDetails }) } as never;
+  // Buyurtma har doim tarifdan: bitta sukut tarif yetadi
+  const plans = [{ id: 'p0', code: 'obuna', priceMonthSom: 99_000, grants: ['PHONE', 'WAGON'], limits: null, maxMonths: 12, sort: 0, active: true }];
+  const prisma = { plan: { findMany: async () => plans }, $transaction: async (fn: (t: unknown) => unknown) => fn(tx) } as never;
+  const config = { get: async () => ({ payDetails }) } as never;
   const adminNotify = { queued: async (...a: unknown[]) => { notified.push(a); } } as never;
   const notifications = { recipients: async () => [], push: async () => {} } as never;
   const svc = new SubscriptionService(prisma, config, adminNotify, notifications);

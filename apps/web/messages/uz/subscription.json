@@ -25,6 +25,7 @@
     "afterPay": "To'lov tasdiqlangach obuna yoqiladi. Tasdiq odatda 1 ish kuni ichida.",
     "extend": "Uzaytirish",
     "loadFailed": "Ma'lumot yuklanmadi.",
+    "noPlans": "Tarif hali belgilanmagan. Keyinroq urinib ko'ring.",
     "reveal": {
       "show": "Raqamni ko'rish",
       "loading": "Olinmoqda",
@@ -48,7 +49,7 @@
     },
     "admin": {
       "tab": "Obunalar",
-      "lead": "Qo'lda to'lov: summa kelganini tekshirib tasdiqlang, obuna yoqiladi.",
+      "lead": "Qo'lda to'lov: summa kelganini tekshirib tasdiqlang, obuna yoqiladi. Narx va tarkib Tariflar bo'limida.",
       "status": {
         "PENDING": "To'lov kutilmoqda",
         "ACTIVE": "Faol",
@@ -85,11 +86,7 @@
     "cancelHint": "Muddatni o'zgartirish uchun shu buyurtmani bekor qiling va yangisini bering.",
     "cancelFailed": "Buyurtma bekor qilinmadi. Qayta urinib ko'ring.",
     "plan": {
-      "label": "Tarif",
-      "full": "To'liq obuna",
-      "wagon": "Faqat vagon qidiruvi",
-      "fullNote": "Telefon raqamlari, vagon qidiruvi va e'lonlarni yuqoriga chiqarish",
-      "wagonNote": "Faqat vagon qidiruvi. Telefon raqamlari ochilmaydi"
+      "label": "Tarif"
     },
     "grant": {
       "PHONE": "Telefon raqamlari",

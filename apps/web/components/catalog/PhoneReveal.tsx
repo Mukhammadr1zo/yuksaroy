@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { LockSimpleIcon, PhoneIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
-import { PLATFORM_DEFAULTS } from '@yuksaroy/domain';
+import { SUBSCRIPTION_FALLBACK } from '@yuksaroy/domain';
 import { ApiError, api, hasSession, tgTokens } from '@/lib/api';
 import { num } from '@/lib/format';
 
@@ -45,13 +45,13 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
       setSt(r.phone ? { s: 'phone', phone: r.phone } : { s: 'none' });
     } catch (e) {
       const status = e instanceof ApiError ? e.status : 0;
-      // JSON bo'lmagan javobda tana null keladi: sonlar sukut sozlamaga tayanadi,
-      // devor raqamsiz qolib komponent yiqilmasin
+      // JSON bo'lmagan javobda tana null keladi: sonlar tarif topilmagandagi qiymatga
+      // tayanadi (narx tarifda, sozlamada emas), devor raqamsiz qolib komponent yiqilmasin
       const b = (e instanceof ApiError ? (e.body as { priceSom?: number; dailyLimit?: number; limit?: number; freeTotal?: number } | null) : null) ?? {};
       setSt(
         status === 401 ? { s: 'login' }
-          : status === 402 ? { s: 'subscribe', priceSom: b.priceSom ?? PLATFORM_DEFAULTS.subscriptionMonthSom, dailyLimit: b.dailyLimit ?? PLATFORM_DEFAULTS.phoneRevealDaily, freeTotal: b.freeTotal ?? 0 }
-            : status === 429 ? { s: 'limit', limit: b.limit ?? PLATFORM_DEFAULTS.phoneRevealDaily }
+          : status === 402 ? { s: 'subscribe', priceSom: b.priceSom ?? SUBSCRIPTION_FALLBACK.priceMonthSom, dailyLimit: b.dailyLimit ?? SUBSCRIPTION_FALLBACK.phoneRevealDaily, freeTotal: b.freeTotal ?? 0 }
+            : status === 429 ? { s: 'limit', limit: b.limit ?? SUBSCRIPTION_FALLBACK.phoneRevealDaily }
               : status === 404 ? { s: 'none' } : { s: 'err' });
     }
   }

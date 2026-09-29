@@ -155,15 +155,15 @@ export class WagonController {
   }
 
   private async quota(userId: string) {
-    const [subscriber, cfg, freeUsed] = await Promise.all([this.subs.isActive(userId, 'WAGON'), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } })]);
-    // Narx kvota bilan birga: 402 tanasi ham, /wagon/me ham shu yerdan oladi
     /*
-     * Narx: vagon qidiruvini ochishning ENG ARZON yo'li.
-     *
-     * Ikki tarif bor va ikkalasi ham vagon qidiruvini ochadi: to'liq obuna va faqat
-     * vagon tarifi. Devor odam chindan to'laydigan summani ko'rsatishi kerak, shuning
-     * uchun kichigini oladi. Narxlar teng bo'lsa (bugungi sukut) farq bilinmaydi.
+     * Narx kvota bilan birga: 402 tanasi ham, /wagon/me ham shu yerdan oladi, bot esa
+     * faqat priceSom ni o'qiydi. Bu vagon qidiruvini ochishning ENG ARZON tarifi:
+     * to'liq obuna ham, faqat vagon tarifi ham ochadi, devor odam chindan to'laydigan
+     * summani ko'rsatishi kerak. Bepul son sozlamada: u obunasiz odamga tegishli.
      */
-    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom: Math.min(cfg.subscriptionMonthSom, cfg.wagonMonthSom) };
+    const [subscriber, cfg, freeUsed, priceSom] = await Promise.all([
+      this.subs.isActive(userId, 'WAGON'), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } }), this.subs.priceFor('WAGON'),
+    ]);
+    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom };
   }
 }

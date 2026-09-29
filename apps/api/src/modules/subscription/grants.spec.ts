@@ -49,14 +49,15 @@ function setup(opts: { pending?: Row; activeRows?: Row[]; phoneSom?: number; wag
     listing: { updateMany: async (a: unknown) => { listingUpdates.push(a); return { count: 0 }; } },
     $queryRaw: async () => [{ nextval: 7n }],
   };
-  const prisma = { ...tx, $transaction: async (fn: (t: unknown) => Promise<unknown>) => fn(tx) } as never;
-  const config = {
-    get: async () => ({
-      subscriptionMonthSom: opts.phoneSom ?? 99_000,
-      wagonMonthSom: opts.wagonSom ?? 49_000,
-      payDetails: '', phoneRevealDaily: 50, wagonSearchFree: 1,
-    }),
-  } as never;
+  // Uch tarif: to'liq obuna (sukut), faqat telefon, faqat vagon. Narx tarifda, sozlamada emas
+  const phoneSom = opts.phoneSom ?? 99_000;
+  const plans = [
+    { id: 'p0', code: 'obuna', priceMonthSom: phoneSom, grants: ['PHONE', 'WAGON'], limits: { phoneRevealDaily: 50 }, maxMonths: 12, sort: 0, active: true },
+    { id: 'p1', code: 'telefon', priceMonthSom: phoneSom, grants: ['PHONE'], limits: { phoneRevealDaily: 50 }, maxMonths: 12, sort: 1, active: true },
+    { id: 'p2', code: 'vagon', priceMonthSom: opts.wagonSom ?? 49_000, grants: ['WAGON'], limits: null, maxMonths: 12, sort: 2, active: true },
+  ];
+  const prisma = { ...tx, plan: { findMany: async () => plans }, $transaction: async (fn: (t: unknown) => Promise<unknown>) => fn(tx) } as never;
+  const config = { get: async () => ({ payDetails: '', wagonSearchFree: 1 }) } as never;
   const svc = new SubscriptionService(prisma, config, { queued: async () => {} } as never, { recipients: async () => [], push: async () => {} } as never);
   return { svc, created, updates, activeWheres, listingUpdates };
 }
@@ -70,13 +71,14 @@ describe('ikki tarif: telefon va vagon', () => {
     expect(f.created[0]!.amountTiyin).toBe(BigInt(2 * 49_000 * 100));
   });
 
-  it("tur berilmasa TO'LIQ obuna: ikkala ruxsat, telefon narxida", async () => {
+  it("tur berilmasa SUKUT tarif: ikkala ruxsat, to'liq obuna narxida", async () => {
     // Ekranda hali bitta karta bor va u turni yubormaydi. Sukut faqat telefon bo'lsa,
     // obuna sotib olgan yangi odamga vagon qidiruvi ochilmay qolardi.
     const f = setup({ phoneSom: 99_000, wagonSom: 49_000 });
     await f.svc.order('u1', 1);
     expect(f.created[0]!.grants).toEqual(['PHONE', 'WAGON']);
     expect(f.created[0]!.amountTiyin).toBe(BigInt(99_000 * 100));
+    expect(f.created[0]!.planId).toBe('p0');
   });
 
   it('telefon tarifi ataylab tanlansa faqat telefonni ochadi', async () => {
@@ -110,6 +112,17 @@ describe('ikki tarif: telefon va vagon', () => {
     const f = setup({ pending: row({ grants: ['WAGON'] }), activeRows: [wagonActive] });
     await f.svc.confirm('s1', new Date('2026-09-01T00:00:00Z'));
     expect(f.updates[0]!.data.startsAt).toEqual(wagonActive.endsAt);
+  });
+
+  it("to'liq tarif vagon obunasining muddatidan davom ETMAYDI", async () => {
+    // Vagon qatori faqat bitta ruxsatni qoplaydi: undan davom etilsa telefon bugundan
+    // 12 oyga ochilardi, ya'ni bir oylik pulga 12 oy telefon
+    const wagon = row({ id: 'w1', grants: ['WAGON'], status: 'ACTIVE', endsAt: new Date('2027-08-01T00:00:00Z') });
+    const f = setup({ pending: row({ grants: ['PHONE', 'WAGON'] }), activeRows: [wagon] });
+    const now = new Date('2026-09-01T00:00:00Z');
+    await f.svc.confirm('s1', now);
+    expect(f.updates[0]!.data.startsAt).toEqual(now);
+    expect((f.updates[0]!.data.endsAt as Date).getFullYear()).toBe(2026);
   });
 
   it('eski obuna ikkalasini ham ochadi, shuning uchun undan davom etadi', async () => {

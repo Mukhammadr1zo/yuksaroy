@@ -9,10 +9,7 @@ export interface PlatformConfigValues {
   commissionThresholdOrders: number;
   slotHoldTtlMin: number;
   terminalConfirmMin: number;
-  subscriptionMonthSom: number;
-  /** Vagon qidiruvi tarifi, so'm/oy. Telefon tarifidan alohida. */
-  wagonMonthSom: number;
-  phoneRevealDaily: number;
+  // Obuna narxi va kunlik raqam soni bu yerda YO'Q: ular tarifda (SubscriptionService.activePlans)
   /** Obunasiz odamga nechta raqam bepul (umrbod). 0 = bepul yo'q. */
   phoneRevealFree: number;
   wagonSearchFree: number;

@@ -18,7 +18,7 @@ const STATUSES = ['PENDING', 'ACTIVE', 'CANCELLED'] as const;
 type Status = (typeof STATUSES)[number];
 
 type Row = {
-  id: string; no: string; status: Status; months: number; amountTiyin: number;
+  id: string; no: string; status: Status; months: number; amountTiyin: number; grants: string[];
   startsAt: string | null; endsAt: string | null; paidAt: string | null; createdAt: string;
   user: { id: string; fullName: string | null; phone: string | null };
 };
@@ -79,6 +79,8 @@ export default function AdminSubscriptionsPage() {
       ),
     },
     { key: 'status', head: tc('status'), cell: (r) => <Pill tone={TONE[r.status]}>{ts(`status.${r.status}`)}</Pill> },
+    // Qaysi tarif olingani qatorning o'z ruxsatlaridan: bir xil summali telefon va vagon qatori boshqacha ajralmaydi
+    { key: 'grants', head: t('plans.grants'), cell: (r) => r.grants.map((g) => t(`plans.grant.${g}`)).join(', ') },
     { key: 'months', head: ts('months'), num: true, cell: (r) => r.months },
     { key: 'amount', head: ts('amount'), num: true, cell: (r) => som(r.amountTiyin) },
     {
@@ -148,6 +150,7 @@ export default function AdminSubscriptionsPage() {
             <Field k={tc('name')} v={sel.user.fullName ?? ts('noName')} />
             <Field k={ts('phone')} v={phoneDisplay(sel.user.phone ?? '')} mono />
             <Field k={tc('status')} v={ts(`status.${sel.status}`)} />
+            <Field k={t('plans.grants')} v={sel.grants.map((g) => t(`plans.grant.${g}`)).join(', ')} />
             <Field k={ts('months')} v={String(sel.months)} mono />
             <Field k={ts('amount')} v={som(sel.amountTiyin)} mono />
             <Field k={ts('createdAt')} v={uzDate(sel.createdAt, locale)} mono />

@@ -3,20 +3,24 @@
 // qo'lda to'lov yo'li: buyurtma PENDING, admin tasdiqlaydi, obuna ACTIVE bo'ladi.
 // Kabinet (/dashboard/subscription) va Telegram Mini App (/tg/subscription) shu bitta kartani ko'rsatadi:
 // api() ikkalasida ham o'z sessiyasini biladi (cookie yoki Bearer).
+//
+// Narx va tarkib faqat tarifdan (admin paneldagi "Tariflar"): ilgari karta sozlamadagi umumiy
+// narxni ham bilardi va ikkisi zid ketardi. Tarif yo'q bo'lsa forma chizilmaydi: narxsiz
+// buyurtma bo'lmaydi, odam keyinroq qaytadi.
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircleIcon, LockSimpleOpenIcon } from '@phosphor-icons/react';
 import { api, post } from '@/lib/api';
 import { som, uzDate, uzDateTime } from '@/lib/format';
+import type { PlanCard } from '@/lib/subscription-price';
 import { BTN_GHOST, BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 import { ConsentLine } from '@/components/site/ConsentLine';
 
 type Pending = { id: string; no: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string } };
 type Grant = 'PHONE' | 'WAGON';
-type Plan = { grant: Grant; active: boolean; endsAt: string | null; pricePerMonthSom: number };
-/** Admin panelda yaratilgan tarif: nomi va tavsifi bazadan keladi, tarjima faylidan emas. */
-type Offer = { code: string; name: Record<string, string>; features: Record<string, string[]>; priceMonthSom: number; grants: string[]; maxMonths: number };
-type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; plans: Plan[]; catalog?: Offer[]; pending: Pending | null };
+/** pricePerMonthSom null: shu ruxsatni beradigan tarif hozir sotuvda yo'q. */
+type Plan = { grant: Grant; active: boolean; endsAt: string | null; pricePerMonthSom: number | null };
+type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; plans: Plan[]; catalog?: PlanCard[]; pending: Pending | null };
 type Created = { order: { id: string; no: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -27,9 +31,7 @@ export function SubscriptionCard() {
   const [me, setMe] = useState<Me | null>(null);
   const [failed, setFailed] = useState(false);
   const [months, setMonths] = useState(1);
-  /** Bo'sh qator = to'liq obuna (ikkala ruxsat). 'WAGON' = faqat vagon qidiruvi. */
-  const [plan, setPlan] = useState<'' | 'WAGON'>('');
-  /** Admin yaratgan tarifning kodi. Bo'sh bo'lsa tarif yo'q va karta bugungidek ishlaydi. */
+  /** Tanlangan tarifning kodi. */
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(false);
@@ -55,12 +57,14 @@ export function SubscriptionCard() {
   }
 
   const catalog = me?.catalog ?? [];
-  const chosen = catalog.find((c) => c.code === code) ?? null;
+  // Tanlangani topilmasa birinchisi: null faqat tarif umuman yo'q bo'lganda
+  const chosen = catalog.find((c) => c.code === code) ?? catalog[0] ?? null;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!chosen) return;
     setBusy(true); setErr(false);
-    try { setCreated(await post<Created>('/subscription/orders', chosen ? { months, planCode: chosen.code } : plan ? { months, grant: plan } : { months })); }
+    try { setCreated(await post<Created>('/subscription/orders', { months, planCode: chosen.code })); }
     catch { setErr(true); } finally { setBusy(false); }
   }
 
@@ -72,18 +76,6 @@ export function SubscriptionCard() {
     ? { id: created.order.id, no: created.order.no, months: created.order.months, amountTiyin: created.order.amountTiyin, details: created.payInstructions.details }
     : me.pending ? { id: me.pending.id, no: me.pending.no, months: me.pending.months, amountTiyin: me.pending.amountTiyin, details: me.pending.payInstructions.details } : null;
 
-  const wagonPlan = me.plans?.find((p) => p.grant === 'WAGON');
-  /*
-   * Vagon tarifi faqat u ARZONROQ bo'lganda taklif qilinadi.
-   *
-   * Narxlar teng bo'lsa alohida tarifning ma'nosi yo'q: odam bir xil pulga kamroq
-   * narsa olardi. Admin narxni tushirgan kunda tanlov o'zi paydo bo'ladi, ya'ni
-   * bayroq ham, deploy ham kerak emas.
-   */
-  const wagonCheaper = !!wagonPlan && wagonPlan.pricePerMonthSom < me.pricePerMonthSom;
-  // Admin tarif yaratgan bo'lsa narx va muddat SHUNDAN: sozlamadagi umumiy narx emas
-  const perMonth = chosen ? chosen.priceMonthSom : plan === 'WAGON' && wagonPlan ? wagonPlan.pricePerMonthSom : me.pricePerMonthSom;
-  const monthOptions = chosen ? MONTHS.filter((n) => n <= chosen.maxMonths) : MONTHS;
   // Ruxsatlar bir xil bo'lsa ro'yxat chizilmaydi: bugungi obunachilarga u hech narsa bermaydi
   const mixed = (me.plans ?? []).some((p) => p.active !== me.plans[0]!.active || p.endsAt !== me.plans[0]!.endsAt);
 
@@ -144,54 +136,37 @@ export function SubscriptionCard() {
             {busy ? t('cancelling') : t('cancelOrder')}
           </button>
         </section>
+      ) : !chosen ? (
+        <div className="mt-6 max-w-md"><Notice tone="warn">{t('noPlans')}</Notice></div>
       ) : (
         <form onSubmit={submit} className="mt-6 max-w-md space-y-4 rounded-card border border-line bg-white p-5">
-          {catalog.length ? (
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-semibold">{t('plan.label')}</legend>
-              {catalog.map((c) => (
-                <label key={c.code} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${code === c.code ? 'border-teal bg-teal-soft' : 'border-line'}`}>
-                  <input
-                    type="radio" name="plan" value={c.code} checked={code === c.code}
-                    onChange={() => { setCode(c.code); if (months > c.maxMonths) setMonths(c.maxMonths); }} className="mt-1"
-                  />
-                  <span className="min-w-0">
-                    <span className="block font-semibold text-navy">{c.name?.[locale] ?? c.name?.uz ?? c.code}</span>
-                    {/* Tavsif admin yozgan matn: shu sababli tarjima kaliti emas */}
-                    <span className="mt-1 block space-y-0.5 text-xs text-muted">
-                      {(c.features?.[locale] ?? c.features?.uz ?? []).map((f) => <span key={f} className="block">{f}</span>)}
-                    </span>
-                    <span className="mt-1 block font-mono text-sm tabular-nums text-navy">{t('perMonth', { price: som(c.priceMonthSom * 100, locale) })}</span>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-semibold">{t('plan.label')}</legend>
+            {catalog.map((c) => (
+              <label key={c.code} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${chosen.code === c.code ? 'border-teal bg-teal-soft' : 'border-line'}`}>
+                <input
+                  type="radio" name="plan" value={c.code} checked={chosen.code === c.code}
+                  onChange={() => { setCode(c.code); if (months > c.maxMonths) setMonths(c.maxMonths); }} className="mt-1"
+                />
+                <span className="min-w-0">
+                  <span className="block font-semibold text-navy">{c.name?.[locale] ?? c.name?.uz ?? c.code}</span>
+                  {/* Tavsif admin yozgan matn: shu sababli tarjima kaliti emas */}
+                  <span className="mt-1 block space-y-0.5 text-xs text-muted">
+                    {(c.features?.[locale] ?? c.features?.uz ?? []).map((f) => <span key={f} className="block">{f}</span>)}
                   </span>
-                </label>
-              ))}
-            </fieldset>
-          ) : wagonCheaper ? (
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-semibold">{t('plan.label')}</legend>
-              {([['', 'full', me.pricePerMonthSom], ['WAGON', 'wagon', wagonPlan!.pricePerMonthSom]] as const).map(([value, key, price]) => (
-                <label key={key} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${plan === value ? 'border-teal bg-teal-soft' : 'border-line'}`}>
-                  <input
-                    type="radio" name="plan" value={value} checked={plan === value}
-                    onChange={() => setPlan(value)} className="mt-1"
-                  />
-                  <span className="min-w-0">
-                    <span className="block font-semibold text-navy">{t(`plan.${key}`)}</span>
-                    <span className="block text-xs text-muted">{t(`plan.${key}Note`)}</span>
-                    <span className="mt-1 block font-mono text-sm tabular-nums text-navy">{t('perMonth', { price: som(price * 100, locale) })}</span>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-          ) : null}
+                  <span className="mt-1 block font-mono text-sm tabular-nums text-navy">{t('perMonth', { price: som(c.priceMonthSom * 100, locale) })}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
           <label className="block text-sm font-semibold">{t('months')}
             <select value={months} onChange={(e) => setMonths(Number(e.target.value))} className={`${INPUT} mt-1 font-mono`}>
-              {monthOptions.map((n) => <option key={n} value={n}>{t('month', { n })}</option>)}
+              {MONTHS.filter((n) => n <= chosen.maxMonths).map((n) => <option key={n} value={n}>{t('month', { n })}</option>)}
             </select>
           </label>
           <div className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl bg-sand px-4 py-3">
-            <span className="font-mono text-sm text-muted tabular-nums">{t('perMonth', { price: som(perMonth * 100, locale) })}</span>
-            <span className="font-mono text-lg font-bold text-navy tabular-nums">{t('total')}: {som(months * perMonth * 100, locale)}</span>
+            <span className="font-mono text-sm text-muted tabular-nums">{t('perMonth', { price: som(chosen.priceMonthSom * 100, locale) })}</span>
+            <span className="font-mono text-lg font-bold text-navy tabular-nums">{t('total')}: {som(months * chosen.priceMonthSom * 100, locale)}</span>
           </div>
           {err ? <Notice tone="err">{t('failed')}</Notice> : null}
           <button type="submit" disabled={busy} className={BTN_PRIMARY}>{busy ? t('sending') : me.active || me.expired ? t('extend') : t('submit')}</button>

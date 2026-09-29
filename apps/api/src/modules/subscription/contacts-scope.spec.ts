@@ -8,7 +8,7 @@ import type { HttpException } from '@nestjs/common';
 import type { AuditService } from '../../common/audit.service';
 import type { PlatformConfigService } from '../../common/platform-config.service';
 import type { PrismaService } from '../../common/prisma.service';
-import type { SubscriptionService } from './subscription.service';
+import { planLimit, type SubscriptionService } from './subscription.service';
 import type { ImpressionsService } from '../impressions/impressions.service';
 import { ContactsController } from './contacts.controller';
 
@@ -81,17 +81,20 @@ function setup(opts: {
       },
     },
   } as unknown as PrismaService;
-  const config = {
-    get: async () => ({ phoneRevealDaily: opts.dailyLimit ?? 50, phoneRevealFree: opts.free ?? 0, subscriptionMonthSom: 99000 }),
-  } as unknown as PlatformConfigService;
+  const config = { get: async () => ({ phoneRevealFree: opts.free ?? 0 }) } as unknown as PlatformConfigService;
   const audit = {
     log: async (r: Record<string, unknown>) => {
       if (opts.auditFails) throw new Error('baza yiqildi');
       rows.push({ ...r, createdAt: new Date() });
     },
   } as unknown as AuditService;
-  // active(), isActive() emas: kunlik chegara tarifning o'z qatoridan olinadi
-  const subs = { active: async () => (opts.subscriber ? { id: 's1', endsAt: new Date(), limits: opts.planDaily ? { phoneRevealDaily: opts.planDaily } : null } : null) } as unknown as SubscriptionService;
+  // active(), isActive() emas: kunlik chegara tarifning o'z qatoridan olinadi.
+  // dailyLimit bu yerda sukut tarifning soni (zanjirning ikkinchi bo'g'ini), narx esa tarifdan
+  const subs = {
+    active: async () => (opts.subscriber ? { id: 's1', endsAt: new Date(), limits: opts.planDaily ? { phoneRevealDaily: opts.planDaily } : null } : null),
+    dailyLimitFor: async (limits: unknown) => planLimit(limits, 'phoneRevealDaily', opts.dailyLimit ?? 50),
+    priceFor: async () => 99_000,
+  } as unknown as SubscriptionService;
   const impressions = { record: async (items: Record<string, unknown>[]) => { opts.calls?.push(...items); } } as unknown as ImpressionsService;
   return new ContactsController(prisma, config, audit, subs, impressions);
 }

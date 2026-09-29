@@ -25,6 +25,7 @@
     "afterPay": "The subscription starts once the payment is confirmed, usually within 1 business day.",
     "extend": "Extend",
     "loadFailed": "Could not load.",
+    "noPlans": "No plan is set yet. Try again later.",
     "reveal": {
       "show": "Show number",
       "loading": "Loading",
@@ -48,7 +49,7 @@
     },
     "admin": {
       "tab": "Subscriptions",
-      "lead": "Manual payment: check the money arrived, confirm, and the subscription activates.",
+      "lead": "Manual payment: check the money arrived, confirm, and the subscription activates. Price and contents live in Plans.",
       "status": {
         "PENDING": "Awaiting payment",
         "ACTIVE": "Active",
@@ -85,11 +86,7 @@
     "cancelHint": "To change the term, cancel this order and place a new one.",
     "cancelFailed": "The order was not cancelled. Try again.",
     "plan": {
-      "label": "Plan",
-      "full": "Full subscription",
-      "wagon": "Wagon search only",
-      "fullNote": "Phone numbers, wagon search and higher ranking for your listings",
-      "wagonNote": "Wagon search only. Phone numbers stay closed"
+      "label": "Plan"
     },
     "grant": {
       "PHONE": "Phone numbers",

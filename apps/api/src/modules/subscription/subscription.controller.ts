@@ -7,12 +7,12 @@ import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
-import { SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
-import { SUBSCRIPTION_STATUSES, SubscriptionService } from './subscription.service';
+import { SUBSCRIPTION_FALLBACK, SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
+import { catalogView, cheapestIn, pickDefault, planLimit, SUBSCRIPTION_STATUSES, SubscriptionService } from './subscription.service';
 
 class OrderDto {
   @IsInt() @Min(1) @Max(12) months!: number;
-  /** Qaysi tarif. Berilmasa telefon tarifi: eski mijozlar va bot shu yo'ldan keladi. */
+  /** Qaysi ruxsat: shu ruxsatni beradigan eng arzon tarif sotiladi. Berilmasa sukut tarif: eski mijozlar va bot shu yo'ldan keladi. */
   @IsOptional() @IsIn(SUBSCRIPTION_GRANTS) grant?: SubscriptionGrant;
   /**
    * Admin yaratgan tarifning kodi. Berilsa narx, ruxsat va chegara o'sha tarifdan
@@ -48,17 +48,24 @@ class ConfirmDto {
 @ApiTags('subscription')
 @Controller('subscription')
 export class SubscriptionPublicController {
-  constructor(private readonly config: PlatformConfigService) {}
+  constructor(
+    private readonly config: PlatformConfigService,
+    private readonly subs: SubscriptionService,
+  ) {}
 
   @Get('price')
   async price() {
-    const cfg = await this.config.get();
+    // Bepul vagon soni sozlamada qoladi: u obunasiz odamga tegishli, tarifga emas
+    const [cfg, plans] = await Promise.all([this.config.get(), this.subs.activePlans()]);
+    const def = pickDefault(plans);
     // pricePerMonthSom eski nom bo'lib qoladi: uni narxlar sahifasi va bot o'qiydi
     return {
-      pricePerMonthSom: cfg.subscriptionMonthSom,
-      wagonPerMonthSom: cfg.wagonMonthSom,
-      phoneRevealDaily: cfg.phoneRevealDaily,
+      pricePerMonthSom: def?.priceMonthSom ?? SUBSCRIPTION_FALLBACK.priceMonthSom,
+      phoneRevealDaily: planLimit(def?.limits, 'phoneRevealDaily', SUBSCRIPTION_FALLBACK.phoneRevealDaily),
       wagonSearchFree: cfg.wagonSearchFree,
+      // null: vagon qidiruvini alohida sotadigan tarif yo'q, sahifa alohida narx chizmaydi
+      wagonPerMonthSom: cheapestIn(plans, 'WAGON')?.priceMonthSom ?? null,
+      plans: plans.map(catalogView),
     };
   }
 }
