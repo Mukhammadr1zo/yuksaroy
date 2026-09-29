@@ -159,11 +159,16 @@
       "email": "Email",
       "slug": "Page address",
       "id": "ID",
-      "history": "History"
+      "history": "History",
+      "today": "today",
+      "copy": "Copy",
+      "more": "More",
+      "som": "UZS"
     },
     "err": {
       "AD_NOT_FOUND": "Ad not found",
       "AD_RANGE": "The end date must be after the start date",
+      "BAD_ENTITY": "Unknown object type.",
       "BAD_ROLE": "Invalid role.",
       "BAD_STATUS": "Invalid status.",
       "BAD_VALUE": "Invalid value.",
@@ -174,6 +179,7 @@
       "CLAIM_NOT_PENDING": "This claim has already been decided.",
       "DEMO_TARGET": "This action is not available on sample data.",
       "DUPLICATE_SERVICE": "This service is listed twice.",
+      "EXPORT_TOO_MANY": "Too many rows ({total}). The limit is {max}: narrow the filter.",
       "INVALID_PHONE": "The phone number is not valid.",
       "KIND_NOT_ALLOWED": "This type cannot be set here.",
       "KYC_ALREADY": "The organisation is already verified.",
@@ -185,6 +191,8 @@
       "MARKET_TRANSITION": "The request cannot move to this state.",
       "MEMBER_NOT_FOUND": "Member not found.",
       "MESSAGE_NOT_FOUND": "Message not found.",
+      "NOTE_NOT_FOUND": "Note not found.",
+      "TEXT_REQUIRED": "Note text must not be empty.",
       "NOTHING_TO_UPDATE": "Nothing to update.",
       "NOT_DRAFT": "The listing is not a draft.",
       "NOT_LISTER": "This listing is not yours.",
@@ -225,28 +233,15 @@
       "USER_NOT_FOUND": "User not found."
     },
     "home": {
-      "lead": "What needs a decision today and how the system is doing.",
-      "queue": "Waiting",
-      "queueEmpty": "The queue is empty.",
-      "health": "System health",
-      "db": "Database",
-      "dbOk": "responding, {ms} ms",
-      "dbFail": "not responding",
-      "last24h": "Last 24 hours",
-      "newUsers": "New users",
-      "newOrders": "New orders",
-      "newListings": "New listings",
+      "lead": "What needs a decision today, where the money is and what is growing.",
       "pendingListings": "Listings to review",
       "pendingKyc": "Company checks",
       "pendingClaims": "Object claims",
       "pendingPremium": "Premium payments",
       "pendingOrders": "Orders awaiting confirmation",
       "pendingUrgent": "Urgent requests",
-      "activity": "Recent actions",
-      "activityEmpty": "Nothing has happened yet.",
       "waitingDays": "oldest has waited {days} d",
       "pendingSubscription": "Subscription payments",
-      "queueDays": "waited {days} d",
       "commission": "Commission threshold",
       "commissionThisMonth": "completed this month",
       "commissionPrevMonth": "last month",
@@ -260,7 +255,67 @@
       "revealFree": "reveals without a subscription",
       "revealWindow": "Free window: {n}.",
       "pendingContact": "Unanswered message",
-      "pendingReports": "New report"
+      "pendingReports": "New report",
+      "work": "Today's work",
+      "workEmpty": "The queue is empty.",
+      "age": {
+        "days": "{n} d",
+        "hours": "{n} h",
+        "minutes": "{n} min",
+        "now": "now"
+      },
+      "alerts": "Alerts",
+      "alert": {
+        "NO_ACTIVE_PLAN": "No plan on sale: nobody can buy a subscription",
+        "WAGON_UPSTREAM": "The wagon source failed {n} of {of} searches in 24 hours",
+        "AD_EXPIRED": "{n} active ads have expired",
+        "AD_ENDING": "{n} ads end within 7 days",
+        "DB_SLOW": "The database is slow: {ms} ms",
+        "DB_DOWN": "The database is not responding"
+      },
+      "alertGo": "Open",
+      "money": "Money",
+      "revenueThisMonth": "Revenue this month",
+      "revenuePrevMonth": "last month: {sum}",
+      "delta": "{pct} %",
+      "deltaNew": "new",
+      "activeSubs": "Active subscribers",
+      "expiring7": "Ending within 7 days",
+      "pendingPay": "Awaiting payment",
+      "pendingPayCount": "{count}, {sum} UZS",
+      "pendingPayOldest": "oldest: {age}",
+      "growth": "Growth, 7 days",
+      "growthUsers": "New users",
+      "growthListings": "New listings",
+      "growthRequests": "New requests",
+      "growthWagon": "Wagon searches",
+      "prev7": "previous 7 days: {n}",
+      "series": "30 days",
+      "seriesVisits": "Visits",
+      "seriesReveals": "Number reveals",
+      "seriesWagon": "Wagon searches",
+      "seriesOrders": "Orders",
+      "today": "today",
+      "total30": "30 days: {n}",
+      "seriesEmpty": "No data in 30 days",
+      "seriesAria": "{name}: {total} in 30 days, {today} today",
+      "decision": {
+        "users": "If it drops: change the acquisition channel (ads, bot, SEO).",
+        "listings": "If it drops: supply side, work with terminal and equipment owners.",
+        "requests": "If it drops: demand side, work with cargo owners.",
+        "wagon": "If it drops: check the wagon plan and the bot ads.",
+        "visits": "Visits down: marketing and SEO.",
+        "reveals": "Reveals down while visits hold: the free window or the price.",
+        "wagonSeries": "Wagon searches down: the source or the bot.",
+        "orders": "Orders down: terminal activity, commission timing."
+      },
+      "mine": "My recent actions",
+      "mineEmpty": "You have not done anything yet.",
+      "mineAll": "All",
+      "teamActions": "Team actions",
+      "retry": "Retry",
+      "blockFailed": "{name} failed to load",
+      "ownerOnly": "Owner only"
     },
     "terminals": {
       "lead": "Terminals and rail sidings, registry records included.",
@@ -318,7 +373,9 @@
       "bulkHide": "Hide the matches",
       "bulkDelete": "Delete the matches",
       "bulkWarn": "Found {count} rows. Hiding is the safer choice: a deleted registry row returns with the next import, a hidden one stays hidden.",
-      "bulkDone": "{done} rows done, {skipped} skipped."
+      "bulkDone": "{done} rows done, {skipped} skipped.",
+      "createTitle": "New terminal",
+      "bulkSelected": "{n} selected rows"
     },
     "stations": {
       "lead": "The official station registry. Fix coordinates here and the map picks them up.",
@@ -384,6 +441,8 @@
       "to": "To",
       "allActions": "All actions",
       "ip": "IP",
+      "feedEmpty": "No entries.",
+      "mine": "My actions",
       "act": {
         "admin-contact-delete": "Deleted a message",
         "admin-contact-handled": "Changed a message status",
@@ -474,7 +533,24 @@
         "urgent-offer": "Offered on an urgent request",
         "wagon-search": "Searched for a wagon",
         "admin-report-decide": "Decided on a report",
-        "report-create": "Sent a report"
+        "report-create": "Sent a report",
+        "admin-note-create": "Wrote an internal note",
+        "admin-note-delete": "Deleted an internal note",
+        "admin-export": "Exported a list to CSV",
+        "admin-terminal-bulkHide": "Hid terminals in bulk",
+        "admin-terminal-bulkActivate": "Activated terminals in bulk",
+        "admin-terminal-bulkDelete": "Deleted terminals in bulk",
+        "admin-user-block": "Blocked a user",
+        "admin-user-unblock": "Unblocked a user",
+        "admin-plan-create": "Created a plan",
+        "admin-plan-update": "Updated a plan",
+        "admin-plan-delete": "Deleted a plan",
+        "admin-ad-create": "Created an ad",
+        "admin-ad-update": "Updated an ad",
+        "admin-ad-delete": "Deleted an ad",
+        "admin-ad-media": "Replaced an ad banner",
+        "subscription-revoke": "Revoked a confirmed subscription",
+        "market-relist": "Relisted a request"
       },
       "ent": {
         "ContactMessage": "Message",
@@ -500,7 +576,10 @@
         "User": "User",
         "Wagon": "Wagon",
         "demo": "Sample data",
-        "Report": "Report"
+        "Report": "Report",
+        "AdminNote": "Internal note",
+        "AdPlacement": "Ad",
+        "Plan": "Plan"
       }
     },
     "settings": {
@@ -578,7 +657,8 @@
         "WAGON_REPAIR": "Wagon repair",
         "CRANE": "Crane",
         "OTHER": "Other"
-      }
+      },
+      "searchNo": "Number (UR-)"
     },
     "demo": {
       "title": "Sample data",
@@ -634,7 +714,8 @@
       "allRegions": "Whole country",
       "hide": "Hide",
       "hideConfirm": "Hide it? The request is cancelled, the profile leaves the list.",
-      "empty": "Nothing yet."
+      "empty": "Nothing yet.",
+      "searchNo": "Number (SR-, CR-)"
     },
     "team": {
       "title": "Team",
@@ -725,7 +806,8 @@
       "revokeHint": "Access stops at once and the end date moves to today. This cannot be undone.",
       "revokeWarn": "The button works once a reason is given",
       "reason": "Reason",
-      "moneyReceived": "The money really arrived (if unchecked, this row leaves the revenue sheet)"
+      "moneyReceived": "The money really arrived (if unchecked, this row leaves the revenue sheet)",
+      "openAll": "All their subscriptions"
     },
     "ads": {
       "lead": "Side advertising: the platform sells and places it itself.",
@@ -775,6 +857,180 @@
         "PHONE": "Phone number",
         "WAGON": "Wagon search"
       }
+    },
+    "shell": {
+      "menu": "Menu",
+      "close": "Close",
+      "collapse": "Collapse the menu",
+      "expand": "Expand the menu",
+      "search": "Search",
+      "searchKbd": "Ctrl K",
+      "site": "To the site",
+      "role": {
+        "owner": "Owner",
+        "operator": "Operator"
+      },
+      "quick": {
+        "title": "New",
+        "newTerminal": "New terminal",
+        "newPlan": "New plan",
+        "newAd": "New ad"
+      },
+      "crumbs": {
+        "home": "Overview",
+        "aria": "Breadcrumb trail"
+      },
+      "badgeAria": "{n} waiting",
+      "keys": {
+        "title": "Keyboard shortcuts",
+        "palette": "Search and commands",
+        "go": "g, then a letter: go to a section",
+        "search": "/ : the search box on the page",
+        "help": "? : this list",
+        "nav": "[ : collapse the left menu",
+        "rowNext": "j or down: next row",
+        "rowPrev": "k or up: previous row",
+        "rowOpen": "Enter: open the row",
+        "rowSelect": "x: select the row",
+        "rowMenu": ". : row menu",
+        "esc": "Esc: close, clear the selection"
+      }
+    },
+    "palette": {
+      "placeholder": "PAY-1042, YS-1041, SR-12, UR-1001, phone, organisation, terminal, name or page",
+      "open": "Open: {q}",
+      "pages": "Pages",
+      "commands": "Commands",
+      "recent": "Recently opened",
+      "orgs": "Organisations",
+      "terminals": "Terminals",
+      "users": "Users",
+      "listings": "Listings",
+      "loading": "Searching",
+      "empty": "Nothing found",
+      "searchUsers": "Search among users",
+      "error": "Server search failed, the page list still works",
+      "hint": "Up/down, Enter opens, Esc closes",
+      "blocked": "blocked",
+      "hidden": "hidden",
+      "active": "active"
+    },
+    "table": {
+      "sortAsc": "Ascending",
+      "sortDesc": "Descending",
+      "sortAria": "Sort by column",
+      "columns": "Columns",
+      "columnsReset": "Default",
+      "columnsAria": "Visible columns",
+      "selectRow": "Select row",
+      "selectPage": "Select all on the page",
+      "selected": "{n} selected",
+      "clear": "Clear",
+      "bulkHide": "Hide",
+      "bulkActivate": "Activate",
+      "bulkBlock": "Block",
+      "bulkWithdraw": "Withdraw",
+      "bulkReason": "Reason (written to the audit log and shown to the owner)",
+      "bulkBlockReason": "Reason for blocking (written to the audit log)",
+      "bulkDone": "{done} done, {skipped} skipped",
+      "bulkTooMany": "At most 500 rows at a time. Reduce the selection.",
+      "export": "CSV ({n})",
+      "exportHint": "Current filter and order, at most 5000 rows",
+      "exportTooMany": "Too many rows to export: at most {max}. Narrow the filter.",
+      "exportOwnerOnly": "Personal data: export is owner only",
+      "rowMenu": "Row actions",
+      "open": "Open",
+      "onSite": "View on the site",
+      "storefront": "Storefront",
+      "history": "History",
+      "user": "User",
+      "terminal": "Terminal",
+      "org": "Organisation",
+      "hisActions": "Their actions",
+      "loadingRows": "Loading rows",
+      "clearFilters": "Clear filters",
+      "retry": "Retry",
+      "keyboardHint": "j/k row, Enter open, x select"
+    },
+    "object": {
+      "back": "Back to the list",
+      "notFound": "Not found",
+      "copyId": "Copy ID",
+      "copied": "Copied",
+      "tabs": {
+        "general": "General",
+        "related": "Related",
+        "money": "Money",
+        "history": "History",
+        "notes": "Notes"
+      },
+      "hisActions": "Their actions",
+      "onSite": "Open on the site",
+      "related": {
+        "terminals": "Terminals",
+        "listings": "Listings",
+        "orders": "Orders",
+        "members": "Members",
+        "reports": "Reports",
+        "reviews": "Reviews",
+        "inquiries": "Enquiries",
+        "owner": "Owner",
+        "claimant": "Claimant",
+        "station": "Station",
+        "all": "All",
+        "none": "None"
+      },
+      "money": {
+        "paidTotal": "Paid in total",
+        "premium": "Premium payments",
+        "subs": "Subscriptions",
+        "tariffs": "Tariffs (last 20)",
+        "tariffHint": "If the price is stale, remind the owner.",
+        "ordersDone": "Completed orders",
+        "ordersDoneSum": "Completed amount",
+        "ordersPending": "Pending orders",
+        "commissionSum": "Commission",
+        "lastOrder": "Last order",
+        "none": "No money movement",
+        "orgHint": "A paying organisation: priority in the check queue, leniency in a dispute; if a commission is introduced, it is counted from here.",
+        "premiumHint": "Withdrawing a paid listing raises a refund question: talk to the owner first.",
+        "userHint": "On a complaint or refund request look here: did they pay, is there abuse."
+      },
+      "stats": {
+        "views30": "{n} views in 30 days",
+        "openInquiries": "{n} unanswered enquiries",
+        "inquiries": "{n} enquiries",
+        "reports": "{n} reports"
+      },
+      "claim": {
+        "title": "Object claim",
+        "claimant": "Claimant",
+        "evidence": "Documents"
+      },
+      "kyc": {
+        "title": "Organisation check",
+        "docs": "Documents",
+        "requestedAt": "Requested on"
+      },
+      "listing": {
+        "noEdit": "The owner edits the listing text. Here only the decision: approve, reject or withdraw.",
+        "withdraw": "Withdraw",
+        "premiumUntil": "Premium: until {date}",
+        "noPremium": "No Premium"
+      }
+    },
+    "notes": {
+      "title": "Internal notes",
+      "add": "Add",
+      "placeholder": "Call outcome, agreement, suspicion. Only the team sees this.",
+      "empty": "No notes yet. This is for reminders only the team sees: call outcome, agreement, suspicion.",
+      "added": "Note added",
+      "delete": "Delete",
+      "deleted": "Note deleted",
+      "deletedUser": "deleted account",
+      "ownerOnly": "Only the owner can delete a note",
+      "ctrlEnter": "Ctrl+Enter sends",
+      "tooLong": "At most 2000 characters"
     }
   }
 }

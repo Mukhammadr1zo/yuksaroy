@@ -14,7 +14,9 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { PLAN_LOCALES, SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { num } from '@/lib/format';
 import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
@@ -66,6 +68,18 @@ export default function AdminPlansPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => { load(); }, [load]);
+
+  // ?new=1 (tez amallar, paleta, bosh sahifadagi "tarif yo'q" ogohlantirishi) yaratish varag'ini ochadi;
+  // param darhol olib tashlanadi, aks holda yopib qayta yuklaganda varaq yana ochilardi
+  const sp = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  useEffect(() => {
+    if (sp.get('new') !== '1') return;
+    setNote(null);
+    setSheet({ id: null, d: NEW() });
+    router.replace(pathname, { scroll: false });
+  }, [sp, pathname, router]);
 
   const set = (p: Partial<Draft>) => setSheet((s) => (s ? { ...s, d: { ...s.d, ...p } } : s));
   const setLang = (k: 'name' | 'features', l: Lang, v: string) => setSheet((s) => (s ? { ...s, d: { ...s.d, [k]: { ...s.d[k], [l]: v } } } : s));

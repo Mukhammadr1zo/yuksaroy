@@ -177,6 +177,25 @@ model AuditLog {
   @@index([action, createdAt])
 }
 
+/// Jamoaning ichki izohi: obyekt egasiga ko'rinmaydi, ommaviy mapperlarga kirmaydi,
+/// faqat /admin/notes orqali o'qiladi. Alohida jadval, AuditLog ga aralashmaydi: jurnalni
+/// tizim yozadi va u o'chmaydi, izohni odam yozadi va ega o'chira oladi.
+/// authorId da relation yo'q (AuditLog.actorId kabi): admin hisobi anonimlashsa izoh qolsin,
+/// ism keyin alohida so'rov bilan topiladi. entity + entityId matn: to'rt jadvalga to'rtta FK
+/// o'rniga bitta jadval; obyekt o'chsa izoh yetim qoladi, bu ataylab (tarix uchun kerak).
+model AdminNote {
+  id        String   @id @default(cuid())
+  /// Organization | Terminal | Listing | User (NOTE_ENTITIES oq ro'yxati kontrollerda)
+  entity    String
+  entityId  String
+  authorId  String
+  text      String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  /// Obyekt sahifasi "shu obyektning izohlari, yangi birinchi" deb so'raydi
+  @@index([entity, entityId, createdAt])
+}
+
 // ───────────────────────── Katalog (S2) ─────────────────────────
 
 enum Rju {

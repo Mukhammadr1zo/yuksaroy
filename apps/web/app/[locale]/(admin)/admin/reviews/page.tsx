@@ -12,18 +12,23 @@
  * Jadval bitta: ikki ro'yxatning farqi faqat "nima haqida" katagida. Buyurtma raqami
  * o'sha katak ostida, reytingga kirmasligi esa bahoning yonida turadi: ikkalasi ham
  * yonidagi qiymatsiz ma'nosiz, alohida ustun bo'lib turishi shart emas.
+ *
+ * Holat URL da (useListQuery): terminal va e'lon obyekt sahifalari "Baholar" havolasini
+ * ?terminalId= va ?listingId= bilan yuboradi, orqaga tugmasi filtrni qaytaradi.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import {
-  BTN_DANGER, ConfirmButton, DataTable, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar,
-  errText, useAdminList, type Col,
+  BTN_DANGER, BTN_GHOST, ConfirmButton, DataTable, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar,
+  errText, useAdminList, useListQuery, type Col,
 } from '@/components/admin/kit';
 
 type Tab = 'terminal' | 'listing';
+/** URL dagi holat: sukut qiymat manzilga yozilmaydi. tab bo'sh bo'lsa listingId dan aniqlanadi. */
+const F0 = { tab: '', q: '', terminalId: '', listingId: '', page: 1 };
 type Base = { id: string; rating: number; text: string | null; reply: string | null; createdAt: string; author: string | null };
 type TerminalReview = Base & {
   orderNo: string; excluded: boolean;
@@ -45,17 +50,22 @@ export default function AdminReviewsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tv = useTranslations('admin.reviews');
+  const tt = useTranslations('admin.table');
 
-  const [tab, setTab] = useState<Tab>('terminal');
-  const [qInput, setQInput] = useState('');
-  const [q, setQ] = useState('');
-  const [page, setPage] = useState(1);
+  const { f, set } = useListQuery(F0);
+  // E'lon sahifasidan ?listingId= bilan kelganda e'lon yorlig'i ochilsin, yorliqni qo'lda tanlash shart bo'lmasin
+  const tab: Tab = f.tab === 'listing' || (!f.tab && f.listingId) ? 'listing' : 'terminal';
+  const [qInput, setQInput] = useState(f.q);
+  useEffect(() => setQInput(f.q), [f.q]);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
 
   const path = tab === 'terminal' ? '/admin/reviews' : '/admin/listing-reviews';
-  const list = useAdminList<Review>(path, { q, page });
+  // Har yorliq faqat o'z obyekt filtrini yuboradi: /admin/reviews listingId ni bilmaydi va aksincha
+  const objectId = tab === 'terminal' ? f.terminalId : f.listingId;
+  const list = useAdminList<Review>(path, { q: f.q, page: f.page, [tab === 'terminal' ? 'terminalId' : 'listingId']: objectId });
 
-  const switchTab = (k: Tab) => { setTab(k); setPage(1); setNote(null); };
+  // Yorliq almashganda obyekt filtri ham ketadi: terminal id e'lon ro'yxatida ma'nosiz
+  const switchTab = (k: Tab) => { set({ tab: k, terminalId: '', listingId: '' }); setNote(null); };
 
   async function remove(id: string) {
     setNote(null);
@@ -80,11 +90,15 @@ export default function AdminReviewsPage() {
         ))}
       </div>
 
-      <Toolbar onSubmit={() => { setQ(qInput.trim()); setPage(1); }}>
+      <Toolbar onSubmit={() => set({ q: qInput.trim() })}>
         <Labeled label={tc('search')} className="w-72">
-          <input value={qInput} onChange={(e) => setQInput(e.target.value)} placeholder={tv('searchHint')} className={INPUT} />
+          <input value={qInput} onChange={(e) => setQInput(e.target.value)} placeholder={tv('searchHint')} className={INPUT} data-search="1" />
         </Labeled>
         <button type="submit" className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal">{tc('apply')}</button>
+        {/* Obyekt sahifasidan kelgan filtr ko'rinmas edi: operator "nega ro'yxat qisqa" deb o'ylamasin */}
+        {objectId ? (
+          <button type="button" onClick={() => set({ terminalId: '', listingId: '' })} className={`${BTN_GHOST} px-3 py-1.5 text-xs`}>{tt('clearFilters')}</button>
+        ) : null}
         {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
       </Toolbar>
 
@@ -94,7 +108,7 @@ export default function AdminReviewsPage() {
 
       {list.data && !list.loading ? <ReviewTable rows={list.data.items} onDelete={remove} /> : null}
 
-      <Pager page={page} pages={list.pages} onPage={setPage} />
+      <Pager page={f.page} pages={list.pages} onPage={(p) => set({ page: p })} />
     </>
   );
 }

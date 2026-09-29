@@ -10,15 +10,17 @@
  * Yopish sababi majburiy: so'rov egasiga bu ko'rinadi va keyin nega yopilgani so'raladi.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { REGIONS, URGENT_STATUSES, type UrgentStatus } from '@yuksaroy/domain';
 import { api, post } from '@/lib/api';
 import { num, som, uzDateTime } from '@/lib/format';
 import {
-  BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice,
-  PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Col,
+  BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, DataTable, Drawer, INPUT, Labeled, LoadError, Notice,
+  PageHead, Pager, Pill, Toolbar, errText, useAdminList, useListQuery, type Col,
 } from '@/components/admin/kit';
+
+/** URL dagi holat: bosh sahifa ?status=OPEN bilan, paleta ?q=UR-1001 bilan keladi. */
+const F0 = { q: '', status: '', region: '', page: 1 };
 
 type Row = {
   id: string; no: string; kind: string; status: string; regionCode: string;
@@ -44,16 +46,13 @@ export default function AdminUrgentPage() {
   const tr = useTranslations('region');
   const locale = useLocale();
 
-  // Bosh sahifadagi "Shoshilinch so'rov" kartochkasi ?status=OPEN bilan keladi: bosgan odam
-  // ochiq so'rovlarni ko'rishni kutadi, yopilganlari aralashib turishini emas.
-  // Suspense shart emas: AdminShell huquq tasdiqlanguncha bolalarni chizmaydi.
-  const sp = useSearchParams();
-  const [status, setStatus] = useState(URGENT_STATUSES.includes(sp.get('status') as never) ? (sp.get('status') as string) : '');
-  const [region, setRegion] = useState('');
-  const [page, setPage] = useState(1);
+  // Filtr URL da (useListQuery): orqaga tugmasi filtrni qaytaradi. Noto'g'ri holat "hammasi" bo'lib qoladi
+  const { f, set, reset } = useListQuery(F0);
+  const status = URGENT_STATUSES.includes(f.status as never) ? f.status : '';
+  const list = useAdminList<Row>('/admin/urgent', { ...f, status });
+  const [q, setQ] = useState(f.q);
+  useEffect(() => setQ(f.q), [f.q]);
   const [sel, setSel] = useState<string | null>(null);
-
-  const list = useAdminList<Row>('/admin/urgent', { status, region, page });
 
   const cols: Col<Row>[] = [
     { key: 'no', head: tu('no'), num: true, cell: (r) => <span className="font-semibold">{r.no}</span> },
@@ -73,28 +72,30 @@ export default function AdminUrgentPage() {
     <>
       <PageHead title={t('nav.urgent')} lead={tu('lead')} />
 
-      <Toolbar onSubmit={() => setPage(1)}>
+      <Toolbar onSubmit={() => set({ q: q.trim() })}>
+        <Labeled label={tu('searchNo')} className="w-40">
+          <input data-search="1" value={q} onChange={(e) => setQ(e.target.value)} maxLength={20} className={`${INPUT} font-mono`} />
+        </Labeled>
         <Labeled label={tc('status')} className="w-48">
-          <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className={INPUT}>
+          <select value={status} onChange={(e) => set({ status: e.target.value })} className={INPUT}>
             <option value="">{tc('all')}</option>
             {URGENT_STATUSES.map((s) => <option key={s} value={s}>{ts(s as UrgentStatus)}</option>)}
           </select>
         </Labeled>
         <Labeled label={tc('region')} className="w-56">
-          <select value={region} onChange={(e) => { setRegion(e.target.value); setPage(1); }} className={INPUT}>
+          <select value={f.region} onChange={(e) => set({ region: e.target.value })} className={INPUT}>
             <option value="">{tc('all')}</option>
             {REGIONS.map((r) => <option key={r} value={r}>{tr(r)}</option>)}
           </select>
         </Labeled>
+        <button type="submit" className={BTN}>{tc('apply')}</button>
+        <button type="button" className={BTN_GHOST} onClick={reset}>{tc('reset')}</button>
         {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
       </Toolbar>
 
-      {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
-      {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
-      {list.data && !list.loading ? (
-        <DataTable cols={cols} rows={list.data.items} keyOf={(r) => r.id} empty={tc('empty')} onRow={(r) => setSel(r.id)} />
-      ) : null}
-      <Pager page={page} pages={list.pages} onPage={setPage} />
+      {list.err ? <LoadError err={list.err} onRetry={list.reload} /> : null}
+      <DataTable cols={cols} rows={list.data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} loading={list.loading} onReset={reset} onRow={(r) => setSel(r.id)} />
+      <Pager page={f.page} pages={list.pages} onPage={(p) => set({ page: p })} />
 
       {sel ? <UrgentDrawer id={sel} onClose={() => setSel(null)} onChanged={() => void list.reload()} /> : null}
     </>

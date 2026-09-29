@@ -41,6 +41,9 @@
 }
 
 html { color-scheme: light; scroll-padding-top: 96px; }
+/* Admin topbar balandligi: yopishqoq jadval sarlavhasi (kit DataTable) shu qiymatdan boshlanadi,
+   aks holda sarlavha topbar ostiga kirib ketardi. Topbar h-[52px] bilan bir xil bo'lishi shart. */
+:root { --admin-top: 52px; }
 body { @apply bg-sand text-ink font-body antialiased; }
 h1, h2, h3 { text-wrap: balance; }
 :focus-visible { outline: 2px solid var(--color-teal); outline-offset: 2px; }
@@ -81,6 +84,8 @@ h1, h2, h3 { text-wrap: balance; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  /* Skelet chiziqlari (kit Skeleton) miltillamaydi: harakatni kamaytirgan odamga bo'sh chiziq ham yetarli */
+  .animate-pulse { animation: none !important; }
 }
 
 /* Ochilgan ro'yxatni brauzer OS uslubida chizadi va uni CSS bilan bo'yab bo'lmaydi.

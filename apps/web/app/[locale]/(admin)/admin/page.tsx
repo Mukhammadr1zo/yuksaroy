@@ -1,81 +1,173 @@
 'use client';
 /**
- * Admin bosh sahifasi: ish kuni shu yerdan boshlanadi.
+ * Admin bosh sahifasi (Boshqaruv 3.0): ish kuni shu yerdan boshlanadi.
  *
- * Ilgari bu yerda uchta raqamlar to'plami turardi va ulardan hech narsa qilib bo'lmasdi.
- * Endi uch savolga javob beradi: hozir nima kutmoqda, eng uzog'i qancha kutdi, va
- * oxirgi paytda nima bo'ldi.
+ * Uch savolga javob beradi: bugun nima kutmoqda (va qaysi biri eng uzoq kutdi), pul qayerda
+ * turibdi, nima o'smoqda yoki tushmoqda. Uch so'rov parallel va har biri alohida yiqiladi:
+ * /admin/home (hamma admin), /admin/home/money (faqat ega: tushum), /admin/audit?actor=me.
  *
- * "Eng uzoq kutgan" alohida ko'rsatiladi, chunki navbatdagi son o'zi hech narsa demaydi:
- * ikkita e'lon uch kundan beri turgani beshta e'lon bugun kelganidan yomonroq.
+ * Qoida: har son yonida qaror matni (i18n home.decision.*) yoki son chizilmaydi.
+ * Sog' baza, "oxirgi sutkada" uch son va umumiy amallar tasmasi shu sababli yo'q:
+ * ulardan qaror chiqmasdi. Yangi son qo'shilsa qaror matni ham qo'shiladi.
  */
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { num, uzDateTime } from '@/lib/format';
-import { CARD, Notice, PageHead, Pill, errText, useActionText } from '@/components/admin/kit';
+import { num, som, uzDateTime } from '@/lib/format';
+import { CARD, Notice, PageHead, Pill, Skeleton, errText, useActionText, useRovingList } from '@/components/admin/kit';
+import { useAdminMe } from '@/components/admin/context';
+import { Sparkline } from '@/components/admin/Sparkline';
 
-type Health = {
-  db: { ok: boolean; ms?: number; error?: string };
-  counts: { listingsPendingReview: number; orgsPendingKyc: number; terminalClaimsPending: number; premiumPending: number; subscriptionPending: number; ordersPending: number; urgentOpen: number; contactNew: number; reportsNew: number };
-  recent: { users: number; orders: number; listings: number };
-  /** Har navbatning eng eskisi; faqat ?full=1 bilan keladi */
-  oldest?: Partial<Record<string, string | null>>;
-  /** Komissiya chegarasi: shu oy va o'tgan oy bajarilgan buyurtma, hamda sozlamadagi chegara. Faqat ?full=1 bilan. */
-  commission?: { thisMonth: number; prevMonth: number; threshold: number };
-  /** Raqam ochish voronkasi, 30 kun. Faqat ?full=1 bilan. */
-  reveals?: { people: number; reveals: number; subscribers: number; freeReveals: number; freeTotal: number };
-  /** Yiqilgan so'rovlar nomi: bo'sh bo'lsa hammasi joyida. */
-  failed?: string[];
+type Tone = 'ok' | 'warn' | 'bad' | 'neutral';
+type Pair = { last7: number; prev7: number };
+type AlertCode = 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN';
+type Home = {
+  db: { ok: boolean; ms?: number };
+  /** count > 0 navbatlar, eng uzoq kutgani birinchi */
+  work: { key: string; count: number; oldestAt: string | null; href: string }[];
+  money: { activeSubscribers: number; expiring7: number; pendingPay: { count: number; amountTiyin: number; oldestAt: string | null } } | null;
+  growth: { users: Pair; listings: Pair; requests: Pair; wagon: Pair } | null;
+  series: { days: string[]; visits: number[]; reveals: number[]; wagon: number[]; orders: number[] } | null;
+  alerts: { code: AlertCode; tone: 'warn' | 'bad'; n?: number; of?: number; ms?: number }[];
+  commission: { thisMonth: number; prevMonth: number; threshold: number } | null;
+  reveals: { people: number; reveals: number; subscribers: number; freeReveals: number; freeTotal: number } | null;
+  /** Yiqilgan bloklar nomi: bo'sh bo'lsa hammasi joyida */
+  failed: string[];
 };
-type Actor = { id: string; phone: string; fullName: string | null };
-type AuditRow = { id: string; action: string; entity: string | null; meta: unknown; createdAt: string; actor: Actor | null };
+type Money = { thisMonthTiyin: number; prevMonthTiyin: number; payments: number };
+type AuditRow = { id: string; action: string; entity: string | null; meta: unknown; createdAt: string };
 
-const QUEUE: { key: keyof Health['counts']; label: string; href: string }[] = [
-  { key: 'listingsPendingReview', label: 'pendingListings', href: '/admin/moderation?tab=listings' },
-  { key: 'orgsPendingKyc', label: 'pendingKyc', href: '/admin/moderation?tab=kyc' },
-  { key: 'terminalClaimsPending', label: 'pendingClaims', href: '/admin/moderation?tab=claims' },
-  { key: 'premiumPending', label: 'pendingPremium', href: '/admin/moderation?tab=premium' },
-  { key: 'subscriptionPending', label: 'pendingSubscription', href: '/admin/moderation?tab=subscription' },
-  { key: 'ordersPending', label: 'pendingOrders', href: '/admin/orders?status=PENDING' },
-  // Shoshilinch so'rov ham shu yerda: ilgari u faqat o'z ekranida turardi va bosh sahifaga
-  // qaragan operator ochiq so'rov borligini bilmasdi
-  { key: 'urgentOpen', label: 'pendingUrgent', href: '/admin/urgent?status=OPEN' },
-  { key: 'contactNew', label: 'pendingContact', href: '/admin/moderation?tab=contact' },
-  { key: 'reportsNew', label: 'pendingReports', href: '/admin/moderation?tab=reports' },
-];
-const RECENT: { key: keyof Health['recent']; label: string }[] = [
-  { key: 'users', label: 'newUsers' }, { key: 'orders', label: 'newOrders' }, { key: 'listings', label: 'newListings' },
-];
+/** Navbat kaliti -> home.* nomi (serverdagi QueueKey bilan bir xil ro'yxat). */
+const WORK_LABEL: Record<string, string> = {
+  listingsPendingReview: 'pendingListings', orgsPendingKyc: 'pendingKyc', terminalClaimsPending: 'pendingClaims',
+  premiumPending: 'pendingPremium', subscriptionPending: 'pendingSubscription', ordersPending: 'pendingOrders',
+  urgentOpen: 'pendingUrgent', contactNew: 'pendingContact', reportsNew: 'pendingReports',
+};
+/** Ogohlantirishdan qaror sahifasiga: baza haqidagisi hech qayerga olib bormaydi (serverga qarash kerak). */
+const ALERT_HREF: Partial<Record<AlertCode, string>> = {
+  NO_ACTIVE_PLAN: '/admin/plans?new=1', WAGON_UPSTREAM: '/admin/audit?action=wagon.search', AD_EXPIRED: '/admin/ads', AD_ENDING: '/admin/ads',
+};
+const GROWTH = [
+  { k: 'users', label: 'growthUsers', href: '/admin/users?sort=createdAt&dir=desc', decision: 'users' },
+  { k: 'listings', label: 'growthListings', href: '/admin/listings?status=ACTIVE&sort=createdAt&dir=desc', decision: 'listings' },
+  { k: 'requests', label: 'growthRequests', href: '/admin/market', decision: 'requests' },
+  { k: 'wagon', label: 'growthWagon', href: '/admin/audit?action=wagon.search', decision: 'wagon' },
+] as const;
+const SERIES = [
+  { k: 'visits', label: 'seriesVisits', href: '/admin/visits', decision: 'visits' },
+  { k: 'reveals', label: 'seriesReveals', href: '/admin/audit?action=contact', decision: 'reveals' },
+  { k: 'wagon', label: 'seriesWagon', href: '/admin/audit?action=wagon.search', decision: 'wagonSeries' },
+  { k: 'orders', label: 'seriesOrders', href: '/admin/orders', decision: 'orders' },
+] as const;
+/** Bloklarga bog'lanmagan yiqilishlar (plans, wagon, ads) ogohlantirish bo'limida bitta xabar bo'ladi. */
+const BLOCKS = ['work', 'money', 'growth', 'series', 'commission', 'reveals'];
 
-/** Kunlarda kutish: navbatdagi son emas, yosh muhim. */
-const daysWaiting = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+const H2 = 'font-mono text-[11px] font-semibold uppercase tracking-wide text-muted';
+const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
+const days = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+
+/**
+ * Soat aniqligidagi yosh: "3 kun" / "5 soat" / "20 daqiqa". Kun bilan cheklanmaydi, chunki
+ * bugun kelgan to'lov ham 6 soat kutgan bo'lishi mumkin. 3 kundan oshgan qizil, 1 kundan sariq.
+ */
+function ageOf(iso: string): { key: 'days' | 'hours' | 'minutes' | 'now'; n: number; tone: Tone } {
+  const ms = Math.max(0, Date.now() - new Date(iso).getTime());
+  const d = Math.floor(ms / 86_400_000);
+  if (d >= 1) return { key: 'days', n: d, tone: d >= 3 ? 'bad' : 'warn' };
+  const h = Math.floor(ms / 3_600_000);
+  if (h >= 1) return { key: 'hours', n: h, tone: 'neutral' };
+  const m = Math.floor(ms / 60_000);
+  return m >= 1 ? { key: 'minutes', n: m, tone: 'neutral' } : { key: 'now', n: 0, tone: 'neutral' };
+}
+
+/** Foiz farqi nishoni. Oldingi oyna nol bo'lsa foiz yo'q: "yangi". warnAt: shundan past tushish sariq. */
+function Delta({ cur, prev, warnAt }: { cur: number; prev: number; warnAt: number }) {
+  const th = useTranslations('admin.home');
+  if (!prev) return cur > 0 ? <Pill tone="ok">{th('deltaNew')}</Pill> : null;
+  const pct = Math.round(((cur - prev) / prev) * 100);
+  return <Pill tone={pct > 0 ? 'ok' : pct < warnAt ? 'warn' : 'neutral'}>{th('delta', { pct: pct > 0 ? `+${pct}` : String(pct) })}</Pill>;
+}
+
+/** Bitta son kartasi: son, nomi, ostida taqqos satri, nishon va qaror matni. Havola bo'lsa butun karta bosiladi. */
+function Stat({ href, value, label, sub, pill, note, children }: {
+  href?: string; value: React.ReactNode; label: string; sub?: React.ReactNode; pill?: React.ReactNode; note?: string; children?: React.ReactNode;
+}) {
+  const cls = `${CARD} block min-w-0 p-4 ${href ? 'transition duration-150 hover:-translate-y-0.5 hover:border-teal hover:shadow-md' : ''}`;
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <span className="font-display text-2xl font-bold tabular-nums text-navy">{value}</span>
+        {pill}
+      </div>
+      <span className="mt-0.5 block text-sm text-ink">{label}</span>
+      {sub ? <span className="mt-1 block font-mono text-[11px] text-muted">{sub}</span> : null}
+      {children}
+      {note ? <span className="mt-2 block text-xs text-muted">{note}</span> : null}
+    </>
+  );
+  return href ? <Link href={href} className={cls}>{body}</Link> : <div className={cls}>{body}</div>;
+}
+
+function Block({ children }: { children: React.ReactNode }) {
+  return <div className={`${CARD} p-4`}>{children}</div>;
+}
+
+/** Bugungi ish ro'yxati: j/k va Enter bilan yuriladi (kit useRovingList, jadval bilan bir xil odat). */
+function WorkList({ rows }: { rows: Home['work'] }) {
+  const th = useTranslations('admin.home');
+  const locale = useLocale();
+  const router = useRouter();
+  const rov = useRovingList(rows.length, { onOpen: (i) => router.push(rows[i]!.href) });
+  return (
+    <ul {...rov.containerProps} className={`${CARD} mt-2 divide-y divide-line/70 outline-none`}>
+      {rows.map((r, i) => {
+        const age = r.oldestAt ? ageOf(r.oldestAt) : null;
+        return (
+          <li key={r.key} {...rov.itemProps(i)} onFocus={() => rov.setIndex(i)}
+            className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal">
+            {/* Havola Tab to'xtash joyi emas (tabIndex -1): qator o'zi fokus oladi, Enter ochadi */}
+            <Link href={r.href} tabIndex={-1} className="flex items-center gap-3 px-4 py-3 hover:bg-sand/60">
+              <span className="min-w-0 flex-1 text-sm font-semibold text-ink">{th(WORK_LABEL[r.key] ?? r.key)}</span>
+              {/* Yosh son yonida: qaysi navbat unutilganini son emas, kutgan vaqti aytadi */}
+              {age ? <Pill tone={age.tone}>{th(`age.${age.key}`, { n: age.n })}</Pill> : null}
+              <span className="w-12 text-right font-mono text-base font-bold tabular-nums text-navy">{num(r.count, locale)}</span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export default function AdminHomePage() {
   const t = useTranslations('admin');
   const th = useTranslations('admin.home');
   const tc = useTranslations('admin.common');
-  const ta = useTranslations('admin.audit');
   const locale = useLocale();
-  const [health, setHealth] = useState<Health | null>(null);
-  const [feed, setFeed] = useState<AuditRow[] | null>(null);
-  const [err, setErr] = useState<unknown>(null);
+  const { me, isOwner } = useAdminMe();
   const actionText = useActionText();
+  const [home, setHome] = useState<Home | null>(null);
+  const [homeErr, setHomeErr] = useState<unknown>(null);
+  const [money, setMoney] = useState<Money | null | 'err'>(null);
+  const [mine, setMine] = useState<AuditRow[] | null | 'err'>(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    // full=1: navbat yoshi faqat shu sahifaga kerak, panelning boshqa ekranlari uni so'ramaydi
-    api<Health>('/admin/health?full=1').then(setHealth).catch(setErr);
-    // Tasma yiqilsa sahifa buzilmasin: navbat muhimroq
-    api<{ items: AuditRow[] }>('/admin/audit?limit=8').then((r) => setFeed(r.items)).catch(() => setFeed([]));
-  }, []);
+    setHome(null); setHomeErr(null); setMoney(null); setMine(null);
+    api<Home>('/admin/home').then(setHome).catch(setHomeErr);
+    // Tushum faqat egaga: operator uchun so'rov umuman ketmaydi (403 xabari emas, karta yo'q)
+    if (isOwner) api<Money>('/admin/home/money').then(setMoney).catch(() => setMoney('err'));
+    api<{ items: AuditRow[] }>(`/admin/audit?actor=${me.id}&limit=8`).then((r) => setMine(r.items)).catch(() => setMine('err'));
+  }, [me.id, isOwner, tick]);
 
-  const total = health ? Object.values(health.counts).reduce((a, b) => a + b, 0) : 0;
+  const failed = (name: string) => !!home?.failed?.includes(name);
+  const total = home ? sum(home.work.map((w) => w.count)) : 0;
   // Eng uzoq kutgan ish qaysi navbatda bo'lsa ham, uning yoshi sarlavhada turadi
-  const waited = health?.oldest
-    ? Math.max(0, ...Object.values(health.oldest).filter((v): v is string => !!v).map(daysWaiting))
-    : null;
-  const c = health?.commission ?? null;
+  const waited = home ? Math.max(0, ...home.work.filter((w) => w.oldestAt).map((w) => days(w.oldestAt!))) : 0;
+  const otherFailed = home?.failed?.filter((f) => !BLOCKS.includes(f)) ?? [];
+
+  const c = home?.commission ?? null;
   // Belgi ikki oyning kattasi bo'yicha: e'lon 30 kun oldin chiqishi kerak, ya'ni
   // qaror chegaraga yetgunga qadar qabul qilinadi. Ommaviy matn "100 tadan ortiq"
   // deydi, shuning uchun o'tganini qat'iy > bilan sanaymiz.
@@ -83,140 +175,185 @@ export default function AdminHomePage() {
   const over = !!c && peak > c.threshold;
   const near = !!c && peak >= c.threshold * 0.8;
 
+  const pendAge = home?.money?.pendingPay.oldestAt ? ageOf(home.money.pendingPay.oldestAt) : null;
+  const link = 'text-xs font-semibold text-teal-ink hover:underline';
+
   return (
     <>
-      <PageHead title={t('title')} lead={th('lead')} />
-      {err ? <Notice tone="err">{errText(err, t, t.has, tc('loadFailed'))}</Notice> : null}
-      {/* Bir qism yiqilsa qolgani baribir ko'rsatiladi, lekin qaysi biri ekani aytiladi */}
-      {health?.failed?.length ? <Notice tone="err">{tc('loadFailed')} ({health.failed.join(', ')})</Notice> : null}
-      {!health && !err ? <p className="mt-5 text-sm text-muted">{tc('loading')}</p> : null}
+      <PageHead title={t('nav.home')} lead={th('lead')} />
+      {homeErr ? (
+        <Notice tone="err">
+          {errText(homeErr, t, t.has, tc('loadFailed'))}
+          <button type="button" onClick={() => setTick((n) => n + 1)} className="ml-2 font-semibold underline">{th('retry')}</button>
+        </Notice>
+      ) : null}
 
-      {health ? (
-        <>
-          {/* Navbat: har biri bosiladigan kartochka, bo'shi xira turadi */}
-          <section className="mt-5">
+      {/* A. Ogohlantirishlar: bo'sh bo'lsa bo'lim umuman yo'q, sog' holat haqida hech narsa chizilmaydi */}
+      {home && (home.alerts.length || otherFailed.length) ? (
+        <section className="mt-5" aria-label={th('alerts')}>
+          {home.alerts.map((a) => {
+            const href = ALERT_HREF[a.code];
+            return (
+              <Notice key={a.code} tone={a.tone === 'bad' ? 'err' : 'warn'}>
+                {th(`alert.${a.code}`, { n: a.n ?? 0, of: a.of ?? 0, ms: a.ms ?? 0 })}
+                {href ? <Link href={href} className="ml-2 font-semibold underline">{th('alertGo')}</Link> : null}
+              </Notice>
+            );
+          })}
+          {otherFailed.length ? <Notice tone="err">{th('blockFailed', { name: th('alerts') })} ({otherFailed.join(', ')})</Notice> : null}
+        </section>
+      ) : null}
+
+      {/* B. Bugungi ish: ro'yxat, eng uzoq kutgani birinchi. Qaror: birinchi nimani ochaman */}
+      <section className="mt-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className={H2}>
+            {th('work')}
+            {home ? <span className="ml-2 font-mono text-xs tabular-nums text-navy">{num(total, locale)}</span> : null}
+          </h2>
+          {waited >= 1 ? <Pill tone={waited >= 3 ? 'bad' : 'warn'}>{th('waitingDays', { days: waited })}</Pill> : null}
+        </div>
+        {!home && !homeErr ? <div className={`${CARD} mt-2 p-4`}><Skeleton rows={4} /></div>
+          : failed('work') ? <Notice tone="err">{th('blockFailed', { name: th('work') })}</Notice>
+          : home && !home.work.length ? <p className={`${CARD} mt-2 border-dashed px-6 py-10 text-center text-sm text-muted`}>{th('workEmpty')}</p>
+          : home ? <WorkList rows={home.work} /> : null}
+      </section>
+
+      {/* C. Pul: tushum faqat egaga; qolgani hamma adminga */}
+      <section className="mt-5">
+        <h2 className={H2}>{th('money')}</h2>
+        {failed('money') ? <Notice tone="err">{th('blockFailed', { name: th('money') })}</Notice> : null}
+        <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {isOwner ? (
+            money === null ? <Block><Skeleton rows={3} /></Block>
+              : money === 'err' ? <Block><Notice tone="err">{th('blockFailed', { name: th('revenueThisMonth') })}</Notice></Block>
+              // Qaror: narx, tarif, reklama siyosati
+              : <Stat href="/admin/revenue" value={som(money.thisMonthTiyin, locale)} label={th('revenueThisMonth')}
+                  sub={th('revenuePrevMonth', { sum: som(money.prevMonthTiyin, locale) })} pill={<Delta cur={money.thisMonthTiyin} prev={money.prevMonthTiyin} warnAt={0} />} />
+          ) : null}
+          {!home && !homeErr ? (
+            <><Block><Skeleton rows={3} /></Block><Block><Skeleton rows={3} /></Block><Block><Skeleton rows={3} /></Block></>
+          ) : home?.money ? (
+            <>
+              {/* Qaror: tarif o'zgarishi nechta odamga tegadi */}
+              <Stat href="/admin/subscriptions?status=ACTIVE" value={num(home.money.activeSubscribers, locale)} label={th('activeSubs')} />
+              {/* Qaror: kimga eslatma qo'ng'irog'i */}
+              <Stat href="/admin/subscriptions?status=ACTIVE&sort=endsAt&dir=asc" value={num(home.money.expiring7, locale)} label={th('expiring7')} />
+              {/* Qaror: bank ko'chirmasida qancha pul qidiriladi; eng eskisi qancha kutdi */}
+              <Stat href="/admin/moderation?tab=subscription" value={num(home.money.pendingPay.count, locale)} label={th('pendingPay')}
+                sub={th('pendingPayCount', { count: home.money.pendingPay.count, sum: num(Math.round(home.money.pendingPay.amountTiyin / 100), locale) })}
+                pill={pendAge ? <Pill tone={pendAge.tone}>{th('pendingPayOldest', { age: th(`age.${pendAge.key}`, { n: pendAge.n }) })}</Pill> : null} />
+            </>
+          ) : null}
+        </div>
+      </section>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        {/* D. O'sish: oxirgi 7 kun va oldingi 7 kun. Namuna qatorlar sanalmagan */}
+        <section className="min-w-0">
+          <h2 className={H2}>{th('growth')}</h2>
+          {failed('growth') ? <Notice tone="err">{th('blockFailed', { name: th('growth') })}</Notice> : null}
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+            {!home && !homeErr ? GROWTH.map((g) => <Block key={g.k}><Skeleton rows={3} /></Block>)
+              : home?.growth ? GROWTH.map((g) => {
+                const p = home.growth![g.k];
+                return (
+                  <Stat key={g.k} href={g.href} value={num(p.last7, locale)} label={th(g.label)} sub={th('prev7', { n: p.prev7 })}
+                    pill={<Delta cur={p.last7} prev={p.prev7} warnAt={-20} />} note={th(`decision.${g.decision}`)} />
+                );
+              }) : null}
+          </div>
+        </section>
+
+        {/* E. 30 kun: bugun, jami, 7 kun oldingi 7 kunga nisbatan va chiziqcha */}
+        <section className="min-w-0">
+          <h2 className={H2}>{th('series')}</h2>
+          {failed('series') ? <Notice tone="err">{th('blockFailed', { name: th('series') })}</Notice> : null}
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+            {!home && !homeErr ? SERIES.map((s) => <Block key={s.k}><Skeleton rows={4} /></Block>)
+              : home?.series ? SERIES.map((s) => {
+                const v = home.series![s.k];
+                const today = v[v.length - 1] ?? 0;
+                const total30 = sum(v);
+                const name = th(s.label);
+                return (
+                  <Stat key={s.k} href={s.href} value={num(today, locale)} label={`${name}, ${th('today')}`} sub={th('total30', { n: total30 })}
+                    pill={<Delta cur={sum(v.slice(-7))} prev={sum(v.slice(-14, -7))} warnAt={-20} />} note={th(`decision.${s.decision}`)}>
+                    <Sparkline values={v} aria={th('seriesAria', { name, total: total30, today })} empty={th('seriesEmpty')} />
+                  </Stat>
+                );
+              }) : null}
+          </div>
+        </section>
+      </div>
+
+      {/* F. Komissiya chegarasi, raqam ochish voronkasi, mening amallarim */}
+      <div className="mt-5 grid gap-4 lg:grid-cols-3">
+        {/* Komissiya chegarasi. O'tgan oy yagona to'liq son, shu oy esa tendensiya:
+            e'lon 30 kun oldin chiqishi kerak, ya'ni qaror chegaradan oldin qabul qilinadi. */}
+        {failed('commission') ? <Notice tone="err">{th('blockFailed', { name: th('commission') })}</Notice> : null}
+        {c ? (
+          <section className={`${CARD} min-w-0 p-4`}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('queue')}</h2>
-              {waited != null && waited >= 1 ? (
-                <Pill tone={waited >= 3 ? 'bad' : 'warn'}>{th('waitingDays', { days: waited })}</Pill>
-              ) : null}
+              <h2 className={H2}>{th('commission')}</h2>
+              {near ? <Pill tone={over ? 'bad' : 'warn'}>{th(over ? 'commissionOver' : 'commissionNear')}</Pill> : null}
             </div>
+            <dl className="mt-1 grid grid-cols-2 gap-2">
+              <div>
+                <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(c.thisMonth, locale)}</dd>
+                <dt className="text-xs text-muted">{th('commissionThisMonth')}</dt>
+              </div>
+              <div>
+                <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(c.prevMonth, locale)}</dd>
+                <dt className="text-xs text-muted">{th('commissionPrevMonth')}</dt>
+              </div>
+            </dl>
+            <p className="mt-2 text-xs text-muted">{th('commissionThreshold', { n: c.threshold })}</p>
+          </section>
+        ) : null}
 
-            {total === 0 ? (
-              <p className={`${CARD} mt-2 border-dashed px-6 py-10 text-center text-sm text-muted`}>{th('queueEmpty')}</p>
-            ) : (
-              <ul className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {QUEUE.map(({ key, label, href }) => {
-                  const n = health.counts[key];
-                  const at = health.oldest?.[key];
-                  const age = n && at ? daysWaiting(at) : null;
-                  const body = (
-                    <>
-                      <span className={`font-display text-3xl font-bold tabular-nums ${n ? 'text-navy' : 'text-muted/50'}`}>{num(n, locale)}</span>
-                      <span className={`mt-0.5 block text-sm ${n ? 'text-ink' : 'text-muted'}`}>{th(label)}</span>
-                      {/* Yosh aynan shu navbatniki: qaysi biri unutilib qolganini son emas, kun aytadi */}
-                      {age != null && age >= 1 ? <span className="mt-1 inline-block font-mono text-[11px] text-amber-ink">{th('queueDays', { days: age })}</span> : null}
-                    </>
-                  );
-                  return (
-                    <li key={key}>
-                      {/* Bo'sh navbatga havola kerak emas: bosib borsa bo'sh ro'yxat ko'radi */}
-                      {n ? (
-                        <Link href={href} className={`${CARD} block p-4 transition duration-150 hover:-translate-y-0.5 hover:border-teal hover:shadow-md`}>{body}</Link>
-                      ) : (
-                        <div className={`${CARD} p-4`}>{body}</div>
-                      )}
-                    </li>
-                  );
-                })}
+        {/* Bepul oyna o'chiq ekan (freeTotal = 0) bu yerda to'rtta nol turardi va hech qanday
+            qarorni o'zgartirmasdi, shuning uchun karta faqat oyna yoqilganda chiziladi.
+            Yuqori qator ODAM, past qator OCHILISH: birliklari aralashib ketmasin. */}
+        {home?.reveals && home.reveals.freeTotal > 0 ? (
+          <section className={`${CARD} min-w-0 p-4`}>
+            <h2 className={H2}>{th('reveals')}</h2>
+            <dl className="mt-1 grid grid-cols-2 gap-2">
+              {([['revealPeople', home.reveals.people], ['revealSubscribers', home.reveals.subscribers],
+                 ['revealCount', home.reveals.reveals], ['revealFree', home.reveals.freeReveals]] as const).map(([k, v]) => (
+                <div key={k} className="min-w-0">
+                  <dd className="font-display text-xl font-bold tabular-nums text-navy">{num(v, locale)}</dd>
+                  <dt className="text-xs text-muted">{th(k)}</dt>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-2 text-xs text-muted">{th('revealWindow', { n: home.reveals.freeTotal })}</p>
+          </section>
+        ) : null}
+
+        {/* Mening oxirgi amallarim: tanaffusdan keyin qayerda to'xtaganini eslash. Kim ustuni yo'q: hammasi meniki */}
+        <section className={`${CARD} min-w-0 p-4`}>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className={H2}>{th('mine')}</h2>
+            <span className="flex gap-3">
+              <Link href={`/admin/audit?actor=${me.id}`} className={link}>{th('mineAll')}</Link>
+              {isOwner ? <Link href="/admin/audit?action=admin" className={link}>{th('teamActions')}</Link> : null}
+            </span>
+          </div>
+          {mine === null ? <Skeleton rows={4} className="mt-3" />
+            : mine === 'err' ? <Notice tone="err">{th('blockFailed', { name: th('mine') })}</Notice>
+            : !mine.length ? <p className="mt-3 text-sm text-muted">{th('mineEmpty')}</p> : (
+              <ul className="mt-2 divide-y divide-line/70">
+                {mine.map((r) => (
+                  <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 py-1.5 text-sm">
+                    <span className="min-w-0 text-ink wrap-anywhere">{actionText(r.action, r.meta)}</span>
+                    <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">{uzDateTime(r.createdAt, locale)}</span>
+                  </li>
+                ))}
               </ul>
             )}
-
-          </section>
-
-          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_minmax(0,320px)]">
-            {/* Oxirgi amallar: panelda kim nima qilgani ko'rinib tursin */}
-            <section className={`${CARD} min-w-0 p-4`}>
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('activity')}</h2>
-                <Link href="/admin/audit" className="text-xs font-semibold text-teal-ink underline">{t('nav.audit')}</Link>
-              </div>
-              {feed === null ? <p className="mt-3 text-sm text-muted">{tc('loading')}</p>
-                : !feed.length ? <p className="mt-3 text-sm text-muted">{th('activityEmpty')}</p> : (
-                  <ul className="mt-2 divide-y divide-line/70">
-                    {feed.map((r) => (
-                      <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 py-1.5 text-sm">
-                        {/* Avval kim, keyin nima qilgani: qator gap bo'lib o'qiladi */}
-                        <span className="min-w-0 font-semibold wrap-anywhere">{r.actor ? r.actor.fullName || r.actor.phone : ta('system')}</span>
-                        <span className="min-w-0 text-muted wrap-anywhere">{actionText(r.action, r.meta)}</span>
-                        <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">{uzDateTime(r.createdAt, locale)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-            </section>
-
-            <section className={`${CARD} min-w-0 p-4`}>
-              <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('health')}</h2>
-              <p className="mt-2 text-sm">
-                {th('db')}: {health.db.ok
-                  ? <span className="font-mono text-teal-ink">{th('dbOk', { ms: health.db.ms ?? 0 })}</span>
-                  : <span className="font-mono font-semibold text-red-700">{th('dbFail')}</span>}
-              </p>
-              <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('last24h')}</p>
-              <dl className="mt-1 grid grid-cols-3 gap-2">
-                {RECENT.map(({ key, label }) => (
-                  <div key={key}>
-                    <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(health.recent[key], locale)}</dd>
-                    <dt className="text-xs text-muted">{th(label)}</dt>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            {/* Komissiya chegarasi. O'tgan oy yagona to'liq son, shu oy esa tendensiya:
-                e'lon 30 kun oldin chiqishi kerak, ya'ni qaror chegaradan oldin qabul qilinadi. */}
-            {c ? (
-              <section className={`${CARD} min-w-0 p-4`}>
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('commission')}</h2>
-                  {near ? <Pill tone={over ? 'bad' : 'warn'}>{th(over ? 'commissionOver' : 'commissionNear')}</Pill> : null}
-                </div>
-                <dl className="mt-1 grid grid-cols-2 gap-2">
-                  <div>
-                    <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(c.thisMonth, locale)}</dd>
-                    <dt className="text-xs text-muted">{th('commissionThisMonth')}</dt>
-                  </div>
-                  <div>
-                    <dd className="font-display text-2xl font-bold tabular-nums text-navy">{num(c.prevMonth, locale)}</dd>
-                    <dt className="text-xs text-muted">{th('commissionPrevMonth')}</dt>
-                  </div>
-                </dl>
-                <p className="mt-2 text-xs text-muted">{th('commissionThreshold', { n: c.threshold })}</p>
-              </section>
-            ) : null}
-
-            {/* Bepul oyna o'chiq ekan (freeTotal = 0) bu yerda to'rtta nol turardi va hech qanday
-                qarorni o'zgartirmasdi, shuning uchun karta faqat oyna yoqilganda chiziladi.
-                Yuqori qator ODAM, past qator OCHILISH: birliklari aralashib ketmasin. */}
-            {health.reveals && health.reveals.freeTotal > 0 ? (
-              <section className={`${CARD} min-w-0 p-4`}>
-                <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{th('reveals')}</h2>
-                <dl className="mt-1 grid grid-cols-2 gap-2">
-                  {([['revealPeople', health.reveals.people], ['revealSubscribers', health.reveals.subscribers],
-                     ['revealCount', health.reveals.reveals], ['revealFree', health.reveals.freeReveals]] as const).map(([k, v]) => (
-                    <div key={k} className="min-w-0">
-                      <dd className="font-display text-xl font-bold tabular-nums text-navy">{num(v, locale)}</dd>
-                      <dt className="text-xs text-muted">{th(k)}</dt>
-                    </div>
-                  ))}
-                </dl>
-                <p className="mt-2 text-xs text-muted">{th('revealWindow', { n: health.reveals.freeTotal })}</p>
-              </section>
-            ) : null}
-          </div>
-        </>
-      ) : null}
+        </section>
+      </div>
     </>
   );
 }

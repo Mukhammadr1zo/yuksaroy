@@ -72,6 +72,32 @@ type Row = { id: string; no: string; userId: string; months: number; grants: str
 /** BigInt -> Number (JSON). */
 export const subscriptionView = (s: Row) => ({ ...s, amountTiyin: Number(s.amountTiyin) });
 
+/** Reyestr qatori: obuna + egasi. CSV ustunlari ham shu shakldan o'qiydi. */
+export type RegistryRow = ReturnType<typeof subscriptionView> & { user: { id: string; fullName: string | null; phone: string | null } };
+
+/**
+ * Reyestr filtri: holat, matn (PAY raqami, telefon, ism), bitta odam (foydalanuvchi
+ * sahifasining Pul yorlig'i), tanlangan qatorlar (ids), jadval sarlavhasidan tartib.
+ */
+export type RegistryFilter = { status?: string; q?: string; userId?: string; ids?: string[]; orderBy?: Prisma.SubscriptionOrderByWithRelationInput[] };
+const registryWhere = (f: RegistryFilter): Prisma.SubscriptionWhereInput => {
+  const text = f.q?.trim();
+  return {
+    ...(f.status ? { status: f.status } : {}),
+    ...(f.userId ? { userId: f.userId } : {}),
+    ...(f.ids ? { id: { in: f.ids } } : {}),
+    ...(text
+      ? {
+          OR: [
+            { no: { contains: text, mode: 'insensitive' as const } },
+            { user: { phone: { contains: text } } },
+            { user: { fullName: { contains: text, mode: 'insensitive' as const } } },
+          ],
+        }
+      : {}),
+  };
+};
+
 /**
  * Bir tashkilotning buyurtmalarini navbatda yonma-yon qo'yadi.
  *
@@ -431,31 +457,24 @@ export class SubscriptionService {
    * filtrlash jami sonini ham, oxirgi sahifani ham buzardi. Tartibda id ham bor:
    * bir soniyada yaratilgan ikki qator sahifalar orasida takrorlanmasin.
    */
-  async registry(f: { status?: string; q?: string; page: number; limit: number }) {
-    const text = f.q?.trim();
-    const where: Prisma.SubscriptionWhereInput = {
-      ...(f.status ? { status: f.status } : {}),
-      ...(text
-        ? {
-            OR: [
-              { no: { contains: text, mode: 'insensitive' as const } },
-              { user: { phone: { contains: text } } },
-              { user: { fullName: { contains: text, mode: 'insensitive' as const } } },
-            ],
-          }
-        : {}),
-    };
+  async registry(f: RegistryFilter & { page: number; limit: number }) {
+    const where = registryWhere(f);
     const [total, rows] = await Promise.all([
       this.prisma.subscription.count({ where }),
       this.prisma.subscription.findMany({
         where,
         include: { user: { select: { id: true, fullName: true, phone: true } } },
-        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        orderBy: f.orderBy ?? [{ createdAt: 'desc' }, { id: 'asc' }],
         skip: (f.page - 1) * f.limit,
         take: f.limit,
       }),
     ]);
-    return { items: rows.map(({ user, ...s }) => ({ ...subscriptionView(s), user })), total, page: f.page, limit: f.limit };
+    return { items: rows.map(({ user, ...s }): RegistryRow => ({ ...subscriptionView(s), user })), total, page: f.page, limit: f.limit };
+  }
+
+  /** CSV eksporti qatorlarni o'qishdan OLDIN sonni tekshiradi: chegaradan oshgani bekor o'qilmasin. */
+  async registryCount(f: RegistryFilter) {
+    return this.prisma.subscription.count({ where: registryWhere(f) });
   }
 
   /**

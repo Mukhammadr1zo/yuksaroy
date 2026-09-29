@@ -4,13 +4,13 @@ import { IsObject } from 'class-validator';
 import { PLATFORM_DEFAULTS, type PlatformConfigKey, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
-import { QUEUE_KEYS, queueStats, type QueueKey } from '../../common/admin-queues';
+import { queueStats, type QueueKey } from '../../common/admin-queues';
 import { ImpressionsService } from '../impressions/impressions.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
-import { monthWindow, monthlyRevenue } from './revenue';
+import { monthlyRevenue } from './revenue';
 
 class SettingsDto {
   // { commissionPct: 300, commissionPayer: 'CLIENT' } - faqat o'zgartiriladigan kalitlar
@@ -34,24 +34,6 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   // Rekvizit: bo'sh saqlanmaydi (bo'shatish uchun qator o'chiriladi), 500 belgi yetarli
   payDetails: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 500,
 };
-
-/**
- * Voronka: guruhlangan qatorlardan to'rtta son.
- *
- * "Obunachi" HOZIR faol obunasi borlar: ochilish paytidagi holat audit qatorida yo'q.
- * Bu 30 kunlik tendensiya uchun yetarli, hisob-kitob uchun emas.
- */
-export function revealFunnel(by: readonly { actorId: string | null; _count: { _all: number } }[], paid: ReadonlySet<string>) {
-  let reveals = 0;
-  let freeReveals = 0;
-  let subscribers = 0;
-  for (const r of by) {
-    reveals += r._count._all;
-    if (r.actorId && paid.has(r.actorId)) subscribers += 1;
-    else freeReveals += r._count._all;
-  }
-  return { people: by.length, reveals, subscribers, freeReveals };
-}
 
 /**
  * Audit filtridagi sana. Faqat kun berilsa (YYYY-MM-DD) u TOSHKENT kuni deb olinadi.
@@ -240,9 +222,11 @@ export class AdminSystemController {
     return this.settings();
   }
 
-  /** Bitta ekran: baza tirikmi, qancha ish odam kutyapti, sutkada nima bo'ldi. */
   /**
-   * Bosh sahifa uchun: navbatlar, oxirgi sutka va baza holati.
+   * Qobiq uchun: baza tirikmi, navbatlarda nechta ish bor, sutkada nima bo'ldi.
+   *
+   * Panel har o'tishda shu yo'lni so'raydi (menyu badge), shuning uchun faqat sonlar:
+   * navbat yoshi, komissiya va voronka /admin/home da, u bir marta ochiladi.
    *
    * Har so'rov ALOHIDA bajariladi. Ilgari hammasi bitta Promise.all da edi va bittasi
    * yiqilsa butun javob 500 bo'lardi: panelda "Ma'lumot yuklanmadi" chiqar, qaysi qismi
@@ -250,11 +234,7 @@ export class AdminSystemController {
    * null bo'lib qoladi va `failed` ro'yxatida nomi bilan qaytadi.
    */
   @Get('health')
-  async health(@Query('full') full?: string) {
-    // Navbat yoshi faqat bosh sahifaga kerak, u esa bir marta ochiladi. Panelning
-    // qolgan ekranlari har o'tishda shu yo'lni qayta so'raydi va ulardan faqat
-    // sonlar o'qiladi, ya'ni yetti qo'shimcha so'rov behuda bo'lardi.
-    const withAge = full === '1';
+  async health() {
     const since = new Date(Date.now() - 86400000);
     const failed: string[] = [];
     const safe = async <T>(name: string, fn: () => Promise<T>): Promise<T | null> => {
@@ -267,50 +247,12 @@ export class AdminSystemController {
       }
     };
 
-    // Komissiya chegarasi: va'da bo'yicha komissiya faqat oyiga N ta bajarilgan
-    // buyurtmadan oshgach kiritiladi va kamida 30 kun oldin e'lon qilinadi. Demak ega
-    // chegaraga YETGUNCHA qaror qilishi kerak; shu ikki son aynan shu qaror uchun.
-    const [db, queues, users, orders, listings, commission, reveals] = await Promise.all([
+    const [db, queues, users, orders, listings] = await Promise.all([
       this.pingDb(),
-      safe('queues', () => queueStats(this.prisma, withAge)),
+      safe('queues', () => queueStats(this.prisma, false)),
       safe('recentUsers', () => this.prisma.user.count({ where: { createdAt: { gte: since } } })),
       safe('recentOrders', () => this.prisma.order.count({ where: { createdAt: { gte: since } } })),
       safe('recentListings', () => this.prisma.listing.count({ where: { createdAt: { gte: since } } })),
-      withAge
-        ? safe('commission', async () => {
-            const { start, prevStart } = monthWindow();
-            // status DONE shart: closedAt rad etilgan, bekor qilingan va muddati o'tgan
-            // buyurtmaga ham yoziladi, ular esa chegaraga sanalmasligi kerak
-            const [cfg, thisMonth, prevMonth] = await Promise.all([
-              this.config.get(),
-              this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: start } } }),
-              this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: prevStart, lt: start } } }),
-            ]);
-            return { thisMonth, prevMonth, threshold: cfg.commissionThresholdOrders };
-          })
-        : null,
-      withAge
-        ? safe('reveals', async () => {
-            const from = new Date(Date.now() - 30 * 86_400_000);
-            // ponytail: guruhlash bazada, qo'shish xotirada; oyiga minglab ochuvchi
-            // bo'lsa bitta SQL ga (COUNT ... FILTER) ko'chiriladi
-            const by = await this.prisma.auditLog.groupBy({
-              by: ['actorId'],
-              where: { action: 'contact.reveal', createdAt: { gte: from }, actorId: { not: null } },
-              _count: { _all: true },
-            });
-            const ids = by.map((r) => r.actorId!).filter(Boolean);
-            const [subs, cfg] = await Promise.all([
-              ids.length
-                ? this.prisma.subscription.findMany({ where: { userId: { in: ids }, status: 'ACTIVE', endsAt: { gt: new Date() } }, select: { userId: true }, distinct: ['userId'] })
-                : Promise.resolve([] as { userId: string }[]),
-              this.config.get(),
-            ]);
-            // freeTotal sonlar YONIDA: qaror "N ni oshiraymi" degan savol, hozirgi N
-            // ko'rinmasa to'rt son bilan javob berib bo'lmaydi
-            return { ...revealFunnel(by, new Set(subs.map((sb) => sb.userId))), freeTotal: cfg.phoneRevealFree };
-          })
-        : null,
     ]);
     const count = (k: QueueKey) => queues?.[k].count ?? 0;
     return {
@@ -327,15 +269,6 @@ export class AdminSystemController {
         reportsNew: count('reportsNew'),
       },
       recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },
-      // Har navbatning eng eskisi: faqat ?full=1 bilan, ya'ni faqat bosh sahifaga
-      oldest: withAge && queues
-        ? Object.fromEntries(QUEUE_KEYS.map((k) => [k, queues[k].oldest])) as Record<QueueKey, Date | null>
-        : undefined,
-      // Uch oylik tarix ataylab yo'q: qaror ikkita songa qaraydi
-      // ponytail: sana kaliti va tashkilot kesimi keyinroq, chegara yarmiga yetganda
-      commission: commission ?? undefined,
-      // Raqam ochish voronkasi, 30 kun. Bepul oyna o'chiq ekan brauzer kartani chizmaydi.
-      reveals: reveals ?? undefined,
       failed, // bo'sh bo'lsa hammasi joyida
     };
   }

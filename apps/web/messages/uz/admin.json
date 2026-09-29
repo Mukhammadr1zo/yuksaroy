@@ -159,11 +159,16 @@
       "email": "Email",
       "slug": "Sahifa manzili",
       "id": "ID",
-      "history": "Tarix"
+      "history": "Tarix",
+      "today": "bugun",
+      "copy": "Nusxa",
+      "more": "Ko'proq",
+      "som": "so'm"
     },
     "err": {
       "AD_NOT_FOUND": "Reklama topilmadi",
       "AD_RANGE": "Tugash sanasi boshlanishdan keyin bo'lishi kerak",
+      "BAD_ENTITY": "Noma'lum obyekt turi.",
       "BAD_ROLE": "Noto'g'ri rol.",
       "BAD_STATUS": "Noto'g'ri holat.",
       "BAD_VALUE": "Qiymat noto'g'ri.",
@@ -174,6 +179,7 @@
       "CLAIM_NOT_PENDING": "Bu da'vo bo'yicha qaror allaqachon chiqqan.",
       "DEMO_TARGET": "Namuna qator bilan bu amalni bajarib bo'lmaydi.",
       "DUPLICATE_SERVICE": "Bu xizmat ro'yxatda ikki marta turibdi.",
+      "EXPORT_TOO_MANY": "Juda ko'p qator ({total}). Chegara {max}: filtrni toraytiring.",
       "INVALID_PHONE": "Telefon raqami noto'g'ri.",
       "KIND_NOT_ALLOWED": "Bu turni bu yerdan qo'yib bo'lmaydi.",
       "KYC_ALREADY": "Tashkilot allaqachon tasdiqlangan.",
@@ -185,6 +191,8 @@
       "MARKET_TRANSITION": "So'rov bu holatga o'tmaydi.",
       "MEMBER_NOT_FOUND": "A'zo topilmadi.",
       "MESSAGE_NOT_FOUND": "Murojaat topilmadi.",
+      "NOTE_NOT_FOUND": "Izoh topilmadi.",
+      "TEXT_REQUIRED": "Izoh matni bo'sh bo'lmasin.",
       "NOTHING_TO_UPDATE": "O'zgartiradigan narsa yo'q.",
       "NOT_DRAFT": "E'lon qoralama emas.",
       "NOT_LISTER": "Bu e'lon sizniki emas.",
@@ -225,28 +233,15 @@
       "USER_NOT_FOUND": "Foydalanuvchi topilmadi."
     },
     "home": {
-      "lead": "Bugun nima kutilmoqda va tizim qanday ishlayapti.",
-      "queue": "Kutilmoqda",
-      "queueEmpty": "Navbat bo'sh.",
-      "health": "Tizim holati",
-      "db": "Baza",
-      "dbOk": "ishlayapti, {ms} ms",
-      "dbFail": "javob bermayapti",
-      "last24h": "Oxirgi sutkada",
-      "newUsers": "Yangi foydalanuvchi",
-      "newOrders": "Yangi buyurtma",
-      "newListings": "Yangi e'lon",
+      "lead": "Bugun nima kutilmoqda, pul qayerda va nima o'smoqda.",
       "pendingListings": "E'lon moderatsiyasi",
       "pendingKyc": "Tashkilot tasdig'i",
       "pendingClaims": "Obyekt da'volari",
       "pendingPremium": "Premium to'lovlari",
       "pendingOrders": "Tasdiq kutayotgan buyurtma",
       "pendingUrgent": "Shoshilinch so'rov",
-      "activity": "Oxirgi amallar",
-      "activityEmpty": "Hali amal qilinmagan.",
       "waitingDays": "eng uzog'i {days} kundan beri kutmoqda",
       "pendingSubscription": "Obuna to'lovlari",
-      "queueDays": "{days} kun kutdi",
       "commission": "Komissiya chegarasi",
       "commissionThisMonth": "shu oy bajarilgan",
       "commissionPrevMonth": "o'tgan oy",
@@ -260,7 +255,67 @@
       "revealFree": "obunasiz ochilish",
       "revealWindow": "Bepul oyna: {n} ta.",
       "pendingContact": "Javobsiz murojaat",
-      "pendingReports": "Yangi shikoyat"
+      "pendingReports": "Yangi shikoyat",
+      "work": "Bugungi ish",
+      "workEmpty": "Navbat bo'sh.",
+      "age": {
+        "days": "{n} kun",
+        "hours": "{n} soat",
+        "minutes": "{n} daqiqa",
+        "now": "hozir"
+      },
+      "alerts": "Ogohlantirish",
+      "alert": {
+        "NO_ACTIVE_PLAN": "Sotuvda tarif yo'q: hech kim obuna sotib ololmaydi",
+        "WAGON_UPSTREAM": "Vagon manbasi 24 soatda {n}/{of} qidiruvda javob bermadi",
+        "AD_EXPIRED": "{n} ta faol reklamaning muddati tugagan",
+        "AD_ENDING": "{n} ta reklama 7 kunda tugaydi",
+        "DB_SLOW": "Baza sekin javob beryapti: {ms} ms",
+        "DB_DOWN": "Baza javob bermayapti"
+      },
+      "alertGo": "Ochish",
+      "money": "Pul",
+      "revenueThisMonth": "Shu oy tushum",
+      "revenuePrevMonth": "o'tgan oy: {sum}",
+      "delta": "{pct} %",
+      "deltaNew": "yangi",
+      "activeSubs": "Faol obunachi",
+      "expiring7": "7 kunda tugaydi",
+      "pendingPay": "To'lov kutmoqda",
+      "pendingPayCount": "{count} ta, {sum} so'm",
+      "pendingPayOldest": "eng eskisi {age}",
+      "growth": "O'sish, 7 kun",
+      "growthUsers": "Yangi foydalanuvchi",
+      "growthListings": "Yangi e'lon",
+      "growthRequests": "Yangi so'rov",
+      "growthWagon": "Vagon qidiruv",
+      "prev7": "oldingi 7 kun: {n}",
+      "series": "30 kun",
+      "seriesVisits": "Tashrif",
+      "seriesReveals": "Raqam ochish",
+      "seriesWagon": "Vagon qidiruv",
+      "seriesOrders": "Buyurtma",
+      "today": "bugun",
+      "total30": "30 kun: {n}",
+      "seriesEmpty": "30 kunda ma'lumot yo'q",
+      "seriesAria": "{name}: 30 kunda {total}, bugun {today}",
+      "decision": {
+        "users": "Pasaysa: jalb kanalini (reklama, bot, SEO) o'zgartiring.",
+        "listings": "Pasaysa: taklif tarafi, terminal va texnika egalari bilan ishlang.",
+        "requests": "Pasaysa: talab tarafi, yuk egalari bilan ishlang.",
+        "wagon": "Pasaysa: vagon tarifi va bot reklamasini ko'ring.",
+        "visits": "Tashrif tushsa: marketing va SEO.",
+        "reveals": "Raqam ochish tushsa, tashrif tushmasa: bepul oyna yoki narx.",
+        "wagonSeries": "Vagon qidiruv tushsa: manba yoki bot.",
+        "orders": "Buyurtma tushsa: terminal faolligi, komissiya vaqti."
+      },
+      "mine": "Mening oxirgi amallarim",
+      "mineEmpty": "Hali amal qilmadingiz.",
+      "mineAll": "Hammasi",
+      "teamActions": "Jamoa amallari",
+      "retry": "Qayta urinish",
+      "blockFailed": "{name} yuklanmadi",
+      "ownerOnly": "Faqat egaga"
     },
     "terminals": {
       "lead": "Terminal va shahobcha yo'llar: reestr yozuvlari ham shu yerda.",
@@ -318,7 +373,9 @@
       "bulkHide": "Topilganini yashirish",
       "bulkDelete": "Topilganini o'chirish",
       "bulkWarn": "{count} qator topildi. Yashirish tavsiya etiladi: o'chirilgan reestr qatori keyingi import bilan qaytib keladi, yashirilgani esa yashirin qoladi.",
-      "bulkDone": "{done} qator bajarildi, {skipped} o'tkazib yuborildi."
+      "bulkDone": "{done} qator bajarildi, {skipped} o'tkazib yuborildi.",
+      "createTitle": "Yangi terminal",
+      "bulkSelected": "Tanlangan {n} qator"
     },
     "stations": {
       "lead": "Rasmiy stansiya reestri. Koordinata shu yerda tuzatiladi va xaritaga darrov tushadi.",
@@ -384,6 +441,8 @@
       "to": "Sanagacha",
       "allActions": "Barcha amallar",
       "ip": "IP",
+      "feedEmpty": "Yozuv yo'q.",
+      "mine": "Mening amallarim",
       "act": {
         "admin-contact-delete": "Murojaatni o'chirdi",
         "admin-contact-handled": "Murojaat holatini o'zgartirdi",
@@ -474,7 +533,24 @@
         "urgent-offer": "Shoshilinch so'rovga taklif berdi",
         "wagon-search": "Vagon qidirdi",
         "admin-report-decide": "Shikoyat bo'yicha qaror qabul qildi",
-        "report-create": "Shikoyat yubordi"
+        "report-create": "Shikoyat yubordi",
+        "admin-note-create": "Ichki izoh yozdi",
+        "admin-note-delete": "Ichki izohni o'chirdi",
+        "admin-export": "Ro'yxatni CSV ga chiqardi",
+        "admin-terminal-bulkHide": "Terminallarni guruh bilan yashirdi",
+        "admin-terminal-bulkActivate": "Terminallarni guruh bilan faollashtirdi",
+        "admin-terminal-bulkDelete": "Terminallarni guruh bilan o'chirdi",
+        "admin-user-block": "Foydalanuvchini blokladi",
+        "admin-user-unblock": "Foydalanuvchini blokdan chiqardi",
+        "admin-plan-create": "Tarif yaratdi",
+        "admin-plan-update": "Tarifni o'zgartirdi",
+        "admin-plan-delete": "Tarifni o'chirdi",
+        "admin-ad-create": "Reklama yaratdi",
+        "admin-ad-update": "Reklamani o'zgartirdi",
+        "admin-ad-delete": "Reklamani o'chirdi",
+        "admin-ad-media": "Reklama rasmini almashtirdi",
+        "subscription-revoke": "Tasdiqlangan obunani bekor qildi",
+        "market-relist": "So'rovni qayta e'lon qildi"
       },
       "ent": {
         "ContactMessage": "Murojaat",
@@ -500,7 +576,10 @@
         "User": "Foydalanuvchi",
         "Wagon": "Vagon",
         "demo": "Namuna ma'lumot",
-        "Report": "Shikoyat"
+        "Report": "Shikoyat",
+        "AdminNote": "Ichki izoh",
+        "AdPlacement": "Reklama",
+        "Plan": "Tarif"
       }
     },
     "settings": {
@@ -578,7 +657,8 @@
         "WAGON_REPAIR": "Vagon ta'miri",
         "CRANE": "Kran",
         "OTHER": "Boshqa"
-      }
+      },
+      "searchNo": "Raqam (UR-)"
     },
     "demo": {
       "title": "Namuna ma'lumotlar",
@@ -634,7 +714,8 @@
       "allRegions": "Butun respublika",
       "hide": "Yashirish",
       "hideConfirm": "Yashirilsinmi? So'rov bekor qilinadi, profil ro'yxatdan tushadi.",
-      "empty": "Hozircha yo'q."
+      "empty": "Hozircha yo'q.",
+      "searchNo": "Raqam (SR-, CR-)"
     },
     "team": {
       "title": "Jamoa",
@@ -725,7 +806,8 @@
       "revokeHint": "Kirish shu zahoti to'xtaydi va tugash sanasi bugunga tushadi. Qaytarib bo'lmaydi.",
       "revokeWarn": "Sabab yozilmaguncha tugma ishlamaydi",
       "reason": "Sabab",
-      "moneyReceived": "Pul haqiqatan kelgan (belgilanmasa, bu qator daromad hisobidan chiqariladi)"
+      "moneyReceived": "Pul haqiqatan kelgan (belgilanmasa, bu qator daromad hisobidan chiqariladi)",
+      "openAll": "Hamma obunalari"
     },
     "ads": {
       "lead": "Yon tomondagi reklama: platformaning o'zi sotadi va shu yerdan joylaydi.",
@@ -775,6 +857,180 @@
         "PHONE": "Telefon raqami",
         "WAGON": "Vagon qidiruvi"
       }
+    },
+    "shell": {
+      "menu": "Menyu",
+      "close": "Yopish",
+      "collapse": "Menyuni yig'ish",
+      "expand": "Menyuni yoyish",
+      "search": "Qidiruv",
+      "searchKbd": "Ctrl K",
+      "site": "Saytga",
+      "role": {
+        "owner": "Ega",
+        "operator": "Operator"
+      },
+      "quick": {
+        "title": "Yangi",
+        "newTerminal": "Yangi terminal",
+        "newPlan": "Yangi tarif",
+        "newAd": "Yangi reklama"
+      },
+      "crumbs": {
+        "home": "Boshqaruv",
+        "aria": "Nonushta yo'li"
+      },
+      "badgeAria": "{n} ta kutmoqda",
+      "keys": {
+        "title": "Klaviatura yo'llari",
+        "palette": "Qidiruv va buyruqlar",
+        "go": "g, keyin harf: bo'limga o'tish",
+        "search": "/ : sahifadagi qidiruv katagi",
+        "help": "? : shu ro'yxat",
+        "nav": "[ : chap menyuni yig'ish",
+        "rowNext": "j yoki pastga: keyingi qator",
+        "rowPrev": "k yoki yuqoriga: oldingi qator",
+        "rowOpen": "Enter: qatorni ochish",
+        "rowSelect": "x: qatorni tanlash",
+        "rowMenu": ". : qator menyusi",
+        "esc": "Esc: yopish, tanlovni bekor qilish"
+      }
+    },
+    "palette": {
+      "placeholder": "PAY-1042, YS-1041, SR-12, UR-1001, telefon, tashkilot, terminal, ism yoki sahifa",
+      "open": "Ochish: {q}",
+      "pages": "Sahifalar",
+      "commands": "Buyruqlar",
+      "recent": "Oxirgi ochilganlar",
+      "orgs": "Tashkilotlar",
+      "terminals": "Terminallar",
+      "users": "Foydalanuvchilar",
+      "listings": "E'lonlar",
+      "loading": "Qidirilmoqda",
+      "empty": "Hech narsa topilmadi",
+      "searchUsers": "Foydalanuvchilar ichida qidirish",
+      "error": "Server qidiruvi ishlamadi, sahifalar ro'yxati ishlaydi",
+      "hint": "Yuqoriga/pastga, Enter ochadi, Esc yopadi",
+      "blocked": "bloklangan",
+      "hidden": "yashirin",
+      "active": "faol"
+    },
+    "table": {
+      "sortAsc": "O'sish tartibida",
+      "sortDesc": "Kamayish tartibida",
+      "sortAria": "Ustun bo'yicha tartiblash",
+      "columns": "Ustunlar",
+      "columnsReset": "Sukut",
+      "columnsAria": "Ko'rinadigan ustunlar",
+      "selectRow": "Qatorni tanlash",
+      "selectPage": "Sahifadagi hammasini tanlash",
+      "selected": "{n} ta tanlandi",
+      "clear": "Bekor",
+      "bulkHide": "Yashirish",
+      "bulkActivate": "Faollashtirish",
+      "bulkBlock": "Bloklash",
+      "bulkWithdraw": "Tortib olish",
+      "bulkReason": "Sabab (auditga yoziladi va egasiga ko'rinadi)",
+      "bulkBlockReason": "Bloklash sababi (auditga yoziladi)",
+      "bulkDone": "{done} bajarildi, {skipped} o'tkazib yuborildi",
+      "bulkTooMany": "Bir safar eng ko'pi 500 qator. Tanlovni kamaytiring.",
+      "export": "CSV ({n})",
+      "exportHint": "Joriy filtr va tartib, eng ko'pi 5000 qator",
+      "exportTooMany": "Eksport uchun juda ko'p qator: eng ko'pi {max}. Filtrni toraytiring.",
+      "exportOwnerOnly": "Shaxsiy ma'lumot: eksport faqat egaga",
+      "rowMenu": "Qator amallari",
+      "open": "Ochish",
+      "onSite": "Saytda ko'rish",
+      "storefront": "Do'kon",
+      "history": "Tarix",
+      "user": "Foydalanuvchi",
+      "terminal": "Terminal",
+      "org": "Tashkilot",
+      "hisActions": "Uning amallari",
+      "loadingRows": "Qatorlar yuklanmoqda",
+      "clearFilters": "Filtrni tozalash",
+      "retry": "Qayta urinish",
+      "keyboardHint": "j/k qator, Enter ochish, x tanlash"
+    },
+    "object": {
+      "back": "Ro'yxatga qaytish",
+      "notFound": "Topilmadi",
+      "copyId": "ID nusxa",
+      "copied": "Nusxalandi",
+      "tabs": {
+        "general": "Umumiy",
+        "related": "Bog'liq",
+        "money": "Pul",
+        "history": "Tarix",
+        "notes": "Izohlar"
+      },
+      "hisActions": "Uning amallari",
+      "onSite": "Saytda ochish",
+      "related": {
+        "terminals": "Terminallar",
+        "listings": "E'lonlar",
+        "orders": "Buyurtmalar",
+        "members": "A'zolar",
+        "reports": "Shikoyatlar",
+        "reviews": "Baholar",
+        "inquiries": "Yozishmalar",
+        "owner": "Egasi",
+        "claimant": "Da'vogar",
+        "station": "Stansiya",
+        "all": "Hammasi",
+        "none": "Yo'q"
+      },
+      "money": {
+        "paidTotal": "Jami to'lagan",
+        "premium": "Premium to'lovlari",
+        "subs": "Obunalar",
+        "tariffs": "Tariflar (oxirgi 20)",
+        "tariffHint": "Narx eskirgan bo'lsa egasiga eslatma yuboring.",
+        "ordersDone": "Bajarilgan buyurtma",
+        "ordersDoneSum": "Bajarilgan summa",
+        "ordersPending": "Kutayotgan buyurtma",
+        "commissionSum": "Komissiya",
+        "lastOrder": "Oxirgi buyurtma",
+        "none": "Pul harakati yo'q",
+        "orgHint": "To'layotgan tashkilot: tasdiq navbatida ustunlik, nizoda yumshoqlik; komissiya kiritilsa shu yerdan hisoblanadi.",
+        "premiumHint": "To'lagan e'lonni tortib olsangiz pul qaytarish savoli tug'iladi: avval egasi bilan gaplashing.",
+        "userHint": "Shikoyat yoki qaytarish so'rovida shu yerga qarang: to'laganmi, suiiste'mol bormi."
+      },
+      "stats": {
+        "views30": "30 kunda {n} ochilish",
+        "openInquiries": "{n} javobsiz yozishma",
+        "inquiries": "{n} yozishma",
+        "reports": "{n} shikoyat"
+      },
+      "claim": {
+        "title": "Obyekt da'vosi",
+        "claimant": "Da'vogar",
+        "evidence": "Hujjatlar"
+      },
+      "kyc": {
+        "title": "Tashkilot tasdig'i",
+        "docs": "Hujjatlar",
+        "requestedAt": "So'ralgan sana"
+      },
+      "listing": {
+        "noEdit": "E'lon matnini egasi tahrirlaydi. Bu yerda faqat qaror: tasdiqlash, rad etish yoki tortib olish.",
+        "withdraw": "Tortib olish",
+        "premiumUntil": "Premium: {date} gacha",
+        "noPremium": "Premium olmagan"
+      }
+    },
+    "notes": {
+      "title": "Ichki izohlar",
+      "add": "Qo'shish",
+      "placeholder": "Qo'ng'iroq natijasi, kelishuv, shubha. Faqat jamoa ko'radi.",
+      "empty": "Hali izoh yo'q. Bu yerga faqat jamoa ko'radigan eslatma yoziladi: qo'ng'iroq natijasi, kelishuv, shubha.",
+      "added": "Izoh qo'shildi",
+      "delete": "O'chirish",
+      "deleted": "Izoh o'chirildi",
+      "deletedUser": "o'chirilgan hisob",
+      "ownerOnly": "Izohni faqat ega o'chira oladi",
+      "ctrlEnter": "Ctrl+Enter yuboradi",
+      "tooLong": "Eng ko'pi 2000 belgi"
     }
   }
 }

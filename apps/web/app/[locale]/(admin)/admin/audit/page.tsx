@@ -1,114 +1,72 @@
 'use client';
 // Audit jurnali: ilgari faqat yozilardi, hech kim o'qiy olmasdi. "Buni kim qildi" ga javob shu yerda.
-// Obyekt turi va ID bo'yicha qo'lda filtr yo'q: ular baza modelining inglizcha nomini
-// harfma-harf yozishni talab qilardi, qabul qilinadigan so'zlar ro'yxati hech qayerda
-// ko'rsatilmasdi va bir harf xato jimgina nol natija berardi. Havola bilan kelgan
-// ?entity= va ?entityId= esa ishlayveradi: kelajakda qatordan jurnalga o'tish uchun.
+// Filtrlar URL da (useListQuery): orqaga tugmasi filtrni qaytaradi, havola ulashiladi.
+// Obyekt turi va ID bo'yicha qo'lda katak yo'q: ular baza modelining inglizcha nomini
+// harfma-harf yozishni talab qilardi va bir harf xato jimgina nol natija berardi.
+// Havola bilan kelgan ?entity= va ?entityId= (qatordagi "Tarix") esa ishlaydi va
+// filtr sifatida ko'rinib turadi, bir bosishda olib tashlanadi.
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { api } from '@/lib/api';
-import { uzDateTime } from '@/lib/format';
-import { BTN, BTN_GHOST, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Toolbar, errText, useActionText, useAdminList, type Col } from '@/components/admin/kit';
+import { BTN, BTN_GHOST, INPUT, Labeled, PageHead, Pill, Toolbar, useActionText, useListQuery } from '@/components/admin/kit';
+import { AuditFeed } from '@/components/admin/AuditFeed';
 
-type Actor = { id: string; phone: string; fullName: string | null };
-type Row = {
-  id: string; actorId: string | null; action: string; entity: string | null; entityId: string | null;
-  meta: unknown; ip: string | null; createdAt: string; actor: Actor | null;
-};
 type ActionCount = { action: string; count: number };
 
-const EMPTY = { action: '', entity: '', entityId: '', actor: '', from: '', to: '' };
+const F0 = { action: '', entity: '', entityId: '', actor: '', from: '', to: '', page: 1 };
+type Draft = Pick<typeof F0, 'action' | 'actor' | 'from' | 'to'>;
+const pick = (f: typeof F0): Draft => ({ action: f.action, actor: f.actor, from: f.from, to: f.to });
 
 export default function AuditPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const ta = useTranslations('admin.audit');
-  const locale = useLocale();
-  // Suspense shart emas: AdminShell huquq tasdiqlanguncha bolalarni chizmaydi, prerender bu hookga yetmaydi
-  const sp = useSearchParams();
-  // actor ham URL dan: foydalanuvchi varag'idagi "uning amallari" havolasi shu yerga keladi
-  const init = { ...EMPTY, entity: sp.get('entity') ?? '', entityId: sp.get('entityId') ?? '', actor: sp.get('actor') ?? '' };
-  // draft = maydonlardagi matn, f = qo'llangan filtr: har harfda so'rov ketmasin
-  const [draft, setDraft] = useState(init);
-  const [f, setF] = useState({ ...init, page: 1 });
+  const { f, set, reset } = useListQuery(F0);
+  // draft = kataklardagi matn, f = qo'llangan filtr (URL): har harfda so'rov ketmasin
+  const [draft, setDraft] = useState<Draft>(() => pick(f));
+  useEffect(() => { setDraft(pick(f)); }, [f]);
   const [actions, setActions] = useState<ActionCount[]>([]);
-  const [open, setOpen] = useState<Row | null>(null);
   const actionText = useActionText();
-  const { data, pages, loading, err } = useAdminList<Row>('/admin/audit', { ...f, limit: 50 });
 
   useEffect(() => { api<ActionCount[]>('/admin/audit/actions').then(setActions).catch(() => {}); }, []);
 
-  const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setDraft((d) => ({ ...d, [k]: e.target.value }));
-
-  // Obyekt ustuni olindi: u baza modelining inglizcha nomini ("Listing", "Organization")
-  // ko'rsatardi, endi gapning o'zi nima ustida ish qilinganini aytadi.
-  const cols: Col<Row>[] = [
-    { key: 'when', head: ta('when'), num: true, width: '1%', cell: (r) => <span className="whitespace-nowrap text-xs">{uzDateTime(r.createdAt, locale)}</span> },
-    {
-      key: 'actor', head: ta('actor'), cell: (r) => r.actor
-        ? <><div className="font-semibold text-navy">{r.actor.fullName || r.actor.phone}</div><div className="font-mono text-[11px] text-muted">{r.actor.phone}</div></>
-        : <span className="text-muted">{ta('system')}</span>,
-    },
-    { key: 'action', head: ta('action'), cell: (r) => actionText(r.action, r.meta) },
-  ];
+  const edit = (k: keyof Draft) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setDraft((d) => ({ ...d, [k]: e.target.value }));
+  const entityLabel = f.entity ? (ta.has(`ent.${f.entity}`) ? ta(`ent.${f.entity}`) : f.entity) : '';
 
   return (
     <>
       <PageHead title={t('nav.audit')} lead={ta('lead')} />
 
-      <Toolbar onSubmit={() => setF({ ...draft, page: 1 })}>
+      <Toolbar onSubmit={() => set({ ...draft })}>
         <Labeled label={ta('action')} className="w-full sm:w-56">
-          <select className={INPUT} value={draft.action} onChange={set('action')}>
+          <select className={INPUT} value={draft.action} onChange={edit('action')}>
             <option value="">{ta('allActions')}</option>
             {actions.map((a) => <option key={a.action} value={a.action}>{actionText(a.action, null)} ({a.count})</option>)}
           </select>
         </Labeled>
         <Labeled label={ta('actor')} className="w-full sm:w-56">
-          <input className={`${INPUT} font-mono`} value={draft.actor} onChange={set('actor')} />
+          <input className={`${INPUT} font-mono`} value={draft.actor} onChange={edit('actor')} data-search="1" />
         </Labeled>
         <Labeled label={ta('from')} className="w-full sm:w-40">
-          <input type="date" className={INPUT} value={draft.from} onChange={set('from')} />
+          <input type="date" className={INPUT} value={draft.from} onChange={edit('from')} />
         </Labeled>
         <Labeled label={ta('to')} className="w-full sm:w-40">
-          <input type="date" className={INPUT} value={draft.to} onChange={set('to')} />
+          <input type="date" className={INPUT} value={draft.to} onChange={edit('to')} />
         </Labeled>
         <button type="submit" className={BTN}>{tc('apply')}</button>
-        <button type="button" className={BTN_GHOST} onClick={() => { setDraft(EMPTY); setF({ ...EMPTY, page: 1 }); }}>{tc('reset')}</button>
+        <button type="button" className={BTN_GHOST} onClick={reset}>{tc('reset')}</button>
       </Toolbar>
 
-      {err ? <Notice tone="err">{errText(err, (k) => t(k), t.has, tc('loadFailed'))}</Notice> : null}
-      <p className="mt-3 text-sm text-muted">{loading ? tc('loading') : tc('total', { count: data?.total ?? 0 })}</p>
+      {/* Havoladan kelgan obyekt filtri: ko'rinib tursin va olib tashlash mumkin bo'lsin */}
+      {f.entity || f.entityId ? (
+        <p className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <Pill>{entityLabel} <span className="font-mono">{f.entityId}</span></Pill>
+          <button type="button" onClick={() => set({ entity: '', entityId: '' })} className="font-semibold text-teal-ink hover:underline">{tc('reset')}</button>
+        </p>
+      ) : null}
 
-      <DataTable cols={cols} rows={data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} onRow={setOpen} />
-      <Pager page={f.page} pages={pages} onPage={(page) => setF((x) => ({ ...x, page }))} />
-
-      <Drawer open={!!open} title={open ? actionText(open.action, open.meta) : ''} onClose={() => setOpen(null)}>
-        {open ? (
-          <dl className="space-y-3 text-sm">
-            <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('when')}</dt><dd className="font-mono">{uzDateTime(open.createdAt, locale)}</dd></div>
-            <div>
-              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('actor')}</dt>
-              <dd>{open.actor ? <>{open.actor.fullName || open.actor.phone} <span className="font-mono text-xs text-muted">{open.actor.phone}</span></> : <span className="text-muted">{ta('system')}</span>}</dd>
-            </div>
-            <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('action')}</dt><dd>{actionText(open.action, open.meta)} <span className="font-mono text-[11px] text-muted">{open.action}</span></dd></div>
-            <div>
-              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('entity')}</dt>
-              <dd>{open.entity ? (ta.has(`ent.${open.entity}`) ? ta(`ent.${open.entity}`) : open.entity) : tc('none')}</dd>
-              {open.entityId ? <dd className="font-mono text-[11px] text-muted">{open.entityId}</dd> : null}
-            </div>
-            {open.ip ? <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{t('audit.ip')}</dt><dd className="font-mono text-xs">{open.ip}</dd></div> : null}
-            <div>
-              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{ta('meta')}</dt>
-              <dd>
-                {open.meta == null
-                  ? <span className="text-muted">{tc('none')}</span>
-                  : <pre className="mt-1 overflow-x-auto rounded-xl border border-line bg-white p-3 font-mono text-xs">{JSON.stringify(open.meta, null, 2)}</pre>}
-              </dd>
-            </div>
-          </dl>
-        ) : null}
-      </Drawer>
+      <AuditFeed entity={f.entity || undefined} entityId={f.entityId || undefined} actor={f.actor || undefined} action={f.action || undefined}
+        from={f.from || undefined} to={f.to || undefined} limit={50} page={f.page} onPage={(page) => set({ page })} />
     </>
   );
 }

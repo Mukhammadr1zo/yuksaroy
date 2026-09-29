@@ -1,14 +1,29 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import type { Prisma } from '@prisma/client';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import type { FastifyReply } from 'fastify';
 import { AuditService } from '../../common/audit.service';
+import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
+import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { SUBSCRIPTION_FALLBACK, SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
-import { catalogView, cheapestIn, pickDefault, planLimit, SUBSCRIPTION_STATUSES, SubscriptionService } from './subscription.service';
+import { catalogView, cheapestIn, pickDefault, planLimit, SUBSCRIPTION_STATUSES, SubscriptionService, type RegistryRow } from './subscription.service';
+
+/** Reyestr jadvali sarlavhasidan: sana yangi birinchi, summa kattasi birinchi, raqam yangisi birinchi. */
+const REGISTRY_SORT: SortAllow<Prisma.SubscriptionOrderByWithRelationInput> = {
+  createdAt: { def: 'desc' }, endsAt: { def: 'asc' }, amountTiyin: { def: 'desc' }, status: { def: 'asc' }, no: { def: 'desc' },
+};
+
+/** CSV: summa so'mda (subscriptionView amountTiyin ni Number qilib beradi), ruxsatlar nuqta-vergul bilan. */
+const REGISTRY_CSV: CsvCols<RegistryRow> = {
+  no: (r) => r.no, status: (r) => r.status, userName: (r) => r.user.fullName, phone: (r) => r.user.phone, grants: (r) => r.grants.join('; '),
+  months: (r) => r.months, amountSom: (r) => r.amountTiyin / 100, startsAt: (r) => r.startsAt, endsAt: (r) => r.endsAt, paidAt: (r) => r.paidAt, createdAt: (r) => r.createdAt,
+};
 
 class OrderDto {
   @IsInt() @Min(1) @Max(12) months!: number;
@@ -118,18 +133,30 @@ export class SubscriptionController {
    */
   @Get('admin/subscriptions/registry')
   @UseGuards(PlatformAdminGuard)
-  registry(
+  async registry(
+    @CurrentUserId() userId: string,
     @Query('status') status?: string,
     @Query('q') q?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('sort') sort?: string,
+    @Query('dir') dir?: string,
+    @Query('ids') ids?: string,
+    @Query('userId') forUser?: string,
+    @Query('format') format?: string,
+    @Res({ passthrough: true }) reply?: FastifyReply,
   ) {
-    return this.subs.registry({
-      status: pickIn(status, SUBSCRIPTION_STATUSES),
-      q,
-      page: clampInt(page, 1, 1, 100_000),
-      limit: clampInt(limit, 30, 1, 100),
-    });
+    // userId: foydalanuvchi sahifasining Pul yorlig'i uning hamma obunasini so'raydi
+    const f = { status: pickIn(status, SUBSCRIPTION_STATUSES), q, userId: forUser, ids: parseIds(ids), orderBy: orderByOf(sort, dir, REGISTRY_SORT, 'createdAt') };
+    if (format === 'csv') {
+      return sendCsv({
+        reply: reply!, audit: this.audit, actorId: userId, resource: 'subscriptions', filters: { status, q, userId: forUser, ids, sort, dir },
+        total: await this.subs.registryCount(f),
+        rows: async () => (await this.subs.registry({ ...f, page: 1, limit: CSV_MAX })).items,
+        cols: REGISTRY_CSV,
+      });
+    }
+    return this.subs.registry({ ...f, page: clampInt(page, 1, 1, 100_000), limit: clampInt(limit, 30, 1, 100) });
   }
 
   @Post('admin/subscriptions/:id/confirm') @HttpCode(200)

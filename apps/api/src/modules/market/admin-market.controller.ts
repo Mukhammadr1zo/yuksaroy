@@ -21,11 +21,17 @@ const INCLUDE = { user: { select: { fullName: true } }, org: { select: { name: t
 export class AdminMarketController {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditService) {}
 
+  /** `q`: raqam (SR-, CR-) bo'yicha, buyruq paleti shu ro'yxat bilan ochadi. */
   @Get('market/requests')
-  async requests(@Query('board') board?: string, @Query('status') status?: string, @Query('page') page?: string, @Query('limit') lim?: string) {
+  async requests(@Query('board') board?: string, @Query('status') status?: string, @Query('q') q?: string, @Query('page') page?: string, @Query('limit') lim?: string) {
     const p = clampInt(page, 1, 1, 10_000);
     const take = clampInt(lim, 30, 1, MARKET.listTake);
-    const where = { ...(board && (MARKET_BOARDS as readonly string[]).includes(board) ? { board } : {}), ...(marketStatus(status) ? { status } : {}) };
+    const text = q?.trim();
+    const where = {
+      ...(board && (MARKET_BOARDS as readonly string[]).includes(board) ? { board } : {}),
+      ...(marketStatus(status) ? { status } : {}),
+      ...(text ? { no: { contains: text, mode: 'insensitive' as const } } : {}),
+    };
     const [total, rows] = await Promise.all([
       this.prisma.marketRequest.count({ where }),
       this.prisma.marketRequest.findMany({ where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take, include: { offers: { orderBy: { createdAt: 'asc' } }, createdBy: { select: { fullName: true } } } }),

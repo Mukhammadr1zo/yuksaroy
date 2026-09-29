@@ -1,7 +1,11 @@
-import { Body, ConflictException, NotFoundException, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, HttpException, NotFoundException, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Prisma } from '@prisma/client';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import type { FastifyReply } from 'fastify';
 import { AuditService } from '../../common/audit.service';
+import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
+import { BULK_MAX, orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PrismaService } from '../../common/prisma.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
@@ -10,6 +14,7 @@ import { PlatformAdminGuard } from '../organizations/presentation/platform-admin
 import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { clampInt } from '../catalog/presentation/catalog.controller';
+import { noteCount } from './admin-notes.controller';
 
 class BlockDto {
   @IsBoolean() block!: boolean;
@@ -20,6 +25,31 @@ class BlockDto {
 class ReasonDto {
   @IsOptional() @IsString() @MaxLength(300) reason?: string;
 }
+
+/** Ommaviy bloklash: sabab majburiy, chunki 500 qatorga bir vaqtda "sababsiz" yozib bo'lmaydi. */
+class BulkBlockDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(BULK_MAX) @IsString({ each: true }) ids!: string[];
+  @IsString() @Length(1, 300) reason!: string;
+}
+
+const LIST_SELECT = {
+  id: true, phone: true, email: true, fullName: true, isActive: true, createdAt: true, personalRoles: true,
+  memberships: { select: { isOwner: true, org: { select: { id: true, name: true, kycStatus: true } } } },
+  _count: { select: { listings: true } },
+} as const;
+type ListRow = Prisma.UserGetPayload<{ select: typeof LIST_SELECT }>;
+
+/** Ism bo'yicha tartibda ismsizlar oxirida; e'lonlar soni bo'yicha ko'pi birinchi. */
+const SORT: SortAllow<Prisma.UserOrderByWithRelationInput> = {
+  createdAt: { def: 'desc' },
+  fullName: { def: 'asc', by: (d) => ({ fullName: { sort: d, nulls: 'last' } }) },
+  listings: { def: 'desc', by: (d) => ({ listings: { _count: d } }) },
+};
+
+const CSV: CsvCols<ListRow> = {
+  id: (r) => r.id, fullName: (r) => r.fullName, phone: (r) => r.phone, email: (r) => r.email, isActive: (r) => r.isActive,
+  listings: (r) => r._count.listings, orgs: (r) => r.memberships.map((m) => m.org.name).join('; '), createdAt: (r) => r.createdAt,
+};
 
 /**
  * Platforma egasi uchun: foydalanuvchilar ro'yxati, qidiruv, bloklash va o'chirish.
@@ -38,7 +68,7 @@ export class AdminUsersController {
   ) {}
 
 
-  /** Ro'yxat: telefon, ism yoki email bo'yicha qidiruv. */
+  /** Ro'yxat: telefon, ism yoki email bo'yicha qidiruv; ?sort&dir, ?ids, ?format=csv (faqat ega: telefon va pochta chiqadi). */
   @Get('users')
   async users(
     @CurrentUserId() userId: string,
@@ -46,14 +76,21 @@ export class AdminUsersController {
     @Query('page') page?: string,
     @Query('blocked') blocked?: string,
     @Query('limit') limit?: string,
+    @Query('sort') sort?: string,
+    @Query('dir') dir?: string,
+    @Query('ids') ids?: string,
+    @Query('format') format?: string,
+    @Res({ passthrough: true }) reply?: FastifyReply,
   ) {
     const p = Math.max(1, Number(page) || 1);
     // Ilgari 30 qattiq yozilgan edi va mijozning limit so'rovi e'tiborsiz qolardi:
     // bu yagona admin ro'yxati edi, uni kengaytirib bo'lmasdi
     const take = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
-    const where = {
+    const idList = parseIds(ids);
+    const where: Prisma.UserWhereInput = {
       ...(blocked === '1' ? { isActive: false, id: { not: { startsWith: 'demo-user-' } } } : {}),
+      ...(idList ? { id: { in: idList } } : {}),
       ...(text
         ? {
             OR: [
@@ -64,19 +101,20 @@ export class AdminUsersController {
           }
         : {}),
     };
+    const orderBy = orderByOf(sort, dir, SORT, 'createdAt');
+    if (format === 'csv') {
+      // Shaxsiy ma'lumot ro'yxati: operator ekranda ko'radi, lekin fayl qilib olib ketmaydi
+      await this.admin.assertPlatformOwner(userId);
+      return sendCsv({
+        reply: reply!, audit: this.audit, actorId: userId, resource: 'users', filters: { q, blocked, ids, sort, dir },
+        total: await this.prisma.user.count({ where }),
+        rows: () => this.prisma.user.findMany({ where, orderBy, take: CSV_MAX, select: LIST_SELECT }),
+        cols: CSV,
+      });
+    }
     const [total, rows] = await Promise.all([
       this.prisma.user.count({ where }),
-      this.prisma.user.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (p - 1) * take,
-        take,
-        select: {
-          id: true, phone: true, email: true, fullName: true, isActive: true, createdAt: true, personalRoles: true,
-          memberships: { select: { isOwner: true, org: { select: { id: true, name: true, kycStatus: true } } } },
-          _count: { select: { listings: true } },
-        },
-      }),
+      this.prisma.user.findMany({ where, orderBy, skip: (p - 1) * take, take, select: LIST_SELECT }),
     ]);
     return {
       total, page: p, limit: take,
@@ -115,17 +153,19 @@ export class AdminUsersController {
     });
     if (!u) throw new NotFoundException({ code: 'USER_NOT_FOUND' });
     const month = new Date(now.getTime() - 30 * 86_400_000);
-    const [activeListings, wagon30, reveals, lastSession, activeSessions] = await Promise.all([
+    const [activeListings, wagon30, reveals, lastSession, activeSessions, notesCount] = await Promise.all([
       this.prisma.listing.count({ where: { ownerUserId: id, status: 'ACTIVE' } }),
       this.prisma.wagonSearch.count({ where: { userId: id, createdAt: { gte: month } } }),
       // Nechta raqam ochgan: obuna qadrini va suiiste'molni bir qarashda ko'rsatadi
       this.prisma.auditLog.count({ where: { actorId: id, action: { in: [...REVEAL_ACTIONS] } } }),
       this.prisma.session.findFirst({ where: { userId: id }, orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
       this.prisma.session.count({ where: { userId: id, revokedAt: null, expiresAt: { gt: now } } }),
+      noteCount(this.prisma, 'User', id), // Izohlar yorlig'idagi son: kimdir bu odam bilan allaqachon ishlaganmi
     ]);
     const { passwordHash, googleSub, memberships, subscriptions, _count, ...rest } = u;
     return {
       ...rest,
+      notesCount,
       hasPassword: !!passwordHash,
       hasGoogle: !!googleSub,
       orgs: memberships.map((m) => ({ id: m.org.id, name: m.org.name, kyc: m.org.kycStatus, isOwner: m.isOwner, roles: m.roles })),
@@ -145,16 +185,55 @@ export class AdminUsersController {
    */
   @Post('users/:id/block')
   async block(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: BlockDto) {
+    if (dto.block) {
+      await this.blockOne(userId, id, dto.reason ?? null);
+      return { id, isActive: false };
+    }
+    // O'z hisobiga tegish: blokdan chiqarish ham o'zi ustida ma'nosiz, qoida ikki yo'lda bir xil
+    if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });
+    await this.prisma.user.update({ where: { id }, data: { isActive: true } });
+    await this.audit.log({ actorId: userId, action: 'admin.user.unblock', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null } });
+    return { id, isActive: true };
+  }
+
+  /**
+   * Bitta hisobni bloklash: yakka amal ham, ommaviy amal ham SHU funksiyadan o'tadi,
+   * aks holda ikki yo'lning qoidasi ayrilib, ommaviy yo'l orqali operator egalarni
+   * bloklab qo'yardi. Muvaffaqiyatsiz qoida HttpException: ommaviy yo'l uni "o'tkazildi" deb sanaydi.
+   */
+  private async blockOne(actorId: string, id: string, reason: string | null, bulk = false) {
     // O'zini bloklash panelga kirishni butunlay yopadi va qaytish yo'li faqat serverdagi
     // .env orqali bo'ladi. Jadvalda qatorlar bir xil ko'rinadi, ya'ni bitta noto'g'ri bosish yetadi.
-    if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });
+    if (id === actorId) throw new ConflictException({ code: 'SELF_ACTION' });
     // Jamoa a'zosini bloklash ham huquqni o'zgartirish: bloklangan odam panelga kira olmaydi.
     // Qulfsiz moderator hamma egalarni bloklab, platformani boshqarishni to'xtatib qo'yardi.
-    if (dto.block && (await this.admin.isPlatformAdmin(id))) await this.admin.assertPlatformOwner(userId);
-    await this.prisma.user.update({ where: { id }, data: { isActive: !dto.block } });
-    if (dto.block) await this.prisma.session.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() } });
-    await this.audit.log({ actorId: userId, action: dto.block ? 'admin.user.block' : 'admin.user.unblock', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null } });
-    return { id, isActive: !dto.block };
+    if (await this.admin.isPlatformAdmin(id)) await this.admin.assertPlatformOwner(actorId);
+    // updateMany: yo'q id uchun update P2025 tashlardi, ommaviy yo'lda esa u shunchaki o'tkaziladi
+    const { count } = await this.prisma.user.updateMany({ where: { id }, data: { isActive: false } });
+    if (!count) throw new NotFoundException({ code: 'USER_NOT_FOUND' });
+    await this.prisma.session.updateMany({ where: { userId: id, revokedAt: null }, data: { revokedAt: new Date() } });
+    await this.audit.log({ actorId, action: 'admin.user.block', entity: 'User', entityId: id, meta: { reason, ...(bulk ? { bulk: true } : {}) } });
+  }
+
+  /**
+   * Ommaviy bloklash serverda, mijoz sikli emas: 500 so'rov o'rniga bitta, natija bitta
+   * javobda. Ketma-ket, har qator o'z audit yozuvini oladi; qoidaga tushgani (o'zi, jamoa
+   * a'zosi ega bo'lmagan aktor uchun, yo'q hisob) o'tkazib yuboriladi, qolgani bloklanadi.
+   */
+  @Post('users/bulk-block')
+  async bulkBlock(@CurrentUserId() userId: string, @Body() dto: BulkBlockDto) {
+    const reason = dto.reason.trim();
+    let done = 0;
+    for (const id of new Set(dto.ids)) {
+      try {
+        await this.blockOne(userId, id, reason, true);
+        done += 1;
+      } catch (e) {
+        // Qoida xatosi o'tkaziladi; baza yoki tarmoq xatosi butun amalni to'xtatadi
+        if (!(e instanceof HttpException)) throw e;
+      }
+    }
+    return { done, skipped: dto.ids.length - done };
   }
 
   /** O'chirish: foydalanuvchining o'zi bosgandagi bilan bir xil (soft delete va anonimlash). */

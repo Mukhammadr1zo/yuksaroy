@@ -1,113 +1,121 @@
 'use client';
-// Admin: hamma e'lonlar, holati bo'yicha. Moderatsiya navbati alohida; bu yerda admin faol e'lonni
-// sabab bilan tortib oladi. Qidiruv va sahifalash serverda: ilgari endpoint 200 tagacha massiv
-// qaytarardi va undan keyingi e'longa yetib borib bo'lmasdi.
-import { useState } from 'react';
+// Admin: hamma e'lonlar, holati bo'yicha. Moderatsiya navbati alohida (tasdiqlash o'sha yerda).
+// Qator obyekt sahifasiga (/admin/listings/{id}) olib boradi; faol e'lonni tortib olish o'sha
+// yerda va pastdagi guruh panelida (bulk-archive: sabab majburiy, egasiga ko'rinadi, xabar ketadi).
+// Filtr va tartib URL da: tashkilot, foydalanuvchi va terminal sahifalari ?orgId= / ?ownerUserId= /
+// ?terminalId= bilan keladi, kataksiz filtr "Tozalash" bilan ketadi.
+import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { LISTING_STATUSES, type ListingStatus } from '@yuksaroy/domain';
-import { Link } from '@/i18n/navigation';
-import { api, post } from '@/lib/api';
-import { som } from '@/lib/format';
+import { LISTING_STATUSES } from '@yuksaroy/domain';
+import { post } from '@/lib/api';
+import { som, uzDate } from '@/lib/format';
 import { listingHref, type OwnerListing } from '@/lib/types-kabinet';
 import { ListingStatusPill, useListingLabels } from '@/components/kabinet/bits';
-import { BTN_DANGER, BTN_GHOST, ConfirmButton, DataTable, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import {
+  BTN, BTN_GHOST, BULK_MAX, BulkBar, type Col, ConfirmButton, DataTable, ExportLink, INPUT, Labeled, LoadError, Notice, PageHead, Pager, Pill,
+  Toolbar, errText, useAdminList, useListQuery, type SortDir,
+} from '@/components/admin/kit';
 
-/** Jadval ichidagi tugmalar kichik: kit sinflari ustidan faqat o'lcham o'zgaradi. */
-const SM = 'px-3 py-1 text-xs';
+/** Sukut holat ACTIVE: ro'yxat doim bitta holatda, "hammasi" tanlovi yo'q (server ham shunday). */
+const F0 = { status: 'ACTIVE', q: '', orgId: '', ownerUserId: '', terminalId: '', sort: '', dir: '', page: 1 };
+const PATH = '/admin/listings';
 
 export default function AdminListingsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tl = useTranslations('admin.listings');
+  const tb = useTranslations('admin.table');
   const tr = useTranslations('region');
   const locale = useLocale();
   const L = useListingLabels();
-  const [status, setStatus] = useState<ListingStatus>('ACTIVE');
-  const [qInput, setQInput] = useState('');
-  const [q, setQ] = useState('');
-  const [page, setPage] = useState(1);
-  const list = useAdminList<OwnerListing>('/admin/listings', { status, q, page });
-  // Qaror qatorni yangilaydi: filtrga mos kelmasa ham admin nima bo'lganini ko'rib turadi
-  const patch = () => void list.reload();
 
-  const cols = [
-    { key: 'title', head: tc('name'), cell: (l: OwnerListing) => (
+  const { f, set, reset } = useListQuery(F0);
+  const { data, pages, loading, err, reload } = useAdminList<OwnerListing>(PATH, f);
+  const [q, setQ] = useState(f.q);
+  useEffect(() => setQ(f.q), [f.q]);
+
+  const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [reason, setReason] = useState('');
+  const [ids, setIds] = useState<Set<string>>(() => new Set());
+  const filterKey = JSON.stringify({ ...f, page: 0 });
+  useEffect(() => setIds(new Set()), [filterKey]);
+  const clearSel = useCallback(() => setIds(new Set()), []);
+
+  /** Tanlanganlarni tortib olish: faqat ACTIVE qatorlar o'zgaradi, qolgani skipped bo'lib qaytadi. */
+  async function withdrawSel() {
+    setBusy(true); setNote(null);
+    try {
+      const r = await post<{ done: number; skipped: number }>(`${PATH}/bulk-archive`, { ids: Array.from(ids), reason: reason.trim() });
+      setNote({ tone: 'ok', text: tb('bulkDone', { done: r.done, skipped: r.skipped }) });
+      clearSel(); setReason('');
+      void reload();
+    } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); } finally { setBusy(false); }
+  }
+
+  const cols: Col<OwnerListing>[] = [
+    { key: 'title', head: tc('name'), sort: 'title', cell: (l) => (
       <>
         <span className="font-semibold">{l.title}</span>
         {l.isDemo ? <Pill tone="warn">{tl('demo')}</Pill> : null}
-        {l.status === 'ACTIVE'
-          ? <Link href={listingHref(l)} target="_blank" className="block font-mono text-[11px] text-teal-ink underline">{l.slug}</Link>
-          : <span className="block font-mono text-[11px] text-muted">{l.slug}</span>}
+        <span className="block font-mono text-[11px] text-muted">{l.slug}</span>
       </>
     ) },
-    { key: 'kind', head: tl('kind'), cell: (l: OwnerListing) => L.kind[l.kind] },
-    { key: 'status', head: tc('status'), cell: (l: OwnerListing) => <ListingStatusPill status={l.status} /> },
-    { key: 'region', head: tc('region'), cell: (l: OwnerListing) => (tr.has(l.regionCode) ? tr(l.regionCode) : l.regionCode) },
-    { key: 'owner', head: tl('owner'), cell: (l: OwnerListing) => l.owner.name },
-    { key: 'price', head: tl('price'), num: true, cell: (l: OwnerListing) => (l.priceTiyin != null ? som(l.priceTiyin, locale) : <span className="font-sans text-muted">{t('listing.onRequest')}</span>) },
-    { key: 'actions', head: tc('actions'), cell: (l: OwnerListing) => <RowActions l={l} onDone={patch} /> },
+    { key: 'kind', head: tl('kind'), cell: (l) => L.kind[l.kind] },
+    { key: 'status', head: tc('status'), cell: (l) => <ListingStatusPill status={l.status} /> },
+    { key: 'region', head: tc('region'), cell: (l) => (tr.has(l.regionCode) ? tr(l.regionCode) : l.regionCode) },
+    { key: 'owner', head: tl('owner'), cell: (l) => l.owner.name },
+    { key: 'price', head: tl('price'), num: true, sort: 'priceTiyin', cell: (l) => (l.priceTiyin != null ? som(l.priceTiyin, locale) : <span className="font-sans text-muted">{t('listing.onRequest')}</span>) },
+    { key: 'createdAt', head: tc('createdAt'), num: true, sort: 'createdAt', cell: (l) => uzDate(l.createdAt, locale) },
   ];
+
+  const needReason = !reason.trim();
 
   return (
     <>
-      <PageHead title={t('nav.listings')} lead={tl('lead')} />
-      <Toolbar onSubmit={() => { setQ(qInput.trim()); setPage(1); }}>
+      <PageHead title={t('nav.listings')} lead={tl('lead')}>
+        <ExportLink path={PATH} filters={f} total={data?.total ?? 0} ids={ids} />
+      </PageHead>
+      <Toolbar onSubmit={() => set({ q: q.trim() })}>
         <Labeled label={tc('status')} className="w-48">
-          <select value={status} onChange={(e) => { setStatus(e.target.value as ListingStatus); setPage(1); }} className={INPUT}>
+          <select value={f.status} onChange={(e) => set({ status: e.target.value })} className={INPUT}>
             {LISTING_STATUSES.map((s) => <option key={s} value={s}>{L.status[s]}</option>)}
           </select>
         </Labeled>
         <Labeled label={tc('search')} className="w-56">
-          <input value={qInput} onChange={(e) => setQInput(e.target.value)} className={INPUT} />
+          <input data-search="1" value={q} onChange={(e) => setQ(e.target.value)} className={INPUT} />
         </Labeled>
-        <button type="submit" className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal">{tc('apply')}</button>
-        {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
+        <button type="submit" className={BTN}>{tc('apply')}</button>
+        <button type="button" className={BTN_GHOST} onClick={reset}>{tc('reset')}</button>
+        {data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: data.total })}</span> : null}
       </Toolbar>
 
-      {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
-      {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
-      {list.data && !list.loading ? <DataTable cols={cols} rows={list.data.items} keyOf={(l) => l.id} empty={tc('empty')} /> : null}
-      <Pager page={page} pages={list.pages} onPage={setPage} />
+      {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
+      {err ? <LoadError err={err} onRetry={reload} /> : null}
+      <DataTable
+        cols={cols} rows={data?.items ?? []} keyOf={(l) => l.id} empty={tc('empty')} loading={loading} screen="listings"
+        onReset={reset}
+        sort={f.sort ? { field: f.sort, dir: (f.dir === 'desc' ? 'desc' : 'asc') as SortDir } : undefined}
+        onSort={(field, dir) => set({ sort: field, dir })}
+        // Tanlov faqat faol ro'yxatda: tortib olish faqat ACTIVE dan, boshqa holatda tanlashning ma'nosi yo'q
+        select={f.status === 'ACTIVE' ? { ids, onChange: setIds } : undefined}
+        href={(l) => `/admin/listings/${l.id}`}
+        rowMenu={(l) => [
+          { label: tb('open'), href: `/admin/listings/${l.id}` },
+          ...(l.status === 'ACTIVE' ? [{ label: tb('onSite'), href: listingHref(l) }] : []),
+          { label: tb('history'), href: `/admin/audit?entity=Listing&entityId=${l.id}` },
+        ]}
+      />
+      <Pager page={f.page} pages={pages} onPage={(p) => set({ page: p })} />
+
+      <BulkBar count={ids.size} onClear={clearSel}>
+        <span className="flex w-full flex-col gap-0.5 sm:w-72">
+          <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} placeholder={tb('bulkReason')}
+            aria-label={tb('bulkReason')} className={`${INPUT} text-navy`} />
+          {needReason ? <span className="text-[11px] text-white/70">{t('reasonRequired')}</span> : null}
+        </span>
+        <ConfirmButton label={tb('bulkWithdraw')} confirm={t('confirmReject')} onRun={withdrawSel} disabled={busy || needReason || ids.size > BULK_MAX} />
+      </BulkBar>
     </>
-  );
-}
-
-/**
- * Faol e'lonni sabab bilan tortib olish. Tekshiruvdagi e'lonni tasdiqlash bu yerda YO'Q:
- * u Moderatsiya bo'limida, Decide bilan. Ilgari bitta qaror ikki ekranda, ikki xil
- * ko'rinishda turardi va operator qaysi biri to'g'ri ekanini bilmasdi.
- * Rad sababi majburiy va egasiga ko'rinadi, shuning uchun input ochilmaguncha tugma yo'q.
- */
-function RowActions({ l, onDone }: { l: OwnerListing; onDone: () => void }) {
-  const t = useTranslations('admin');
-  const [reason, setReason] = useState<string | null>(null); // null = sabab maydoni yopiq
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<unknown>(null);
-  if (l.status !== 'ACTIVE') return null;
-
-  async function withdraw() {
-    setBusy(true); setErr(null);
-    try { await post<OwnerListing>(`/admin/listings/${l.id}/decide`, { approve: false, reason: reason?.trim() }); setReason(null); onDone(); }
-    catch (e) { setErr(e); } finally { setBusy(false); }
-  }
-
-  return (
-    <div className="flex min-w-[10rem] flex-col gap-1.5">
-      {reason === null ? (
-        <button type="button" disabled={busy} onClick={() => setReason('')} className={`${BTN_DANGER} ${SM}`}>{t('reject')}</button>
-      ) : (
-        <>
-          <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} placeholder={t('reason')} className={`${INPUT} py-1 text-xs`} />
-          <div className="flex gap-1.5">
-            {reason.trim()
-              ? <ConfirmButton label={t('reject')} confirm={t('confirmReject')} onRun={withdraw} className={`${BTN_DANGER} ${SM}`} />
-              : <button type="button" disabled className={`${BTN_DANGER} ${SM}`}>{t('reject')}</button>}
-            <button type="button" onClick={() => setReason(null)} className={`${BTN_GHOST} ${SM}`}>{t('cancel')}</button>
-          </div>
-          {!reason.trim() ? <p className="text-[11px] text-muted">{t('reasonRequired')}</p> : null}
-        </>
-      )}
-      {err ? <p role="alert" className="text-[11px] text-red-700">{errText(err, t, t.has, t('failed'))}</p> : null}
-    </div>
   );
 }

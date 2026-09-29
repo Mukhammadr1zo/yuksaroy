@@ -1,18 +1,23 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
-import { IsBoolean, IsDateString, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, MaxLength, Min } from 'class-validator';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, MaxLength, Min } from 'class-validator';
+import type { FastifyReply } from 'fastify';
 import {
   CLAIM_STATUSES, OWNER_KINDS, REGIONS, RJUS, TERMINAL_KINDS, TERMINAL_STATUSES, slugify,
   type ClaimStatus, type OwnerKind, type RegionCode, type Rju, type TerminalKind, type TerminalStatus,
 } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
+import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
+import { BULK_MAX, orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PrismaService } from '../../common/prisma.service';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { dayKeys } from '../impressions/day-series';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { regionOfPoint } from '../catalog/domain/region-of-point';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { noteCount } from './admin-notes.controller';
 import { ownerKindWhere } from './owner-kind.where';
 import { ImpressionsService } from '../impressions/impressions.service';
 
@@ -96,8 +101,11 @@ class StationCreateDto {
 
 class StationUpdateDto extends PartialType(StationCreateDto) {}
 
-/** Guruh amali: bitta chaqiruvda eng ko'p shuncha qator. Kattarog'i bo'lsa filtr aniqlashtiriladi. */
-const BULK_MAX = 500;
+/** Tanlangan qatorlar ustida guruh amali. Izohi bulk ustida. */
+class BulkDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(BULK_MAX) @IsString({ each: true }) ids!: string[];
+  @IsIn(['HIDE', 'ACTIVATE']) action!: 'HIDE' | 'ACTIVATE';
+}
 
 /** Reestr tozalash uchun guruh amali. Izohi bulkByOwner ustida. */
 class BulkOwnerDto {
@@ -134,6 +142,20 @@ const LIST_SELECT = {
   station: { select: { id: true, nameUz: true, esrCode: true } },
   org: { select: { id: true, name: true } },
 };
+type ListRow = Prisma.TerminalGetPayload<{ select: typeof LIST_SELECT }>;
+
+/** Jadval sarlavhasidan tartiblanadigan ustunlar; sana yangi birinchi, matn alifbo. */
+const SORT: SortAllow<Prisma.TerminalOrderByWithRelationInput> = {
+  name: { def: 'asc' }, createdAt: { def: 'desc' }, registryNo: { def: 'asc' },
+  status: { def: 'asc' }, claimStatus: { def: 'asc' }, regionCode: { def: 'asc' },
+};
+
+/** CSV ustunlari qat'iy: stansiya bog'langan bo'lsa uning nomi, bo'lmasa reestrdagi matn. */
+const CSV: CsvCols<ListRow> = {
+  id: (r) => r.id, name: (r) => r.name, slug: (r) => r.slug, kind: (r) => r.kind, status: (r) => r.status,
+  regionCode: (r) => r.regionCode, station: (r) => r.station?.nameUz ?? r.stationNameRaw, org: (r) => r.org?.name,
+  ownerNameRaw: (r) => r.ownerNameRaw, claimStatus: (r) => r.claimStatus, registryNo: (r) => r.registryNo, createdAt: (r) => r.createdAt,
+};
 
 @ApiTags('admin')
 @Controller('admin')
@@ -148,7 +170,11 @@ export class AdminCatalogController {
 
   // ───────────────────────── Terminallar ─────────────────────────
 
-  /** Ro'yxat: qidiruv reestr nomlarini ham qamraydi (stationNameRaw, ownerNameRaw). */
+  /**
+   * Ro'yxat: qidiruv reestr nomlarini ham qamraydi (stationNameRaw, ownerNameRaw).
+   * ?sort&dir jadval sarlavhasidan (oq ro'yxat, tiebreak id), ?ids tanlangan qatorlar,
+   * ?orgId tashkilot sahifasining Bog'liq yorlig'i, ?format=csv eksport (ustunlar serverda).
+   */
   @Get('catalog/terminals')
   async terminals(
     @Query('q') q?: string,
@@ -161,9 +187,16 @@ export class AdminCatalogController {
     @Query('sort') sort?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('dir') dir?: string,
+    @Query('ids') ids?: string,
+    @Query('orgId') orgId?: string,
+    @Query('format') format?: string,
+    @CurrentUserId() userId?: string,
+    @Res({ passthrough: true }) reply?: FastifyReply,
   ) {
     const p = clampInt(page, 1, 1, 100_000), l = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
+    const idList = parseIds(ids);
     const where: Prisma.TerminalWhereInput = {
       // slug ham qidiriladi: murojaatdan kelgan manzilni to'g'ridan-to'g'ri qo'yib topish uchun
       ...(text ? { OR: [{ name: like(text) }, { slug: like(text) }, { address: like(text) }, { stationNameRaw: like(text) }, { ownerNameRaw: like(text) }] } : {}),
@@ -171,7 +204,8 @@ export class AdminCatalogController {
       regionCode: pickIn(region, REGIONS),
       status: pickIn(status, TERMINAL_STATUSES),
       claimStatus: pickIn(claim, CLAIM_STATUSES),
-      orgId: owned === '1' ? { not: null } : owned === '0' ? null : undefined,
+      orgId: orgId || (owned === '1' ? { not: null } : owned === '0' ? null : undefined),
+      id: idList ? { in: idList } : undefined,
       // AND ichida: yuqoridagi matn qidiruvi ham OR ishlatadi, ikkisi bir sathda
       // bo'lsa biri ikkinchisini ustidan yozib ketardi
       ...(pickIn(ownerKind, OWNER_KINDS) ? { AND: [ownerKindWhere(ownerKind as OwnerKind)] } : {}),
@@ -188,6 +222,19 @@ export class AdminCatalogController {
      * "umumiy top 100 ning filtrga tushgani". Filtr ichida kerak bo'lsa Impression bilan
      * Terminal $queryRaw da birlashtiriladi.
      */
+    const orderBy = orderByOf(sort, dir, SORT, 'createdAt');
+    // CSV demand shoxidan oldin: ekran sort=demand bilan ham eksport so'raydi, demand shoxi esa
+    // JSON qaytarib brauzer uni fayl qilib saqlardi va audit yozilmasdi. orderByOf 'demand' ni
+    // bilmaydi, eksport createdAt tartibida chiqadi
+    if (format === 'csv') {
+      return sendCsv({
+        reply: reply!, audit: this.audit, actorId: userId!, resource: 'terminals',
+        filters: { q, kind, region, status, claim, owned, ownerKind, orgId, ids, sort, dir },
+        total: await this.prisma.terminal.count({ where }),
+        rows: () => this.prisma.terminal.findMany({ where, orderBy, take: CSV_MAX, select: LIST_SELECT }),
+        cols: CSV,
+      });
+    }
     if (sort === 'demand') {
       const top = await this.impressions.topDetailViews('terminal', 100);
       if (!top.length) return { items: [], total: 0, page: p, limit: l };
@@ -215,19 +262,71 @@ export class AdminCatalogController {
     }
     const [total, items] = await Promise.all([
       this.prisma.terminal.count({ where }),
-      this.prisma.terminal.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (p - 1) * l, take: l, select: LIST_SELECT }),
+      this.prisma.terminal.findMany({ where, orderBy, skip: (p - 1) * l, take: l, select: LIST_SELECT }),
     ]);
     return { items, total, page: p, limit: l };
   }
 
+  /**
+   * Obyekt sahifasi bitta so'rov bilan to'lsin: pasport + oxirgi tariflar + sonlar.
+   * Har son qaror uchun: 30 kunlik ochilish (talab bor, egasiga qo'ng'iroq), javobsiz
+   * yozishma (platforma javob berishi kerak), buyurtmalar (buyurtmasi bor terminal
+   * o'chmaydi, yashiriladi; komissiya kiritilsa manba), izohlar soni (kimdir ishlaganmi).
+   */
   @Get('catalog/terminals/:id')
   async terminal(@Param('id') id: string) {
     const t = await this.prisma.terminal.findUnique({
       where: { id },
-      include: { station: true, org: { select: { id: true, name: true } } },
+      include: {
+        station: true,
+        org: { select: { id: true, name: true } },
+        tariffs: { orderBy: { createdAt: 'desc' }, take: 20, select: { id: true, serviceCode: true, priceTiyin: true, unit: true, createdAt: true } },
+      },
     });
     if (!t) throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
-    return t;
+    const [notesCount, views, openInquiries, done, pending] = await Promise.all([
+      noteCount(this.prisma, 'Terminal', id),
+      this.prisma.impression.aggregate({ where: { kind: 'terminal', targetId: id, surface: 'detail', day: { gte: new Date(dayKeys(new Date())[0]!) } }, _sum: { count: true } }),
+      this.prisma.inquiry.count({ where: { terminalId: id, status: 'OPEN' } }),
+      this.prisma.order.aggregate({ where: { terminalId: id, status: 'DONE' }, _count: { _all: true }, _sum: { totalTiyin: true } }),
+      this.prisma.order.count({ where: { terminalId: id, status: 'PENDING' } }),
+    ]);
+    return {
+      ...t,
+      tariffs: t.tariffs.map((x) => ({ ...x, priceTiyin: Number(x.priceTiyin) })), // BigInt JSON ga chiqmaydi
+      notesCount,
+      stats: {
+        views30: views._sum.count ?? 0,
+        openInquiries,
+        orders: { done: done._count._all, doneTiyin: Number(done._sum.totalTiyin ?? 0n), pending },
+      },
+    };
+  }
+
+  /**
+   * Tanlangan qatorlar ustida guruh amali: yashirish yoki faollashtirish.
+   *
+   * Yashirish qaytariladigan amal (PATCH status ham admin darajasida), shuning uchun
+   * operatorga ochiq; o'chirish bu yerda yo'q (bulk-owner qoladi, ega). expect yo'q:
+   * ids aniq ro'yxat, ekrandagi son bilan solishtiradigan narsa yo'q. Namuna qatorlar
+   * o'tkazib yuboriladi: ular saytni to'ldirish uchun, holati qo'lda o'zgarmaydi.
+   * Audit har o'zgargan qatorga alohida: "shu terminal nega yashirin" degan savol
+   * entityId bo'yicha qidiriladi.
+   */
+  @Post('catalog/terminals/bulk')
+  async bulk(@CurrentUserId() userId: string, @Body() dto: BulkDto) {
+    const to = dto.action === 'HIDE' ? 'HIDDEN' : 'ACTIVE';
+    const rows = await this.prisma.terminal.findMany({
+      where: { id: { in: dto.ids }, isDemo: false, status: { not: to } },
+      select: { id: true, name: true, registryNo: true, status: true },
+    });
+    if (!rows.length) return { action: dto.action, done: 0, skipped: dto.ids.length };
+    const res = await this.prisma.terminal.updateMany({ where: { id: { in: rows.map((r) => r.id) } }, data: { status: to } });
+    await this.audit.logMany(rows.map((t) => ({
+      actorId: userId, action: dto.action === 'HIDE' ? 'admin.terminal.bulkHide' : 'admin.terminal.bulkActivate',
+      entity: 'Terminal', entityId: t.id, meta: { name: t.name, registryNo: t.registryNo, was: t.status },
+    })));
+    return { action: dto.action, done: res.count, skipped: dto.ids.length - res.count };
   }
 
   @Post('catalog/terminals')

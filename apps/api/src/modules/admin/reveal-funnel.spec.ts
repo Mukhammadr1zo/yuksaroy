@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { revealFunnel } from './admin-system.controller';
+import { revealFunnel } from './admin-home';
 
 /**
  * Voronka to'rtta sonni beradi: nechta odam, nechta ochilish, shundan obunachi va

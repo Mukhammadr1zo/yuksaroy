@@ -5,14 +5,20 @@
  * Moderatsiyadagi obuna yorlig'idan farqi: u faqat TO'LANMAGAN navbat va u yerda
  * qidiruv ham, sahifalash ham yo'q. Bu ekran esa hamma holatni ko'rsatadi va PAY
  * raqami, telefon yoki ism bo'yicha qidiradi.
+ *
+ * Filtr, tartib va ochiq varaq (?open=<id>) URL da: havola ulashiladi, foydalanuvchi
+ * sahifasi to'g'ridan-to'g'ri bitta obunaga olib keladi.
  */
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { api, post } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
 import { phoneDisplay } from '@/components/ui/fields';
-import type { Me } from '@/lib/types-auth';
-import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList } from '@/components/admin/kit';
+import { useAdminMe } from '@/components/admin/context';
+import {
+  AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, ExportLink, INPUT, Labeled, LoadError, Notice, PageHead, Pager, Pill,
+  Toolbar, errText, useAdminList, useListQuery, type Paged, type SortDir,
+} from '@/components/admin/kit';
 
 const STATUSES = ['PENDING', 'ACTIVE', 'CANCELLED'] as const;
 type Status = (typeof STATUSES)[number];
@@ -24,7 +30,9 @@ type Row = {
 };
 
 const TONE: Record<Status, 'ok' | 'warn' | 'neutral'> = { ACTIVE: 'ok', PENDING: 'warn', CANCELLED: 'neutral' };
-const F0 = { status: '', q: '', page: 1 };
+const F0 = { status: '', q: '', sort: '', dir: '', page: 1, open: '' };
+const PATH = '/admin/subscriptions/registry';
+const LIMIT = 30;
 const DAY = 86_400_000;
 
 /** Tugashigacha necha kun. Manfiy bo'lsa allaqachon tugagan. */
@@ -34,23 +42,36 @@ export default function AdminSubscriptionsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const ts = useTranslations('admin.subs');
+  const tb = useTranslations('admin.table');
   const locale = useLocale();
-
-  const [form, setForm] = useState(F0);
-  const [f, setF] = useState(F0);
-  const { data, pages, loading, err, reload } = useAdminList<Row>('/admin/subscriptions/registry', { ...f, limit: 30 });
-
   // Bekor qilish faqat egaga: server ham shunday, lekin ishlamaydigan tugmani ko'rsatmaymiz
-  const [isOwner, setIsOwner] = useState(false);
-  useEffect(() => { api<Me>('/auth/me').then((m) => setIsOwner(!!m.isPlatformOwner)).catch(() => {}); }, []);
+  const { isOwner } = useAdminMe();
 
-  const [sel, setSel] = useState<Row | null>(null);
+  const { f, set, reset } = useListQuery(F0);
+  const filters = { ...f, open: undefined };
+  const { data, pages, loading, err, reload } = useAdminList<Row>(PATH, { ...filters, limit: LIMIT });
+  const [q, setQ] = useState(f.q);
+  useEffect(() => setQ(f.q), [f.q]);
+
+  // ?open= bilan kelgan obuna joriy sahifada bo'lmasa (masalan foydalanuvchi sahifasidan havola),
+  // shu bitta qator ids= bilan alohida so'raladi: tafsilot yo'li yo'q, ro'yxatning o'zi yetadi
+  const [extra, setExtra] = useState<Row | null>(null);
+  useEffect(() => {
+    if (!f.open || !data || data.items.some((r) => r.id === f.open)) return;
+    let alive = true;
+    api<Paged<Row>>(`${PATH}?ids=${encodeURIComponent(f.open)}`).then((r) => { if (alive) setExtra(r.items[0] ?? null); }).catch(() => {});
+    return () => { alive = false; };
+  }, [f.open, data]);
+  const sel = f.open ? (data?.items.find((r) => r.id === f.open) ?? (extra?.id === f.open ? extra : null)) : null;
+
   const [reason, setReason] = useState('');
   const [moneyReceived, setMoneyReceived] = useState(false);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function open(r: Row) { setSel(r); setReason(''); setMoneyReceived(false); setNote(null); }
+  // Varaq URL da: page ham patch da, aks holda ochish sahifani 1 ga qaytarardi
+  function open(r: Row) { setReason(''); setMoneyReceived(false); setNote(null); set({ open: r.id, page: f.page }, 'replace'); }
+  function close() { set({ open: '', page: f.page }, 'replace'); }
 
   async function revoke() {
     if (!sel) return;
@@ -58,7 +79,7 @@ export default function AdminSubscriptionsPage() {
     setNote(null);
     try {
       await post(`/admin/subscriptions/${sel.id}/revoke`, { reason: reason.trim(), moneyReceived });
-      setSel(null);
+      close();
       void reload();
     } catch (e) {
       setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) });
@@ -68,7 +89,7 @@ export default function AdminSubscriptionsPage() {
   const som = (tiyin: number) => num(Math.round(tiyin / 100), locale);
 
   const cols: Col<Row>[] = [
-    { key: 'no', head: ts('no'), cell: (r) => <span className="font-mono text-xs font-semibold text-navy">{r.no}</span> },
+    { key: 'no', head: ts('no'), sort: 'no', cell: (r) => <span className="font-mono text-xs font-semibold text-navy">{r.no}</span> },
     {
       key: 'user', head: tc('name'),
       cell: (r) => (
@@ -78,14 +99,14 @@ export default function AdminSubscriptionsPage() {
         </>
       ),
     },
-    { key: 'status', head: tc('status'), cell: (r) => <Pill tone={TONE[r.status]}>{ts(`status.${r.status}`)}</Pill> },
+    { key: 'status', head: tc('status'), sort: 'status', cell: (r) => <Pill tone={TONE[r.status]}>{ts(`status.${r.status}`)}</Pill> },
     // Qaysi tarif olingani qatorning o'z ruxsatlaridan: bir xil summali telefon va vagon qatori boshqacha ajralmaydi
     { key: 'grants', head: t('plans.grants'), cell: (r) => r.grants.map((g) => t(`plans.grant.${g}`)).join(', ') },
     { key: 'months', head: ts('months'), num: true, cell: (r) => r.months },
-    { key: 'amount', head: ts('amount'), num: true, cell: (r) => som(r.amountTiyin) },
+    { key: 'amount', head: ts('amount'), num: true, sort: 'amountTiyin', cell: (r) => som(r.amountTiyin) },
     {
       // Tugash sanasi yonida qolgan kun: operator "kimniki tugayapti" ni shu ustundan ko'radi
-      key: 'endsAt', head: ts('endsAt'),
+      key: 'endsAt', head: ts('endsAt'), sort: 'endsAt',
       cell: (r) => {
         const d = daysLeft(r.endsAt);
         if (!r.endsAt) return '';
@@ -100,37 +121,51 @@ export default function AdminSubscriptionsPage() {
       },
     },
     { key: 'paidAt', head: ts('paidAt'), cell: (r) => (r.paidAt ? <span className="font-mono text-xs">{uzDate(r.paidAt, locale)}</span> : '') },
+    { key: 'createdAt', head: ts('createdAt'), num: true, sort: 'createdAt', hidden: true, cell: (r) => uzDate(r.createdAt, locale) },
   ];
 
   const opt = (v: string, label: string) => <option key={v} value={v}>{label}</option>;
 
   return (
     <div>
-      <PageHead title={t('nav.subscriptions')} lead={ts('lead')} />
+      <PageHead title={t('nav.subscriptions')} lead={ts('lead')}>
+        <ExportLink path={PATH} filters={filters} total={data?.total ?? 0} />
+      </PageHead>
 
-      <Toolbar onSubmit={() => setF({ ...form, page: 1 })}>
+      <Toolbar onSubmit={() => set({ q: q.trim() })}>
         <Labeled label={tc('search')} className="w-full sm:w-64">
-          <input className={INPUT} value={form.q} onChange={(e) => setForm({ ...form, q: e.target.value })} placeholder={ts('searchHint')} />
+          <input data-search="1" className={INPUT} value={q} onChange={(e) => setQ(e.target.value)} placeholder={ts('searchHint')} />
         </Labeled>
         <Labeled label={tc('status')} className="w-full sm:w-44">
-          <select className={INPUT} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+          <select className={INPUT} value={f.status} onChange={(e) => set({ status: e.target.value })}>
             {opt('', tc('all'))}{STATUSES.map((s) => opt(s, ts(`status.${s}`)))}
           </select>
         </Labeled>
         <button type="submit" className={BTN}>{tc('apply')}</button>
-        <button type="button" className={BTN_GHOST} onClick={() => { setForm(F0); setF(F0); }}>{tc('reset')}</button>
+        <button type="button" className={BTN_GHOST} onClick={reset}>{tc('reset')}</button>
       </Toolbar>
 
-      {err ? <Notice tone="err">{errText(err, t, t.has, tc('loadFailed'))}</Notice> : null}
-      <p className="mt-4 font-mono text-xs text-muted">{loading || !data ? tc('loading') : tc('total', { count: data.total })}</p>
+      {err ? <LoadError err={err} onRetry={reload} /> : null}
+      {data ? <p className="mt-4 font-mono text-xs text-muted">{tc('total', { count: data.total })}</p> : null}
 
-      <DataTable cols={cols} rows={data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} onRow={open} />
-      <Pager page={f.page} pages={pages} onPage={(p) => { setF({ ...f, page: p }); setForm({ ...form, page: p }); }} />
+      <DataTable
+        cols={cols} rows={data?.items ?? []} keyOf={(r) => r.id} empty={tc('empty')} loading={loading} screen="subs"
+        onReset={reset} onRow={open}
+        sort={f.sort ? { field: f.sort, dir: (f.dir === 'desc' ? 'desc' : 'asc') as SortDir } : undefined}
+        onSort={(field, dir) => set({ sort: field, dir })}
+        rowMenu={(r) => [
+          { label: tb('open'), onSelect: () => open(r) },
+          { label: tb('user'), href: `/admin/users/${r.user.id}` },
+          ...(r.user.phone ? [{ label: ts('openAll'), href: `/admin/subscriptions?q=${encodeURIComponent(r.user.phone)}` }] : []),
+          { label: tb('history'), href: `/admin/audit?entity=Subscription&entityId=${r.id}` },
+        ]}
+      />
+      <Pager page={f.page} pages={pages} onPage={(p) => set({ page: p })} />
 
       <Drawer
         open={!!sel}
         title={sel?.no ?? ''}
-        onClose={() => setSel(null)}
+        onClose={close}
         footer={sel ? (
           <>
             {note ? <div className="w-full"><Notice tone={note.tone}>{note.text}</Notice></div> : null}
@@ -141,7 +176,7 @@ export default function AdminSubscriptionsPage() {
                 <ConfirmButton label={ts('revoke')} confirm={tc('confirm')} disabled={busy || !reason.trim()} onRun={revoke} />
               </div>
             ) : null}
-            <button type="button" className={BTN_GHOST} onClick={() => setSel(null)}>{tc('cancel')}</button>
+            <button type="button" className={BTN_GHOST} onClick={close}>{tc('cancel')}</button>
           </>
         ) : null}
       >

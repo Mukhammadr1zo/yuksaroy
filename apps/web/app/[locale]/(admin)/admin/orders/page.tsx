@@ -1,8 +1,9 @@
 'use client';
 // Admin: hamma buyurtmalar. Qotib qolgan buyurtmani (terminal javob bermadi, sweeper o'tkazib yubordi)
 // o'tish qoidalarini chetlab holatga majburan qo'yish faqat shu yerda; sabab buyurtma tarixiga tushadi.
-import { Suspense, useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+// Filtr, tartib va ochiq varaq (?open=<no>) URL da: shikoyat qatori va paleta ?q= bilan keladi,
+// tashkilot va terminal sahifalari ?orgId= / ?terminalId= bilan.
+import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, type OrderStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
@@ -11,7 +12,10 @@ import { num, som, uzDateTime } from '@/lib/format';
 import type { OrderLine, OrderTimelineEntry } from '@/lib/types';
 import { StatusPill } from '@/components/order/bits';
 import { useLang } from '@/components/kabinet/bits';
-import { BTN, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pager, Toolbar, errText, useAdminList, type Col } from '@/components/admin/kit';
+import {
+  BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, ExportLink, INPUT, Labeled, LoadError, Notice, PageHead, Pager, Toolbar, errText,
+  useAdminList, useListQuery, type Col, type SortDir,
+} from '@/components/admin/kit';
 
 /** GET /admin/orders qatori; pul maydonlari serverda Number ga o'tkazilgan. */
 type Row = {
@@ -21,65 +25,77 @@ type Row = {
 /** GET /admin/orders/:no: qatorlar va tarix (yangisi yuqorida). */
 type Detail = Row & { items: OrderLine[]; history: (OrderTimelineEntry & { id: string })[] };
 
-const isStatus = (s: string | null): s is OrderStatus => (ORDER_STATUSES as readonly string[]).includes(s ?? '');
-const STOP = (e: React.MouseEvent) => e.stopPropagation();
+const isStatus = (s: string): s is OrderStatus => (ORDER_STATUSES as readonly string[]).includes(s);
+const F0 = { q: '', status: '', terminalId: '', orgId: '', sort: '', dir: '', page: 1, open: '' };
+const PATH = '/admin/orders';
+const LIMIT = 30;
 
 export default function AdminOrdersPage() {
-  const tc = useTranslations('admin.common');
-  return <Suspense fallback={<p className="text-sm text-muted">{tc('loading')}</p>}><Orders /></Suspense>;
-}
-
-function Orders() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const to = useTranslations('admin.orders');
+  const tb = useTranslations('admin.table');
   const locale = useLocale();
   const lang = useLang();
-  const sp = useSearchParams();
+
+  const { f, set, reset } = useListQuery(F0);
   // Bosh sahifadagi "tasdiq kutayotgan" havolasi ?status=PENDING bilan keladi; noto'g'ri qiymat "hammasi" bo'lib qoladi
-  // ?q= shikoyat qatoridan keladi: buyurtma raqami bilan to'g'ridan-to'g'ri ochilsin
-  const [f, setF] = useState({ q: sp.get('q') ?? '', status: isStatus(sp.get('status')) ? sp.get('status')! : '', page: 1 });
-  const [q, setQ] = useState(sp.get('q') ?? '');
-  const [open, setOpen] = useState<string | null>(null);
-  const { data, pages, loading, err, reload } = useAdminList<Row>('/admin/orders', { ...f, limit: 30 });
+  const filters = { ...f, status: isStatus(f.status) ? f.status : '', open: undefined };
+  const { data, pages, loading, err, reload } = useAdminList<Row>(PATH, { ...filters, limit: LIMIT });
+  const [q, setQ] = useState(f.q);
+  useEffect(() => setQ(f.q), [f.q]);
+
+  // Varaq URL da: page ham patch da, aks holda ochish sahifani 1 ga qaytarardi
+  const open = (no: string) => set({ open: no, page: f.page }, 'replace');
+  const close = useCallback(() => set({ open: '', page: f.page }, 'replace'), [set, f.page]);
 
   const cols: Col<Row>[] = [
-    { key: 'no', head: to('no'), cell: (r) => <span className="font-mono font-bold">{r.no}</span> },
-    { key: 'status', head: tc('status'), cell: (r) => <StatusPill status={r.status} /> },
-    { key: 'terminal', head: to('terminal'), cell: (r) => <Link href={`/terminals/${r.terminal.slug}`} target="_blank" onClick={STOP} className="text-teal-ink underline">{r.terminal.name}</Link> },
-    { key: 'shipper', head: to('shipper'), cell: (r) => (
-      <Link href={`/admin/orgs?q=${encodeURIComponent(r.shipperOrg.name)}`} onClick={STOP} className="text-teal-ink underline">{r.shipperOrg.name}</Link>
-    ) },
+    { key: 'no', head: to('no'), sort: 'no', cell: (r) => <span className="font-mono font-bold">{r.no}</span> },
+    { key: 'status', head: tc('status'), sort: 'status', cell: (r) => <StatusPill status={r.status} /> },
+    // Terminal va yuk egasi panel ichidagi obyekt sahifasiga: sayt havolasi qator menyusida
+    { key: 'terminal', head: to('terminal'), cell: (r) => <Link href={`/admin/terminals/${r.terminal.id}`} className="text-teal-ink underline">{r.terminal.name}</Link> },
+    { key: 'shipper', head: to('shipper'), cell: (r) => <Link href={`/admin/orgs/${r.shipperOrg.id}`} className="text-teal-ink underline">{r.shipperOrg.name}</Link> },
     // Ilgari bu yerda "LOAD / IMPORT" turardi: baza qiymatining o'zi, tarjimasiz
     { key: 'op', head: to('operation'), cell: (r) => `${to(`op.${r.operation}`)} / ${to(`dir.${r.direction}`)}` },
     { key: 'wagons', head: to('wagons'), num: true, cell: (r) => num(r.wagonCount, locale) },
-    { key: 'total', head: to('total'), num: true, cell: (r) => som(r.totalTiyin, locale) },
-    { key: 'created', head: tc('createdAt'), num: true, cell: (r) => uzDateTime(r.createdAt, locale) },
+    { key: 'total', head: to('total'), num: true, sort: 'totalTiyin', cell: (r) => som(r.totalTiyin, locale) },
+    { key: 'created', head: tc('createdAt'), num: true, sort: 'createdAt', cell: (r) => uzDateTime(r.createdAt, locale) },
   ];
 
   return (
     <>
-      <PageHead title={t('nav.orders')} lead={to('lead')} />
-      <Toolbar onSubmit={() => setF({ ...f, q, page: 1 })}>
+      <PageHead title={t('nav.orders')} lead={to('lead')}>
+        <ExportLink path={PATH} filters={filters} total={data?.total ?? 0} />
+      </PageHead>
+      <Toolbar onSubmit={() => set({ q: q.trim() })}>
         <Labeled label={to('no')} className="w-40">
-          <input value={q} onChange={(e) => setQ(e.target.value)} className={INPUT} />
+          <input data-search="1" value={q} onChange={(e) => setQ(e.target.value)} className={INPUT} />
         </Labeled>
         <Labeled label={tc('status')} className="w-48">
-          <select value={f.status} onChange={(e) => setF({ ...f, status: e.target.value, page: 1 })} className={INPUT}>
+          <select value={filters.status} onChange={(e) => set({ status: e.target.value })} className={INPUT}>
             <option value="">{tc('all')}</option>
             {ORDER_STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS_LABELS[lang][s]}</option>)}
           </select>
         </Labeled>
         <button type="submit" className={BTN}>{tc('apply')}</button>
+        <button type="button" className={BTN_GHOST} onClick={reset}>{tc('reset')}</button>
         {data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: data.total })}</span> : null}
       </Toolbar>
 
-      {loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
-      {err ? <Notice tone="err">{errText(err, t, t.has, tc('loadFailed'))}</Notice> : null}
-      {data ? <DataTable cols={cols} rows={data.items} keyOf={(r) => r.no} empty={tc('empty')} onRow={(r) => setOpen(r.no)} /> : null}
-      <Pager page={f.page} pages={pages} onPage={(p) => setF({ ...f, page: p })} />
+      {err ? <LoadError err={err} onRetry={reload} /> : null}
+      <DataTable
+        cols={cols} rows={data?.items ?? []} keyOf={(r) => r.no} empty={tc('empty')} loading={loading} screen="orders"
+        onReset={reset} onRow={(r) => open(r.no)}
+        sort={f.sort ? { field: f.sort, dir: (f.dir === 'desc' ? 'desc' : 'asc') as SortDir } : undefined}
+        onSort={(field, dir) => set({ sort: field, dir })}
+        rowMenu={(r) => [
+          { label: tb('open'), onSelect: () => open(r.no) },
+          { label: tb('onSite'), href: `/terminals/${r.terminal.slug}` },
+        ]}
+      />
+      <Pager page={f.page} pages={pages} onPage={(p) => set({ page: p })} />
 
-      {open ? <OrderDrawer no={open} onClose={() => setOpen(null)} onChanged={reload} /> : null}
+      {f.open ? <OrderDrawer no={f.open} onClose={close} onChanged={reload} /> : null}
     </>
   );
 }
@@ -123,8 +139,8 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
         <div className="space-y-5 text-sm">
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 wrap-anywhere">
             <dt className="text-muted">{tc('status')}</dt><dd><StatusPill status={d.status} /></dd>
-            <dt className="text-muted">{to('terminal')}</dt><dd><Link href={`/terminals/${d.terminal.slug}`} target="_blank" className="text-teal-ink underline">{d.terminal.name}</Link></dd>
-            <dt className="text-muted">{to('shipper')}</dt><dd><Link href={`/admin/orgs?q=${encodeURIComponent(d.shipperOrg.name)}`} className="text-teal-ink underline">{d.shipperOrg.name}</Link></dd>
+            <dt className="text-muted">{to('terminal')}</dt><dd><Link href={`/admin/terminals/${d.terminal.id}`} className="text-teal-ink underline">{d.terminal.name}</Link></dd>
+            <dt className="text-muted">{to('shipper')}</dt><dd><Link href={`/admin/orgs/${d.shipperOrg.id}`} className="text-teal-ink underline">{d.shipperOrg.name}</Link></dd>
             <dt className="text-muted">{tc('createdAt')}</dt><dd className="font-mono tabular-nums">{uzDateTime(d.createdAt, locale)}</dd>
           </dl>
 

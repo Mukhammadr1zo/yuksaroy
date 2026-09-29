@@ -1,14 +1,35 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Inject, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Inject, NotFoundException, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { Prisma } from '@prisma/client';
 import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
+import type { FastifyReply } from 'fastify';
 import { ORDER_STATUSES, type OrderStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../booking/domain/ports';
+import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
+import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt } from '../catalog/presentation/catalog.controller';
 import { reportWhere, resolveData } from './report-status';
+
+const ORDER_SELECT = {
+  id: true, no: true, status: true, createdAt: true, operation: true, direction: true, wagonCount: true, totalTiyin: true,
+  terminal: { select: { id: true, name: true, slug: true } },
+  shipperOrg: { select: { id: true, name: true } },
+} as const;
+type OrderRow = Prisma.OrderGetPayload<{ select: typeof ORDER_SELECT }>;
+
+/** Tiebreak id, `no` emas: no noyob, lekin tartib qoidasi hamma ro'yxatda bir xil bo'lsin. */
+const ORDER_SORT: SortAllow<Prisma.OrderOrderByWithRelationInput> = {
+  createdAt: { def: 'desc' }, totalTiyin: { def: 'desc' }, status: { def: 'asc' }, no: { def: 'desc' },
+};
+
+const ORDER_CSV: CsvCols<OrderRow> = {
+  no: (r) => r.no, status: (r) => r.status, terminal: (r) => r.terminal.name, shipperOrg: (r) => r.shipperOrg.name,
+  operation: (r) => r.operation, direction: (r) => r.direction, wagonCount: (r) => r.wagonCount, totalSom: (r) => r.totalTiyin, createdAt: (r) => r.createdAt,
+};
 
 class StatusDto {
   @IsString() @MaxLength(30) status!: string;
@@ -66,7 +87,7 @@ export class AdminOpsController {
 
   // ───────────────────────── Buyurtmalar ─────────────────────────
 
-  /** Ro'yxat: raqam bo'yicha qidiruv, holat/terminal/tashkilot filtri. */
+  /** Ro'yxat: raqam bo'yicha qidiruv, holat/terminal/tashkilot filtri; ?sort&dir, ?ids, ?format=csv. */
   @Get('orders')
   async orders(
     @Query('q') q?: string,
@@ -75,30 +96,37 @@ export class AdminOpsController {
     @Query('orgId') orgId?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('sort') sort?: string,
+    @Query('dir') dir?: string,
+    @Query('ids') ids?: string,
+    @Query('format') format?: string,
+    @CurrentUserId() userId?: string,
+    @Res({ passthrough: true }) reply?: FastifyReply,
   ) {
     const p = clampInt(page, 1, 1, 10_000);
     const take = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
-    const where = {
+    const idList = parseIds(ids);
+    const where: Prisma.OrderWhereInput = {
       ...(text ? { no: like(text) } : {}),
       // Noto'g'ri holat nomi Prisma da xato bo'lardi: ro'yxatda bo'lmasa filtr e'tiborsiz qoladi
       ...(status && (ORDER_STATUSES as readonly string[]).includes(status) ? { status: status as OrderStatus } : {}),
       ...(terminalId ? { terminalId } : {}),
       ...(orgId ? { shipperOrgId: orgId } : {}),
+      ...(idList ? { id: { in: idList } } : {}),
     };
+    const orderBy = orderByOf(sort, dir, ORDER_SORT, 'createdAt');
+    if (format === 'csv') {
+      return sendCsv({
+        reply: reply!, audit: this.audit, actorId: userId!, resource: 'orders', filters: { q, status, terminalId, orgId, ids, sort, dir },
+        total: await this.prisma.order.count({ where }),
+        rows: () => this.prisma.order.findMany({ where, orderBy, take: CSV_MAX, select: ORDER_SELECT }),
+        cols: ORDER_CSV,
+      });
+    }
     const [total, rows] = await Promise.all([
       this.prisma.order.count({ where }),
-      this.prisma.order.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (p - 1) * take,
-        take,
-        select: {
-          no: true, status: true, createdAt: true, operation: true, direction: true, wagonCount: true, totalTiyin: true,
-          terminal: { select: { id: true, name: true, slug: true } },
-          shipperOrg: { select: { id: true, name: true } },
-        },
-      }),
+      this.prisma.order.findMany({ where, orderBy, skip: (p - 1) * take, take, select: ORDER_SELECT }),
     ]);
     // totalTiyin - BigInt: JSON uni seriallashtira olmaydi, shuning uchun Number ga o'tkaziladi
     return { items: rows.map((o) => ({ ...o, totalTiyin: Number(o.totalTiyin) })), total, page: p, limit: take };
@@ -325,10 +353,17 @@ export class AdminOpsController {
    * ataylab yo'q - bu navbat, jadval emas.
    */
   @Get('reports')
-  async reports(@Query('status') status?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+  async reports(
+    @Query('status') status?: string,
+    @Query('targetKind') targetKind?: string,
+    @Query('targetId') targetId?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     const p = clampInt(page, 1, 1, 10_000);
     const take = clampInt(limit, 30, 1, 100);
-    const where = reportWhere(status);
+    // targetKind/targetId: e'lon sahifasining Bog'liq yorlig'i shu obyektning shikoyatlarini so'raydi
+    const where = { ...reportWhere(status), ...(targetKind ? { targetKind } : {}), ...(targetId ? { targetId } : {}) };
     const [total, items] = await Promise.all([
       this.prisma.report.count({ where }),
       this.prisma.report.findMany({ where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
@@ -362,12 +397,14 @@ export class AdminOpsController {
 
   // ───────────────────────── Shoshilinch so'rovlar ─────────────────────────
 
-  /** Ro'yxat: holat va viloyat filtri, har bir so'rov uchun takliflar soni. */
+  /** Ro'yxat: holat va viloyat filtri, raqam (UR-) bo'yicha qidiruv, har bir so'rov uchun takliflar soni. */
   @Get('urgent')
-  async urgent(@Query('status') status?: string, @Query('region') region?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+  async urgent(@Query('status') status?: string, @Query('region') region?: string, @Query('q') q?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
     const p = clampInt(page, 1, 1, 10_000);
     const take = clampInt(limit, 30, 1, 100);
-    const where = { ...(status ? { status } : {}), ...(region ? { regionCode: region } : {}) };
+    const text = q?.trim();
+    // q: buyruq paleti UR-1001 ni shu ro'yxat bilan ochadi
+    const where = { ...(status ? { status } : {}), ...(region ? { regionCode: region } : {}), ...(text ? { no: like(text) } : {}) };
     const [total, items] = await Promise.all([
       this.prisma.urgentRequest.count({ where }),
       this.prisma.urgentRequest.findMany({

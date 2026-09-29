@@ -16,6 +16,27 @@ const ci = (s: string) => ({ contains: s, mode: 'insensitive' as const });
 
 export const toRecord = (r: Row): ListingRecord => ({ ...r, priceTiyin: r.priceTiyin === null ? null : Number(r.priceTiyin), routes: (r.routes as Route[] | null) ?? [] });
 
+/**
+ * Admin ro'yxati filtrlari: obyekt sahifalarining Bog'liq yorlig'i (tashkilot, egasi,
+ * terminal bo'yicha), tanlangan qatorlar (ids) va jadval sarlavhasidan kelgan tartib.
+ */
+export type AdminListOpts = {
+  q?: string; skip?: number; take?: number;
+  orgId?: string; ownerUserId?: string; terminalId?: string; ids?: string[];
+  orderBy?: Prisma.ListingOrderByWithRelationInput[];
+};
+const adminWhere = (status: ListingStatus, o: AdminListOpts): Prisma.ListingWhereInput => {
+  const text = o.q?.trim();
+  return {
+    status,
+    ...(text ? { OR: [{ title: ci(text) }, { slug: ci(text) }, { org: { name: ci(text) } }] } : {}),
+    ...(o.orgId ? { orgId: o.orgId } : {}),
+    ...(o.ownerUserId ? { ownerUserId: o.ownerUserId } : {}),
+    ...(o.terminalId ? { terminalId: o.terminalId } : {}),
+    ...(o.ids ? { id: { in: o.ids } } : {}),
+  };
+};
+
 /** Domen kiritmasi + hisoblangan nuqta. Narx tiyin BigInt, yo'nalishlar Json. */
 export type ListingWrite = ListingInput & { lat: number | null; lng: number | null };
 const writeData = <T extends ListingWrite>({ ownerType: _o, ...d }: T) => ({ ...d, priceTiyin: d.priceTiyin === null ? null : BigInt(d.priceTiyin), routes: d.routes as unknown as Prisma.InputJsonValue });
@@ -51,17 +72,18 @@ export class PrismaListingRepository {
    * qaytmasdi: platforma 200 ta faol e'londan oshgach yangisiga yetib borib bo'lmasdi,
    * qidiruv esa faqat brauzerdagi 200 qator ichida ishlardi.
    */
-  async listByStatus(status: ListingStatus, opts: { q?: string; skip?: number; take?: number } = {}) {
-    const text = opts.q?.trim();
-    const where: Prisma.ListingWhereInput = {
-      status,
-      ...(text ? { OR: [{ title: ci(text) }, { slug: ci(text) }, { org: { name: ci(text) } }] } : {}),
-    };
+  async listByStatus(status: ListingStatus, opts: AdminListOpts = {}) {
+    const where = adminWhere(status, opts);
     const [total, rows] = await Promise.all([
       this.prisma.listing.count({ where }),
-      this.prisma.listing.findMany({ where, include, orderBy: [{ updatedAt: 'asc' }], skip: opts.skip ?? 0, take: opts.take ?? 30 }),
+      // Sukut tartib eski birinchi: bu moderatsiya navbati, jadval sarlavhasi orderBy bilan o'zgartiradi
+      this.prisma.listing.findMany({ where, include, orderBy: opts.orderBy ?? [{ updatedAt: 'asc' }, { id: 'asc' }], skip: opts.skip ?? 0, take: opts.take ?? 30 }),
     ]);
     return { rows: rows.map(toRecord), total };
+  }
+  /** CSV eksporti qatorlarni o'qishdan OLDIN sonni tekshiradi: chegaradan oshgani bekor o'qilmasin. */
+  async countByStatus(status: ListingStatus, opts: AdminListOpts = {}) {
+    return this.prisma.listing.count({ where: adminWhere(status, opts) });
   }
   async findBySlug(slug: string) {
     const r = await this.prisma.listing.findUnique({ where: { slug }, include });

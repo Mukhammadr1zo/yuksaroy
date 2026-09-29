@@ -8,11 +8,13 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { AD_PLACEMENTS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { api, authHeaders, post } from '@/lib/api';
 import { num, uzDate } from '@/lib/format';
-import type { Me } from '@/lib/types-auth';
 import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pill, Toolbar, errText } from '@/components/admin/kit';
+import { useAdminMe } from '@/components/admin/context';
 
 type Ad = {
   id: string; placement: AdPlacement; title: string; body: string | null; imageUrl: string | null; href: string;
@@ -39,7 +41,8 @@ export default function AdminAdsPage() {
 
   const [rows, setRows] = useState<Ad[] | null>(null);
   const [f, setF] = useState({ placement: '', status: '' });
-  const [isOwner, setIsOwner] = useState(false);
+  // Qobiqdan: /auth/me qayta so'ralmaydi
+  const { isOwner } = useAdminMe();
   const [sheet, setSheet] = useState<{ id: string | null; d: Draft } | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,7 +56,17 @@ export default function AdminAdsPage() {
   }, [f.placement, f.status]);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { api<Me>('/auth/me').then((m) => setIsOwner(!!m.isPlatformOwner)).catch(() => {}); }, []);
+
+  // ?new=1 (tez amallar, paleta, bosh sahifa) yaratish varag'ini ochadi, faqat egaga (operatorda tugma ham yo'q);
+  // param darhol olib tashlanadi, aks holda yopib qayta yuklaganda varaq yana ochilardi
+  const sp = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  useEffect(() => {
+    if (sp.get('new') !== '1') return;
+    if (isOwner) { setNote(null); setSheet({ id: null, d: NEW() }); }
+    router.replace(pathname, { scroll: false });
+  }, [sp, pathname, router, isOwner]);
 
   const set = (p: Partial<Draft>) => setSheet((s) => (s ? { ...s, d: { ...s.d, ...p } } : s));
 

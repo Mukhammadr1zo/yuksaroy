@@ -16,16 +16,17 @@ import { api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import { PhoneField, phoneDisplay } from '@/components/ui/fields';
 import { BTN, BTN_DANGER, CARD, ConfirmButton, INPUT, Notice, PageHead, Pill, errText } from '@/components/admin/kit';
+import { useAdminMe } from '@/components/admin/context';
 
 type Level = 'owner' | 'moderator';
 type Member = { userId: string; fullName: string | null; phone: string | null; isActive: boolean; level: Level; fromEnv: boolean; since: string };
-type Me = { id: string };
 
 export default function TeamPage() {
   const t = useTranslations('admin.team');
   const tc = useTranslations('admin.common');
   const [rows, setRows] = useState<Member[] | null>(null);
-  const [me, setMe] = useState<Me | null>(null);
+  // Qobiqdan: /auth/me qayta so'ralmaydi
+  const { me } = useAdminMe();
   const [msg, setMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [add, setAdd] = useState<{ phone: string; level: Level }>({ phone: '', level: 'moderator' });
@@ -34,7 +35,6 @@ export default function TeamPage() {
 
   useEffect(() => {
     load().catch(() => { setRows([]); setMsg({ tone: 'err', text: tc('loadFailed') }); });
-    api<Me>('/auth/me').then(setMe).catch(() => {});
   }, [load, tc]);
 
   /** Har amaldan keyin ro'yxat serverdan qayta o'qiladi: holatni taxmin qilmaymiz. */

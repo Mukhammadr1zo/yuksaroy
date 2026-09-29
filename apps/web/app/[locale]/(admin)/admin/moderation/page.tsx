@@ -5,7 +5,7 @@
  * qatorlarni ko'rsatib, qarorni ikki xil endpointga yuborardi.
  * Faol bo'lim URL da (?tab=), shunda bosh sahifadagi "kutilmoqda" havolalari to'g'ri bo'limga olib keladi.
  */
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { LISTING_OWNER_LABELS, ORG_KIND_LABELS, REPORT_REASON_LABELS, REPORT_STATUSES, REPORT_STATUS_LABELS, REPORT_TARGET_LABELS } from '@yuksaroy/domain';
@@ -25,13 +25,8 @@ const isTab = (v: string | null): v is Tab => TABS.includes(v as Tab);
 
 type Flash = { text: string; tone: 'ok' | 'bad' } | null;
 
+// Suspense shart emas: AdminShell bolalarni bitta Suspense ichida chizadi (useSearchParams talabi bir joyda)
 export default function ModerationPage() {
-  const tc = useTranslations('admin.common');
-  // useSearchParams statik renderda Suspense talab qiladi
-  return <Suspense fallback={<p className="text-sm text-muted">{tc('loading')}</p>}><Moderation /></Suspense>;
-}
-
-function Moderation() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tp = useTranslations('premium');
@@ -129,7 +124,8 @@ function ListingRow({ l, onDone }: { l: OwnerListing; onDone: (d: Decision) => v
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{L.kind[l.kind]}</Pill>
-        <span className="min-w-0 break-words font-semibold">{l.title}</span>
+        {/* Sarlavha obyekt sahifasiga: shikoyat, yozishma va pul tarixi qaror oldidan o'sha yerda ko'riladi */}
+        <Link href={`/admin/listings/${l.id}`} className="min-w-0 break-words font-semibold text-navy hover:underline">{l.title}</Link>
         <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(l.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
@@ -158,7 +154,7 @@ function OrgRow({ o, onDone }: { o: OrgRecord; onDone: (d: Decision) => void }) 
   return (
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="min-w-0 break-words font-semibold">{o.name}</span>
+        <Link href={`/admin/orgs/${o.id}`} className="min-w-0 break-words font-semibold text-navy hover:underline">{o.name}</Link>
         {kinds.map((k) => <Pill key={k} tone="ok">{ORG_KIND_LABELS[lang][k]}</Pill>)}
         {o.kycRequestedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('requestedAt')} {uzDateTime(o.kycRequestedAt, lang)}</span> : null}
       </div>
@@ -185,7 +181,7 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
     <li className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{tk(x.kind)}</Pill>
-        <span className="min-w-0 break-words font-semibold">{x.name}</span>
+        <Link href={`/admin/terminals/${x.id}`} className="min-w-0 break-words font-semibold text-navy hover:underline">{x.name}</Link>
         <span className="text-sm text-muted">{t('station')}: {stationName({ station: x.station, stationNameRaw: x.rail?.stationNameRaw ?? null })}{x.regionCode && tr.has(x.regionCode) ? ` · ${tr(x.regionCode)}` : ''}</span>
       </div>
       <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></p>
@@ -521,10 +517,11 @@ function ReportRow({ r, onDone }: { r: ReportPage['items'][number]; onDone: (d: 
       </div>
       <p className="mt-2 text-sm font-semibold">{REPORT_REASON_LABELS[lang][r.reason]}</p>
       <p className="mt-1 whitespace-pre-line break-words text-sm">{r.text}</p>
-      {/* Yuborgan odam: takroriy shikoyatchi ko'rinib tursin va kerak bo'lsa bog'lanish mumkin */}
+      {/* Yuborgan odam: takroriy shikoyatchi ko'rinib tursin va kerak bo'lsa bog'lanish mumkin.
+          Id bo'lsa to'g'ridan-to'g'ri obyekt sahifasi, bo'lmasa telefon bo'yicha qidiruv */}
       <p className="mt-2 text-xs text-muted">
         {tr('reporter')}:{' '}
-        <Link href={`/admin/users?q=${encodeURIComponent(r.reporter?.phone ?? r.reporterId)}`} className="text-teal-ink underline">
+        <Link href={r.reporterId ? `/admin/users/${r.reporterId}` : `/admin/users?q=${encodeURIComponent(r.reporter?.phone ?? '')}`} className="text-teal-ink underline">
           {r.reporter?.fullName || r.reporter?.phone || r.reporterId}
         </Link>
       </p>

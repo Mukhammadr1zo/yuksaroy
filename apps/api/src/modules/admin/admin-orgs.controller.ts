@@ -1,14 +1,37 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
+import type { FastifyReply } from 'fastify';
 import { KYC_STATUSES, ORG_KINDS, ROLES, type KycStatus, type OrgKind, type Role } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
+import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
+import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PLATFORM_ROLES } from './team/team.rules';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
+import { noteCount } from './admin-notes.controller';
+
+const LIST_SELECT = {
+  id: true, name: true, slug: true, kinds: true, stir: true, kycStatus: true, createdAt: true,
+  _count: { select: { members: true, terminals: true, listings: true } },
+} as const;
+type ListRow = Prisma.OrganizationGetPayload<{ select: typeof LIST_SELECT }>;
+
+/** Sonlar bo'yicha ko'pi birinchi (_count), matn alifbo, sana yangi birinchi. */
+const SORT: SortAllow<Prisma.OrganizationOrderByWithRelationInput> = {
+  name: { def: 'asc' }, createdAt: { def: 'desc' }, kycStatus: { def: 'asc' },
+  members: { def: 'desc', by: (d) => ({ members: { _count: d } }) },
+  terminals: { def: 'desc', by: (d) => ({ terminals: { _count: d } }) },
+  listings: { def: 'desc', by: (d) => ({ listings: { _count: d } }) },
+};
+
+const CSV: CsvCols<ListRow> = {
+  id: (r) => r.id, name: (r) => r.name, slug: (r) => r.slug, stir: (r) => r.stir, kinds: (r) => r.kinds.join('; '), kycStatus: (r) => r.kycStatus,
+  members: (r) => r._count.members, terminals: (r) => r._count.terminals, listings: (r) => r._count.listings, createdAt: (r) => r.createdAt,
+};
 
 class AdminUpdateOrgDto {
   @IsOptional() @IsString() @Length(2, 120) name?: string;
@@ -59,13 +82,27 @@ export class AdminOrgsController {
    * (orgs.controller.ts) va uni takrorlamaymiz.
    */
   @Get('orgs/all')
-  async list(@Query('q') q?: string, @Query('kyc') kyc?: string, @Query('kind') kind?: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+  async list(
+    @CurrentUserId() userId: string,
+    @Query('q') q?: string,
+    @Query('kyc') kyc?: string,
+    @Query('kind') kind?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('sort') sort?: string,
+    @Query('dir') dir?: string,
+    @Query('ids') ids?: string,
+    @Query('format') format?: string,
+    @Res({ passthrough: true }) reply?: FastifyReply,
+  ) {
     const p = Math.max(1, Number(page) || 1);
     const take = Math.min(100, Math.max(1, Number(limit) || 30));
     const text = q?.trim();
     const k = (ORG_KINDS as readonly string[]).includes(kind ?? '') ? (kind as OrgKind) : undefined;
+    const idList = parseIds(ids);
     const where: Prisma.OrganizationWhereInput = {
       ...((KYC_STATUSES as readonly string[]).includes(kyc ?? '') ? { kycStatus: kyc as KycStatus } : {}),
+      ...(idList ? { id: { in: idList } } : {}),
       // eski qatorlarda `kinds` bo'sh, faqat `kind` to'lgan bo'lishi mumkin: ikkalasini ham qaraymiz
       ...(k ? { AND: [{ OR: [{ kinds: { has: k } }, { kind: k }] }] } : {}),
       ...(text
@@ -78,18 +115,18 @@ export class AdminOrgsController {
           }
         : {}),
     };
+    const orderBy = orderByOf(sort, dir, SORT, 'createdAt');
+    if (format === 'csv') {
+      return sendCsv({
+        reply: reply!, audit: this.audit, actorId: userId, resource: 'orgs', filters: { q, kyc, kind, ids, sort, dir },
+        total: await this.prisma.organization.count({ where }),
+        rows: () => this.prisma.organization.findMany({ where, orderBy, take: CSV_MAX, select: LIST_SELECT }),
+        cols: CSV,
+      });
+    }
     const [total, items] = await Promise.all([
       this.prisma.organization.count({ where }),
-      this.prisma.organization.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (p - 1) * take,
-        take,
-        select: {
-          id: true, name: true, slug: true, kinds: true, stir: true, kycStatus: true, createdAt: true,
-          _count: { select: { members: true, terminals: true, listings: true } },
-        },
-      }),
+      this.prisma.organization.findMany({ where, orderBy, skip: (p - 1) * take, take, select: LIST_SELECT }),
     ]);
     return { items, total, page: p, limit: take };
   }
@@ -109,7 +146,44 @@ export class AdminOrgsController {
     return {
       ...rest,
       counts: _count,
+      notesCount: await noteCount(this.prisma, 'Organization', id), // Izohlar yorlig'idagi son: kimdir bu tashkilot bilan ishlaganmi
       members: members.map((m) => ({ id: m.userId, phone: m.user.phone, fullName: m.user.fullName, roles: m.roles, isOwner: m.isOwner, createdAt: m.createdAt })),
+    };
+  }
+
+  /**
+   * Tashkilotning puli: Premium to'lovlari, a'zolarining obunalari, jami to'lagani va
+   * buyurtmalari. Faqat ega: tushum siyosati bosh sahifadagi bilan bir xil.
+   * Qaror: to'layotgan tashkilotga tasdiq navbatida ustunlik, nizoda yumshoqlik,
+   * komissiya kiritilsa qancha to'laydi.
+   */
+  @Get('orgs/:id/money')
+  @UseGuards(PlatformOwnerGuard)
+  async money(@Param('id') id: string) {
+    const org = await this.prisma.organization.findUnique({ where: { id }, select: { members: { select: { userId: true } } } });
+    if (!org) throw new NotFoundException({ code: 'ORG_NOT_FOUND' });
+    const userIds = org.members.map((m) => m.userId);
+    const n = (v: bigint | null | undefined) => Number(v ?? 0n); // BigInt JSON ga chiqmaydi
+    const [premium, subscriptions, premPaid, subPaid, orders, done] = await Promise.all([
+      this.prisma.premiumOrder.findMany({ where: { orgId: id }, orderBy: { createdAt: 'desc' }, take: 20, select: { id: true, listingId: true, months: true, amountTiyin: true, status: true, paidAt: true } }),
+      this.prisma.subscription.findMany({
+        where: { userId: { in: userIds } }, orderBy: { createdAt: 'desc' }, take: 20,
+        select: { id: true, no: true, status: true, amountTiyin: true, endsAt: true, user: { select: { id: true, fullName: true, phone: true } } },
+      }),
+      this.prisma.premiumOrder.aggregate({ where: { orgId: id, paidAt: { not: null } }, _sum: { amountTiyin: true } }),
+      this.prisma.subscription.aggregate({ where: { userId: { in: userIds }, paidAt: { not: null } }, _sum: { amountTiyin: true } }),
+      this.prisma.order.aggregate({ where: { shipperOrgId: id }, _count: { _all: true }, _max: { createdAt: true } }),
+      this.prisma.order.aggregate({ where: { shipperOrgId: id, status: 'DONE' }, _count: { _all: true }, _sum: { totalTiyin: true, commissionTiyin: true } }),
+    ]);
+    return {
+      premium: premium.map((p) => ({ ...p, amountTiyin: n(p.amountTiyin) })),
+      subscriptions: subscriptions.map((s) => ({ ...s, amountTiyin: n(s.amountTiyin) })),
+      paidTotalTiyin: n(premPaid._sum.amountTiyin) + n(subPaid._sum.amountTiyin),
+      orders: {
+        total: orders._count._all, done: done._count._all,
+        doneTiyin: n(done._sum.totalTiyin), commissionTiyin: n(done._sum.commissionTiyin),
+        lastAt: orders._max.createdAt,
+      },
     };
   }
 
