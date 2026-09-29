@@ -13,7 +13,8 @@
     "cta": {
       "heading": "Amalga o'tish",
       "map": "Xaritada ko'rish",
-      "booking": "Bron qilish"
+      "booking": "Bron qilish",
+      "wagon": "Vagonni qidirish"
     },
     "notFound": "Bunday maqola yo'q"
   }

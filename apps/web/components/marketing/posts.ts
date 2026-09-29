@@ -2,7 +2,7 @@ import type { SearchLang } from '@yuksaroy/domain';
 
 // Blog: statik matn, uch til (uz va ru to'liq, en qisqaroq). Har maqola oxirida amal: /map yoki /booking.
 export type Block = { h?: string; p?: string; li?: string[] };
-export interface Post { slug: string; date: string; cta: '/map' | '/booking'; title: Record<SearchLang, string>; lead: Record<SearchLang, string>; body: Record<SearchLang, Block[]> }
+export interface Post { slug: string; date: string; cta: '/map' | '/booking' | '/wagon'; title: Record<SearchLang, string>; lead: Record<SearchLang, string>; body: Record<SearchLang, Block[]> }
 
 /** O'qish vaqti: 180 so'z / daqiqa, kamida 1. */
 export const readMinutes = (blocks: Block[]) => Math.max(1, Math.round(blocks.map((b) => [b.h, b.p, ...(b.li ?? [])].join(' ')).join(' ').split(/\s+/).length / 180));
@@ -137,6 +137,53 @@ export const POSTS: Post[] = [
         { h: 'Where the number comes from', p: 'The owner sets hours and window capacity in the dashboard. Every confirmed booking takes one slot; the rest shows in the catalog as "free today". It is computed from the owner\'s schedule and drops when a booking is made.' },
         { h: 'Why it matters', li: ['No waiting: the window is yours.', 'The tariff freezes when the order is sent.', 'The terminal confirms within the agreed time or the order expires and the slot frees up.', 'Act and invoice PDF at the end.'] },
         { h: 'Booking', p: 'On the terminal page pick a window, enter the service and weight or wagon count. The order waits for confirmation, then moves through arrived, weighed, loaded, departed. Booking commission is 0 % today.' },
+      ],
+    },
+  },
+  {
+    slug: 'wagon-tracking',
+    date: '2026-09-30',
+    cta: '/wagon',
+    title: {
+      uz: "Vagonni raqami bo'yicha qanday topish mumkin",
+      ru: 'Как отследить вагон по номеру: дислокация за одну минуту',
+      en: 'How to track a wagon by number',
+    },
+    lead: {
+      uz: "Vagon raqami yon tomonida yozilgan, 7 yoki 8 ta raqam. Shu raqam bilan uning oxirgi joylashuvini, qaysi stansiyada turganini va yuklangan yoki bo'shligini ko'rish mumkin. Birinchi qidiruv bepul.",
+      ru: 'Номер вагона написан на его борту, это 7 или 8 цифр. По нему видно последнее местоположение, станцию, где вагон стоит, и состояние: гружёный или порожний. Первый поиск бесплатный.',
+      en: 'The wagon number is painted on its side: 7 or 8 digits. It shows the last known location, the station and whether the wagon is loaded or empty. The first search is free.',
+    },
+    body: {
+      uz: [
+        { h: 'Raqamni qayerdan olasiz', p: "Raqam vagonning yon tomoniga bo'yalgan va perevozka hujjatlarida yozilgan: 7 yoki 8 ta raqam. Boshidagi nol ahamiyatsiz, 01234567 va 1234567 bitta vagon. Konteyner raqami boshqa narsa: u harflar bilan boshlanadi va bu sahifada qidirilmaydi." },
+        { h: 'Javobda nima keladi', li: ["Stansiya nomi yoki stansiya ko'rsatilmagani haqidagi belgi.", "Holati: yuklangan, bo'sh yoki noma'lum.", "Ma'lumot qaysi vaqtga tegishli ekani.", "Javob qachon yangilangani."] },
+        { h: "Ma'lumot qanchalik yangi", p: "Hisobotlar sutkasiga bir-ikki marta yangilanadi, shuning uchun bitta vagonni ketma-ket qayta so'rashning ma'nosi yo'q: javob o'sha bo'ladi. Shu sababli o'zingiz qidirgan vagonni 6 soat ichida qayta ochish bepul." },
+        { h: 'Marshrut tarixi bormi', p: "Yo'q. Sahifa faqat joriy joylashuvni ko'rsatadi: vagon hozir qayerda. Tarix saqlanmaydi va yuborilmaydi." },
+        { h: 'Vagon topilmasa', p: "Avval raqamni tekshiring. Raqam to'g'ri bo'lsa, vagon hisobotlarda yo'q: u yangi bo'lishi yoki mamlakat tashqarisida bo'lishi mumkin." },
+        { h: 'Narxi', p: "Har bir hisob uchun birinchi qidiruv bepul. O'zingiz qidirgan vagonni 6 soat ichida qayta ko'rish ham sanalmaydi. Undan keyin cheksiz qidiruv obunaga kiradi; tarif va narx obuna sahifasida." },
+        { h: 'Bir vaqtda 20 tagacha', p: "Bir necha vagonni birdan tekshirish mumkin: har qatorga bitta raqam yoki vergul bilan, 20 tagacha. Har raqam alohida qidiruv hisoblanadi." },
+        { h: 'Kimga kerak', li: ["Ekspeditorga: yuk qayerda va qachon yetib boradi.", "Yuk egasiga: vagon bo'shadimi, qaytarish vaqti keldimi.", "Terminalga: bugun nechta vagon keladi."] },
+      ],
+      ru: [
+        { h: 'Где взять номер вагона', p: 'Номер нанесён на борт вагона и указан в перевозочных документах: 7 или 8 цифр. Начальный ноль не важен, 01234567 и 1234567 это один вагон. Номер контейнера это другое: он начинается с букв и на этой странице не ищется.' },
+        { h: 'Что приходит в ответе', li: ['Название станции или пометка, что станция не указана.', 'Состояние: гружёный, порожний или неизвестно.', 'На какое время относятся данные.', 'Когда ответ был обновлён.'] },
+        { h: 'Насколько свежие данные', p: 'Отчёты обновляются один-два раза в сутки, поэтому запрашивать один и тот же вагон подряд бессмысленно: ответ будет тот же. Именно поэтому повторный просмотр своего вагона в течение 6 часов бесплатный.' },
+        { h: 'Показывается ли история маршрута', p: 'Нет. Страница показывает только текущее местоположение: где вагон сейчас. История не хранится и не передаётся.' },
+        { h: 'Если вагон не найден', p: 'Сначала проверьте номер. Если номер верный, вагона нет в отчётах: он может быть новым или находиться за пределами страны.' },
+        { h: 'Сколько это стоит', p: 'Первый поиск бесплатный для каждого аккаунта. Повторный просмотр своего вагона в течение 6 часов тоже не считается. Дальше поиск без ограничений входит в подписку; тариф и цена на странице подписки.' },
+        { h: 'До 20 номеров за раз', p: 'Можно проверить несколько вагонов сразу: по одному номеру в строке или через запятую, до 20. Каждый номер считается отдельным поиском.' },
+        { h: 'Кому это нужно', li: ['Экспедитору: где груз и когда доедет.', 'Грузовладельцу: освободился ли вагон, пора ли возвращать.', 'Терминалу: сколько вагонов придёт сегодня.'] },
+        { h: 'Как это называют по-другому', p: 'Эту задачу ищут разными словами: отследить вагон, отслеживание вагона по номеру, дислокация вагона, где находится вагон, проверить вагон по номеру, узнать станцию вагона. Всё это одно и то же: вводите номер и видите, где вагон сейчас.' },
+      ],
+      en: [
+        { h: 'Where the number comes from', p: 'The number is painted on the wagon and written in the transport papers: 7 or 8 digits. A leading zero does not matter, 01234567 and 1234567 are the same wagon. A container number is different: it starts with letters and is not searched here.' },
+        { h: 'What the answer contains', li: ['The station name, or a note that no station is given.', 'State: loaded, empty or unknown.', 'What time the data refers to.', 'When the answer was refreshed.'] },
+        { h: 'How fresh the data is', p: 'Reports refresh once or twice a day, so asking for the same wagon again straight away returns the same answer. That is why opening your own wagon again within 6 hours is free.' },
+        { h: 'Route history', p: 'No. The page shows the current location only: where the wagon is now.' },
+        { h: 'If the wagon is not found', p: 'Check the number first. If the number is right, the wagon is not in the reports: it may be new or outside the country.' },
+        { h: 'Price', p: 'The first search is free for every account. Opening your own wagon again within 6 hours does not count either. After that, unlimited search comes with a subscription.' },
+        { h: 'Up to 20 at once', p: 'You can check several wagons at once: one number per line or separated by commas, up to 20. Each number counts as a separate search.' },
       ],
     },
   },

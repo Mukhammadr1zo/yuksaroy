@@ -13,7 +13,8 @@
     "cta": {
       "heading": "Take action",
       "map": "See on the map",
-      "booking": "Book a spot"
+      "booking": "Book a spot",
+      "wagon": "Find a wagon"
     },
     "notFound": "No such post"
   }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { WagonSearch } from '@/components/wagon/WagonSearch';
 import { Ld, breadcrumbs, pageMeta, url } from '@/lib/seo';
 
@@ -132,6 +133,11 @@ export default async function WagonPage({ params }: Params) {
             </div>
           ))}
         </dl>
+
+        {/* Batafsil maqolaga havola: savolga javob topmagan odam shu yerdan o'qiydi */}
+        <p className={P}>
+          <Link href="/blog/wagon-tracking" className="font-semibold text-teal-ink hover:underline">{t('more')}</Link>
+        </p>
       </div>
     </section>
   );

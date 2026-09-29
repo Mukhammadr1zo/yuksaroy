@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { BTN } from '@/components/marketing/bits';
 import { findPost, readMinutes } from '@/components/marketing/posts';
 import { postDate } from '../date';
-import { alt } from '@/lib/seo';
+import { Ld, breadcrumbs, pageMeta, url } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -16,7 +16,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = findPost(slug);
   if (!p) return {};
   const lang = locale as SearchLang;
-  return { title: `${p.title[lang]} · YukSaroy`, description: p.lead[lang], ...alt(locale, `/blog/${slug}`) };
+  // pageMeta: og:url va og:title har maqolaga o'ziniki. alt() faqat canonical va hreflang
+  // berardi, og esa maketdan meros qolib, ulashilgan havola bosh sahifani ko'rsatardi.
+  return pageMeta(locale, `/blog/${slug}`, { title: `${p.title[lang]} · YukSaroy`, description: p.lead[lang] });
 }
 
 /** Maqola: sarlavha, sana, o'qish vaqti, bloklar (h/p/li), oxirida amal (xarita yoki bron). */
@@ -30,6 +32,21 @@ export default async function PostPage({ params }: Props) {
   const body = p.body[lang];
   return (
     <article className="mx-auto max-w-3xl px-6 py-10 md:py-14">
+      {/* Article va nonushta yo'li: qidiruv tizimi maqolani sana va sarlavha bilan taniydi */}
+      <Ld
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: p.title[lang],
+          description: p.lead[lang],
+          datePublished: p.date,
+          inLanguage: locale,
+          mainEntityOfPage: url(locale, `/blog/${slug}`),
+          author: { '@type': 'Organization', name: 'YukSaroy' },
+          publisher: { '@type': 'Organization', name: 'YukSaroy' },
+        }}
+      />
+      <Ld data={breadcrumbs(locale, [{ name: t('title'), path: '/blog' }, { name: p.title[lang], path: `/blog/${slug}` }])} />
       <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-ink hover:underline"><ArrowLeftIcon size={16} aria-hidden="true" />{t('back')}</Link>
       <p className="mt-6 font-mono text-xs text-muted">{postDate(p.date, locale)} · {t('minutes', { n: readMinutes(body) })}</p>
       <h1 className="mt-3 font-display text-3xl font-bold leading-[1.1] text-navy md:text-4xl">{p.title[lang]}</h1>
@@ -49,7 +66,7 @@ export default async function PostPage({ params }: Props) {
       </div>
       <div className="mt-10 flex flex-wrap items-center gap-4 rounded-card border border-line bg-sand p-6">
         <p className="font-display text-lg font-bold text-navy">{t('cta.heading')}</p>
-        <Link href={p.cta} className={`ml-auto ${BTN.primary}`}>{t(p.cta === '/map' ? 'cta.map' : 'cta.booking')}</Link>
+        <Link href={p.cta} className={`ml-auto ${BTN.primary}`}>{t(p.cta === '/map' ? 'cta.map' : p.cta === '/wagon' ? 'cta.wagon' : 'cta.booking')}</Link>
       </div>
     </article>
   );
