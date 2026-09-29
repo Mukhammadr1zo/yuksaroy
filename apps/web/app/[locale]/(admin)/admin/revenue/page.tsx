@@ -286,7 +286,7 @@ function ExpiringTab({ f, set, onExport }: TabProps) {
     {
       key: 'act', head: tc('actions'),
       cell: (r) => (
-        <button type="button" disabled={r.remindedToday || busy === r.id} onClick={() => void remind(r)} className={`${BTN_GHOST} w-full px-3 py-1 text-xs sm:w-auto`}>
+        <button type="button" disabled={r.remindedToday || busy === r.id} onClick={() => void remind(r)} className={`${BTN_GHOST} w-full whitespace-nowrap px-3 py-1 text-xs sm:w-auto`}>
           <BellRingingIcon size={14} aria-hidden="true" />
           {tr(r.remindedToday ? 'expiring.remindedToday' : 'expiring.remind')}
         </button>

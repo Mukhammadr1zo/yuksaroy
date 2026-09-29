@@ -42,7 +42,7 @@ export default function AdminOrgsPage() {
       </div>
     ) },
     { key: 'stir', head: t('orgs.stir'), num: true, cell: (o) => o.stir ?? '' },
-    { key: 'kinds', head: t('orgs.kinds'), cell: (o) => <div className="flex flex-wrap gap-1">{o.kinds.map((k) => <Pill key={k}>{tok.has(k) ? tok(k) : k}</Pill>)}</div> },
+    { key: 'kinds', head: t('orgs.kinds'), cell: (o) => <div className="flex min-w-0 flex-wrap gap-1">{o.kinds.map((k) => <Pill key={k}>{tok.has(k) ? tok(k) : k}</Pill>)}</div> },
     { key: 'kyc', head: t('orgs.kyc'), sort: 'kycStatus', cell: (o) => <Pill tone={kycTone(o.kycStatus)}>{tk.has(o.kycStatus) ? tk(o.kycStatus) : o.kycStatus}</Pill> },
     { key: 'members', head: t('orgs.members'), num: true, sort: 'members', cell: (o) => num(o._count.members, locale) },
     { key: 'terminals', head: t('orgs.objects'), num: true, sort: 'terminals', cell: (o) => num(o._count.terminals, locale) },

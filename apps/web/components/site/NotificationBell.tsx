@@ -54,7 +54,8 @@ export function NotificationBell() {
       <button type="button" onClick={toggle} aria-expanded={open} aria-label={t('aria', { count: unread })}
         className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white transition-colors duration-150 hover:border-teal">
         <BellIcon size={17} weight={unread ? 'fill' : 'regular'} className={unread ? 'text-navy' : 'text-muted'} aria-hidden="true" />
-        {unread ? <span className="absolute -right-1 -top-1 rounded-full bg-orange px-1.5 font-mono text-[10px] font-bold text-white">{unread > 9 ? '9+' : unread}</span> : null}
+        {/* bg-amber: loyihada "orange" tokeni yo'q, bg-orange hech narsa bermas va oq raqam oq tugmada ko'rinmasdi */}
+        {unread ? <span className="absolute -right-1 -top-1 rounded-full bg-amber px-1.5 font-mono text-[10px] font-bold text-white">{unread > 9 ? '9+' : unread}</span> : null}
       </button>
       {open ? (
         <div className="absolute right-0 z-40 mt-2 w-80 max-w-[calc(100vw-5rem)] overflow-hidden rounded-2xl border border-line bg-white shadow-lg">

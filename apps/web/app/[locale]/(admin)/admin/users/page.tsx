@@ -56,15 +56,18 @@ export default function AdminUsersPage() {
   }
 
   const cols: Col<Row>[] = [
-    { key: 'name', head: tc('name'), sort: 'fullName', cell: (u) => (
+    // Kenglik berilgan: uzun tashkilot nomi yonida ism ustuni siqilib, har harf yangi qatorga tushardi
+    { key: 'name', head: tc('name'), sort: 'fullName', width: '15rem', cell: (u) => (
       <div className="min-w-0">
         <div className={`font-semibold ${u.fullName ? 'text-navy' : 'text-muted'}`}>{u.fullName || t('users.noName')}</div>
         {u.phone ? <div className="font-mono text-xs text-muted">{phoneDisplay(u.phone)}</div> : null}
       </div>
     ) },
-    { key: 'email', head: tc('email'), cell: (u) => <span className="text-xs">{u.email ?? ''}</span> },
+    // wrap-anywhere: elektron pochta bo'shliqsiz uzun so'z, ustunni cho'zib yuborardi
+    { key: 'email', head: tc('email'), width: '12rem', cell: (u) => <span className="block wrap-anywhere text-xs">{u.email ?? ''}</span> },
     { key: 'orgs', head: t('users.orgs'), cell: (u) => (
-      <div className="flex flex-wrap gap-1">
+      // min-w-0: yorliq ichidagi uzun tashkilot nomi katakni cho'zmasin, kesilsin
+      <div className="flex min-w-0 max-w-[14rem] flex-wrap gap-1">
         {u.orgs.map((o) => (
           <Pill key={o.id} tone={o.kyc === 'VERIFIED' ? 'ok' : o.kyc === 'PENDING' ? 'warn' : 'neutral'}>
             {o.isOwner ? <b>{o.name}</b> : o.name}

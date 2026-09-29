@@ -20,7 +20,7 @@ import { api, ApiError } from '@/lib/api';
 import { AdminContext } from './context';
 
 export const INPUT = 'w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand';
-export const BTN = 'inline-flex items-center justify-center gap-1.5 rounded-full bg-teal px-4 py-2 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98] disabled:opacity-60';
+export const BTN = 'inline-flex items-center justify-center gap-1.5 rounded-full bg-teal px-4 py-2 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:cursor-not-allowed';
 export const BTN_GHOST = 'inline-flex items-center justify-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition duration-150 hover:border-teal hover:text-teal-ink active:scale-[0.98] disabled:opacity-60';
 export const BTN_DANGER = 'inline-flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition duration-150 hover:bg-red-50 active:scale-[0.98] disabled:opacity-60';
 export const CARD = 'rounded-card border border-line bg-white';
@@ -164,10 +164,12 @@ export function useRovingList(n: number, h: { onOpen: (i: number) => void; onSel
  * ochilganda fokus birinchi bandda, strelkalar aylanadi. Tez amallar, Ustunlar va RowMenu shu bitta
  * primitivdan: uch xil menyu uch xil klaviatura bilan bo'lmasin.
  */
-export function Popover({ label, icon, items, align = 'right', className = BTN_GHOST, iconOnly = false }: {
+export function Popover({ label, icon, items, align = 'right', className = BTN_GHOST, iconOnly = false, labelClass = '' }: {
   label: string; icon?: React.ReactNode; items: MenuItem[]; align?: 'left' | 'right'; className?: string;
   /** Faqat ikonka ko'rinadi, label aria-label bo'ladi (RowMenu). */
   iconOnly?: boolean;
+  /** Label o'ramiga sinf: yuqori panelda telefonda matn yashiriladi ("hidden sm:inline"). */
+  labelClass?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<React.CSSProperties>({});
@@ -232,9 +234,9 @@ export function Popover({ label, icon, items, align = 'right', className = BTN_G
   return (
     <div ref={box} className="relative inline-block">
       <button ref={btn} type="button" onClick={toggle} aria-haspopup="menu" aria-expanded={open}
-        aria-label={iconOnly ? label : undefined} title={iconOnly ? label : undefined} className={className}>
+        aria-label={iconOnly || labelClass ? label : undefined} title={iconOnly || labelClass ? label : undefined} className={className}>
         {icon}
-        {iconOnly ? null : label}
+        {iconOnly ? null : labelClass ? <span className={labelClass}>{label}</span> : label}
       </button>
       {open ? (
         <div ref={panel} role="menu" aria-label={label} onKeyDown={onKey} style={pos}
@@ -475,7 +477,11 @@ export function DataTable<T>({ cols, rows, keyOf, empty, onRow, loading, sort, o
                   {/* Raqam va sana hech qachon sinmaydi: "3-" / "sentabr" ikki qatorga bo'linib o'qilmas edi */}
                   {shown.map((c, ci) => (
                     <td key={c.key} data-label={c.head}
-                      className={`flex items-baseline justify-between gap-3 py-0.5 empty:hidden before:shrink-0 before:font-mono before:text-[11px] before:font-semibold before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] sm:table-cell sm:px-3 sm:py-2 sm:align-top sm:empty:table-cell sm:before:content-none ${c.num ? 'font-mono tabular-nums sm:whitespace-nowrap sm:text-right' : ''}`}>
+                      /* min-w-0 (mobil karta) va sm:max-w-[22rem] (jadval): bitta uzun qiymat,
+                         masalan 70 belgili tashkilot nomi, ustunni cheksiz kengaytirib butun
+                         sahifani yon tomonga surib yuborardi. Chegara bilan matn o'raladi yoki
+                         kesiladi, jadval esa ekranda qoladi. */
+                      className={`flex min-w-0 items-baseline justify-between gap-3 py-0.5 empty:hidden before:shrink-0 before:font-mono before:text-[11px] before:font-semibold before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] sm:table-cell sm:max-w-[22rem] sm:px-3 sm:py-2 sm:align-top sm:empty:table-cell sm:before:content-none ${c.num ? 'font-mono tabular-nums sm:whitespace-nowrap sm:text-right' : ''}`}>
                       {href && ci === 0 ? <Link href={href(r)} className="text-inherit">{c.cell(r)}</Link> : c.cell(r)}
                     </td>
                   ))}
@@ -548,9 +554,24 @@ export function AuditLink({ entity, id }: { entity: string; id: string }) {
   );
 }
 
+/**
+ * Holat yorlig'i. `truncate` (whitespace-nowrap emas): uzun matn bir qatorda qoladi, lekin
+ * konteynerdan oshsa uch nuqta bilan kesiladi.
+ *
+ * Nega: yorliq ichida tashkilot nomi ham bo'ladi va u 70 belgigacha chiqadi. nowrap bilan u
+ * jadval katagini cho'zar, katak sahifani cho'zar va butun sahifa yon tomonga surilardi
+ * (foydalanuvchilar ro'yxati 1280 px da ham). truncate esa overflow:hidden beradi, shuning
+ * uchun eng kichik kenglik nolga tushadi va yorliq hech qachon sahifani cho'zmaydi.
+ * To'liq matn title da: kesilgani sichqoncha ostida o'qiladi.
+ */
 export function Pill({ tone = 'neutral', children }: { tone?: 'ok' | 'warn' | 'bad' | 'neutral'; children: React.ReactNode }) {
   const c = tone === 'ok' ? 'bg-teal-soft text-teal-ink' : tone === 'warn' ? 'bg-amber-soft text-amber-ink' : tone === 'bad' ? 'bg-red-50 text-red-700' : 'bg-sand text-muted';
-  return <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${c}`}>{children}</span>;
+  return (
+    <span title={typeof children === 'string' ? children : undefined}
+      className={`inline-block max-w-full truncate align-middle rounded-full px-2 py-0.5 text-[11px] font-semibold ${c}`}>
+      {children}
+    </span>
+  );
 }
 
 /** Ro'yxat yuklanmadi: xato matni va "Qayta urinish". To'qqiz ekranda bir xil, shuning uchun kitda. */
@@ -694,14 +715,23 @@ export function Drawer({ open, title, onClose, children, footer, side = 'right' 
   open: boolean; title: string; onClose: () => void; children: React.ReactNode; footer?: React.ReactNode; side?: 'left' | 'right';
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  /*
+   * onClose ref orqali: chaqiruvchilar uni har renderda yangi funksiya qilib beradi
+   * (onClose={() => setSheet(null)}). U effekt bog'liqligida turganida har harf
+   * yozilganda (holat o'zgaradi, render bo'ladi) effekt qayta yurib fokusni varaqning
+   * o'ziga olib qo'yardi: odam har harfdan keyin inputga qayta bosishga majbur edi.
+   * Endi effekt faqat ochilish/yopilishda yuradi, fokus faqat ochilganda kiradi.
+   */
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeRef.current(); };
     document.addEventListener('keydown', onKey);
     // Ochilganda fokus varaq ichiga kirsin, aks holda Tab orqadagi ro'yxatni aylanib chiqadi
     ref.current?.focus();
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open]);
   // Tab varaq ichida aylanadi: aria-modal buni va'da qiladi; aks holda fokus orqadagi ro'yxat va
   // menyuga chiqib ketar, klaviaturali operator varaq ostidagi tugmani ko'rmasdan bosardi
   const trap = (e: React.KeyboardEvent) => {

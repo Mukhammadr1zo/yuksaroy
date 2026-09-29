@@ -148,7 +148,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <AdminContext.Provider value={ctx}>
       {/* Chapda yopishqoq menyu (o'z ichida aylanadi), o'ngda topbar va sahifa; lg dan past menyu varaqda */}
       <div className="min-h-dvh lg:grid lg:grid-cols-[auto_minmax(0,1fr)]">
-        <aside className="hidden border-r border-line/70 lg:sticky lg:top-0 lg:block lg:h-dvh lg:overflow-y-auto">
+        {/* no-scrollbar: menyu aylanadi, lekin chiziq ko'rinmaydi. Ko'rinadigan chiziq 19 band
+            bilan har ekranda turar va menyuni "sinib qolgan" dek ko'rsatardi */}
+        <aside className="no-scrollbar hidden border-r border-line/70 lg:sticky lg:top-0 lg:block lg:h-dvh lg:overflow-y-auto">
           <AdminNav mode={navMin ? 'rail' : 'full'} counts={counts} isOwner={isOwner} />
         </aside>
         <div className="min-w-0">

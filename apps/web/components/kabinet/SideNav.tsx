@@ -36,7 +36,8 @@ export function SideNav({ counts }: { counts?: Partial<Record<string, number>> }
           <Link key={href} href={href}
             className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition-colors duration-150 lg:shrink ${on ? 'bg-navy text-white' : 'text-muted hover:bg-white hover:text-navy'}`}>
             {t(key)}
-            {n ? <span className={`rounded-full px-1.5 font-mono text-[11px] ${on ? 'bg-white/20 text-white' : 'bg-orange text-white'}`}>{n}</span> : null}
+            {/* bg-amber: loyihada "orange" tokeni yo'q, bg-orange hech narsa bermas va oq raqam oq fonda ko'rinmasdi */}
+            {n ? <span className={`rounded-full px-1.5 font-mono text-[11px] ${on ? 'bg-white/20 text-white' : 'bg-amber text-white'}`}>{n}</span> : null}
           </Link>
         );
       })}

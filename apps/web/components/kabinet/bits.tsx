@@ -5,8 +5,8 @@ import { LISTING_LABELS, type ListingStatus, type SearchLang } from '@yuksaroy/d
 import { ApiError } from '@/lib/api';
 
 export const INPUT = 'w-full rounded-xl border border-line bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand disabled:text-muted';
-export const BTN_PRIMARY = 'rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98] disabled:opacity-60';
-export const BTN_NAVY = 'rounded-full bg-navy px-5 py-2 text-sm font-semibold text-white transition hover:bg-navy-2 disabled:opacity-60';
+export const BTN_PRIMARY = 'rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:cursor-not-allowed';
+export const BTN_NAVY = 'rounded-full bg-navy px-5 py-2 text-sm font-semibold text-white transition hover:bg-navy-2 disabled:bg-line disabled:text-muted disabled:cursor-not-allowed';
 export const BTN_GHOST = 'rounded-full border border-line bg-white px-5 py-2 text-sm font-semibold transition hover:border-teal hover:bg-sand disabled:opacity-60';
 export const CHIP = (on: boolean) => `rounded-full px-3 py-1.5 text-sm font-semibold transition ${on ? 'bg-navy text-white' : 'border border-line bg-white text-muted hover:border-teal hover:text-ink'}`;
 
