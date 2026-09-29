@@ -68,6 +68,22 @@ export default function AdminSubscriptionsPage() {
   const [moneyReceived, setMoneyReceived] = useState(false);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  // Qo'lda eslatma natijasi ro'yxat tepasida: varaq yopiq turganda ham ko'rinsin
+  const [remindMsg, setRemindMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+
+  /**
+   * Tugayotgan obunaga qo'lda eslatma (operator ham yuboradi). Bir bosqichli: qaytarilmas zarar
+   * yo'q, kunlik chegara serverda (409 REMIND_TODAY), shu sababli ikkinchi bosish xabar bilan qaytadi.
+   */
+  async function remind(r: Row) {
+    setRemindMsg(null);
+    try {
+      await post(`/admin/subscriptions/${r.id}/remind`, {});
+      setRemindMsg({ tone: 'ok', text: ts('remindOk', { phone: phoneDisplay(r.user.phone ?? '') }) });
+    } catch (e) {
+      setRemindMsg({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) });
+    }
+  }
 
   // Varaq URL da: page ham patch da, aks holda ochish sahifani 1 ga qaytarardi
   function open(r: Row) { setReason(''); setMoneyReceived(false); setNote(null); set({ open: r.id, page: f.page }, 'replace'); }
@@ -146,6 +162,7 @@ export default function AdminSubscriptionsPage() {
       </Toolbar>
 
       {err ? <LoadError err={err} onRetry={reload} /> : null}
+      {remindMsg ? <Notice tone={remindMsg.tone}>{remindMsg.text}</Notice> : null}
       {data ? <p className="mt-4 font-mono text-xs text-muted">{tc('total', { count: data.total })}</p> : null}
 
       <DataTable
@@ -157,6 +174,9 @@ export default function AdminSubscriptionsPage() {
           { label: tb('open'), onSelect: () => open(r) },
           { label: tb('user'), href: `/admin/users/${r.user.id}` },
           ...(r.user.phone ? [{ label: ts('openAll'), href: `/admin/subscriptions?q=${encodeURIComponent(r.user.phone)}` }] : []),
+          // Eslatma faqat faol va 30 kun ichida tugaydiganga: avto eslatma 3 kun qolganda ketadi, undan oldingi
+          // qo'ng'iroq o'rnini shu bosadi; uzoq muddatliga eslatma shovqin
+          ...(r.status === 'ACTIVE' && (daysLeft(r.endsAt) ?? 99) <= 30 ? [{ label: ts('remind'), onSelect: () => void remind(r) }] : []),
           { label: tb('history'), href: `/admin/audit?entity=Subscription&entityId=${r.id}` },
         ]}
       />

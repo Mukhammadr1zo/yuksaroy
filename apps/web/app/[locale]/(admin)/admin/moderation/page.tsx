@@ -4,6 +4,8 @@
  * Shahobcha ham terminal, shuning uchun da'vo navbati bitta: ilgari ikkita bo'lim bir xil
  * qatorlarni ko'rsatib, qarorni ikki xil endpointga yuborardi.
  * Faol bo'lim URL da (?tab=), shunda bosh sahifadagi "kutilmoqda" havolalari to'g'ri bo'limga olib keladi.
+ * ?mine=1 faqat menga biriktirilgan qatorlar (vazifalar xaritasi bitta so'rov: GET /admin/tasks?open=1),
+ * #<id> esa vazifa havolasidan kelgan qatorni o'rtaga keltirib 2 s belgilaydi (obyekt sahifasi yo'q navbatlar).
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -17,13 +19,39 @@ import type { AdminPremiumOrder, AdminSubscription, ContactPage, ReportPage } fr
 import { useLang, useListingLabels } from '@/components/kabinet/bits';
 import { BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, INPUT, Labeled, Notice, PageHead, Pager, Pill, Toolbar, errText, useAdminList, type Paged } from '@/components/admin/kit';
 import { Decide, type Decision } from '@/components/admin/Decide';
+import { AssignTask, type Task, type TaskEntity } from '@/components/admin/AssignTask';
+import { useAdminMe } from '@/components/admin/context';
 import { MessageFiles } from '@/components/chat/Attachments';
 
 type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'subscription' | 'contact' | 'reports';
 const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'subscription', 'contact', 'reports'];
 const isTab = (v: string | null): v is Tab => TABS.includes(v as Tab);
+/** Yorliq -> vazifa obyekti turi (serverdagi TASK_ENTITIES; Order va UrgentRequest o'z varaqlarida). */
+const ENTITY: Record<Tab, TaskEntity> = { listings: 'Listing', kyc: 'Organization', claims: 'Terminal', premium: 'PremiumOrder', subscription: 'Subscription', contact: 'ContactMessage', reports: 'Report' };
+/** Shu sahifada chiziladigan turlar: xaritada Order va UrgentRequest ham bor, ular chip soniga kirmasin (son ko'ringan qatorlarga teng bo'lsin). */
+const MOD = new Set<TaskEntity>(Object.values(ENTITY));
 
 type Flash = { text: string; tone: 'ok' | 'bad' } | null;
+/** Qator komponentlariga uzatiladigan vazifa holati: task yo'q = biriktirilmagan. */
+type TaskProps = { task?: Task | null; onTaskChanged?: () => void };
+/** Yorliq qatorlari: joriy vazifani beradi, mine rejimida faqat menikini qoldiradi. */
+type TaskCtx = { taskOf: (entity: TaskEntity, id: string) => Task | null; mine: boolean; meId: string; reloadTasks: () => void };
+
+/**
+ * #<id> hash: qatorlar chizilgach o'sha qator o'rtaga keladi va 2 s belgilanadi. Vazifa havolasi
+ * shu bilan keladi (Premium, murojaat, shikoyatda alohida obyekt sahifasi yo'q). ready = ro'yxat chizildi.
+ */
+function useHashRing(ready: boolean) {
+  useEffect(() => {
+    if (!ready) return;
+    const el = location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null;
+    if (!el) return;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('ring-2', 'ring-teal');
+    const tm = setTimeout(() => el.classList.remove('ring-2', 'ring-teal'), 2000);
+    return () => clearTimeout(tm);
+  }, [ready]);
+}
 
 // Suspense shart emas: AdminShell bolalarni bitta Suspense ichida chizadi (useSearchParams talabi bir joyda)
 export default function ModerationPage() {
@@ -33,8 +61,11 @@ export default function ModerationPage() {
   const tsb = useTranslations('subscription');
   const router = useRouter();
   const pathname = usePathname();
-  const q = useSearchParams().get('tab');
+  const sp = useSearchParams();
+  const q = sp.get('tab');
   const tab: Tab = isTab(q) ? q : 'listings';
+  const mine = sp.get('mine') === '1';
+  const { me } = useAdminMe();
 
   const [listings, setListings] = useState<OwnerListing[] | null>(null);
   const [orgs, setOrgs] = useState<OrgRecord[] | null>(null);
@@ -45,6 +76,8 @@ export default function ModerationPage() {
   const [reports, setReports] = useState<ReportPage | null>(null);
   const [err, setErr] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
+  // Ochiq vazifalar xaritasi entity:id bo'yicha; 500 ta yetadi (navbatlar shuncha bo'lmaydi), oshsa keyingi o'qishda
+  const [tasks, setTasks] = useState<Map<string, Task>>(() => new Map());
 
   // Yorliqdagi son javobsizlarniki. Alohida funksiya: ContactTab amaldan keyin uni
   // qayta chaqiradi, aks holda yorliq filtrlangan sonni ko'rsatib qolardi.
@@ -55,6 +88,17 @@ export default function ModerationPage() {
   const loadReportCount = useCallback(() => {
     void api<ReportPage>('/admin/reports?limit=1&status=NEW').then(setReports).catch(() => setErr(true));
   }, []);
+  // Vazifalar ikkilamchi: yiqilsa navbatlar baribir ko'rinadi, shuning uchun xato e'lon qilinmaydi.
+  // Har biriktirish, yopish va qarordan keyin qayta o'qiladi (qaror berilgan ishni server o'zi yopadi).
+  const reloadTasks = useCallback(() => {
+    void api<{ items: Task[] }>('/admin/tasks?open=1&limit=500')
+      .then((r) => setTasks(new Map(r.items.map((x) => [`${x.entity}:${x.entityId}`, x])))).catch(() => {});
+  }, []);
+  const taskOf = useCallback((entity: TaskEntity, id: string) => tasks.get(`${entity}:${id}`) ?? null, [tasks]);
+  const isMine = (entity: TaskEntity, id: string) => taskOf(entity, id)?.assignee?.id === me.id;
+  const mineCount = [...tasks.values()].filter((x) => MOD.has(x.entity) && x.assignee?.id === me.id).length;
+  const ctx: TaskCtx = { taskOf, mine, meId: me.id, reloadTasks };
+  const goTab = (k: Tab, m: boolean) => router.replace(`${pathname}?tab=${k}${m ? '&mine=1' : ''}`, { scroll: false });
 
   useEffect(() => {
     // Har navbat alohida: biri yiqilsa qolgan bo'limlar ko'rinaveradi, xato esa bir marta e'lon qilinadi
@@ -68,23 +112,35 @@ export default function ModerationPage() {
     // Faqat yorliqdagi son uchun: to'liq ro'yxat, qidiruv va sahifalash ContactTab da.
     loadContactCount();
     loadReportCount();
-  }, [loadContactCount, loadReportCount]);
+    reloadTasks();
+  }, [loadContactCount, loadReportCount, reloadTasks]);
 
-  const counts: Record<Tab, number | null> = { listings: listings?.length ?? null, kyc: orgs?.length ?? null, claims: claims?.length ?? null, premium: prem?.length ?? null, subscription: subs?.length ?? null, contact: msgs?.total ?? null, reports: reports?.total ?? null };
+  // mine rejimida massivli yorliqlar mijozda filtrlanadi (hammasi yuklangan); murojaat va shikoyat
+  // sahifalangan, ularning soni xaritadan (menga biriktirilgan ochiq vazifalar), qatorlari joriy sahifada
+  const only = <T extends { id: string }>(k: Tab, xs: T[] | null) => (mine ? xs?.filter((x) => isMine(ENTITY[k], x.id)) ?? null : xs);
+  const vl = only('listings', listings), vo = only('kyc', orgs), vc = only('claims', claims), vp = only('premium', prem), vs = only('subscription', subs);
+  const mineOf = (k: Tab) => [...tasks.values()].filter((x) => x.entity === ENTITY[k] && x.assignee?.id === me.id).length;
+  const counts: Record<Tab, number | null> = {
+    listings: vl?.length ?? null, kyc: vo?.length ?? null, claims: vc?.length ?? null, premium: vp?.length ?? null, subscription: vs?.length ?? null,
+    contact: mine ? mineOf('contact') : msgs?.total ?? null, reports: mine ? mineOf('reports') : reports?.total ?? null,
+  };
   const tabLabel = (k: Tab) => (k === 'premium' ? tp('admin.tab') : k === 'subscription' ? tsb('admin.tab') : k === 'contact' ? tp('messages.tab') : t(`tabs.${k}`));
-  const emptyText = tab === 'premium' ? tp('admin.empty') : tab === 'subscription' ? tsb('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty');
+  const emptyText = mine ? t('tasks.mineEmpty') : tab === 'premium' ? tp('admin.empty') : tab === 'subscription' ? tsb('admin.empty') : tab === 'contact' ? tp('messages.empty') : t('empty');
 
-  // Qaror berilgan qator ro'yxatdan chiqadi, natija esa ro'yxat tepasida bir qator bo'lib qoladi
-  const decided = (d: Decision) => setFlash({ text: t(`decided.${d}`), tone: d === 'approved' ? 'ok' : 'bad' });
+  // Qaror berilgan qator ro'yxatdan chiqadi, natija esa ro'yxat tepasida bir qator bo'lib qoladi;
+  // vazifasi serverda yopiladi, xarita qayta o'qiladi (chip soni to'g'ri qolsin)
+  const decided = (d: Decision) => { setFlash({ text: t(`decided.${d}`), tone: d === 'approved' ? 'ok' : 'bad' }); reloadTasks(); };
   const drop = <T extends { id: string }>(set: (f: (xs: T[] | null) => T[] | null) => void, id: string) => set((xs) => xs?.filter((x) => x.id !== id) ?? null);
+  const tp2 = (k: Tab, id: string): TaskProps => ({ task: taskOf(ENTITY[k], id), onTaskChanged: reloadTasks });
 
   const loaded = counts[tab] !== null;
-  const rows = tab === 'listings' ? listings?.map((l) => <ListingRow key={l.id} l={l} onDone={(d) => { drop(setListings, l.id); decided(d); }} />)
-    : tab === 'kyc' ? orgs?.map((o) => <OrgRow key={o.id} o={o} onDone={(d) => { drop(setOrgs, o.id); decided(d); }} />)
-    : tab === 'claims' ? claims?.map((x) => <TerminalClaimRow key={x.id} x={x} onDone={(d) => { drop(setClaims, x.id); decided(d); }} />)
-    : tab === 'premium' ? prem?.map((o) => <PremiumRow key={o.id} o={o} onDone={(text) => { drop(setPrem, o.id); setFlash({ text, tone: 'ok' }); }} />)
-    : tab === 'subscription' ? subs?.map((s) => <SubscriptionRow key={s.id} s={s} onDone={(text) => { drop(setSubs, s.id); setFlash({ text, tone: 'ok' }); }} />)
+  const rows = tab === 'listings' ? vl?.map((l) => <ListingRow key={l.id} l={l} {...tp2('listings', l.id)} onDone={(d) => { drop(setListings, l.id); decided(d); }} />)
+    : tab === 'kyc' ? vo?.map((o) => <OrgRow key={o.id} o={o} {...tp2('kyc', o.id)} onDone={(d) => { drop(setOrgs, o.id); decided(d); }} />)
+    : tab === 'claims' ? vc?.map((x) => <TerminalClaimRow key={x.id} x={x} {...tp2('claims', x.id)} onDone={(d) => { drop(setClaims, x.id); decided(d); }} />)
+    : tab === 'premium' ? vp?.map((o) => <PremiumRow key={o.id} o={o} {...tp2('premium', o.id)} onDone={(text) => { drop(setPrem, o.id); setFlash({ text, tone: 'ok' }); reloadTasks(); }} />)
+    : tab === 'subscription' ? vs?.map((s) => <SubscriptionRow key={s.id} s={s} {...tp2('subscription', s.id)} onDone={(text) => { drop(setSubs, s.id); setFlash({ text, tone: 'ok' }); reloadTasks(); }} />)
     : null; // murojaatlar alohida komponentda: o'z qidiruvi va sahifalashi bor
+  useHashRing(tab !== 'contact' && tab !== 'reports' && loaded);
 
   return (
     <>
@@ -93,21 +149,27 @@ export default function ModerationPage() {
       <div className="mt-5 flex flex-wrap gap-2">
         {TABS.map((k) => (
           <button key={k} type="button" aria-pressed={tab === k}
-            onClick={() => { setFlash(null); router.replace(`${pathname}?tab=${k}`, { scroll: false }); }}
+            onClick={() => { setFlash(null); goTab(k, mine); }}
             className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-colors duration-150 ${tab === k ? 'bg-navy text-white' : 'border border-line bg-white text-muted hover:border-teal hover:text-ink'}`}>
             {tabLabel(k)}{counts[k] ? <span className={`ml-1.5 font-mono text-xs tabular-nums ${tab === k ? 'text-white/70' : 'text-muted'}`}>{counts[k]}</span> : null}
           </button>
         ))}
+        {/* Menga biriktirilgan: yorliq emas, filtr; yorliqlar orasida yurganda saqlanadi (goTab) */}
+        <button type="button" aria-pressed={mine} onClick={() => { setFlash(null); goTab(tab, !mine); }}
+          className={`ml-auto rounded-full px-3 py-1.5 text-sm font-semibold transition-colors duration-150 ${mine ? 'bg-teal text-white' : 'border border-line bg-white text-muted hover:border-teal hover:text-ink'}`}>
+          {t('tasks.mineCount', { n: mineCount })}
+        </button>
       </div>
 
       {err ? <Notice tone="err">{tc('loadFailed')}</Notice> : null}
       {flash ? <p role="status" className={`mt-3 text-sm font-semibold ${flash.tone === 'ok' ? 'text-teal-ink' : 'text-red-700'}`}>{flash.text}</p> : null}
 
-      {tab === 'contact' ? <ContactTab onChanged={loadContactCount} />
-        : tab === 'reports' ? <ReportsTab onChanged={loadReportCount} />
+      {tab === 'contact' ? <ContactTab onChanged={loadContactCount} ctx={ctx} />
+        : tab === 'reports' ? <ReportsTab onChanged={loadReportCount} ctx={ctx} />
         : !loaded ? <p className="mt-5 text-sm text-muted">{err ? tc('loadFailed') : tc('loading')}</p>
         : counts[tab] === 0 ? <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{emptyText}</div>
         : <ul className="mt-5 space-y-3">{rows}</ul>}
+      {mine ? <p className="mt-3 text-xs text-muted">{t('tasks.decision.mine')}</p> : null}
       {tab === 'premium' || tab === 'contact' ? <p className="mt-3 text-xs text-muted">{tp(tab === 'premium' ? 'admin.lead' : 'messages.lead')}</p> : null}
       {tab === 'subscription' ? <p className="mt-3 text-xs text-muted">{tsb('admin.lead')}</p> : null}
       {tab === 'reports' ? <p className="mt-3 text-xs text-muted">{t('reports.lead')}</p> : null}
@@ -115,17 +177,23 @@ export default function ModerationPage() {
   );
 }
 
-function ListingRow({ l, onDone }: { l: OwnerListing; onDone: (d: Decision) => void }) {
+/** Qator sarlavhasidagi biriktirish: vazifa holati yoki tugma; forma ota flex-wrap ning keyingi qatoriga tushadi. */
+function RowTask({ entity, id, task, onTaskChanged }: { entity: TaskEntity; id: string } & TaskProps) {
+  return <AssignTask entity={entity} entityId={id} task={task ?? null} onChanged={() => onTaskChanged?.()} />;
+}
+
+function ListingRow({ l, onDone, ...tk }: { l: OwnerListing; onDone: (d: Decision) => void } & TaskProps) {
   const t = useTranslations('admin.listing');
   const tr = useTranslations('region');
   const L = useListingLabels();
   const lang = useLang();
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={l.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{L.kind[l.kind]}</Pill>
         {/* Sarlavha obyekt sahifasiga: shikoyat, yozishma va pul tarixi qaror oldidan o'sha yerda ko'riladi */}
         <Link href={`/admin/listings/${l.id}`} className="min-w-0 break-words font-semibold text-navy hover:underline">{l.title}</Link>
+        <RowTask entity="Listing" id={l.id} {...tk} />
         <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(l.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
@@ -146,16 +214,17 @@ function ListingRow({ l, onDone }: { l: OwnerListing; onDone: (d: Decision) => v
   );
 }
 
-function OrgRow({ o, onDone }: { o: OrgRecord; onDone: (d: Decision) => void }) {
+function OrgRow({ o, onDone, ...tk }: { o: OrgRecord; onDone: (d: Decision) => void } & TaskProps) {
   const t = useTranslations('admin.org');
   const tr = useTranslations('region');
   const lang = useLang();
   const kinds = o.kinds?.length ? o.kinds : [o.kind];
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={o.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-2">
         <Link href={`/admin/orgs/${o.id}`} className="min-w-0 break-words font-semibold text-navy hover:underline">{o.name}</Link>
         {kinds.map((k) => <Pill key={k} tone="ok">{ORG_KIND_LABELS[lang][k]}</Pill>)}
+        <RowTask entity="Organization" id={o.id} {...tk} />
         {o.kycRequestedAt ? <span className="ml-auto font-mono text-xs text-muted">{t('requestedAt')} {uzDateTime(o.kycRequestedAt, lang)}</span> : null}
       </div>
       <p className="mt-1 font-mono text-sm">
@@ -170,7 +239,7 @@ function OrgRow({ o, onDone }: { o: OrgRecord; onDone: (d: Decision) => void }) 
 }
 
 /** Terminal da'vosi: da'vogar tashkilot, obyektda ko'rsatilgan egasi va mas'ul shaxs, stansiya, ochiq sahifa; qaror POST /terminals/:id/claim/decide. */
-function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decision) => void }) {
+function TerminalClaimRow({ x, onDone, ...task }: { x: AdminTerminal; onDone: (d: Decision) => void } & TaskProps) {
   const t = useTranslations('terminalsAdmin.admin');
   const tk = useTranslations('kind');
   const tr = useTranslations('region');
@@ -178,11 +247,12 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
   // Temir yo'l bo'lmagan obyektda (ROAD, MULTI) pasport yo'q: obyektning o'z raqami olinadi
   const contact = [x.rail?.contactName, x.rail?.contactPhone ?? x.phone].filter(Boolean).join(' · ');
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={x.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{tk(x.kind)}</Pill>
         <Link href={`/admin/terminals/${x.id}`} className="min-w-0 break-words font-semibold text-navy hover:underline">{x.name}</Link>
         <span className="text-sm text-muted">{t('station')}: {stationName({ station: x.station, stationNameRaw: x.rail?.stationNameRaw ?? null })}{x.regionCode && tr.has(x.regionCode) ? ` · ${tr(x.regionCode)}` : ''}</span>
+        <RowTask entity="Terminal" id={x.id} {...task} />
       </div>
       <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></p>
       {/*
@@ -212,7 +282,7 @@ function TerminalClaimRow({ x, onDone }: { x: AdminTerminal; onDone: (d: Decisio
  * qolib ketardi va operatorda ikki yo'l bo'lardi, pulsiz Premium berish yoki qatorni
  * umrbod ko'rib yurish. Sabab majburiy, chunki u auditga yoziladi.
  */
-function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string) => void }) {
+function PremiumRow({ o, onDone, ...tk }: { o: AdminPremiumOrder; onDone: (text: string) => void } & TaskProps) {
   const lang = useLang();
   const t = useTranslations('premium.admin');
   const ta = useTranslations('admin');
@@ -230,10 +300,11 @@ function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string
     catch { setErr(true); setBusy(false); }
   }
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={o.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-semibold">{o.listing.title}</span>
         <Pill tone="warn">{t(`status.${o.status}`)}</Pill>
+        <RowTask entity="PremiumOrder" id={o.id} {...tk} />
         <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(o.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
@@ -270,7 +341,7 @@ function PremiumRow({ o, onDone }: { o: AdminPremiumOrder; onDone: (text: string
  * summani qaysi qatorlarga taqsimlashini shu bo'yicha ko'radi. Qatorlar serverda
  * tashkilot id si bo'yicha guruhlab keladi.
  */
-function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: string) => void }) {
+function SubscriptionRow({ s, onDone, ...tk }: { s: AdminSubscription; onDone: (text: string) => void } & TaskProps) {
   const lang = useLang();
   const t = useTranslations('subscription.admin');
   const ta = useTranslations('admin');
@@ -299,10 +370,11 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
   }
   const who = s.user.fullName || s.user.phone || s.user.email || s.userId;
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={s.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-semibold">{who}</span>
         <Pill tone="warn">{t(`status.${s.status}`)}</Pill>
+        <RowTask entity="Subscription" id={s.id} {...tk} />
         <span className="ml-auto font-mono text-xs text-muted">{t('created')} {uzDateTime(s.createdAt, lang)}</span>
       </div>
       <p className="mt-1 text-sm text-muted">
@@ -353,7 +425,7 @@ function SubscriptionRow({ s, onDone }: { s: AdminSubscription; onDone: (text: s
  * holat maydoni yo'q, sana bo'sh bo'lishi "yangi" degani. Sukut filtr javobsizlar:
  * yorliqdagi son ham shuni sanaydi.
  */
-function ContactTab({ onChanged }: { onChanged: () => void }) {
+function ContactTab({ onChanged, ctx }: { onChanged: () => void; ctx: TaskCtx }) {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tm = useTranslations('premium.messages');
@@ -364,6 +436,9 @@ function ContactTab({ onChanged }: { onChanged: () => void }) {
   // Sukut: javobsizlar. Bo'sh qiymat useAdminList da tashlab yuboriladi, ya'ni filtrsiz
   const [handled, setHandled] = useState('0');
   const list = useAdminList<ContactPage['items'][number]>('/admin/contact/all', { q, handled, page });
+  // ponytail: mine filtri faqat joriy sahifa ichida (server ids filtri yo'q), matn bilan aytiladi; kerak bo'lsa keyin ?ids=
+  const items = list.data ? (ctx.mine ? list.data.items.filter((m) => ctx.taskOf('ContactMessage', m.id)?.assignee?.id === ctx.meId) : list.data.items) : [];
+  useHashRing(!!list.data && !list.loading);
 
   async function remove(id: string) {
     setNote(null);
@@ -371,6 +446,7 @@ function ContactTab({ onChanged }: { onChanged: () => void }) {
       await api(`/admin/contact/${id}`, { method: 'DELETE' });
       await list.reload();
       onChanged();
+      ctx.reloadTasks();
     } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); }
   }
 
@@ -380,6 +456,7 @@ function ContactTab({ onChanged }: { onChanged: () => void }) {
       await post(`/admin/contact/${id}/handled`, { handled: on, note: why });
       await list.reload();
       onChanged();
+      ctx.reloadTasks();
     } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); }
   }
 
@@ -400,12 +477,13 @@ function ContactTab({ onChanged }: { onChanged: () => void }) {
         {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
       </Toolbar>
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
+      {ctx.mine ? <p className="mt-3 text-xs text-muted">{t('tasks.pageOnly')}</p> : null}
       {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
       {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
       {list.data && !list.loading ? (
-        list.data.items.length
-          ? <ul className="mt-4 space-y-3">{list.data.items.map((m) => <ContactRow key={m.id} m={m} onDelete={remove} onMark={mark} />)}</ul>
-          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tm(handled === '0' ? 'emptyNew' : 'empty')}</div>
+        items.length
+          ? <ul className="mt-4 space-y-3">{items.map((m) => <ContactRow key={m.id} m={m} onDelete={remove} onMark={mark} task={ctx.taskOf('ContactMessage', m.id)} onTaskChanged={ctx.reloadTasks} />)}</ul>
+          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{ctx.mine ? t('tasks.mineEmpty') : tm(handled === '0' ? 'emptyNew' : 'empty')}</div>
       ) : null}
       <Pager page={page} pages={list.pages} onPage={setPage} />
     </>
@@ -413,22 +491,24 @@ function ContactTab({ onChanged }: { onChanged: () => void }) {
 }
 
 /** Aloqa formasidan kelgan murojaat: javob telefon yoki email orqali, spam o'chiriladi. */
-function ContactRow({ m, onDelete, onMark }: {
+function ContactRow({ m, onDelete, onMark, ...tk }: {
   m: ContactPage['items'][number];
   onDelete: (id: string) => Promise<void>;
   onMark: (id: string, on: boolean, why?: string) => Promise<void>;
-}) {
+} & TaskProps) {
   const lang = useLang();
   const tc = useTranslations('admin.common');
   const t = useTranslations('premium.messages');
   const [why, setWhy] = useState('');
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={m.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone="ok">{t.has(`topic.${m.topic}`) ? t(`topic.${m.topic}`) : m.topic}</Pill>
         <span className="font-semibold">{m.name}</span>
         {/* Raqam ham, pochta ham foydalanuvchilar qidiruviga tushadi: u uchalasi bo'yicha qidiradi */}
         <Link href={`/admin/users?q=${encodeURIComponent(m.contact)}`} className="min-w-0 break-all font-mono text-sm text-teal-ink underline">{m.contact}</Link>
+        {/* Hal qilingan murojaat navbatdan chiqqan: vazifa ochilmaydi (server 409 NOT_IN_QUEUE) */}
+        {m.handledAt ? null : <RowTask entity="ContactMessage" id={m.id} {...tk} />}
         <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(m.createdAt, lang)}</span>
       </div>
       <p className="mt-2 whitespace-pre-line break-words text-sm">{m.message}</p>
@@ -462,7 +542,7 @@ function ContactRow({ m, onDelete, onMark }: {
  * Obyektni yashirish tugmasi bu yerda YO'Q: har turning o'z ekrani va o'z amali bor.
  * Qator obyekt sahifasiga havola qiladi, qaror esa shikoyatning o'ziga tegishli.
  */
-function ReportsTab({ onChanged }: { onChanged: () => void }) {
+function ReportsTab({ onChanged, ctx }: { onChanged: () => void; ctx: TaskCtx }) {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
   const tr = useTranslations('admin.reports');
@@ -471,6 +551,9 @@ function ReportsTab({ onChanged }: { onChanged: () => void }) {
   const [page, setPage] = useState(1);
   const [flash, setFlash] = useState<Flash>(null);
   const list = useAdminList<ReportPage['items'][number]>('/admin/reports', { status, page });
+  // ponytail: mine filtri faqat joriy sahifa ichida (ContactTab bilan bir xil sabab)
+  const items = list.data ? (ctx.mine ? list.data.items.filter((r) => ctx.taskOf('Report', r.id)?.assignee?.id === ctx.meId) : list.data.items) : [];
+  useHashRing(!!list.data && !list.loading);
 
   return (
     <>
@@ -484,18 +567,20 @@ function ReportsTab({ onChanged }: { onChanged: () => void }) {
         {list.data ? <span className="ml-auto font-mono text-xs text-muted">{tc('total', { count: list.data.total })}</span> : null}
       </Toolbar>
       {flash ? <p role="status" className={`mt-3 text-sm font-semibold ${flash.tone === 'ok' ? 'text-teal-ink' : 'text-red-700'}`}>{flash.text}</p> : null}
+      {ctx.mine ? <p className="mt-3 text-xs text-muted">{t('tasks.pageOnly')}</p> : null}
       {list.loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p> : null}
       {list.err ? <Notice tone="err">{errText(list.err, t, t.has, tc('loadFailed'))}</Notice> : null}
       {list.data && !list.loading ? (
-        list.data.items.length
-          ? <ul className="mt-4 space-y-3">{list.data.items.map((r) => (
-              <ReportRow key={r.id} r={r} onDone={(d) => {
+        items.length
+          ? <ul className="mt-4 space-y-3">{items.map((r) => (
+              <ReportRow key={r.id} r={r} task={ctx.taskOf('Report', r.id)} onTaskChanged={ctx.reloadTasks} onDone={(d) => {
                 setFlash({ text: tr(d === 'approved' ? 'doneResolved' : 'doneDismissed'), tone: d === 'approved' ? 'ok' : 'bad' });
                 void list.reload();
                 onChanged();
+                ctx.reloadTasks();
               }} />
             ))}</ul>
-          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tr('empty')}</div>
+          : <div className={`${CARD} mt-4 border-dashed px-6 py-12 text-center text-sm text-muted`}>{ctx.mine ? t('tasks.mineEmpty') : tr('empty')}</div>
       ) : null}
       <Pager page={page} pages={list.pages} onPage={setPage} />
     </>
@@ -503,16 +588,18 @@ function ReportsTab({ onChanged }: { onChanged: () => void }) {
 }
 
 /** Bitta shikoyat: nima ustidan, nega, kim yozgan va qaror. */
-function ReportRow({ r, onDone }: { r: ReportPage['items'][number]; onDone: (d: Decision) => void }) {
+function ReportRow({ r, onDone, ...tk }: { r: ReportPage['items'][number]; onDone: (d: Decision) => void } & TaskProps) {
   const lang = useLang();
   const tr = useTranslations('admin.reports');
   return (
-    <li className={`${CARD} p-4`}>
+    <li id={r.id} className={`${CARD} p-4`}>
       <div className="flex flex-wrap items-center gap-3">
         <Pill tone={r.status === 'NEW' ? 'warn' : r.status === 'RESOLVED' ? 'ok' : 'neutral'}>{REPORT_STATUS_LABELS[lang][r.status]}</Pill>
         <span className="text-xs font-semibold text-muted">{REPORT_TARGET_LABELS[lang][r.targetKind]}</span>
         {/* Nom va havola shikoyat yuborilgan paytdagi holicha: obyekt o'chsa ham qator o'qiladi */}
         <Link href={r.targetHref} className="min-w-0 break-words font-semibold text-teal-ink underline">{r.targetTitle}</Link>
+        {/* Faqat yangi shikoyat navbatda: qaror berilganiga vazifa ochilmaydi */}
+        {r.status === 'NEW' ? <RowTask entity="Report" id={r.id} {...tk} /> : null}
         <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(r.createdAt, lang)}</span>
       </div>
       <p className="mt-2 text-sm font-semibold">{REPORT_REASON_LABELS[lang][r.reason]}</p>

@@ -7,6 +7,16 @@ export class UpstreamError extends Error {}
 export interface UpstreamHistory { count: number; events: UpstreamEvent[] }
 
 type FetchFn = typeof fetch;
+type WagonCfg = { url?: string; email?: string; password?: string };
+const envCfg = (): WagonCfg => ({ url: env.D_RAILWAY_URL, email: env.D_RAILWAY_EMAIL, password: env.D_RAILWAY_PASSWORD });
+
+/**
+ * Uchala sir ham borligi. Alohida funksiya: DRailwayClient WagonModule dan eksport qilinmagan
+ * (useFactory bilan yaratiladi), tizim sahifasi esa modulni import qilmasdan shuni so'raydi.
+ */
+export function isWagonConfigured(cfg: WagonCfg = envCfg()): boolean {
+  return !!(cfg.url && cfg.email && cfg.password);
+}
 
 /**
  * d-railway.uz (egasining tahlil platformasi) uchun server-server mijoz.
@@ -21,12 +31,12 @@ export class DRailwayClient {
   private token: string | null = null;
 
   constructor(
-    private readonly cfg: { url?: string; email?: string; password?: string } = { url: env.D_RAILWAY_URL, email: env.D_RAILWAY_EMAIL, password: env.D_RAILWAY_PASSWORD },
+    private readonly cfg: WagonCfg = envCfg(),
     private readonly fetchFn: FetchFn = fetch,
   ) {}
 
   get configured(): boolean {
-    return !!(this.cfg.url && this.cfg.email && this.cfg.password);
+    return isWagonConfigured(this.cfg);
   }
 
   /** Tarix; vagon hisobotlarda yo'q bo'lsa null. Tarmoq/upstream xatosi UpstreamError. */

@@ -3,8 +3,9 @@
  * Admin bosh sahifasi (Boshqaruv 3.0): ish kuni shu yerdan boshlanadi.
  *
  * Uch savolga javob beradi: bugun nima kutmoqda (va qaysi biri eng uzoq kutdi), pul qayerda
- * turibdi, nima o'smoqda yoki tushmoqda. Uch so'rov parallel va har biri alohida yiqiladi:
- * /admin/home (hamma admin), /admin/home/money (faqat ega: tushum), /admin/audit?actor=me.
+ * turibdi, nima o'smoqda yoki tushmoqda. To'rt so'rov parallel va har biri alohida yiqiladi:
+ * /admin/home (hamma admin), /admin/home/money (faqat ega: tushum), /admin/audit?actor=me,
+ * /admin/tasks?assignee=me (menga biriktirilgan ish; yiqilsa jim, blok shunchaki chizilmaydi).
  *
  * Qoida: har son yonida qaror matni (i18n home.decision.*) yoki son chizilmaydi.
  * Sog' baza, "oxirgi sutkada" uch son va umumiy amallar tasmasi shu sababli yo'q:
@@ -14,12 +15,13 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { num, som, uzDateTime } from '@/lib/format';
+import { num, som, uzDate, uzDateTime } from '@/lib/format';
 import { CARD, Notice, PageHead, Pill, Skeleton, errText, useActionText, useRovingList } from '@/components/admin/kit';
 import { useAdminMe } from '@/components/admin/context';
+import { ageOf } from '@/components/admin/age';
+import { dueTone, type Task } from '@/components/admin/AssignTask';
 import { Sparkline } from '@/components/admin/Sparkline';
 
-type Tone = 'ok' | 'warn' | 'bad' | 'neutral';
 type Pair = { last7: number; prev7: number };
 type AlertCode = 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN';
 type Home = {
@@ -37,6 +39,8 @@ type Home = {
 };
 type Money = { thisMonthTiyin: number; prevMonthTiyin: number; payments: number };
 type AuditRow = { id: string; action: string; entity: string | null; meta: unknown; createdAt: string };
+/** GET /admin/tasks?assignee=me&open=1&limit=5: 5 qator, summary butun filtr bo'yicha. */
+type MyTasks = { items: Task[]; summary: { open: number; overdue: number } };
 
 /** Navbat kaliti -> home.* nomi (serverdagi QueueKey bilan bir xil ro'yxat). */
 const WORK_LABEL: Record<string, string> = {
@@ -44,10 +48,11 @@ const WORK_LABEL: Record<string, string> = {
   premiumPending: 'pendingPremium', subscriptionPending: 'pendingSubscription', ordersPending: 'pendingOrders',
   urgentOpen: 'pendingUrgent', contactNew: 'pendingContact', reportsNew: 'pendingReports',
 };
-/** Ogohlantirishdan qaror sahifasiga: baza haqidagisi hech qayerga olib bormaydi (serverga qarash kerak). */
+/** Ogohlantirishdan qaror sahifasiga. Baza haqidagisi Tizim sahifasiga, u faqat egada bor: operatorga havola yo'q (serverga qarash kerak). */
 const ALERT_HREF: Partial<Record<AlertCode, string>> = {
   NO_ACTIVE_PLAN: '/admin/plans?new=1', WAGON_UPSTREAM: '/admin/audit?action=wagon.search', AD_EXPIRED: '/admin/ads', AD_ENDING: '/admin/ads',
 };
+const alertHref = (code: AlertCode, isOwner: boolean) => (code === 'DB_SLOW' || code === 'DB_DOWN' ? (isOwner ? '/admin/system' : undefined) : ALERT_HREF[code]);
 const GROWTH = [
   { k: 'users', label: 'growthUsers', href: '/admin/users?sort=createdAt&dir=desc', decision: 'users' },
   { k: 'listings', label: 'growthListings', href: '/admin/listings?status=ACTIVE&sort=createdAt&dir=desc', decision: 'listings' },
@@ -66,20 +71,6 @@ const BLOCKS = ['work', 'money', 'growth', 'series', 'commission', 'reveals'];
 const H2 = 'font-mono text-[11px] font-semibold uppercase tracking-wide text-muted';
 const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
 const days = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-
-/**
- * Soat aniqligidagi yosh: "3 kun" / "5 soat" / "20 daqiqa". Kun bilan cheklanmaydi, chunki
- * bugun kelgan to'lov ham 6 soat kutgan bo'lishi mumkin. 3 kundan oshgan qizil, 1 kundan sariq.
- */
-function ageOf(iso: string): { key: 'days' | 'hours' | 'minutes' | 'now'; n: number; tone: Tone } {
-  const ms = Math.max(0, Date.now() - new Date(iso).getTime());
-  const d = Math.floor(ms / 86_400_000);
-  if (d >= 1) return { key: 'days', n: d, tone: d >= 3 ? 'bad' : 'warn' };
-  const h = Math.floor(ms / 3_600_000);
-  if (h >= 1) return { key: 'hours', n: h, tone: 'neutral' };
-  const m = Math.floor(ms / 60_000);
-  return m >= 1 ? { key: 'minutes', n: m, tone: 'neutral' } : { key: 'now', n: 0, tone: 'neutral' };
-}
 
 /** Foiz farqi nishoni. Oldingi oyna nol bo'lsa foiz yo'q: "yangi". warnAt: shundan past tushish sariq. */
 function Delta({ cur, prev, warnAt }: { cur: number; prev: number; warnAt: number }) {
@@ -140,6 +131,51 @@ function WorkList({ rows }: { rows: Home['work'] }) {
   );
 }
 
+/**
+ * Menga biriktirilgan ish: 5 tagacha qator, muddati o'tgan tepada (server tartibi). Butun qator
+ * havola (task.href), j/k va Enter navbat ro'yxati bilan bir xil odat (alohida hook chaqiruvi).
+ * Faqat open > 0 bo'lganda chiziladi: nol vazifa qaror bermaydi.
+ */
+function MineTasks({ data }: { data: MyTasks }) {
+  const th = useTranslations('admin.home');
+  const tt = useTranslations('admin.tasks');
+  const locale = useLocale();
+  const router = useRouter();
+  const rov = useRovingList(data.items.length, { onOpen: (i) => router.push(data.items[i]!.href) });
+  return (
+    <div className={`${CARD} mt-2 p-4`}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-sm font-semibold text-ink">
+          {th('mineTasks')}
+          <span className="ml-2 font-mono text-xs tabular-nums text-navy">{th('mineTasksCount', { n: data.summary.open })}</span>
+        </span>
+        <span className="flex items-center gap-3">
+          {data.summary.overdue > 0 ? <Pill tone="bad">{th('mineTasksOverdue', { n: data.summary.overdue })}</Pill> : null}
+          <Link href="/admin/moderation?mine=1" className="text-xs font-semibold text-teal-ink hover:underline">{th('mineTasksAll')}</Link>
+        </span>
+      </div>
+      <ul {...rov.containerProps} className="mt-2 divide-y divide-line/70 outline-none">
+        {data.items.map((x, i) => {
+          const due = dueTone(x.dueAt);
+          return (
+            <li key={x.id} {...rov.itemProps(i)} onFocus={() => rov.setIndex(i)}
+              className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal">
+              <Link href={x.href} tabIndex={-1} className="flex items-center gap-3 py-2 hover:bg-sand/60">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm text-ink">{x.title ?? x.entityId}</span>
+                  <span className="block text-xs text-muted">{th(WORK_LABEL[x.queue] ?? x.queue)}</span>
+                </span>
+                {due ? <Pill tone={due.tone}>{due.key === 'dueBy' ? tt('dueBy', { date: uzDate(x.dueAt!, locale) }) : tt(due.key)}</Pill> : null}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-xs text-muted">{th('mineTasksDecision')}</p>
+    </div>
+  );
+}
+
 export default function AdminHomePage() {
   const t = useTranslations('admin');
   const th = useTranslations('admin.home');
@@ -151,14 +187,17 @@ export default function AdminHomePage() {
   const [homeErr, setHomeErr] = useState<unknown>(null);
   const [money, setMoney] = useState<Money | null | 'err'>(null);
   const [mine, setMine] = useState<AuditRow[] | null | 'err'>(null);
+  const [tasks, setTasks] = useState<MyTasks | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    setHome(null); setHomeErr(null); setMoney(null); setMine(null);
+    setHome(null); setHomeErr(null); setMoney(null); setMine(null); setTasks(null);
     api<Home>('/admin/home').then(setHome).catch(setHomeErr);
     // Tushum faqat egaga: operator uchun so'rov umuman ketmaydi (403 xabari emas, karta yo'q)
     if (isOwner) api<Money>('/admin/home/money').then(setMoney).catch(() => setMoney('err'));
     api<{ items: AuditRow[] }>(`/admin/audit?actor=${me.id}&limit=8`).then((r) => setMine(r.items)).catch(() => setMine('err'));
+    // Yiqilsa jim: vazifa bloki ikkilamchi, navbat ro'yxati baribir bor
+    api<MyTasks>('/admin/tasks?assignee=me&open=1&limit=5').then(setTasks).catch(() => {});
   }, [me.id, isOwner, tick]);
 
   const failed = (name: string) => !!home?.failed?.includes(name);
@@ -192,7 +231,7 @@ export default function AdminHomePage() {
       {home && (home.alerts.length || otherFailed.length) ? (
         <section className="mt-5" aria-label={th('alerts')}>
           {home.alerts.map((a) => {
-            const href = ALERT_HREF[a.code];
+            const href = alertHref(a.code, isOwner);
             return (
               <Notice key={a.code} tone={a.tone === 'bad' ? 'err' : 'warn'}>
                 {th(`alert.${a.code}`, { n: a.n ?? 0, of: a.of ?? 0, ms: a.ms ?? 0 })}
@@ -213,6 +252,8 @@ export default function AdminHomePage() {
           </h2>
           {waited >= 1 ? <Pill tone={waited >= 3 ? 'bad' : 'warn'}>{th('waitingDays', { days: waited })}</Pill> : null}
         </div>
+        {/* Menga biriktirilgan: navbatlardan oldin, chunki jamoadosh yoki egasi aynan shuni kutmoqda */}
+        {tasks && tasks.summary.open > 0 ? <MineTasks data={tasks} /> : null}
         {!home && !homeErr ? <div className={`${CARD} mt-2 p-4`}><Skeleton rows={4} /></div>
           : failed('work') ? <Notice tone="err">{th('blockFailed', { name: th('work') })}</Notice>
           : home && !home.work.length ? <p className={`${CARD} mt-2 border-dashed px-6 py-10 text-center text-sm text-muted`}>{th('workEmpty')}</p>

@@ -1,16 +1,21 @@
 import { BadRequestException, Body, Controller, Get, Logger, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsObject } from 'class-validator';
+import { promises as fs } from 'node:fs';
+import { join } from 'node:path';
 import { PLATFORM_DEFAULTS, type PlatformConfigKey, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
+import { env } from '../../common/env';
 import { PlatformConfigService } from '../../common/platform-config.service';
-import { queueStats, type QueueKey } from '../../common/admin-queues';
+import { QUEUE_KEYS, queueStats, type QueueKey } from '../../common/admin-queues';
+import { recentErrors, runtime } from '../../common/runtime';
 import { ImpressionsService } from '../impressions/impressions.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { UPLOADS_DIR } from '../listings/presentation/uploads.controller';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
-import { monthlyRevenue } from './revenue';
+import { isWagonConfigured } from '../wagon/d-railway.client';
 
 class SettingsDto {
   // { commissionPct: 300, commissionPayer: 'CLIENT' } - faqat o'zgartiriladigan kalitlar
@@ -34,6 +39,38 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   // Rekvizit: bo'sh saqlanmaydi (bo'shatish uchun qator o'chiriladi), 500 belgi yetarli
   payDetails: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 500,
 };
+
+type UploadsInfo = { files: number; bytes: number; scannedAt: Date; capped: boolean; disk: { freeBytes: number; totalBytes: number } | null };
+const UPLOADS_TTL_MS = 600_000;
+const UPLOADS_CAP = 100_000;
+let uploadsCache: { at: number; value: UploadsInfo } | null = null;
+
+/**
+ * Yuklamalar hajmi: butun papka o'qiladi, 10 daqiqa keshlanadi (modul darajasida: kontroller
+ * so'rovga yaratilmaydi, lekin kesh bitta bo'lsin). 100 000 faylda to'xtaydi (capped): undan
+ * ko'p bo'lsa son taxminiy, so'rov esa soniyalarga cho'zilmaydi. Disk bo'sh joyi statfs dan;
+ * Windows dev da yiqilsa null va sahifa qatorni chizmaydi.
+ */
+async function uploadsInfo(now: Date): Promise<UploadsInfo> {
+  if (uploadsCache && now.getTime() - uploadsCache.at < UPLOADS_TTL_MS) return uploadsCache.value;
+  let files = 0, bytes = 0, capped = false;
+  for (const e of await fs.readdir(UPLOADS_DIR, { recursive: true, withFileTypes: true })) {
+    if (!e.isFile()) continue;
+    if (files >= UPLOADS_CAP) { capped = true; break; }
+    const st = await fs.stat(join(e.parentPath, e.name)).catch(() => null);
+    if (!st) continue; // skan paytida o'chgan fayl
+    files++;
+    bytes += st.size;
+  }
+  let disk: UploadsInfo['disk'] = null;
+  try {
+    const s = await fs.statfs(UPLOADS_DIR);
+    disk = { freeBytes: s.bavail * s.bsize, totalBytes: s.blocks * s.bsize };
+  } catch { /* statfs yo'q (Windows dev): qator chizilmaydi */ }
+  const value = { files, bytes, scannedAt: now, capped, disk };
+  uploadsCache = { at: now.getTime(), value };
+  return value;
+}
 
 /**
  * Audit filtridagi sana. Faqat kun berilsa (YYYY-MM-DD) u TOSHKENT kuni deb olinadi.
@@ -83,24 +120,6 @@ export class AdminSystemController {
   @Get('visits')
   visits() {
     return this.impressions.visits();
-  }
-
-  /**
-   * Oylik tushum: obuna va Premium to'lovlari, tasdiqlangan sana (paidAt) bo'yicha, 12 oy.
-   * paidAt faqat tasdiqda to'ldiriladi, ya'ni bu yerga to'lanmagan buyurtma tushmaydi.
-   */
-  @Get('revenue')
-  @UseGuards(PlatformOwnerGuard)
-  async revenue() {
-    // 400 kun: 12 to'liq oy chetidan chiqmasin, ortiqchasini monthlyRevenue kesadi.
-    // orderBy majburiy: chegara ishga tushsa eng ESKI qatorlar tushib qolsin, aks holda
-    // varaqdagi oxirgi oylar jimgina kam ko'rinib, hisob ko'chirmaga to'g'ri kelmasdi
-    const gte = new Date(Date.now() - 400 * 86_400_000);
-    const [subs, prems] = await Promise.all([
-      this.prisma.subscription.findMany({ where: { paidAt: { gte } }, select: { paidAt: true, startsAt: true, amountTiyin: true }, orderBy: { paidAt: 'desc' }, take: 5000 }),
-      this.prisma.premiumOrder.findMany({ where: { paidAt: { gte } }, select: { paidAt: true, amountTiyin: true }, orderBy: { paidAt: 'desc' }, take: 5000 }),
-    ]);
-    return { months: monthlyRevenue(subs, prems) };
   }
 
   /** Audit izi: kim, nima, qachon. `action` prefiks bo'yicha ("admin." barcha admin amallarini beradi). */
@@ -270,6 +289,94 @@ export class AdminSystemController {
       },
       recent: { users: users ?? 0, orders: orders ?? 0, listings: listings ?? 0 },
       failed, // bo'sh bo'lsa hammasi joyida
+    };
+  }
+
+  /**
+   * Tizim holati, faqat ega: versiya, baza, vagon manbasi, navbatlar, kunlik sikl, xatolar,
+   * Telegram, reklama va tarif, yuklamalar. Har blok safe() bilan (health uslubi): bittasi
+   * yiqilsa qolgani ko'rinadi, yiqilgani failed[] da. Xatolar, kunlik sikl va Telegram belgisi
+   * jarayon xotirasidan (runtime.ts): restartda tozalanadi, sahifa "ishga tushgandan beri" deydi.
+   */
+  @Get('system')
+  @UseGuards(PlatformOwnerGuard)
+  async system() {
+    const now = new Date();
+    const failed: string[] = [];
+    const safe = async <T>(name: string, fn: () => Promise<T>): Promise<T | null> => {
+      try {
+        return await fn();
+      } catch (e) {
+        failed.push(name);
+        this.log.error(`admin/system: ${name} yiqildi: ${(e as Error).message.split(String.fromCharCode(10)).pop()}`);
+        return null;
+      }
+    };
+    const h24 = new Date(now.getTime() - 86_400_000);
+    const d7 = new Date(now.getTime() - 7 * 86_400_000);
+    const in7 = new Date(now.getTime() + 7 * 86_400_000);
+    const [db, sizeMb, wagon, queues, ads, plans, uploads] = await Promise.all([
+      this.pingDb(),
+      safe('dbSize', async () => {
+        const [r] = await this.prisma.$queryRaw<{ b: bigint }[]>`SELECT pg_database_size(current_database())::bigint b`;
+        return Math.round(Number(r.b) / 1048576);
+      }),
+      // Bitta raw SQL: 7 kunlik oyna, 24 soat FILTER bilan. meta.error faqat xato qatorida bor
+      // (muvaffaqiyat qatorida kalit yo'q), Prisma NOT + JSON path NULL tufayli uni tashlab
+      // yuborardi; coalesce(...,false) ikkalasini ham to'g'ri sanaydi. lastOk 7 kun oynasida:
+      // null = "7 kunda muvaffaqiyat yo'q". [action, createdAt] indeksi.
+      safe('wagon', async () => {
+        const [r] = await this.prisma.$queryRaw<{ t24: bigint; e24: bigint; t7: bigint; e7: bigint; lastOk: Date | null; lastErr: Date | null }[]>`
+          SELECT count(*) FILTER (WHERE "createdAt" >= ${h24}) t24,
+                 count(*) FILTER (WHERE "createdAt" >= ${h24} AND coalesce((meta->>'error')::boolean, false)) e24,
+                 count(*) t7,
+                 count(*) FILTER (WHERE coalesce((meta->>'error')::boolean, false)) e7,
+                 max("createdAt") FILTER (WHERE NOT coalesce((meta->>'error')::boolean, false)) "lastOk",
+                 max("createdAt") FILTER (WHERE coalesce((meta->>'error')::boolean, false)) "lastErr"
+          FROM "AuditLog" WHERE action = 'wagon.search' AND "createdAt" >= ${d7}`;
+        return {
+          configured: isWagonConfigured(),
+          h24: { total: Number(r.t24), errors: Number(r.e24) },
+          d7: { total: Number(r.t7), errors: Number(r.e7) },
+          lastOkAt: r.lastOk, lastErrorAt: r.lastErr,
+        };
+      }),
+      safe('queues', async () => {
+        const st = await queueStats(this.prisma, true);
+        return QUEUE_KEYS.map((key) => ({ key, count: st[key].count, oldestAt: st[key].oldest }));
+      }),
+      safe('ads', async () => {
+        const [active, expired, ending7, draft] = await Promise.all([
+          this.prisma.adPlacement.count({ where: { status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gte: now } } }),
+          this.prisma.adPlacement.count({ where: { status: 'ACTIVE', endsAt: { lt: now } } }),
+          this.prisma.adPlacement.count({ where: { status: 'ACTIVE', endsAt: { gte: now, lte: in7 } } }),
+          this.prisma.adPlacement.count({ where: { status: 'DRAFT' } }),
+        ]);
+        return { active, expired, ending7, draft };
+      }),
+      // Telefon ochadigan faol tarif nol bo'lsa hech kim obuna sotib ololmaydi
+      safe('plans', async () => {
+        const [active, phoneActive] = await Promise.all([
+          this.prisma.plan.count({ where: { active: true } }),
+          this.prisma.plan.count({ where: { active: true, grants: { has: 'PHONE' } } }),
+        ]);
+        return { active, phoneActive };
+      }),
+      safe('uploads', () => uploadsInfo(now)),
+    ]);
+    return {
+      // Obraz yoshi = ishga tushgan vaqt ("deploy" emas: restart ham nolga qaytaradi)
+      api: { sha: env.GIT_SHA ?? null, startedAt: runtime.startedAt, uptimeSec: Math.round(process.uptime()), rssMb: Math.round(process.memoryUsage().rss / 1048576) },
+      db: db.ok ? { ok: true, ms: db.ms, ...(sizeMb == null ? {} : { sizeMb }) } : { ok: false },
+      wagon,
+      queues,
+      daily: runtime.daily,
+      errors: recentErrors(),
+      telegram: runtime.telegram,
+      ads,
+      plans,
+      uploads,
+      failed,
     };
   }
 

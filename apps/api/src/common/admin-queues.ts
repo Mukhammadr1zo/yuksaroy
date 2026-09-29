@@ -49,52 +49,61 @@ export const QUEUE_HREF: Record<QueueKey, string> = {
   reportsNew: '/admin/moderation?tab=reports',
 };
 
-export type QueueStat = { count: number; oldest: Date | null };
+/** Vazifa biriktiriladigan obyekt turlari: har navbatga bittadan, QUEUE_DEF bilan birga-bir. */
+export const TASK_ENTITIES = ['Listing', 'Organization', 'Terminal', 'PremiumOrder', 'Subscription', 'Order', 'UrgentRequest', 'ContactMessage', 'Report'] as const;
+export type TaskEntity = (typeof TASK_ENTITIES)[number];
+export type QueueModel = 'listing' | 'organization' | 'terminal' | 'premiumOrder' | 'subscription' | 'order' | 'urgentRequest' | 'contactMessage' | 'report';
 
 /**
- * Har navbatning soni va eng eskisining sanasi.
+ * Navbat sharti BITTA joyda. queueStats (menyu badge, bosh sahifa, kunlik eslatma) va
+ * vazifa yopilishi (admin-tasks.ts inQueue) shu jadvaldan yuradi: ish navbatdan chiqdimi
+ * degan savolga ikki joyda ikki xil javob bo'lmasin.
  *
- * "Kutish boshlangan" maydon har jadvalda boshqacha:
- * tashkilot uchun tasdiq so'ralgan vaqt, qolganlari uchun yaratilgan vaqt.
- * Terminal da'vosida alohida maydon yo'q, shuning uchun oxirgi o'zgarish vaqti
- * olinadi: admin qatorni tahrir qilsa yosh nolga qaytadi, bu ma'lum kamchilik.
+ * "Kutish boshlangan" maydon har jadvalda boshqacha: tashkilot uchun tasdiq so'ralgan
+ * vaqt, qolganlari uchun yaratilgan vaqt. Terminal da'vosida alohida maydon yo'q, shuning
+ * uchun oxirgi o'zgarish vaqti olinadi: admin qatorni tahrir qilsa yosh nolga qaytadi,
+ * bu ma'lum kamchilik.
  */
+export const QUEUE_DEF: Record<QueueKey, { entity: TaskEntity; model: QueueModel; where: Record<string, unknown>; oldest: 'createdAt' | 'kycRequestedAt' | 'updatedAt' }> = {
+  listingsPendingReview: { entity: 'Listing', model: 'listing', where: { status: 'PENDING_REVIEW' }, oldest: 'createdAt' },
+  orgsPendingKyc: { entity: 'Organization', model: 'organization', where: { kycStatus: 'PENDING' }, oldest: 'kycRequestedAt' },
+  terminalClaimsPending: { entity: 'Terminal', model: 'terminal', where: { claimStatus: 'PENDING' }, oldest: 'updatedAt' },
+  premiumPending: { entity: 'PremiumOrder', model: 'premiumOrder', where: { status: 'PENDING' }, oldest: 'createdAt' },
+  subscriptionPending: { entity: 'Subscription', model: 'subscription', where: { status: 'PENDING' }, oldest: 'createdAt' },
+  ordersPending: { entity: 'Order', model: 'order', where: { status: 'PENDING' }, oldest: 'createdAt' },
+  urgentOpen: { entity: 'UrgentRequest', model: 'urgentRequest', where: { status: 'OPEN' }, oldest: 'createdAt' },
+  contactNew: { entity: 'ContactMessage', model: 'contactMessage', where: { handledAt: null }, oldest: 'createdAt' },
+  reportsNew: { entity: 'Report', model: 'report', where: { status: 'NEW' }, oldest: 'createdAt' },
+};
+
+/** Obyekt turidan navbat kaliti (TASK_ENTITIES bilan birga-bir, spec tekshiradi). */
+export const queueOf = (entity: TaskEntity): QueueKey => QUEUE_KEYS.find((k) => QUEUE_DEF[k].entity === entity)!;
+
+type Tbl = {
+  count(a: { where: Record<string, unknown> }): Promise<number>;
+  findFirst(a: { where: Record<string, unknown>; orderBy: Record<string, 'asc' | 'desc'>; select: Record<string, boolean> }): Promise<Record<string, unknown> | null>;
+  findMany(a: { where: Record<string, unknown>; select: Record<string, boolean>; take?: number }): Promise<Record<string, unknown>[]>;
+};
+/**
+ * Bitta cast: to'qqiz jadval bir xil uch usul bilan so'raladi, Prisma ning har biriga alohida
+ * turi bu yerda ortiqcha. where QUEUE_DEF dan (kodda qat'iy), tashqaridan kelmaydi.
+ */
+export const tbl = (prisma: PrismaService, model: QueueModel): Tbl => (prisma as unknown as Record<QueueModel, Tbl>)[model];
+
+export type QueueStat = { count: number; oldest: Date | null };
+
+/** Har navbatning soni va (oldest bo'lsa) eng eskisining sanasi. So'rovlar: count + findFirst orderBy oldest asc. */
 export async function queueStats(prisma: PrismaService, oldest: boolean): Promise<Record<QueueKey, QueueStat>> {
-  const first = async <T extends { [k: string]: unknown }>(p: Promise<T | null>, field: string): Promise<Date | null> =>
-    oldest ? (((await p) as Record<string, unknown> | null)?.[field] as Date | undefined) ?? null : null;
-
-  const [lc, lo, oc, oo, tc, to, pc, po, sc, so, rc, ro, uc, uo, cc, co, rpc, rpo] = await Promise.all([
-    prisma.listing.count({ where: { status: 'PENDING_REVIEW' } }),
-    first(oldest ? prisma.listing.findFirst({ where: { status: 'PENDING_REVIEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-    prisma.organization.count({ where: { kycStatus: 'PENDING' } }),
-    first(oldest ? prisma.organization.findFirst({ where: { kycStatus: 'PENDING' }, orderBy: { kycRequestedAt: 'asc' }, select: { kycRequestedAt: true } }) : Promise.resolve(null), 'kycRequestedAt'),
-    prisma.terminal.count({ where: { claimStatus: 'PENDING' } }),
-    first(oldest ? prisma.terminal.findFirst({ where: { claimStatus: 'PENDING' }, orderBy: { updatedAt: 'asc' }, select: { updatedAt: true } }) : Promise.resolve(null), 'updatedAt'),
-    prisma.premiumOrder.count({ where: { status: 'PENDING' } }),
-    first(oldest ? prisma.premiumOrder.findFirst({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-    prisma.subscription.count({ where: { status: 'PENDING' } }),
-    first(oldest ? prisma.subscription.findFirst({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-    prisma.order.count({ where: { status: 'PENDING' } }),
-    first(oldest ? prisma.order.findFirst({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-    prisma.urgentRequest.count({ where: { status: 'OPEN' } }),
-    first(oldest ? prisma.urgentRequest.findFirst({ where: { status: 'OPEN' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-    prisma.contactMessage.count({ where: { handledAt: null } }),
-    first(oldest ? prisma.contactMessage.findFirst({ where: { handledAt: null }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-    prisma.report.count({ where: { status: 'NEW' } }),
-    first(oldest ? prisma.report.findFirst({ where: { status: 'NEW' }, orderBy: { createdAt: 'asc' }, select: { createdAt: true } }) : Promise.resolve(null), 'createdAt'),
-  ]);
-
-  return {
-    listingsPendingReview: { count: lc, oldest: lo },
-    orgsPendingKyc: { count: oc, oldest: oo },
-    terminalClaimsPending: { count: tc, oldest: to },
-    premiumPending: { count: pc, oldest: po },
-    subscriptionPending: { count: sc, oldest: so },
-    ordersPending: { count: rc, oldest: ro },
-    urgentOpen: { count: uc, oldest: uo },
-    contactNew: { count: cc, oldest: co },
-    reportsNew: { count: rpc, oldest: rpo },
-  };
+  const rows = await Promise.all(QUEUE_KEYS.map(async (k) => {
+    const d = QUEUE_DEF[k];
+    const t = tbl(prisma, d.model);
+    const [count, first] = await Promise.all([
+      t.count({ where: d.where }),
+      oldest ? t.findFirst({ where: d.where, orderBy: { [d.oldest]: 'asc' }, select: { [d.oldest]: true } }) : null,
+    ]);
+    return [k, { count, oldest: (first?.[d.oldest] as Date | undefined) ?? null }] as const;
+  }));
+  return Object.fromEntries(rows) as Record<QueueKey, QueueStat>;
 }
 
 /**

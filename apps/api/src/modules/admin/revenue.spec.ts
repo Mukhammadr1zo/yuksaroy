@@ -18,6 +18,11 @@ describe('oy chegarasi Toshkent bo\'yicha', () => {
     expect(monthBack('2026-09', 11)).toBe('2025-10');
     expect(monthBack('2026-01', 1)).toBe('2025-12');
   });
+
+  it('monthBack manfiy bilan oldinga yuradi (oy oxiri shunga tayanadi)', () => {
+    expect(monthBack('2026-12', -1)).toBe('2027-01');
+    expect(monthBack('2026-09', -1)).toBe('2026-10');
+  });
 });
 
 describe('oylik tushum', () => {

@@ -45,6 +45,8 @@ const schema = z.object({
   D_RAILWAY_URL: opt(z.string().url()),
   D_RAILWAY_EMAIL: opt(z.string()),
   D_RAILWAY_PASSWORD: opt(z.string()),
+  // Ixtiyoriy: deploy commit (Dockerfile.api ARG). Bo'sh bo'lsa tizim sahifasi "noma'lum (lokal qurilish)" deydi
+  GIT_SHA: opt(z.string()),
 });
 
 export const env = schema.parse(process.env);

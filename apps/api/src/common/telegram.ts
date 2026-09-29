@@ -2,6 +2,7 @@ import type { SearchLang } from '@yuksaroy/domain';
 import { env } from './env';
 import { IpBucket } from './ip-bucket';
 import type { PrismaService } from './prisma.service';
+import { recordTelegram } from './runtime';
 // Faqat tur: qurilishda yo'qoladi, shuning uchun modul aylanishi paydo bo'lmaydi
 import type { NotificationKind, NotificationsService } from '../modules/notifications/notifications.service';
 
@@ -26,7 +27,10 @@ export async function sendTelegram(chatIds: readonly (bigint | string)[], text: 
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ chat_id, text: body, parse_mode: 'HTML', reply_markup: replyMarkup }),
-      }).catch(() => {}),
+      })
+        // Tizim sahifasi uchun belgi: oxirgi muvaffaqiyat va xato (status). Xulq o'zgarmaydi, xato yutiladi
+        .then((r) => recordTelegram(r.ok, r.ok ? undefined : r.status))
+        .catch(() => recordTelegram(false, 0)),
     ),
   );
   return allowed.length;
@@ -176,6 +180,12 @@ const TEXTS = {
     uz: "⏳ <b>Navbat kutib qolgan</b>\n{list}\n\n{url}",
     ru: '⏳ <b>Очередь ждёт</b>\n{list}\n\n{url}',
     en: '⏳ <b>Queue is waiting</b>\n{list}\n\n{url}',
+  },
+  // Jamoadoshga: sizga vazifa biriktirildi. {due} butun satr (DUE_LINE): notifyParts bo'sh qatorni tashlaydi
+  adminTask: {
+    uz: '📌 <b>Sizga vazifa biriktirildi</b>\n{what}\nKim: {by}\n{due}\n\n{url}',
+    ru: '📌 <b>Вам назначена задача</b>\n{what}\nКто: {by}\n{due}\n\n{url}',
+    en: '📌 <b>A task was assigned to you</b>\n{what}\nBy: {by}\n{due}\n\n{url}',
   },
 } as const;
 

@@ -16,14 +16,15 @@ import {
   BTN, BTN_GHOST, ConfirmButton, DataTable, Drawer, ExportLink, INPUT, Labeled, LoadError, Notice, PageHead, Pager, Toolbar, errText,
   useAdminList, useListQuery, type Col, type SortDir,
 } from '@/components/admin/kit';
+import { AssignTask, type Task } from '@/components/admin/AssignTask';
 
 /** GET /admin/orders qatori; pul maydonlari serverda Number ga o'tkazilgan. */
 type Row = {
   no: string; status: OrderStatus; createdAt: string; operation: string; direction: string; wagonCount: number; totalTiyin: number;
   terminal: { id: string; name: string; slug: string }; shipperOrg: { id: string; name: string };
 };
-/** GET /admin/orders/:no: qatorlar va tarix (yangisi yuqorida). */
-type Detail = Row & { items: OrderLine[]; history: (OrderTimelineEntry & { id: string })[] };
+/** GET /admin/orders/:no: qatorlar va tarix (yangisi yuqorida); id vazifa uchun (vazifa obyekt id si bilan, no bilan emas). */
+type Detail = Row & { id: string; items: OrderLine[]; history: (OrderTimelineEntry & { id: string })[] };
 
 const isStatus = (s: string): s is OrderStatus => (ORDER_STATUSES as readonly string[]).includes(s);
 const F0 = { q: '', status: '', terminalId: '', orgId: '', sort: '', dir: '', page: 1, open: '' };
@@ -113,9 +114,16 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
   const [status, setStatus] = useState<OrderStatus>('PENDING');
   const [reason, setReason] = useState('');
   const [msg, setMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  const [task, setTask] = useState<Task | null>(null);
 
   const load = useCallback(() => api<Detail>(`/admin/orders/${no}`).then((x) => { setD(x); setStatus(x.status); }).catch((e) => setMsg({ tone: 'err', text: errText(e, t, t.has, tc('loadFailed')) })), [no, t, tc]);
   useEffect(() => { void load(); }, [load]);
+  // Vazifa faqat tasdiq kutayotgan buyurtmada (navbat shu); yiqilsa jim, biriktirish tugmasi baribir chiziladi
+  const id = d?.status === 'PENDING' ? d.id : null;
+  const loadTask = useCallback(() => {
+    if (id) void api<{ items: Task[] }>(`/admin/tasks?entity=Order&entityId=${id}&open=1&limit=1`).then((r) => setTask(r.items[0] ?? null)).catch(() => {});
+  }, [id]);
+  useEffect(() => { loadTask(); }, [loadTask]);
 
   // Yopuvchi holatlar uchun sabab majburiy: server ham shuni talab qiladi, lekin
   // operator tugmani bosmasdan oldin bilib tursin (aks holda faqat xato banneri chiqardi).
@@ -137,6 +145,8 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
     <Drawer open title={no} onClose={onClose}>
       {!d ? <p className="text-sm text-muted">{tc('loading')}</p> : (
         <div className="space-y-5 text-sm">
+          {/* AssignTask Fragment qaytaradi, forma keyingi qatorga tushishi uchun ota flex-wrap */}
+          {id ? <div className="flex flex-wrap items-center gap-3"><AssignTask entity="Order" entityId={id} task={task} onChanged={loadTask} /></div> : null}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 wrap-anywhere">
             <dt className="text-muted">{tc('status')}</dt><dd><StatusPill status={d.status} /></dd>
             <dt className="text-muted">{to('terminal')}</dt><dd><Link href={`/admin/terminals/${d.terminal.id}`} className="text-teal-ink underline">{d.terminal.name}</Link></dd>

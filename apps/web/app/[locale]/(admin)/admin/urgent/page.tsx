@@ -18,6 +18,7 @@ import {
   BTN, BTN_DANGER, BTN_GHOST, CARD, ConfirmButton, DataTable, Drawer, INPUT, Labeled, LoadError, Notice,
   PageHead, Pager, Pill, Toolbar, errText, useAdminList, useListQuery, type Col,
 } from '@/components/admin/kit';
+import { AssignTask, type Task } from '@/components/admin/AssignTask';
 
 /** URL dagi holat: bosh sahifa ?status=OPEN bilan, paleta ?q=UR-1001 bilan keladi. */
 const F0 = { q: '', status: '', region: '', page: 1 };
@@ -114,11 +115,18 @@ function UrgentDrawer({ id, onClose, onChanged }: { id: string; onClose: () => v
   const [d, setD] = useState<Detail | null>(null);
   const [reason, setReason] = useState('');
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  const [task, setTask] = useState<Task | null>(null);
 
   const load = useCallback(() => api<Detail>(`/admin/urgent/${id}`)
     .then(setD)
     .catch((e) => setNote({ tone: 'err', text: errText(e, t, t.has, tc('loadFailed')) })), [id, t, tc]);
   useEffect(() => { void load(); }, [load]);
+  // Vazifa faqat ochiq so'rovda (navbat shu); yiqilsa jim, biriktirish tugmasi baribir chiziladi
+  const open = d?.status === 'OPEN';
+  const loadTask = useCallback(() => {
+    if (open) void api<{ items: Task[] }>(`/admin/tasks?entity=UrgentRequest&entityId=${id}&open=1&limit=1`).then((r) => setTask(r.items[0] ?? null)).catch(() => {});
+  }, [id, open]);
+  useEffect(() => { loadTask(); }, [loadTask]);
 
   async function close() {
     setNote(null);
@@ -138,6 +146,8 @@ function UrgentDrawer({ id, onClose, onChanged }: { id: string; onClose: () => v
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
       {!d ? <p className="text-sm text-muted">{tc('loading')}</p> : (
         <div className="space-y-5">
+          {/* AssignTask Fragment qaytaradi, forma keyingi qatorga tushishi uchun ota flex-wrap */}
+          {open ? <div className="flex flex-wrap items-center gap-3"><AssignTask entity="UrgentRequest" entityId={id} task={task} onChanged={loadTask} /></div> : null}
           <dl className={`${CARD} grid grid-cols-2 gap-x-4 gap-y-2 p-3 text-sm wrap-anywhere`}>
             <Fact k={tu('kind')} v={tu.has(`kinds.${d.kind}`) ? tu(`kinds.${d.kind}`) : d.kind} />
             <Fact k={tc('status')} v={ts.has(d.status) ? ts(d.status) : d.status} />

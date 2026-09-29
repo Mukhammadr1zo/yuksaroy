@@ -10,8 +10,10 @@ import { AdminHomeController } from './admin-home.controller';
 import { AdminNotesController } from './admin-notes.controller';
 import { AdminOrgsController } from './admin-orgs.controller';
 import { AdminOpsController } from './admin-ops.controller';
+import { AdminRevenueController } from './admin-revenue.controller';
 import { AdminSearchController } from './admin-search.controller';
 import { AdminSystemController } from './admin-system.controller';
+import { AdminTasksController } from './admin-tasks.controller';
 import { AdminDemoController } from './admin-demo.controller';
 import { AdminTeamController } from './team/admin-team.controller';
 
@@ -25,10 +27,12 @@ import { AdminTeamController } from './team/admin-team.controller';
 @Module({
   // BookingModule: admin buyurtmani majburan bekor qilganda band qilingan joy bo'shatiladi
   imports: [IdentityModule, OrganizationsModule, BookingModule],
-  // Home (bosh sahifa), Search (Ctrl+K paleti) va Notes (ichki izohlar): panel 3.0 qatlamlari
+  // Home (bosh sahifa), Search (Ctrl+K paleti) va Notes (ichki izohlar): panel 3.0 qatlamlari.
+  // Revenue (pul, faqat ega) va Tasks (vazifa biriktirish): 3.x
   controllers: [
     AdminUsersController, AdminCatalogController, AdminOrgsController, AdminOpsController, AdminSystemController,
     AdminHomeController, AdminSearchController, AdminNotesController, AdminDemoController, AdminTeamController,
+    AdminRevenueController, AdminTasksController,
   ],
   providers: [PlatformAdminGuard, PlatformOwnerGuard],
 })

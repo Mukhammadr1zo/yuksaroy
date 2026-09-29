@@ -6,6 +6,7 @@
 // hisoblanadi; ular o'chsa ekrandagi raqam sababsiz kichrayib ketardi.
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma.service';
+import { runtime } from '../../../common/runtime';
 import type { IdempotencyService } from '../../../common/idempotency.service';
 import type { BookingRepository } from '../../booking/domain/ports';
 import type { OrderRepository } from '../domain/ports';
@@ -16,19 +17,22 @@ import { SlaSweeperService } from './sla-sweeper.service';
 
 type Call = { model: string; where: Record<string, unknown> };
 
-function setup() {
+function setup(o: { dailyFails?: boolean } = {}) {
   const calls: Call[] = [];
   const del = (model: string) => ({
     deleteMany: async (a: { where: Record<string, unknown> }) => { calls.push({ model, where: a.where }); return { count: 1 }; },
   });
   let listingReads = 0;
   const prisma = {
-    session: del('session'),
+    // dailyFails: birinchi bosqich yiqiladi, sikl xato bilan tugaydi (runtime.daily.ok=false)
+    session: o.dailyFails ? { deleteMany: async () => { throw new Error('baza yotibdi'); } } : del('session'),
     otpCode: del('otpCode'),
     notification: del('notification'),
     // Muddati o'tgan e'lon alohida spec da: bu yerda ro'yxat bo'sh.
     // deleteMany EMAS, shuning uchun calls ga tushmaydi
     listing: { findMany: async () => { listingReads += 1; return []; }, updateMany: async () => ({ count: 0 }) },
+    // Vazifa yopilishi har tikda: ochiq vazifa yo'q, so'rov shu bilan tugaydi
+    adminTask: { findMany: async () => [] },
     // Bular ataylab yo'q: chaqirilsa test "is not a function" bilan yiqiladi
   } as unknown as PrismaService;
   const purged: Date[] = [];
@@ -96,4 +100,23 @@ it("kunlik sikl muddati o'tgan e'lonlarni ham ko'radi", async () => {
   await svc.tick();
   await svc.tick();
   expect(reads()).toBe(1); // tikda emas, sutkada bir marta
+});
+
+/** Tizim sahifasi uchun natija: sikl tugadimi, qancha vaqt oldi, nima qildi. */
+describe('kunlik sikl natijasi (runtime.daily)', () => {
+  it('muvaffaqiyatda ok=true va sonlar', async () => {
+    const { svc } = setup();
+    await svc.tick();
+    expect(runtime.daily?.ok).toBe(true);
+    expect(runtime.daily?.result).toMatchObject({ keys: 2, sessions: 1, codes: 1, notes: 1, reminded: 0, expired: 0, stale: 0 });
+    expect(runtime.daily?.ms).toBeGreaterThanOrEqual(0);
+  });
+
+  it('bosqich yiqilsa ok=false, xabar va yetgan joygacha natija; tick o\'zi yiqilmaydi', async () => {
+    const { svc } = setup({ dailyFails: true });
+    await expect(svc.tick()).resolves.toEqual({ holds: 0, orders: 0 });
+    expect(runtime.daily?.ok).toBe(false);
+    expect(runtime.daily?.error).toBe('baza yotibdi');
+    expect(runtime.daily?.result).toMatchObject({ keys: 2, sessions: 0 });
+  });
 });

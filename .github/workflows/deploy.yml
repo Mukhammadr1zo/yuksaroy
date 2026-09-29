@@ -94,6 +94,8 @@ jobs:
           context: .
           file: deploy/Dockerfile.api
           push: true
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           tags: |
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-api:latest
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-api:${{ github.sha }}
@@ -116,6 +118,7 @@ jobs:
             NEXT_PUBLIC_SITE_URL=${{ vars.SITE_URL || 'https://yuksaroy.uz' }}
             NEXT_PUBLIC_BOT_USERNAME=${{ vars.BOT_USERNAME }}
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ vars.GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_GIT_SHA=${{ github.sha }}
           tags: |
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-web:latest
             ${{ env.REGISTRY }}/${{ steps.p.outputs.repo }}/yuksaroy-web:${{ github.sha }}

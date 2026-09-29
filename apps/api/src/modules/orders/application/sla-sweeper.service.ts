@@ -1,7 +1,9 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { queueStats, staleQueues } from '../../../common/admin-queues';
+import { closeStaleTasks } from '../../../common/admin-tasks';
 import { IdempotencyService } from '../../../common/idempotency.service';
 import { PrismaService } from '../../../common/prisma.service';
+import { runtime, type DailyResult } from '../../../common/runtime';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
 import { ORDER_REPOSITORY, type OrderRepository } from '../domain/ports';
 import { NotificationsService } from '../../notifications/notifications.service';
@@ -67,6 +69,8 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
       for (const o of stale) { await this.actions.expire(o.id, o.bookingId); expired++; }
       holds = await this.bookings.releaseExpired(now, BATCH);
       if (holds || expired) this.log.log(`hold bo'shatildi: ${holds}, buyurtma muddati o'tdi: ${expired}`);
+      // Navbatdan chiqqan ishning vazifasi yopiladi; xato siklni to'xtatmasin
+      await closeStaleTasks(this.prisma, now).catch(() => {});
       if (now.getTime() - this.lastDaily >= DAY_MS) {
         this.lastDaily = now.getTime();
         await this.daily(now);
@@ -90,34 +94,47 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
    * o'chirsak ekrandagi raqam sababsiz kichrayib ketardi.
    */
   private async daily(now: Date) {
-    const ago = (days: number) => new Date(now.getTime() - days * DAY_MS);
-    const keys = await this.idempotency.purge(now);
-    // Bekor qilingan yoki muddati o'tgan sessiya boshqa hech qachon ishlatilmaydi
-    const sessions = await this.prisma.session.deleteMany({
-      where: { OR: [{ revokedAt: { lt: ago(KEEP_SESSIONS_DAYS) } }, { expiresAt: { lt: ago(KEEP_SESSIONS_DAYS) } }] },
-    });
-    // Bir martalik kod bir necha daqiqada tugaydi, bir kundan keyin faqat tarix
-    const codes = await this.prisma.otpCode.deleteMany({ where: { createdAt: { lt: ago(KEEP_OTP_DAYS) } } });
-    // O'qilgan bildirishnoma qaytib ochilmaydi; o'qilmagani qolaveradi
-    const notes = await this.prisma.notification.deleteMany({
-      where: { readAt: { not: null, lt: ago(KEEP_READ_NOTIFICATIONS_DAYS) } },
-    });
-    // Obuna tugashiga uch kun qolganlarga eslatma; takrorlanishni obuna qatoridagi belgi to'sadi
-    const reminded = await remindExpiring(this.prisma, this.notifications, now).catch(() => 0);
-    if (reminded) this.log.log(`obuna eslatmasi: ${reminded}`);
-    // Muddati o'tgan e'lon ACTIVE bo'lib qolardi: katalogda ko'rinmasdi, lekin havola bilan
-    // ochilardi, unga xabar yozish mumkin edi va egasi uni qaytara olmasdi
-    const expired = await expireListings(this.prisma, this.notifications, now).catch(() => 0);
-    if (expired) this.log.log(`e'lon muddati o'tdi: ${expired}`);
-    // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
-    // catch argumentni ham qamrasin: queueStats yiqilsa u .catch dan tashqarida qolib,
-    // butun kunlik siklni uzib yuborardi
-    await queueStats(this.prisma, true)
-      .then((st) => this.adminNotify.stale(staleQueues(st, now, STALE_DAYS)))
-      .catch(() => {});
-    const total = keys + sessions.count + codes.count + notes.count;
-    if (total) {
-      this.log.log(`kunlik tozalash: kalit ${keys}, sessiya ${sessions.count}, kod ${codes.count}, bildirishnoma ${notes.count}`);
+    const t0 = Date.now();
+    // Natija tizim sahifasiga (runtime.daily): yiqilsa ham qaysi bosqichgacha yetgani ko'rinsin
+    const r: DailyResult = { keys: 0, sessions: 0, codes: 0, notes: 0, reminded: 0, expired: 0, stale: 0 };
+    try {
+      const ago = (days: number) => new Date(now.getTime() - days * DAY_MS);
+      r.keys = await this.idempotency.purge(now);
+      // Bekor qilingan yoki muddati o'tgan sessiya boshqa hech qachon ishlatilmaydi
+      r.sessions = (await this.prisma.session.deleteMany({
+        where: { OR: [{ revokedAt: { lt: ago(KEEP_SESSIONS_DAYS) } }, { expiresAt: { lt: ago(KEEP_SESSIONS_DAYS) } }] },
+      })).count;
+      // Bir martalik kod bir necha daqiqada tugaydi, bir kundan keyin faqat tarix
+      r.codes = (await this.prisma.otpCode.deleteMany({ where: { createdAt: { lt: ago(KEEP_OTP_DAYS) } } })).count;
+      // O'qilgan bildirishnoma qaytib ochilmaydi; o'qilmagani qolaveradi
+      r.notes = (await this.prisma.notification.deleteMany({
+        where: { readAt: { not: null, lt: ago(KEEP_READ_NOTIFICATIONS_DAYS) } },
+      })).count;
+      // Obuna tugashiga uch kun qolganlarga eslatma; takrorlanishni obuna qatoridagi belgi to'sadi
+      r.reminded = await remindExpiring(this.prisma, this.notifications, now).catch(() => 0);
+      if (r.reminded) this.log.log(`obuna eslatmasi: ${r.reminded}`);
+      // Muddati o'tgan e'lon ACTIVE bo'lib qolardi: katalogda ko'rinmasdi, lekin havola bilan
+      // ochilardi, unga xabar yozish mumkin edi va egasi uni qaytara olmasdi
+      r.expired = await expireListings(this.prisma, this.notifications, now).catch(() => 0);
+      if (r.expired) this.log.log(`e'lon muddati o'tdi: ${r.expired}`);
+      // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
+      // catch argumentni ham qamrasin: queueStats yiqilsa u .catch dan tashqarida qolib,
+      // butun kunlik siklni uzib yuborardi
+      await queueStats(this.prisma, true)
+        .then((st) => {
+          const stale = staleQueues(st, now, STALE_DAYS);
+          r.stale = stale.length;
+          return this.adminNotify.stale(stale);
+        })
+        .catch(() => {});
+      const total = r.keys + r.sessions + r.codes + r.notes;
+      if (total) {
+        this.log.log(`kunlik tozalash: kalit ${r.keys}, sessiya ${r.sessions}, kod ${r.codes}, bildirishnoma ${r.notes}`);
+      }
+      runtime.daily = { at: now, ms: Date.now() - t0, ok: true, result: r };
+    } catch (e) {
+      runtime.daily = { at: now, ms: Date.now() - t0, ok: false, error: (e as Error).message, result: r };
+      throw e;
     }
   }
 }

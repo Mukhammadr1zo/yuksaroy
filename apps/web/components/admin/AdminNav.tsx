@@ -12,7 +12,7 @@
  */
 import { useTranslations } from 'next-intl';
 import {
-  BuildingsIcon, ChartLineIcon, ClockCounterClockwiseIcon, CreditCardIcon, EyeIcon, FlagIcon, GearIcon, HouseIcon,
+  BuildingsIcon, ChartLineIcon, ClockCounterClockwiseIcon, CreditCardIcon, EyeIcon, FlagIcon, GearIcon, HeartbeatIcon, HouseIcon,
   type Icon, MegaphoneIcon, PackageIcon, ScalesIcon, SirenIcon, StarIcon, StorefrontIcon, TagIcon, TrainRegionalIcon,
   UsersIcon, UsersThreeIcon, WarehouseIcon,
 } from '@phosphor-icons/react';
@@ -58,6 +58,8 @@ export const GROUPS: { key: string; items: NavItem[] }[] = [
     { href: '/admin/revenue', key: 'revenue', owner: true, icon: ChartLineIcon },
     { href: '/admin/visits', key: 'visits', icon: EyeIcon },
     { href: '/admin/audit', key: 'audit', icon: ClockCounterClockwiseIcon, hotkey: 'a' },
+    // Server holati (baza, vagon manbasi, xatolar, disk): serverga kira oladigan odam ega, operator emas
+    { href: '/admin/system', key: 'system', owner: true, icon: HeartbeatIcon },
     // Komissiya foizi va muddatlar: operatorga ko'rinmaydi, server ham ruxsat bermaydi
     { href: '/admin/settings', key: 'settings', owner: true, icon: GearIcon },
   ] },

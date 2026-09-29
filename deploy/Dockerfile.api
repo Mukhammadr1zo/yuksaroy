@@ -32,6 +32,9 @@ WORKDIR /app
 COPY --from=build /prod/api ./
 # Yuklangan fayllar volume'da: konteyner almashsa ham qoladi
 RUN mkdir -p uploads && chown -R node:node uploads
+# Deploy versiyasi: tizim sahifasi ko'rsatadi. Oxirida turadi: COPY qatlami keshdan chiqmasin. Bo'sh = lokal qurilish
+ARG GIT_SHA=
+ENV GIT_SHA=$GIT_SHA
 USER node
 EXPOSE 4000
 # Migratsiya har ishga tushishda qo'llanadi, keyin server

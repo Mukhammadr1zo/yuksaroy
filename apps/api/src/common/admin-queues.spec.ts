@@ -3,7 +3,23 @@
 // Nega muhim: har navbatni eslatmaga qo'shsak, ogohlantirish har kuni keladi va odam
 // unga qarashni to'xtatadi. Shuning uchun ro'yxat ataylab qisqa.
 import { describe, expect, it } from 'vitest';
-import { QUEUE_KEYS, staleQueues, type QueueKey, type QueueStat } from './admin-queues';
+import { QUEUE_DEF, QUEUE_KEYS, TASK_ENTITIES, queueOf, staleQueues, type QueueKey, type QueueStat } from './admin-queues';
+
+/** Navbat sharti bitta joyda: vazifa yopilishi ham, badge ham shu jadvaldan. */
+describe('QUEUE_DEF', () => {
+  it("entity to'plami aynan TASK_ENTITIES (har navbatga bittadan)", () => {
+    expect(new Set(QUEUE_KEYS.map((k) => QUEUE_DEF[k].entity))).toEqual(new Set(TASK_ENTITIES));
+    expect(QUEUE_KEYS.length).toBe(TASK_ENTITIES.length);
+  });
+
+  it('har kalitda where va oldest bor, queueOf teskarisini topadi', () => {
+    for (const k of QUEUE_KEYS) {
+      expect(Object.keys(QUEUE_DEF[k].where).length, k).toBeGreaterThan(0);
+      expect(QUEUE_DEF[k].oldest, k).toBeTruthy();
+      expect(queueOf(QUEUE_DEF[k].entity)).toBe(k);
+    }
+  });
+});
 
 const now = new Date('2026-09-24T10:00:00Z');
 const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000);

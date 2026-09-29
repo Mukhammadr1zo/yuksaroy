@@ -7,7 +7,10 @@ import { AuditService } from '../../common/audit.service';
 import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
 import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { NotificationsService } from '../notifications/notifications.service';
+import { remindManual } from './remind-manual';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
@@ -94,6 +97,8 @@ export class SubscriptionController {
   constructor(
     private readonly subs: SubscriptionService,
     private readonly audit: AuditService,
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /** Mening obunam: faolmi, qachongacha, kutilayotgan buyurtma, narx. */
@@ -157,6 +162,16 @@ export class SubscriptionController {
       });
     }
     return this.subs.registry({ ...f, page: clampInt(page, 1, 1, 100_000), limit: clampInt(limit, 30, 1, 100) });
+  }
+
+  /**
+   * Qo'lda eslatma: operator ham yuboradi (qaytariladigan amal, bir bosqich).
+   * Chegara serverda: kuniga bitta, avto eslatma bilan birga hisoblanadi (remind-manual.ts).
+   */
+  @Post('admin/subscriptions/:id/remind') @HttpCode(200)
+  @UseGuards(PlatformAdminGuard)
+  remind(@CurrentUserId() userId: string, @Param('id') id: string) {
+    return remindManual(this.prisma, this.notifications, this.audit, userId, id);
   }
 
   @Post('admin/subscriptions/:id/confirm') @HttpCode(200)

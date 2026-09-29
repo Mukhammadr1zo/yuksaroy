@@ -196,6 +196,30 @@ model AdminNote {
   @@index([entity, entityId, createdAt])
 }
 
+/// Jamoa vazifasi: navbatdagi ish kimga biriktirilgan. Bir obyektga bitta qator (unique):
+/// "kimga" savoli bitta javob kutadi, tarix auditda (admin.task.assign, reassignedFrom).
+/// Obyekt navbatdan chiqsa doneAt o'zi to'ladi (30 s tick va ro'yxat o'qilganda).
+/// assigneeId/assignedById da FK yo'q (AdminNote va AuditLog kabi): hisob anonimlashsa iz qolsin.
+model AdminTask {
+  id           String    @id @default(cuid())
+  /// TASK_ENTITIES: Listing | Organization | Terminal | PremiumOrder | Subscription | Order | UrgentRequest | ContactMessage | Report
+  entity       String
+  entityId     String
+  assigneeId   String
+  assignedById String
+  note         String?
+  dueAt        DateTime? @db.Timestamptz(3)
+  /// Bo'sh = ochiq. doneReason: 'queue' (ish navbatdan chiqdi) | 'manual' (Bajarildi tugmasi)
+  doneAt       DateTime? @db.Timestamptz(3)
+  doneReason   String?
+  /// Oxirgi biriktirish vaqti: qayta biriktirishda yangilanadi, tartib shundan
+  assignedAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([entity, entityId])
+  /// "Menga biriktirilgan ochiq vazifalar, muddati yaqini birinchi"
+  @@index([assigneeId, doneAt, dueAt])
+}
+
 // ───────────────────────── Katalog (S2) ─────────────────────────
 
 enum Rju {

@@ -28,7 +28,7 @@ export function monthWindow(now = new Date()) {
   return { start: uzLocalToUtc(`${k}-01`, '00:00'), prevStart: uzLocalToUtc(`${monthBack(k, 1)}-01`, '00:00') };
 }
 
-/** `back` oy orqadagi kalit: "2026-09" dan 11 orqada "2025-10". */
+/** `back` oy orqadagi kalit: "2026-09" dan 11 orqada "2025-10". Manfiy `back` oldinga yuradi: -1 keyingi oy (money.ts monthEnd shunga tayanadi). */
 export function monthBack(key: string, back: number) {
   const [y, m] = key.split('-').map(Number);
   const t = y! * 12 + (m! - 1) - back;
