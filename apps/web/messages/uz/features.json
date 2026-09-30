@@ -125,6 +125,62 @@
       "companies": "kompaniya",
       "freeSlotsToday": "bugun bo'sh joy"
     },
+    "explainer": {
+      "demo": "Namuna",
+      "pause": "To'xtatish",
+      "play": "Davom etish",
+      "hint": "Chap va o'ng o'q qadamni almashtiradi, To'xtatish tugmasi ko'rgazmani to'xtatadi.",
+      "steps": {
+        "s1": {
+          "title": "Qidiring",
+          "body": "Viloyat yoki yuk turini yozing. Katalogda mingdan ortiq terminal, texnika va tashuvchi bor."
+        },
+        "s2": {
+          "title": "Filtrlang",
+          "body": "Viloyat, xizmat va imkoniyat bo'yicha ajrating. Ro'yxat ham, xarita ham bir vaqtda o'zgaradi."
+        },
+        "s3": {
+          "title": "Solishtiring",
+          "body": "Ikki yoki uchtasini yonma yon qo'ying: narx, ish vaqti, imkoniyat bitta jadvalda."
+        },
+        "s4": {
+          "title": "Bog'laning",
+          "body": "Raqamni ochish obuna bilan ishlaydi. Kuniga nechta ochish mumkinligi tarifda yozilgan."
+        },
+        "s5": {
+          "title": "Bron qiling",
+          "body": "So'rov yuborish uchun hisob kerak. Yuborilgan so'rovning holatini esa siz ham, hamkoringiz ham havola orqali hisobsiz ochasiz."
+        }
+      },
+      "frame": {
+        "query": "konteyner",
+        "found": "topildi",
+        "row1": "Toshkent viloyati, konteyner maydoni",
+        "row2": "Samarqand, konteyner terminali",
+        "row3": "Andijon, konteyner ombori",
+        "filterRegion": "Toshkent viloyati",
+        "filterService": "Konteyner",
+        "colA": "1-maydon",
+        "colB": "2-maydon",
+        "price": "Narx",
+        "hours": "Ish vaqti",
+        "ability": "Imkoniyat",
+        "hoursA": "08:00-20:00",
+        "hoursB": "24 soat",
+        "abilityA": "Kran 20 t",
+        "abilityB": "Kran 32 t",
+        "reveal": "Raqamni ko'rish",
+        "phone": "+998 90 000 00 00",
+        "left": "bugun qolgan: {n}",
+        "cargo": "Yuk turi",
+        "cargoValue": "Konteyner 20 fut",
+        "date": "Sana",
+        "dateValue": "12-oktabr",
+        "send": "So'rov yuborish",
+        "status": "Ochiq",
+        "track": "Holat sahifasi"
+      }
+    },
     "assistant": {
       "meta": {
         "title": "Yordamchi qidiruv · YukSaroy",

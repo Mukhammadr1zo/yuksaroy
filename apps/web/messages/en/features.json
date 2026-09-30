@@ -125,6 +125,62 @@
       "companies": "companies",
       "freeSlotsToday": "free spots today"
     },
+    "explainer": {
+      "demo": "Sample",
+      "pause": "Pause",
+      "play": "Resume",
+      "hint": "Left and right arrows change the step, the Pause button stops the demo.",
+      "steps": {
+        "s1": {
+          "title": "Search",
+          "body": "Type a region or a cargo type. The catalog holds more than a thousand terminals, machines and carriers."
+        },
+        "s2": {
+          "title": "Filter",
+          "body": "Narrow it down by region, service and capability. The list and the map change at the same time."
+        },
+        "s3": {
+          "title": "Compare",
+          "body": "Put two or three side by side: price, working hours and capability in one table."
+        },
+        "s4": {
+          "title": "Connect",
+          "body": "Opening a number works with a subscription. How many you may open a day is written in the plan."
+        },
+        "s5": {
+          "title": "Book",
+          "body": "Sending a request needs an account. The status of a sent request opens by link without an account, for you and for your partner."
+        }
+      },
+      "frame": {
+        "query": "container",
+        "found": "found",
+        "row1": "Tashkent region, container yard",
+        "row2": "Samarkand, container terminal",
+        "row3": "Andijan, container depot",
+        "filterRegion": "Tashkent region",
+        "filterService": "Container",
+        "colA": "Yard 1",
+        "colB": "Yard 2",
+        "price": "Price",
+        "hours": "Working hours",
+        "ability": "Capability",
+        "hoursA": "08:00-20:00",
+        "hoursB": "24 hours",
+        "abilityA": "Crane 20 t",
+        "abilityB": "Crane 32 t",
+        "reveal": "Show the number",
+        "phone": "+998 90 000 00 00",
+        "left": "left today: {n}",
+        "cargo": "Cargo type",
+        "cargoValue": "Container 20 ft",
+        "date": "Date",
+        "dateValue": "12 October",
+        "send": "Send the request",
+        "status": "Open",
+        "track": "Status page"
+      }
+    },
     "assistant": {
       "meta": {
         "title": "Assistant search · YukSaroy",

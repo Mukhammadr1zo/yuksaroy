@@ -50,6 +50,10 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
           <CategoryGrid />
         </div>
 
+        {/* Ko'rgazma (Explainer) bu yerda turmaydi: uning besh qadami HowItWorks ning to'rt
+            kartochkasi bilan bir xil yo'lni aytardi va uchta sarlavha so'zma-so'z takrorlanardi.
+            Kartochkalar qoldi, chunki ular real sahifalarga HAVOLA. Ko'rgazmaning o'zi /help va
+            /for-shippers da, video uchun esa /explainer da. */}
         <HowItWorks stats={stats} />
 
         <VisitMap total={stats?.visits30 ?? 0} regions={stats?.visitRegions ?? []} lang={locale as SearchLang} />

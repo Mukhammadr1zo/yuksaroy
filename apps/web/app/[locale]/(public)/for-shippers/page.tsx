@@ -5,6 +5,7 @@ import { sapi } from '@/lib/server-api';
 import type { Stats } from '@/lib/types';
 import { CtaBand, Faq, Hero, ValueCards } from '@/components/marketing/bits';
 import { ShipperRoi } from '@/components/marketing/Roi';
+import { Explainer } from '@/components/landing/Explainer';
 import { alt } from '@/lib/seo';
 
 export const revalidate = 300;
@@ -23,12 +24,20 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ForShippersPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, stats] = await Promise.all([getTranslations('marketing.shippers'), sapi<Stats>('/stats', 60).catch(() => null)]);
+  const [t, th, stats] = await Promise.all([getTranslations('marketing.shippers'), getTranslations('how'), sapi<Stats>('/stats', 60).catch(() => null)]);
   const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 })] : [];
   return (
     <>
       <Hero side="shippers" facts={facts} primary="/terminals" secondary="/quote" />
       <ValueCards side="shippers" items={VALUES} />
+      {/* Kartalar nima berilishini aytadi, hisoblagich esa pulni sanaydi. Ko'rgazma ikkisining
+          o'rtasida turadi: avval nima borligi, keyin qanday olinishi, keyin qanchaga tushishi. */}
+      <section className="border-t border-line">
+        <div className="mx-auto max-w-6xl px-6 py-14 md:py-16">
+          <h2 className="font-display text-2xl font-bold text-navy md:text-3xl">{th('heading')}</h2>
+          <div className="mt-8"><Explainer /></div>
+        </div>
+      </section>
       <section className="border-t border-line bg-white">
         <div className="mx-auto max-w-6xl px-6 py-14 md:py-16">
           <h2 className="font-display text-2xl font-bold text-navy md:text-3xl">{t('roi.heading')}</h2>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { DashLink } from '@/components/site/DashLink';
+import { Explainer } from '@/components/landing/Explainer';
 import { sapiOrNull } from '@/lib/server-api';
 import { alt } from '@/lib/seo';
 
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HelpPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, faq] = await Promise.all([getTranslations('help'), sapiOrNull<Faq[]>(`/help/faq?locale=${locale}`, 3600)]);
+  const [t, th, faq] = await Promise.all([getTranslations('help'), getTranslations('how'), sapiOrNull<Faq[]>(`/help/faq?locale=${locale}`, 3600)]);
   return (
     <>
       <section className="border-b border-line bg-white">
@@ -26,6 +27,15 @@ export default async function HelpPage({ params }: Props) {
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-teal-ink">{t('page.eyebrow')}</p>
           <h1 className="mt-3 max-w-[22ch] font-display text-3xl font-bold leading-[1.08] text-navy md:text-5xl">{t('page.title')}</h1>
           <p className="mt-4 max-w-[58ch] text-lg text-muted">{t('page.lead')}</p>
+        </div>
+      </section>
+
+      {/* Savollardan OLDIN: odam savol bilan keladi, lekin ko'pincha savolning o'zi
+          umumiy yo'lni bilmaslikdan chiqadi. Avval yo'lni ko'rsatamiz, keyin ro'yxatni. */}
+      <section className="border-b border-line bg-sand">
+        <div className="mx-auto max-w-6xl px-6 py-14 md:py-16">
+          <h2 className="font-display text-2xl font-bold text-navy md:text-3xl">{th('heading')}</h2>
+          <div className="mt-8"><Explainer /></div>
         </div>
       </section>
 
