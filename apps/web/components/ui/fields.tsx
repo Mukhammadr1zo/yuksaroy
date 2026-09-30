@@ -99,8 +99,13 @@ function CountryPicker({ iso, onPick, disabled }: { iso: string; onPick: (iso: s
 
   return (
     <div ref={box} className="relative shrink-0">
+      {/* aria-controls faqat ro'yxat ochiq turganda beriladi: yopiqda ro'yxat DOM da
+          umuman yo'q va mavjud bo'lmagan id ga ishora qilish o'zi xato bo'lardi.
+          useId ni o'chirmadik, chunki tugma bilan ro'yxat orasidagi bog'lanish aynan
+          shu yerda ekran o'quvchiga kerak */}
       <button
         type="button" disabled={disabled} aria-haspopup="listbox" aria-expanded={open} aria-label={t('country')}
+        aria-controls={open ? id : undefined}
         onClick={() => { if (!open) place(); setOpen((v) => !v); }}
         className="flex h-full items-center gap-1 rounded-xl border border-line bg-white px-3 font-mono text-sm text-navy outline-none transition-colors duration-150 hover:border-teal focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand"
       >
@@ -148,17 +153,13 @@ function CountryPicker({ iso, onPick, disabled }: { iso: string; onPick: (iso: s
   );
 }
 
-type PhoneProps = {
+// Inputning barcha odatiy xossalari (id, aria-describedby, aria-invalid, aria-required ...)
+// qabul qilinadi va ...rest orqali ICHKI <input> ga tushadi, davlat kodi tugmasiga emas.
+// Field aynan shularni uzatadi, ro'yxatni qo'lda yuritish esa har safar bittasini unutishga
+// olib kelardi. value/onChange chiqarib tashlangan: bu yerda ular matn emas, E.164 qiymat.
+type PhoneProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> & {
   value: string;
   onChange: (value: string) => void;
-  className?: string;
-  placeholder?: string;
-  id?: string;
-  name?: string;
-  required?: boolean;
-  disabled?: boolean;
-  autoFocus?: boolean;
-  'aria-label'?: string;
 };
 
 /**
@@ -239,6 +240,11 @@ export function PhoneField({ value, onChange, className = '', placeholder, disab
     </div>
   );
 }
+// Field (kabinet/bits.tsx) shu belgiga qarab id va aria larni ichkariga uzatadi.
+// Nega belgi, nega import qilib solishtirmadik: bits.tsx ni butun davlatlar ro'yxati va
+// ikonkalarga bog'lab qo'yardi, holbuki bits ni faqat tugma sinflari uchun oladigan
+// o'nlab sahifa bor. Nomni solishtirish esa siqilgan qurishda buzilardi.
+PhoneField.isFieldControl = true;
 
 type PasswordProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
 
@@ -263,3 +269,4 @@ export function PasswordField({ className = '', ...rest }: PasswordProps) {
     </span>
   );
 }
+PasswordField.isFieldControl = true;

@@ -28,7 +28,7 @@ export default async function CompanyPage({ params }: Params) {
   const lang = locale as SearchLang;
   const o = await sapiOrNull<CompanyDetail>(`/companies/${slug}`, 60);
   if (!o) notFound();
-  const [t, tk] = await Promise.all([getTranslations('companies'), getTranslations('orgKind')]);
+  const [t, tk, ta] = await Promise.all([getTranslations('companies'), getTranslations('orgKind'), getTranslations('a11y')]);
   const tg = o.telegram ? o.telegram.replace(/^@|^https?:\/\/t\.me\//, '') : null;
   const site = o.website ? (o.website.startsWith('http') ? o.website : `https://${o.website}`) : null;
   const pins: Pin[] = [
@@ -41,7 +41,7 @@ export default async function CompanyPage({ params }: Params) {
     <div className="mx-auto max-w-6xl px-6 py-10">
       <Ld data={{ '@context': 'https://schema.org', '@type': 'Organization', name: o.name, url: url(locale, `/companies/${slug}`), address: o.regionCode ? { '@type': 'PostalAddress', addressRegion: o.regionCode, addressCountry: 'UZ' } : undefined, sameAs: [site, tg ? `https://t.me/${tg}` : null].filter(Boolean) }} />
       <Ld data={breadcrumbs(locale, [{ name: t('title'), path: '/companies' }, { name: o.name, path: `/companies/${slug}` }])} />
-      <nav aria-label="Yo'l" className="font-mono text-xs text-muted"><Link href="/companies" className="hover:text-navy">{t('title')}</Link> / {o.name}</nav>
+      <nav aria-label={ta('breadcrumb')} className="font-mono text-xs text-muted"><Link href="/companies" className="hover:text-navy">{t('title')}</Link> / {o.name}</nav>
       <header className="mt-3 max-w-3xl">
         <div className="flex flex-wrap items-center gap-2">
           {o.kinds.map((k) => <span key={k} className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(k as OrgKind)}</span>)}

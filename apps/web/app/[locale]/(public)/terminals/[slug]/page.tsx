@@ -98,8 +98,10 @@ export default async function TerminalPage({ params }: Params) {
             <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(t.kind)}</span>
             {t.isDemo ? <span className="rounded-full border border-amber/40 bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{tr('demoBadge')}</span> : null}
             {registryOnly ? null : <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>}
+            {/* "Tasdiqlanmagan" yorlig'ida text-amber bu fonda 2.33 edi, kodda eng past qiymat:
+                amber faqat fon bo'ladi, matn esa amber-ink. */}
             {registryOnly ? <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">{t.claimStatus === 'PENDING' ? tcl('pendingBadge') : tcl('registryBadge')}</span>
-              : !t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber">{tr('badge.unverifiedPassport')}</span> : null}
+              : !t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{tr('badge.unverifiedPassport')}</span> : null}
             {registryOnly ? null : <a href="#reviews" className={`rounded-full border border-line bg-white px-3 py-1 font-mono text-xs font-semibold tabular-nums ${t.ratingAvg != null ? 'text-navy' : 'text-muted'}`}>{t.ratingAvg != null ? `★ ${t.ratingAvg.toFixed(1)} (${t.ratingCount})` : t.ratingCount ? trv('hidden', { count: t.ratingCount, min: REVIEW.minToShow }) : trv('none')}</a>}
           </div>
           <h1 className="font-display mt-3 text-3xl font-bold md:text-4xl">{t.name}</h1>
@@ -133,7 +135,7 @@ export default async function TerminalPage({ params }: Params) {
             {t.tariffs.length === 0 ? <p className="mt-2 text-sm text-muted">{tr('tariffs.empty')}</p> : (
               <div className="mt-3 overflow-x-auto rounded-card border border-line bg-white">
                 <table className="w-full text-sm">
-                  <thead className="bg-sand text-left font-mono text-xs text-muted"><tr><th className="px-4 py-2">{tr('tariffs.col.service')}</th><th className="px-4 py-2">{tr('tariffs.col.cargoGroup')}</th><th className="px-4 py-2 text-right">{tc('price')}</th><th className="px-4 py-2 text-right">{tr('tariffs.col.min')}</th></tr></thead>
+                  <thead className="bg-sand text-left font-mono text-xs text-muted"><tr><th scope="col" className="px-4 py-2">{tr('tariffs.col.service')}</th><th scope="col" className="px-4 py-2">{tr('tariffs.col.cargoGroup')}</th><th scope="col" className="px-4 py-2 text-right">{tc('price')}</th><th scope="col" className="px-4 py-2 text-right">{tr('tariffs.col.min')}</th></tr></thead>
                   <tbody>
                     {t.tariffs.map((x) => (
                       <tr key={x.id} className="border-t border-line/70">

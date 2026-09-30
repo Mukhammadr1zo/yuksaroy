@@ -7,6 +7,7 @@
     "sort": "Сортировка",
     "locale": "Язык",
     "breadcrumb": "Путь",
-    "loading": "Загрузка"
+    "loading": "Загрузка",
+    "required": "обязательно"
   }
 }

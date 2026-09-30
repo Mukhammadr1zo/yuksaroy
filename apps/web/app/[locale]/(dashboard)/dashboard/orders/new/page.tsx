@@ -22,7 +22,7 @@ const STEPS = ['cargo', 'terminal', 'summary'] as const;
 
 export default function NewOrderPage() {
   const t = useTranslations('dashboard2.order');
-  return <Suspense fallback={<main className="mx-auto max-w-4xl px-6 py-10 text-muted">{t('loading')}</main>}><Wizard /></Suspense>;
+  return <Suspense fallback={<div className="mx-auto max-w-4xl px-6 py-10 text-muted">{t('loading')}</div>}><Wizard /></Suspense>;
 }
 
 function Wizard() {
@@ -37,6 +37,11 @@ function Wizard() {
   const [orgs, setOrgs] = useState<Membership[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Tekshiruv yiqilganda fokus shu maydonlarga ko'chadi. Bu yerda effekt kerak emas:
+  // xato aniq bitta maydonga tegishli va maydon allaqachon chizilgan.
+  const stationBox = useRef<HTMLDivElement>(null);
+  const weightRef = useRef<HTMLInputElement>(null);
+  const wagonRef = useRef<HTMLInputElement>(null);
 
   // 1-qadam
   const [orgId, setOrgId] = useState('');
@@ -94,8 +99,8 @@ function Wizard() {
 
   async function toStep2(e: React.FormEvent) {
     e.preventDefault(); setErr(null);
-    if (!station) return setErr(t('err.selectStation'));
-    if (!(weightKg > 0)) return setErr(t('err.enterWeight'));
+    if (!station) { setErr(t('err.selectStation')); stationBox.current?.querySelector('input')?.focus(); return; }
+    if (!(weightKg > 0)) { setErr(t('err.enterWeight')); weightRef.current?.focus(); return; }
     setBusy(true);
     try {
       const r = await post<QuoteResponse>('/quote', {
@@ -150,7 +155,7 @@ function Wizard() {
     // Noto'g'ri vagon raqami jimgina tushib qolmasin: 8 raqam bo'lishi shart
     const wagonList = wagonNumbers.split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
     const badWagons = wagonList.filter((x) => !/^\d{8}$/.test(x));
-    if (badWagons.length) { setBusy(false); return setErr(t('err.wagonNumbers', { list: badWagons.join(', ') })); }
+    if (badWagons.length) { setBusy(false); setErr(t('err.wagonNumbers', { list: badWagons.join(', ') })); wagonRef.current?.focus(); return; }
     try {
       const order = await post<Order>('/orders', {
         orgId: orgId || undefined, bookingId: hold.id, operation, cargoCode: cargo?.code, weightKg,
@@ -169,7 +174,7 @@ function Wizard() {
   const selectedSlot = useMemo(() => slots.find((s) => s.id === hold?.slotId) ?? null, [slots, hold]);
 
   return (
-    <main className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl">
       <nav aria-label={ta('breadcrumb')} className="font-mono text-xs text-muted"><Link href="/dashboard" className="hover:text-navy">{t('cabinet')}</Link> / {t('newTitle')}</nav>
       <h1 className="font-display mt-2 text-3xl font-bold">{t('newTitle')}</h1>
 
@@ -214,7 +219,7 @@ function Wizard() {
           </fieldset>
 
           <label className="block text-sm font-semibold">{t('row.station')}
-            <div className="mt-1 font-normal"><StationSearch value={station} onChange={setStation} /></div>
+            <div ref={stationBox} className="mt-1 font-normal"><StationSearch value={station} onChange={setStation} /></div>
           </label>
           <label className="block text-sm font-semibold">{t('cargoOptional')}
             <div className="mt-1 font-normal"><CargoSearch value={cargo} onChange={setCargo} /></div>
@@ -222,7 +227,7 @@ function Wizard() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <label className="block text-sm font-semibold">{t('weightT')}
-              <input inputMode="decimal" required value={weightT} onChange={(e) => setWeightT(e.target.value)} className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
+              <input ref={weightRef} inputMode="decimal" required value={weightT} onChange={(e) => setWeightT(e.target.value)} className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
             </label>
             <label className="block text-sm font-semibold">{t('wagonCount')}
               <input inputMode="numeric" value={wagons} onChange={(e) => setWagons(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
@@ -309,7 +314,7 @@ function Wizard() {
           <section className="rounded-card border border-line bg-white p-6">
             <h2 className="text-lg font-bold">{t('extraInfo')}</h2>
             <label className="mt-4 block text-sm font-semibold">{t('wagonNumbers')}
-              <input value={wagonNumbers} onChange={(e) => setWagonNumbers(e.target.value)} placeholder="62031845 62031846" className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
+              <input ref={wagonRef} value={wagonNumbers} onChange={(e) => setWagonNumbers(e.target.value)} placeholder="62031845 62031846" className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
             </label>
             <label className="mt-4 block text-sm font-semibold">{t('noteOptional')}
               <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-base font-normal" />
@@ -342,7 +347,7 @@ function Wizard() {
           </aside>
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }
 

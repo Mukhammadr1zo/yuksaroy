@@ -122,12 +122,12 @@ export function UrgentMine() {
           <table className="w-full min-w-[720px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-muted">
               <tr className="border-b border-line">
-                <th className="px-4 py-3 font-semibold">{t('col.no')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.kind')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.region')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.status')}</th>
-                <th className="px-4 py-3 text-right font-semibold">{t('col.offers')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.created')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.no')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.kind')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.region')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.status')}</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">{t('col.offers')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.created')}</th>
               </tr>
             </thead>
             <tbody>

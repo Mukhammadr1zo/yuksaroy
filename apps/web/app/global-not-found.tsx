@@ -10,6 +10,13 @@ const mono = JetBrains_Mono({ subsets: ['latin', 'cyrillic'], weight: ['400'], v
 
 export default function GlobalNotFound() {
   return (
+    // lang="uz" qattiq yozilgan va shunday qoladi: bu sahifa /_not-found marshruti bo'lib,
+    // qurish paytida bir marta HTML ga aylanadi va topilmagan har qanday manzilga o'sha bitta
+    // fayl beriladi. Next hujjatiga ko'ra bu faylga prop berilmaydi, so'rov manzili esa hech
+    // qaysi sarlavhada kelmaydi (headers() faqat host ni beradi), ya'ni server tomonda tilni
+    // aniqlashning yo'li yo'q. Tuzatish mijoz tomonida: NotFoundBody document.documentElement.lang
+    // ni /ru yoki /en prefiksiga qarab almashtiradi. Server tomonda tuzatmoqchi bo'lsa, manzilni
+    // proxy.ts so'rov sarlavhasiga qo'yishi kerak.
     <html lang="uz" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="bg-sand text-ink antialiased">
         <NotFoundBody />

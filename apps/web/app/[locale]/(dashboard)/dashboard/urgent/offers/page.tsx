@@ -51,7 +51,7 @@ export default function UrgentOffersPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
@@ -90,7 +90,7 @@ export default function UrgentOffersPage() {
                 </div>
               ) : r.status === 'OPEN' ? (
                 <form onSubmit={(e) => { e.preventDefault(); void send(r); }} className="mt-4 border-t border-line pt-4">
-                  <h3 className="text-sm font-semibold">{t('offer.title')}</h3>
+                  <h2 className="text-sm font-semibold">{t('offer.title')}</h2>
                   <div className="mt-2 grid gap-3 sm:grid-cols-3">
                     <Field label={t('offer.price')} hint={t('offer.priceHint')}>
                       <input className={`${INPUT} font-mono`} type="number" min={0} step={1000} inputMode="numeric" value={d.price} onChange={(e) => set(r.id, { price: e.target.value })} />
@@ -110,6 +110,6 @@ export default function UrgentOffersPage() {
           );
         })}
       </ul>
-    </main>
+    </div>
   );
 }

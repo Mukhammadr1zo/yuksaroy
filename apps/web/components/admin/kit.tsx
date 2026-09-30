@@ -714,7 +714,13 @@ export function Skeleton({ rows = 3, className = '' }: { rows?: number; classNam
 export function Drawer({ open, title, onClose, children, footer, side = 'right' }: {
   open: boolean; title: string; onClose: () => void; children: React.ReactNode; footer?: React.ReactNode; side?: 'left' | 'right';
 }) {
+  const ta = useTranslations('a11y');
   const ref = useRef<HTMLDivElement>(null);
+  /*
+   * Varaq ochilishidan oldin fokus qayerda edi. Ref da, holatda emas: effekt faqat [open] ga
+   * bog'liq va uni qayta yurgizish fokusni inputdan tortib olardi.
+   */
+  const prevFocus = useRef<HTMLElement | null>(null);
   /*
    * onClose ref orqali: chaqiruvchilar uni har renderda yangi funksiya qilib beradi
    * (onClose={() => setSheet(null)}). U effekt bog'liqligida turganida har harf
@@ -726,11 +732,19 @@ export function Drawer({ open, title, onClose, children, footer, side = 'right' 
   closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;
+    prevFocus.current = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeRef.current(); };
     document.addEventListener('keydown', onKey);
     // Ochilganda fokus varaq ichiga kirsin, aks holda Tab orqadagi ro'yxatni aylanib chiqadi
     ref.current?.focus();
-    return () => document.removeEventListener('keydown', onKey);
+    // Tozalash faqat yopilganda va komponent ketganda yuradi (bog'liqlik faqat [open]):
+    // shunda fokus varaqni ochgan tugmaga qaytadi. Aks holda klaviatura bilan yurgan odam
+    // varaqni yopgach sahifaning boshiga tushib, o'sha qatorni qaytadan qidirishga majbur bo'lardi.
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      prevFocus.current?.focus();
+      prevFocus.current = null;
+    };
   }, [open]);
   // Tab varaq ichida aylanadi: aria-modal buni va'da qiladi; aks holda fokus orqadagi ro'yxat va
   // menyuga chiqib ketar, klaviaturali operator varaq ostidagi tugmani ko'rmasdan bosardi
@@ -751,7 +765,8 @@ export function Drawer({ open, title, onClose, children, footer, side = 'right' 
         className="relative flex h-full w-full max-w-xl flex-col bg-sand shadow-2xl outline-none">
         <div className="flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-3">
           <h2 className="truncate font-display text-lg font-bold text-navy">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="X" className="rounded-full px-2 py-1 text-xl leading-none text-muted hover:bg-sand hover:text-navy">×</button>
+          {/* Nomi "Yopish": ekran o'quvchi aria-label ni ovoz chiqarib o'qiydi va "X" "iks" bo'lib eshitilardi */}
+          <button type="button" onClick={onClose} aria-label={ta('close')} className="rounded-full px-2 py-1 text-xl leading-none text-muted hover:bg-sand hover:text-navy">×</button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
         {footer ? <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line bg-white px-5 py-3">{footer}</div> : null}

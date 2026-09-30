@@ -42,7 +42,7 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
         potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: `${url(locale, '/terminals')}?q={search_term_string}` }, 'query-input': 'required name=search_term_string' },
       }} />
       <Header />
-      <main className="bg-sand">
+      <main id="main" className="bg-sand">
         <MapHero terminals={stats?.terminals ?? null} />
 
         <div className="border-t border-line bg-white">

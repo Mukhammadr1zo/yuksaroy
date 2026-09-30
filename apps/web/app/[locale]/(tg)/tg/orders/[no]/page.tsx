@@ -54,12 +54,12 @@ export default function TgOrderPage() {
     } catch { setErr(tc('failed')); }
   }
 
-  if (err && !o) return <main className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err}</main>;
-  if (!o) return <main className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
+  if (err && !o) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err}</main>;
+  if (!o) return <main id="main" className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
   const cancellable = o.status === 'PENDING' || o.status === 'CONFIRMED';
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="font-display text-xl font-bold">{o.no}</h1>
         <StatusPill status={o.status} />

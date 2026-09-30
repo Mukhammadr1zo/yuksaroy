@@ -81,7 +81,7 @@ export function NotFoundBody() {
         </a>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-12">
+      <main id="main" className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-12">
         <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-teal-ink">{t.code}</p>
         <h1 className="font-display mt-3 text-[clamp(2rem,4.5vw,3.25rem)] font-bold leading-[1.05] tracking-tight text-navy">{t.title}</h1>
         <p className="mt-4 max-w-[56ch] text-[17px] leading-relaxed text-muted">{t.lead}</p>

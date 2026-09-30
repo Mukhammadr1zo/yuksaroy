@@ -11,7 +11,11 @@
   --color-teal-lit: #05979E;
   --color-teal-soft: #E2F2F3;
   --color-amber: #FD7B03;
-  --color-amber-ink: #A85C06;
+  /* amber-ink FON emas, MATN rangi: oq fonda 6.80, amber-soft fonda 6.05 beradi.
+     Oldingi #A85C06 amber-soft ustida 4.45 edi, ya'ni 4.5 chegarasidan past.
+     amber (#FD7B03) esa faqat fon bo'ladi va ustiga OQ emas, ink yoziladi:
+     oq matn u yerda 2.62, ink esa 6.03. */
+  --color-amber-ink: #8A4B04;
   --color-amber-soft: #FDF0DC;
   --color-sand: #F1F4F8;
   --color-ink: #0B2340;

@@ -45,7 +45,7 @@ export default function MyListingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
         <Link href="/dashboard/listings/new" className={BTN_NAVY}>{t('new')}</Link>
@@ -67,14 +67,14 @@ export default function MyListingsPage() {
           <table className="w-full min-w-[980px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-muted">
               <tr className="border-b border-line">
-                <th className="px-4 py-3 font-semibold">{t('col.title')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.kind')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.owner')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.status')}</th>
-                <th className="px-4 py-3 font-semibold">{tp('col')}</th>
-                <th className="px-4 py-3 text-right font-semibold">{t('col.price')}</th>
-                <th className="px-4 py-3 text-right font-semibold">{t('col.views')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.updated')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.title')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.kind')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.owner')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.status')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{tp('col')}</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">{t('col.price')}</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">{t('col.views')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.updated')}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -121,6 +121,6 @@ export default function MyListingsPage() {
         </div>
       ) : null}
 
-    </main>
+    </div>
   );
 }

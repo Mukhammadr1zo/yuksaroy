@@ -110,6 +110,7 @@
       "phoneHint": "Raqam faqat obunachi ijrochilarga ochiladi. Bo'sh qoldirsangiz, ular takliflarini shu yerda yozadi.",
       "submit": "E'lon qilish",
       "sending": "Yuborilmoqda",
+      "errCount": "To'ldirilmagan maydonlar: {count} ta. Birinchisiga o'tdingiz.",
       "authTitle": "Yuborishdan oldin raqamingizni tasdiqlang.",
       "authLead": "So'rov tayyor. Kod tasdiqlangan zahoti u o'zi yuboriladi, yozganlaringiz shu yerda turadi.",
       "authSubmit": "Tasdiqlash va yuborish",

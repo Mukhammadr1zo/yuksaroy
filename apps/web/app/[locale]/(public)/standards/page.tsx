@@ -44,7 +44,7 @@ export default async function StandartPage({ params }: Params) {
             <section key={k} className="rounded-card border border-line bg-white p-5">
               <h2 className="font-display text-lg font-bold text-navy">{labels.kind[k]}</h2>
               <table className="mt-3 w-full text-sm">
-                <thead className="text-left font-mono text-xs text-muted"><tr><th className="py-1 font-normal">{t('col.field')}</th><th className="py-1 text-right font-normal">{t('col.level')}</th></tr></thead>
+                <thead className="text-left font-mono text-xs text-muted"><tr><th scope="col" className="py-1 font-normal">{t('col.field')}</th><th scope="col" className="py-1 text-right font-normal">{t('col.level')}</th></tr></thead>
                 <tbody>
                   <tr><td className="py-1.5">{t('owner.label')}</td><td className="py-1.5 text-right text-xs font-semibold text-navy">{t(k === 'TRUCK' ? 'owner.any' : 'owner.org')}</td></tr>
                   {fields.map(([f, must]) => (

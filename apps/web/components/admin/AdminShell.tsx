@@ -123,13 +123,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   );
 
   // Tekshirilmoqda: qobiq skeleti, joylar keyin sakramasin
+  // Quyidagi uchta <main> ga ham id="main" qo'yilgan: ular bir-birini istisno qiladigan
+  // tarmoqlar (tekshirilmoqda / huquq yo'q / panel), ya'ni bir vaqtda faqat bittasi chiziladi
+  // va sahifada id takrorlanmaydi. Sakrash havolasi qaysi holat bo'lsa ham manzilni topadi.
   if (me === undefined) {
     return (
       <div className="min-h-dvh lg:grid lg:grid-cols-[208px_minmax(0,1fr)]" aria-busy="true">
         <aside className="hidden border-r border-line/70 lg:block" />
         <div className="min-w-0">
           <div className="h-[52px] border-b border-line/70" />
-          <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6"><Skeleton rows={3} /></main>
+          <main id="main" className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6"><Skeleton rows={3} /></main>
         </div>
       </div>
     );
@@ -137,7 +140,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   // Huquq yo'q: menyu ham, panel ham chizilmaydi, faqat saytga qaytish yo'li
   if (!ctx) {
     return (
-      <main className="mx-auto max-w-[1600px] px-4 py-10 sm:px-6">
+      <main id="main" className="mx-auto max-w-[1600px] px-4 py-10 sm:px-6">
         <p role="alert" className="text-sm text-muted">{t('forbidden')}</p>
         <Link href="/" className="mt-3 inline-block text-sm font-semibold text-teal-ink hover:underline">{ts('site')}</Link>
       </main>
@@ -155,7 +158,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </aside>
         <div className="min-w-0">
           <AdminTopbar navMin={navMin} onToggleNav={toggleNav} onMenu={() => setMenu(true)} />
-          <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6">
+          <main id="main" className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6">
             {/* useSearchParams statik renderda Suspense talab qiladi: o'ram bitta joyda, ekranlar o'zi o'ramaydi */}
             <Suspense fallback={<Skeleton rows={3} />}>{children}</Suspense>
           </main>

@@ -32,7 +32,7 @@ export default function MyTerminalsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
@@ -60,13 +60,13 @@ export default function MyTerminalsPage() {
           <table className="w-full min-w-[900px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-muted">
               <tr className="border-b border-line">
-                <th className="px-4 py-3 font-semibold">{t('col.name')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.kind')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.status')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.station')}</th>
-                <th className="px-4 py-3 font-semibold">{t('col.region')}</th>
-                <th className="px-4 py-3 text-right font-semibold">{t('col.freeToday')}</th>
-                <th className="px-4 py-3 text-right font-semibold">{t('col.tariffs')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.name')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.kind')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.status')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.station')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.region')}</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">{t('col.freeToday')}</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">{t('col.tariffs')}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -94,6 +94,6 @@ export default function MyTerminalsPage() {
           </table>
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

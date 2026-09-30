@@ -133,7 +133,7 @@ export default function TgBookPage() {
   const selectedSlot = useMemo(() => slots.find((s) => s.id === hold?.slotId) ?? null, [slots, hold]);
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-28 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">
       <p className="text-xs text-muted">{terminal?.name ?? '…'}</p>
       <h1 className="font-display mt-0.5 text-xl font-bold">{t('title')}</h1>
       <ol className="mt-3 flex gap-1.5" aria-label={t('title')}>

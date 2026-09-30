@@ -61,12 +61,15 @@ export function HelpWidget() {
     api<Faq[]>(`/help/faq?locale=${locale}`).then(setFaq).catch(() => setFaq([]));
   }, [open, faq, locale]);
 
+  // Oyna yopilganda fokus uni ochgan tugmaga qaytadi: klaviatura bilan yurgan odam
+  // Esc bosgach sahifaning boshiga tushib qolmasin, turgan joyida davom etsin
   useEffect(() => {
     if (!open) return;
+    const prev = document.activeElement as HTMLElement | null;
     input.current?.focus();
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); prev?.focus(); };
   }, [open]);
 
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [msgs, busy]);

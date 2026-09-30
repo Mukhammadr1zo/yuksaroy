@@ -29,7 +29,7 @@ export async function listingMetadata(slug: string) {
 export async function ListingDetailView({ slug, section }: { slug: string; section: Section }) {
   const l = await sapiOrNull<ListingDetail>(`/listings/${slug}`, 60);
   if (!l || (l.kind === 'TRUCK') !== (section === 'carriers')) notFound();
-  const [lang, t] = await Promise.all([getLocale() as Promise<SearchLang>, getTranslations('listing.detail')]);
+  const [lang, t, ta] = await Promise.all([getLocale() as Promise<SearchLang>, getTranslations('listing.detail'), getTranslations('a11y')]);
   const L = LISTING_LABELS[lang];
   const truck = l.kind === 'TRUCK';
   const similar = await sapi<ListingPage>(`/listings?kind=${l.kind}&region=${l.regionCode}&limit=4`, 60).then((d) => d.items.filter((x) => x.id !== l.id).slice(0, 3)).catch(() => []);
@@ -59,7 +59,7 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
       <Impressions kind="listing" ids={[l.id]} surface="detail" />
-      <nav aria-label="Yo'l" className="font-mono text-xs text-muted"><Link href={`/${section}`} className="hover:text-navy">{sectionTitle}</Link> / {regionName(l.regionCode, lang)}</nav>
+      <nav aria-label={ta('breadcrumb')} className="font-mono text-xs text-muted"><Link href={`/${section}`} className="hover:text-navy">{sectionTitle}</Link> / {regionName(l.regionCode, lang)}</nav>
       <header className="mt-3 max-w-3xl">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{L.kind[l.kind]}</span>

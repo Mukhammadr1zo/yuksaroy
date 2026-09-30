@@ -15,7 +15,7 @@ import { Impressions } from '@/components/catalog/Impressions';
 export async function TgListingView({ slug, section }: { slug: string; section: 'equipment' | 'carriers' }) {
   const [lang, t, tl, tc] = await Promise.all([getLocale() as Promise<SearchLang>, getTranslations('tg.listing'), getTranslations('listing.detail'), getTranslations('tg.common')]);
   const l = await sapiOrNull<ListingDetail>(`/listings/${slug}`, 60);
-  if (!l) return <main className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{t('notFound')}</main>;
+  if (!l) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{t('notFound')}</main>;
   const truck = l.kind === 'TRUCK';
   if (truck !== (section === 'carriers')) redirect({ href: `/tg/${truck ? 'carriers' : 'equipment'}/${slug}`, locale: lang });
   const L = LISTING_LABELS[lang];
@@ -45,7 +45,7 @@ export async function TgListingView({ slug, section }: { slug: string; section: 
   ].filter((x): x is string => x !== null);
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{L.kind[l.kind]}</span>
         {l.isDemo ? <DemoBadge className="px-3 py-1 text-xs" /> : null}

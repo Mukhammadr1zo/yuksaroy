@@ -51,6 +51,8 @@ export function CommandPalette({ mode, onClose }: { mode: 'search' | 'keys' | nu
   const [recent, setRecent] = useState<{ href: string; label: string }[]>([]);
   const input = useRef<HTMLInputElement>(null);
   const box = useRef<HTMLDivElement>(null);
+  // Paleta ochilishidan oldingi fokus: yopilganda o'sha joyga qaytariladi
+  const prevFocus = useRef<HTMLElement | null>(null);
 
   // Har ochilishda toza holat: eski so'rov matni keyingi safar chalg'itmasin
   useEffect(() => {
@@ -65,7 +67,16 @@ export function CommandPalette({ mode, onClose }: { mode: 'search' | 'keys' | nu
   // Fokus dialog ichida: qidiruvda inputga, yo'llar ro'yxatida qutining o'ziga (input yo'q),
   // aks holda Esc hujjatga tushardi va qobiq uni ochiq dialog deb e'tiborsiz qoldirardi
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      // Yopilganda fokus Ctrl+K bosilgan joyga qaytadi: klaviatura bilan yurgan odam
+      // paleta yopilgach sahifaning boshiga tushib, yo'lini qaytadan qidirmasin
+      prevFocus.current?.focus();
+      prevFocus.current = null;
+      return;
+    }
+    // ??= : effekt yo'llar ro'yxati rejimiga o'tganda ham yuradi, o'shanda eslab qo'yilgan
+    // joy paletaning o'z tugmasiga almashib ketmasin - faqat birinchi ochilishdagisi saqlanadi
+    prevFocus.current ??= document.activeElement as HTMLElement | null;
     if (keys) box.current?.focus(); else input.current?.focus();
   }, [open, keys]);
 

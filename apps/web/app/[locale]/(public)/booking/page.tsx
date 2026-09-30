@@ -93,7 +93,7 @@ export default async function BookingPage({ params }: Params) {
                 <div className="mt-5 overflow-x-auto rounded-card border border-line">
                   <table className="w-full text-sm">
                     <thead className="bg-sand text-left font-mono text-xs text-muted">
-                      <tr><th className="px-4 py-2 font-normal">{t('example.col.line')}</th><th className="px-4 py-2 font-normal">{t('example.col.formula')}</th><th className="px-4 py-2 text-right font-normal">{t('example.col.amount')}</th></tr>
+                      <tr><th scope="col" className="px-4 py-2 font-normal">{t('example.col.line')}</th><th scope="col" className="px-4 py-2 font-normal">{t('example.col.formula')}</th><th scope="col" className="px-4 py-2 text-right font-normal">{t('example.col.amount')}</th></tr>
                     </thead>
                     <tbody>
                       {offer.lines.map((l) => (

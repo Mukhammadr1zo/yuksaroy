@@ -95,7 +95,8 @@ export function AdminNav({ counts, isOwner = false, mode = 'full', onNavigate }:
                   rail
                     // Rail da son sig'maydi: amber nuqta, soni ekran o'quvchi uchun
                     ? <span role="img" aria-label={ts('badgeAria', { n })} className="absolute right-1 top-1 h-2 w-2 rounded-full bg-amber ring-2 ring-sand" />
-                    : <span className={`rounded-full px-1.5 font-mono text-[11px] tabular-nums ${on ? 'bg-white/20 text-white' : 'bg-amber text-white'}`}>{n}</span>
+                    // Amber fonda matn ink: oq raqam bu fonda 2.62 edi. Tanlangan qatorda fon navy, o'shanda oq to'g'ri.
+                    : <span className={`rounded-full px-1.5 font-mono text-[11px] tabular-nums ${on ? 'bg-white/20 text-white' : 'bg-amber text-ink'}`}>{n}</span>
                 ) : null}
               </Link>
             );

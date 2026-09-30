@@ -7,18 +7,33 @@ export type ImpressionKind = 'listing' | 'terminal' | 'org' | 'ad';
 export interface ImpressionItem { kind: ImpressionKind; targetId: string; surface: string }
 
 /**
- * Reklama banneri uchun ikkita yuza: ko'rildi va bosildi.
+ * Reklama banneri uchun uchta yuza: ko'rildi, bosildi va yopildi.
+ *
+ * "Yopildi" bezak emas, u aniq qarorga olib boradi: yopish ulushi yuqori bo'lsa
+ * ko'rsatish muddati qisqartiriladi yoki jim vaqt uzaytiriladi.
  *
  * Nega domain dagi IMPRESSION_SURFACES ga qo'shilmadi: u ro'yxat katalog obyektining
  * kunlik qatorini (har yuza uchun ustun) belgilaydi, ya'ni unga yangi yuza qo'shilsa
  * e'lon egasining sahifasida "bosildi" degan bo'sh ustun paydo bo'lardi. Reklama
  * sanog'i butunlay boshqa hisob, shuning uchun ro'yxati ham alohida.
  */
-export const AD_SURFACES = ['view', 'click'] as const;
+export const AD_SURFACES = ['view', 'click', 'close'] as const;
 export type AdSurface = (typeof AD_SURFACES)[number];
 const isAdSurface = (s: string): s is AdSurface => (AD_SURFACES as readonly string[]).includes(s);
 
-export interface AdStats { views: number; clicks: number; views30: number; clicks30: number }
+export interface AdStats { views: number; clicks: number; closes: number; views30: number; clicks30: number; closes30: number }
+
+/**
+ * Yuza -> ustun: har biri o'z nomi bilan yoziladi.
+ *
+ * Nega jadval, nega "click bo'lmasa view" emas: eski kod aynan shunday yozilgan edi va
+ * yangi yuza qo'shilishi bilan u JIM buzilardi - har yopish bitta ko'rish bo'lib
+ * sanalardi va sotib oluvchiga shishirilgan raqam ketardi. Hech qanday xato xabari
+ * chiqmaydi, faqat son noto'g'ri bo'ladi. Endi yangi yuza qo'shilsa TypeScript bu
+ * jadvalni to'ldirishni talab qiladi.
+ */
+const AD_FIELD: Record<AdSurface, 'views' | 'clicks' | 'closes'> = { view: 'views', click: 'clicks', close: 'closes' };
+const ZERO_AD_STATS = (): AdStats => ({ views: 0, clicks: 0, closes: 0, views30: 0, clicks30: 0, closes30: 0 });
 
 /** Ko'rsatishlar: kun bo'yicha yig'ma (foydalanuvchi ma'lumoti yo'q). */
 @Injectable()
@@ -91,7 +106,7 @@ export class ImpressionsService {
   async adStats(ids: readonly string[], days = 30, now = new Date()): Promise<Map<string, AdStats>> {
     const out = new Map<string, AdStats>();
     if (!ids.length) return out; // bo'sh ro'yxatda bazaga umuman borilmaydi
-    for (const id of ids) out.set(id, { views: 0, clicks: 0, views30: 0, clicks30: 0 });
+    for (const id of ids) out.set(id, ZERO_AD_STATS());
     const where = { kind: 'ad', targetId: { in: [...new Set(ids)] }, surface: { in: [...AD_SURFACES] } };
     const from = new Date(dayKeys(now, days)[0]!);
     const [all, recent] = await Promise.all([
@@ -102,7 +117,7 @@ export class ImpressionsService {
       for (const r of rows) {
         const s = out.get(r.targetId);
         if (!s || !isAdSurface(r.surface)) continue;
-        const key = ((r.surface === 'click' ? 'clicks' : 'views') + suffix) as keyof AdStats;
+        const key = (AD_FIELD[r.surface] + suffix) as keyof AdStats;
         s[key] += r._sum.count ?? 0;
       }
     };

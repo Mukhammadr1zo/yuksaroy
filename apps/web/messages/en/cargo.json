@@ -110,6 +110,7 @@
       "phoneHint": "The number opens only to subscribed providers. Leave it empty and they will write their offers here.",
       "submit": "Post",
       "sending": "Sending",
+      "errCount": "Fields left to fill in: {count}. You are now on the first one.",
       "authTitle": "Confirm your number before sending.",
       "authLead": "Your request is ready. It goes out as soon as the code is confirmed, and what you typed stays here.",
       "authSubmit": "Confirm and send",

@@ -8,7 +8,7 @@
  * Endi tartib teskari: odam yozadi, yuborishni bosadi, va faqat shundan keyin raqamini
  * tasdiqlaydi; kod tasdiqlangan zahoti so'rov o'zi ketadi va sahifa almashmaydi.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { PAYMENT_TERMS, REGIONS, SERVICE_TYPES, TRUCK_TYPES, validateRequest, type MarketBoard, type ServiceType } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
@@ -61,6 +61,22 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   const [top, setTop] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<MarketRequest | null>(null);
+  // Har muvaffaqiyatsiz yuborishda oshadi: xatolar to'plami bir xil bo'lsa ham
+  // fokus qayta ko'chsin, aks holda ikkinchi urinishda effekt ishlamasdi.
+  const [badTry, setBadTry] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Fokus xatolar CHIZILGANDAN keyin ko'chadi: setState darhol DOM ga tushmaydi,
+  // shu sababli qidiruv effekt ichida, ya'ni aria-invalid allaqachon turgan paytda.
+  useEffect(() => {
+    if (!badTry) return;
+    const f = formRef.current;
+    // Rasm yuklagichi guruh bo'lgani uchun unda aria-invalid yo'q: o'sha holatda
+    // xato matnidan o'rab turgan yorliqqa chiqib, birinchi boshqaruv olinadi.
+    const el = f?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      ?? f?.querySelector('p[role="alert"]')?.closest('label,[role="group"]')?.querySelector<HTMLElement>('input,select,textarea,button');
+    el?.focus();
+  }, [badTry]);
 
   const set = (p: Partial<Draft>) => setD((x) => {
     const v = { ...x, ...p };
@@ -95,7 +111,8 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
       // odam nega to'xtaganini bilmay qolmasin
       if (e instanceof ApiError && e.status === 401) { if (needAuth) setTop(te('generic')); else setNeedAuth(true); return; }
       setNeedAuth(false);
-      if (e instanceof ApiError && e.status === 400 && e.body?.errors) setErrors(e.body.errors as FieldErrors);
+      // Server ham maydon xatosi qaytarsa fokus xuddi mijoz tekshiruvidagidek ko'chadi
+      if (e instanceof ApiError && e.status === 400 && e.body?.errors) { setErrors(e.body.errors as FieldErrors); setBadTry((x) => x + 1); }
       else setTop(e instanceof ApiError && e.status === 429 ? te('RATE_LIMITED') : te('generic'));
     } finally { setBusy(false); }
   }
@@ -106,7 +123,10 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
     // Avval mijozda tekshiriladi: maydonini to'ldirmagan odamdan raqam so'rash ma'nosiz
     const errs = validateRequest(body()) as FieldErrors;
     setErrors(errs);
-    if (Object.keys(errs).length) return;
+    // Nechta maydon qolganini yuqorida bitta jumla aytadi: yigirmata inline xato
+    // orasidan odam umumiy holatni ko'rmasdi
+    const left = Object.keys(errs).length;
+    if (left) { setTop(t('errCount', { count: left })); setBadTry((x) => x + 1); return; }
     if (!hasSession()) { setNeedAuth(true); return; }
     void send();
   }
@@ -153,7 +173,7 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   );
 
   return (
-    <form onSubmit={submit} className="grid gap-4">
+    <form ref={formRef} onSubmit={submit} className="grid gap-4">
       {cargo ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2">

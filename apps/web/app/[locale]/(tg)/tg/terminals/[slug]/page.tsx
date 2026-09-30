@@ -18,7 +18,7 @@ export default async function TgTerminalPage({ params }: Params) {
   const lang = locale as SearchLang;
   const [t, ts, tcl] = await Promise.all([getTranslations('tg.terminal'), getTranslations('service'), getTranslations('claim')]);
   const x = await sapiOrNull<TerminalDetail>(`/terminals/${slug}`, 60);
-  if (!x) return <main className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{t('notFound')}</main>;
+  if (!x) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{t('notFound')}</main>;
   const today = uzToday();
   const slots = x.rail !== null && !x.claimed ? [] : await sapi<Slot[]>(`/terminals/${x.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]);
   const L = SEARCH_LABELS[lang];
@@ -27,7 +27,7 @@ export default async function TgTerminalPage({ params }: Params) {
   const registryOnly = x.rail !== null && !x.claimed;
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-28 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">
       {/* Botdagi ochilish ham sanalsin: veb terminal sahifasi bilan bir xil mayoq */}
       <Impressions kind="terminal" ids={[x.id]} surface="detail" />
       <div className="flex flex-wrap items-center gap-2">

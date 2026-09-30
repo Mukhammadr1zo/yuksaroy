@@ -33,7 +33,7 @@ export default function OrgPage() {
   useEffect(() => { void load(); }, []);
 
   return (
-    <main className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 text-muted">{t('lead')}</p>
       {err ? <p role="alert" className="mt-6 text-sm text-red-700">{tc('loadFailed')}</p> : null}
@@ -42,7 +42,7 @@ export default function OrgPage() {
         {orgs?.map((m) => <OrgCard key={m.orgId} m={m} onChange={load} />)}
         <NewOrgForm onCreated={load} />
       </div>
-    </main>
+    </div>
   );
 }
 

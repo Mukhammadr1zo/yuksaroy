@@ -60,7 +60,7 @@ export default async function CompaniesPage({ params, searchParams }: Params & {
           {data.items.map((o) => (
             <Link key={o.id} href={`/companies/${o.slug ?? o.id}`} className="group rounded-card border border-line bg-white p-4 text-ink transition hover:border-teal">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="min-w-0 truncate font-bold group-hover:text-teal-ink">{o.name}</h3>
+                <h2 className="min-w-0 truncate font-bold group-hover:text-teal-ink">{o.name}</h2>
                 {o.isDemo ? <DemoBadge /> : <KycBadge kyc={o.kyc} />}
               </div>
               <p className="mt-0.5 text-xs text-muted">{regionName(o.regionCode, lang) || ' '}</p>

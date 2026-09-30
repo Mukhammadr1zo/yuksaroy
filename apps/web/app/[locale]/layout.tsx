@@ -6,6 +6,7 @@ import { JetBrains_Mono, Manrope, Unbounded } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { OG_LOCALE, SITE } from '@/lib/seo';
 import '../globals.css';
+import { SkipLink } from '@/components/site/SkipLink';
 import { VisitBeacon } from '@/components/site/VisitBeacon';
 
 // next/font: build vaqtida yuklanadi, self-host, layout shift yo'q (CLS ≤ .05)
@@ -56,6 +57,8 @@ export default async function RootLayout({
     <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
         <NextIntlClientProvider>
+          {/* Hamma narsadan oldin: birinchi Tab aynan shu havolaga tushsin */}
+          <SkipLink />
           {children}
           <VisitBeacon />
         </NextIntlClientProvider>

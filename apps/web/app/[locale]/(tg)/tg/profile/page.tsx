@@ -35,7 +35,7 @@ export default function TgProfilePage() {
   const out = async () => { haptic('medium'); await logout(); tg?.close(); };
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <h1 className="font-display text-xl font-bold">{t('title')}</h1>
       <section className={`${CARD} mt-4 flex items-center gap-4 p-4`}>
         <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-teal-soft font-display text-lg font-bold text-teal-ink">

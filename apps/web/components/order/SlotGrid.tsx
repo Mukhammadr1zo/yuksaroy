@@ -95,7 +95,7 @@ export function SlotGrid({ slots, selectedId, onSelect, busy }: {
           <thead>
             <tr>
               <th className="sticky left-0 z-10 w-24 bg-white" aria-hidden="true" />
-              {windows.map((w, i) => <th key={w} className="pb-1 font-mono text-[11px] font-normal text-muted">{times[i]}</th>)}
+              {windows.map((w, i) => <th key={w} scope="col" className="pb-1 font-mono text-[11px] font-normal text-muted">{times[i]}</th>)}
             </tr>
           </thead>
           <tbody>

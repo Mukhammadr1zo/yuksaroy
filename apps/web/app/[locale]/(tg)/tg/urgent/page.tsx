@@ -54,7 +54,7 @@ export default function TgUrgentPage() {
   useMainButton({ text: busy ? tf('form.sending') : tf('form.submit'), onClick: () => void submit(), disabled: !valid, busy });
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-28 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">
       <h1 className="font-display text-xl font-bold">{t('title')}</h1>
       <p className="mt-1 text-sm text-muted">{t('lead')}</p>
       {needsPhone ? <div className="mt-3"><PhoneCard /></div> : null}

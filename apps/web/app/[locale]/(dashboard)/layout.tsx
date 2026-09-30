@@ -12,7 +12,7 @@ export default function KabinetLayout({ children }: { children: React.ReactNode 
       <Header />
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[190px_minmax(0,1fr)] lg:py-8">
         <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start"><SideNav /></aside>
-        <main className="min-w-0">{children}</main>
+        <main id="main" className="min-w-0">{children}</main>
       </div>
       <SessionGuard />
     </>

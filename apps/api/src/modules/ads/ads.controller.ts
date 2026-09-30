@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Req, UnsupportedMediaTypeException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, PayloadTooLargeException, Post, Query, Req, UnsupportedMediaTypeException, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { IsDateString, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
@@ -39,6 +39,16 @@ const MEDIA_EXT: Record<string, string> = {
   'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
   'image/gif': 'gif', 'video/mp4': 'mp4', 'video/webm': 'webm',
 };
+
+/**
+ * Banner fayli uchun chegara: 1.5 MB.
+ *
+ * Nega umumiy 10 MB emas: bu fayl har ochiq sahifada yuklanadi va telefon internetiga
+ * tushadi, ya'ni og'ir banner butun saytni sekinlashtiradi. Katalog fotosi bir marta,
+ * bitta sahifada ochiladi, shuning uchun unga 5 MB yetadi. Aylanadigan rasm o'rniga
+ * mp4 yoki webm berilsa bir xil sifat bir necha barobar yengil tushadi.
+ */
+export const AD_MEDIA_MAX_BYTES = 1_572_864;
 
 /** Ommaviy javob: sotuv ma'lumoti (kim oldi, qancha to'ladi) bu yerda yo'q. */
 const publicAd = (a: { id: string; title: string; body: string | null; imageUrl: string | null; href: string }) => ({
@@ -181,6 +191,7 @@ export class AdsAdminController {
     const { part, buf } = await takeFile(req);
     const ext = MEDIA_EXT[part.mimetype];
     if (!ext) throw new BadRequestException({ code: 'FILE_TYPE', allowed: Object.keys(MEDIA_EXT) });
+    if (buf.length > AD_MEDIA_MAX_BYTES) throw new PayloadTooLargeException({ code: 'FILE_TOO_LARGE', maxBytes: AD_MEDIA_MAX_BYTES });
     const actual = detectImageExt(buf) ?? detectAdMediaExt(buf);
     if (actual !== ext) throw new UnsupportedMediaTypeException({ code: 'FILE_CONTENT_MISMATCH', allowed: Object.keys(MEDIA_EXT) });
     const { url, path } = await storeFile(buf, ext, true);

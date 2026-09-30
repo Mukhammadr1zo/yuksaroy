@@ -2,7 +2,7 @@
 // E'lon formasi: 1) tur tanlash, 2) LISTING_RULES bo'yicha maydonlar. validateListing jonli: xatolar inline (urinishdan keyin), tavsiyalar amber.
 // Qoralama: POST/PATCH /listings. E'lon berish: saqlash + POST /listings/:id/publish (tasdiqlangan tashkilot va telefoni tasdiqlangan haydovchi darhol ACTIVE).
 // Egasi: TRUCK ni shaxsan (orgId yo'q) yoki tashkilot nomidan; temir yo'l turlari faqat tashkilot (ORG_REQUIRED). Egasi keyin o'zgarmaydi.
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Train, TrainRegional, TrainSimple, Truck } from '@phosphor-icons/react';
 import {
@@ -51,6 +51,10 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
   const [orgs, setOrgs] = useState<Membership[] | null>(null);
   const [terminals, setTerminals] = useState<MyTerminal[]>([]);
   const [tried, setTried] = useState(false);
+  // Har muvaffaqiyatsiz yuborishda oshadi. `tried` ning o'zi yetmaydi: u ikkinchi
+  // urinishda ham `true` bo'lib qolaveradi va fokus effekti boshqa ishlamasdi.
+  const [badTry, setBadTry] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
   const [serverErrors, setServerErrors] = useState<{ field: string; code: string }[]>([]);
   const [busy, setBusy] = useState<'save' | 'publish' | null>(null);
   const [notice, setNotice] = useState<{ tone: 'ok' | 'err'; text: React.ReactNode } | null>(null);
@@ -59,6 +63,19 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
     api<Membership[]>('/orgs/mine').then((ms) => { setOrgs(ms); if (!initial) setOrgId((v) => v || ms[0]?.orgId || ''); }).catch(() => setOrgs([]));
     api<MyTerminal[]>('/terminals/mine').then(setTerminals).catch(() => {});
   }, []);
+
+  // Fokus xatolar CHIZILGANDAN keyin ko'chishi kerak, shuning uchun effekt: setState
+  // darhol DOM ga tushmaydi va o'sha zahoti qidirsak aria-invalid hali yo'q bo'lardi.
+  useEffect(() => {
+    if (!badTry) return;
+    const f = formRef.current;
+    // Oddiy maydonga Field aria-invalid qo'yadi. Chip'lar guruhida (deal, condition,
+    // hududlar) boshqaruv ko'p, shuning uchun u yerda belgi yo'q: xato matnidan
+    // o'rab turgan yorliqqa chiqib, guruhdagi birinchi boshqaruv olinadi.
+    const el = f?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      ?? f?.querySelector('p[role="alert"]')?.closest('label,[role="group"]')?.querySelector<HTMLElement>('input,select,textarea,button');
+    el?.focus();
+  }, [badTry]);
 
   // Shahobcha /terminals/mine ichida keladi: ilgari /sidings/mine ham so'ralib, har biri ikki marta chiqardi
   const road = terminals.filter((x) => x.kind !== 'RAIL');
@@ -98,7 +115,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
   async function save(): Promise<OwnerListing | null> {
     setTried(true); setNotice(null);
     if (!id && !truck && !orgId) { setNotice({ tone: 'err', text: t('noOrg') }); return null; }
-    if (errors.length) return null; // xatolar ro'yxati pastda ko'rsatiladi
+    if (errors.length) { setBadTry((n) => n + 1); return null; } // ro'yxat pastda, fokus birinchi nosoz maydonda
     const body = { ...input, priceTiyin: askPrice ? null : input.priceTiyin, priceUnit: askPrice ? null : input.priceUnit };
     const l = id ? await api<OwnerListing>(`/listings/${id}`, { method: 'PATCH', body: JSON.stringify(body) }) : await post<OwnerListing>('/listings', { ...(orgId ? { orgId } : {}), ...body });
     setId(l.id); setStatus(l.status);
@@ -151,7 +168,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
   const objectValue = input.terminalId ?? '';
 
   return (
-    <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); void onSave(); }}>
+    <form ref={formRef} className="space-y-5" onSubmit={(e) => { e.preventDefault(); void onSave(); }}>
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-2 rounded-full bg-teal-soft px-4 py-1.5 text-sm font-semibold text-teal-ink"><Icon size={18} weight="bold" /> {L.kind[kind]}</span>
         {!id ? <button type="button" onClick={() => setKind(null)} className="text-sm text-muted underline hover:text-ink">{t('changeKind')}</button> : null}

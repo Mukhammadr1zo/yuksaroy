@@ -64,7 +64,7 @@ export default function DocumentsPage() {
     (status === 'all' || (status === 'ACT' ? d.kind === 'ACT' : d.kind === 'INVOICE' && d.status === status)) && (!month || monthOf(d.createdAt) === month));
 
   return (
-    <main className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-3xl font-bold">{t('title')}</h1>
       <p className="mt-1 max-w-2xl text-muted">{t('lead')}</p>
       {noStir ? (
@@ -101,13 +101,13 @@ export default function DocumentsPage() {
           <table className="w-full min-w-[820px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-muted">
               <tr className="border-b border-line">
-                <th className="px-4 py-3 font-semibold">{t('col.no')}</th>
-                <th className="px-3 py-3 font-semibold">{t('col.kind')}</th>
-                <th className="px-3 py-3 font-semibold">{t('col.order')}</th>
-                <th className="px-3 py-3 font-semibold">{t('col.org')}</th>
-                <th className="px-3 py-3 text-right font-semibold">{t('col.amount')}</th>
-                <th className="px-3 py-3 font-semibold">{t('col.status')}</th>
-                <th className="px-3 py-3 font-semibold">{t('col.date')}</th>
+                <th scope="col" className="px-4 py-3 font-semibold">{t('col.no')}</th>
+                <th scope="col" className="px-3 py-3 font-semibold">{t('col.kind')}</th>
+                <th scope="col" className="px-3 py-3 font-semibold">{t('col.order')}</th>
+                <th scope="col" className="px-3 py-3 font-semibold">{t('col.org')}</th>
+                <th scope="col" className="px-3 py-3 text-right font-semibold">{t('col.amount')}</th>
+                <th scope="col" className="px-3 py-3 font-semibold">{t('col.status')}</th>
+                <th scope="col" className="px-3 py-3 font-semibold">{t('col.date')}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -142,6 +142,6 @@ export default function DocumentsPage() {
         </div>
       ) : null}
       {data && data.total > data.items.length ? <p className="mt-4 text-center text-sm text-muted">{t('shown', { n: data.items.length, total: data.total })}</p> : null}
-    </main>
+    </div>
   );
 }

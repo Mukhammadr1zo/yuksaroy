@@ -72,7 +72,7 @@ export default async function TgSearchPage({ params, searchParams }: { params: P
   } catch { failed = true; }
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <h1 className="font-display text-xl font-bold">{t('title')}</h1>
       <div className="mt-3"><SearchBox initial={q} cat={cat} placeholder={t('ph')} /></div>
 

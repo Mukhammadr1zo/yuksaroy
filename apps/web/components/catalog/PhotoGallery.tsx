@@ -34,6 +34,9 @@ export function PhotoGallery({ photos, alt, fallback, aspect = 'aspect-[16/10]',
 
   useEffect(() => {
     if (!open) return;
+    // To'liq ekrandan chiqqanda fokus uni ochgan tugmaga qaytsin: aks holda klaviatura
+    // bilan yurgan odam sahifaning boshiga tushib, rasmgacha qaytadan Tab bosardi
+    const prev = document.activeElement as HTMLElement | null;
     close.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
@@ -42,9 +45,9 @@ export function PhotoGallery({ photos, alt, fallback, aspect = 'aspect-[16/10]',
     };
     window.addEventListener('keydown', onKey);
     // Orqadagi sahifa aylanmasin: telefonda rasmni surganda sahifa ketib qolardi
-    const prev = document.body.style.overflow;
+    const prevScroll = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prevScroll; prev?.focus(); };
   }, [open, go]);
 
   const onStart = (e: React.TouchEvent) => { swipe.current = e.touches[0]?.clientX ?? null; };

@@ -59,7 +59,10 @@ export function ErrorBody({ error, reset }: { error: Error & { digest?: string }
         </a>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-12">
+      {/* div, main emas: bu bo'lak (public) va (dashboard) qobiqlari ichida chiziladi va
+          u yerda allaqachon <main id="main"> bor. Ikkita main bir-birining ichida bo'lsa
+          sakrash havolasi qaysi biriga tushishini brauzer o'zi hal qilardi. */}
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-12">
         <p className="flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.16em] text-amber-ink">
           <WarningCircleIcon size={16} weight="duotone" aria-hidden="true" />
           {t.code}
@@ -77,7 +80,7 @@ export function ErrorBody({ error, reset }: { error: Error & { digest?: string }
 
         {/* Xato belgisi: odam uni murojaatda aytsa, jurnaldan aynan shu hodisa topiladi */}
         {error.digest ? <p className="mt-6 font-mono text-[11px] text-muted">{error.digest}</p> : null}
-      </main>
+      </div>
 
       <footer className="mx-auto w-full max-w-6xl px-6 py-6 font-mono text-xs text-muted">© {new Date().getFullYear()} YukSaroy</footer>
     </div>

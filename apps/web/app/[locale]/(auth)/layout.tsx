@@ -17,7 +17,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       <Header />
       {/* Qadam almashganda bir marta kiradi: 220 ms, faqat holat o'zgarganda. reduced-motion global qoidaga bo'ysunadi */}
       <style>{'@keyframes ys-step{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.ys-step{animation:ys-step 220ms cubic-bezier(.16,1,.3,1) both}'}</style>
-      <main className="mx-auto grid max-w-6xl items-start gap-6 px-6 py-8 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:py-14">
+      <main id="main" className="mx-auto grid max-w-6xl items-start gap-6 px-6 py-8 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:py-14">
         <section className="flex flex-col rounded-card bg-navy p-8 text-white lg:order-first lg:min-h-[560px] lg:p-12">
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-teal-lit">{t('eyebrow')}</p>
           <h2 className="mt-3 font-display text-[clamp(1.5rem,2.6vw,2.2rem)] font-bold leading-[1.15]">{t('title')}</h2>

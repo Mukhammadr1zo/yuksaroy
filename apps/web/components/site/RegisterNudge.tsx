@@ -46,8 +46,15 @@ export function RegisterNudge() {
   }
 
   if (!open) return null;
+  // role="dialog" olib tashlandi: bu taklif sahifani to'smaydi va fokusni ushlamaydi, ya'ni
+  // ekran o'quvchiga oyna deb va'da berib, o'zini oyna kabi tutmasdi. Endi oddiy bo'lim:
+  // odam sahifada erkin yuraveradi va fokus hech qayerga ko'chmagani uchun yopilganda ham
+  // o'z joyida qoladi.
+  // aside, div emas: rolsiz div ga qo'yilgan aria-labelledby ekran o'quvchida umuman
+  // ishlamaydi (nomsiz umumiy element nom qabul qilmaydi), aside esa nom oladi va
+  // ro'yxatda "yonaki mazmun" bo'lib ko'rinadi.
   return (
-    <div role="dialog" aria-labelledby="nudge-title" className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md rounded-card border border-line bg-white p-5 shadow-2xl sm:inset-x-auto sm:left-6 sm:mx-0">
+    <aside aria-labelledby="nudge-title" className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md rounded-card border border-line bg-white p-5 shadow-2xl sm:inset-x-auto sm:left-6 sm:mx-0">
       <div className="flex items-start gap-3">
         <UserCirclePlusIcon size={28} weight="fill" className="shrink-0 text-teal" aria-hidden="true" />
         <div className="min-w-0 flex-1">
@@ -63,6 +70,6 @@ export function RegisterNudge() {
         <Link href={`/login?next=${pathname}`} onClick={close} className="rounded-full border border-line bg-white px-5 py-2.5 text-sm font-semibold text-navy transition hover:border-teal">{t('login')}</Link>
         <button type="button" onClick={close} className="px-3 py-2.5 text-sm font-semibold text-muted hover:text-navy">{t('later')}</button>
       </div>
-    </div>
+    </aside>
   );
 }

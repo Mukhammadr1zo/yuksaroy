@@ -70,7 +70,7 @@ export function SlotsTab({ terminalId }: { terminalId: string | null }) {
           <p className="text-sm font-semibold">{t('capacity.windows')}</p>
           <div className="mt-2 overflow-x-auto">
             <table className="min-w-[420px] text-sm">
-              <thead className="text-left text-xs text-muted"><tr><th className="pb-1 pr-3 font-normal">{t('capacity.window')}</th><th className="pb-1 pr-3 font-normal">{t('capacity.start')}</th><th className="pb-1 pr-3 font-normal">{t('capacity.end')}</th><th className="pb-1 pr-3 font-normal">{t('capacity.cap')}</th><th /></tr></thead>
+              <thead className="text-left text-xs text-muted"><tr><th scope="col" className="pb-1 pr-3 font-normal">{t('capacity.window')}</th><th scope="col" className="pb-1 pr-3 font-normal">{t('capacity.start')}</th><th scope="col" className="pb-1 pr-3 font-normal">{t('capacity.end')}</th><th scope="col" className="pb-1 pr-3 font-normal">{t('capacity.cap')}</th><th /></tr></thead>
               <tbody>
                 {cap.windows.map((w, i) => (
                   <tr key={i}>
@@ -102,7 +102,7 @@ export function SlotsTab({ terminalId }: { terminalId: string | null }) {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[560px] border-separate border-spacing-1">
               <thead>
-                <tr><th className="sticky left-0 z-10 w-24 bg-white" aria-hidden="true" />{windows.map((w) => <th key={w} className="pb-1 font-mono text-[11px] font-normal text-muted">{timeOf(w)}</th>)}</tr>
+                <tr><th className="sticky left-0 z-10 w-24 bg-white" aria-hidden="true" />{windows.map((w) => <th key={w} scope="col" className="pb-1 font-mono text-[11px] font-normal text-muted">{timeOf(w)}</th>)}</tr>
               </thead>
               <tbody>
                 {days.map((d) => (

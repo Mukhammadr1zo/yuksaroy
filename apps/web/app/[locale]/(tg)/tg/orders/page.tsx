@@ -34,7 +34,7 @@ export default function TgOrdersPage() {
   }, [filter]);
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <h1 className="font-display text-xl font-bold">{t('title')}</h1>
       <div className="tg-strip -mx-4 mt-3 px-4">
         {FILTERS.map((f) => <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => { haptic(); setFilter(f.key); }} className={CHIP(filter === f.key)}>{t(`filter.${f.key}`)}</button>)}

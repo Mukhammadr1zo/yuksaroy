@@ -5,7 +5,7 @@ import { SubscriptionCard } from '@/components/subscription/SubscriptionCard';
 
 export default function TgSubscriptionPage() {
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <SubscriptionCard />
     </main>
   );

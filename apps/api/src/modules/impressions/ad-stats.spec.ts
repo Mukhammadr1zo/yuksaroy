@@ -40,20 +40,38 @@ describe('reklama sanog\'i', () => {
       [{ targetId: 'a1', surface: 'view', sum: 40 }, { targetId: 'a1', surface: 'click', sum: 3 }],
     );
     const s = await f.svc.adStats(['a1']);
-    expect(s.get('a1')).toEqual({ views: 100, clicks: 7, views30: 40, clicks30: 3 });
+    expect(s.get('a1')).toEqual({ views: 100, clicks: 7, closes: 0, views30: 40, clicks30: 3, closes30: 0 });
     expect(f.groups).toHaveLength(2); // banner boshiga so'rov emas: ikkita so'rov, xolos
+  });
+
+  /**
+   * Bu tekshiruv aynan bitta jim xatoni ushlaydi: eski kod "click bo'lmasa view" deb
+   * yozilgan edi, ya'ni yopish sanog'i qo'shilishi bilan har yopish bitta ko'rish
+   * bo'lib sanalardi va sotib oluvchiga shishirilgan raqam ketardi.
+   */
+  it("yopildi ko'rildi ustiga qo'shilmaydi, har yuza o'z ustuniga tushadi", async () => {
+    const f = fake(
+      [
+        { targetId: 'a1', surface: 'view', sum: 100 },
+        { targetId: 'a1', surface: 'click', sum: 7 },
+        { targetId: 'a1', surface: 'close', sum: 55 },
+      ],
+      [{ targetId: 'a1', surface: 'close', sum: 20 }],
+    );
+    const s = await f.svc.adStats(['a1']);
+    expect(s.get('a1')).toEqual({ views: 100, clicks: 7, closes: 55, views30: 0, clicks30: 0, closes30: 20 });
   });
 
   it("hali ko'rilmagan banner nol beradi, undefined emas", async () => {
     const f = fake([]);
     const s = await f.svc.adStats(['a1', 'a2']);
-    expect(s.get('a2')).toEqual({ views: 0, clicks: 0, views30: 0, clicks30: 0 });
+    expect(s.get('a2')).toEqual({ views: 0, clicks: 0, closes: 0, views30: 0, clicks30: 0, closes30: 0 });
   });
 
-  it("faqat 'ad' turi va view/click yuzasi so'raladi", async () => {
+  it("faqat 'ad' turi va view/click/close yuzasi so'raladi", async () => {
     const f = fake([]);
     await f.svc.adStats(['a1']);
-    expect(f.groups[0]!.where).toMatchObject({ kind: 'ad', surface: { in: ['view', 'click'] } });
+    expect(f.groups[0]!.where).toMatchObject({ kind: 'ad', surface: { in: ['view', 'click', 'close'] } });
     expect(f.groups[0]!.by).toEqual(['targetId', 'surface']);
   });
 
@@ -78,7 +96,7 @@ describe('reklama sanog\'i', () => {
 
   it("notanish yuza qatori sanoqqa qo'shilmaydi", async () => {
     const f = fake([{ targetId: 'a1', surface: 'list', sum: 999 }]);
-    expect((await f.svc.adStats(['a1'])).get('a1')).toEqual({ views: 0, clicks: 0, views30: 0, clicks30: 0 });
+    expect((await f.svc.adStats(['a1'])).get('a1')).toEqual({ views: 0, clicks: 0, closes: 0, views30: 0, clicks30: 0, closes30: 0 });
   });
 });
 

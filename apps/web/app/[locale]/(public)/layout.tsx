@@ -9,7 +9,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <Header />
-      <main className="min-h-[70vh]">{children}</main>
+      <main id="main" className="min-h-[70vh]">{children}</main>
       {/* Futer shu yerda: shartlar va maxfiylik havolalari faqat bosh sahifada emas,
           har bir ochiq sahifada ko'rinsin. Ilgari futer faqat bosh sahifa va kirish
           sahifasida edi. Ataylab: holat sahifalariga ham tushadi. */}

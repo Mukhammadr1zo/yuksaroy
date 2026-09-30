@@ -1,6 +1,6 @@
 'use client';
 // So'rov yuborish: kirish talab qilinadi (telefon esa obunachiga, PhoneReveal da).
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { api, hasSession, post } from '@/lib/api';
 import { Link } from '@/i18n/navigation';
@@ -20,6 +20,7 @@ export function ListingContact({ endpoint, next, cta }: { endpoint: string; next
   const [orgId, setOrgId] = useState('');
   const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'err' | 'short'>('idle');
   const [threadId, setThreadId] = useState<string | null>(null);
+  const boxRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -35,7 +36,9 @@ export function ListingContact({ endpoint, next, cta }: { endpoint: string; next
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (msg.trim().length < 5) return setState('short');
+    // Fokus maydonga qaytadi: ilgari u tugmada qolar va xato matni tugmaning
+    // ostida chiqar edi, ya'ni ekran o'quvchiga ham, ko'zga ham bilinmay ketardi
+    if (msg.trim().length < 5) { setState('short'); boxRef.current?.focus(); return; }
     setState('busy');
     try {
       const inq = await post<{ id: string }>(endpoint, { message: msg.trim(), orgId: orgId || undefined });
@@ -63,7 +66,7 @@ export function ListingContact({ endpoint, next, cta }: { endpoint: string; next
   return (
     <form onSubmit={send} className="space-y-2">
       <label className="block text-xs text-muted" htmlFor="inq-msg">{t('inquiry.label')}</label>
-      <textarea id="inq-msg" value={msg} onChange={(e) => setMsg(e.target.value)} rows={3} maxLength={1000} placeholder={t('inquiry.placeholder')} className="w-full rounded-xl border border-line px-3 py-2 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
+      <textarea ref={boxRef} id="inq-msg" aria-invalid={state === 'short' || undefined} aria-describedby={state === 'short' ? 'inq-err' : undefined} value={msg} onChange={(e) => setMsg(e.target.value)} rows={3} maxLength={1000} placeholder={t('inquiry.placeholder')} className="w-full rounded-xl border border-line px-3 py-2 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
       {orgs.length ? (
         <select value={orgId} onChange={(e) => setOrgId(e.target.value)} aria-label={t('inquiry.org')} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm">
           <option value="">{t('inquiry.personal')}</option>
@@ -71,7 +74,8 @@ export function ListingContact({ endpoint, next, cta }: { endpoint: string; next
         </select>
       ) : null}
       <button disabled={state === 'busy'} className="w-full rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink disabled:opacity-60">{state === 'busy' ? t('inquiry.sending') : t('inquiry.send')}</button>
-      {state === 'err' ? <p className="text-xs text-amber-ink">{t('inquiry.err')}</p> : state === 'short' ? <p className="text-xs text-amber-ink">{t('inquiry.short')}</p> : null}
+      {/* role="alert": ilgari bu oddiy <p> edi va xato ekran o'quvchiga umuman aytilmasdi */}
+      {state === 'err' ? <p role="alert" className="text-xs text-amber-ink">{t('inquiry.err')}</p> : state === 'short' ? <p id="inq-err" role="alert" className="text-xs text-amber-ink">{t('inquiry.short')}</p> : null}
     </form>
   );
 }

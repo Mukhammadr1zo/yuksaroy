@@ -52,7 +52,7 @@ export default function TgHome() {
   const name = me?.fullName?.split(/\s+/)[0];
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <header>
         <h1 className="font-display text-xl font-bold">{name ? t('hello', { name }) : t('helloNoName')}</h1>
         {me?.phone ? <p className="mt-0.5 font-mono text-xs text-muted">{t('phoneOk', { phone: me.phone })}</p> : null}

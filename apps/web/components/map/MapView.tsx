@@ -496,7 +496,11 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   );
 
   return (
-    <main className="ys-map relative flex min-h-0 flex-1 lg:[--sheet:0px]" style={{ '--sheet': SNAP[snap] } as CSSProperties}>
+    // div, main emas: bu komponent bosh sahifada, do'kon sahifasida va xarita sahifasida
+    // chiziladi. Birinchi ikkisida qobiqning o'z <main id="main"> i bor, ya'ni bu yerda main
+    // bo'lsa ikkita main bir-birining ichiga tushardi va id ham takrorlanardi.
+    // Xarita sahifalarida main o'sha sahifaning o'zida turadi.
+    <div className="ys-map relative flex min-h-0 flex-1 lg:[--sheet:0px]" style={{ '--sheet': SNAP[snap] } as CSSProperties}>
       {/* Panel: lg da chap ustun (400px), telefonda pastki varaq (peek / half / full) */}
       <section
         aria-label={t('list.aria')}
@@ -659,6 +663,6 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
           </div>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

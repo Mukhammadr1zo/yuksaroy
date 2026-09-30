@@ -43,13 +43,13 @@ export default function TgUrgentDetail() {
   const share = () => { if (!url || !r) return; haptic(); tg?.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(tu('shareText', { no: r.no }))}`); };
   const copy = async () => { if (!url) return; try { await navigator.clipboard.writeText(url); setCopied(true); window.setTimeout(() => setCopied(false), 2000); } catch { /* clipboard yo'q */ } };
 
-  if (r === undefined) return <main className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
-  if (!r) return <main className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err ?? tu('notFound')}</main>;
+  if (r === undefined) return <main id="main" className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
+  if (!r) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err ?? tu('notFound')}</main>;
   const offers = r.offers ?? [];
   const canClose = r.status === 'OPEN' || r.status === 'AWARDED';
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="font-display text-xl font-bold">{r.no}</h1>
         <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{L.kind[r.kind] ?? r.kind}</span>

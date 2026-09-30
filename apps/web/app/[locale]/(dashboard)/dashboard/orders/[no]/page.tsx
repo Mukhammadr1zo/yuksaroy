@@ -58,15 +58,15 @@ export default function OrderPage() {
     } finally { setBusy(false); }
   }
 
-  if (err && !o) return <main className="mx-auto max-w-3xl px-6 py-16"><p className="text-muted">{err}</p><Link href="/dashboard/orders" className="mt-4 inline-block underline">{t('backToOrders')}</Link></main>;
-  if (!o) return <main className="mx-auto max-w-3xl px-6 py-16 text-muted">{t('loading')}</main>;
+  if (err && !o) return <div className="mx-auto max-w-3xl px-6 py-16"><p className="text-muted">{err}</p><Link href="/dashboard/orders" className="mt-4 inline-block underline">{t('backToOrders')}</Link></div>;
+  if (!o) return <div className="mx-auto max-w-3xl px-6 py-16 text-muted">{t('loading')}</div>;
 
   const cancellable = o.status === 'PENDING' || o.status === 'CONFIRMED';
   const entryLabel = (to: OrderStatus | null, code: string | null) =>
     (code && ORDER_EVENT_LABELS[lang][code as OrderEventCode]) || (to && ORDER_STATUS_LABELS[lang][to]) || code || t('updated');
 
   return (
-    <main className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl">
       <nav aria-label={ta('breadcrumb')} className="font-mono text-xs text-muted"><Link href="/dashboard/orders" className="hover:text-navy">{t('title')}</Link> / {o.no}</nav>
 
       <header className="mt-2 flex flex-wrap items-center gap-3">
@@ -161,7 +161,7 @@ export default function OrderPage() {
       {/* Buyurtmada namuna qator yo'q. Server baribir tekshiradi: shikoyat faqat
           buyurtma tomonlaridan qabul qilinadi. */}
       <div className="mt-8"><ReportButton kind="order" targetId={o.no} /></div>
-    </main>
+    </div>
   );
 }
 

@@ -23,7 +23,7 @@ export default function TgListingsPage() {
   const edit = (l: OwnerListing) => { haptic(); tg?.openLink(`${window.location.origin}/dashboard/listings/${l.id}`); };
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-8 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-xl font-bold">{t('title')}</h1>
         <Link href="/tg/listings/new" onClick={() => haptic()} className="min-h-10 rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white">{t('new')}</Link>

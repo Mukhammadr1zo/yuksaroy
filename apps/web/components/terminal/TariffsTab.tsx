@@ -65,13 +65,13 @@ export function TariffsTab({ terminalId, services }: { terminalId: string | null
             <table className="w-full min-w-[720px] text-sm">
               <thead className="text-left text-xs uppercase tracking-wide text-muted">
                 <tr className="border-b border-line">
-                  <th className="px-4 py-2 font-semibold">{t('col.service')}</th>
-                  <th className="px-4 py-2 font-semibold">{t('col.cargoGroup')}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{t('col.price')}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{t('col.min')}</th>
-                  <th className="px-4 py-2 font-semibold">{t('col.validFrom')}</th>
-                  <th className="px-4 py-2 font-semibold">{t('col.validTo')}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{t('col.version')}</th>
+                  <th scope="col" className="px-4 py-2 font-semibold">{t('col.service')}</th>
+                  <th scope="col" className="px-4 py-2 font-semibold">{t('col.cargoGroup')}</th>
+                  <th scope="col" className="px-4 py-2 text-right font-semibold">{t('col.price')}</th>
+                  <th scope="col" className="px-4 py-2 text-right font-semibold">{t('col.min')}</th>
+                  <th scope="col" className="px-4 py-2 font-semibold">{t('col.validFrom')}</th>
+                  <th scope="col" className="px-4 py-2 font-semibold">{t('col.validTo')}</th>
+                  <th scope="col" className="px-4 py-2 text-right font-semibold">{t('col.version')}</th>
                 </tr>
               </thead>
               <tbody>

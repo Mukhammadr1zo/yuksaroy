@@ -27,8 +27,8 @@ export default async function TgMapPage({ params, searchParams }: { params: Prom
   for (const x of terms?.items ?? []) cards[`terminal:${x.id}`] = <TerminalRow key={x.id} t={x} lang={lang} />;
   for (const l of lists?.items ?? []) cards[`${l.kind === 'TRUCK' ? 'truck' : 'equipment'}:${l.id}`] = <ListingRow key={l.id} l={l} lang={lang} />;
   return (
-    <div className="flex h-[var(--tg-vh,100dvh)] flex-col">
+    <main id="main" className="flex h-[var(--tg-vh,100dvh)] flex-col">
       <MapView initial={initial} cards={cards} />
-    </div>
+    </main>
   );
 }

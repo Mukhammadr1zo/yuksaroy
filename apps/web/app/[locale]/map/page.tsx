@@ -46,7 +46,12 @@ export default async function MapPage({ params, searchParams }: Params & { searc
   return (
     <div className="flex h-dvh flex-col">
       <Header />
-      <MapView initial={initial} cards={cards} />
+      {/* main shu yerda, MapView ichida emas: MapView bosh sahifada va do'kon sahifasida ham
+          chiziladi, u yerda esa qobiqning o'z main i bor va ikkita main bir-birining ichiga
+          tushib qolardi. Sakrash havolasining nishoni har sahifada bitta bo'lishi kerak. */}
+      <main id="main" className="flex min-h-0 flex-1 flex-col">
+        <MapView initial={initial} cards={cards} />
+      </main>
     </div>
   );
 }

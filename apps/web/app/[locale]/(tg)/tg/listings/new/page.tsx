@@ -63,10 +63,10 @@ export default function TgNewListingPage() {
   useMainButton({ text: busy ? tf('sending') : tf('submit'), onClick: () => void submit(), show: kind === 'TRUCK' && !done, disabled: !valid, busy });
   const openSite = () => { haptic(); tg?.openLink(`${window.location.origin}/dashboard/listings/new`); };
 
-  if (done) return <main className="mx-auto max-w-md px-4 py-10 text-center"><p className="rounded-card border border-teal/30 bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{tf(done === 'ACTIVE' ? 'done.ACTIVE' : 'done.PENDING_REVIEW')}</p></main>;
+  if (done) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center"><p className="rounded-card border border-teal/30 bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{tf(done === 'ACTIVE' ? 'done.ACTIVE' : 'done.PENDING_REVIEW')}</p></main>;
 
   return (
-    <main className="mx-auto max-w-md px-4 pb-28 pt-4">
+    <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">
       <h1 className="font-display text-xl font-bold">{t('new')}</h1>
       {!kind ? (
         <div className="mt-4 space-y-2">

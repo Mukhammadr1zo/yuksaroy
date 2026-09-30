@@ -43,8 +43,8 @@ export default function UrgentDetailPage() {
     try { await navigator.clipboard.writeText(url); setCopied(true); window.setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
   }
 
-  if (r === undefined) return <main className="mx-auto max-w-4xl px-6 py-10 text-sm text-muted">{tc('loading')}</main>;
-  if (!r) return <main className="mx-auto max-w-4xl"><Notice tone="err">{err ?? t('notFound')}</Notice><Link href="/dashboard/urgent" className={`${BTN_GHOST} mt-4 inline-block`}>{t('back')}</Link></main>;
+  if (r === undefined) return <div className="mx-auto max-w-4xl px-6 py-10 text-sm text-muted">{tc('loading')}</div>;
+  if (!r) return <div className="mx-auto max-w-4xl"><Notice tone="err">{err ?? t('notFound')}</Notice><Link href="/dashboard/urgent" className={`${BTN_GHOST} mt-4 inline-block`}>{t('back')}</Link></div>;
 
   const url = r.statusUrl ?? (r.statusToken && origin ? `${origin}/status/${r.statusToken}` : null);
   const offers = r.offers ?? [];
@@ -58,7 +58,7 @@ export default function UrgentDetailPage() {
   ];
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-4xl px-6 py-10">
       <Link href="/dashboard/urgent" className="text-sm font-semibold text-teal-ink hover:text-navy">{t('back')}</Link>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-3xl font-bold">{r.no}</h1>
@@ -110,6 +110,6 @@ export default function UrgentDetailPage() {
           ))}
         </ul>
       </section>
-    </main>
+    </div>
   );
 }
