@@ -1,0 +1,89 @@
+# Tashqi tekshiruv: sayt tashqaridan ko'rinadimi.
+#
+# Nega serverdagi taymerdan tashqari yana bittasi kerak. Serverdagi tekshiruv (deploy/
+# systemd/yuksaroy-health.timer) har 5 daqiqada yuradi va ilova yiqilsa tez xabar beradi.
+# Lekin u serverning O'ZIDA turadi: server o'lsa, tarmoq uzilsa yoki disk to'lsa, xabar
+# hech qachon kelmaydi, ya'ni aynan eng yomon holatda jim qoladi. Shu tekshiruv esa
+# GitHub da yuradi, ya'ni serverdan mustaqil.
+#
+# Nega soatiga bir marta, tez-tez emas. Yopiq repoda Actions daqiqalari sanaladi va har
+# yugurish kamida bitta daqiqa deb hisoblanadi. Har 5 daqiqada yugursa oyiga 8000 dan
+# ortiq daqiqa ketardi va deploy uchun joy qolmasdi. Bo'linish shunday: tez xabar
+# serverdagi taymerdan keladi, bu esa faqat "server umuman o'lganmi" degan savolga javob
+# beradi va unga bir soat yetarli.
+#
+# Sirlar (Settings > Secrets and variables > Actions > Secrets), egasi o'zi qo'shadi:
+#   ALERT_BOT_TOKEN   Telegram bot tokeni. Xabar yuboradi, boshqa hech narsa qilmaydi.
+#   ALERT_CHAT_ID     Xabar keladigan suhbat.
+# Ikkisidan biri yo'q bo'lsa tekshiruv baribir yuradi va natija Actions jurnalida
+# ko'rinadi, faqat Telegramga xabar ketmaydi.
+#
+# Eslatma: GitHub yopiq repoda 60 kun hech qanday harakat bo'lmasa jadval bo'yicha
+# yuradigan ishlarni o'zi o'chirib qo'yadi. Deploy har push da yuradi, ya'ni amalda
+# bu holat bo'lmaydi; lekin loyiha uzoq turib qolsa Actions sahifasida yoqish kerak.
+name: Uptime
+
+on:
+  schedule:
+    - cron: '17 * * * *' # soatiga bir marta, 17-daqiqada: butun soatda hamma birga urmasin
+  workflow_dispatch:
+
+# Bir vaqtda ikkitasi yugurmasin: jadval kechikib, oldingisi tugamay turib kelishi mumkin
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Saytni tekshirish
+        id: probe
+        env:
+          BASE: https://yuksaroy.uz
+        run: |
+          set -uo pipefail
+          # Uch urinish, oralig'i 20 soniya. Bitta so'rovning o'zi yetmaydi: deploy paytida
+          # yoki bir martalik tarmoq uzilishida bekorga xabar ketardi. Uchalasi ham yiqilsa,
+          # bu bir martalik hodisa emas. Uchtasi bitta yugurishda: bu bitta hisoblangan
+          # daqiqaga sig'adi va holatni fayl bilan saqlash kerak bo'lmaydi.
+          fails=0
+          detail=""
+          for i in 1 2 3; do
+            if [ "$i" -gt 1 ]; then sleep 20; fi
+            web=$(curl -sS -o /dev/null -m 20 -w '%{http_code}' "$BASE/" 2>/dev/null || echo 000)
+            api=$(curl -sS -o /dev/null -m 20 -w '%{http_code}' "$BASE/v1/health" 2>/dev/null || echo 000)
+            echo "urinish $i: web=$web api=$api"
+            # Bitta qatorga yig'iladi: ko'p qatorli qiymat GITHUB_OUTPUT da alohida
+            # chegara belgisini talab qiladi va u xato qilishning oson joyi
+            detail="$detail [$i] web=$web api=$api"
+            if [ "$web" != 200 ] || [ "$api" != 200 ]; then fails=$((fails + 1)); fi
+          done
+          echo "fails=$fails" >> "$GITHUB_OUTPUT"
+          echo "detail=$detail" >> "$GITHUB_OUTPUT"
+
+      - name: Telegramga xabar
+        # Faqat uchalasi ham yiqilganda. Tiklanganda xabar bermaydi: buni serverdagi
+        # tekshiruv aytadi, u tiklanish paytida allaqachon tirik bo'ladi.
+        if: steps.probe.outputs.fails == '3'
+        env:
+          TOKEN: ${{ secrets.ALERT_BOT_TOKEN }}
+          CHAT: ${{ secrets.ALERT_CHAT_ID }}
+          DETAIL: ${{ steps.probe.outputs.detail }}
+        run: |
+          set -uo pipefail
+          if [ -z "${TOKEN:-}" ] || [ -z "${CHAT:-}" ]; then
+            echo "ogohlantirish sozlanmagan: ALERT_BOT_TOKEN yoki ALERT_CHAT_ID yo'q"
+            exit 1
+          fi
+          curl -sS -m 25 -o /dev/null -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
+            --data-urlencode "chat_id=$CHAT" \
+            --data-urlencode "text=🔴 yuksaroy.uz tashqaridan javob bermayapti. Uch urinish:$DETAIL . Bu tekshiruv GitHub da yuradi, ya'ni serverning o'zi o'lgan bo'lishi mumkin."
+
+      - name: Yiqilgan bo'lsa ish ham qizil bo'lsin
+        # Jurnalda ko'k belgi qolmasin: Actions sahifasida uzilish darhol ko'rinsin
+        if: steps.probe.outputs.fails == '3'
+        run: exit 1

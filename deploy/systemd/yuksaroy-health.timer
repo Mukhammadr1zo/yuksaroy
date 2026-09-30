@@ -1,0 +1,15 @@
+[Unit]
+Description=YukSaroy sog'ligini har 5 daqiqada tekshirish
+Documentation=file:///opt/yuksaroy/docs/runbooks/kuzatuv.md
+
+[Timer]
+# Qayta yuklangandan keyin darhol emas: konteynerlar ko'tarilishiga vaqt kerak,
+# aks holda har qayta yuklash bitta bekor "yiqildi" xabari berardi.
+OnBootSec=3min
+OnUnitActiveSec=5min
+AccuracySec=30s
+# Persistent yo'q, ataylab: o'tkazib yuborilgan tekshiruvni keyin bajarishning ma'nosi
+# yo'q, u o'tmishdagi holatni aytadi. Zaxirada esa aksincha.
+
+[Install]
+WantedBy=timers.target

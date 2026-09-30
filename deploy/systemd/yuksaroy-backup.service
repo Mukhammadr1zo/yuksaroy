@@ -1,0 +1,16 @@
+[Unit]
+# Kunlik zaxira: Postgres dump va yuklangan fayllar. Skript: deploy/backup.sh
+# Bu fayl ham serverda ishlab turgan, lekin repoda yo'q edi.
+Description=YukSaroy kunlik zaxira (Postgres dump + yuklangan fayllar)
+Documentation=file:///opt/yuksaroy/docs/runbooks/kuzatuv.md
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+Environment=BACKUP_DIR=/var/backups/yuksaroy
+Environment=KEEP_DAYS=30
+ExecStart=/opt/yuksaroy/deploy/backup.sh
+# Zaxira boshqa loyihalarni sekinlashtirmasin: past ustuvorlik
+Nice=10
+IOSchedulingClass=idle

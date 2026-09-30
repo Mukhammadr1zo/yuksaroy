@@ -15,6 +15,9 @@ THRESHOLD="${THRESHOLD:-2}"
 mkdir -p "$STATE_DIR"
 STATE="$STATE_DIR/health.state"
 FAILS="$STATE_DIR/health.fails"
+# Uzilish yozuvi: faqat holat almashganda bitta qator. Shartlardagi "ishlamagan kunlar
+# obuna muddatiga qo'shiladi" va'dasini hisoblash uchun boshqa manba yo'q edi.
+LOG="$STATE_DIR/outages.log"
 
 # .env dagi qiymatlar (faqat kerakli ikkitasi, qolganini muhitga chiqarmaymiz)
 val() { grep -m1 "^$1=" "$ENV_FILE" 2>/dev/null | cut -d= -f2- | tr -d '\r'; }
@@ -39,6 +42,7 @@ if [ "$WEB" = 200 ] && [ "$API" = 200 ]; then
   echo 0 > "$FAILS"
   if [ "$prev" = fail ]; then
     notify "✅ yuksaroy.uz qayta ishlayapti."
+    echo "$(date -u +%FT%TZ) tiklandi" >> "$LOG"
   fi
   echo ok > "$STATE"
   exit 0
@@ -54,5 +58,6 @@ if [ "$n" -ge "$THRESHOLD" ] && [ "$prev" != fail ]; then
 web: $WEB
 api: $API
 Server: 89.39.94.99"
+  echo "$(date -u +%FT%TZ) yiqildi web=$WEB api=$API" >> "$LOG"
   echo fail > "$STATE"
 fi

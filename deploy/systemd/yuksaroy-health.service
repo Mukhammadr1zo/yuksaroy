@@ -1,0 +1,19 @@
+[Unit]
+# Sayt tirikmi degan tekshiruv, har 5 daqiqada. Skript: deploy/healthcheck.sh
+#
+# Bu fayl serverda 2026-yil 11-sentabrdan beri ishlab turibdi, lekin repoda yo'q edi:
+# ya'ni uni hech kim ko'rib chiqa olmasdi va server qaytadan qurilsa yo'qolardi.
+# Shuning uchun u shu yerga ko'chirildi. Mazmuni serverdagining aynan o'zi, bitta
+# qo'shimcha bilan: Wants= (pastga qarang).
+Description=YukSaroy sog'liq tekshiruvi (yiqilsa Telegramga xabar)
+Documentation=file:///opt/yuksaroy/docs/runbooks/kuzatuv.md
+After=network-online.target
+# Wants serverdagi nusxada yo'q. After yolg'iz turganda maqsadni O'ZI tortib kelmaydi,
+# ya'ni qayta yuklangandan keyingi birinchi tekshiruv tarmoqsiz ketishi mumkin edi.
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/yuksaroy/deploy/healthcheck.sh
+# Serverda yana to'rtta loyiha bor: tekshiruv ularni sekinlashtirmasin
+Nice=10

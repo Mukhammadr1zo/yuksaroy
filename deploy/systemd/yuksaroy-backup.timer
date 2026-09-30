@@ -1,0 +1,16 @@
+[Unit]
+Description=YukSaroy zaxirasi har kuni 02:30 da (Toshkent vaqti = 21:30 UTC, server UTC da)
+Documentation=file:///opt/yuksaroy/docs/runbooks/kuzatuv.md
+
+[Timer]
+# Server soati UTC da (timedatectl bilan tekshirilgan), shuning uchun 21:30 UTC yoziladi
+# va bu Toshkentda 02:30 bo'ladi. Bu yerga 02:00 deb yozilsa zaxira Toshkent vaqti bilan
+# ertalab 07:00 da, ya'ni ish vaqtida olinardi.
+OnCalendar=*-*-* 21:30:00
+# Server o'chib qolgan bo'lsa, yoqilgach o'tkazib yuborilgan zaxira bajariladi
+Persistent=true
+# Serverdagi boshqa loyihalar bilan bir vaqtda turtmasin
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target
