@@ -182,6 +182,7 @@
       "DEMO_TARGET": "This action is not available on sample data.",
       "DUPLICATE_SERVICE": "This service is listed twice.",
       "EXPORT_TOO_MANY": "Too many rows ({total}). The limit is {max}: narrow the filter.",
+      "FILE_TOO_LARGE": "The file is too large: 1.5 MB at most. Give an mp4 or a webm instead of an image.",
       "INVALID_PHONE": "The phone number is not valid.",
       "KIND_NOT_ALLOWED": "This type cannot be set here.",
       "KYC_ALREADY": "The organisation is already verified.",
@@ -948,19 +949,52 @@
       "endsAt": "Ends",
       "buyer": "Buyer",
       "price": "Paid, UZS",
+      "delaySec": "Delay, seconds",
+      "showSec": "Show for, seconds",
+      "quietHours": "Quiet hours",
+      "locale": "Language",
+      "localeAll": "Every language",
+      "delayHint": "It appears this many seconds after the page opens. A smaller number gets more views but interrupts reading more.",
+      "showHint": "It leaves on its own after this many seconds. Set 0 and it never closes itself, it waits for the person.",
+      "quietHint": "After someone closes it, it stays away for this many hours. At 12 it shows at most twice a day.",
+      "localeHint": "Empty means every language. The banner wording lives inside the image, so put an Uzbek banner on Uzbek pages only.",
+      "preview": "See how it looks",
+      "previewStop": "Stop",
+      "previewNote": "This runs on your screen only: nothing is counted and the link does not open.",
+      "previewNeedMedia": "Upload the banner file first: there is nothing to show.",
+      "previewWait": "{sec} seconds until it appears.",
+      "previewLeft": "{sec} seconds until it leaves.",
+      "previewStay": "It never closes itself: you close it.",
+      "previewPhone": "Phone, 390 px",
+      "previewDesk": "Desktop",
+      "bottomTitleHint": "In the bottom banner the title is not drawn on screen: it is an internal name, so you recognise the ad in this list.",
+      "bottomBodyHint": "In the bottom banner the text is not drawn either: it is the link description for a screen reader, so say what the image says.",
+      "closes": "Closed",
       "place": {
         "terminal-aside": "Terminal page",
         "listing-aside": "Listing page",
         "site-left": "Left column (every page)",
-        "site-right": "Right column (every page)"
+        "site-right": "Right column (every page)",
+        "site-bottom": "Bottom banner (every page)"
       },
       "st": {
         "DRAFT": "Draft",
         "ACTIVE": "Active"
       },
       "media": "Banner file",
-      "mediaHint": "An image, a GIF or a silent video (mp4, webm). On the page the video plays muted and loops.",
+      "mediaHint": "An image, a GIF or a silent video (mp4, webm). On the page the video plays muted and loops. 1.5 MB at most: instead of an animated image (GIF) give an mp4 or a webm, several times lighter at the same quality.",
       "mediaRemove": "Remove the file",
+      "rules": {
+        "head": "The banner must not contain:",
+        "fakeClose": "A fake close button or a fake X inside the image.",
+        "fakeUi": "A fake search box, a fake play button, a fake system message.",
+        "lookAlike": "The look of a part of our site: our colours or our logo.",
+        "sound": "Sound that starts by itself.",
+        "flash": "Flashing faster than three times a second, or a large area blinking harshly.",
+        "harm": "Content not for minors, gambling, unlicensed credit.",
+        "http": "A link without https.",
+        "tail": "Code cannot check flashing. Do not set Active until you have watched the file to the end yourself."
+      },
       "views": "Views",
       "clicks": "Clicks",
       "ctr": "Click share",
@@ -970,7 +1004,8 @@
       "decision": {
         "views": "Views: is the spot working. If the number stops growing, move the banner where people see it.",
         "clicks": "Clicks: is the banner itself working. If nobody clicks, change the text or the image.",
-        "ctr": "Click share: clicks per hundred views. If it is low, revisit the price or the placement."
+        "ctr": "Click share: clicks per hundred views. If it is low, revisit the price or the placement.",
+        "closes": "Closed: is the banner in the way. If the close share is high, cut the show time or raise the quiet hours."
       },
       "why": {
         "live": "Visible now",
@@ -982,7 +1017,8 @@
         "site-left": "On the left of every public page. Wide screens only (from 1536 pixels): on narrower ones it is not drawn so the content is not squeezed.",
         "site-right": "On the right of every public page. Wide screens only (from 1536 pixels).",
         "terminal-aside": "On a terminal's own page, in the right column. Not in the terminal list and not on the home page.",
-        "listing-aside": "On a listing's own page, in the right column. Not in the listing list."
+        "listing-aside": "On a listing's own page, in the right column. Not in the listing list.",
+        "site-bottom": "At the bottom of every public page, phones included. The title and the text are not drawn: only the image or the video shows. It leaves on its own after the set number of seconds, and once a person closes it, it stays away for the quiet hours."
       },
       "subNote": "Subscribers are not shown ads: with an active subscription you will not see it either. Check in another window, signed out."
     },

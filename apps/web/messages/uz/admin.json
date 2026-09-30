@@ -182,6 +182,7 @@
       "DEMO_TARGET": "Namuna qator bilan bu amalni bajarib bo'lmaydi.",
       "DUPLICATE_SERVICE": "Bu xizmat ro'yxatda ikki marta turibdi.",
       "EXPORT_TOO_MANY": "Juda ko'p qator ({total}). Chegara {max}: filtrni toraytiring.",
+      "FILE_TOO_LARGE": "Fayl juda katta: eng ko'pi 1,5 MB. Rasm o'rniga mp4 yoki webm bering.",
       "INVALID_PHONE": "Telefon raqami noto'g'ri.",
       "KIND_NOT_ALLOWED": "Bu turni bu yerdan qo'yib bo'lmaydi.",
       "KYC_ALREADY": "Tashkilot allaqachon tasdiqlangan.",
@@ -948,19 +949,52 @@
       "endsAt": "Tugaydi",
       "buyer": "Sotib oluvchi",
       "price": "To'langan, so'm",
+      "delaySec": "Kechikish, soniya",
+      "showSec": "Turish muddati, soniya",
+      "quietHours": "Jim vaqt, soat",
+      "locale": "Til",
+      "localeAll": "Hamma til",
+      "delayHint": "Sahifa ochilgandan shu soniyadan keyin chiqadi. Son kichik bo'lsa ko'proq ko'riladi, lekin odamni o'qishdan uzadi.",
+      "showHint": "Shu soniyadan keyin o'zi ketadi. 0 yozsangiz o'zi yopilmaydi, odam yopmaguncha turadi.",
+      "quietHint": "Odam yopgandan keyin shu soat davomida qayta chiqmaydi. 12 desangiz kuniga ko'pi bilan ikki marta ko'rinadi.",
+      "localeHint": "Bo'sh bo'lsa hamma tilda chiqadi. Banner yozuvi rasm ichida bo'lgani uchun o'zbekcha bannerni faqat o'zbekcha sahifaga qo'ying.",
+      "preview": "Qanday ko'rinadi",
+      "previewStop": "To'xtatish",
+      "previewNote": "Bu ko'rsatish faqat sizning ekraningizda: sanoq yozilmaydi va havola ochilmaydi.",
+      "previewNeedMedia": "Avval banner faylini yuklang: ko'rsatadigan narsa yo'q.",
+      "previewWait": "Chiqishiga {sec} soniya.",
+      "previewLeft": "Ketishiga {sec} soniya.",
+      "previewStay": "O'zi yopilmaydi: siz yopasiz.",
+      "previewPhone": "Telefon, 390 px",
+      "previewDesk": "Kompyuter",
+      "bottomTitleHint": "Pastki bannerda sarlavha ekranda chizilmaydi: u faqat sizga, shu ro'yxatda tanib olish uchun ichki nom.",
+      "bottomBodyHint": "Pastki bannerda matn ham chizilmaydi: u ekran o'quvchi uchun havola tavsifi, ya'ni rasmda nima yozilganini ayting.",
+      "closes": "Yopildi",
       "place": {
         "terminal-aside": "Terminal sahifasi",
         "listing-aside": "E'lon sahifasi",
         "site-left": "Chap ustun (hamma sahifa)",
-        "site-right": "O'ng ustun (hamma sahifa)"
+        "site-right": "O'ng ustun (hamma sahifa)",
+        "site-bottom": "Pastki banner (hamma sahifa)"
       },
       "st": {
         "DRAFT": "Qoralama",
         "ACTIVE": "Faol"
       },
       "media": "Banner fayli",
-      "mediaHint": "Rasm, GIF yoki ovozsiz video (mp4, webm). Video sahifada ovozsiz va o'zi aylanib turadi.",
+      "mediaHint": "Rasm, GIF yoki ovozsiz video (mp4, webm). Video sahifada ovozsiz va o'zi aylanib turadi. Eng ko'pi 1,5 MB: aylanadigan rasm (GIF) o'rniga mp4 yoki webm bering, bir xil sifatda bir necha barobar yengil.",
       "mediaRemove": "Faylni olib tashlash",
+      "rules": {
+        "head": "Bannerda bo'lmasligi kerak:",
+        "fakeClose": "Rasm ichida soxta yopish tugmasi yoki soxta X.",
+        "fakeUi": "Soxta qidiruv maydoni, soxta ijro tugmasi, soxta tizim xabari.",
+        "lookAlike": "Saytimizning ranglari yoki logotipi bilan sayt qismidek ko'rinish.",
+        "sound": "O'zi ovoz chiqarish.",
+        "flash": "Soniyada uchdan tez chaqnash yoki katta maydonning keskin miltillashi.",
+        "harm": "Voyaga yetmaganlarga yaramaydigan mazmun, qimor, litsenziyasiz kredit.",
+        "http": "https bo'lmagan havola.",
+        "tail": "Chaqnashni kod tekshira olmaydi. Faylni oxirigacha o'zingiz ko'rmaguningizcha Faol qilmang."
+      },
       "views": "Ko'rildi",
       "clicks": "Bosildi",
       "ctr": "Bosish ulushi",
@@ -970,7 +1004,8 @@
       "decision": {
         "views": "Ko'rildi: joy ishlayaptimi. Son o'smasa, bannerni ko'rinadigan joyga ko'chiring.",
         "clicks": "Bosildi: bannerning o'zi ishlayaptimi. Bosish bo'lmasa, matn yoki rasmni almashtiring.",
-        "ctr": "Bosish ulushi: yuz marta ko'rilganda necha marta bosilgani. Past bo'lsa, narxni yoki joyni qayta ko'rib chiqing."
+        "ctr": "Bosish ulushi: yuz marta ko'rilganda necha marta bosilgani. Past bo'lsa, narxni yoki joyni qayta ko'rib chiqing.",
+        "closes": "Yopildi: banner xalaqit berayaptimi. Yopish ulushi yuqori bo'lsa ko'rsatish muddatini qisqartiring yoki jim vaqtni uzaytiring."
       },
       "why": {
         "live": "Hozir ko'rinadi",
@@ -982,7 +1017,8 @@
         "site-left": "Har bir ochiq sahifaning chap yonida. Faqat keng ekranda (1536 pikseldan boshlab): torroq ekranda mazmunni siqib qo'ymaslik uchun chizilmaydi.",
         "site-right": "Har bir ochiq sahifaning o'ng yonida. Faqat keng ekranda (1536 pikseldan boshlab).",
         "terminal-aside": "Bitta terminalning o'z sahifasida, o'ng ustunda. Terminallar ro'yxatida va bosh sahifada chiqmaydi.",
-        "listing-aside": "Bitta e'lonning o'z sahifasida, o'ng ustunda. E'lonlar ro'yxatida chiqmaydi."
+        "listing-aside": "Bitta e'lonning o'z sahifasida, o'ng ustunda. E'lonlar ro'yxatida chiqmaydi.",
+        "site-bottom": "Har bir ochiq sahifaning pastida, telefonda ham chiqadi. Sarlavha va matn chizilmaydi: faqat rasm yoki video ko'rinadi. Belgilangan soniyadan keyin o'zi ketadi, odam yopsa jim vaqt davomida qayta chiqmaydi."
       },
       "subNote": "Obunachiga reklama ko'rsatilmaydi: o'z hisobingizda faol obuna bo'lsa siz ham ko'rmaysiz. Tekshirish uchun boshqa oynada, kirmasdan oching."
     },

@@ -3,7 +3,7 @@ import { Footer } from '@/components/site/Footer';
 import { CompareTray } from '@/components/compare/CompareTray';
 import { RegisterNudge } from '@/components/site/RegisterNudge';
 import { HelpWidget } from '@/components/help/HelpWidget';
-import { SideRails } from '@/components/site/AdSlot';
+import { SiteAds } from '@/components/site/AdSlot';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,9 +20,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <RegisterNudge />
       {/* Yordam chati: o'ng pastdagi tugma, ko'p so'raladigan savollar */}
       <HelpWidget />
-      {/* Ikki yondagi reklama ustuni: sotilgan bo'lsa va ekran keng bo'lsa chiziladi.
+      {/* Reklamaning uch joyi (ikki yon ustun va pastki banner) bitta so'rovdan chiziladi.
           Layoutda, har sahifada alohida emas: yangi sahifa qo'shilganda esdan chiqmaydi. */}
-      <SideRails />
+      <SiteAds />
     </>
   );
 }

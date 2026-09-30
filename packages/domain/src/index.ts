@@ -615,10 +615,30 @@ export * from './owner-kind';
  * terminal-aside va listing-aside: tafsilot sahifasidagi haqiqiy yon ustun ichida,
  * har ekranda ko'rinadi.
  *
+ * site-bottom: pastda yotgan past banner, TOR EKRANDA HAM chiqadi. Yon ustunlar tor
+ * ekranda chizilmaydi, ya'ni telefonda sotiladigan joy umuman yo'q edi; shu banner
+ * aynan shuning uchun bor va uning ichida sarlavha chizilmaydi (faqat rasm).
+ *
  * Nomi "slot" emas: bu so'z bron oynasi uchun band. Inglizcha "spot" ham o'sha bron
  * oynasining tarjimasi, shuning uchun u ham ishlatilmaydi.
+ *
+ * Tartib muhim: panelda tanlash ro'yxati aynan shu tartibda chiziladi, shuning uchun
+ * sayt bo'ylab sotiladigan uchta joy ro'yxat boshida birga turadi.
  */
-export const AD_PLACEMENTS = ['site-left', 'site-right', 'terminal-aside', 'listing-aside'] as const;
+export const AD_PLACEMENTS = ['site-left', 'site-right', 'site-bottom', 'terminal-aside', 'listing-aside'] as const;
+/**
+ * Pastki banner. Alohida nomlangan, chunki uning javob shakli boshqa: sarlavhasiz,
+ * lekin uchta vaqt bilan.
+ */
+export const AD_BOTTOM = 'site-bottom';
+/**
+ * Pastki bannerning sukut vaqtlari, egasi tasdiqlagan: 8 soniyada chiqadi, 15 soniya
+ * turadi, yopilgach 12 soat qayta ko'rinmaydi (ya'ni kuniga ko'pi bilan ikki marta).
+ *
+ * Bazadagi ustunlarning sukut qiymati ham aynan shu: qator qo'lda to'ldirilmasa ham
+ * banner shu o'lchov bilan ishlaydi.
+ */
+export const AD_BOTTOM_DEFAULTS = { delaySec: 8, showSec: 15, quietHours: 12 } as const;
 /** Ikki yon ustun: bitta so'rovda olinadi va bitta komponent chizadi. */
 export const AD_RAILS = ['site-left', 'site-right'] as const;
 export type AdPlacement = (typeof AD_PLACEMENTS)[number];
@@ -648,3 +668,9 @@ export type PlanLimitKey = (typeof PLAN_LIMIT_KEYS)[number];
 
 /** Tarif nomi va tavsif satrlari uch tilda: admin yozgan matnni tarjima tizimi tarjima qila olmaydi. */
 export const PLAN_LOCALES = ['uz', 'ru', 'en'] as const;
+
+/**
+ * Reklama qaysi tilda chiqishi. Ro'yxat tarifdagisi bilan bitta: sayt uchta tilda,
+ * to'rtinchi til qo'shilsa ikkalasiga ham birdan qo'shilishi kerak.
+ */
+export const AD_LOCALES = PLAN_LOCALES;

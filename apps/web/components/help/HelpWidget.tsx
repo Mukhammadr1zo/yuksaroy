@@ -116,7 +116,10 @@ export function HelpWidget() {
         // display faqat bitta joydan keladi: asosiy ro'yxatda ham inline-flex bo'lsa,
         // Tailwind da hidden bilan ikkisi bir xil xususiyatni belgilab, qaysi biri ustun
         // bo'lishini sinf tartibi emas, stil fayli tartibi hal qilardi va tugma yashirinmasdi
-        className={`fixed bottom-6 right-4 z-40 h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${cornerBusy ? 'hidden sm:inline-flex' : 'inline-flex'}`}
+        // Pastki masofaga --ad-bottom qo'shiladi: pastdan chiquvchi reklama banneri ko'rinib
+        // turgan bo'lsa tugma uning ustiga ko'chadi. O'lchamni banner o'zi yozadi (AdSlot.tsx),
+        // shunda balandlik bitta joyda hisoblanadi va uch joyda takrorlanmaydi.
+        className={`fixed bottom-[calc(1.5rem_+_var(--ad-bottom,0px))] right-4 z-40 h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${cornerBusy ? 'hidden sm:inline-flex' : 'inline-flex'}`}
       >
         <ChatCircleDotsIcon size={22} weight="fill" aria-hidden="true" />
         <span className="hidden sm:inline">{t('open')}</span>
@@ -125,7 +128,11 @@ export function HelpWidget() {
       {open ? (
         <div
           id="help-widget" role="dialog" aria-label={t('title')}
-          className="fixed inset-x-0 bottom-0 z-40 flex max-h-[85dvh] flex-col rounded-t-card border border-line bg-white shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[520px] sm:max-h-[calc(100dvh-8rem)] sm:w-[380px] sm:rounded-card"
+          // Kompyuterdagi pastki masofaga --ad-bottom qo'shiladi: reklama banneri ko'rinib
+          // turgan bo'lsa oyna uning ustida ochiladi. O'lchamni banner o'zi yozadi (AdSlot.tsx).
+          // Telefonda oyna pastga yopishadi, lekin u yerda banner umuman chizilmaydi: ochiq
+          // oyna bo'lsa banner o'zini ko'rsatmaydi.
+          className="fixed inset-x-0 bottom-0 z-40 flex max-h-[85dvh] flex-col rounded-t-card border border-line bg-white shadow-2xl sm:inset-x-auto sm:bottom-[calc(6rem_+_var(--ad-bottom,0px))] sm:right-6 sm:h-[520px] sm:max-h-[calc(100dvh-8rem)] sm:w-[380px] sm:rounded-card"
         >
           <header className="flex items-center gap-2 border-b border-line px-4 py-3">
             <p className="min-w-0 flex-1 truncate font-display text-sm font-bold text-navy">{t('title')}</p>

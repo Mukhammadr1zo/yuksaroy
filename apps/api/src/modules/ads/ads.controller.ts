@@ -1,8 +1,8 @@
 import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, PayloadTooLargeException, Post, Query, Req, UnsupportedMediaTypeException, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
-import { IsDateString, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
-import { AD_PLACEMENTS, AD_RAILS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
+import { IsDateString, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { AD_BOTTOM, AD_LOCALES, AD_PLACEMENTS, AD_RAILS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { ImpressionsService } from '../impressions/impressions.service';
@@ -17,6 +17,7 @@ import { storeFile, takeFile } from '../listings/presentation/uploads.controller
 
 class AdCreateDto {
   @IsIn(AD_PLACEMENTS) placement!: AdPlacement;
+  /** Pastki bannerda ekranga chizilmaydi, lekin majburiy qoladi: panelda qatorni shu nom bilan topiladi. */
   @IsString() @MaxLength(80) title!: string;
   @IsOptional() @IsString() @MaxLength(200) body?: string;
   @IsOptional() @IsString() @MaxLength(500) imageUrl?: string;
@@ -24,6 +25,13 @@ class AdCreateDto {
   @IsOptional() @IsString() @MaxLength(200) buyer?: string;
   @IsOptional() @IsInt() @Min(0) pricePaidSom?: number;
   @IsIn(AD_STATUSES) status!: AdStatus;
+  // Chegaralar: 0 kechikish = darhol chiqadi, 120 soniyadan keyin odam sahifadan ketgan
+  // bo'ladi. showSec 0 = odam yopgunicha turadi. Jim vaqt eng kami 1 soat, eng ko'pi
+  // bir hafta: 0 soat "har sahifada qayta chiqsin" degani bo'lardi.
+  @IsOptional() @IsInt() @Min(0) @Max(120) delaySec?: number;
+  @IsOptional() @IsInt() @Min(0) @Max(300) showSec?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(168) quietHours?: number;
+  @IsOptional() @IsIn(AD_LOCALES) locale?: string;
   @IsDateString() startsAt!: string;
   @IsDateString() endsAt!: string;
 }
@@ -50,10 +58,35 @@ const MEDIA_EXT: Record<string, string> = {
  */
 export const AD_MEDIA_MAX_BYTES = 1_572_864;
 
-/** Ommaviy javob: sotuv ma'lumoti (kim oldi, qancha to'ladi) bu yerda yo'q. */
-const publicAd = (a: { id: string; title: string; body: string | null; imageUrl: string | null; href: string }) => ({
-  id: a.id, title: a.title, body: a.body, imageUrl: a.imageUrl, href: a.href,
-});
+/**
+ * Ommaviy javob: sotuv ma'lumoti (kim oldi, qancha to'ladi) bu yerda yo'q.
+ *
+ * Pastki bannerning shakli boshqa: SARLAVHA YO'Q (ekranda faqat rasm chiziladi) va
+ * uchta vaqt bor, chunki ularni chizuvchi serverdan oladi, kodda yozib qo'yilmaydi.
+ *
+ * Boshqa joylarning shakli ataylab o'zgarmadi: terminal yon ustuni allaqachon sotilgan
+ * va u yerda sarlavha ko'rinadigan matn. Umumiy shaklga o'tsak ishlab turgan reklama
+ * jim buzilardi.
+ */
+const publicAd = (a: {
+  id: string; placement: string; title: string; body: string | null; imageUrl: string | null; href: string;
+  delaySec: number; showSec: number; quietHours: number;
+}) => a.placement === AD_BOTTOM
+  ? { id: a.id, body: a.body, imageUrl: a.imageUrl, href: a.href, delaySec: a.delaySec, showSec: a.showSec, quietHours: a.quietHours }
+  : { id: a.id, title: a.title, body: a.body, imageUrl: a.imageUrl, href: a.href };
+
+/**
+ * Pastki banner uchun ikki maydon majburiy: tavsif va rasm.
+ *
+ * Nega: bu bannerda sarlavha chizilmaydi. Rasm bo'lmasa ekranda ko'rsatadigan narsa
+ * qolmaydi; tavsif bo'lmasa esa u ekran o'quvchi uchun NOMSIZ havola bo'lib qoladi,
+ * ya'ni odam nimaga bosayotganini bilmaydi.
+ */
+function requireBottomMedia(a: { placement: string; body?: string | null; imageUrl?: string | null }) {
+  if (a.placement !== AD_BOTTOM) return;
+  if (!a.body?.trim()) throw new BadRequestException({ code: 'AD_BOTTOM_BODY', field: 'body' });
+  if (!a.imageUrl?.trim()) throw new BadRequestException({ code: 'AD_BOTTOM_IMAGE', field: 'imageUrl' });
+}
 
 /**
  * Yon tomondagi reklama, ommaviy tomoni.
@@ -92,25 +125,32 @@ export class AdsPublicController {
   }
 
   /**
-   * Sahifaning ikki yonidagi ustun, BITTA so'rovda.
+   * Sahifa bo'ylab chiziladigan uchta joy: ikki yon ustun va pastki banner, BITTA so'rovda.
    *
-   * Nega alohida yo'l: bu ikki ustun har ochiq sahifada chiziladi. Har biri o'z
-   * so'rovini yuborsa har sahifa ochilishida ikki marta obuna tekshiruvi va ikki
-   * marta baza so'rovi ketardi.
+   * Nega alohida yo'l: bu uchtasi har ochiq sahifada chiziladi. Har biri o'z so'rovini
+   * yuborsa har sahifa ochilishida uch marta obuna tekshiruvi va uch marta baza so'rovi
+   * ketardi. Pastki banner ham shu bitta so'rovga qo'shildi, yangisi ochilmadi.
+   *
+   * locale berilsa: tili yozilmagan (hamma tilga atalgan) va aynan shu tilga atalgan
+   * qatorlar tanlanadi.
    */
   @Get('rails')
-  async rails(@Req() req: FastifyRequest) {
+  async rails(@Req() req: FastifyRequest, @Query('locale') locale?: string) {
     const userId = optionalUserId(req, this.tokens);
-    if (userId && (await this.subs.isActive(userId))) return { left: null, right: null };
+    if (userId && (await this.subs.isActive(userId))) return { left: null, right: null, bottom: null };
     const now = new Date();
+    const lang = pickIn(locale, AD_LOCALES);
     const rows = await this.prisma.adPlacement.findMany({
-      where: { placement: { in: [...AD_RAILS] }, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now } },
+      where: {
+        placement: { in: [...AD_RAILS, AD_BOTTOM] }, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now },
+        ...(lang ? { OR: [{ locale: null }, { locale: lang }] } : {}),
+      },
       orderBy: [{ startsAt: 'desc' }, { id: 'asc' }],
       take: 20,
     });
-    // Bir ustunda bir nechta faol bo'lsa eng keyin boshlangani: `one` bilan bir xil qoida
+    // Bir joyda bir nechta faol bo'lsa eng keyin boshlangani: `one` bilan bir xil qoida
     const pick = (p: string) => { const a = rows.find((r) => r.placement === p); return a ? publicAd(a) : null; };
-    return { left: pick('site-left'), right: pick('site-right') };
+    return { left: pick('site-left'), right: pick('site-right'), bottom: pick(AD_BOTTOM) };
   }
 }
 
@@ -155,6 +195,7 @@ export class AdsAdminController {
   @UseGuards(PlatformOwnerGuard)
   async create(@CurrentUserId() userId: string, @Body() dto: AdCreateDto) {
     const data = range(dto.startsAt, dto.endsAt);
+    requireBottomMedia(dto);
     const a = await this.prisma.adPlacement.create({ data: { ...dto, ...data } });
     await this.audit.log({ actorId: userId, action: 'admin.ad.create', entity: 'AdPlacement', entityId: a.id, meta: { placement: a.placement, buyer: a.buyer, pricePaidSom: a.pricePaidSom } });
     return a;
@@ -168,6 +209,13 @@ export class AdsAdminController {
     // Sanalar birga tekshiriladi: bittasi o'zgarsa ikkinchisi bazadagisidan olinadi
     const startsAt = dto.startsAt ?? cur.startsAt.toISOString();
     const endsAt = dto.endsAt ?? cur.endsAt.toISOString();
+    // Pastki banner sharti ham shunday birlashtirib tekshiriladi: faqat vaqtni
+    // o'zgartirganda so'rovda body kelmaydi, birlashtirmasak o'sha yerda yiqilardi
+    requireBottomMedia({
+      placement: dto.placement ?? cur.placement,
+      body: dto.body ?? cur.body,
+      imageUrl: dto.imageUrl ?? cur.imageUrl,
+    });
     const a = await this.prisma.adPlacement.update({ where: { id }, data: { ...dto, ...range(startsAt, endsAt) } });
     await this.audit.log({ actorId: userId, action: 'admin.ad.update', entity: 'AdPlacement', entityId: id, meta: { fields: Object.keys(dto) } });
     return a;

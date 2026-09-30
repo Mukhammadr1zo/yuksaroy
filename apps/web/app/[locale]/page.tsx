@@ -9,6 +9,7 @@ import { CategoryGrid } from '@/components/landing/CategoryGrid';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { VisitMap } from '@/components/landing/VisitMap';
 import { Footer } from '@/components/site/Footer';
+import { SiteAds } from '@/components/site/AdSlot';
 import { Ld, pageMeta, url } from '@/lib/seo';
 
 export const revalidate = 60;
@@ -73,6 +74,9 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
         </section>
       </main>
       <Footer />
+      {/* Bosh sahifa (public) guruhidan tashqarida turadi va shu sababli reklamani umuman
+          ko'rsatmasdi, panel esa joyni "har sahifada" deb sotardi. Endi bu yerda ham bor. */}
+      <SiteAds />
     </>
   );
 }

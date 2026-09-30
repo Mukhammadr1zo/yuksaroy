@@ -1194,6 +1194,14 @@ model AdPlacement {
   buyer        String?
   pricePaidSom Int      @default(0)
   status       String   @default("DRAFT") // AD_STATUSES: DRAFT | ACTIVE
+  /// Pastki banner vaqtlari (AD_BOTTOM_DEFAULTS). Boshqa joylar bu sonlarni o'qimaydi.
+  /// Bazada, chunki bu sotuv shartnomasining bir qismi: o'zgarishi uchun deploy kutilmaydi.
+  delaySec     Int      @default(8)
+  /// 0 bo'lsa banner o'zi yopilmaydi, odam yopgunicha turadi.
+  showSec      Int      @default(15)
+  quietHours   Int      @default(12)
+  /// Bo'sh bo'lsa reklama hamma tilda chiqadi; til yozilsa faqat shu tilda.
+  locale       String?
   startsAt     DateTime @db.Timestamptz(3)
   endsAt       DateTime @db.Timestamptz(3)
   createdAt    DateTime @default(now()) @db.Timestamptz(3)

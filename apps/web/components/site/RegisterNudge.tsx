@@ -54,7 +54,10 @@ export function RegisterNudge() {
   // ishlamaydi (nomsiz umumiy element nom qabul qilmaydi), aside esa nom oladi va
   // ro'yxatda "yonaki mazmun" bo'lib ko'rinadi.
   return (
-    <aside aria-labelledby="nudge-title" className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md rounded-card border border-line bg-white p-5 shadow-2xl sm:inset-x-auto sm:left-6 sm:mx-0">
+    // Pastki masofaga --ad-bottom qo'shiladi: pastdan chiquvchi reklama banneri
+    // ko'rinib turgan bo'lsa taklif uning ustida qoladi. O'lchamni banner o'zi yozadi
+    // (AdSlot.tsx), shunda balandlik bitta joyda hisoblanadi va bu yerda takrorlanmaydi.
+    <aside aria-labelledby="nudge-title" className="fixed inset-x-4 bottom-[calc(1rem_+_var(--ad-bottom,0px))] z-40 mx-auto max-w-md rounded-card border border-line bg-white p-5 shadow-2xl sm:inset-x-auto sm:left-6 sm:mx-0">
       <div className="flex items-start gap-3">
         <UserCirclePlusIcon size={28} weight="fill" className="shrink-0 text-teal" aria-hidden="true" />
         <div className="min-w-0 flex-1">
