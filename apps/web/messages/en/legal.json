@@ -54,6 +54,16 @@
         "p3": "Phone numbers open with a daily limit. That limit is there against catalog copying, and every opening is recorded.",
         "p4": "We give a place to meet. We do not answer for the quality of the owner's service, for a delay or for a deal that fell through.",
         "p5": "If the terms change, the date at the top is updated. Important changes are announced at least 30 days in advance. If there is a dispute, write to us first: we answer on business days."
+      },
+      "s7": {
+        "h": "Advertising",
+        "p1": "The site has five advertising places and we sell them.",
+        "p2": "We mark every advert with the word Advertisement. Nobody can take that mark off: an advert does not look like a catalog row.",
+        "p3": "The advert file sits on our own server, so your browser does not go to an outside address. There is no third party code, no pixel and no tracker.",
+        "p4": "If you click an advert you go to another site.",
+        "p5": "We refuse a banner that does not fit the rules. The rules are open on the /advertise page.",
+        "p6": "We count three things: shown, clicked, closed. What stays on the server is a daily total, no IP, no session and no page address.",
+        "p7": "We do not show adverts to a subscriber."
       }
     },
     "privacy": {
@@ -84,7 +94,8 @@
         "p1": "Your name, organisation and listing text are public: anyone sees them.",
         "p2": "Your phone number is not shown on its own. A subscriber opens it with the Show number button, and every opening is recorded.",
         "p3": "Our team sees the data when a request or a dispute needs it.",
-        "p4": "There are three outside services: the sign-in code arrives through the Telegram bot; if you sign in with Google, Google recognises you; when the map opens the tiles load from an outside map service and your browser connects to it directly. There are no advertising trackers."
+        "p4": "There are three outside services: the sign-in code arrives through the Telegram bot; if you sign in with Google, Google recognises you; when the map opens the tiles load from the CARTO service.",
+        "p5": "We name CARTO because it is different: when the map opens your browser connects to that service by itself, and the service sees your IP address. Its terms are on the carto.com/attributions page. The sign-in page does something similar: the code for the Google button loads from a Google server, and Google sees your IP address then, even if you have not clicked anything yet. If you open the site inside the Telegram app, the Telegram code loads the same way. There are no advertising trackers, no pixels and no outside counters."
       },
       "s4": {
         "h": "How long it is kept",
@@ -99,6 +110,20 @@
         "p2": "If you want your phone number to stop being opened, pick the Close a number topic on the Contact page.",
         "p3": "Use the same form to close the account or to ask what is kept about you.",
         "p4": "We answer on business days."
+      },
+      "s6": {
+        "h": "Cookies and browser storage",
+        "p1": "We use three cookies for signing in. All three are our own, there are no third party cookies.",
+        "p2": "ys_access: keeps you signed in, lives 15 minutes. Page code cannot read it, only the browser sends it to the server.",
+        "p3": "ys_refresh: renews the session, so you do not have to sign in again every 15 minutes. Lives 30 days. Page code cannot read this one either.",
+        "p4": "ys_in: tells the browser that you are signed in, lives 30 days. We made this one readable on purpose: while you are a guest, the page does not send the server a pointless request.",
+        "p5": "A fourth one is for language: NEXT_LOCALE remembers the language you picked for a year.",
+        "p6": "Everything else sits in the browser's own storage, on this device only. Nothing of it goes to the server except one item: that is ys-tg-token, and we say more about it below. The lifetime differs too: ys-compare, ys-visit, ys-first-seen, ys-nudge-snooze, ys-ad-quiet, ys-order-draft and the ones starting with ys-admin- stay until you clear them; ys-authed, ys-me, ys-tg-token and the ones starting with ys-req- disappear the moment you close the browser tab.",
+        "p7": "ys-authed and ys-me: your sign-in marker and a copy of your profile. They are there so the menu does not flicker when a page opens. When you sign out we remove both ourselves.",
+        "p8": "ys-compare: the comparison basket. ys-visit: so one visit is not counted twice. ys-first-seen and ys-nudge-snooze: the time of your first visit and the snooze time of the sign-up offer.",
+        "p9": "ys-ad-quiet: the quiet time for adverts. It holds a time number only, which advert it was is not written down. ys-tg-token: the sign-in marker inside the Telegram app. This is the one exception: it goes to the server with every request, because inside the app it takes the place of a cookie. The ones starting with ys-admin-: panel settings, they only exist in a staff browser.",
+        "p10": "We say this about ys-order-draft and the ones starting with ys-req- separately: they are the drafts of an order and a request you have not sent, so they hold text you wrote yourself, including a contact phone number. We do not take them, they stay in your browser. If you do not need it, you clear it yourself: by sending the form or by removing the site data in your browser settings.",
+        "p11": "There is no third party cookie and no third party tracker: everything listed above is our own."
       }
     }
   }

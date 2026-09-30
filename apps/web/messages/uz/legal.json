@@ -54,6 +54,16 @@
         "p3": "Telefon raqami kuniga chegaralangan sonda ochiladi. Bu chegara katalogni ko'chirib olishga qarshi, va har bir ochish yozib qo'yiladi.",
         "p4": "Biz uchrashish joyini beramiz. Egasi ko'rsatgan xizmat sifati, kechikish yoki buzilgan kelishuv uchun javob bermaymiz.",
         "p5": "Shartlar o'zgarsa yuqoridagi sana yangilanadi. Muhim o'zgarish kamida 30 kun oldin e'lon qilinadi. Nizo bo'lsa avval bizga yozing: ish kunlari javob beramiz."
+      },
+      "s7": {
+        "h": "Reklama",
+        "p1": "Saytda beshta reklama joyi bor va biz ularni sotamiz.",
+        "p2": "Har bir reklamani Reklama yozuvi bilan belgilaymiz. Bu yozuvni hech kim olib tashlay olmaydi: reklama katalog qatoriga o'xshab ketmaydi.",
+        "p3": "Reklama fayli bizning serverimizda turadi, ya'ni brauzeringiz begona manzilga bormaydi. Uchinchi tomon kodi, pikseli va kuzatuvchisi yo'q.",
+        "p4": "Reklamani bossangiz boshqa saytga o'tasiz.",
+        "p5": "Qoidaga to'g'ri kelmagan bannerni rad etamiz. Qoidalar /advertise sahifasida ochiq turadi.",
+        "p6": "Uchta narsani sanaymiz: ko'rildi, bosildi, yopildi. Serverda kunlik jamlangan son qoladi, IP ham, sessiya ham, sahifa manzili ham saqlanmaydi.",
+        "p7": "Obunachiga reklama ko'rsatmaymiz."
       }
     },
     "privacy": {
@@ -84,7 +94,8 @@
         "p1": "Ism, tashkilot va e'lon matni ochiq: ularni har kim ko'radi.",
         "p2": "Telefon raqamingiz o'zi ko'rinmaydi. Uni obunachi Raqamni ko'rish tugmasi orqali ochadi va har bir ochish yozib qo'yiladi.",
         "p3": "Jamoamiz murojaat yoki nizo bo'yicha kerak bo'lganda ko'radi.",
-        "p4": "Tashqi xizmatlar uchta: kirish kodi Telegram bot orqali keladi; Google bilan kirsangiz Google sizni taniydi; xarita ochilganda plitkalar tashqi xarita xizmatidan yuklanadi va brauzeringiz unga bevosita ulanadi. Reklama kuzatuvchilari yo'q."
+        "p4": "Tashqi xizmatlar uchta: kirish kodi Telegram bot orqali keladi; Google bilan kirsangiz Google sizni taniydi; xarita ochilganda plitkalar CARTO xizmatidan yuklanadi.",
+        "p5": "CARTO ni nomi bilan aytamiz, chunki farqi bor: xarita ochilganda brauzeringiz o'sha xizmatga o'zi ulanadi va u sizning IP manzilingizni ko'radi. Uning shartlari carto.com/attributions sahifasida. Kirish sahifasida ham shunga o'xshash narsa bo'ladi: Google tugmasining kodi Google serveridan yuklanadi va o'shanda Google IP manzilingizni ko'radi, siz hali hech narsani bosmagan bo'lsangiz ham. Saytni Telegram ilovasi ichida ochsangiz, Telegram kodi ham shunday yuklanadi. Reklama kuzatuvchisi, piksel va tashqi sanoq kodi esa yo'q."
       },
       "s4": {
         "h": "Qancha saqlanadi",
@@ -99,6 +110,20 @@
         "p2": "Telefon raqamingiz ochilishini to'xtatmoqchi bo'lsangiz, Murojaat sahifasida Raqamni yopish mavzusini tanlang.",
         "p3": "Hisobni yopish yoki sizda nima saqlanayotganini so'rash uchun ham shu forma orqali yozing.",
         "p4": "Savolingizga ish kunlari javob beramiz."
+      },
+      "s6": {
+        "h": "Cookie va brauzer xotirasi",
+        "p1": "Kirish uchun uchta cookie ishlatamiz. Uchalasi ham bizning saytimizniki, uchinchi tomonning cookie'si yo'q.",
+        "p2": "ys_access: kirgan holatingizni ushlab turadi, 15 daqiqa yashaydi. Sahifa kodi uni o'qiy olmaydi, faqat brauzer serverga yuboradi.",
+        "p3": "ys_refresh: seansni yangilaydi, ya'ni har 15 daqiqada qaytadan kirishingiz shart emas. 30 kun yashaydi. Buni ham sahifa kodi o'qiy olmaydi.",
+        "p4": "ys_in: brauzerga siz kirganingizni aytadi, 30 kun yashaydi. Buni ataylab o'qiladigan qilganmiz: mehmon bo'lganingizda sahifa serverga bekorga so'rov yubormaydi.",
+        "p5": "To'rtinchisi til uchun: NEXT_LOCALE tanlagan tilingizni bir yil eslab qoladi.",
+        "p6": "Qolgan narsalar brauzeringizning o'z xotirasida, faqat shu qurilmada turadi. Bittasidan boshqasi serverga yuborilmaydi; o'sha bittasi ys-tg-token, uni quyida alohida aytamiz. Muddati ham ikki xil: ys-compare, ys-visit, ys-first-seen, ys-nudge-snooze, ys-ad-quiet, ys-order-draft va ys-admin- bilan boshlanadiganlar siz tozalamaguningizcha turaveradi; ys-authed, ys-me, ys-tg-token va ys-req- bilan boshlanadiganlar esa brauzer yorlig'ini yopsangiz o'sha zahoti o'chadi.",
+        "p7": "ys-authed va ys-me: kirgan belgingiz va profilingizning nusxasi. Sahifa ochilganda menyu miltillamasligi uchun turadi. Chiqib ketsangiz ikkalasini ham o'zimiz o'chiramiz.",
+        "p8": "ys-compare: solishtirish savati. ys-visit: bitta tashrif ikki marta sanalmasligi uchun. ys-first-seen va ys-nudge-snooze: birinchi tashrif vaqti va ro'yxatdan o'tish taklifining uxlash vaqti.",
+        "p9": "ys-ad-quiet: reklamaning jim vaqti. Unda faqat vaqt soni turadi, qaysi reklama ekani yozilmaydi. ys-tg-token: Telegram ilovasi ichidagi kirish belgisi. Bu bittasi istisno: har bir so'rovda serverga yuboriladi, chunki ilova ichida u cookie o'rnini bosadi. ys-admin- bilan boshlanadiganlar: panel sozlamalari, ular faqat xodimning brauzerida bo'ladi.",
+        "p10": "ys-order-draft va ys-req- bilan boshlanadiganlarni alohida aytamiz: bular yuborilmagan buyurtma va so'rov qoralamalari, ya'ni ichida sizning o'zingiz yozgan matningiz, shu jumladan aloqa telefoni bo'lishi mumkin. Ularni bizga yubormaymiz, ular brauzeringizda qoladi. Kerak bo'lmasa formani yuborib yoki brauzer sozlamasidan sayt ma'lumotini o'chirib o'zingiz tozalaysiz.",
+        "p11": "Uchinchi tomonning cookie'si ham, kuzatuvchisi ham yo'q: yuqoridagilarning hammasi bizniki."
       }
     }
   }

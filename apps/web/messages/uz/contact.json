@@ -18,7 +18,11 @@
         "tech": "Texnik muammo",
         "partner": "Hamkorlik",
         "badphone": "Raqam ishlamadi",
-        "phone": "Raqamni yopish"
+        "phone": "Raqamni yopish",
+        "refund": "Pulni qaytarish so'rovi",
+        "account": "Hisobni yopish",
+        "data": "Menda qanday ma'lumot saqlanadi",
+        "copyright": "Mualliflik huquqi bo'yicha shikoyat"
       },
       "message": "Xabar",
       "messageHint": "Kamida 10 ta belgi",

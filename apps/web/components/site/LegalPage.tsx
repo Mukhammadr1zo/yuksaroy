@@ -18,7 +18,7 @@ import en from '@/messages/en/legal.json';
 const DOCS: Record<string, typeof uz.legal> = { uz: uz.legal, ru: ru.legal, en: en.legal };
 
 /** Versiya alohida raqam emas - tahrir sanasi versiyaning o'zi. Matn o'zgarganda SHU QATOR yangilanadi. */
-export const LEGAL_UPDATED = '2026-09-24';
+export const LEGAL_UPDATED = '2026-09-30';
 
 /** Noma'lum til bo'lsa o'zbekcha: sahifa yiqilmaydi. generateMetadata ham shuni chaqiradi. */
 export const legalDoc = (locale: string) => DOCS[locale] ?? DOCS.uz!;

@@ -580,14 +580,21 @@ export const REPORT_TARGET_LABELS: Record<SearchLang, Record<ReportTarget, strin
   en: { listing: 'Listing', terminal: 'Terminal', service: 'Service page', request: 'Request', order: 'Order' },
 };
 
-/** Sabab kodi. Ro'yxat qisqa: uzun ro'yxatdan odam baribir "Boshqa" ni tanlaydi. */
-export const REPORT_REASONS = ['SPAM', 'WRONG', 'PHONE', 'FRAUD', 'OTHER'] as const;
+/**
+ * Sabab kodi. Ro'yxat qisqa: uzun ro'yxatdan odam baribir "Boshqa" ni tanlaydi.
+ *
+ * COPYRIGHT OTHER dan oldin turadi, chunki "Boshqa" doim oxirgi variant bo'lishi
+ * kerak: ro'yxat oxirida turmasa odam uni to'liq o'qimay tanlab yuboradi. O'z surati
+ * yoki matni ruxsatsiz ishlatilganini ko'rgan odamga shu qatorgacha alohida yo'l
+ * yo'q edi, "Boshqa" esa panelda tartiblashga yaramaydi.
+ */
+export const REPORT_REASONS = ['SPAM', 'WRONG', 'PHONE', 'FRAUD', 'COPYRIGHT', 'OTHER'] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
 export const REPORT_REASON_LABELS: Record<SearchLang, Record<ReportReason, string>> = {
-  uz: { SPAM: 'Reklama yoki takroriy', WRONG: "Ma'lumot noto'g'ri", PHONE: 'Telefon javob bermaydi', FRAUD: "Aldov yoki oldindan pul so'rash", OTHER: 'Boshqa' },
-  ru: { SPAM: 'Реклама или дубль', WRONG: 'Неверные данные', PHONE: 'Телефон не отвечает', FRAUD: 'Обман или предоплата', OTHER: 'Другое' },
-  en: { SPAM: 'Spam or duplicate', WRONG: 'Wrong details', PHONE: 'Phone does not answer', FRAUD: 'Scam or upfront payment', OTHER: 'Other' },
+  uz: { SPAM: 'Reklama yoki takroriy', WRONG: "Ma'lumot noto'g'ri", PHONE: 'Telefon javob bermaydi', FRAUD: "Aldov yoki oldindan pul so'rash", COPYRIGHT: 'Mualliflik huquqi buzilgan', OTHER: 'Boshqa' },
+  ru: { SPAM: 'Реклама или дубль', WRONG: 'Неверные данные', PHONE: 'Телефон не отвечает', FRAUD: 'Обман или предоплата', COPYRIGHT: 'Нарушены авторские права', OTHER: 'Другое' },
+  en: { SPAM: 'Spam or duplicate', WRONG: 'Wrong details', PHONE: 'Phone does not answer', FRAUD: 'Scam or upfront payment', COPYRIGHT: 'Copyright infringed', OTHER: 'Other' },
 };
 
 export const REPORT_STATUSES = ['NEW', 'RESOLVED', 'DISMISSED'] as const;

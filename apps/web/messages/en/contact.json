@@ -18,7 +18,11 @@
         "tech": "Technical issue",
         "partner": "Partnership",
         "badphone": "Number does not work",
-        "phone": "Close a number"
+        "phone": "Close a number",
+        "refund": "Refund request",
+        "account": "Close account",
+        "data": "What you keep about me",
+        "copyright": "Copyright complaint"
       },
       "message": "Message",
       "messageHint": "At least 10 characters",

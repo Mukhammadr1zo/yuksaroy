@@ -6,7 +6,10 @@ import { CheckCircleIcon } from '@phosphor-icons/react';
 import { post } from '@/lib/api';
 import { BTN } from './bits';
 
-const TOPICS = ['demo', 'question', 'tech', 'badphone', 'phone', 'partner'] as const;
+// Mavzu serverda erkin matn (contact.controller.ts: @Length(1, 40)), ya'ni yangi mavzu
+// qo'shish uchun API o'zgarmaydi. Tartib ekranda ko'ringan tartib: avval savol va nosozlik,
+// keyin pul va hisob, oxirida hamkorlik taklifi.
+const TOPICS = ['demo', 'question', 'tech', 'refund', 'badphone', 'phone', 'account', 'data', 'copyright', 'partner'] as const;
 type Topic = (typeof TOPICS)[number];
 const INPUT = 'mt-1 w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25';
 
