@@ -10,14 +10,39 @@
  * Uchinchi tomon kodi, pikseli va kuzatuvchisi yo'q: maxfiylik sahifasida "reklama
  * kuzatuvchilari yo'q" deb yozilgan va bu blok shu yozuvni buzmaydi. Banner fayli
  * ham o'z serverimizda turadi, ya'ni brauzer begona manzilga murojaat qilmaydi.
+ * Ko'rildi va bosildi sanog'i o'z serverimizga boradi va u yerda kunlik jamlangan
+ * son bo'lib qoladi (pastdagi beacon ga qarang).
  *
  * Reklama bo'lmasa hech narsa chizilmaydi: bo'sh ramka sahifani buzadi.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { pushImpression } from '@/components/catalog/Impressions';
+import { usePathname } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 
 type Ad = { id: string; title: string; body: string | null; imageUrl: string | null; href: string };
+
+/**
+ * Bosilgani: "necha marta bosildi" degan savolga javob.
+ *
+ * Serverda kunlik jamlangan bitta son qoladi (mavjud Impression jadvali): IP, sessiya
+ * yoki sahifa manzili saqlanmaydi va uchinchi tomon piksellari yo'q, ya'ni maxfiylik
+ * sahifasidagi va'da buzilmaydi.
+ *
+ * Nega navbat emas, to'g'ridan-to'g'ri fetch: bosilganda odam shu zahoti boshqa saytga
+ * ketadi va navbatning ikki soniyalik kutishi bu yerda ortiqcha xavf. keepalive so'rovni
+ * yo'lda uzilishdan saqlaydi. Xato jim yutiladi: sanoq tufayli havola ishlamay qolmasin.
+ * Ko'rilgani esa navbatdan ketadi (pastdagi Banner ga qarang).
+ */
+function clickBeacon(targetId: string) {
+  fetch('/api/v1/events/impressions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ items: [{ kind: 'ad', targetId, surface: 'click' }] }),
+    keepalive: true,
+  }).catch(() => {});
+}
 
 /** Video fayllari kengaytmadan aniqlanadi: media turini alohida ustunda saqlash shart emas. */
 const isVideo = (url: string) => /\.(mp4|webm)(\?|#|$)/i.test(url);
@@ -63,11 +88,48 @@ function useReducedMotion() {
 
 /** Bosiladigan banner. Yozuv majburiy: reklama reklama sifatida tanilishi kerak. */
 function Banner({ ad, label, reduced }: { ad: Ad; label: string; reduced: boolean }) {
+  const box = useRef<HTMLAnchorElement>(null);
+  /*
+   * Kalitda yo'l ham bor, faqat banner id emas.
+   *
+   * Yon ustunlar ommaviy layoutda turadi, ya'ni sahifadan sahifaga o'tganda qayta
+   * yaratilmaydi: id ning o'zi kalit bo'lsa ular butun seansga bir marta sanalardi,
+   * sahifa ichidagi blok esa har sahifada. Panelda ikkalasi bitta "Ko'rildi" ustunida
+   * yonma yon turadi, ya'ni o'lchov bir xil bo'lishi shart: bitta ko'rsatilgan sahifa
+   * = bitta ko'rildi.
+   */
+  const path = usePathname();
+  const sentFor = useRef<string | null>(null);
+
+  useEffect(() => {
+    const el = box.current;
+    const key = `${ad.id}|${path}`;
+    if (!el || sentFor.current === key) return;
+    /*
+     * Nega IntersectionObserver, nega oddiy mount emas: yon ustunlar 1600 px dan tor
+     * ekranda CSS bilan yashirin (display:none) va sahifa pastidagi blok umuman
+     * ko'rinmasligi mumkin. Yashirin banner hech qachon kesishmaydi, ya'ni "ko'rildi"
+     * deb sanalmaydi. Sotuvchiga aynan shu son kerak: joy chindan ko'rindimi.
+     */
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting) || sentFor.current === key) return;
+      sentFor.current = key;
+      io.disconnect();
+      // Katalog mayoqlari bilan bitta navbat: bir sahifadagi uch banner bitta so'rovda ketadi
+      pushImpression({ kind: 'ad', targetId: ad.id, surface: 'view' });
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ad.id, path]);
+
   return (
     <>
       <p className="font-mono text-[11px] uppercase tracking-wide text-muted">{label}</p>
       <a
+        ref={box}
         href={ad.href} target="_blank" rel="noopener noreferrer sponsored"
+        // preventDefault yo'q: mayoq yuboriladi, havola o'z ishini qiladi
+        onClick={() => clickBeacon(ad.id)}
         className="mt-2 block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-teal/40"
       >
         {ad.imageUrl ? <span className="mb-2 block"><Media url={ad.imageUrl} reduced={reduced} /></span> : null}
@@ -123,12 +185,18 @@ export function SideRails() {
   }, []);
 
   if (!rails.left && !rails.right) return null;
-  const side = 'pointer-events-auto w-40 rounded-2xl border border-line bg-white p-3';
+  /*
+   * Kenglik ekranga qarab: 1536 px da mazmun ustuni (1280) yonida har tomonda 128 px
+   * qoladi, shuning uchun u yerda banner 112 px; 1600 dan boshlab 160 px.
+   * Ilgari faqat 1600 dan chizilardi va ko'p noutbukda reklama umuman ko'rinmasdi:
+   * egasi bannerni sotib qo'yib, o'z ekranida hech narsa ko'rmagan edi.
+   */
+  const side = 'pointer-events-auto w-28 rounded-2xl border border-line bg-white p-2 [@media(min-width:1600px)]:w-40 [@media(min-width:1600px)]:p-3';
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-28 z-0 mx-auto hidden max-w-[1660px] justify-between px-3 [@media(min-width:1600px)]:flex">
+    <div className="pointer-events-none fixed inset-x-0 top-28 z-0 mx-auto hidden max-w-[1660px] justify-between px-3 [@media(min-width:1536px)]:flex">
       {/* Bo'sh tomon ham joy egallaydi: bitta banner sotilgan bo'lsa u o'z yonida qolsin */}
-      {rails.left ? <aside className={side}><Banner ad={rails.left} label={t('label')} reduced={reduced} /></aside> : <div className="w-40" />}
-      {rails.right ? <aside className={side}><Banner ad={rails.right} label={t('label')} reduced={reduced} /></aside> : <div className="w-40" />}
+      {rails.left ? <aside className={side}><Banner ad={rails.left} label={t('label')} reduced={reduced} /></aside> : <div className="w-28" />}
+      {rails.right ? <aside className={side}><Banner ad={rails.right} label={t('label')} reduced={reduced} /></aside> : <div className="w-28" />}
     </div>
   );
 }

@@ -960,7 +960,31 @@
       },
       "media": "Banner fayli",
       "mediaHint": "Rasm, GIF yoki ovozsiz video (mp4, webm). Video sahifada ovozsiz va o'zi aylanib turadi.",
-      "mediaRemove": "Faylni olib tashlash"
+      "mediaRemove": "Faylni olib tashlash",
+      "views": "Ko'rildi",
+      "clicks": "Bosildi",
+      "ctr": "Bosish ulushi",
+      "total30": "30 kun",
+      "totalAll": "Jami",
+      "noData": "Hali sanoq yo'q",
+      "decision": {
+        "views": "Ko'rildi: joy ishlayaptimi. Son o'smasa, bannerni ko'rinadigan joyga ko'chiring.",
+        "clicks": "Bosildi: bannerning o'zi ishlayaptimi. Bosish bo'lmasa, matn yoki rasmni almashtiring.",
+        "ctr": "Bosish ulushi: yuz marta ko'rilganda necha marta bosilgani. Past bo'lsa, narxni yoki joyni qayta ko'rib chiqing."
+      },
+      "why": {
+        "live": "Hozir ko'rinadi",
+        "draft": "Qoralama: chizilmaydi",
+        "soon": "Muddati boshlanmagan",
+        "over": "Muddati tugagan"
+      },
+      "placeHint": {
+        "site-left": "Har bir ochiq sahifaning chap yonida. Faqat keng ekranda (1536 pikseldan boshlab): torroq ekranda mazmunni siqib qo'ymaslik uchun chizilmaydi.",
+        "site-right": "Har bir ochiq sahifaning o'ng yonida. Faqat keng ekranda (1536 pikseldan boshlab).",
+        "terminal-aside": "Bitta terminalning o'z sahifasida, o'ng ustunda. Terminallar ro'yxatida va bosh sahifada chiqmaydi.",
+        "listing-aside": "Bitta e'lonning o'z sahifasida, o'ng ustunda. E'lonlar ro'yxatida chiqmaydi."
+      },
+      "subNote": "Obunachiga reklama ko'rsatilmaydi: o'z hisobingizda faol obuna bo'lsa siz ham ko'rmaysiz. Tekshirish uchun boshqa oynada, kirmasdan oching."
     },
     "plans": {
       "lead": "Obuna tariflari: narxi, ichidagilari va chegaralari. Obuna narxi va kunlik raqam soni faqat shu yerda belgilanadi: saytdagi obuna kartasi, narxlar sahifasi va telefon raqami o'rnidagi obuna taklifi shu ro'yxatni ko'rsatadi.",

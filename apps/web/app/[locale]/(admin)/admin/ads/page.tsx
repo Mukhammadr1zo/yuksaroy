@@ -20,7 +20,17 @@ type Ad = {
   id: string; placement: AdPlacement; title: string; body: string | null; imageUrl: string | null; href: string;
   buyer: string | null; pricePaidSom: number; status: AdStatus; startsAt: string; endsAt: string;
 };
+/** Sanoq serverdan keladi: 30 kunlik va butun davr uchun ko'rildi/bosildi. */
+type Stats = { views: number; clicks: number; views30: number; clicks30: number };
+type Row = Ad & { stats?: Stats };
 type Draft = Omit<Ad, 'id'>;
+
+const ZERO: Stats = { views: 0, clicks: 0, views30: 0, clicks30: 0 };
+/**
+ * Bosish ulushi: 30 kunlik bosish 30 kunlik ko'rishga nisbatan, bitta kasr.
+ * Ko'rish bo'lmasa foiz ham yo'q (nolga bo'lish emas, chiziqcha).
+ */
+const ctr = (s: Stats) => (s.views30 ? `${((s.clicks30 / s.views30) * 100).toFixed(1)} %` : '-');
 
 /** Banner fayli: rasm, harakatlanuvchi rasm va ovozsiz video. Server ham shu ro'yxatni tekshiradi. */
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm';
@@ -39,11 +49,11 @@ export default function AdminAdsPage() {
   const ta = useTranslations('admin.ads');
   const locale = useLocale();
 
-  const [rows, setRows] = useState<Ad[] | null>(null);
+  const [rows, setRows] = useState<Row[] | null>(null);
   const [f, setF] = useState({ placement: '', status: '' });
   // Qobiqdan: /auth/me qayta so'ralmaydi
   const { isOwner } = useAdminMe();
-  const [sheet, setSheet] = useState<{ id: string | null; d: Draft } | null>(null);
+  const [sheet, setSheet] = useState<{ id: string | null; d: Draft; s?: Stats } | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [upBusy, setUpBusy] = useState(false);
@@ -51,7 +61,7 @@ export default function AdminAdsPage() {
 
   const load = useCallback(() => {
     const qs = new URLSearchParams(Object.entries(f).filter(([, v]) => v) as [string, string][]);
-    api<Ad[]>(`/admin/ads?${qs}`).then(setRows).catch((e) => setNote({ tone: 'err', text: errText(e, t, t.has, tc('loadFailed')) }));
+    api<Row[]>(`/admin/ads?${qs}`).then(setRows).catch((e) => setNote({ tone: 'err', text: errText(e, t, t.has, tc('loadFailed')) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [f.placement, f.status]);
 
@@ -123,10 +133,56 @@ export default function AdminAdsPage() {
     } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('deleteFailed')) }); }
   }
 
-  const cols: Col<Ad>[] = [
+  /**
+   * Sanoq katagi: katta son 30 kunlik (sotuvda gap shu haqda ketadi), ostida jami.
+   * Ikkalasi bitta elementda: telefonda katak flex bo'lib, ikki bola yonma yon tushardi.
+   *
+   * Oyna nomi sarlavhada emas, shu yerda: sarlavha nowrap va "Ko'rildi, 30 kun" uchta
+   * ustunda jadvalni 1280 px oynadan chiqarib yuborardi (karta xl da aylanmaydi, ya'ni
+   * butun sahifa yon tomonga surilardi). Bu qator esa sondan tor.
+   *
+   * ponytail: 1280 px da ruscha sarlavhalar va juda uzun havola bilan jadval yana bir
+   * necha piksel oshib ketishi mumkin; chiqish yo'li Ustunlar menyusi (screen="ads").
+   * Muammo takrorlansa "Muddati" ustunini sukut bo'yicha yashirin qilish kerak.
+   */
+  const statCell = (big: number, all: number) => (
+    <span className="block">
+      <span className="block font-semibold text-navy">{num(big, locale)}</span>
+      <span className="block text-[11px] text-muted">{ta('total30')}</span>
+      <span className="block text-[11px] text-muted">{ta('totalAll')} {num(all, locale)}</span>
+    </span>
+  );
+
+  /**
+   * Nega hozir ko'rinmayapti. null bo'lsa ko'rinadi.
+   * Joyning o'zi ham sabab bo'ladi: yon ustun tor ekranda umuman chizilmaydi, buni
+   * panelda aytmasa operator "reklama ishlamayapti" deb o'ylaydi.
+   */
+  const why = (r: Row): 'draft' | 'soon' | 'over' | null => {
+    if (r.status !== 'ACTIVE') return 'draft';
+    const now = Date.now();
+    if (new Date(r.startsAt).getTime() > now) return 'soon';
+    if (new Date(r.endsAt).getTime() <= now) return 'over';
+    return null;
+  };
+
+  const cols: Col<Row>[] = [
     { key: 'title', head: ta('title'), cell: (r) => <><div className="font-semibold text-navy">{r.title}</div><div className="truncate font-mono text-[11px] text-muted">{r.href}</div></> },
     { key: 'placement', head: ta('placement'), cell: (r) => ta(`place.${r.placement}`) },
-    { key: 'status', head: tc('status'), cell: (r) => <Pill tone={r.status === 'ACTIVE' ? 'ok' : 'neutral'}>{ta(`st.${r.status}`)}</Pill> },
+    // Holat yonida sabab: "faol" deb turgan reklama muddati boshlanmagani uchun
+    // ko'rinmasligi mumkin edi va buni panelda bilib bo'lmasdi
+    { key: 'status', head: tc('status'), cell: (r) => {
+      const w = why(r);
+      return (
+        <div className="min-w-0">
+          <Pill tone={w ? 'warn' : 'ok'}>{w ? ta(`why.${w}`) : ta('why.live')}</Pill>
+          {r.status !== 'ACTIVE' ? null : w === 'soon' ? <div className="mt-0.5 text-[11px] text-muted">{uzDate(r.startsAt, locale)}</div> : null}
+        </div>
+      );
+    } },
+    { key: 'views', head: ta('views'), num: true, cell: (r) => statCell((r.stats ?? ZERO).views30, (r.stats ?? ZERO).views) },
+    { key: 'clicks', head: ta('clicks'), num: true, cell: (r) => statCell((r.stats ?? ZERO).clicks30, (r.stats ?? ZERO).clicks) },
+    { key: 'ctr', head: ta('ctr'), num: true, cell: (r) => ctr(r.stats ?? ZERO) },
     { key: 'range', head: ta('range'), cell: (r) => <span className="font-mono text-xs">{uzDate(r.startsAt, locale)} - {uzDate(r.endsAt, locale)}</span> },
     { key: 'buyer', head: ta('buyer'), cell: (r) => r.buyer ?? '' },
     { key: 'price', head: ta('price'), num: true, cell: (r) => (r.pricePaidSom ? num(r.pricePaidSom, locale) : '') },
@@ -156,8 +212,14 @@ export default function AdminAdsPage() {
       {note && !sheet ? <Notice tone={note.tone}>{note.text}</Notice> : null}
       <p className="mt-4 font-mono text-xs text-muted">{rows === null ? tc('loading') : tc('total', { count: rows.length })}</p>
       <p className="mt-1 text-xs text-muted">{ta('note')}</p>
+      {/* Obuna qoidasi eslatma sifatida: egasi o'z hisobida ko'rmay "reklama ishlamayapti" deb o'ylagan edi */}
+      <p className="mt-1 text-xs text-muted">{ta('subNote')}</p>
 
-      <DataTable cols={cols} rows={rows ?? []} keyOf={(r) => r.id} empty={tc('empty')} onRow={isOwner ? (r) => { setNote(null); setSheet({ id: r.id, d: { ...r } }); } : undefined} />
+      {/* screen: boshqa keng jadvallar kabi Ustunlar menyusi chiqsin, operator keraksiz ustunni yashira olsin */}
+      <DataTable cols={cols} rows={rows ?? []} keyOf={(r) => r.id} empty={tc('empty')} screen="ads" onRow={isOwner ? (r) => { setNote(null); setSheet({ id: r.id, d: { ...r }, s: r.stats ?? ZERO }); } : undefined} />
+
+      {/* Har son yonida qaror: bu uch ustun nimani hal qilishini aytadi, aks holda son bezak bo'lib qoladi */}
+      <p className="mt-2 text-xs text-muted">{ta('decision.views')} {ta('decision.clicks')} {ta('decision.ctr')}</p>
 
       <Drawer
         open={!!sheet}
@@ -179,11 +241,37 @@ export default function AdminAdsPage() {
       >
         {sheet ? (
           <div className="space-y-3">
+            {/* Sanoq faqat tahrirda: yangi reklamada hali ko'rilgan ham, bosilgan ham yo'q */}
+            {sheet.id && sheet.s ? (
+              <div className="rounded-xl border border-line p-3">
+                {sheet.s.views || sheet.s.clicks ? (
+                  <>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        [`${ta('views')}, ${ta('total30')}`, num(sheet.s.views30, locale), `${ta('totalAll')} ${num(sheet.s.views, locale)}`],
+                        [`${ta('clicks')}, ${ta('total30')}`, num(sheet.s.clicks30, locale), `${ta('totalAll')} ${num(sheet.s.clicks, locale)}`],
+                        [ta('ctr'), ctr(sheet.s), ta('total30')],
+                      ].map(([head, big, small]) => (
+                        <div key={head}>
+                          <div className="text-[11px] font-semibold uppercase tracking-wide text-muted">{head}</div>
+                          <div className="font-mono text-lg font-semibold tabular-nums text-navy">{big}</div>
+                          <div className="font-mono text-[11px] text-muted">{small}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-xs text-muted">{ta('decision.views')} {ta('decision.clicks')} {ta('decision.ctr')}</p>
+                  </>
+                ) : <p className="text-xs text-muted">{ta('noData')}</p>}
+              </div>
+            ) : null}
             <Labeled label={ta('placement')} className="block">
               <select className={INPUT} value={sheet.d.placement} onChange={(e) => set({ placement: e.target.value as AdPlacement })}>
                 {AD_PLACEMENTS.map((p) => opt(p, ta(`place.${p}`)))}
               </select>
             </Labeled>
+            {/* Joy tanlangach darhol: qaysi sahifada va qaysi ekranda chiqadi.
+                Egasi bannerni qo'yib, boshqa sahifaga qarab "chiqmadi" degan edi. */}
+            <p className="-mt-1 text-xs text-muted">{ta(`placeHint.${sheet.d.placement}`)}</p>
             <Labeled label={ta('title')} className="block">
               <input className={INPUT} value={sheet.d.title} maxLength={80} onChange={(e) => set({ title: e.target.value })} />
             </Labeled>

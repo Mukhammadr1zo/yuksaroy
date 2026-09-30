@@ -9,15 +9,17 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { OrderAccess } from '../orders/application/order-access';
-import { ImpressionsService, type ImpressionKind } from './impressions.service';
+import { AD_SURFACES, ImpressionsService, type AdSurface, type ImpressionKind } from './impressions.service';
 
 class ImpressionItemDto {
-  @IsIn(['listing', 'terminal', 'org']) kind!: ImpressionKind;
+  // 'ad' ham shu yerda: reklama banneri ko'rilgani va bosilgani ham kunlik yig'ma qator,
+  // alohida jadval kerak emas. Haqiqiy banner ekani keyin serverda tekshiriladi.
+  @IsIn(['listing', 'terminal', 'org', 'ad']) kind!: ImpressionKind;
   @IsString() @Length(1, 40) targetId!: string;
   // 'contact' bu ro'yxatda yo'q: telefon ochilgani faqat serverda, raqam haqiqatan
   // berilganda yoziladi. Bu yo'l kirishsiz, ya'ni undan kelgan 'contact' shunchaki
   // shishirilgan son bo'lardi.
-  @IsIn(IMPRESSION_SURFACES.filter((s) => s !== 'contact')) surface!: ImpressionSurface;
+  @IsIn([...IMPRESSION_SURFACES.filter((s) => s !== 'contact'), ...AD_SURFACES]) surface!: ImpressionSurface | AdSurface;
 }
 class ImpressionsDto {
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => ImpressionItemDto) items!: ImpressionItemDto[];
@@ -32,6 +34,16 @@ const visitDaily = new DailyBucket();
  * emas, faqat skript bilan raqam shishirishni to'xtatadi.
  */
 const VISITS_PER_IP_DAY = 2000;
+const adsDaily = new DailyBucket();
+/**
+ * Bitta IP dan kuniga nechta reklama mayog'i yoziladi.
+ *
+ * Nega alohida chelak: bu son brendga hisobot bo'lib ketadi, ya'ni uni shishirish
+ * to'g'ridan-to'g'ri pul. Chegara VISITS_PER_IP_DAY kabi baland, chunki bitta operator
+ * IP si ortida minglab abonent turadi va past chegara haqiqiy odamlarni sanoqdan
+ * chiqarardi. Katalog mayoqlari bu chelakka kirmaydi: u yerda son sotilmaydi.
+ */
+const ADS_PER_IP_DAY = 2000;
 const since30 = (now: Date) => new Date(now.getTime() - 30 * 86_400_000);
 
 /** Ko'rsatish hodisalari (ochiq, IP limit) va egasi analitikasi (oxirgi 30 kun). */
@@ -46,9 +58,14 @@ export class ImpressionsController {
   ) {}
 
   @Post('events/impressions') @HttpCode(200)
-  record(@Ip() ip: string, @Body() dto: ImpressionsDto) {
-    if (!bucket.take(ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
-    return this.impressions.record(dto.items);
+  async record(@Ip() ip: string, @Body() dto: ImpressionsDto) {
+    const key = ip ?? '?';
+    if (!bucket.take(key)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
+    // Reklama mayoqlari yozishdan oldin tekshiriladi: notanish banner id jim tashlanadi
+    const items = await this.impressions.keepRealAds(dto.items);
+    // Kunlik chegaradan oshgan reklama mayog'i ham JIM tashlanadi: bitta element uchun
+    // butun so'rov yiqilmasin va katalog mayoqlari o'z yo'lida qolsin
+    return this.impressions.record(items.filter((i) => i.kind !== 'ad' || adsDaily.take(key, ADS_PER_IP_DAY).ok));
   }
 
   /**

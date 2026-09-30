@@ -859,8 +859,6 @@ model Review {
   @@index([terminalId, createdAt])
 }
 
-/// Ko'rsatishlar: kun va yuza bo'yicha yig'ilgan hisob, foydalanuvchi ma'lumoti yo'q.
-
 /// E'lon uchun izoh: xizmatdan foydalangan odam qoldiradi.
 /// Huquq: shu e'longa so'rov yozgan va egasi javob bergan bo'lishi kerak (haqiqiy aloqa izi).
 /// Bir foydalanuvchi bitta e'longa bitta izoh yozadi; egasi bir marta javob bera oladi.
@@ -879,12 +877,15 @@ model ListingReview {
   @@index([listingId, createdAt])
 }
 
+/// Ko'rsatishlar: kun va yuza bo'yicha yig'ilgan hisob, foydalanuvchi ma'lumoti yo'q.
+/// Reklama banneri sanog'i ham shu yerda (kind = 'ad'): alohida jadval yo'q, ya'ni
+/// har so'rov kind bo'yicha filtrlanishi shart, aks holda katalog va reklama aralashadi.
 model Impression {
   id       String   @id @default(cuid())
-  kind     String // 'listing' | 'terminal' | 'org'
+  kind     String // 'listing' | 'terminal' | 'org' | 'ad'
   targetId String
   day      DateTime @db.Date
-  surface  String // 'list' | 'map' | 'detail' | 'compare' | 'bot' | 'contact'
+  surface  String // katalog: 'list' | 'map' | 'detail' | 'compare' | 'bot' | 'contact'; reklama: 'view' | 'click'
   count    Int      @default(0)
 
   @@unique([kind, targetId, day, surface])

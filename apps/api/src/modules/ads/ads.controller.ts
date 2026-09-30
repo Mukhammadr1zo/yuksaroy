@@ -5,6 +5,7 @@ import { IsDateString, IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from 
 import { AD_PLACEMENTS, AD_RAILS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
+import { ImpressionsService } from '../impressions/impressions.service';
 import { JwtGuard, CurrentUserId, optionalUserId } from '../identity/presentation/jwt.guard';
 import { TokenService } from '../identity/application/token.service';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
@@ -117,11 +118,18 @@ export class AdsAdminController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly impressions: ImpressionsService,
   ) {}
 
+  /**
+   * Ro'yxat + har qator uchun sanoq: ko'rildi, bosildi (jami va 30 kun).
+   *
+   * Sanoq faqat shu yerda: bannerni sotgan odamga "necha marta ko'rildi" degan savolga
+   * javob kerak. Sonlar bitta adStats chaqirig'ida olinadi, qator boshiga so'rov yo'q.
+   */
   @Get()
   async list(@Query('placement') placement?: string, @Query('status') status?: string) {
-    return this.prisma.adPlacement.findMany({
+    const ads = await this.prisma.adPlacement.findMany({
       where: {
         placement: pickIn(placement, AD_PLACEMENTS),
         status: pickIn(status, AD_STATUSES),
@@ -129,6 +137,8 @@ export class AdsAdminController {
       orderBy: [{ startsAt: 'desc' }, { id: 'asc' }],
       take: 200,
     });
+    const stats = await this.impressions.adStats(ads.map((a) => a.id));
+    return ads.map((a) => ({ ...a, stats: stats.get(a.id)! }));
   }
 
   @Post()

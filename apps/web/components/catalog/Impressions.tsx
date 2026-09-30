@@ -5,7 +5,10 @@ import { useEffect } from 'react';
 import type { ImpressionSurface } from '@yuksaroy/domain';
 
 export type ImpressionKind = 'listing' | 'terminal';
-type Item = { kind: ImpressionKind; targetId: string; surface: ImpressionSurface };
+// Reklama banneri ham shu navbatdan ketadi: bitta sahifada uchtagacha banner bor va
+// har biri o'z so'rovini yuborsa IP chelagi (daqiqasiga 60) ommaviy operator manzilida
+// tez to'lardi, 429 esa jim yo'qoladi va brendga ko'rsatiladigan son kam chiqardi.
+type Item = { kind: ImpressionKind | 'ad'; targetId: string; surface: ImpressionSurface | 'view' | 'click' };
 
 const URL = '/api/v1/events/impressions';
 const BATCH = 20;
@@ -23,24 +26,36 @@ function flush() {
   }
 }
 
+/**
+ * Navbatga bitta element qo'shish.
+ *
+ * Takror tekshiruvi chaqiruvchida: bu yerdagi `seen` to'plami hech qachon tozalanmaydi,
+ * ya'ni reklama ko'rilishi butun seansga bir marta sanalib qolardi. Katalog uchun bu
+ * to'g'ri (bir obyekt ro'yxatda bir marta), banner uchun esa har ko'rsatilgan sahifa
+ * alohida sanaladi va kalitni AdSlot o'zi saqlaydi.
+ */
+export function pushImpression(item: Item) {
+  if (!bound) {
+    bound = true;
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+  }
+  queue.push(item);
+  if (queue.length >= BATCH) flush();
+  else { window.clearTimeout(timer); timer = window.setTimeout(flush, 2000); }
+}
+
 /** ids o'zgarganda yangi obyektlar navbatga qo'shiladi. */
 export function useImpressions(kind: ImpressionKind, ids: string[], surface: ImpressionSurface) {
   const key = ids.join(',');
   useEffect(() => {
     if (!key) return;
-    if (!bound) {
-      bound = true;
-      window.addEventListener('pagehide', flush);
-      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
-    }
     for (const targetId of key.split(',')) {
       const k = `${kind}:${targetId}:${surface}`;
       if (seen.has(k)) continue;
       seen.add(k);
-      queue.push({ kind, targetId, surface });
+      pushImpression({ kind, targetId, surface });
     }
-    if (queue.length >= BATCH) flush();
-    else if (queue.length) { window.clearTimeout(timer); timer = window.setTimeout(flush, 2000); }
   }, [kind, key, surface]);
 }
 

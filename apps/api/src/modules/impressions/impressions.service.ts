@@ -3,8 +3,22 @@ import { uzLocalDate } from '@yuksaroy/domain';
 import { PrismaService } from '../../common/prisma.service';
 import { dayKeys, daySeries } from './day-series';
 
-export type ImpressionKind = 'listing' | 'terminal' | 'org';
+export type ImpressionKind = 'listing' | 'terminal' | 'org' | 'ad';
 export interface ImpressionItem { kind: ImpressionKind; targetId: string; surface: string }
+
+/**
+ * Reklama banneri uchun ikkita yuza: ko'rildi va bosildi.
+ *
+ * Nega domain dagi IMPRESSION_SURFACES ga qo'shilmadi: u ro'yxat katalog obyektining
+ * kunlik qatorini (har yuza uchun ustun) belgilaydi, ya'ni unga yangi yuza qo'shilsa
+ * e'lon egasining sahifasida "bosildi" degan bo'sh ustun paydo bo'lardi. Reklama
+ * sanog'i butunlay boshqa hisob, shuning uchun ro'yxati ham alohida.
+ */
+export const AD_SURFACES = ['view', 'click'] as const;
+export type AdSurface = (typeof AD_SURFACES)[number];
+const isAdSurface = (s: string): s is AdSurface => (AD_SURFACES as readonly string[]).includes(s);
+
+export interface AdStats { views: number; clicks: number; views30: number; clicks30: number }
 
 /** Ko'rsatishlar: kun bo'yicha yig'ma (foydalanuvchi ma'lumoti yo'q). */
 @Injectable()
@@ -31,6 +45,70 @@ export class ImpressionsService {
       }),
     );
     return { accepted: items.length };
+  }
+
+  /**
+   * Reklama mayoqlarini tozalash: faqat bazada chindan bor banner sanaladi.
+   *
+   * Bu yo'l kirishsiz, ya'ni begona odam ixtiyoriy id yuborib sotib oluvchiga
+   * ko'rsatiladigan sonni shishira olardi. Notanish element JIM tashlanadi, butun
+   * so'rov yiqilmaydi: bir sahifada bir nechta mayoq bo'ladi va bittasi eskirgani
+   * uchun qolganlari yo'qolmasin.
+   *
+   * Tur bilan yuza ham mos bo'lishi shart: 'ad' faqat view/click, katalog obyekti esa
+   * faqat o'z yuzalari. Aks holda reklama sanog'iga katalog mayog'ini quyish mumkin edi.
+   *
+   * Banner id ommaviy (GET /ads javobida turadi), ya'ni id ni tekshirishning o'zi yetmaydi.
+   * Shuning uchun bitta so'rovda bitta banner uchun bitta ko'rildi va bitta bosildi
+   * qoladi: haqiqiy brauzer ham aynan shunday yuboradi, begona odam esa 50 talik
+   * ro'yxatni bir xil element bilan to'ldirib sonni 50 barobar shishira olardi
+   * (record() bir xil uchlikni birlashtirib count += 50 qilardi).
+   */
+  async keepRealAds(items: readonly ImpressionItem[]): Promise<ImpressionItem[]> {
+    const fit = items.filter((i) => (i.kind === 'ad') === isAdSurface(i.surface));
+    const ids = [...new Set(fit.filter((i) => i.kind === 'ad').map((i) => i.targetId))];
+    if (!ids.length) return fit; // reklama mayog'i yo'q: bazaga borilmaydi
+    const rows = await this.prisma.adPlacement.findMany({ where: { id: { in: ids } }, select: { id: true } });
+    const real = new Set(rows.map((r) => r.id));
+    const seen = new Set<string>();
+    return fit.filter((i) => {
+      if (i.kind !== 'ad') return true;
+      if (!real.has(i.targetId)) return false;
+      const k = `${i.targetId}:${i.surface}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }
+
+  /**
+   * Banner sanog'i: ko'rildi va bosildi, jami va oxirgi 30 kun.
+   *
+   * Nega ikki oyna: jami sotuvchiga "shu joy umuman ishlaydimi" deydi, 30 kunlik son esa
+   * hozirgi shartnoma bo'yicha hisobot beradi. Ikkalasi bitta juft so'rovda olinadi,
+   * qator boshiga so'rov yuborilmaydi.
+   */
+  async adStats(ids: readonly string[], days = 30, now = new Date()): Promise<Map<string, AdStats>> {
+    const out = new Map<string, AdStats>();
+    if (!ids.length) return out; // bo'sh ro'yxatda bazaga umuman borilmaydi
+    for (const id of ids) out.set(id, { views: 0, clicks: 0, views30: 0, clicks30: 0 });
+    const where = { kind: 'ad', targetId: { in: [...new Set(ids)] }, surface: { in: [...AD_SURFACES] } };
+    const from = new Date(dayKeys(now, days)[0]!);
+    const [all, recent] = await Promise.all([
+      this.prisma.impression.groupBy({ by: ['targetId', 'surface'], where, _sum: { count: true } }),
+      this.prisma.impression.groupBy({ by: ['targetId', 'surface'], where: { ...where, day: { gte: from } }, _sum: { count: true } }),
+    ]);
+    const add = (rows: { targetId: string; surface: string; _sum: { count: number | null } }[], suffix: '' | '30') => {
+      for (const r of rows) {
+        const s = out.get(r.targetId);
+        if (!s || !isAdSurface(r.surface)) continue;
+        const key = ((r.surface === 'click' ? 'clicks' : 'views') + suffix) as keyof AdStats;
+        s[key] += r._sum.count ?? 0;
+      }
+    };
+    add(all, '');
+    add(recent, '30');
+    return out;
   }
 
   /**

@@ -960,7 +960,31 @@
       },
       "media": "Banner file",
       "mediaHint": "An image, a GIF or a silent video (mp4, webm). On the page the video plays muted and loops.",
-      "mediaRemove": "Remove the file"
+      "mediaRemove": "Remove the file",
+      "views": "Views",
+      "clicks": "Clicks",
+      "ctr": "Click share",
+      "total30": "30 days",
+      "totalAll": "All time",
+      "noData": "No counts yet",
+      "decision": {
+        "views": "Views: is the spot working. If the number stops growing, move the banner where people see it.",
+        "clicks": "Clicks: is the banner itself working. If nobody clicks, change the text or the image.",
+        "ctr": "Click share: clicks per hundred views. If it is low, revisit the price or the placement."
+      },
+      "why": {
+        "live": "Visible now",
+        "draft": "Draft: not shown",
+        "soon": "Not started yet",
+        "over": "Finished"
+      },
+      "placeHint": {
+        "site-left": "On the left of every public page. Wide screens only (from 1536 pixels): on narrower ones it is not drawn so the content is not squeezed.",
+        "site-right": "On the right of every public page. Wide screens only (from 1536 pixels).",
+        "terminal-aside": "On a terminal's own page, in the right column. Not in the terminal list and not on the home page.",
+        "listing-aside": "On a listing's own page, in the right column. Not in the listing list."
+      },
+      "subNote": "Subscribers are not shown ads: with an active subscription you will not see it either. Check in another window, signed out."
     },
     "plans": {
       "lead": "Subscription plans: price, contents and limits. The subscription price and the daily number count are set only here: the subscription card, the pricing page and the subscribe prompt shown in place of a phone number show this list.",
