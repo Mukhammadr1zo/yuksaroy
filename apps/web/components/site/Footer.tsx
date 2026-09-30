@@ -3,9 +3,9 @@ import { Link } from '@/i18n/navigation';
 import { Logo } from './Logo';
 
 export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
-  const [t, nav, tm, tp, tf, ta, tc, tb, n2] = await Promise.all([
+  const [t, nav, tm, tp, tf, ta, tc, tb, n2, tad] = await Promise.all([
     getTranslations('footer'), getTranslations('nav'), getTranslations('marketing'),
-    getTranslations('pricing'), getTranslations('features'), getTranslations('about'), getTranslations('contact'), getTranslations('blog'), getTranslations('nav2'),
+    getTranslations('pricing'), getTranslations('features'), getTranslations('about'), getTranslations('contact'), getTranslations('blog'), getTranslations('nav2'), getTranslations('advertise'),
   ]);
   const dark = tone === 'dark';
   const muted = dark ? 'text-white/55' : 'text-muted';
@@ -13,7 +13,9 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   // Ustunlar: Katalog, Platforma (mahsulot), Kompaniya (biz haqimizda, blog)
   const platform = [
     ['/pricing', tp('eyebrow')], ['/features', tf('eyebrow')], ['/for-shippers', tm('footer.shippers')], ['/for-providers', tm('footer.providers')],
-    ['/booking', tm('footer.booking')], ['/urgent', tf('items.urgent.title')], ['/login', t('platform.login')],
+    ['/booking', tm('footer.booking')], ['/urgent', tf('items.urgent.title')],
+    // Reklama beruvchi sayt bo'yicha havola izlaydi: shu ustunda, kirish tugmasidan oldin
+    ['/advertise', tad('footer')], ['/login', t('platform.login')],
   ] as const;
   // Huquqiy havolalar shu ustunda: alohida ustun ochilsa futer to'rttadan beshtaga o'sib,
   // telefonda uzun ro'yxat bo'lardi, holbuki ikkita havola uchun yangi ustun keraksiz.

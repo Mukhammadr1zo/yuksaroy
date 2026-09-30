@@ -363,6 +363,18 @@ export default function AdminAdsPage() {
                 <input type="date" className={INPUT} value={sheet.d.endsAt.slice(0, 10)} onChange={(e) => set({ endsAt: e.target.value })} />
               </Labeled>
             </div>
+            {/* Til beshta joyning hammasi uchun: banner yozuvi rasm ichida, ya'ni yon
+                ustun va terminal yon bloki uchun ham "qaysi tilga qo'yiladi" degan
+                tanlov kerak. Ilgari bu maydon pastki banner shartining ichida turardi
+                va boshqa joyga til umuman qo'yib bo'lmasdi. */}
+            <div>
+              <Labeled label={ta('locale')} className="block">
+                <select className={INPUT} value={sheet.d.locale ?? ''} onChange={(e) => set({ locale: e.target.value })}>
+                  {opt('', ta('localeAll'))}{AD_LOCALES.map((l) => opt(l, LOCALE_LABEL[l] ?? l))}
+                </select>
+              </Labeled>
+              <p className="mt-1 text-xs text-muted">{ta('localeHint')}</p>
+            </div>
             {/* Faqat pastki banner uchun: yon ustun doim ko'rinib turadi, u yerda "necha
                 soniyada chiqadi" degan son yolg'on bo'lardi. Eslatmalar Labeled ichida emas,
                 yonida: label ichidagi matn maydonning ekran o'quvchidagi nomiga qo'shilib ketardi. */}
@@ -389,14 +401,6 @@ export default function AdminAdsPage() {
                     </Labeled>
                     <p className="mt-1 text-xs text-muted">{ta('quietHint')}</p>
                   </div>
-                </div>
-                <div>
-                  <Labeled label={ta('locale')} className="block">
-                    <select className={INPUT} value={sheet.d.locale ?? ''} onChange={(e) => set({ locale: e.target.value })}>
-                      {opt('', ta('localeAll'))}{AD_LOCALES.map((l) => opt(l, LOCALE_LABEL[l] ?? l))}
-                    </select>
-                  </Labeled>
-                  <p className="mt-1 text-xs text-muted">{ta('localeHint')}</p>
                 </div>
                 {/* Uch sonning tagida: egasi sonni o'zgartirib, shu yerda his qiladi.
                     Media bo'lmasa tugma o'chirilgan: ko'rsatadigan narsa yo'q. */}

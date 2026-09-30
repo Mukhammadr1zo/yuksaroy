@@ -1,0 +1,133 @@
+{
+  "advertise": {
+    "meta": {
+      "title": "Advertise on YukSaroy",
+      "description": "Five ad places on the site: the bottom banner, two side rails and a block on the terminal and listing pages. File rules, what we count and the conditions, all on one page."
+    },
+    "eyebrow": "Advertising",
+    "title": "Advertise on the site",
+    "lead": "YukSaroy is a freight marketplace: terminal owners, freight forwarders, cargo owners and carriers find each other here. For brands that sell equipment, services or financing to these people, the site has five ad places. Below: where each one appears, what file is needed, what gets counted and which conditions apply.",
+    "places": {
+      "heading": "Five places",
+      "lead": "Two of them follow the whole site, three are drawn only on a specific page.",
+      "scroll": "The table is wide: scroll it sideways.",
+      "col": {
+        "place": "Place",
+        "where": "Where it appears",
+        "size": "Size and content"
+      },
+      "bottom": {
+        "name": "Bottom banner",
+        "where": "At the bottom of every public page. Visible on phones too.",
+        "size": "An 8:1 image or muted video, for example 1200x150. On a computer it is 96 pixels tall; on a phone it takes no more than 22 percent of the screen. No heading and no text are drawn: the screen holds your file only."
+      },
+      "left": {
+        "name": "Left side rail",
+        "where": "To the left of every public page. Drawn only on screens wider than 1536 pixels.",
+        "size": "A tall image or muted video: the rail is narrow, so wording inside a wide image would be unreadable. A heading and one line of text are drawn under the image."
+      },
+      "right": {
+        "name": "Right side rail",
+        "where": "To the right of every public page. Drawn only on screens wider than 1536 pixels.",
+        "size": "Same as the left rail."
+      },
+      "terminal": {
+        "name": "Block on a terminal page",
+        "where": "On a single terminal's own page, in the right column. It does not appear in the terminal list or on the home page.",
+        "size": "An image or muted video, with a heading and one line of text under it."
+      },
+      "listing": {
+        "name": "Block on a listing page",
+        "where": "On a single listing's own page, in the right column.",
+        "size": "Same as the terminal page block."
+      }
+    },
+    "bottom": {
+      "heading": "The bottom banner and its three timings",
+      "lead": "The bottom banner is the main place we sell, because people on phones see it too. It has three timings and each one has a reason.",
+      "delay": {
+        "value": "8 seconds",
+        "label": "Appears after the page opens",
+        "why": "People first see what they came for. Shown at once, the banner blends into page loading and gets closed unread."
+      },
+      "show": {
+        "value": "15 seconds",
+        "label": "Stays on screen",
+        "why": "Enough time to take the image in. Longer than that and the banner is in the way of reading. When the time is up it leaves on its own."
+      },
+      "quiet": {
+        "value": "12 hours",
+        "label": "Does not return after being closed",
+        "why": "That is at most twice a day per person. A banner that comes back the same day after being closed makes people leave the site."
+      },
+      "note": "The close button is 44x44 pixels and is never hidden. The banner is not a modal window: it does not take focus, and search, forms and menus keep working. On pages with a form (contact, cost estimate, request) and on the cargo status page the banner is not shown at all.",
+      "counted": "A view of this banner is recorded only once it is actually on screen: during the delay it is not in the page at all."
+    },
+    "files": {
+      "heading": "File requirements",
+      "lead": "You send us the file, we do the placement.",
+      "types": "Formats: jpg, png, webp, gif, mp4, webm. The type is checked from the file contents, not from the name: renaming the extension to send something else will not work.",
+      "size": "1.5 MB at most. A larger file is not accepted.",
+      "muted": "Video always plays muted. An audio track, if there is one, is never heard.",
+      "prefer": "Instead of an animated image (gif), send mp4 or webm: at the same quality the file is several times lighter.",
+      "host": "The file sits on our own server. That means the browser makes no request to an outside address, and none of your script reaches the site.",
+      "lang": "The wording lives inside the image, so you either give a separate file per language (uz, ru, en) or put one file on all three. That choice is yours."
+    },
+    "counts": {
+      "heading": "What we count",
+      "lead": "We report three numbers and keep nothing else.",
+      "view": {
+        "name": "Views",
+        "body": "Counted when the banner is actually on screen, not when it is added to the page. If a person never scrolled down, the block down there is not counted as seen."
+      },
+      "click": {
+        "name": "Clicks",
+        "body": "How many times the banner was clicked through to your site."
+      },
+      "close": {
+        "name": "Closes",
+        "body": "How many times the close button was pressed. We report this one too: if the close share is high, we shorten the display time or lengthen the quiet period."
+      },
+      "privacy": "No third-party trackers, no pixels, no Google Analytics. What stays on the server is a daily aggregated number: no IP, no session, no page address. So there is no \"which page it was clicked on\" report either."
+    },
+    "honest": {
+      "heading": "Conditions we state up front",
+      "lead": "These conditions reduce the number of views. We write them down here so there is no argument later.",
+      "subscribers": {
+        "name": "Subscribers are shown no ads",
+        "body": "A user with a paid subscription sees no banner in any of the five places. So the view count will be lower than the site's overall traffic."
+      },
+      "rails": {
+        "name": "Side rails only on wide screens",
+        "body": "On screens narrower than 1536 pixels they are not drawn at all: we do not squeeze the content for a banner. Anyone on a phone will not see the side rails."
+      },
+      "label": {
+        "name": "The \"Ad\" label cannot be removed",
+        "body": "It sits next to every banner. We do not pass advertising off as the site's own content."
+      },
+      "outside": {
+        "name": "After the click it is on you",
+        "body": "The link opens in a new tab and the person lands on your site. We are not answerable for what is there."
+      }
+    },
+    "reject": {
+      "heading": "What we do not run",
+      "lead": "Such a banner is not accepted, and is taken down if it is already running.",
+      "fakeClose": "A fake close button or fake X inside the image.",
+      "fakeUi": "A fake search field, a fake play button, a fake system message.",
+      "disguise": "Anything dressed as part of the site, using our colours or our logo.",
+      "sound": "Video that turns sound on by itself.",
+      "flash": "More than three flashes per second, or a large area blinking sharply.",
+      "restricted": "Content unsuitable for minors, gambling, unlicensed lending.",
+      "http": "A link without https."
+    },
+    "cta": {
+      "heading": "Get in touch",
+      "body": "Tell us which place you need, which language it goes on and for how long you are planning. We will look at the file and reply.",
+      "action": "Contact us",
+      "price": "We do not print a price on this page: we agree it by place, duration and number of languages.",
+      "note": "In the contact form pick the \"Partnership\" topic."
+    },
+    "footer": "Advertise with us"
+  }
+}

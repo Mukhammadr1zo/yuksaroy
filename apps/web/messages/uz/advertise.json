@@ -1,0 +1,133 @@
+{
+  "advertise": {
+    "meta": {
+      "title": "Reklama joylashtirish · YukSaroy",
+      "description": "Saytda beshta reklama joyi: pastki banner, ikki yon ustun va terminal hamda e'lon sahifasidagi yon blok. Fayl talablari, sanoq va shartlar bitta sahifada."
+    },
+    "eyebrow": "Reklama",
+    "title": "Saytda reklama joylashtirish",
+    "lead": "YukSaroy yuk tashish bozori: terminal egalari, ekspeditorlar, yuk egalari va tashuvchilar shu yerda bir-birini topadi. Shu odamlarga texnika, xizmat yoki moliya taklif qiladigan brend uchun saytda beshta reklama joyi ajratilgan. Quyida har bir joy qayerda ko'rinadi, qanday fayl kerak, nima sanaladi va qanday shartlar amal qiladi.",
+    "places": {
+      "heading": "Beshta joy",
+      "lead": "Ikkitasi butun sayt bo'ylab yuradi, uchtasi esa faqat ma'lum sahifada chiziladi.",
+      "scroll": "Jadval keng: uni yon tomonga surib ko'ring.",
+      "col": {
+        "place": "Joy",
+        "where": "Qayerda ko'rinadi",
+        "size": "O'lcham va mazmun"
+      },
+      "bottom": {
+        "name": "Pastki banner",
+        "where": "Har bir ochiq sahifaning pastida. Telefonda ham ko'rinadi.",
+        "size": "8:1 nisbatli rasm yoki ovozsiz video, masalan 1200x150. Kompyuterda balandligi 96 piksel, telefonda ekranning 22 foizidan oshmaydi. Sarlavha va matn chizilmaydi: ekranda faqat sizning faylingiz turadi."
+      },
+      "left": {
+        "name": "Chap yon ustun",
+        "where": "Har bir ochiq sahifaning chap yonida. Faqat 1536 pikseldan keng ekranda chiziladi.",
+        "size": "Tik rasm yoki ovozsiz video: ustun tor, keng rasm ichidagi yozuv o'qilmaydi. Rasm ostida sarlavha va bir qator matn ham chiziladi."
+      },
+      "right": {
+        "name": "O'ng yon ustun",
+        "where": "Har bir ochiq sahifaning o'ng yonida. Faqat 1536 pikseldan keng ekranda chiziladi.",
+        "size": "Chap ustun bilan bir xil."
+      },
+      "terminal": {
+        "name": "Terminal sahifasidagi yon blok",
+        "where": "Bitta terminalning o'z sahifasida, o'ng ustunda. Terminallar ro'yxatida va bosh sahifada chiqmaydi.",
+        "size": "Rasm yoki ovozsiz video, ostida sarlavha va bir qator matn."
+      },
+      "listing": {
+        "name": "E'lon sahifasidagi yon blok",
+        "where": "Bitta e'lonning o'z sahifasida, o'ng ustunda.",
+        "size": "Terminal sahifasidagi blok bilan bir xil."
+      }
+    },
+    "bottom": {
+      "heading": "Pastki banner va uning uchta vaqti",
+      "lead": "Pastki banner asosiy sotiladigan joy, chunki u telefondan kirgan odamga ham ko'rinadi. Uning uch vaqti bor va har biri aniq sababga ega.",
+      "delay": {
+        "value": "8 soniya",
+        "label": "Sahifa ochilgandan keyin chiqadi",
+        "why": "Odam avval o'zi izlagan narsani ko'radi. Darhol chiqsa banner sahifa yuklanishiga qo'shilib ketardi va o'qilmay yopilardi."
+      },
+      "show": {
+        "value": "15 soniya",
+        "label": "Ekranda turadi",
+        "why": "Rasmni ko'rib olishga beriladigan vaqt. Undan uzun tursa banner o'qishni to'sadi. Vaqt tugagach o'zi ketadi."
+      },
+      "quiet": {
+        "value": "12 soat",
+        "label": "Yopilgach qayta ko'rinmaydi",
+        "why": "Ya'ni bir odamga kuniga ko'pi bilan ikki marta. Yopilgan banner o'sha kuni yana chiqsa, odam saytdan chiqib ketadi."
+      },
+      "note": "Yopish tugmasi 44x44 piksel va hech qachon yashirilmaydi. Banner oyna emas: fokusni o'ziga olmaydi va sahifadagi qidiruv, forma, menyu ishlab turaveradi. Forma to'ldiriladigan sahifalarda (murojaat, hisob-kitob, so'rov) va yuk holati sahifasida banner umuman chiqmaydi.",
+      "counted": "Shu bannerning \"ko'rildi\" sanog'i u chindan chiqqanidan keyin yoziladi: kutish vaqtida u sahifada umuman yo'q."
+    },
+    "files": {
+      "heading": "Fayl talablari",
+      "lead": "Faylni bizga yuborasiz, joylashtirishni o'zimiz qilamiz.",
+      "types": "Turlari: jpg, png, webp, gif, mp4, webm. Tur fayl mazmunidan tekshiriladi, nomidan emas: kengaytmani almashtirib boshqa narsa yuborib bo'lmaydi.",
+      "size": "Hajmi eng ko'pi 1.5 MB. Undan katta fayl qabul qilinmaydi.",
+      "muted": "Video har doim ovozsiz chiziladi. Ovoz yo'lakchasi bo'lsa ham eshitilmaydi.",
+      "prefer": "Aylanadigan rasm (gif) o'rniga mp4 yoki webm bering: bir xil sifatda fayl bir necha barobar yengil tushadi.",
+      "host": "Fayl bizning serverimizda turadi. Ya'ni brauzer begona manzilga murojaat qilmaydi va saytga sizning skriptingiz qo'shilmaydi.",
+      "lang": "Banner yozuvi rasm ichida bo'lgani uchun har til (uz, ru, en) uchun alohida fayl berasiz yoki bitta faylni uchala tilga ham qo'yasiz. Bu tanlov sizniki."
+    },
+    "counts": {
+      "heading": "Nima sanaladi",
+      "lead": "Uch son beriladi, boshqasi saqlanmaydi.",
+      "view": {
+        "name": "Ko'rildi",
+        "body": "Banner chindan ekranga chiqqanda sanaladi, sahifaga qo'shilganda emas. Odam pastga tushmagan bo'lsa, o'sha yerdagi blok ko'rildi hisoblanmaydi."
+      },
+      "click": {
+        "name": "Bosildi",
+        "body": "Odam bannerni bosib sizning saytingizga o'tgan soni."
+      },
+      "close": {
+        "name": "Yopildi",
+        "body": "Odam yopish tugmasini bosgan soni. Buni ham beramiz: yopish ulushi yuqori bo'lsa ko'rsatish muddatini qisqartiramiz yoki jim vaqtni uzaytiramiz."
+      },
+      "privacy": "Uchinchi tomon kuzatuvchisi, pikseli va Google Analytics yo'q. Serverda kunlik jamlangan son qoladi: IP ham, sessiya ham, sahifa manzili ham saqlanmaydi. Shuning uchun \"qaysi sahifada bosildi\" degan hisobot ham bo'lmaydi."
+    },
+    "honest": {
+      "heading": "Oldindan aytiladigan shartlar",
+      "lead": "Bu shartlar ko'rishlar sonini kamaytiradi. Keyin janjal chiqmasligi uchun ularni shu yerga yozib qo'ydik.",
+      "subscribers": {
+        "name": "Obunachiga reklama ko'rsatilmaydi",
+        "body": "Pul to'lagan foydalanuvchi beshta joyning birortasida ham banner ko'rmaydi. Ya'ni ko'rishlar soni saytdagi umumiy tashrifdan kam bo'ladi."
+      },
+      "rails": {
+        "name": "Yon ustunlar faqat keng ekranda",
+        "body": "1536 pikseldan tor ekranda ular umuman chizilmaydi: mazmunni banner uchun siqib qo'ymaymiz. Telefondan kirgan odam yon ustunlarni ko'rmaydi."
+      },
+      "label": {
+        "name": "\"Reklama\" yorlig'i o'chirilmaydi",
+        "body": "Har bir bannerning yonida shu yozuv turadi. Reklamani saytning o'z mazmuni qilib ko'rsatmaymiz."
+      },
+      "outside": {
+        "name": "Bosilgandan keyingi javobgarlik sizda",
+        "body": "Havola yangi varaqda ochiladi va odam sizning saytingizga o'tadi. U yerdagi narsaga biz javob bermaymiz."
+      }
+    },
+    "reject": {
+      "heading": "Nimani reklama qilmaymiz",
+      "lead": "Quyidagi banner qabul qilinmaydi, chiqib turgan bo'lsa o'chiriladi.",
+      "fakeClose": "Rasm ichidagi soxta yopish tugmasi yoki soxta X.",
+      "fakeUi": "Soxta qidiruv maydoni, soxta ijro tugmasi, soxta tizim xabari.",
+      "disguise": "Saytning o'z ranglari yoki logotipi bilan sayt qismidek ko'rinish.",
+      "sound": "O'zi ovoz chiqaradigan video.",
+      "flash": "Soniyada uchdan ko'p chaqnash yoki katta maydonning keskin miltillashi.",
+      "restricted": "Voyaga yetmaganlar uchun yaramaydigan mazmun, qimor, litsenziyasiz kredit.",
+      "http": "https bo'lmagan havola."
+    },
+    "cta": {
+      "heading": "Murojaat qiling",
+      "body": "Qaysi joy kerakligini, qaysi tilga qo'yishni va qancha muddatga rejalashtirganingizni yozing. Faylni ko'rib javob beramiz.",
+      "action": "Bog'lanish",
+      "price": "Narx bu sahifada yozilmaydi: joy, muddat va til soniga qarab kelishamiz.",
+      "note": "Murojaat formasida \"Hamkorlik\" mavzusini tanlang."
+    },
+    "footer": "Reklama joylashtirish"
+  }
+}

@@ -109,16 +109,25 @@ export class AdsPublicController {
    *
    * Bir vaqtda bir nechta faol bo'lsa eng keyin boshlangani olinadi: yangi shartnoma
    * eskisining ustiga chiqadi va bu operator uchun taxmin qilinadigan qoida.
+   *
+   * locale `rails` dagi bilan bir xil ishlaydi: tili yozilmagan va aynan shu tilga
+   * atalgan qatorlar tanlanadi. Nega kerak: banner yozuvi rasm ichida, ya'ni tilsiz
+   * filtr bilan ruscha banner o'zbekcha terminal sahifasida chiqib qolardi va
+   * uch til uchun uch qator sotilsa ham faqat bittasi ko'rinardi.
    */
   @Get()
-  async one(@Req() req: FastifyRequest, @Query('placement') placement?: string) {
+  async one(@Req() req: FastifyRequest, @Query('placement') placement?: string, @Query('locale') locale?: string) {
     const p = pickIn(placement, AD_PLACEMENTS);
     if (!p) return { ad: null };
     const userId = optionalUserId(req, this.tokens);
     if (userId && (await this.subs.isActive(userId))) return { ad: null };
     const now = new Date();
+    const lang = pickIn(locale, AD_LOCALES);
     const ad = await this.prisma.adPlacement.findFirst({
-      where: { placement: p, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now } },
+      where: {
+        placement: p, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now },
+        ...(lang ? { OR: [{ locale: null }, { locale: lang }] } : {}),
+      },
       orderBy: [{ startsAt: 'desc' }, { id: 'asc' }],
     });
     return { ad: ad ? publicAd(ad) : null };

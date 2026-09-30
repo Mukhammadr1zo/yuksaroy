@@ -169,16 +169,19 @@ function Banner({ ad, label, reduced }: { ad: Ad; label: string; reduced: boolea
 
 export function AdSlot({ placement }: { placement: 'terminal-aside' | 'listing-aside' }) {
   const t = useTranslations('ads');
+  const locale = useLocale();
   const reduced = useReducedMotion();
   const [ad, setAd] = useState<Ad | null>(null);
 
   useEffect(() => {
     let alive = true;
-    api<{ ad: Ad | null }>(`/ads?placement=${placement}`)
+    // Til so'rovga qo'shiladi: yon blok yozuvi rasm ichida, ya'ni ruscha banner
+    // o'zbekcha sahifada chiqmasligi kerak. Server tanlaydi, brauzer emas.
+    api<{ ad: Ad | null }>(`/ads?placement=${placement}&locale=${locale}`)
       .then((r) => { if (alive) setAd(r.ad); })
       .catch(() => {}); // reklama yo'qligi sahifaning ishiga ta'sir qilmaydi
     return () => { alive = false; };
-  }, [placement]);
+  }, [placement, locale]);
 
   if (!ad) return null;
   return (

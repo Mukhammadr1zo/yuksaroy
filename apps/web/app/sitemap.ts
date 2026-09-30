@@ -7,7 +7,7 @@ import { POSTS } from '@/components/marketing/posts';
 
 // /sitemap.xml: statik yo'llar, obyekti bor viloyat hublari, tafsilot sahifalari (terminal, e'lon, kompaniya), uch til (uz prefiksiz).
 // Temir yo'l terminallarining cuid manzillari bu yerda yo'q: faqat viloyat hublari; sahifalarning o'zi indekslanaveradi.
-const STATIC = ['', '/terminals', '/equipment', '/carriers', '/companies', '/standards', '/quote', '/map', '/booking', '/for-shippers', '/for-providers', '/urgent', '/cargo', '/services', '/wagon', '/help', '/pricing', '/features', '/features/assistant', '/about', '/contact', '/blog', '/terms', '/privacy', ...POSTS.map((p) => `/blog/${p.slug}`)];
+const STATIC = ['', '/terminals', '/equipment', '/carriers', '/companies', '/standards', '/quote', '/map', '/booking', '/for-shippers', '/for-providers', '/urgent', '/cargo', '/services', '/wagon', '/help', '/pricing', '/features', '/features/assistant', '/about', '/contact', '/advertise', '/blog', '/terms', '/privacy', ...POSTS.map((p) => `/blog/${p.slug}`)];
 /** Viloyat hublari: obyekti bor viloyatlar; ro'yxat bo'sh bo'lsa (API yo'q) hammasi qoladi. */
 const hubs = (cat: string, rows: { regionCode: string | null; serviceRegions?: string[] }[]) => {
   const has = new Set(rows.flatMap((r) => [r.regionCode, ...(r.serviceRegions ?? [])]).filter((x): x is string => x !== null));

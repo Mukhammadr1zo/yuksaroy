@@ -107,6 +107,18 @@ describe('yon tomondagi reklama', () => {
     const f = setup({ ad: AD, userId: null });
     expect((await f.c.one(f.req, 'terminal-aside')).ad?.id).toBe('a1');
   });
+
+  it("til filtri yon blokda ham ishlaydi", async () => {
+    // Nega kerak: banner yozuvi rasm ichida. Filtrsiz ruscha banner o'zbekcha terminal
+    // sahifasida chiqardi va uch til uchun uch qator sotilsa ham faqat bittasi ko'rinardi.
+    const f = setup({ ad: AD });
+    await f.c.one(f.req, 'terminal-aside', 'ru');
+    expect(f.calls[0]!.where.OR).toEqual([{ locale: null }, { locale: 'ru' }]);
+    // Til berilmasa yoki tanilmasa filtr yo'q: reklama yo'qolib qolmaydi
+    const g = setup({ ad: AD });
+    await g.c.one(g.req, 'terminal-aside', 'yoq-til');
+    expect(g.calls[0]!.where.OR).toBeUndefined();
+  });
 });
 
 /**
