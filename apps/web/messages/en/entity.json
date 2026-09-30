@@ -1,0 +1,11 @@
+{
+  "entity": {
+    "heading": "Company details",
+    "legalName": "Legal name",
+    "tin": "Tax ID",
+    "address": "Registered address",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Working hours"
+  }
+}

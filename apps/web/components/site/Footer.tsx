@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Logo } from './Logo';
+import { EntityDetails } from './EntityDetails';
 
 export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   const [t, nav, tm, tp, tf, ta, tc, tb, n2, tad] = await Promise.all([
@@ -61,7 +62,12 @@ export async function Footer({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
         </div>
       </div>
       <div className={dark ? 'border-t border-white/10' : 'border-t border-line'}>
-        <p className={`mx-auto max-w-6xl px-6 py-4 font-mono text-xs ${muted}`}>{t('legal', { year: new Date().getFullYear() })}</p>
+        <div className="mx-auto max-w-6xl px-6 py-4">
+          <p className={`font-mono text-xs ${muted}`}>{t('legal', { year: new Date().getFullYear() })}</p>
+          {/* Rekvizitlar huquqiy qator ostida. Qiymat bo'lmasa komponent null qaytaradi,
+              shuning uchun bo'sh joy ham, qo'shimcha chegara ham qolmaydi. */}
+          <EntityDetails variant="inline" className={`mt-1.5 font-mono text-xs ${muted}`} />
+        </div>
       </div>
     </footer>
   );

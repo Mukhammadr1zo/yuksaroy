@@ -10,6 +10,7 @@ import { HowItWorks } from '@/components/landing/HowItWorks';
 import { VisitMap } from '@/components/landing/VisitMap';
 import { Footer } from '@/components/site/Footer';
 import { SiteAds } from '@/components/site/AdSlot';
+import { ENTITY } from '@/lib/entity';
 import { Ld, pageMeta, url } from '@/lib/seo';
 
 export const revalidate = 60;
@@ -34,9 +35,19 @@ export default async function Landing({ params }: { params: Promise<{ locale: st
 
   return (
     <>
+      {/* Saytda YAKKA Organization tuguni. Rasmiy rekvizitlar (lib/entity.ts) shu yerga
+          qo'shiladi, /about ga emas: ikki sahifada ikki tugun bo'lsa ikkisi ham bitta url ni
+          ko'rsatib, nomi boshqa bo'lardi. name brend nomi bo'lib qoladi, rasmiy nom esa
+          legalName da - schema.org da Organization uchun alohida xossa. To'ldirilmagan maydon
+          undefined bo'lib JSON.stringify da tushib qoladi, ya'ni yo'q ma'lumot chiqmaydi. */}
       <Ld data={{
         '@context': 'https://schema.org', '@type': 'Organization', name: 'YukSaroy', url: url(locale),
-        address: { '@type': 'PostalAddress', addressCountry: 'UZ' },
+        legalName: ENTITY.legalName || undefined,
+        taxID: ENTITY.tin || undefined,
+        address: { '@type': 'PostalAddress', streetAddress: ENTITY.address || undefined, addressCountry: 'UZ' },
+        telephone: ENTITY.phone || undefined,
+        email: ENTITY.email || undefined,
+        openingHours: ENTITY.hours || undefined,
       }} />
       <Ld data={{
         '@context': 'https://schema.org', '@type': 'WebSite', name: 'YukSaroy', url: url(locale), inLanguage: locale,

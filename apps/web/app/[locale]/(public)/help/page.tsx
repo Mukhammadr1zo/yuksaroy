@@ -4,7 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { DashLink } from '@/components/site/DashLink';
 import { Explainer } from '@/components/landing/Explainer';
 import { sapiOrNull } from '@/lib/server-api';
-import { alt } from '@/lib/seo';
+import { Ld, alt } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string }> };
 type Faq = { id: string; q: string; a: string; href: string };
@@ -22,6 +22,26 @@ export default async function HelpPage({ params }: Props) {
   const [t, th, faq] = await Promise.all([getTranslations('help'), getTranslations('how'), sapiOrNull<Faq[]>(`/help/faq?locale=${locale}`, 3600)]);
   return (
     <>
+      {/* FAQPage sxemasi: savollar serverdan keladi, shuning uchun sxema ham shu bitta
+          ro'yxatdan quriladi va ekrandagi matn bilan hech qachon farq qilmaydi.
+          Ro'yxat bo'sh yoki null bo'lsa (API javob bermadi) sxema UMUMAN chizilmaydi:
+          bo'sh mainEntity qidiruv tizimi uchun buzuq sxema va u sahifani pastga tushirishi
+          mumkin. Javoblar lug'atda oddiy matn, HTML emas, shuning uchun /wagon dagi kabi
+          to'g'ridan-to'g'ri qo'yiladi: tozalash kerak emas. */}
+      {faq?.length ? (
+        <Ld
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faq.map((f) => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: { '@type': 'Answer', text: f.a },
+            })),
+          }}
+        />
+      ) : null}
+
       <section className="border-b border-line bg-white">
         <div className="mx-auto max-w-6xl px-6 py-14 md:py-20">
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-teal-ink">{t('page.eyebrow')}</p>

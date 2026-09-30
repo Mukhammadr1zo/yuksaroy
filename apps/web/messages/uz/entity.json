@@ -1,0 +1,11 @@
+{
+  "entity": {
+    "heading": "Rekvizitlar",
+    "legalName": "Rasmiy nom",
+    "tin": "STIR",
+    "address": "Yuridik manzil",
+    "phone": "Telefon",
+    "email": "Pochta",
+    "hours": "Ish vaqti"
+  }
+}

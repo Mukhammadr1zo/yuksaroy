@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { ContactForm } from '@/components/marketing/ContactForm';
+import { EntityDetails } from '@/components/site/EntityDetails';
 import { alt } from '@/lib/seo';
 
 type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ topic?: string; text?: string }> };
@@ -50,6 +51,9 @@ export default async function ContactPage({ params, searchParams }: Props) {
               </li>
             ))}
           </ul>
+          {/* Sayt ro'yxatdan o'tishda STIR so'raydi, shuning uchun o'z rekvizitlarini ham
+              shu yerda ko'rsatadi. To'ldirilmagan bo'lsa komponent null qaytaradi. */}
+          <EntityDetails className="mt-8" />
         </aside>
       </section>
     </>

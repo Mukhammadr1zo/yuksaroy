@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ScalesIcon, TagIcon, UserCircleIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
 import { BTN } from '@/components/marketing/bits';
+import { EntityDetails } from '@/components/site/EntityDetails';
+import { entityRows } from '@/lib/entity';
 import { alt } from '@/lib/seo';
 
 type Params = { params: Promise<{ locale: string }> };
@@ -19,6 +21,15 @@ export default async function AboutPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('about');
+  // Rekvizitlar to'ldirilmagan bo'lsa blok chizilmaydi: yorlig'i bor, qiymati yo'q
+  // qator "hali to'ldirilmagan" degan taassurot qoldiradi.
+  //
+  // Organization sxemasi bu sahifada EMAS. Nega: u sayt ildizini (url(locale)) ko'rsatadi va
+  // bosh sahifada allaqachon bitta Organization tuguni bor. Ikkinchisini shu yerda chizsak,
+  // qidiruv tizimi bitta url da ikki xil nomli ikki tashkilotni ko'rardi va qaysi biri
+  // to'g'ri ekanini o'zi taxmin qilardi. ENTITY maydonlari shuning uchun o'sha yakka
+  // tugunga qo'shildi: app/[locale]/page.tsx . Bu sahifa faqat ekrandagi ro'yxatni beradi.
+  const rows = entityRows();
   return (
     <>
       <section className="border-b border-line bg-white">
@@ -60,6 +71,13 @@ export default async function AboutPage({ params }: Params) {
           </ul>
         </div>
       </section>
+
+      {rows.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-6 py-14 md:py-16">
+          {/* Ro'yxat 6xl da cho'zilib ketmasin: chap chekkasi boshqa bo'limlar bilan tenglashadi */}
+          <EntityDetails className="max-w-2xl" />
+        </section>
+      ) : null}
 
       <section className="bg-navy">
         <div className="mx-auto grid max-w-6xl gap-8 px-6 py-14 md:grid-cols-[1.4fr_1fr] md:items-center md:py-20">

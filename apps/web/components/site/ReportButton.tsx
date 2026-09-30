@@ -7,8 +7,11 @@
  * asosiy ishini (bog'lanish, taklif berish) ko'zdan qochirmasligi kerak.
  *
  * Sabab tanlagichi native select emas: brauzerning o'z oynasi dizayn tizimidan
- * tashqarida qoladi, beshta variant esa bir qatorga bemalol sig'adi, ya'ni ro'yxat
- * oynasi umuman kerak emas.
+ * tashqarida qoladi. Variantlar oltita (COPYRIGHT qo'shilgandan keyin) va ular
+ * flex-wrap ichida yotadi: keng ekranda ikki qatorga, tor ekranda esa bir nechta
+ * qatorga tushadi. Hech bir tugma o'rtadan sinmaydi, chunki eng uzun yorliq ham
+ * 390px kenglikda bitta qatorga sig'adi. Shu sababli kod o'zgartirilmadi: ro'yxat
+ * oynasi baribir kerak emas.
  *
  * Takroriy shikoyat serverda 409 bo'lib qaytadi (bazadagi noyoblik kaliti): bu yerda
  * oldindan "yuborganmisiz" so'rovi yo'q, sahifa bitta ham ortiqcha so'rov yubormaydi.
