@@ -30,7 +30,7 @@ export function UserMenu() {
   const item = 'block rounded-xl px-3 py-2 text-sm font-semibold text-ink hover:bg-sand';
   return (
     <div ref={box} className="relative">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu"
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" aria-label={t('menu')}
         className="flex items-center gap-1.5 rounded-full border border-line bg-white py-1 pl-1 pr-2 transition-colors duration-150 hover:border-teal">
         <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-teal-soft font-mono text-[11px] font-bold text-teal-ink">
           {/* eslint-disable-next-line @next/next/no-img-element */}

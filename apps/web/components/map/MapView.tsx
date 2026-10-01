@@ -520,7 +520,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
             onSubmit={(e) => { e.preventDefault(); apply({ ...s, q: String(new FormData(e.currentTarget).get('q') ?? '').trim(), region: '', corridor: '', near: null, radius: 0, free: false, cat: [] }, true); }}
             className="mx-4 mt-4 flex items-center gap-2 rounded-full border border-line bg-white p-1 focus-within:border-teal focus-within:ring-2 focus-within:ring-teal/25"
           >
-            <MagnifyingGlassIcon size={18} weight="regular" className="ml-2 shrink-0 text-muted" />
+            <MagnifyingGlassIcon size={18} weight="regular" aria-hidden="true" className="ml-2 shrink-0 text-muted" />
             <input key={s.q} name="q" type="search" defaultValue={s.q} placeholder={t('search.placeholder')} aria-label={t('search.aria')} className="min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted/70" />
             <button className="shrink-0 rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-teal-ink">{t('search.submit')}</button>
           </form>
@@ -558,7 +558,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               value={eff.regions.length === 1 ? eff.regions[0] : ''}
               onChange={(e) => apply({ ...materialize(s, eff), region: e.target.value, corridor: '' }, true)}
               aria-label={tf('region.all')}
-              className="min-w-0 flex-1 rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25"
+              className="min-w-0 flex-1 rounded-xl border border-field bg-white px-3 py-2.5 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25"
             >
               <option value="">{tf('region.all')}</option>
               {REGIONS.map((r) => <option key={r} value={r}>{tr(r)}</option>)}
@@ -567,7 +567,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               type="button" onClick={locate} disabled={busy}
               className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition disabled:opacity-60 ${eff.near ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
             >
-              <CrosshairIcon size={16} weight="regular" />
+              <CrosshairIcon size={16} weight="regular" aria-hidden="true" />
               {busy ? tc('nearMe.busy') : eff.near ? tc('nearMe.active', { radius: eff.radius }) : tc('nearMe.idle')}
             </button>
             {/* Yorliq domen lug'atidan (chipLabel): chiplar qatori ham, katalog ham shu matnni ko'rsatadi */}
@@ -576,7 +576,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               onClick={() => apply({ ...materialize(s, eff), free: !eff.free })}
               className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${eff.free ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
             >
-              <CalendarCheckIcon size={16} weight="regular" />
+              <CalendarCheckIcon size={16} weight="regular" aria-hidden="true" />
               {chipLabel(FREE_CHIP, lang)}
             </button>
           </div>

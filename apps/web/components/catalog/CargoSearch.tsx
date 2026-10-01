@@ -5,7 +5,7 @@ import type { CargoType } from '@/lib/types';
 export type CargoPick = Pick<CargoType, 'code' | 'name' | 'groupCode' | 'groupName'>;
 
 /** ETSNG pozitsiya combobox: /api/v1/cargo-types?q= (nom, guruh yoki kod). */
-const DEFAULT_INPUT = 'w-full rounded-xl border border-line bg-white px-4 py-3 outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
+const DEFAULT_INPUT = 'w-full rounded-xl border border-field bg-white px-4 py-3 outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 export function CargoSearch({ value, onChange, placeholder = 'Yuk turi (ETSNG): sement, bug\'doy, 281000…', ariaLabel, inputClassName = DEFAULT_INPUT }: { value: CargoPick | null; onChange: (c: CargoPick | null) => void; placeholder?: string; ariaLabel?: string; inputClassName?: string }) {
   const id = useId();

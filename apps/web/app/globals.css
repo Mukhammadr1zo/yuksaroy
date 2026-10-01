@@ -21,6 +21,16 @@
   --color-ink: #0B2340;
   --color-muted: #52677E;
   --color-line: #DCE4EC;
+  /* Boshqaruv maydonining chegarasi uchun ALOHIDA token. O'lchov: --color-line oq fonda
+     1.28, qumrang fonda 1.16 beradi, boshqaruv chegarasi uchun esa 3.0 kerak. Ya'ni input,
+     select, textarea, checkbox va radio fondan deyarli ajralmaydi. #7D8CA0 oq fonda 3.43,
+     qumrang fonda 3.10 beradi: ikkalasi ham zaxira bilan o'tadi. Navy ohangi saqlangan va u
+     --color-muted (#52677E, 5.83) dan yengilroq, shuning uchun chegara matnga o'xshab qolmaydi.
+     Nega --color-line o'zi to'qlashtirilmadi: u butun saytdagi ajratgich chiziq, karta cheti va
+     jadval chizig'i uchun ishlatiladi, uni to'qlashtirish sahifani to'rga aylantirardi.
+     Ajratgich chizig'idan 3.0 talab qilinmaydi: u boshqaruv emas, bezak. 3.0 faqat
+     BOSHQARUV elementining chegarasiga tegishli. */
+  --color-field: #7D8CA0;
   --radius-card: 14px;
   --ease-out-quart: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-emph: cubic-bezier(0.05, 0.7, 0.1, 1);
@@ -153,7 +163,7 @@ h1, h2, h3 { text-wrap: balance; }
   flex: none;
   width: 1.0625rem;
   height: 1.0625rem;
-  border: 1.5px solid var(--color-line);
+  border: 1.5px solid var(--color-field);
   background-color: #fff;
   cursor: pointer;
   transition: background-color 140ms var(--ease-emph), border-color 140ms var(--ease-emph);

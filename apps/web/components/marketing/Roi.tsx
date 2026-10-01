@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { formatSom } from '@yuksaroy/domain';
 
 const som = (v: number) => formatSom(Math.round(v) * 100);
-const INPUT = 'mt-1 w-full rounded-xl border border-line bg-white px-4 py-3 font-mono text-base font-normal text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
+const INPUT = 'mt-1 w-full rounded-xl border border-field bg-white px-4 py-3 font-mono text-base font-normal text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 function Field({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
   return (

@@ -162,7 +162,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
 
 function Sel({ name, value, label, options }: { name: string; value: string; label?: string; options: (readonly [string, string])[] }) {
   return (
-    <select name={name} defaultValue={value} aria-label={label ?? name} className="w-full rounded-xl border border-line bg-white px-3 py-3 text-sm">
+    <select name={name} defaultValue={value} aria-label={label ?? name} className="w-full rounded-xl border border-field bg-white px-3 py-3 text-sm">
       {label ? <option value="">{label}</option> : null}
       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
     </select>

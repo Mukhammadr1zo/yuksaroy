@@ -984,6 +984,7 @@
       "media": "Banner fayli",
       "mediaHint": "Rasm, GIF yoki ovozsiz video (mp4, webm). Video sahifada ovozsiz va o'zi aylanib turadi. Eng ko'pi 1,5 MB: aylanadigan rasm (GIF) o'rniga mp4 yoki webm bering, bir xil sifatda bir necha barobar yengil.",
       "mediaRemove": "Faylni olib tashlash",
+      "mediaPreview": "Yuklangan reklama fayli",
       "rules": {
         "head": "Bannerda bo'lmasligi kerak:",
         "fakeClose": "Rasm ichida soxta yopish tugmasi yoki soxta X.",

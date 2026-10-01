@@ -8,7 +8,7 @@ export type StationPick = Pick<Station, 'id' | 'nameUz' | 'esrCode' | 'rju'>;
  * Stansiya combobox: /api/v1/stations?q= (debounce 200 ms). Formada `name` bo'lsa yashirin input (GET filtr) qo'shadi.
  * Klaviatura: ↑ ↓ Enter Esc. WAI-ARIA combobox.
  */
-const DEFAULT_INPUT = 'w-full rounded-xl border border-line bg-white px-4 py-3 outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
+const DEFAULT_INPUT = 'w-full rounded-xl border border-field bg-white px-4 py-3 outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 export function StationSearch({ value, onChange, name, placeholder = 'Stansiya nomi yoki ESR kodi', ariaLabel, autoFocus, inputClassName = DEFAULT_INPUT, hideCode }: {
   value: StationPick | null; onChange: (s: StationPick | null) => void; name?: string; placeholder?: string; ariaLabel?: string; autoFocus?: boolean; inputClassName?: string;

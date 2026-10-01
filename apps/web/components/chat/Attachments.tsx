@@ -136,7 +136,7 @@ export function MessageFiles({ files, mine }: { files: Attachment[]; mine: boole
             <li key={f.url}>
               <a href={f.url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-xl ring-1 ring-black/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={f.url} alt={f.name} loading="lazy" className={`w-full object-cover ${images.length === 1 ? 'max-h-72' : 'aspect-square'}`} />
+                <img src={f.url} alt={t('imageAlt', { name: f.name })} loading="lazy" className={`w-full object-cover ${images.length === 1 ? 'max-h-72' : 'aspect-square'}`} />
               </a>
             </li>
           ))}

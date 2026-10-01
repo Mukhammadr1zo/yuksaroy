@@ -81,7 +81,7 @@ export default function UrgentDetailPage() {
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('statusLink')}</h2>
           <div className="mt-2 flex flex-wrap gap-2">
-            <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 rounded-xl border border-line bg-sand px-3 py-2 font-mono text-xs" />
+            <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 rounded-xl border border-field bg-sand px-3 py-2 font-mono text-xs" />
             <button type="button" onClick={() => copy(url)} className={BTN_NAVY}>{copied ? t('copied') : t('copy')}</button>
           </div>
           <p className="mt-1 text-xs text-muted">{t('statusLinkHint')}</p>

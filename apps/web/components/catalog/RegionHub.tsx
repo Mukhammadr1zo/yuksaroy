@@ -46,7 +46,7 @@ export async function RegionHub({ cat, code, count, shown, pins, children }: { c
           <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">{t(`${cat}.h1`, { region, count })}</h1>
           <p className="mt-2 max-w-[64ch] text-muted">{t(`${cat}.lead`)}</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Link href={`/map?region=${code}&cat=${MAP_CAT[cat]}`} className="inline-flex items-center gap-1.5 rounded-full border border-navy px-4 py-2 text-sm font-semibold text-navy transition hover:bg-white"><MapTrifoldIcon size={16} />{t('openMap')}</Link>
+            <Link href={`/map?region=${code}&cat=${MAP_CAT[cat]}`} className="inline-flex items-center gap-1.5 rounded-full border border-navy px-4 py-2 text-sm font-semibold text-navy transition hover:bg-white"><MapTrifoldIcon size={16} aria-hidden="true" />{t('openMap')}</Link>
             {CATS.filter((x) => x !== cat).map((x) => <Link key={x} href={`/${x}/region/${code}`} className="rounded-full border border-line bg-white px-3 py-2 text-sm text-ink/80 transition hover:border-teal hover:text-teal-ink">{t(`cat.${x}`)}</Link>)}
           </div>
           {count > 0 ? <div className="mt-4">{neighbours}</div> : null}

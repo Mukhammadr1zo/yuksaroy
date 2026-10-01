@@ -44,7 +44,8 @@
       "org": "Tashkilot",
       "admin": "Admin panel",
       "logout": "Chiqish",
-      "subscription": "Obuna"
+      "subscription": "Obuna",
+      "menu": "Hisob menyusi"
     },
     "add": {
       "label": "Qo'shish",

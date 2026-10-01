@@ -181,7 +181,7 @@ function ChatPanel({ target, next, onClose }: { target: ChatTarget; next: string
           {at.err ? <p role="alert" className="mb-1 text-xs font-semibold text-red-700">{at.err}</p> : null}
           {err ? <p role="alert" className="mb-1 text-xs font-semibold text-red-700">{err}</p> : null}
           {orgs.length && !threadId ? (
-            <select value={orgId} onChange={(e) => setOrgId(e.target.value)} aria-label={t('asOrg')} className="mb-2 w-full rounded-xl border border-line bg-white px-3 py-1.5 text-xs">
+            <select value={orgId} onChange={(e) => setOrgId(e.target.value)} aria-label={t('asOrg')} className="mb-2 w-full rounded-xl border border-field bg-white px-3 py-1.5 text-xs">
               <option value="">{t('asPerson')}</option>
               {orgs.map((o) => <option key={o.orgId} value={o.orgId}>{o.org.name}</option>)}
             </select>
@@ -197,7 +197,7 @@ function ChatPanel({ target, next, onClose }: { target: ChatTarget; next: string
                 e.preventDefault();
                 void at.add(pasted);
               }}
-              className="max-h-28 min-h-[44px] w-full min-w-0 resize-none rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
+              className="max-h-28 min-h-[44px] w-full min-w-0 resize-none rounded-xl border border-field bg-white px-3 py-2.5 text-sm outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
             />
             <button disabled={!canSend} aria-label={t('send')} className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xl bg-teal text-white transition hover:bg-teal-ink disabled:opacity-50">
               <PaperPlaneRightIcon size={16} weight="fill" aria-hidden="true" />

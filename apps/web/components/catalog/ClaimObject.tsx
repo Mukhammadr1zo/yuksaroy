@@ -37,14 +37,14 @@ export function ClaimObject({ terminalId }: { terminalId: string }) {
       {orgs.length ? (
         <>
           <label className="block text-xs text-muted" htmlFor="claim-org">{t('org')}</label>
-          <select id="claim-org" value={orgId} onChange={(e) => setOrgId(e.target.value)} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm">
+          <select id="claim-org" value={orgId} onChange={(e) => setOrgId(e.target.value)} className="w-full rounded-xl border border-field bg-white px-3 py-2 text-sm">
             {orgs.map((o) => <option key={o.orgId} value={o.orgId}>{o.org.name}</option>)}
           </select>
         </>
       ) : <p className="text-xs text-muted">{t('noOrgAuto')}</p>}
       <label className="block text-xs text-muted" htmlFor="claim-why">{t('why')}</label>
       <textarea id="claim-why" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} required
-        placeholder={t('whyPlaceholder')} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm" />
+        placeholder={t('whyPlaceholder')} className="w-full rounded-xl border border-field bg-white px-3 py-2 text-sm" />
       {note.length > 0 && tooShort ? <p className="text-xs text-amber-ink">{t('whyShort')}</p> : null}
 
       <p className="text-xs text-muted"><span className="font-semibold text-ink">{t('docs')}.</span> {t('docsHint')}</p>

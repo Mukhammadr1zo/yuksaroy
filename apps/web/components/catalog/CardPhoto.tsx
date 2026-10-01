@@ -17,7 +17,7 @@ export function CardPhoto({ kind, slug, photo, alt = '', className = '' }: { kin
   const [top, bottom] = SKIES[i]!;
   const id = `cp${i}`;
   return (
-    <svg viewBox="0 0 96 72" className={`h-full w-full ${className}`} role="img" aria-label={alt} preserveAspectRatio="xMidYMid slice">
+    <svg viewBox="0 0 96 72" className={`h-full w-full ${className}`} role="img" aria-label={alt} aria-hidden={!alt} preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id={`${id}s`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={top} /><stop offset="1" stopColor={bottom} />

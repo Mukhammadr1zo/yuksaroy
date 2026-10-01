@@ -118,7 +118,7 @@ export default function InquiryThreadPage() {
               e.preventDefault();
               void at.add(pasted);
             }}
-            className="min-h-[52px] w-full min-w-0 rounded-xl border border-line bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
+            className="min-h-[52px] w-full min-w-0 rounded-xl border border-field bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
           />
           <button
             disabled={!canSend} aria-label={t('send')}

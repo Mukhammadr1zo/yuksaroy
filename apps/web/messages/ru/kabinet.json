@@ -497,6 +497,7 @@
       "attach": "Приложить файл",
       "download": "Открыть файл",
       "removeFile": "Убрать файл {name}",
+      "imageAlt": "Отправленное фото: {name}",
       "tooManyFiles": "К одному сообщению не более {max} файлов",
       "unread": "{count} новых сообщений",
       "role": {

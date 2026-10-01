@@ -44,7 +44,7 @@ export async function ListingCard({ l }: { l: L }) {
     <Link href={listingHref(l)} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:border-teal">
       <div className="relative h-[84px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-sand">
         {l.photo ? <img src={l.photo} alt="" className="h-full w-full object-cover" /> : (
-          <div className="flex h-full w-full items-center justify-center text-navy/40" aria-label={t('noPhoto')}><Icon size={36} weight="duotone" /></div>
+          <div className="flex h-full w-full items-center justify-center text-navy/40"><Icon size={36} weight="duotone" aria-hidden="true" /></div>
         )}
         {l.deal ? <span className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold ${l.deal === 'RENT' ? 'bg-teal text-white' : 'bg-navy text-white'}`}>{SEARCH_LABELS[lang].deal[l.deal]}</span> : null}
       </div>

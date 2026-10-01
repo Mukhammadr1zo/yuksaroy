@@ -38,7 +38,7 @@ function payload(form: Form, orig: Form | null) {
 // Jadval ichidagi tugma va maydon: kit'dagi kattalari qator balandligini ikki baravar qilib yuboradi
 const SM = 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold transition duration-150 active:scale-[0.98] disabled:opacity-60';
 const BTN_SM = `${SM} bg-teal text-white hover:bg-teal-ink`;
-const INPUT_SM = 'w-24 rounded-lg border border-line bg-white px-2 py-1 font-mono text-xs tabular-nums outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
+const INPUT_SM = 'w-24 rounded-lg border border-field bg-white px-2 py-1 font-mono text-xs tabular-nums outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 /** Koordinatasi yo'q qator: ikki maydon va saqlash, varaqsiz. Enter ham saqlaydi. */
 function CoordCell({ row, onSaved }: { row: Row; onSaved: (s: Saved) => void }) {

@@ -66,9 +66,9 @@ export function ListingContact({ endpoint, next, cta }: { endpoint: string; next
   return (
     <form onSubmit={send} className="space-y-2">
       <label className="block text-xs text-muted" htmlFor="inq-msg">{t('inquiry.label')}</label>
-      <textarea ref={boxRef} id="inq-msg" aria-invalid={state === 'short' || undefined} aria-describedby={state === 'short' ? 'inq-err' : undefined} value={msg} onChange={(e) => setMsg(e.target.value)} rows={3} maxLength={1000} placeholder={t('inquiry.placeholder')} className="w-full rounded-xl border border-line px-3 py-2 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
+      <textarea ref={boxRef} id="inq-msg" aria-invalid={state === 'short' || undefined} aria-describedby={state === 'short' ? 'inq-err' : undefined} value={msg} onChange={(e) => setMsg(e.target.value)} rows={3} maxLength={1000} placeholder={t('inquiry.placeholder')} className="w-full rounded-xl border border-field px-3 py-2 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
       {orgs.length ? (
-        <select value={orgId} onChange={(e) => setOrgId(e.target.value)} aria-label={t('inquiry.org')} className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm">
+        <select value={orgId} onChange={(e) => setOrgId(e.target.value)} aria-label={t('inquiry.org')} className="w-full rounded-xl border border-field bg-white px-3 py-2 text-sm">
           <option value="">{t('inquiry.personal')}</option>
           {orgs.map((o) => <option key={o.orgId} value={o.orgId}>{o.org.name}</option>)}
         </select>

@@ -984,6 +984,7 @@
       "media": "Banner file",
       "mediaHint": "An image, a GIF or a silent video (mp4, webm). On the page the video plays muted and loops. 1.5 MB at most: instead of an animated image (GIF) give an mp4 or a webm, several times lighter at the same quality.",
       "mediaRemove": "Remove the file",
+      "mediaPreview": "Uploaded ad file",
       "rules": {
         "head": "The banner must not contain:",
         "fakeClose": "A fake close button or a fake X inside the image.",

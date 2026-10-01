@@ -14,7 +14,7 @@ export function ShareLink() {
   }
   return (
     <button type="button" onClick={copy} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink/80 transition hover:border-teal hover:text-teal-ink">
-      <LinkSimpleIcon size={16} />{ok ? t('shared') : t('share')}
+      <LinkSimpleIcon size={16} aria-hidden="true" />{ok ? t('shared') : t('share')}
     </button>
   );
 }
@@ -29,7 +29,7 @@ export function RemoveColumn({ cat, slug, slugs, name }: { cat: CompareCat; slug
   }
   return (
     <button type="button" onClick={remove} aria-label={`${t('remove')}: ${name}`} className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-muted hover:text-navy">
-      <XIcon size={11} weight="bold" />{t('remove')}
+      <XIcon size={11} weight="bold" aria-hidden="true" />{t('remove')}
     </button>
   );
 }

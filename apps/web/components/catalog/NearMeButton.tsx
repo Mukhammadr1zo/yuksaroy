@@ -47,7 +47,7 @@ export function NearMeButton({ path, radiusKm = 30 }: { path: string; radiusKm?:
           active ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'
         }`}
       >
-        <CrosshairIcon size={17} weight="regular" />
+        <CrosshairIcon size={17} weight="regular" aria-hidden="true" />
         {busy ? t('busy') : active ? t('active', { radius: sp.get('radius') ?? radiusKm }) : t('idle')}
       </button>
       {err ? <span className="mt-1 text-xs text-amber-ink">{err}</span> : null}

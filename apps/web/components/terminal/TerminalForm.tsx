@@ -276,7 +276,7 @@ export function TerminalForm({ initial, onSaved }: { initial?: MyTerminal; onSav
               <li key={c} className={`flex flex-wrap items-center gap-3 rounded-xl border px-3 py-2 transition ${s.on ? 'border-teal bg-teal-soft/40' : 'border-line bg-white'}`}>
                 <label className="flex flex-1 items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={s.on} onChange={(e) => upd({ on: e.target.checked })} className="h-4 w-4 accent-teal" />{ts(c)}</label>
                 <label className="flex items-center gap-1.5 text-xs text-muted">{t('field.leadTime')}
-                  <input type="number" min={0} max={10080} step={30} value={s.lead} disabled={!s.on} onChange={(e) => upd({ lead: Math.max(0, Number(e.target.value) || 0) })} className="w-20 rounded-lg border border-line bg-white px-2 py-1 font-mono text-sm text-ink disabled:bg-sand disabled:text-muted" />
+                  <input type="number" min={0} max={10080} step={30} value={s.lead} disabled={!s.on} onChange={(e) => upd({ lead: Math.max(0, Number(e.target.value) || 0) })} className="w-20 rounded-lg border border-field bg-white px-2 py-1 font-mono text-sm text-ink disabled:bg-sand disabled:text-muted" />
                 </label>
               </li>
             );
@@ -304,7 +304,7 @@ export function TerminalForm({ initial, onSaved }: { initial?: MyTerminal; onSav
   );
 }
 
-const TIME = 'rounded-lg border border-line bg-white px-2 py-1 font-mono text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
+const TIME = 'rounded-lg border border-field bg-white px-2 py-1 font-mono text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 /** Hafta kunlari: har kun ko'pi bilan ikkita oraliq, native time input. Bo'sh kun = dam olish. */
 function HoursEditor({ hours, onChange }: { hours: WeekHours; onChange: (h: WeekHours) => void }) {

@@ -30,7 +30,7 @@ export async function CategoryGrid() {
               className="flex h-full items-start gap-4 rounded-card border border-line bg-white p-5 transition duration-200 hover:border-teal/50 hover:shadow-sm"
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-soft text-teal-ink">
-                <Icon size={22} weight="regular" />
+                <Icon size={22} weight="regular" aria-hidden="true" />
               </span>
               <span>
                 <span className="block font-semibold text-ink">{t(`${key}.label`)}</span>

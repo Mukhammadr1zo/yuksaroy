@@ -43,7 +43,6 @@
       "routes": "{count} направл.",
       "verified": "Подтверждённая организация",
       "regionsMore": "+{count}",
-      "noPhoto": "Без фото",
       "phoneVerified": "Телефон подтверждён",
       "phoneUnverified": "Телефон не подтверждён",
       "demo": "Образец",

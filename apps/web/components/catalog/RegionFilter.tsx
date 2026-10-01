@@ -9,7 +9,7 @@ export async function RegionFilter({ value }: { value: string }) {
       name="region"
       defaultValue={value}
       aria-label={tc('region')}
-      className="rounded-xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25"
+      className="rounded-xl border border-field bg-white px-4 py-3 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25"
     >
       <option value="">{t('all')}</option>
       {REGIONS.map((r) => (

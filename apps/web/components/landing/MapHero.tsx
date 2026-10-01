@@ -80,7 +80,7 @@ export function MapHero({ terminals }: { terminals: number | null }) {
           <p className="mt-4 max-w-[46ch] text-[17px] leading-relaxed text-muted">{t('lead')}</p>
 
           <form action="/search" className="mt-7 flex max-w-[34rem] items-center gap-2 rounded-full border border-line bg-white p-1.5 shadow-sm">
-            <MagnifyingGlassIcon size={20} weight="regular" className="ml-3 shrink-0 text-muted" />
+            <MagnifyingGlassIcon size={20} weight="regular" aria-hidden="true" className="ml-3 shrink-0 text-muted" />
             <input
               name="q"
               type="search"
@@ -121,7 +121,7 @@ export function MapHero({ terminals }: { terminals: number | null }) {
                 className={`group inline-flex items-center gap-2 text-[15px] font-semibold transition-colors duration-200 ${d.muted ? 'text-muted hover:text-navy' : 'text-navy hover:text-teal-ink'}`}
               >
                 {d.key === 'map' ? tm('open') : t(`door.${d.key}`)}
-                <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-200 group-hover:translate-x-1" />
+                <ArrowRightIcon size={16} weight="bold" aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             ))}
           </div>

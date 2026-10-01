@@ -108,7 +108,7 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
       <form className="mt-4 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-[1fr_1.3fr_auto]" action="/equipment">
         {Object.entries({ kind, deal, near, radius, corridor }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
         <RegionFilter value={region} />
-        <input name="q" defaultValue={raw.q} placeholder={t('filter.q')} className="rounded-xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
+        <input name="q" defaultValue={raw.q} placeholder={t('filter.q')} className="rounded-xl border border-field bg-white px-4 py-3 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
         <div className="flex gap-2">
           <Sel name="sort" value={raw.sort || 'new'} options={[['new', t('filter.sort.new')], ['price', t('filter.sort.price')], ...(near ? [['nearest', t('filter.sort.nearest')] as const] : [])]} />
           <button className="rounded-xl bg-navy px-5 py-3 font-semibold text-white hover:bg-navy-2">{tf('apply')}</button>

@@ -17,7 +17,7 @@ export { listingPrice, regionName, tgListingHref };
 // O'chiq holat so'nish bilan emas, kul rang bilan: oq matn so'ngan teal ustida o'qilmay qolardi
 export const BTN = 'flex min-h-11 w-full items-center justify-center rounded-full bg-teal px-5 font-semibold text-white transition active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:cursor-not-allowed';
 export const BTN_GHOST = 'flex min-h-11 w-full items-center justify-center rounded-full border border-line bg-white px-5 font-semibold text-ink transition active:scale-[0.98] disabled:opacity-60';
-export const INPUT = 'w-full min-h-11 rounded-xl border border-line bg-white px-4 py-2.5 text-base text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:opacity-60';
+export const INPUT = 'w-full min-h-11 rounded-xl border border-field bg-white px-4 py-2.5 text-base text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:opacity-60';
 export const CHIP = (on: boolean) => `min-h-11 rounded-full px-4 text-sm font-semibold transition active:scale-[0.97] ${on ? 'bg-navy text-white' : 'border border-line bg-white text-ink'}`;
 export const CARD = 'rounded-card border border-line bg-white';
 

@@ -103,7 +103,7 @@ export default function OrderPage() {
               {asking ? (
                 <div className="space-y-3">
                   <label className="block text-sm font-semibold">{t('cancel.reason')}
-                    <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} className="mt-1 w-full rounded-xl border border-line px-4 py-2.5 text-base font-normal" />
+                    <input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} className="mt-1 w-full rounded-xl border border-field px-4 py-2.5 text-base font-normal" />
                   </label>
                   <div className="flex gap-2">
                     <button type="button" onClick={cancel} disabled={busy} className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">{t('cancel.yes')}</button>

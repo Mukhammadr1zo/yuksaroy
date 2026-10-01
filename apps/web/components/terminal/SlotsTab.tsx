@@ -12,7 +12,7 @@ import { BTN_GHOST, BTN_PRIMARY, INPUT, Notice, errText } from '@/components/kab
 type Win = { window: number; start: string; end: string; capacity: number };
 const plusDays = (d: string, n: number) => new Date(new Date(`${d}T00:00:00Z`).getTime() + n * 86_400_000).toISOString().slice(0, 10);
 const defaultWindows = (): Win[] => BOOKING.defaultWindows.map(([start, end], i) => ({ window: i + 1, start, end, capacity: BOOKING.defaultCapacity }));
-const SMALL = 'rounded-lg border border-line bg-white px-2 py-1 font-mono text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
+const SMALL = 'rounded-lg border border-field bg-white px-2 py-1 font-mono text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 export function SlotsTab({ terminalId }: { terminalId: string | null }) {
   const t = useTranslations('terminalsAdmin.slots');

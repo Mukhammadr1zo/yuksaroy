@@ -62,7 +62,7 @@ export default function TgHome() {
       <form onSubmit={submit} role="search" aria-label={t('searchAria')} className="mt-4 flex gap-2">
         <label className="relative min-w-0 flex-1">
           <MagnifyingGlassIcon size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('searchPh')} enterKeyHint="search" className="min-h-12 w-full rounded-full border border-line bg-white pl-10 pr-4 text-base text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('searchPh')} enterKeyHint="search" className="min-h-12 w-full rounded-full border border-field bg-white pl-10 pr-4 text-base text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
         </label>
         <button type="submit" aria-label={t('search')} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal text-white active:scale-[0.96]"><ArrowRightIcon size={20} weight="bold" /></button>
       </form>

@@ -8,6 +8,7 @@
     "locale": "Language",
     "breadcrumb": "Breadcrumb",
     "loading": "Loading",
-    "required": "required"
+    "required": "required",
+    "photoOf": "{name}, photo"
   }
 }

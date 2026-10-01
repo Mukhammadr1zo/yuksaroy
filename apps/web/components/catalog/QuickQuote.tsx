@@ -13,7 +13,7 @@ import { DashLink } from '@/components/site/DashLink';
 const EXTRAS: ServiceCode[] = ['WEIGH', 'STORAGE', 'CONTAINER', 'SVX', 'LAST_MILE', 'SHUNTING'];
 type Tone = 'light' | 'dark';
 const INPUT: Record<Tone, string> = {
-  light: 'w-full rounded-xl border border-line bg-white px-4 py-3 outline-none focus:border-teal focus:ring-2 focus:ring-teal/25',
+  light: 'w-full rounded-xl border border-field bg-white px-4 py-3 outline-none focus:border-teal focus:ring-2 focus:ring-teal/25',
   dark: 'w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none placeholder:text-white/50 focus:border-teal focus:ring-2 focus:ring-teal/30',
 };
 

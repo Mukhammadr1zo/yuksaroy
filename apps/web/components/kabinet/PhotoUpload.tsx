@@ -32,6 +32,8 @@ export async function uploadOne(file: File, kind: 'photo' | 'doc' = 'doc', retry
 
 export function PhotoUpload({ photos, onChange, max = LISTING.maxPhotos, error }: { photos: string[]; onChange: (p: string[]) => void; max?: number; error?: string }) {
   const t = useTranslations('kabinet.form');
+  // Galereyadagi "{n}-rasm" bilan bir xil matn: ikki joyda ikki xil yozilmasin
+  const tg = useTranslations('gallery');
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(0);
   const [err, setErr] = useState<string | null>(null);
@@ -61,7 +63,7 @@ export function PhotoUpload({ photos, onChange, max = LISTING.maxPhotos, error }
         {photos.map((url, i) => (
           <li key={url} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-sand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt="" className="h-full w-full object-cover" />
+            <img src={url} alt={tg('photoN', { n: i + 1 })} className="h-full w-full object-cover" />
             <button
               type="button" aria-label={t('remove')} onClick={() => onChange(photos.filter((_, j) => j !== i))}
               className="tap-40 absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-xs font-semibold text-red-700 shadow-sm ring-1 ring-line"

@@ -115,8 +115,8 @@ export default async function AvtotransportPage({ params, searchParams }: Params
         {Object.entries({ near, radius, corridor }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
         <RegionFilter value={region} />
         <Sel name="truckType" value={truckType} label={t('filter.truckType')} options={TRUCK_TYPES.map((x) => [x, LISTING_LABELS[lang].truckType[x]])} />
-        <input name="tonnage" type="number" min={1} max={100} defaultValue={tonnage || ''} placeholder={t('filter.tonnageMin')} aria-label={t('filter.tonnageMin')} className="rounded-xl border border-line bg-white px-4 py-3 font-mono text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
-        <input name="q" defaultValue={raw.q} placeholder={t('filter.q')} className="rounded-xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
+        <input name="tonnage" type="number" min={1} max={100} defaultValue={tonnage || ''} placeholder={t('filter.tonnageMin')} aria-label={t('filter.tonnageMin')} className="rounded-xl border border-field bg-white px-4 py-3 font-mono text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
+        <input name="q" defaultValue={raw.q} placeholder={t('filter.q')} className="rounded-xl border border-field bg-white px-4 py-3 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25" />
         <div className="flex gap-2">
           <Sel name="sort" value={raw.sort || 'new'} options={[['new', t('filter.sort.new')], ['price', t('filter.sort.price')], ...(near ? [['nearest', t('filter.sort.nearest')] as const] : [])]} />
           <button className="rounded-xl bg-navy px-5 py-3 font-semibold text-white hover:bg-navy-2">{tf('apply')}</button>

@@ -11,7 +11,7 @@ import { BTN } from './bits';
 // keyin pul va hisob, oxirida hamkorlik taklifi.
 const TOPICS = ['demo', 'question', 'tech', 'refund', 'badphone', 'phone', 'account', 'data', 'copyright', 'partner'] as const;
 type Topic = (typeof TOPICS)[number];
-const INPUT = 'mt-1 w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25';
+const INPUT = 'mt-1 w-full rounded-xl border border-field bg-white px-4 py-3 text-base text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25';
 
 // text: ochilgan raqam ishlamaganda PhoneReveal havolasi xabarni oldindan qo'yadi
 export function ContactForm({ topic, text }: { topic?: string; text?: string }) {

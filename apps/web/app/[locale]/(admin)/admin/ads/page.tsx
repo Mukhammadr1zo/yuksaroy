@@ -349,9 +349,9 @@ export default function AdminAdsPage() {
             {sheet.d.imageUrl ? (
               <div className="flex items-start gap-3 rounded-xl border border-line p-3">
                 {isVideo(sheet.d.imageUrl)
-                  ? <video src={sheet.d.imageUrl} muted playsInline loop autoPlay className="h-24 w-24 rounded-lg object-cover" />
+                  ? <video src={sheet.d.imageUrl} muted playsInline loop autoPlay aria-label={ta('mediaPreview')} className="h-24 w-24 rounded-lg object-cover" />
                   // eslint-disable-next-line @next/next/no-img-element
-                  : <img src={sheet.d.imageUrl} alt="" className="h-24 w-24 rounded-lg object-cover" />}
+                  : <img src={sheet.d.imageUrl} alt={ta('mediaPreview')} className="h-24 w-24 rounded-lg object-cover" />}
                 <button type="button" className={BTN_GHOST} onClick={() => set({ imageUrl: '' })}>{ta('mediaRemove')}</button>
               </div>
             ) : null}

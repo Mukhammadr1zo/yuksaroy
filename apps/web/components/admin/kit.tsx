@@ -19,7 +19,7 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { api, ApiError } from '@/lib/api';
 import { AdminContext } from './context';
 
-export const INPUT = 'w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand';
+export const INPUT = 'w-full rounded-xl border border-field bg-white px-3 py-2 text-sm outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand';
 export const BTN = 'inline-flex items-center justify-center gap-1.5 rounded-full bg-teal px-4 py-2 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98] disabled:bg-line disabled:text-muted disabled:cursor-not-allowed';
 export const BTN_GHOST = 'inline-flex items-center justify-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition duration-150 hover:border-teal hover:text-teal-ink active:scale-[0.98] disabled:opacity-60';
 export const BTN_DANGER = 'inline-flex items-center justify-center gap-1.5 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition duration-150 hover:bg-red-50 active:scale-[0.98] disabled:opacity-60';
@@ -531,7 +531,7 @@ export function Pager({ page, pages, onPage }: { page: number; pages: number; on
           onChange={(e) => setJump(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } }}
           onBlur={() => jump && go()}
-          className="w-16 rounded-lg border border-line bg-white px-2 py-1 text-center font-mono text-sm text-navy outline-none focus:border-teal"
+          className="w-16 rounded-lg border border-field bg-white px-2 py-1 text-center font-mono text-sm text-navy outline-none focus:border-teal"
         />
       </label>
     </nav>

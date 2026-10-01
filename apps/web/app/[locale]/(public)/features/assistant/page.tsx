@@ -74,7 +74,7 @@ export default async function AssistantPage({ params }: Params) {
             <div className="absolute left-[-10%] top-[58%] w-[120%] rotate-[-8deg] border-t-2 border-dashed border-navy/50" />
             <div className="absolute left-[-10%] top-[34%] w-[120%] rotate-[14deg] border-t-2 border-[#F39C1F]/70" />
             <div className="absolute left-[54%] top-[44%] flex -translate-x-1/2 -translate-y-full flex-col items-center">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-white ring-2 ring-white"><MapPinIcon size={16} weight="fill" /></span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-white ring-2 ring-white"><MapPinIcon size={16} weight="fill" aria-hidden="true" /></span>
             </div>
             <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-line bg-white/95 px-4 py-3">
               <p className="text-xs font-semibold text-muted">{t('example.result')}</p>

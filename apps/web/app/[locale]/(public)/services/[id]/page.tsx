@@ -25,7 +25,7 @@ export default async function ServiceProfilePage({ params }: Params) {
   setRequestLocale(locale);
   const p = await load(id);
   if (!p) notFound();
-  const [t, tg, tsv] = await Promise.all([getTranslations('services.detail'), getTranslations('services.grid'), getTranslations('services')]);
+  const [t, tg, tsv, ta] = await Promise.all([getTranslations('services.detail'), getTranslations('services.grid'), getTranslations('services'), getTranslations('a11y')]);
   const lang = (['uz', 'ru', 'en'].includes(locale) ? locale : 'uz') as SearchLang;
   const regions = p.regions.length ? p.regions.map((r) => SEARCH_LABELS[lang].region[r as RegionCode] ?? r).join(', ') : tg('regionsAll');
   const facts: [string, string][] = [
@@ -59,7 +59,7 @@ export default async function ServiceProfilePage({ params }: Params) {
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('about')}</h2>
         <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{p.description}</p>
       </section>
-      <PhotoStrip photos={p.photos} />
+      <PhotoStrip photos={p.photos} alt={ta('photoOf', { name: p.title })} />
       {p.hasPhone && !p.isDemo ? (
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('phone')}</h2>

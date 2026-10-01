@@ -85,7 +85,7 @@ export function ListingReviews({ listingId, slug }: { listingId: string; slug: s
             ))}
           </div>
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={1000} placeholder={tl('placeholder')}
-            className="mt-3 w-full rounded-xl border border-line px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25" />
+            className="mt-3 w-full rounded-xl border border-field px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25" />
           <button disabled={!rating || busy} className="mt-2 rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink disabled:opacity-60">
             {busy ? tl('sending') : tl('send')}
           </button>

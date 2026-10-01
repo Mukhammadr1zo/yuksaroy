@@ -497,6 +497,7 @@
       "attach": "Attach a file",
       "download": "Open the file",
       "removeFile": "Remove file {name}",
+      "imageAlt": "Sent photo: {name}",
       "tooManyFiles": "Up to {max} files per message",
       "unread": "{count} new messages",
       "role": {

@@ -44,7 +44,8 @@
       "org": "Organization",
       "admin": "Admin panel",
       "logout": "Log out",
-      "subscription": "Subscription"
+      "subscription": "Subscription",
+      "menu": "Account menu"
     },
     "add": {
       "label": "Add",

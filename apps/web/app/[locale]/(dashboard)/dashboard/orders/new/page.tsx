@@ -198,7 +198,7 @@ function Wizard() {
         <form onSubmit={toStep2} className="mt-6 space-y-5 rounded-card border border-line bg-white p-6">
           {orgs.length > 1 ? (
             <label className="block text-sm font-semibold">{t('org')}
-              <select value={orgId} onChange={(e) => setOrgId(e.target.value)} className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-base font-normal">
+              <select value={orgId} onChange={(e) => setOrgId(e.target.value)} className="mt-1 w-full rounded-xl border border-field px-4 py-3 text-base font-normal">
                 {orgs.map((m) => <option key={m.orgId} value={m.orgId}>{m.org.name}</option>)}
               </select>
             </label>
@@ -227,13 +227,13 @@ function Wizard() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <label className="block text-sm font-semibold">{t('weightT')}
-              <input ref={weightRef} inputMode="decimal" required value={weightT} onChange={(e) => setWeightT(e.target.value)} className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
+              <input ref={weightRef} inputMode="decimal" required value={weightT} onChange={(e) => setWeightT(e.target.value)} className="mt-1 w-full rounded-xl border border-field px-4 py-3 font-mono text-base font-normal" />
             </label>
             <label className="block text-sm font-semibold">{t('wagonCount')}
-              <input inputMode="numeric" value={wagons} onChange={(e) => setWagons(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
+              <input inputMode="numeric" value={wagons} onChange={(e) => setWagons(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-field px-4 py-3 font-mono text-base font-normal" />
             </label>
             <label className="block text-sm font-semibold">{t('storage')}
-              <input inputMode="numeric" disabled={!extras.includes('STORAGE')} value={storageDays} onChange={(e) => setStorageDays(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal disabled:opacity-50" />
+              <input inputMode="numeric" disabled={!extras.includes('STORAGE')} value={storageDays} onChange={(e) => setStorageDays(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-field px-4 py-3 font-mono text-base font-normal disabled:opacity-50" />
             </label>
           </div>
 
@@ -314,10 +314,10 @@ function Wizard() {
           <section className="rounded-card border border-line bg-white p-6">
             <h2 className="text-lg font-bold">{t('extraInfo')}</h2>
             <label className="mt-4 block text-sm font-semibold">{t('wagonNumbers')}
-              <input ref={wagonRef} value={wagonNumbers} onChange={(e) => setWagonNumbers(e.target.value)} placeholder="62031845 62031846" className="mt-1 w-full rounded-xl border border-line px-4 py-3 font-mono text-base font-normal" />
+              <input ref={wagonRef} value={wagonNumbers} onChange={(e) => setWagonNumbers(e.target.value)} placeholder="62031845 62031846" className="mt-1 w-full rounded-xl border border-field px-4 py-3 font-mono text-base font-normal" />
             </label>
             <label className="mt-4 block text-sm font-semibold">{t('noteOptional')}
-              <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} className="mt-1 w-full rounded-xl border border-line px-4 py-3 text-base font-normal" />
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} className="mt-1 w-full rounded-xl border border-field px-4 py-3 text-base font-normal" />
             </label>
             <div className="mt-6 flex gap-2">
               <button type="button" onClick={() => setStep(1)} className="rounded-full border border-line px-5 py-2.5 font-semibold hover:bg-sand">{t('back')}</button>

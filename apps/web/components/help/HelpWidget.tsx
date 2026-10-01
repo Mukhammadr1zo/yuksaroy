@@ -181,7 +181,7 @@ export function HelpWidget() {
             <div className="flex items-center gap-2">
               <input
                 ref={input} value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder={t('placeholder')} aria-label={t('placeholder')}
-                className="h-11 w-full min-w-0 rounded-xl border border-line bg-white px-3 text-sm outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
+                className="h-11 w-full min-w-0 rounded-xl border border-field bg-white px-3 text-sm outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25"
               />
               <button type="submit" disabled={busy || !text.trim()} aria-label={t('send')} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal text-white transition hover:bg-teal-ink disabled:opacity-50">
                 <PaperPlaneRightIcon size={18} weight="fill" aria-hidden="true" />

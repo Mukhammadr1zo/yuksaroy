@@ -20,6 +20,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
   const cargo = r.board === 'CARGO';
   const t = useTranslations(cargo ? 'cargo.detail' : 'services.requestDetail');
   const td = useTranslations('services.detail');
+  const ta = useTranslations('a11y');
   const L = useMarketLabels();
   const next = requestHref(r);
   /*
@@ -88,7 +89,7 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
           <p className="mt-2 whitespace-pre-line text-sm wrap-anywhere">{r.description}</p>
         </section>
       ) : null}
-      <PhotoStrip photos={r.photos} />
+      <PhotoStrip photos={r.photos} alt={ta('photoOf', { name: r.title })} />
 
       {/* Raqam serverda OPEN, AWARDED va DONE so'rovga ochiladi; oxirgi ikkisida faqat tanlangan
           ijrochiga: ish bajarilgach ham hisob-kitob uchun kerak. Yopiq so'rovda "yo'q" deb aldamaydi */}

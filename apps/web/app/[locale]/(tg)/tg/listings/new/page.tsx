@@ -16,6 +16,8 @@ export default function TgNewListingPage() {
   const tf = useTranslations('tg.listings.form');
   const tc = useTranslations('tg.common');
   const tr = useTranslations('region');
+  // Saytdagi galereya bilan bir xil "{n}-rasm": tanlangan suratni nomlaydigan boshqa matn yo'q
+  const tgal = useTranslations('gallery');
   const lang = useLang();
   const L = LISTING_LABELS[lang];
   const { tg, me, needsPhone } = useTg();
@@ -111,7 +113,7 @@ export default function TgNewListingPage() {
             <div className="mt-1.5 flex flex-wrap gap-2">
               {photos.map((p, i) => (
                 <div key={p} className="relative h-20 w-24 overflow-hidden rounded-xl border border-line bg-sand">
-                  <img src={p} alt="" className="h-full w-full object-cover" />
+                  <img src={p} alt={tgal('photoN', { n: i + 1 })} className="h-full w-full object-cover" />
                   <button type="button" aria-label={tf('remove')} onClick={() => setPhotos(photos.filter((_, j) => j !== i))} className="absolute right-1 top-1 rounded-full bg-white/90 px-2 text-xs font-semibold text-red-700">x</button>
                 </div>
               ))}

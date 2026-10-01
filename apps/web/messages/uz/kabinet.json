@@ -497,6 +497,7 @@
       "attach": "Fayl biriktirish",
       "download": "Faylni ochish",
       "removeFile": "{name} faylini olib tashlash",
+      "imageAlt": "Yuborilgan surat: {name}",
       "tooManyFiles": "Bir xabarga ko'pi bilan {max} ta fayl",
       "unread": "{count} ta yangi xabar",
       "role": {

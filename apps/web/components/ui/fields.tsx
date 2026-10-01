@@ -107,7 +107,7 @@ function CountryPicker({ iso, onPick, disabled }: { iso: string; onPick: (iso: s
         type="button" disabled={disabled} aria-haspopup="listbox" aria-expanded={open} aria-label={t('country')}
         aria-controls={open ? id : undefined}
         onClick={() => { if (!open) place(); setOpen((v) => !v); }}
-        className="flex h-full items-center gap-1 rounded-xl border border-line bg-white px-3 font-mono text-sm text-navy outline-none transition-colors duration-150 hover:border-teal focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand"
+        className="flex h-full items-center gap-1 rounded-xl border border-field bg-white px-3 font-mono text-sm text-navy outline-none transition-colors duration-150 hover:border-teal focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand"
       >
         {iso === OTHER ? '+' : `+${dialOf(iso)}`}
         <CaretDownIcon size={12} weight="bold" className="text-muted" aria-hidden="true" />

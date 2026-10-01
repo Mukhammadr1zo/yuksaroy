@@ -150,7 +150,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
             const Icon = KIND_ICON[k];
             return (
               <button key={k} type="button" onClick={() => pickKind(k)} className="flex items-start gap-4 rounded-card border border-line bg-white p-5 text-left transition hover:border-teal focus-visible:border-teal">
-                <span className="rounded-xl bg-teal-soft p-3 text-teal-ink"><Icon size={28} weight="duotone" /></span>
+                <span className="rounded-xl bg-teal-soft p-3 text-teal-ink"><Icon size={28} weight="duotone" aria-hidden="true" /></span>
                 <span>
                   <span className="block font-display text-base font-bold">{L.kind[k]}</span>
                   <span className="mt-1 block text-sm text-muted">{t(`kindHint.${k}`)}</span>
@@ -170,7 +170,7 @@ export function ListingForm({ initial, presetKind }: { initial?: OwnerListing; p
   return (
     <form ref={formRef} className="space-y-5" onSubmit={(e) => { e.preventDefault(); void onSave(); }}>
       <div className="flex flex-wrap items-center gap-3">
-        <span className="flex items-center gap-2 rounded-full bg-teal-soft px-4 py-1.5 text-sm font-semibold text-teal-ink"><Icon size={18} weight="bold" /> {L.kind[kind]}</span>
+        <span className="flex items-center gap-2 rounded-full bg-teal-soft px-4 py-1.5 text-sm font-semibold text-teal-ink"><Icon size={18} weight="bold" aria-hidden="true" /> {L.kind[kind]}</span>
         {!id ? <button type="button" onClick={() => setKind(null)} className="text-sm text-muted underline hover:text-ink">{t('changeKind')}</button> : null}
         {status ? <span className="ml-auto flex items-center gap-2 text-sm text-muted">{t('currentStatus')}: <ListingStatusPill status={status} /></span> : null}
       </div>

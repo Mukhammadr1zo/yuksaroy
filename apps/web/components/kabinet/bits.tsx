@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { LISTING_LABELS, type ListingStatus, type SearchLang } from '@yuksaroy/domain';
 import { ApiError } from '@/lib/api';
 
-export const INPUT = 'w-full rounded-xl border border-line bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand disabled:text-muted';
+export const INPUT = 'w-full rounded-xl border border-field bg-white px-4 py-2.5 text-base outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/25 disabled:bg-sand disabled:text-muted';
 // Xato holatidagi chegara. Bolaning o'z className iga Field ichidan qo'shib bo'lmaydi
 // (uning sinfini buzardi), shuning uchun chaqiruvchi o'zi qo'shadi: className={`${INPUT} ${err ? INPUT_ERR : ''}`}
 export const INPUT_ERR = 'border-red-600 focus:border-red-600 focus:ring-red-600/25';
