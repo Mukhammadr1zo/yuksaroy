@@ -123,7 +123,9 @@
         "p8": "ys-compare: solishtirish savati. ys-visit: bitta tashrif ikki marta sanalmasligi uchun. ys-first-seen va ys-nudge-snooze: birinchi tashrif vaqti va ro'yxatdan o'tish taklifining uxlash vaqti.",
         "p9": "ys-ad-quiet: reklamaning jim vaqti. Unda faqat vaqt soni turadi, qaysi reklama ekani yozilmaydi. ys-tg-token: Telegram ilovasi ichidagi kirish belgisi. Bu bittasi istisno: har bir so'rovda serverga yuboriladi, chunki ilova ichida u cookie o'rnini bosadi. ys-admin- bilan boshlanadiganlar: panel sozlamalari, ular faqat xodimning brauzerida bo'ladi.",
         "p10": "ys-order-draft va ys-req- bilan boshlanadiganlarni alohida aytamiz: bular yuborilmagan buyurtma va so'rov qoralamalari, ya'ni ichida sizning o'zingiz yozgan matningiz, shu jumladan aloqa telefoni bo'lishi mumkin. Ularni bizga yubormaymiz, ular brauzeringizda qoladi. Kerak bo'lmasa formani yuborib yoki brauzer sozlamasidan sayt ma'lumotini o'chirib o'zingiz tozalaysiz.",
-        "p11": "Uchinchi tomonning cookie'si ham, kuzatuvchisi ham yo'q: yuqoridagilarning hammasi bizniki."
+        "p11": "Uchinchi tomonning cookie'si ham, kuzatuvchisi ham yo'q: yuqoridagilarning hammasi bizniki.",
+        "p12": "Saytga birinchi kirganingizda pastda rozilik chizig'i chiqadi. U faqat to'rtta narsa uchun ruxsat so'raydi: ys-first-seen, ys-nudge-snooze, ys-ad-quiet va ys-visit. Javobingiz ys-consent da saqlanadi, ichida tanlov va sana, boshqa hech narsa. Buning o'zi rozilik so'ramaydi, chunki u aynan javobingizni bajarish uchun kerak: eslab qolmasak, chiziq har sahifada qaytib chiqardi.",
+        "p13": "Rozi bo'lmasangiz pastki reklama banneri umuman chizilmaydi, ro'yxatdan o'tish taklifi ko'rsatilmaydi va tashrif mayog'i yuborilmaydi, ya'ni siz tashrif sanog'iga tushmaysiz. Yuqorida sanalgan zarur cookie'lar va yozuvlar esa rozilikdan qat'i nazar qo'yiladi: kirish, til tanlovi, solishtirish savati va yuborilmagan qoralamalaringiz ularsiz ishlamaydi."
       }
     }
   }

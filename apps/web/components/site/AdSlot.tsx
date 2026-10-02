@@ -22,6 +22,7 @@ import { pushImpression } from '@/components/catalog/Impressions';
 import { usePathname } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { getCompare, getCompareServer, subscribeCompare } from '@/lib/compare';
+import { getConsent, getConsentServer, subscribeConsent } from '@/lib/consent';
 
 type Ad = { id: string; title: string; body: string | null; imageUrl: string | null; href: string };
 /*
@@ -341,6 +342,7 @@ function BottomAd({ ad, label, closeLabel, reduced }: { ad: BottomAdData; label:
   const path = usePathname();
   const compare = useSyncExternalStore(subscribeCompare, getCompare, getCompareServer);
   const dialog = useSyncExternalStore(subscribeDom, dialogOpen, () => false);
+  const consent = useSyncExternalStore(subscribeConsent, getConsent, getConsentServer);
   const [shown, setShown] = useState(false);
   const box = useRef<HTMLElement>(null);
 
@@ -358,6 +360,13 @@ function BottomAd({ ad, label, closeLabel, reduced }: { ad: BottomAdData; label:
    */
   const [quiet, setQuiet] = useState(true);
   useEffect(() => {
+    /*
+     * Rozilik berilmaguncha jim holicha qoladi, ya'ni banner chizilmaydi. Sabab quyidagi
+     * "yoza olmasak chiqmaydi" qoidasining aynan o'zi: jim vaqt ys-ad-quiet ga yoziladi va
+     * roziliksiz biz uni yoza olmaymiz. Yozuvsiz esa yopilgani eslanmaydi va banner har
+     * sahifada qaytib chiqardi. Odam rozi bo'lganda bu effekt qayta yuradi.
+     */
+    if (consent !== 'yes') { setQuiet(true); return; }
     try {
       const until = Number(localStorage.getItem(QUIET_KEY) || 0);
       // Bor sonni qaytib yozamiz: maxfiy oynada o'qish ishlashi mumkin, lekin yozish
@@ -366,7 +375,7 @@ function BottomAd({ ad, label, closeLabel, reduced }: { ad: BottomAdData; label:
       localStorage.setItem(QUIET_KEY, String(until));
       setQuiet(until > Date.now());
     } catch { /* yoza olmasak jim holicha qoladi va banner chiqmaydi */ }
-  }, []);
+  }, [consent]);
 
   /**
    * Yopish. Mayoq faqat odam bosganda ketadi: showSec tugab o'zi ketgani "turtib

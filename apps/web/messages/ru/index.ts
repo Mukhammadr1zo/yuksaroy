@@ -39,5 +39,6 @@ import wagon from './wagon.json';
 import help from './help.json';
 import gallery from './gallery.json';
 import entity from './entity.json';
+import consent from './consent.json';
 
-export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2, ...subscription, ...services, ...cargo, ...wagon, ...help, ...gallery, ...advertise, ...entity };
+export default { ...base, ...admin, ...analytics, ...auth2, ...booking, ...claim, ...claimStatus, ...compare, ...dashboard2, ...companies, ...hubs, ...kabinet, ...kyc, ...listing, ...map, ...marketing, ...nav2, ...orgKind, ...premium, ...reviews, ...standart, ...terminalsAdmin, ...about, ...blog, ...contact, ...features, ...pricing, ...urgent, ...storefront, ...tg, ...a11y, ...seo2, ...subscription, ...services, ...cargo, ...wagon, ...help, ...gallery, ...advertise, ...entity, ...consent };

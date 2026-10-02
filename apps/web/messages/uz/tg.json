@@ -31,6 +31,8 @@
       "searchPh": "Andijonda tushirish, 20 vagon",
       "searchAria": "Qidiruv",
       "search": "Qidirish",
+      "wagon": "Vagon qayerda",
+      "wagonHint": "Raqam bo'yicha oxirgi stansiya, birinchi qidiruv bepul",
       "cats": {
         "terminal": "Terminallar",
         "equipment": "Texnika",
@@ -67,6 +69,39 @@
       "unresolved": "tushunilmadi: {words}",
       "map": "Xaritada",
       "more": "{shown} / {total} ko'rsatildi"
+    },
+    "wagon": {
+      "title": "Vagon qayerda",
+      "lead": "Raqamni kiriting: oxirgi stansiya, holati va ma'lumot vaqti.",
+      "label": "Vagon raqami",
+      "ph": "24567890",
+      "hint": "7 yoki 8 ta raqam. Birinchi qidiruv bepul. O'zingiz qidirgan vagonni 6 soat ichida qayta ochish ham bepul.",
+      "submit": "Qidirish",
+      "searching": "Qidirilmoqda",
+      "quotaFree": "Bepul qidiruv qoldi: {left} ta",
+      "quotaSub": "Obunachi: cheksiz qidiruv",
+      "subscribe": "Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.",
+      "subscribeCta": "Obuna bo'lish",
+      "price": "Oyiga {price} so'm.",
+      "guest": "Sessiya tugadi. Qidirish uchun qayta kiring.",
+      "notFound": "{no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.",
+      "current": "Oxirgi joylashuvi",
+      "stationUnknown": "Stansiya ko'rsatilmagan",
+      "date": "Vaqti",
+      "fetchedAt": "Yangilangan: {at}",
+      "recent": "Oxirgi qidirganlarim",
+      "state": {
+        "loaded": "Yuklangan",
+        "empty": "Bo'sh",
+        "unknown": "Holati noma'lum"
+      },
+      "errors": {
+        "WAGON_NO_INVALID": "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
+        "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
+        "WAGON_UPSTREAM": "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
+        "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
+        "generic": "Qidirilmadi. Qayta urinib ko'ring."
+      }
     },
     "terminal": {
       "notFound": "Terminal topilmadi.",

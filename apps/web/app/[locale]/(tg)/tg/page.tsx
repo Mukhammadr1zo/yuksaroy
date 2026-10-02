@@ -2,7 +2,7 @@
 // Mini App bosh sahifasi: salom va telefon holati, qidiruv, to'rt toifa sanoq bilan, bugun bo'sh slotli terminallar, ochiq buyurtmalar, shoshilinch so'rov.
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRightIcon, LightningIcon, MagnifyingGlassIcon, MapTrifoldIcon, TrainIcon, TruckIcon, UserIcon, WarehouseIcon, ClipboardTextIcon, MegaphoneIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, LightningIcon, MagnifyingGlassIcon, MapTrifoldIcon, TrainIcon, TrainRegionalIcon, TruckIcon, UserIcon, WarehouseIcon, ClipboardTextIcon, MegaphoneIcon } from '@phosphor-icons/react';
 import { EQUIPMENT_KINDS } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
@@ -78,6 +78,15 @@ export default function TgHome() {
           </Link>
         ))}
       </div>
+
+      {/* Vagon qidiruvi: asbob, lekin pastdagi to'rt ustunli LINKS qatoriga qo'shilmadi.
+          Beshinchi katak 390px ekranda ustunni 65px ga tushirar va "Buyurtmalar" yozuvi
+          kesilardi. Shu sababli alohida qator karta, shoshilinch so'rov kartasi bilan bir xil. */}
+      <Link href="/tg/wagon" onClick={() => haptic()} className={`${CARD} mt-4 flex items-center gap-3 p-4 active:bg-sand`}>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-soft text-teal-ink"><TrainRegionalIcon size={22} weight="duotone" aria-hidden="true" /></span>
+        <span className="min-w-0"><span className="block font-bold">{t('wagon')}</span><span className="block text-xs text-muted">{t('wagonHint')}</span></span>
+        <ArrowRightIcon size={18} className="ml-auto shrink-0 text-muted" aria-hidden="true" />
+      </Link>
 
       <section className="mt-6">
         <h2 className="mb-2 text-sm font-bold">{t('bookable')}</h2>

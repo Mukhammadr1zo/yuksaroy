@@ -8,11 +8,12 @@
  * Kompyuterda chap pastda turadi: o'ng past chat oynasiniki, o'rta past taqqoslash
  * panelniki. z-40: chat (z-50) ochiq bo'lsa u ustun.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { UserCirclePlusIcon, XIcon } from '@phosphor-icons/react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { hasSession } from '@/lib/api';
+import { getConsent, getConsentServer, subscribeConsent } from '@/lib/consent';
 
 const AFTER_MS = 3 * 60_000;
 const SNOOZE_MS = 7 * 86_400_000;
@@ -23,8 +24,13 @@ export function RegisterNudge() {
   const t = useTranslations('subscription.nudge');
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const consent = useSyncExternalStore(subscribeConsent, getConsent, getConsentServer);
 
   useEffect(() => {
+    // Rozilik berilmaguncha taklif umuman chizilmaydi: uning vaqtini (ys-first-seen,
+    // ys-nudge-snooze) eslab qololmasak, taklif har sahifada qaytarardi. Pastdagi maxfiy
+    // oyna qoidasi bilan bir xil sabab, faqat bu yerda qarorni odamning o'zi beradi.
+    if (consent !== 'yes') return;
     // Forma to'ldirilayotgan sahifada taklif chiqmaydi: kirish qadami formaning o'zida
     // va oyna telefonda aynan yuborish tugmasi ustiga tushardi
     if (hasSession() || /^\/(login|signup|cargo\/new|services\/request)/.test(pathname)) return;
@@ -38,7 +44,7 @@ export function RegisterNudge() {
     if (snoozed > Date.now()) return;
     const id = setTimeout(() => { if (!hasSession()) setOpen(true); }, Math.max(0, first + AFTER_MS - Date.now()));
     return () => clearTimeout(id);
-  }, [pathname]);
+  }, [pathname, consent]);
 
   function close() {
     setOpen(false);

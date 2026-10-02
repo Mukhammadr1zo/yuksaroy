@@ -8,6 +8,7 @@ import { OG_LOCALE, SITE } from '@/lib/seo';
 import '../globals.css';
 import { SkipLink } from '@/components/site/SkipLink';
 import { VisitBeacon } from '@/components/site/VisitBeacon';
+import { CookieConsent } from '@/components/site/CookieConsent';
 
 // next/font: build vaqtida yuklanadi, self-host, layout shift yo'q (CLS ≤ .05)
 // Kirill subseti uchala shriftda ham bor, ya'ni rus tili qo'shimcha fayl talab qilmaydi.
@@ -61,6 +62,11 @@ export default async function RootLayout({
           <SkipLink />
           {children}
           <VisitBeacon />
+          {/* Rozilik chizig'i aynan mayoqning yonida: mayoq shu javobga bog'liq, ya'ni
+              so'rov ham u yurgan hamma yo'lda chiqishi kerak. Ilgari chiziq faqat (public)
+              guruhida va bosh sahifada edi, /k/[slug] yoki /map ga kelgan odam esa umuman
+              so'ralmay, tashrifi ham sanalmay qolardi. */}
+          <CookieConsent />
         </NextIntlClientProvider>
       </body>
     </html>

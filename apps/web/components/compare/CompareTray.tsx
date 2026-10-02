@@ -14,10 +14,12 @@ export function CompareTray() {
   const s = useSyncExternalStore(subscribeCompare, getCompare, getCompareServer);
   const path = usePathname();
   const cats = CATS.filter((c) => s[c].length);
+  // Pastki masofaga --ad-bottom qo'shiladi: cookie roziligi chizig'i ko'rinib turgan bo'lsa
+  // savat uning ustiga ko'chadi. O'lchamni chiziqning o'zi yozadi, ya'ni balandlik bitta joyda.
   // Solishtirish sahifasining o'zida savat ko'rinmaydi: jadval allaqachon ochiq
   if (!cats.length || path.includes('/compare')) return null;
   return (
-    <aside aria-label={t('tray.aria')} className="sticky bottom-3 z-40 mx-auto mt-6 w-[calc(100%-1.5rem)] max-w-3xl rounded-card border border-navy/20 bg-white p-3 shadow-lg sm:w-[calc(100%-3rem)]">
+    <aside aria-label={t('tray.aria')} className="sticky bottom-[calc(0.75rem_+_var(--ad-bottom,0px))] z-40 mx-auto mt-6 w-[calc(100%-1.5rem)] max-w-3xl rounded-card border border-navy/20 bg-white p-3 shadow-lg sm:w-[calc(100%-3rem)]">
       {cats.map((c) => (
         <div key={c} className="flex flex-wrap items-center gap-2 py-1">
           <span className="font-mono text-[11px] font-semibold text-muted">{t(`cat.${c}`)} · {t('tray.count', { count: s[c].length })}</span>

@@ -1,0 +1,9 @@
+{
+  "consent": {
+    "title": "Cookie roziligi",
+    "text": "Reklamaning jim vaqtini, ro'yxatdan o'tish taklifining vaqtini va tashrif belgisini brauzeringizda eslab qolishimizga ruxsat berasizmi?",
+    "accept": "Ruxsat beraman",
+    "decline": "Ruxsat bermayman",
+    "more": "Maxfiylik"
+  }
+}

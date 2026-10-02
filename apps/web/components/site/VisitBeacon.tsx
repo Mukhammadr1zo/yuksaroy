@@ -14,17 +14,21 @@
  * tashrif emas. Yo'l tili prefiksisiz olinadi, aks holda /ru/dashboard bu ro'yxatga
  * tushmay, egasining har kuni tashrif bo'lib sanalardi.
  */
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { usePathname } from '@/i18n/navigation';
+import { PRIVATE_PATH, getConsent, getConsentServer, subscribeConsent } from '@/lib/consent';
 
 const KEY = 'ys-visit';
-const SKIP = /^\/(dashboard|admin|tg)(\/|$)/;
 
 export function VisitBeacon() {
   const path = usePathname();
+  const consent = useSyncExternalStore(subscribeConsent, getConsent, getConsentServer);
 
   useEffect(() => {
-    if (SKIP.test(path)) return;
+    // Rozilik berilmaguncha mayoq yuborilmaydi va ys-visit yozilmaydi: takrorni to'suvchi
+    // belgisiz har sahifa ochilishi yangi tashrif bo'lib sanalardi. Ya'ni rozi bo'lmagan
+    // odam tashrif sanog'iga umuman tushmaydi, bu ataylab.
+    if (consent !== 'yes' || PRIVATE_PATH.test(path)) return;
     const today = new Date().toISOString().slice(0, 10);
     try {
       if (localStorage.getItem(KEY) === today) return;
@@ -36,7 +40,7 @@ export function VisitBeacon() {
     }
     // Javob kutilmaydi: sahifa chizilishiga ta'sir qilmasin
     void fetch('/api/v1/events/visit', { method: 'POST', keepalive: true }).catch(() => {});
-  }, [path]);
+  }, [path, consent]);
 
   return null;
 }

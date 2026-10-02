@@ -123,7 +123,9 @@
         "p8": "ys-compare: the comparison basket. ys-visit: so one visit is not counted twice. ys-first-seen and ys-nudge-snooze: the time of your first visit and the snooze time of the sign-up offer.",
         "p9": "ys-ad-quiet: the quiet time for adverts. It holds a time number only, which advert it was is not written down. ys-tg-token: the sign-in marker inside the Telegram app. This is the one exception: it goes to the server with every request, because inside the app it takes the place of a cookie. The ones starting with ys-admin-: panel settings, they only exist in a staff browser.",
         "p10": "We say this about ys-order-draft and the ones starting with ys-req- separately: they are the drafts of an order and a request you have not sent, so they hold text you wrote yourself, including a contact phone number. We do not take them, they stay in your browser. If you do not need it, you clear it yourself: by sending the form or by removing the site data in your browser settings.",
-        "p11": "There is no third party cookie and no third party tracker: everything listed above is our own."
+        "p11": "There is no third party cookie and no third party tracker: everything listed above is our own.",
+        "p12": "The first time you open the site, a consent bar appears at the bottom. It asks permission for exactly four things: ys-first-seen, ys-nudge-snooze, ys-ad-quiet and ys-visit. Your answer is kept in ys-consent, holding the choice and the date, nothing else. That one does not ask for consent itself, because it is what carries your answer out: without it the bar would come back on every page.",
+        "p13": "If you do not allow it, the bottom advert banner is not drawn at all, the sign-up offer is not shown and the visit marker is not sent, so you are not counted in the visit numbers. The necessary cookies and entries listed above are set regardless of consent: signing in, the language choice, the comparison basket and your unsent drafts do not work without them."
       }
     }
   }

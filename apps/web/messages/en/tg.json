@@ -31,6 +31,8 @@
       "searchPh": "Unloading in Andijan, 20 wagons",
       "searchAria": "Search",
       "search": "Search",
+      "wagon": "Where is the wagon",
+      "wagonHint": "Last station by number, the first search is free",
       "cats": {
         "terminal": "Terminals",
         "equipment": "Equipment",
@@ -67,6 +69,39 @@
       "unresolved": "not understood: {words}",
       "map": "On the map",
       "more": "{shown} / {total} shown"
+    },
+    "wagon": {
+      "title": "Where is the wagon",
+      "lead": "Enter the number: last station, state and the time the data refers to.",
+      "label": "Wagon number",
+      "ph": "24567890",
+      "hint": "7 or 8 digits. The first search is free. Reopening a wagon you searched yourself within 6 hours is free too.",
+      "submit": "Search",
+      "searching": "Searching",
+      "quotaFree": "Free searches left: {left}",
+      "quotaSub": "Subscriber: unlimited searches",
+      "subscribe": "Your free search is used up. Unlimited searches need a subscription.",
+      "subscribeCta": "Subscribe",
+      "price": "{price} som a month.",
+      "guest": "The session ended. Sign in again to search.",
+      "notFound": "Wagon {no} was not found. Check the number and try again.",
+      "current": "Last known location",
+      "stationUnknown": "Station not given",
+      "date": "Time",
+      "fetchedAt": "Updated: {at}",
+      "recent": "My recent searches",
+      "state": {
+        "loaded": "Loaded",
+        "empty": "Empty",
+        "unknown": "State unknown"
+      },
+      "errors": {
+        "WAGON_NO_INVALID": "The number must have 7 or 8 digits.",
+        "WAGON_NOT_CONFIGURED": "Wagon search is not working yet. It will be available soon.",
+        "WAGON_UPSTREAM": "The search did not go through. Try again in a little while.",
+        "RATE_LIMITED": "Too many searches. You can continue in an hour.",
+        "generic": "Search failed. Try again."
+      }
     },
     "terminal": {
       "notFound": "Terminal not found.",

@@ -1,5 +1,5 @@
 // YukSaroy Telegram bot: terminal qidiruvi (API /search/parse orqali) va kirish (OTP) kanali.
-// Buyruqlar ro'yxati BotFather'da emas, Bot API orqali o'rnatiladi (scripts/setup-profile.mjs).
+// Buyruqlar ro'yxati BotFather'da emas, bot ishga tushganda kodda o'rnatiladi (pastda CMD_DESC).
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Context, Markup, Telegraf } from 'telegraf';
@@ -146,7 +146,7 @@ const T: Record<Lang, {
     terminals: (n) => `${n} terminal`, free: (n) => `${n} tasida bugun bo'sh joy`, cheapest: (p) => `eng arzon ${p}`, nearest: (km) => `eng yaqini ${km} km`,
     slots: (n) => (n > 0 ? `Bugun ${n} ta bo'sh joy` : "Bugun bo'sh joy yo'q"),
     contactBtn: "📱 Telefon raqamimni yuborish",
-    welcome: 'YukSaroy ga xush kelibsiz.',
+    welcome: "YukSaroy ga xush kelibsiz.\nVagon raqamini shunchaki yuborsangiz, oxirgi joylashuvi chiqadi. Terminal uchun nima kerakligini oddiy so'zlar bilan yozing.",
     askPhone: "Platformaga kirish kodini shu yerda olasiz. Avval telefon raqamingizni tasdiqlang:",
     askPhoneLogin: 'Kirish uchun telefon raqamingizni tasdiqlang.',
     ownContactOnly: "Iltimos, faqat o'z raqamingizni yuboring. Buning uchun pastdagi tugmadan foydalaning.",
@@ -165,7 +165,7 @@ const T: Record<Lang, {
     terminals: (n) => `${n} ${qtyWord('ru', 'terminals', n)}`, free: (n) => `${n} со свободными местами сегодня`, cheapest: (p) => `дешевле всего ${p}`, nearest: (km) => `ближайший ${km} км`,
     slots: (n) => (n > 0 ? `Сегодня свободно: ${n} ${qtyWord('ru', 'slots', n)}` : 'Сегодня свободных мест нет'),
     contactBtn: "📱 Отправить мой номер",
-    welcome: 'Добро пожаловать в YukSaroy.',
+    welcome: 'Добро пожаловать в YukSaroy.\nОтправьте номер вагона, и придёт его последнее местоположение. Нужен терминал: напишите простыми словами, что нужно.',
     askPhone: 'Код для входа на платформу придёт сюда. Сначала подтвердите номер телефона:',
     askPhoneLogin: 'Для входа подтвердите номер телефона.',
     ownContactOnly: 'Отправьте, пожалуйста, только свой номер. Воспользуйтесь кнопкой ниже.',
@@ -184,7 +184,7 @@ const T: Record<Lang, {
     terminals: (n) => `${n} terminal${n === 1 ? '' : 's'}`, free: (n) => `${n} with free spots today`, cheapest: (p) => `cheapest ${p}`, nearest: (km) => `nearest ${km} km`,
     slots: (n) => (n > 0 ? `${n} free spot${n === 1 ? '' : 's'} today` : 'No free spots today'),
     contactBtn: "📱 Send my phone number",
-    welcome: 'Welcome to YukSaroy.',
+    welcome: 'Welcome to YukSaroy.\nSend a wagon number and its last known location comes back. For a terminal, write in plain words what you need.',
     askPhone: 'Your sign-in code will arrive here. First confirm your phone number:',
     askPhoneLogin: 'Confirm your phone number to sign in.',
     ownContactOnly: 'Please send only your own number. Use the button below.',
@@ -225,12 +225,13 @@ const dayOf = (d: string) => (/^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0, 10) : d)
 
 /** Vagon matnlari: saytdagi wagon.json tarjimalari bilan bir xil so'zlar. */
 const W: Record<Lang, {
-  hint: string; notLinked: string; notFound: (no: string) => string;
+  btn: string; hint: string; notLinked: string; notFound: (no: string) => string;
   current: string; stationUnknown: string; state: Record<'loaded' | 'empty' | 'unknown', string>;
   date: string; subscribe: string; price: (som: string) => string; subscribeCta: string;
   quotaFree: (left: number) => string; err: Record<string, string>;
 }> = {
   uz: {
+    btn: 'Vagon qayerda',
     hint: "Vagon raqamini yozing, masalan: 24567890. Raqam 7 yoki 8 ta raqamdan iborat.",
     notLinked: "Vagon qidiruvi uchun telefon raqamingizni tasdiqlash kerak.",
     notFound: (no) => `${no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.`,
@@ -249,6 +250,7 @@ const W: Record<Lang, {
     },
   },
   ru: {
+    btn: 'Где вагон',
     hint: 'Напишите номер вагона, например: 24567890. Номер состоит из 7 или 8 цифр.',
     notLinked: 'Для поиска вагона нужно подтвердить номер телефона.',
     notFound: (no) => `Вагон ${no} не найден. Проверьте номер и попробуйте снова.`,
@@ -267,6 +269,7 @@ const W: Record<Lang, {
     },
   },
   en: {
+    btn: 'Where is my wagon',
     hint: 'Send a wagon number, for example: 24567890. The number has 7 or 8 digits.',
     notLinked: 'Wagon search needs your phone number confirmed.',
     notFound: (no) => `Wagon ${no} was not found. Check the number and try again.`,
@@ -300,7 +303,10 @@ type Btn = ReturnType<typeof Markup.button.url> | ReturnType<typeof Markup.butto
 const rowsOf = (rows: (Btn | null)[][]) =>
   rows.map((r) => r.filter((b): b is Btn => b !== null)).filter((r) => r.length > 0);
 const appKeyboard = (lang: Lang) => {
-  const rows = rowsOf([[appBtn(T[lang].app, '', lang)]]);
+  // Vagon tugmasi aynan shu yerda: asosiy shikoyat odam /start dan keyin vagon qidiruvi
+  // borligini umuman ko'rmasligi edi. Mini App da APP_URL + /wagon (ya'ni /tg/wagon),
+  // https bo'lmasa sayt tomonidagi /wagon sahifasi ochiladi.
+  const rows = rowsOf([[appBtn(T[lang].app, '', lang)], [appBtn(W[lang].btn, '/wagon', lang)]]);
   return rows.length ? Markup.inlineKeyboard(rows) : undefined;
 };
 
@@ -376,7 +382,10 @@ async function wagon(ctx: Context, no: string, lang: Lang) {
     if (code === 'NOT_LINKED') return askContact(ctx, lang, w.notLinked);
     if (code === 'SUBSCRIPTION_REQUIRED') {
       const price = body?.priceSom ? ` ${w.price(body.priceSom.toLocaleString('ru-RU').replace(/\s/g, ' '))}` : '';
-      const rows = rowsOf([[appBtn(w.subscribeCta, '/dashboard/subscription', lang)]]);
+      // Obuna sahifasi ikki tomonda ikki xil yo'lda: Mini App da /tg/subscription,
+      // saytda /dashboard/subscription. Oldin ikkalasi uchun ham ikkinchisi berilardi,
+      // ya'ni Mini App tugmasi mavjud bo'lmagan /tg/dashboard/subscription ga olib borardi.
+      const rows = rowsOf([[appBtn(w.subscribeCta, '/subscription', lang, '/dashboard/subscription')]]);
       return ctx.reply(`${w.subscribe}${price}`, rows.length ? Markup.inlineKeyboard(rows) : undefined);
     }
     return ctx.reply(w.err[code] ?? w.err.generic!);
@@ -483,8 +492,65 @@ bot.catch((err, ctx) => {
   console.error('bot xatosi:', ctx.updateType, err);
 });
 
+// ── Buyruqlar menyusi ──
+
+// Telegram dagi "/" menyusi. Tartib shu ro'yxatdagidek ko'rinadi: avval kirish,
+// keyin eng ko'p so'raladigan vagon qidiruvi.
+// ponytail: scripts/setup-profile.mjs dagi CMDS endi ortiqcha (u qo'lda ishga tushirilardi
+// va hech kim tushirmagan, shuning uchun menyu bo'sh edi). Keyingi tegishda o'sha fayldan
+// faqat CMDS loop i o'chirilsin, nom va tavsif o'rnatish o'sha yerda qolaveradi.
+const CMD_ORDER = ['start', 'vagon', 'qidir', 'app', 'help'] as const;
+// Tavsif kichik harfdan boshlanadi (Telegram menyusidagi odat) va 256 belgidan qisqa.
+// Uchta til bitta jadvalda: kalitlar tipdan kelib chiqib aynan teng bo'lishga majbur.
+const CMD_DESC: Record<Lang, Record<(typeof CMD_ORDER)[number], string>> = {
+  uz: {
+    start: 'boshlash va telefon raqamini tasdiqlash',
+    vagon: 'vagon qayerda, masalan: /vagon 24567890',
+    qidir: 'terminal qidirish, masalan: /qidir Andijonda tushirish',
+    app: 'mini ilovani ochish',
+    help: 'bot nima qiladi',
+  },
+  ru: {
+    start: 'начать и подтвердить номер телефона',
+    vagon: 'где вагон, например: /vagon 24567890',
+    qidir: 'поиск терминала, например: /qidir выгрузка в Андижане',
+    app: 'открыть мини-приложение',
+    help: 'что умеет бот',
+  },
+  en: {
+    start: 'start and confirm your phone number',
+    vagon: 'where is my wagon, e.g. /vagon 24567890',
+    qidir: 'find a terminal, e.g. /qidir unloading in Andijan',
+    app: 'open the Mini App',
+    help: 'what this bot does',
+  },
+};
+
+/**
+ * Buyruqlar ro'yxatini Telegram ga yozadi.
+ *
+ * Har til alohida chaqiriladi, chunki Telegram ro'yxatni mijozning language_code iga
+ * qarab tanlaydi. Tilsiz chaqiruv sukut nusxa: mijoz tiliga ro'yxat topilmasa shu
+ * ko'rinadi, bizda u uz.
+ *
+ * Xato butun botni yiqitmaydi: ro'yxat eskirgan bo'lsa ham bot javob berishi kerak,
+ * shuning uchun har chaqiruv o'z catch i bilan va faqat console ga yoziladi.
+ */
+const setCommands = async () => {
+  for (const lang of [null, 'uz', 'ru', 'en'] as const) {
+    const commands = CMD_ORDER.map((command) => ({ command, description: CMD_DESC[lang ?? 'uz'][command] }));
+    try {
+      await bot.telegram.setMyCommands(commands, lang ? { language_code: lang } : undefined);
+    } catch (e) {
+      console.error('bot: setMyCommands', lang ?? 'default', e);
+    }
+  }
+};
+
 // launch() promise'i to'xtaganda bajariladi: shuning uchun "ishga tushdi" xabari callbackda,
-// xato esa ushlanadi (aks holda jim yiqilardi).
-bot.launch(() => console.log('bot: polling')).catch((e) => { console.error('bot: launch failed', e); process.exit(1); });
+// xato esa ushlanadi (aks holda jim yiqilardi). Buyruqlar ro'yxati ham shu callbackda:
+// launch() token ni tekshirgandan keyin bir marta yoziladi va kutilmaydi, shuning uchun
+// polling boshlanishi kechikmaydi.
+bot.launch(() => { console.log('bot: polling'); void setCommands(); }).catch((e) => { console.error('bot: launch failed', e); process.exit(1); });
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));

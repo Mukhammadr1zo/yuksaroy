@@ -130,9 +130,9 @@ export function HelpWidget() {
           id="help-widget" role="dialog" aria-label={t('title')}
           // Kompyuterdagi pastki masofaga --ad-bottom qo'shiladi: reklama banneri ko'rinib
           // turgan bo'lsa oyna uning ustida ochiladi. O'lchamni banner o'zi yozadi (AdSlot.tsx).
-          // Telefonda oyna pastga yopishadi, lekin u yerda banner umuman chizilmaydi: ochiq
-          // oyna bo'lsa banner o'zini ko'rsatmaydi.
-          className="fixed inset-x-0 bottom-0 z-40 flex max-h-[85dvh] flex-col rounded-t-card border border-line bg-white shadow-2xl sm:inset-x-auto sm:bottom-[calc(6rem_+_var(--ad-bottom,0px))] sm:right-6 sm:h-[520px] sm:max-h-[calc(100dvh-8rem)] sm:w-[380px] sm:rounded-card"
+          // Telefonda ham shu o'lcham qo'shiladi: banner ochiq oynada chizilmaydi, lekin
+          // cookie roziligi chizig'i chiziladi va usiz oynaning yozish maydonini yopardi.
+          className="fixed inset-x-0 bottom-[var(--ad-bottom,0px)] z-40 flex max-h-[85dvh] flex-col rounded-t-card border border-line bg-white shadow-2xl sm:inset-x-auto sm:bottom-[calc(6rem_+_var(--ad-bottom,0px))] sm:right-6 sm:h-[520px] sm:max-h-[calc(100dvh-8rem)] sm:w-[380px] sm:rounded-card"
         >
           <header className="flex items-center gap-2 border-b border-line px-4 py-3">
             <p className="min-w-0 flex-1 truncate font-display text-sm font-bold text-navy">{t('title')}</p>
