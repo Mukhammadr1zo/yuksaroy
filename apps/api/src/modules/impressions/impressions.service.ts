@@ -3,7 +3,26 @@ import { uzLocalDate } from '@yuksaroy/domain';
 import { PrismaService } from '../../common/prisma.service';
 import { dayKeys, daySeries } from './day-series';
 
-export type ImpressionKind = 'listing' | 'terminal' | 'org' | 'ad';
+/*
+ * 'wall': to'lov devoriga urilgan odam. Bu konversiyaning MAXRAJI: obuna soni ko'rinadi,
+ * devorda to'xtab ketganlar esa ko'rinmasdi, ya'ni narx, bepul oyna va devor joyi
+ * haqidagi uchala qaror ham tusmol bilan qilinardi.
+ *
+ * targetId devor nomi: 'phone' (raqam ochish) va 'wagon' (vagon qidiruvi). Bitta
+ * jadvalda, chunki ikkisi yonma-yon qo'yilsa qaysi devor odamni ko'proq to'xtatayotgani
+ * ko'rinadi.
+ *
+ * DIQQAT: 'wall' ommaviy DTO ga (impressions.controller.ts) QO'SHILMAYDI. O'sha yo'l
+ * kirishsiz, ya'ni begona odam devor sonini bir so'rovda shishirib yuborardi va qaror
+ * uchun yaroqsiz bo'lib qolardi. Bu son FAQAT serverda, 402 tashlanadigan joyda,
+ * bir odam uchun kuniga bir marta yoziladi (wallDaily chelagi) - obuna soni ham ODAM
+ * bo'yicha, ya'ni surat bilan maxraj bitta birlikda bo'lishi kerak.
+ *
+ * O'qiladigan joy: admin boshsahifasidagi raqam ochish kartasi (admin-home.controller.ts
+ * reveals()), telefon va vagon devori alohida qator. Yozilib hech qayerda ko'rinmagan
+ * son hech qanday qarorni qo'llab-quvvatlamaydi, shuning uchun o'quvchi bilan birga keldi.
+ */
+export type ImpressionKind = 'listing' | 'terminal' | 'org' | 'ad' | 'wall';
 export interface ImpressionItem { kind: ImpressionKind; targetId: string; surface: string }
 
 /**

@@ -17,10 +17,28 @@ export const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 /** 3500 belgidan uzun matn qisqartiriladi. ponytail: tegdan o'rtada kesilmasin deb shablonlar tegsiz, faqat <b> sarlavhada. */
 export const clip = (text: string, max = TG_MAX) => (text.length <= max ? text : `${text.slice(0, max - 1)}…`);
 
-/** Chatlarga xabar. Xato yutiladi, chegaradan oshgan chat tashlab ketiladi. Yuborilganlar soni qaytadi. */
-export async function sendTelegram(chatIds: readonly (bigint | string)[], text: string, replyMarkup?: unknown): Promise<number> {
+/** Telegram tugmasi: tayyor obyekt yoki oluvchining tilidan qiymat qaytaradigan funksiya. */
+type Markup = Record<string, unknown>;
+export type ReplyMarkup = Markup | ((l: SearchLang) => Markup);
+
+/**
+ * Chatlarga xabar. Xato yutiladi, chegaradan oshgan chat tashlab ketiladi.
+ * Haqiqatda yetib borganlar soni qaytadi: ilgari urinishlar soni qaytardi, ya'ni
+ * bloklangan chat ham "yuborildi" deb sanalardi va son haqiqatdan katta ko'rinardi.
+ *
+ * ponytail: 403 javobda TelegramLink qatori O'CHIRILMAYDI. Telegram xuddi shu 403 ni
+ * "bot can't initiate conversation with a user" uchun ham qaytaradi, ya'ni Mini App
+ * orqali kelgan, botda hech qachon /start bosmagan odam uchun ham. Qator o'chirilsa
+ * u keyingi kirishda yangi, bo'sh hisobga tushib qolardi (e'lonlari, obunasi
+ * ko'rinmaydi) va Mini App ichidan qaytib ham bo'lmasdi. Bekor so'rovni chatBucket
+ * soatiga 5 ta bilan to'sadi, son esa `sent` bilan to'g'ri sanaladi, demak tozalash
+ * hech narsa bermasdi. Chindan kerak bo'lsa javob tanasidagi `description` o'qiladi
+ * ('blocked by the user' va 'user is deactivated' - ha, qolgani - yo'q).
+ */
+export async function sendTelegram(chatIds: readonly (bigint | string)[], text: string, replyMarkup?: Markup): Promise<number> {
   const body = clip(text);
   const allowed = chatIds.map(String).filter((id) => chatBucket.take(id));
+  let sent = 0;
   await Promise.all(
     allowed.map((chat_id) =>
       fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
@@ -28,12 +46,15 @@ export async function sendTelegram(chatIds: readonly (bigint | string)[], text: 
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ chat_id, text: body, parse_mode: 'HTML', reply_markup: replyMarkup }),
       })
-        // Tizim sahifasi uchun belgi: oxirgi muvaffaqiyat va xato (status). Xulq o'zgarmaydi, xato yutiladi
-        .then((r) => recordTelegram(r.ok, r.ok ? undefined : r.status))
+        // Tizim sahifasi uchun belgi: oxirgi muvaffaqiyat va xato (status). Xato yutiladi
+        .then((r) => {
+          recordTelegram(r.ok, r.ok ? undefined : r.status);
+          if (r.ok) sent++;
+        })
         .catch(() => recordTelegram(false, 0)),
     ),
   );
-  return allowed.length;
+  return sent;
 }
 
 const LANGS: readonly string[] = ['uz', 'ru', 'en'];
@@ -106,6 +127,32 @@ const TEXTS = {
     ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nНомера открыты друг для друга.\n\n{url}',
     en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nYou can now see each other\'s numbers.\n\n{url}',
   },
+  /*
+   * Shoshilinch so'rov: bu yagona joy, u yerda odam telefon yonida HOZIR javob kutadi.
+   * Shu sababli har qadam aytiladi, hatto rad javobi ham: ijrochi "tanlanmadim" degan
+   * xabarni olmasa, u so'rovni o'zi ochib tekshirishga qaytmaydi va kutishda qoladi.
+   * Matnlar yuk bozori shablonlaridan (marketCargoNew, marketOffer, marketAward) olingan.
+   */
+  urgentNew: {
+    uz: "🚨 <b>Shoshilinch so'rov {no}</b>\n{what} · {where}\n\n{message}\n\nTaklif yuborish: {url}",
+    ru: '🚨 <b>Срочный запрос {no}</b>\n{what} · {where}\n\n{message}\n\nПредложить: {url}',
+    en: '🚨 <b>Urgent request {no}</b>\n{what} · {where}\n\n{message}\n\nMake an offer: {url}',
+  },
+  urgentOffer: {
+    uz: "💬 <b>Shoshilinch so'rovingizga taklif keldi</b>\n{no} · {what}\n{from}\n\nKo'rish: {url}",
+    ru: '💬 <b>По вашему срочному запросу есть предложение</b>\n{no} · {what}\n{from}\n\nПосмотреть: {url}',
+    en: '💬 <b>You have an offer on your urgent request</b>\n{no} · {what}\n{from}\n\nView: {url}',
+  },
+  urgentAward: {
+    uz: "✅ <b>Taklifingiz tanlandi</b>\n{no} · {what}\nBuyurtmachi bilan bog'laning.\n\n{url}",
+    ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {what}\nСвяжитесь с заказчиком.\n\n{url}',
+    en: '✅ <b>Your offer was chosen</b>\n{no} · {what}\nGet in touch with the customer.\n\n{url}',
+  },
+  urgentDeclined: {
+    uz: "➖ <b>Taklifingiz tanlanmadi</b>\n{no} · {what}\nBoshqa ijrochi tanlandi.\n\n{url}",
+    ru: '➖ <b>Ваше предложение не выбрано</b>\n{no} · {what}\nВыбран другой исполнитель.\n\n{url}',
+    en: '➖ <b>Your offer was not chosen</b>\n{no} · {what}\nAnother provider was chosen.\n\n{url}',
+  },
   reviewNew: {
     uz: "⭐ <b>Yangi baho</b>\n{title}\n{rating}\n\n{text}\n\nKo'rish: {url}",
     ru: '⭐ <b>Новый отзыв</b>\n{title}\n{rating}\n\n{text}\n\nПосмотреть: {url}',
@@ -142,6 +189,24 @@ const TEXTS = {
     uz: "❌ <b>Tashkilot tasdiqlanmadi</b>\n{name}\nSabab: {reason}\n\n{url}",
     ru: '❌ <b>Организация не подтверждена</b>\n{name}\nПричина: {reason}\n\n{url}',
     en: '❌ <b>Organisation was not confirmed</b>\n{name}\nReason: {reason}\n\n{url}',
+  },
+  /*
+   * Shikoyat yozgan odamga: qaror. Ikkita tur, chunki qolgan qaror xabarlari ham
+   * shunday juftlik (claimApproved/claimRejected): bitta shablonga holat qiymatini
+   * tiqish uchun uchala tilda yana bitta lug'at kerak bo'lardi.
+   *
+   * Ichki izoh (resolveNote) bu yerda YO'Q: u moderatorning o'ziga yozilgan va uni
+   * tashqariga chiqarish ichki yozuvni mijozga ko'rsatib qo'yardi.
+   */
+  reportResolved: {
+    uz: "✅ <b>Shikoyatingiz ko'rib chiqildi</b>\n{title}\nShikoyat o'rinli deb topildi, chora ko'rildi.\n\n{url}",
+    ru: '✅ <b>Ваша жалоба рассмотрена</b>\n{title}\nЖалоба признана обоснованной, меры приняты.\n\n{url}',
+    en: '✅ <b>Your report has been reviewed</b>\n{title}\nThe report was upheld and we have taken action.\n\n{url}',
+  },
+  reportDismissed: {
+    uz: "❌ <b>Shikoyatingiz ko'rib chiqildi</b>\n{title}\nTekshiruvda qoidabuzarlik topilmadi, obyekt o'z o'rnida qoldi.\n\n{url}",
+    ru: '❌ <b>Ваша жалоба рассмотрена</b>\n{title}\nПри проверке нарушений не нашлось, объект остался на месте.\n\n{url}',
+    en: '❌ <b>Your report has been reviewed</b>\n{title}\nWe found no violation, the object stays as it is.\n\n{url}',
   },
   subscriptionActive: {
     uz: '✅ <b>Obuna yoqildi</b>\n{until} gacha amal qiladi.\n\n{url}',
@@ -232,15 +297,26 @@ export async function telegramRecipients(prisma: PrismaService, t: NotifyTarget)
   return rows.map((r) => ({ chatId: r.chatId, locale: r.user.locale }));
 }
 
-/** Qabul qiluvchilarni topadi va har birining tilida yuboradi. Hech kim topilmasa 0. */
-export async function notifyTelegram(prisma: PrismaService, target: NotifyTarget, kind: NotifyKind, vars: Vars | ((locale: string) => Vars)): Promise<number> {
+/**
+ * Qabul qiluvchilarni topadi va har birining tilida yuboradi. Hech kim topilmasa 0.
+ *
+ * `replyMarkup` shu yerdan o'tadi, chunki Mini App tugmasi (web_app) xabarning o'zida
+ * turadi: tugmasiz yuborilsa odam botdan saytga o'tish uchun matndagi havolani
+ * qo'lda bosishga majbur bo'ladi.
+ *
+ * Tugma ham funksiya bo'lishi mumkin: oluvchilar til bo'yicha guruhlanadi, demak
+ * matn o'z tilida ketadi. Tugma bitta obyekt bo'lib qotirilsa rus yoki ingliz tilidagi
+ * odam ruscha matn ostida o'zbekcha tugma ko'rardi.
+ */
+export async function notifyTelegram(prisma: PrismaService, target: NotifyTarget, kind: NotifyKind, vars: Vars | ((locale: string) => Vars), replyMarkup?: ReplyMarkup): Promise<number> {
   const rows = await telegramRecipients(prisma, target);
   if (!rows.length) return 0;
   const byLocale = new Map<string, bigint[]>();
   for (const r of rows) byLocale.set(r.locale, [...(byLocale.get(r.locale) ?? []), r.chatId]);
   let sent = 0;
   for (const [locale, chats] of byLocale) {
-    sent += await sendTelegram(chats, notifyText(kind, locale, typeof vars === 'function' ? vars(locale) : vars));
+    const markup = typeof replyMarkup === 'function' ? replyMarkup(lang(locale)) : replyMarkup;
+    sent += await sendTelegram(chats, notifyText(kind, locale, typeof vars === 'function' ? vars(locale) : vars), markup);
   }
   return sent;
 }
@@ -280,6 +356,8 @@ export async function notifyBoth(
     href: string;
     vars: Vars | ((l: SearchLang) => Vars);
     card?: { title: string; body?: string | null };
+    /** Telegram xabariga tugma (masalan Mini App). Sayt qo'ng'irog'iga ta'sir qilmaydi. */
+    replyMarkup?: ReplyMarkup;
   },
 ): Promise<void> {
   const userIds = [...new Set(await notifications.recipients(o.target))].filter((id) => id !== o.target.exceptUserId);
@@ -294,6 +372,6 @@ export async function notifyBoth(
     for (const [l, ids] of byLocale) await notifications.push(ids, { kind: o.inApp, href: o.href, ...notifyParts(o.kind, l, varsOf(l)) });
   })().catch(() => {});
   // Oluvchilar yuqorida aniqlangan: bu yerda ulardan Telegram bog'laganlari qoladi
-  const tg = notifyTelegram(prisma, { userIds }, o.kind, (l) => varsOf(lang(l))).catch(() => 0);
+  const tg = notifyTelegram(prisma, { userIds }, o.kind, (l) => varsOf(lang(l)), o.replyMarkup).catch(() => 0);
   await Promise.all([bell, tg]);
 }

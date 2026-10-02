@@ -7,7 +7,7 @@ import { ApiError, api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
 import { asList, type UrgentOffer, type UrgentRequest } from '@/lib/types-urgent';
 import { BTN_GHOST, BTN_NAVY, Field, INPUT, Notice } from '@/components/kabinet/bits';
-import { UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
+import { OfferStatusPill, UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
 
 type Draft = { price: string; eta: string; message: string };
 const EMPTY: Draft = { price: '', eta: '', message: '' };
@@ -84,7 +84,10 @@ export default function UrgentOffersPage() {
 
               {mine ? (
                 <div className="mt-4 rounded-xl bg-sand p-3 text-sm">
-                  <p className="font-semibold">{t('offer.mine')}</p>
+                  {/* Taklif holati: so'rov tanlangach ijrochi havoladan shu qatorga qaytadi va
+                      "meni tanladimi" degan savolga javob shu yerda bo'lishi kerak. SENT da
+                      chizilmaydi: u "javob kutilmoqda" degani va holat belgisi yangilik bermasdi. */}
+                  <p className="flex flex-wrap items-center gap-2 font-semibold">{t('offer.mine')}{mine.status !== 'SENT' ? <OfferStatusPill status={mine.status} /> : null}</p>
                   <p className="mt-1 font-mono text-navy tabular-nums">{mine.priceTiyin != null ? som(mine.priceTiyin, locale) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}</p>
                   {sent[r.id] ? <p className="mt-1 text-teal-ink">{t('offer.sent')}</p> : null}
                 </div>

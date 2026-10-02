@@ -9,7 +9,9 @@ import { BOOKING_REPOSITORY, type BookingRepository } from '../booking/domain/po
 import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
 import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PrismaService } from '../../common/prisma.service';
+import { notifyBoth } from '../../common/telegram';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt } from '../catalog/presentation/catalog.controller';
 import { reportWhere, resolveData } from './report-status';
@@ -82,6 +84,8 @@ export class AdminOpsController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    // NotificationsModule global: shikoyat qarorini yozgan odamga qaytarish uchun
+    private readonly notifications: NotificationsService,
     @Inject(BOOKING_REPOSITORY) private readonly bookings: BookingRepository,
   ) {}
 
@@ -386,12 +390,41 @@ export class AdminOpsController {
    * turning o'z ekrani va o'z amali bor, ikkinchi nusxa ikkita qoida bo'lib qolardi.
    *
    * Faqat NEW dan: ikki operator barobar bossa ikkinchisi 404 oladi.
+   *
+   * Qaror shikoyat yozgan odamga QAYTADI. Ilgari u faqat auditga tushardi va yozgan
+   * odam natijani hech qachon bilmasdi: javobsiz shikoyat oqimi bir necha oyda o'ladi,
+   * ya'ni bitta odam boshqaradigan platforma eng arzon nazorat vositasini yo'qotadi.
    */
   @Post('reports/:id/decide') @HttpCode(200)
   async decideReport(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ReportDecideDto) {
+    // Avval o'qiladi: xabar uchun nom va havola kerak, updateMany esa qatorni qaytarmaydi
+    const r = await this.prisma.report.findUnique({ where: { id }, select: { reporterId: true, targetTitle: true, targetHref: true } });
+    if (!r) throw new NotFoundException({ code: 'REPORT_NOT_FOUND' });
     const { count } = await this.prisma.report.updateMany({ where: { id, status: 'NEW' }, data: resolveData(dto.approve, userId, dto.note) });
     if (!count) throw new NotFoundException({ code: 'REPORT_NOT_FOUND' });
     await this.audit.log({ actorId: userId, action: 'admin.report.decide', entity: 'Report', entityId: id, meta: { approve: dto.approve } });
+    /*
+     * Mehmon shikoyat yoza olmaydi (ReportsController butunlay JwtGuard ortida), shuning
+     * uchun reporterId doim to'la. Lekin hisob o'chirilgan bo'lishi mumkin: Report qatori
+     * ataylab qoladi, Notification esa User ga bog'langan. O'chgan hisobda notifyBoth
+     * o'zi jim o'tadi - u qo'ng'iroq matnini tilga ajratish uchun User ni o'qiydi va
+     * qator topilmasa hech narsa yozmaydi.
+     *
+     * ponytail: inApp 'claim' - saytda qo'ng'iroq turini hech kim ko'rsatmaydi va hech
+     * joyda filtr ham yo'q (adminTask ham shu turni ishlatadi), yangi tur faqat
+     * ro'yxatni uzaytirardi.
+     *
+     * Havola: /admin bilan boshlansa yuborilmaydi (buyurtma ustidagi shikoyatning
+     * targetHref i admin ekrani) - oddiy foydalanuvchi o'sha sahifaga kira olmaydi va
+     * havola 403 ga olib borardi. O'rniga o'z kabineti.
+     */
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [r.reporterId], exceptUserId: userId },
+      kind: dto.approve ? 'reportResolved' : 'reportDismissed',
+      inApp: 'claim',
+      href: r.targetHref.startsWith('/admin') ? '/dashboard/orders' : r.targetHref,
+      vars: { title: r.targetTitle },
+    }).catch(() => {});
     return { id, status: dto.approve ? 'RESOLVED' : 'DISMISSED' };
   }
 

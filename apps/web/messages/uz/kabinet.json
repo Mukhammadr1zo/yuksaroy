@@ -365,6 +365,7 @@
         "yes": "bog'langan",
         "no": "bog'lanmagan",
         "telegramHint": "Kirish kodlari botga keladi.",
+        "telegramReconnect": "Botni bloklasangiz bog'lanish uziladi va xabarlar kelmaydi. Qayta ulash uchun botga /start yuboring va raqamingizni tasdiqlang.",
         "googleNo": "Google bilan kirish ulanmagan."
       },
       "danger": {

@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, uzDateTime } from '@/lib/format';
 import { asList, type UrgentOffer, type UrgentRequest } from '@/lib/types-urgent';
-import { UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
+import { OfferStatusPill, UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
 import { haptic } from '@/components/tg/TgProvider';
 import { BTN, CARD, Empty, Err, INPUT, Skeleton } from '@/components/tg/bits';
 
@@ -67,7 +67,7 @@ export default function TgOffersPage() {
                     <div className="mt-3 border-t border-line pt-3">
                       <p className="font-mono text-sm"><span className="text-muted">{t('phone')}: </span><a href={`tel:${r.contactPhone}`} className="font-semibold text-navy">{r.contactPhone}</a></p>
                       {mine ? (
-                        <p className="mt-2 rounded-xl bg-teal-soft px-3 py-2 text-sm text-teal-ink"><b>{t('offer.mine')}:</b> {mine.priceTiyin != null ? som(mine.priceTiyin, locale) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}</p>
+                        <p className="mt-2 rounded-xl bg-teal-soft px-3 py-2 text-sm text-teal-ink"><b>{t('offer.mine')}:</b> {mine.priceTiyin != null ? som(mine.priceTiyin, locale) : td('onRequest')}{mine.etaMinutes != null ? ` · ${td('eta', { min: mine.etaMinutes })}` : ''}{mine.status !== 'SENT' ? <> <OfferStatusPill status={mine.status} /></> : null}</p>
                       ) : (
                         <form onSubmit={(e) => { e.preventDefault(); void send(r); }} className="mt-2 space-y-2">
                           <div className="grid grid-cols-2 gap-2">

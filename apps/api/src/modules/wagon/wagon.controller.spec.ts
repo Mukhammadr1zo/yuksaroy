@@ -4,6 +4,7 @@ import type { AuditService } from '../../common/audit.service';
 import type { PlatformConfigService } from '../../common/platform-config.service';
 import type { PrismaService } from '../../common/prisma.service';
 import type { SubscriptionService } from '../subscription/subscription.service';
+import type { ImpressionsService } from '../impressions/impressions.service';
 import type { DRailwayClient } from './d-railway.client';
 import { WagonController } from './wagon.controller';
 
@@ -55,7 +56,16 @@ function fakeLinks(links: Record<string, string>) {
   };
 }
 
-function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set<string>; links?: Record<string, string> } = {}) {
+function setup(opts: {
+  freeTotal?: number;
+  subscriber?: boolean;
+  missFirst?: Set<string>;
+  links?: Record<string, string>;
+  /** To'lov devorining sanog'i shu massivga tushadi. */
+  walls?: Record<string, unknown>[];
+  /** Sanoq yiqilgan holat: devor baribir 402 qaytarishi kerak. */
+  wallFails?: boolean;
+} = {}) {
   const db = fakePrisma();
   const upstreamCalls: string[] = [];
   const upstream = {
@@ -76,6 +86,13 @@ function setup(opts: { freeTotal?: number; subscriber?: boolean; missFirst?: Set
     { isActive: async () => opts.subscriber ?? false, priceFor: async () => 99_000 } as unknown as SubscriptionService,
     { log: async () => {} } as unknown as AuditService,
     upstream,
+    {
+      record: async (items: Record<string, unknown>[]) => {
+        if (opts.wallFails) throw new Error('baza yiqildi');
+        opts.walls?.push(...items);
+        return { accepted: items.length };
+      },
+    } as unknown as ImpressionsService,
   );
   return { c, rows: db.rows, upstreamCalls };
 }
@@ -243,5 +260,54 @@ describe('WagonController.telegramSearch', () => {
     const { c, upstreamCalls } = setup({ subscriber: true, links: { '777': 'u-tg-badno' } });
     expect(await status(c.telegramSearch({ chatId: '777', no: '123' }))).toBe(400);
     expect(upstreamCalls).toHaveLength(0);
+  });
+});
+
+/**
+ * To'lov devorining sanog'i. Ilgari konversiyaning faqat suratini (obuna soni) ko'rish
+ * mumkin edi, MAXRAJI esa yo'q edi: nechta odam devorga urilib ketgani hech qayerda
+ * yozilmasdi, ya'ni narx va bepul oyna tusmol bilan tanlanardi.
+ */
+describe("vagon devorining sanog'i", () => {
+  beforeEach(() => vi.useFakeTimers({ toFake: ['Date'] }));
+  afterEach(() => vi.useRealTimers());
+
+  it('402 tashlanganda bitta qator yoziladi', async () => {
+    const walls: Record<string, unknown>[] = [];
+    const { c } = setup({ freeTotal: 0, walls });
+    expect(await status(c.search('w-wall-1', { no: '5100001' }))).toBe(402);
+    expect(walls).toEqual([{ kind: 'wall', targetId: 'wagon', surface: 'view' }]);
+  });
+
+  it("o'tib ketgan qidiruvda devor sanog'i yozilmaydi", async () => {
+    const walls: Record<string, unknown>[] = [];
+    const { c } = setup({ freeTotal: 1, walls });
+    expect(await status(c.search('w-wall-2', { no: '5200001' }))).toBe(200);
+    expect(walls).toHaveLength(0);
+  });
+
+  it("sanoq yiqilsa 402 baribir tashlanadi", async () => {
+    const { c } = setup({ freeTotal: 0, wallFails: true });
+    expect(await status(c.search('w-wall-3', { no: '5300001' }))).toBe(402);
+  });
+
+  it("botdan kelgan devor ham sanaladi: ikki yo'l bitta sonni to'ldiradi", async () => {
+    const walls: Record<string, unknown>[] = [];
+    const { c } = setup({ freeTotal: 0, walls, links: { '777': 'w-wall-4' } });
+    expect(await status(c.telegramSearch({ chatId: '777', no: '5400001' }))).toBe(402);
+    expect(walls).toHaveLength(1);
+  });
+
+  /*
+   * Son URINISHNI emas, ODAMNI sanaydi. Nega muhim: obuna soni (surat) odam bo'yicha,
+   * ya'ni maxraj urinish bo'yicha sanalsa nisbat bir necha barobar past chiqib, narx
+   * va bepul oyna haqidagi qaror teskari tomonga olinardi.
+   */
+  it("bir odam kuniga bir marta: ikkinchi urinishda qator qo'shilmaydi", async () => {
+    const walls: Record<string, unknown>[] = [];
+    const { c } = setup({ freeTotal: 0, walls });
+    expect(await status(c.search('w-wall-5', { no: '5500001' }))).toBe(402);
+    expect(await status(c.search('w-wall-5', { no: '5500002' }))).toBe(402);
+    expect(walls).toHaveLength(1);
   });
 });

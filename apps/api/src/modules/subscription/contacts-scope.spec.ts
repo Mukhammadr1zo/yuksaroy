@@ -32,6 +32,8 @@ function setup(opts: {
   free?: number;
   /** Audit yozuvi yiqilgan holat: kvota qatori yozilmasa raqam ham berilmaydi. */
   auditFails?: boolean;
+  /** Mayoq yozuvi yiqilgan holat: sanoq o'lchov, u devorni ham, raqamni ham yiqitmaydi. */
+  recordFails?: boolean;
   /** Umrbod sanoq so'ralganda bu massivga bitta element tushadi. */
   countProbe?: number[];
 } = {}) {
@@ -95,7 +97,12 @@ function setup(opts: {
     dailyLimitFor: async (limits: unknown) => planLimit(limits, 'phoneRevealDaily', opts.dailyLimit ?? 50),
     priceFor: async () => 99_000,
   } as unknown as SubscriptionService;
-  const impressions = { record: async (items: Record<string, unknown>[]) => { opts.calls?.push(...items); } } as unknown as ImpressionsService;
+  const impressions = {
+    record: async (items: Record<string, unknown>[]) => {
+      if (opts.recordFails) throw new Error('baza yiqildi');
+      opts.calls?.push(...items);
+    },
+  } as unknown as ImpressionsService;
   return new ContactsController(prisma, config, audit, subs, impressions);
 }
 
@@ -283,6 +290,59 @@ describe('kunlik kvota auditdan', () => {
     const calls: Record<string, unknown>[] = [];
     const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, auditFails: true, calls });
     expect(await refusal(() => c.reveal('u1', 'terminal', 't1'))).toMatchObject({ status: 503, code: 'RETRY' });
+    expect(calls).toHaveLength(0);
+  });
+});
+
+/**
+ * To'lov devorining sanog'i: konversiyaning MAXRAJI.
+ *
+ * Nega kerak: ega obuna sonini ko'radi, lekin nechta odam devorga urilib ketganini
+ * ko'rmaydi. Shu maxraj bo'lmasa narx, bepul oyna va devor joyi haqidagi uchala qaror
+ * ham tusmol bilan qilinadi.
+ *
+ * Qator FAQAT shu yerda, serverda yoziladi: ommaviy mayoq yo'lida 'wall' yo'q va u
+ * yerdan kelgan son bir so'rovda shishirilib qo'yilardi.
+ */
+describe("telefon devorining sanog'i", () => {
+  it('402 tashlanganda bitta qator yoziladi', async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, calls });
+    expect(await refusal(() => c.reveal('u-wall-1', 'terminal', 't1'))).toMatchObject({ status: 402 });
+    expect(calls).toEqual([{ kind: 'wall', targetId: 'phone', surface: 'view' }]);
+  });
+
+  it("raqam ochilganda devor sanog'i yozilmaydi", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: true, calls });
+    await c.reveal('u-wall-2', 'terminal', 't1');
+    // Faqat 'contact': devor umuman qo'yilmadi
+    expect(calls).toEqual([{ kind: 'terminal', targetId: 't1', surface: 'contact' }]);
+  });
+
+  it('sanoq yiqilsa 402 baribir tashlanadi', async () => {
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, recordFails: true });
+    expect(await refusal(() => c.reveal('u-wall-3', 'terminal', 't1'))).toMatchObject({ status: 402, code: 'SUBSCRIPTION_REQUIRED' });
+  });
+
+  /*
+   * Son URINISHNI emas, ODAMNI sanaydi: bu yo'lda devordan oldin hech qanday chegara
+   * yo'q (kunlik chegara devordan keyin tekshiriladi), ya'ni sahifani besh marta
+   * yangilagan odam maxrajni besh barobar shishirib qo'yardi, obuna soni esa haqiqiy
+   * odamlar bo'yicha qolardi.
+   */
+  it("bir odam kuniga bir marta: qayta bosilganda qator qo'shilmaydi", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, calls });
+    await refusal(() => c.reveal('u-wall-4', 'terminal', 't1'));
+    await refusal(() => c.reveal('u-wall-4', 'terminal', 't1'));
+    expect(calls).toHaveLength(1);
+  });
+
+  it("bitim raqamida devor ham, sanoq ham yo'q", async () => {
+    const calls: Record<string, unknown>[] = [];
+    const c = setup({ request: { status: 'AWARDED', contactPhone: '+998901234567', awardedTo: 'w' }, subscriber: false, calls });
+    expect((await c.reveal('w', 'request', 'CR-1')).phone).toBe('+998901234567');
     expect(calls).toHaveLength(0);
   });
 });

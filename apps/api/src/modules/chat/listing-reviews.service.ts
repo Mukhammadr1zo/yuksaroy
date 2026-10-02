@@ -41,7 +41,28 @@ export class ListingReviewsService {
   async eligibility(userId: string, listingId: string) {
     const mine = await this.prisma.listingReview.findUnique({ where: { listingId_userId: { listingId, userId } }, select: { id: true, rating: true, text: true } });
     if (mine) return { canReview: false, already: mine };
+    // Qorovul shu yerda ham: aks holda xodim o'z tashkiloti e'loniga ochilgan besh
+    // yulduzli formani ko'rardi, yuborganda esa create() SELF_REVIEW bilan rad etardi
+    // va ekranda sababsiz "failed" chiqardi.
+    const l = await this.prisma.listing.findUnique({ where: { id: listingId }, select: { orgId: true, ownerUserId: true } });
+    if (l && (await this.ownSide(userId, l))) return { canReview: false, already: null };
     return { canReview: await this.answered(userId, listingId), already: null };
+  }
+
+  /**
+   * O'z tomonimi: e'lonning yakka egasi yoki shu e'lon tashkilotining a'zosi.
+   *
+   * Tashkilot e'lonida ownerUserId doim bo'sh qoladi (listings.usecase: orgId ? null : userId),
+   * shuning uchun bitta tenglik tashkilotga hech qachon ishlamasdi va xodim o'z
+   * tashkiloti e'loniga besh ball qo'yib, o'rtacha bahoni ko'tarib qo'yardi.
+   *
+   * A'zolik so'rovi FAQAT e'londa orgId bor bo'lganda ketadi: yakka egali e'londa
+   * bitta ham bekor so'rov qo'shilmaydi.
+   */
+  private async ownSide(userId: string, l: { orgId: string | null; ownerUserId: string | null }): Promise<boolean> {
+    if (l.ownerUserId === userId) return true;
+    if (!l.orgId) return false;
+    return !!(await this.prisma.membership.findUnique({ where: { userId_orgId: { userId, orgId: l.orgId } }, select: { id: true } }));
   }
 
   /** Ikki tomonli yozishma bormi: men yozdim va boshqa tomon javob berdi. */
@@ -56,7 +77,9 @@ export class ListingReviewsService {
   async create(userId: string, listingId: string, rating: number, text: string | null) {
     const l = await this.prisma.listing.findUnique({ where: { id: listingId }, select: { id: true, title: true, slug: true, kind: true, orgId: true, ownerUserId: true, ratingAvg: true, ratingCount: true } });
     if (!l) throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
-    if (l.ownerUserId === userId) throw new ForbiddenException({ code: 'SELF_REVIEW' });
+    // Bitta qorovul, ikkita chaqiruv nuqtasi (ikkinchisi eligibility): forma ham
+    // chizilmaydi, yuborilgani ham o'tmaydi
+    if (await this.ownSide(userId, l)) throw new ForbiddenException({ code: 'SELF_REVIEW' });
     if (!(await this.answered(userId, listingId))) throw new ForbiddenException({ code: 'NO_CONTACT' });
     const dup = await this.prisma.listingReview.findUnique({ where: { listingId_userId: { listingId, userId } }, select: { id: true } });
     if (dup) throw new ConflictException({ code: 'REVIEW_EXISTS' });

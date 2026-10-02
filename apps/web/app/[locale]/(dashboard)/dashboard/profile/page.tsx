@@ -309,7 +309,10 @@ function Linked({ me }: { me: Me }) {
           <TelegramLogoIcon size={20} weight="fill" className="text-teal" aria-hidden="true" />
           <span className="font-semibold">Telegram</span>
           {pill(me.telegramLinked)}
-          <span className="text-muted">{t('telegramHint')}</span>
+          {/* Bog'lanmagan holat ikki sababdan bo'ladi: hech qachon bog'lamagan yoki botni
+              bloklagani uchun bog'lanish uzilgan. Matn ikkisiga ham to'g'ri keladi va
+              qayta ulash yo'lini aytadi: xabarlar kelmay qolganini odam shu yerda biladi. */}
+          <span className="text-muted">{me.telegramLinked ? t('telegramHint') : t('telegramReconnect')}</span>
           <a href={`https://t.me/${BOT}`} target="_blank" rel="noreferrer" className="ml-auto font-semibold text-teal-ink hover:underline">@{BOT}</a>
         </li>
         <li className="flex flex-wrap items-center gap-3 py-3">

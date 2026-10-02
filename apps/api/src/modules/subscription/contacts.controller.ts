@@ -3,6 +3,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { uzLocalDate, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
+import { DailyBucket } from '../../common/ip-bucket';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
 import { PrismaService } from '../../common/prisma.service';
 import { ImpressionsService } from '../impressions/impressions.service';
@@ -13,6 +14,18 @@ import { SubscriptionService } from './subscription.service';
 
 const KINDS = ['listing', 'terminal', 'org', 'service', 'request', 'offer'] as const;
 type Kind = (typeof KINDS)[number];
+
+/**
+ * Devor sanog'i: bir odam bir kunda BITTA qator.
+ *
+ * Nega chelak kerak: bu yo'lda bu nuqtadan oldin hech qanday chegara yo'q (kunlik
+ * chegara devordan KEYIN tekshiriladi), ya'ni devorga urilgan odam sahifani besh marta
+ * yangilasa besh qator yozilardi. Obuna soni (surat) esa haqiqiy ODAMLAR bo'yicha, ya'ni
+ * obuna/devor nisbati bir necha barobar past chiqib, narx va bepul oyna haqidagi qaror
+ * teskari tomonga olinardi. Pastdagi 'contact' mayog'i ham xuddi shunday, obyekt id si
+ * bo'yicha kuniga bir marta sanaladi: surat bilan maxraj bitta qoidada bo'lsin.
+ */
+const wallDaily = new DailyBucket();
 
 /**
  * Topilgan raqam va u obuna ortidami.
@@ -102,6 +115,11 @@ export class ContactsController {
       // ochilishini, qancha turishini va nimasi bepulligini shu yerdan biladi.
       // Narx telefonni ochadigan eng arzon tarifniki: devor odam chindan to'laydigan summani ko'rsatsin
       if (!canSearch(subscriber, freeUsed, cfg.phoneRevealFree)) {
+        // Devorning MAXRAJI: shu yerda to'xtab ketgan ODAM sanaladi (kuniga bir marta,
+        // wallDaily). Obuna sonining o'zi narx to'g'rimi degan savolga javob bermaydi,
+        // chunki nechta odam devorga urilib ketgani ko'rinmaydi.
+        // Javob kutilmaydi va xato yutiladi: u kvota emas, o'lchov.
+        if (wallDaily.take(userId, 1).ok) void this.impressions.record([{ kind: 'wall', targetId: 'phone', surface: 'view' }]).catch(() => {});
         throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: await this.subs.priceFor('PHONE'), dailyLimit: daily, freeTotal: cfg.phoneRevealFree }, 402);
       }
     }

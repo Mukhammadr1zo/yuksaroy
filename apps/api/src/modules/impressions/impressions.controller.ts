@@ -11,9 +11,13 @@ import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { OrderAccess } from '../orders/application/order-access';
 import { AD_SURFACES, ImpressionsService, type AdSurface, type ImpressionKind } from './impressions.service';
 
-class ImpressionItemDto {
+export class ImpressionItemDto {
   // 'ad' ham shu yerda: reklama banneri ko'rilgani va bosilgani ham kunlik yig'ma qator,
   // alohida jadval kerak emas. Haqiqiy banner ekani keyin serverda tekshiriladi.
+  //
+  // 'wall' bu ro'yxatda YO'Q: to'lov devoriga urilgan odam faqat serverda, 402
+  // tashlanadigan joyda sanaladi. Bu yo'l kirishsiz, ya'ni undan kelgan 'wall' shunchaki
+  // shishirilgan son bo'lardi va devor sonining o'zi narx qarori uchun yaroqsiz bo'lib qolardi.
   @IsIn(['listing', 'terminal', 'org', 'ad']) kind!: ImpressionKind;
   @IsString() @Length(1, 40) targetId!: string;
   // 'contact' bu ro'yxatda yo'q: telefon ochilgani faqat serverda, raqam haqiqatan

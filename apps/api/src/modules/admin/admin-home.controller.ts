@@ -211,15 +211,34 @@ export class AdminHomeController {
       _count: { _all: true },
     });
     const ids = by.map((r) => r.actorId!).filter(Boolean);
-    const [subs, cfg] = await Promise.all([
+    const [subs, cfg, wallRows] = await Promise.all([
       ids.length
         ? this.prisma.subscription.findMany({ where: { userId: { in: ids }, status: 'ACTIVE', endsAt: { gt: now } }, select: { userId: true }, distinct: ['userId'] })
         : Promise.resolve([] as { userId: string }[]),
       this.config.get(),
+      /*
+       * Konversiyaning MAXRAJI: to'lov devorida to'xtab ketgan odam. Yuqoridagi to'rt
+       * son faqat suratni beradi, ya'ni "narxni tushiraymi yoki bepul oynani
+       * kengaytiraymi" degan savolga javob chiqmasdi.
+       *
+       * Qator serverda, 402 tashlanadigan joyda, bir odam uchun kuniga bir marta
+       * yoziladi (contacts.controller.ts va wagon.controller.ts), ya'ni bu son ham
+       * yuqoridagi "odam ochdi" kabi ODAM sanog'i.
+       *
+       * Impression.day kun aniqligida saqlanadi: chegara kun boshiga tushiriladi, aks
+       * holda eng chekka kun yarmi tushib qolardi.
+       */
+      this.prisma.impression.groupBy({
+        by: ['targetId'],
+        where: { kind: 'wall', day: { gte: new Date(from.toISOString().slice(0, 10)) } },
+        _sum: { count: true },
+      }),
     ]);
+    const walls = { phone: 0, wagon: 0 };
+    for (const w of wallRows) if (w.targetId === 'phone' || w.targetId === 'wagon') walls[w.targetId] = w._sum.count ?? 0;
     // freeTotal sonlar YONIDA: qaror "N ni oshiraymi" degan savol, hozirgi N
     // ko'rinmasa to'rt son bilan javob berib bo'lmaydi
-    return { ...revealFunnel(by, new Set(subs.map((sb) => sb.userId))), freeTotal: cfg.phoneRevealFree };
+    return { ...revealFunnel(by, new Set(subs.map((sb) => sb.userId))), freeTotal: cfg.phoneRevealFree, walls };
   }
 
   private async pingDb(): Promise<{ ok: boolean; ms?: number }> {

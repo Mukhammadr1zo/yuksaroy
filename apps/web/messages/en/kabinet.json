@@ -365,6 +365,7 @@
         "yes": "linked",
         "no": "not linked",
         "telegramHint": "Sign-in codes arrive in the bot.",
+        "telegramReconnect": "If you block the bot the link is dropped and messages stop arriving. To reconnect, send /start to the bot and confirm your number.",
         "googleNo": "Google sign-in is not connected."
       },
       "danger": {

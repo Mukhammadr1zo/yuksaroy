@@ -4,13 +4,14 @@ import {
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsInt, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min } from 'class-validator';
 import { randomBytes } from 'node:crypto';
-import { REGIONS, REGION_LABELS, URGENT_KINDS, URGENT_KIND_LABELS, formatUrgentNo, normalizePhone, type RegionCode, type UrgentKind } from '@yuksaroy/domain';
+import { REGIONS, REGION_LABELS, URGENT_KINDS, URGENT_KIND_LABELS, formatUrgentNo, normalizePhone, type RegionCode, type SearchLang, type UrgentKind } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { env } from '../../common/env';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
-import { esc, sendTelegram } from '../../common/telegram';
+import { notifyBoth } from '../../common/telegram';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
 import { PROVIDER_KINDS, awardOffers, canUrgentTransition, notifyRegions } from './urgent.rules';
 
 class CreateUrgentDto {
@@ -56,11 +57,27 @@ const createBucket = new IpBucket(5, 3_600_000); // soatiga 5 ta shoshilinch so'
 const offerBucket = new IpBucket(20, 3_600_000); // soatiga 20 ta taklif
 const limit = (b: IpBucket, userId: string) => { if (!b.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
 
+// Bozor taxtasidagi bilan bitta tur: shoshilinch so'rov ham so'rov-taklif juftligi
+const KIND: NotificationKind = 'market';
+/**
+ * Telegram tugmasining yozuvi, oluvchining tilida. Matn urgentNew shablonida uch tilda,
+ * tugma esa shablondan tashqarida turadi: uning so'zi ham shu yerda uch tilda yoziladi.
+ */
+const OFFER_BTN: Record<SearchLang, string> = { uz: "Taklif yuborish", ru: 'Предложить', en: 'Make an offer' };
+/** Ish turi oluvchining tilida. */
+const kindLabel = (k: string, l: SearchLang) => URGENT_KIND_LABELS[l][k as UrgentKind] ?? k;
+/**
+ * Joy: viloyat va stansiya. Vagon soni ataylab yo'q - uning uchun uch tilli so'z
+ * ("vagon") hech qayerda yo'q, soni esa odam tugmani bosganda to'liq so'rovda ko'rinadi.
+ */
+const placeLine = (r: { regionCode: string; stationName: string | null }) =>
+  [REGION_LABELS[r.regionCode as RegionCode] ?? r.regionCode, r.stationName?.trim()].filter(Boolean).join(', ');
+
 /** Shoshilinch so'rovlar: egasi yaratadi va taklif tanlaydi, provayder taklif yuboradi, ochiq holat sahifasi narxsiz. */
 @ApiTags('urgent')
 @Controller('urgent')
 export class UrgentController {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditService) {}
+  constructor(private readonly prisma: PrismaService, private readonly audit: AuditService, private readonly notifications: NotificationsService) {}
 
   @Post() @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)
   async create(@CurrentUserId() userId: string, @Body() dto: CreateUrgentDto) {
@@ -95,7 +112,7 @@ export class UrgentController {
   @Post(':id/offers') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)
   async offer(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: OfferDto) {
     limit(offerBucket, userId);
-    const r = await this.prisma.urgentRequest.findUnique({ where: { id }, select: { status: true, createdById: true } });
+    const r = await this.prisma.urgentRequest.findUnique({ where: { id }, select: { status: true, createdById: true, no: true, kind: true } });
     if (!r) throw new NotFoundException({ code: 'URGENT_NOT_FOUND' });
     if (r.status !== 'OPEN') throw new ConflictException({ code: 'URGENT_NOT_OPEN', status: r.status });
     if (r.createdById === userId) throw new ForbiddenException({ code: 'OWN_REQUEST' });
@@ -110,7 +127,9 @@ export class UrgentController {
       data: { requestId: id, providerOrgId, providerUserId: userId, priceTiyin: dto.priceTiyin == null ? null : BigInt(dto.priceTiyin), etaMinutes: dto.etaMinutes ?? null, message: dto.message?.trim() || null },
     });
     await this.audit.log({ actorId: userId, action: 'urgent.offer', entity: 'UrgentOffer', entityId: o.id, meta: { requestId: id, providerOrgId, priceTiyin: dto.priceTiyin ?? null } });
-    return offerView(o, await this.orgsOf([o]));
+    const view = offerView(o, await this.orgsOf([o]));
+    void this.notifyOffer({ id, no: r.no, kind: r.kind, createdById: r.createdById }, view.providerOrg?.name ?? null).catch(() => {}); // javobni kutmaydi
+    return view;
   }
 
   @Post(':id/award') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(200)
@@ -124,6 +143,11 @@ export class UrgentController {
       this.prisma.urgentRequest.update({ where: { id }, data: { status: 'AWARDED', awardedOfferId: dto.offerId } }),
     ]);
     await this.audit.log({ actorId: userId, action: 'urgent.award', entity: 'UrgentRequest', entityId: id, meta: { offerId: dto.offerId } });
+    // Taklif egalari: g'olib bitta, qolgan SENT lar DECLINED bo'ldi (awardOffers)
+    const byId = new Map(r.offers.map((o) => [o.id, o.providerUserId]));
+    const winnerUserId = byId.get(dto.offerId);
+    const declinedUserIds = [...new Set(changes.filter((c) => c.status === 'DECLINED').map((c) => byId.get(c.id)).filter((x): x is string => !!x))];
+    if (winnerUserId) void this.notifyAward(r, winnerUserId, declinedUserIds).catch(() => {}); // javobni kutmaydi
     return this.mineOne(id);
   }
 
@@ -163,7 +187,18 @@ export class UrgentController {
     // Holat o'zgarmaydi: egasi uni o'z kabinetida ko'radi.
     const fresh = new Date(Date.now() - URGENT_LIST_HOURS * 3_600_000);
     const rows = await this.prisma.urgentRequest.findMany({
-      where: { status: 'OPEN', createdById: { not: userId }, createdAt: { gte: fresh }, ...(all ? {} : { regionCode: { in: regions } }) },
+      // "OCHIQ yoki men taklif bergan": taklif tanlangach so'rov AWARDED bo'ladi va
+      // faqat OPEN sharti bilan u ro'yxatdan butunlay chiqib ketardi, ya'ni g'olib
+      // "Taklifingiz tanlandi" xabaridagi havolani bosib so'rovni ham, buyurtmachining
+      // raqamini ham topmasdi. O'zim taklif bergan qator muddatdan va hududdan
+      // qat'i nazar qoladi: u menga tegishli ish.
+      where: {
+        OR: [
+          { status: 'OPEN', createdAt: { gte: fresh }, ...(all ? {} : { regionCode: { in: regions } }) },
+          { offers: { some: { providerUserId: userId } } },
+        ],
+        createdById: { not: userId },
+      },
       include: { offers: { where: { providerUserId: userId } } },
       orderBy: { createdAt: 'desc' }, take: 100,
     });
@@ -174,7 +209,8 @@ export class UrgentController {
   }
 
   private async owned(userId: string, id: string) {
-    const r = await this.prisma.urgentRequest.findUnique({ where: { id }, include: { offers: { select: { id: true, status: true } } } });
+    // providerUserId: taklif tanlanganda g'olibga va rad etilganlarga xabar shu yerdan boradi
+    const r = await this.prisma.urgentRequest.findUnique({ where: { id }, include: { offers: { select: { id: true, status: true, providerUserId: true } } } });
     if (!r) throw new NotFoundException({ code: 'URGENT_NOT_FOUND' });
     if (r.createdById !== userId) throw new ForbiddenException({ code: 'NOT_OWNER' });
     return r;
@@ -199,23 +235,69 @@ export class UrgentController {
     return new Map(rows.map((o) => [o.id, o]));
   }
 
-  /** Hudud va qo'shnilaridagi LOCO_SERVICE/CARRIER/ASSET_OWNER tashkilot egalariga (Telegram bog'langan) xabar. Xato e'tiborsiz. */
-  private async notify(r: { id: string; no: string; kind: string; regionCode: string; stationName: string | null; wagonCount: number | null; description: string; createdById: string }) {
-    const links = await this.prisma.telegramLink.findMany({
-      where: { userId: { not: r.createdById }, user: { memberships: { some: { isOwner: true, org: { kinds: { hasSome: [...PROVIDER_KINDS] }, regionCode: { in: notifyRegions(r.regionCode as RegionCode) } } } } } },
-      select: { chatId: true },
+  /**
+   * Hudud va qo'shnilaridagi LOCO_SERVICE/CARRIER/ASSET_OWNER tashkilot egalariga xabar.
+   * Xato e'tiborsiz.
+   *
+   * Ilgari bu yerda TelegramLink to'g'ridan-to'g'ri o'qilardi, ya'ni botni bog'lamagan
+   * ijrochi shoshilinch so'rovni umuman ko'rmasdi. Endi notifyBoth: saytdagi qo'ng'iroq
+   * ham qo'yiladi, matn esa oluvchining tilida ketadi.
+   */
+  private async notify(r: { id: string; no: string; kind: string; regionCode: string; stationName: string | null; description: string; createdById: string }) {
+    const ms = await this.prisma.membership.findMany({
+      where: { isOwner: true, userId: { not: r.createdById }, org: { kinds: { hasSome: [...PROVIDER_KINDS] }, regionCode: { in: notifyRegions(r.regionCode as RegionCode) } } },
+      select: { userId: true },
+      take: 500,
     });
-    if (!links.length) return;
-    const url = `${env.WEB_ORIGIN}/dashboard/urgent/offers?id=${r.id}`;
-    const text = [
-      `🚨 Shoshilinch so'rov ${r.no}`,
-      `${URGENT_KIND_LABELS.uz[r.kind as UrgentKind] ?? r.kind} · ${REGION_LABELS[r.regionCode as RegionCode] ?? r.regionCode}${r.stationName ? `, ${esc(r.stationName)}` : ''}${r.wagonCount ? ` · ${r.wagonCount} vagon` : ''}`,
-      '', esc(r.description.slice(0, 300)), '', `Taklif yuborish: ${url}`,
-    ].join('\n');
+    const userIds = [...new Set(ms.map((m) => m.userId))];
+    if (!userIds.length) return;
     // Telegram tugmasi faqat https manzilni qabul qiladi: https da Mini App (web_app) tugmasi, localhost da matndagi havola yetarli
-    const reply_markup = env.WEB_ORIGIN.startsWith('https://')
-      ? { inline_keyboard: [[{ text: 'Taklif yuborish', web_app: { url: `${env.WEB_ORIGIN}/tg/urgent/offers?id=${r.id}` } }]] }
+    // Tugma funksiya: oluvchilar til bo'yicha guruhlanadi, demak matn o'z tilida ketadi.
+    // Qotirilgan bitta tugma bo'lsa rus yoki ingliz ijrochi ruscha matn ostida o'zbekcha
+    // tugma ko'rardi, ya'ni aralash tilli xabar chiqardi.
+    const replyMarkup = env.WEB_ORIGIN.startsWith('https://')
+      ? (l: SearchLang) => ({ inline_keyboard: [[{ text: OFFER_BTN[l], web_app: { url: `${env.WEB_ORIGIN}/tg/urgent/offers?id=${r.id}` } }]] })
       : undefined;
-    await sendTelegram(links.map((l) => l.chatId), text, reply_markup);
+    const where = placeLine(r);
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds, exceptUserId: r.createdById },
+      kind: 'urgentNew',
+      inApp: KIND,
+      href: `/dashboard/urgent/offers?id=${r.id}`,
+      vars: (l) => ({ no: r.no, what: kindLabel(r.kind, l), where, message: r.description.slice(0, 300) }),
+      replyMarkup,
+    });
+  }
+
+  /**
+   * Taklif keldi: so'rov egasiga. Bu xabarsiz odam saytni o'zi qayta-qayta ochib
+   * tekshirishga majbur bo'ladi, shoshilinch so'rovda esa u shunchaki telefon kutadi.
+   */
+  private async notifyOffer(r: { id: string; no: string; kind: string; createdById: string }, from: string | null) {
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds: [r.createdById] },
+      kind: 'urgentOffer',
+      inApp: KIND,
+      href: `/dashboard/urgent/${r.id}`,
+      vars: (l) => ({ no: r.no, what: kindLabel(r.kind, l), from: from ?? '' }),
+    });
+  }
+
+  /**
+   * Taklif tanlandi: g'olibga va qolganlarga. Rad javobi ham yuboriladi, chunki
+   * tanlanmagan ijrochi jimlikni "hali qaror yo'q" deb o'qib, resursini bo'sh ushlab turadi.
+   */
+  private async notifyAward(r: { id: string; no: string; kind: string }, winnerUserId: string, declinedUserIds: string[]) {
+    // ponytail: ijrochi uchun alohida tafsilot sahifasi yo'q, shuning uchun havola uning
+    // o'z taxtasiga boradi; qaror esa xabarning o'zida yozilgan. Ijrochiga ham tafsilot
+    // sahifasi kerak bo'lsa, GET /urgent/:id ijrochi uchun ochiladi va havola o'zgaradi.
+    const href = `/dashboard/urgent/offers?id=${r.id}`;
+    const vars = (l: SearchLang) => ({ no: r.no, what: kindLabel(r.kind, l) });
+    await Promise.all([
+      notifyBoth(this.prisma, this.notifications, { target: { userIds: [winnerUserId] }, kind: 'urgentAward', inApp: KIND, href, vars }),
+      declinedUserIds.length
+        ? notifyBoth(this.prisma, this.notifications, { target: { userIds: declinedUserIds }, kind: 'urgentDeclined', inApp: KIND, href, vars })
+        : null,
+    ]);
   }
 }
