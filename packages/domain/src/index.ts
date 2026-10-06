@@ -86,6 +86,21 @@ export function normalizePhone(raw: string): string | null {
   return null;
 }
 
+/**
+ * Saqlashdan oldin: tanilgan raqam bitta shaklga keltiriladi, tanilmagani o'zgarmay qoladi.
+ *
+ * Nega bitta shakl: "90 123 45 67" va "+998901234567" bitta raqam, lekin bazada ikki xil
+ * yozilsa ularni solishtirib bo'lmaydi (da'vodagi telefon mosligi, bir raqam ortidagi
+ * hisoblar). Nega tanilmagani qoladi: reestrda "71 299-12-34, 71 299-12-35" kabi ikki
+ * raqamli yoki eski shakldagi yozuvlar bor, rad etsak yoki o'chirsak ma'lumot yo'qolardi.
+ * Bazadagi eski qatorlar hali eski shaklda: solishtirishda ikkala tomon ham normalizePhone
+ * dan o'tkaziladi, bazadagi qiymatga tayanilmaydi.
+ */
+export function storePhone(raw: string | null | undefined): string | null {
+  const t = raw?.trim();
+  return t ? (normalizePhone(t) ?? t) : null;
+}
+
 // ───────────────────────── Katalog (S2) ─────────────────────────
 
 /** Mintaqaviy temir yo'l uzeli (RJU / MTU). Stansiya va shahobcha reestrlari shu kod bilan. */

@@ -11,14 +11,17 @@ import { MarketService } from './market.service';
 type Where = Record<string, unknown>;
 
 function setup(opts: { members?: string[]; trucks?: { ownerUserId: string | null; orgId: string | null }[];
-  watches?: { id: string; userId: string; kind: string; params: Record<string, string> }[] } = {}) {
+  watches?: { id: string; userId: string; kind: string; params: Record<string, string> }[]; profiles?: string[] } = {}) {
   const listingWhere: Where[] = [];
   const memberWhere: Where[] = [];
+  const profileWhere: Where[] = [];
+  const fanout: Where[] = [];
   const marked: string[][] = [];
   const prisma = {
     membership: { findMany: async (a: { where: Where }) => { memberWhere.push(a.where); return (opts.members ?? []).map((userId) => ({ userId })); } },
     listing: { findMany: async (a: { where: Where }) => { listingWhere.push(a.where); return opts.trucks ?? []; } },
-    serviceProfile: { findMany: async () => [] },
+    serviceProfile: { findMany: async (a: { where: Where }) => { profileWhere.push(a.where); return (opts.profiles ?? []).map((userId) => ({ userId })); } },
+    auditLog: { create: async (a: { data: Where }) => { fanout.push(a.data); return {}; } },
     // notifyTelegram bazaga boradi: bo'sh ro'yxat qaytaramiz, xabar yuborilmaydi
     telegramLink: { findMany: async () => [] },
     // Kuzatuv: notifyNew uni to'g'ridan-to'g'ri await qiladi, ya'ni soxta shart
@@ -36,7 +39,7 @@ function setup(opts: { members?: string[]; trucks?: { ownerUserId: string | null
       return [...new Set([...direct, ...fromOrgs])];
     },
   } as unknown as NotificationsService;
-  return { svc: new MarketService(prisma, notifications), pushed, listingWhere, memberWhere, marked };
+  return { svc: new MarketService(prisma, notifications), pushed, listingWhere, memberWhere, profileWhere, fanout, marked };
 }
 
 const cargo = (extra: Record<string, unknown> = {}) => ({
@@ -129,5 +132,28 @@ describe('kuzatuvchilar ham oladi', () => {
     const { svc, pushed } = setup({ watches: [w('w1', 'expeditor', { truckType: 'TENT' })] });
     await svc.notifyNew(cargo({ truckType: null }));
     expect(pushed[0]).toContain('expeditor');
+  });
+});
+
+describe("so'rov kimga ketgani jurnalga yoziladi", () => {
+  const service = () => ({ id: 'r1', no: 'SR-1', board: 'SERVICE', title: 'Ekspeditor kerak', createdById: 'shipper', serviceType: 'FORWARDER', regionCode: 'UZ-AN', fromRegion: null, toRegion: null }) as never;
+
+  it("hech kimga ketmagani ham yoziladi, sent = 0", async () => {
+    const { svc, pushed, fanout } = setup();
+    await svc.notifyNew(cargo({ id: 'r0' }));
+    expect(pushed).toHaveLength(0);
+    expect(fanout).toEqual([{ action: 'request.fanout', entity: 'MarketRequest', entityId: 'r0', meta: { board: 'CARGO', region: 'UZ-TK', type: 'TENT', sent: 0 } }]);
+  });
+
+  it("xizmat so'rovi viloyat va qo'shnilarga, hududsiz profilga ham; namuna profilga emas", async () => {
+    const { svc, pushed, profileWhere, fanout } = setup({ profiles: ['weigher'] });
+    await svc.notifyNew(service());
+    const where = profileWhere[0] as { isDemo: boolean; OR: [{ regions: { hasSome: string[] } }, { regions: { isEmpty: boolean } }] };
+    expect(where.isDemo).toBe(false);
+    expect(where.OR[0].regions.hasSome).toContain('UZ-AN');
+    expect(where.OR[0].regions.hasSome.length).toBeGreaterThan(1); // qo'shnilar ham
+    expect(where.OR[1]).toEqual({ regions: { isEmpty: true } });
+    expect(pushed[0]).toEqual(['weigher']);
+    expect((fanout[0] as { meta: { sent: number } }).meta.sent).toBe(1);
   });
 });

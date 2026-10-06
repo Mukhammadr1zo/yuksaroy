@@ -98,6 +98,8 @@ function Requests({ region, svc }: { region: (c: string | null) => string; svc: 
         <Labeled label={tc('status')} className="w-44">
           <select value={f.status} onChange={(e) => set({ status: e.target.value })} className={INPUT}>
             {MARKET_STATUSES.map((s) => <option key={s} value={s}>{tm(`status.${s}`)}</option>)}
+            {/* Holat emas, filtr: doskada turgan va taklif olmagan so'rovlar (server hal qiladi) */}
+            <option value="NO_OFFERS">{tm('status.NO_OFFERS')}</option>
           </select>
         </Labeled>
         <button type="submit" className={BTN}>{tc('apply')}</button>

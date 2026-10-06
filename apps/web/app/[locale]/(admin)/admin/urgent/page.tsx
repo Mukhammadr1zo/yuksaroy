@@ -49,7 +49,8 @@ export default function AdminUrgentPage() {
 
   // Filtr URL da (useListQuery): orqaga tugmasi filtrni qaytaradi. Noto'g'ri holat "hammasi" bo'lib qoladi
   const { f, set, reset } = useListQuery(F0);
-  const status = URGENT_STATUSES.includes(f.status as never) ? f.status : '';
+  // NO_OFFERS holat emas, filtr: 48 soat ichidagi ochiq va taklifsiz so'rovlar (server hal qiladi)
+  const status = URGENT_STATUSES.includes(f.status as never) || f.status === 'NO_OFFERS' ? f.status : '';
   const list = useAdminList<Row>('/admin/urgent', { ...f, status });
   const [q, setQ] = useState(f.q);
   useEffect(() => setQ(f.q), [f.q]);
@@ -81,6 +82,7 @@ export default function AdminUrgentPage() {
           <select value={status} onChange={(e) => set({ status: e.target.value })} className={INPUT}>
             <option value="">{tc('all')}</option>
             {URGENT_STATUSES.map((s) => <option key={s} value={s}>{ts(s as UrgentStatus)}</option>)}
+            <option value="NO_OFFERS">{tu('noOffers')}</option>
           </select>
         </Labeled>
         <Labeled label={tc('region')} className="w-56">

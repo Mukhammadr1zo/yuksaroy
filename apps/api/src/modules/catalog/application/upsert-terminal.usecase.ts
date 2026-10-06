@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { slugify, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
+import { slugify, storePhone, type TerminalKind, type TerminalStatus } from '@yuksaroy/domain';
 import { CATALOG_REPOSITORY, type CatalogRepository, type TerminalRecord, type TerminalServiceRecord, type WeekHours } from '../domain/ports';
 import { TerminalAccess } from './terminal-access';
 
@@ -69,5 +69,6 @@ export class UpsertTerminalUseCase {
 /** Faqat yozuv maydonlari (stationEsr/stationId/name/kind alohida hal qilinadi). */
 function strip(i: TerminalInput) {
   const { stationId: _s, stationEsr: _e, name: _n, kind: _k, ...rest } = i;
-  return rest;
+  // Kelmagan kalit tegilmaydi: undefined ni null ga aylantirsak har tahrir raqamni o'chirardi
+  return rest.phone === undefined ? rest : { ...rest, phone: storePhone(rest.phone) };
 }

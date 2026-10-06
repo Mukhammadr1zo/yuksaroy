@@ -282,7 +282,8 @@
         "AD_EXPIRED": "{n} ta faol reklamaning muddati tugagan",
         "AD_ENDING": "{n} ta reklama 7 kunda tugaydi",
         "DB_SLOW": "Baza sekin javob beryapti: {ms} ms",
-        "DB_DOWN": "Baza javob bermayapti"
+        "DB_DOWN": "Baza javob bermayapti",
+        "NO_PROVIDER": "{n} ta yangi so'rov 24 soatda hech kimga yuborilmadi: mos ijrochi topilmadi"
       },
       "alertGo": "Ochish",
       "money": "Pul",
@@ -569,7 +570,8 @@
         "market-relist": "So'rovni qayta e'lon qildi",
         "admin-subscription-remind": "Obuna eslatmasini qo'lda yubordi",
         "admin-task-assign": "Ishni jamoadoshga biriktirdi",
-        "admin-task-done": "Vazifani yopdi"
+        "admin-task-done": "Vazifani yopdi",
+        "request-fanout": "Yangi so'rov ijrochilarga yuborildi"
       },
       "ent": {
         "ContactMessage": "Murojaat",
@@ -663,7 +665,7 @@
       "offers": "Takliflar",
       "phone": "Telefon",
       "description": "Tavsif",
-      "noOffers": "Hali taklif kelmagan.",
+      "noOffers": "Taklif kelmaganlar",
       "noPrice": "narx aytilmagan",
       "eta": "{min} daqiqada",
       "awarded": "Tanlangan",
@@ -713,7 +715,8 @@
         "AWARDED": "Tanlangan",
         "DONE": "Bajarilgan",
         "CLOSED": "Yopilgan",
-        "CANCELLED": "Bekor qilingan"
+        "CANCELLED": "Bekor qilingan",
+        "NO_OFFERS": "Taklif kelmaganlar"
       },
       "profileStatus": {
         "ACTIVE": "Faol",

@@ -72,7 +72,7 @@ const inList = (list: readonly string[], v: string | undefined) => (v && list.in
  * Sana Toshkent kuni bilan solishtiriladi va shartlar AND ichida: ro'yxatdagi viloyat
  * filtri OR ni band qilgan, shu yerga yozilsa ikkalasi bir-birini bosib qolardi.
  */
-const visible = (now = new Date()) => ({
+export const visible = (now = new Date()) => ({
   status: 'OPEN',
   createdAt: { gte: staleBefore(now) },
   AND: [{ OR: [{ loadDate: null }, { loadDate: { gte: new Date(`${uzLocalDate(now)}T00:00:00Z`) } }] }],

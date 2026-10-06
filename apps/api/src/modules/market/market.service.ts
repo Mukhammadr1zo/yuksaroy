@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PAYMENT_TERM_LABELS, REGION_LABELS, SERVICE_TYPE_LABELS, TRUCKS_WORD, uzDateText, uzLocalDate, type PaymentTerm, type RegionCode, type SearchLang, type ServiceType } from '@yuksaroy/domain';
 import { env } from '../../common/env';
+import { logFanout } from '../../common/fanout';
 import { PrismaService } from '../../common/prisma.service';
 import { esc, notifyBoth, sendTelegram, webUrl } from '../../common/telegram';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
@@ -166,10 +167,27 @@ export class MarketService {
         values: { fromRegion: r.fromRegion ?? r.regionCode, toRegion: r.toRegion, truckType: r.truckType },
       }));
     } else {
-      const ps = await this.prisma.serviceProfile.findMany({ where: { status: 'ACTIVE', serviceType: r.serviceType ?? '', userId: { not: r.createdById } }, select: { userId: true }, take: 500 });
+      // Hudud: so'rov viloyati va qo'shnilari (yuk va shoshilinch so'rovdagi qoida). Hududi
+      // ko'rsatilmagan profil hamma joyda ishlaydi deb hisoblanadi, /services ro'yxatida ham
+      // shunday. Ilgari hudud umuman qaralmasdi: Xorazmdagi mutaxassis Andijondagi so'rovdan
+      // xabar olardi.
+      // isDemo: namuna profilning egasi ham "oluvchi" bo'lib sanalardi va hech kimga
+      // ketmagan so'rov jurnalda bitta odamga ketgandek ko'rinardi.
+      const regions = r.regionCode ? notifyRegions(r.regionCode as RegionCode) : null;
+      const ps = await this.prisma.serviceProfile.findMany({
+        where: {
+          status: 'ACTIVE', isDemo: false, serviceType: r.serviceType ?? '', userId: { not: r.createdById },
+          ...(regions ? { OR: [{ regions: { hasSome: regions } }, { regions: { isEmpty: true } }] } : {}),
+        },
+        select: { userId: true }, take: 500,
+      });
       userIds = ps.map((p) => p.userId);
     }
     userIds = [...new Set(userIds)];
+    const cargo = r.board === 'CARGO';
+    await logFanout(this.prisma, 'MarketRequest', r.id, {
+      board: cargo ? 'CARGO' : 'SERVICE', region: (cargo ? r.fromRegion : null) ?? r.regionCode, type: cargo ? r.truckType : r.serviceType, sent: userIds.length,
+    });
     if (!userIds.length) return;
     const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
     const where = r.board === 'CARGO' ? `${region(r.fromRegion)} -> ${region(r.toRegion)}` : region(r.regionCode);

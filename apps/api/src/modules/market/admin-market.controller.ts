@@ -6,7 +6,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { clampInt } from '../catalog/presentation/catalog.controller';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
-import { marketStatus } from './market.controller';
+import { marketStatus, visible } from './market.controller';
 import { canMarketTransition } from './market.rules';
 import { offerView, requestView } from './market.service';
 import { profileView } from './services.controller';
@@ -29,7 +29,9 @@ export class AdminMarketController {
     const text = q?.trim();
     const where = {
       ...(board && (MARKET_BOARDS as readonly string[]).includes(board) ? { board } : {}),
-      ...(marketStatus(status) ? { status } : {}),
+      // NO_OFFERS holat emas, filtr: doskada hali ko'rinib turgan va bitta ham taklif olmagan
+      // so'rovlar. visible() takrorlanadi, aks holda 30 kunlik o'lik qatorlar ham chiqardi.
+      ...(status === 'NO_OFFERS' ? { ...visible(), offers: { none: {} } } : marketStatus(status) ? { status } : {}),
       ...(text ? { no: { contains: text, mode: 'insensitive' as const } } : {}),
     };
     const [total, rows] = await Promise.all([

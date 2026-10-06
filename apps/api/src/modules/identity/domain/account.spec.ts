@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PASSWORD, normalizePhone } from '@yuksaroy/domain';
+import { PASSWORD, normalizePhone, storePhone } from '@yuksaroy/domain';
 import { afterLoginAttempt, anonymizedUser, deleteConfirmed, lockRetryAfter } from './account';
 
 const now = new Date('2026-09-08T10:00:00Z');
@@ -78,5 +78,19 @@ describe('normalizePhone', () => {
     expect(normalizePhone('+0123456789')).toBeNull();
     expect(normalizePhone('+1234567')).toBeNull();
     expect(normalizePhone('+1234567890123456')).toBeNull();
+  });
+});
+
+describe('storePhone', () => {
+  it('tanilgan raqam bitta shaklda saqlanadi', () => {
+    expect(storePhone(' 90 123-45-67 ')).toBe('+998901234567');
+  });
+
+  it("tanilmagan qiymat o'zgarmay qoladi, bo'shi null", () => {
+    // Reestrdagi ikki raqamli yozuv: rad etilsa yoki bo'shatilsa ma'lumot yo'qolardi
+    expect(storePhone('71 299-12-34, 71 299-12-35')).toBe('71 299-12-34, 71 299-12-35');
+    expect(storePhone('   ')).toBeNull();
+    expect(storePhone(null)).toBeNull();
+    expect(storePhone(undefined)).toBeNull();
   });
 });

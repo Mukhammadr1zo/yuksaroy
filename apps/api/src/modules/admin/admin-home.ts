@@ -32,7 +32,7 @@ export function sortWork(stats: Record<QueueKey, QueueStat>): WorkRow[] {
 }
 
 export type Alert = {
-  code: 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN';
+  code: 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN' | 'NO_PROVIDER';
   tone: 'warn' | 'bad';
   n?: number;
   of?: number;
@@ -49,12 +49,15 @@ export const DB_SLOW_MS = 300;
  * phonePlans: PHONE ruxsatli faol tarif soni. Nol bo'lsa hech kim obuna sotib ololmaydi,
  * faol tarif umuman yo'qmi yoki faqat vagon tarifi bormi, farqi yo'q.
  * Vagon manbasi: yarmi yoki ko'pi javobsiz bo'lsa bad, aks holda warn.
+ * noProvider: 24 soatda hech kimga yuborilmagan yangi so'rovlar soni (common/fanout.ts).
+ * Qaror aniq: o'sha viloyatda o'sha turdagi ijrochi topish yoki taklif qilish.
  */
 export function alertsOf(i: {
   phonePlans: number | null;
   wagon: { errors: number; total: number } | null;
   ads: { expired: number; ending: number } | null;
   db: { ok: boolean; ms?: number };
+  noProvider?: number | null;
 }): Alert[] {
   const out: Alert[] = [];
   if (!i.db.ok) out.push({ code: 'DB_DOWN', tone: 'bad' });
@@ -63,6 +66,7 @@ export function alertsOf(i: {
   if (i.wagon && i.wagon.errors > 0) out.push({ code: 'WAGON_UPSTREAM', tone: i.wagon.errors >= i.wagon.total / 2 ? 'bad' : 'warn', n: i.wagon.errors, of: i.wagon.total });
   if (i.ads && i.ads.expired > 0) out.push({ code: 'AD_EXPIRED', tone: 'warn', n: i.ads.expired });
   if (i.ads && i.ads.ending > 0) out.push({ code: 'AD_ENDING', tone: 'warn', n: i.ads.ending });
+  if (i.noProvider) out.push({ code: 'NO_PROVIDER', tone: 'warn', n: i.noProvider });
   return out;
 }
 

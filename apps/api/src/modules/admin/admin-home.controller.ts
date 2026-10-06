@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { uzLocalToUtc } from '@yuksaroy/domain';
 import { queueStats } from '../../common/admin-queues';
 import { countByDay } from '../../common/day-counts';
+import { FANOUT_ACTION } from '../../common/fanout';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
@@ -60,7 +61,7 @@ export class AdminHomeController {
     };
     const in7 = new Date(now.getTime() + 7 * DAY);
     const since24h = new Date(now.getTime() - DAY);
-    const [db, work, money, growth, series, phonePlans, wagon, ads, commission, reveals] = await Promise.all([
+    const [db, work, money, growth, series, phonePlans, wagon, ads, commission, reveals, noProvider] = await Promise.all([
       this.pingDb(),
       safe('work', async () => sortWork(await queueStats(this.prisma, true))),
       safe('money', () => this.money(now, in7)),
@@ -86,6 +87,8 @@ export class AdminHomeController {
       }),
       safe('commission', () => this.commission()),
       safe('reveals', () => this.reveals(now)),
+      // 24 soatda hech kimga yuborilmagan yangi so'rovlar: sent son bo'lib yoziladi (common/fanout.ts)
+      safe('fanout', () => this.prisma.auditLog.count({ where: { action: FANOUT_ACTION, createdAt: { gte: since24h }, meta: { path: ['sent'], equals: 0 } } })),
     ]);
     return {
       db,
@@ -93,7 +96,7 @@ export class AdminHomeController {
       money,
       growth,
       series,
-      alerts: alertsOf({ phonePlans, wagon, ads, db }),
+      alerts: alertsOf({ phonePlans, wagon, ads, db, noProvider }),
       // Uch oylik tarix ataylab yo'q: qaror ikkita songa qaraydi
       commission,
       // Raqam ochish voronkasi, 30 kun. Bepul oyna o'chiq ekan brauzer kartani chizmaydi.

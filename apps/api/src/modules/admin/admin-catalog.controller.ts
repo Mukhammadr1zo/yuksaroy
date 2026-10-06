@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, MaxLength, Min } from 'class-validator';
 import type { FastifyReply } from 'fastify';
 import {
-  CLAIM_STATUSES, OWNER_KINDS, REGIONS, RJUS, TERMINAL_KINDS, TERMINAL_STATUSES, slugify,
+  CLAIM_STATUSES, OWNER_KINDS, REGIONS, RJUS, TERMINAL_KINDS, TERMINAL_STATUSES, slugify, storePhone,
   type ClaimStatus, type OwnerKind, type RegionCode, type Rju, type TerminalKind, type TerminalStatus,
 } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
@@ -124,6 +124,8 @@ const defined = (dto: object): Row => Object.fromEntries(Object.entries(dto).fil
 const terminalData = (dto: TerminalCreateDto | TerminalUpdateDto | TerminalCreateFullDto): Row => {
   const d = defined(dto);
   for (const k of ['contractStart', 'contractEnd']) if (typeof d[k] === 'string') d[k] = new Date(d[k] as string);
+  // Mas'ul shaxs raqami da'vo qarorida foydalanuvchining raqami bilan solishtiriladi
+  for (const k of ['phone', 'contactPhone']) if (typeof d[k] === 'string') d[k] = storePhone(d[k] as string);
   return d;
 };
 /** Katta-kichik harf farqsiz qidiruv. */

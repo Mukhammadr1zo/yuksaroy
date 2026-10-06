@@ -60,4 +60,10 @@ describe('ogohlantirishlar', () => {
       .toEqual(['DB_SLOW:bad', 'NO_ACTIVE_PLAN:bad', 'AD_EXPIRED:warn', 'AD_ENDING:warn']);
     expect(alertsOf({ phonePlans: null, wagon: null, ads: null, db: { ok: false } })).toEqual([{ code: 'DB_DOWN', tone: 'bad' }]);
   });
+
+  it("hech kimga ketmagan so'rov warn; nol yoki yiqilgan blok jim", () => {
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, noProvider: 3 })).toEqual([{ code: 'NO_PROVIDER', tone: 'warn', n: 3 }]);
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, noProvider: 0 })).toEqual([]);
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, noProvider: null })).toEqual([]);
+  });
 });

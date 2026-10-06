@@ -7,6 +7,7 @@ import { randomBytes } from 'node:crypto';
 import { REGIONS, REGION_LABELS, URGENT_KINDS, URGENT_KIND_LABELS, formatUrgentNo, normalizePhone, type RegionCode, type SearchLang, type UrgentKind } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { env } from '../../common/env';
+import { logFanout } from '../../common/fanout';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { notifyBoth } from '../../common/telegram';
@@ -51,7 +52,7 @@ const statusUrl = (token: string) => `${env.WEB_ORIGIN}/status/${token}`;
  * shoshilinch emas; hisobotda 24 soat taklif qilingan edi, lekin tunda yuborilgan
  * so'rov ertasi kuni kechqurun ro'yxatdan tushib, ijrochining ko'ziga tushmay qolardi.
  */
-const URGENT_LIST_HOURS = 48;
+export const URGENT_LIST_HOURS = 48;
 
 const createBucket = new IpBucket(5, 3_600_000); // soatiga 5 ta shoshilinch so'rov
 const offerBucket = new IpBucket(20, 3_600_000); // soatiga 20 ta taklif
@@ -250,6 +251,7 @@ export class UrgentController {
       take: 500,
     });
     const userIds = [...new Set(ms.map((m) => m.userId))];
+    await logFanout(this.prisma, 'UrgentRequest', r.id, { board: 'URGENT', region: r.regionCode, type: r.kind, sent: userIds.length });
     if (!userIds.length) return;
     // Telegram tugmasi faqat https manzilni qabul qiladi: https da Mini App (web_app) tugmasi, localhost da matndagi havola yetarli
     // Tugma funksiya: oluvchilar til bo'yicha guruhlanadi, demak matn o'z tilida ketadi.

@@ -1,5 +1,5 @@
 import { ConflictException, Inject, Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { orgSlug, type OrgKind, type Role } from '@yuksaroy/domain';
+import { orgSlug, storePhone, type OrgKind, type Role } from '@yuksaroy/domain';
 import { ORG_REPOSITORY, type OrgPatch, type OrganizationRepository } from '../domain/ports';
 import { filterRoles, rolesForKinds } from '../domain/rules';
 
@@ -21,7 +21,7 @@ export class CreateOrgUseCase {
     if (!roles.length) throw new BadRequestException({ code: 'ROLES_NOT_ALLOWED', allowed: rolesForKinds(kinds) });
     const name = input.name.trim();
     const base = {
-      kind: kinds[0]!, kinds, name, stir, phone: input.phone ?? null,
+      kind: kinds[0]!, kinds, name, stir, phone: storePhone(input.phone),
       description: input.description ?? null, telegram: input.telegram ?? null, website: input.website ?? null, regionCode: input.regionCode ?? null, address: input.address ?? null,
     };
     // Bir xil nomli ikki tashkilot bir vaqtda ochilsa uniqueSlug ikkalasiga bir xil slug beradi:
@@ -40,6 +40,7 @@ export class CreateOrgUseCase {
     const m = await this.orgs.findMembership(userId, orgId);
     if (!m?.isOwner) throw new ForbiddenException({ code: 'NOT_OWNER' });
     const patch: OrgPatch = { ...input, name: input.name?.trim() };
+    if (input.phone !== undefined) patch.phone = storePhone(input.phone);
     if (input.kinds) { patch.kinds = this.kinds(input.kinds); patch.kind = patch.kinds[0]; }
     if (input.stir !== undefined) {
       const stir = await this.stir(input.stir, orgId);

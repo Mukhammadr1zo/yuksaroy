@@ -63,8 +63,15 @@ export interface MyTerminal {
   claimEvidence?: { note: string; files: ClaimFile[] } | null;
   services: { serviceCode: ServiceCode; isEnabled: boolean; leadTimeMin: number }[]; tariffs: Tariff[]; freeToday?: number;
 }
-/** GET /admin/terminals: da'vogar tashkilot nomi bilan. */
-export type AdminTerminal = MyTerminal & { claimOrgName: string | null };
+/**
+ * GET /admin/terminals: da'vogar tashkilot nomi, STIR i va tasdiq holati bilan.
+ * phoneMatch: da'vo yuborgan odamning raqami obyektdagi raqamga mosmi; null - obyektda
+ * tanilgan raqam yo'q yoki da'vogarning raqami yo'q, ya'ni solishtirib bo'lmaydi.
+ */
+export type AdminTerminal = MyTerminal & {
+  claimOrgName: string | null; claimOrgStir: string | null; claimOrgKyc: KycStatus | null;
+  claimantPhone: string | null; phoneMatch: boolean | null;
+};
 
 /** E'lon sahifasi: temir yo'l /equipment, avto /carriers. */
 export const listingHref = (l: { kind: ListingKind; slug: string }) => `/${l.kind === 'TRUCK' ? 'carriers' : 'equipment'}/${l.slug}`;

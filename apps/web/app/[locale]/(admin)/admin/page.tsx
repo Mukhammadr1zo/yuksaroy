@@ -23,7 +23,7 @@ import { dueTone, type Task } from '@/components/admin/AssignTask';
 import { Sparkline } from '@/components/admin/Sparkline';
 
 type Pair = { last7: number; prev7: number };
-type AlertCode = 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN';
+type AlertCode = 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN' | 'NO_PROVIDER';
 type Home = {
   db: { ok: boolean; ms?: number };
   /** count > 0 navbatlar, eng uzoq kutgani birinchi */
@@ -51,6 +51,8 @@ const WORK_LABEL: Record<string, string> = {
 /** Ogohlantirishdan qaror sahifasiga. Baza haqidagisi Tizim sahifasiga, u faqat egada bor: operatorga havola yo'q (serverga qarash kerak). */
 const ALERT_HREF: Partial<Record<AlertCode, string>> = {
   NO_ACTIVE_PLAN: '/admin/plans?new=1', WAGON_UPSTREAM: '/admin/audit?action=wagon.search', AD_EXPIRED: '/admin/ads', AD_ENDING: '/admin/ads',
+  // Jurnalda har so'rovning viloyati, turi va necha odamga ketgani: qayerda ijrochi yo'qligi shundan ko'rinadi
+  NO_PROVIDER: '/admin/audit?action=request.fanout',
 };
 const alertHref = (code: AlertCode, isOwner: boolean) => (code === 'DB_SLOW' || code === 'DB_DOWN' ? (isOwner ? '/admin/system' : undefined) : ALERT_HREF[code]);
 const GROWTH = [

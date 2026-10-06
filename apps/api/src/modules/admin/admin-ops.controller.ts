@@ -15,6 +15,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { clampInt } from '../catalog/presentation/catalog.controller';
 import { reportWhere, resolveData } from './report-status';
+import { URGENT_LIST_HOURS } from '../urgent/urgent.controller';
 
 const ORDER_SELECT = {
   id: true, no: true, status: true, createdAt: true, operation: true, direction: true, wagonCount: true, totalTiyin: true,
@@ -437,7 +438,9 @@ export class AdminOpsController {
     const take = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
     // q: buyruq paleti UR-1001 ni shu ro'yxat bilan ochadi
-    const where = { ...(status ? { status } : {}), ...(region ? { regionCode: region } : {}), ...(text ? { no: like(text) } : {}) };
+    // NO_OFFERS holat emas, filtr: ijrochilar ro'yxatida hali turgan (48 soat) va taklif olmagan so'rovlar
+    const waiting = { status: 'OPEN', createdAt: { gte: new Date(Date.now() - URGENT_LIST_HOURS * 3_600_000) }, offers: { none: {} } };
+    const where = { ...(status === 'NO_OFFERS' ? waiting : status ? { status } : {}), ...(region ? { regionCode: region } : {}), ...(text ? { no: like(text) } : {}) };
     const [total, items] = await Promise.all([
       this.prisma.urgentRequest.count({ where }),
       this.prisma.urgentRequest.findMany({

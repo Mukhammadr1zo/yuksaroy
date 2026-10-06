@@ -209,7 +209,11 @@
       "claimant": "Claimant",
       "open": "Page",
       "claimNote": "Claim note",
-      "claimDocs": "Attached documents"
+      "claimDocs": "Attached documents",
+      "stir": "STIR",
+      "claimantPhone": "Claimant phone",
+      "phoneMatch": "Matches the number on the object",
+      "phoneNoMatch": "Does not match the number on the object"
     },
     "quick": {
       "title": "Your offer in two steps",

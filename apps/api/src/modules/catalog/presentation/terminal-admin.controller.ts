@@ -17,6 +17,7 @@ import { ClaimDecideDto, ClaimDto, CreateTerminalDto, PublishTariffDto, ReplaceS
 import { pickIn } from './catalog.controller';
 import { filesOrThrow } from '../../../common/attachments';
 import { hideClaimPhone } from './mappers';
+import { claimPhoneMatch } from '../domain/claim-phone';
 import { PlatformAdminGuard } from '../../organizations/presentation/platform-admin.guard';
 
 /** Terminal kabineti va shahobcha claim: faqat kirgan foydalanuvchi; ruxsat use-case ichida (TerminalAccess), moderatsiya PlatformAdmin. */
@@ -92,6 +93,11 @@ export class TerminalAdminController {
    * Qator XOM qaytadi (ochiq mapperga o'ralmaydi): moderator obyektda ko'rsatilgan egasi
    * va mas'ul shaxs raqamini ko'rib qaror qiladi, publicTerminal esa raqamni yashiradi.
    * `pool=1`: ochiq ma'lumotdan yig'ilgan egasiz terminallar reestri (katalogda ko'rinmaydi, murojaat uchun).
+   *
+   * Da'vogar haqida yana uchta narsa: tashkilotning STIR i va tasdiq holati, da'vo yuborgan
+   * odamning tasdiqlangan raqami va u obyektdagi raqamga mosmi (claimPhoneMatch). Ilgari
+   * moderator qarorni izoh matniga va ism o'xshashligiga qo'yardi, noto'g'ri tasdiqlangan
+   * da'vo esa begona odamga obyekt sahifasini, yozishmalarini va telefonini beradi.
    */
   @Get('admin/terminals')
   @UseGuards(PlatformAdminGuard)
@@ -101,8 +107,35 @@ export class TerminalAdminController {
       : { claimStatus: pickIn(claim, CLAIM_STATUSES) ?? ('PENDING' as const), status: 'ANY' as const };
     const items = await this.repo.listTerminals(filter, new Date());
     const ids = [...new Set(items.flatMap((t) => (t.claimOrgId ? [t.claimOrgId] : [])))];
-    const names = new Map((await Promise.all(ids.map((id) => this.orgs.findById(id)))).flatMap((o) => (o ? [[o.id, o.name] as const] : [])));
-    return items.map((t) => ({ ...t, claimOrgName: t.claimOrgId ? (names.get(t.claimOrgId) ?? null) : null }));
+    const orgs = new Map((await Promise.all(ids.map((id) => this.orgs.findById(id)))).flatMap((o) => (o ? [[o.id, o] as const] : [])));
+    const phones = await this.claimantPhones(items.flatMap((t) => (t.claimOrgId ? [t.id] : [])));
+    return items.map((t) => {
+      const o = t.claimOrgId ? orgs.get(t.claimOrgId) : undefined;
+      const claimantPhone = phones.get(t.id) ?? null;
+      return {
+        ...t, claimOrgName: o?.name ?? null, claimOrgStir: o?.stir ?? null, claimOrgKyc: o?.kycStatus ?? null,
+        claimantPhone, phoneMatch: claimantPhone ? claimPhoneMatch(claimantPhone, [t.rail?.contactPhone, t.phone]) : null,
+      };
+    });
+  }
+
+  /**
+   * Da'vo yuborgan odamning raqami. Terminal qatorida faqat tashkilot saqlanadi, odam esa
+   * 'terminal.claim' audit yozuvida (indeks: entity, entityId). Obyekt bo'yicha eng
+   * oxirgisi olinadi: rad etilgandan keyin boshqa odam qayta da'vo qilgan bo'lishi mumkin.
+   * Ikki so'rov, qator soniga bog'liq emas.
+   */
+  private async claimantPhones(terminalIds: string[]): Promise<Map<string, string>> {
+    if (!terminalIds.length) return new Map();
+    const rows = await this.prisma.auditLog.findMany({
+      where: { action: 'terminal.claim', entity: 'Terminal', entityId: { in: terminalIds } },
+      orderBy: { createdAt: 'desc' }, select: { entityId: true, actorId: true },
+    });
+    const actorOf = new Map<string, string>();
+    for (const r of rows) if (r.entityId && r.actorId && !actorOf.has(r.entityId)) actorOf.set(r.entityId, r.actorId);
+    const users = await this.prisma.user.findMany({ where: { id: { in: [...new Set(actorOf.values())] } }, select: { id: true, phone: true } });
+    const phoneOf = new Map(users.flatMap((u) => (u.phone ? [[u.id, u.phone] as const] : [])));
+    return new Map([...actorOf].flatMap(([t, u]) => { const p = phoneOf.get(u); return p ? [[t, p] as const] : []; }));
   }
 
   @Post('terminals')

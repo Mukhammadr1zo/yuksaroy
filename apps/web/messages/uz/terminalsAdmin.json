@@ -209,7 +209,11 @@
       "claimant": "Da'vogar",
       "open": "Sahifasi",
       "claimNote": "Da'vo izohi",
-      "claimDocs": "Biriktirilgan hujjatlar"
+      "claimDocs": "Biriktirilgan hujjatlar",
+      "stir": "STIR",
+      "claimantPhone": "Da'vogar telefoni",
+      "phoneMatch": "Obyektdagi raqamga mos",
+      "phoneNoMatch": "Obyektdagi raqamga mos emas"
     },
     "quick": {
       "title": "Ikki qadamda taklif",

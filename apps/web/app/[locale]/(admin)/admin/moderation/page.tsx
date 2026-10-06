@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { LISTING_OWNER_LABELS, ORG_KIND_LABELS, REPORT_REASON_LABELS, REPORT_STATUSES, REPORT_STATUS_LABELS, REPORT_TARGET_LABELS } from '@yuksaroy/domain';
+import { KYC_STATUS_LABELS, LISTING_OWNER_LABELS, ORG_KIND_LABELS, REPORT_REASON_LABELS, REPORT_STATUSES, REPORT_STATUS_LABELS, REPORT_TARGET_LABELS } from '@yuksaroy/domain';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { som, stationName, uzDateTime } from '@/lib/format';
@@ -244,6 +244,7 @@ function TerminalClaimRow({ x, onDone, ...task }: { x: AdminTerminal; onDone: (d
   const tk = useTranslations('kind');
   const tr = useTranslations('region');
   const tcl = useTranslations('claim');
+  const lang = useLang();
   // Temir yo'l bo'lmagan obyektda (ROAD, MULTI) pasport yo'q: obyektning o'z raqami olinadi
   const contact = [x.rail?.contactName, x.rail?.contactPhone ?? x.phone].filter(Boolean).join(' · ');
   return (
@@ -254,7 +255,19 @@ function TerminalClaimRow({ x, onDone, ...task }: { x: AdminTerminal; onDone: (d
         <span className="text-sm text-muted">{t('station')}: {stationName({ station: x.station, stationNameRaw: x.rail?.stationNameRaw ?? null })}{x.regionCode && tr.has(x.regionCode) ? ` · ${tr(x.regionCode)}` : ''}</span>
         <RowTask entity="Terminal" id={x.id} {...task} />
       </div>
-      <p className="mt-1 text-sm"><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></p>
+      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <span><span className="text-muted">{t('claimant')}:</span> <span className="font-semibold">{x.claimOrgName ?? x.claimOrgId ?? '·'}</span></span>
+        {x.claimOrgStir ? <span className="font-mono text-muted">{t('stir')}: {x.claimOrgStir}</span> : null}
+        {x.claimOrgKyc ? <Pill tone={x.claimOrgKyc === 'VERIFIED' ? 'ok' : 'neutral'}>{KYC_STATUS_LABELS[lang][x.claimOrgKyc]}</Pill> : null}
+      </p>
+      {/* Egalikning eng arzon dalili: da'vogarning kod bilan tasdiqlangan raqami obyektdagi
+          raqamga mosmi. Obyektda raqam bo'lmasa belgi chizilmaydi, "mos emas" ham emas. */}
+      {x.claimantPhone ? (
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <span><span className="text-muted">{t('claimantPhone')}:</span> <span className="font-mono font-semibold">{x.claimantPhone}</span></span>
+          {x.phoneMatch === null ? null : <Pill tone={x.phoneMatch ? 'ok' : 'warn'}>{t(x.phoneMatch ? 'phoneMatch' : 'phoneNoMatch')}</Pill>}
+        </p>
+      ) : null}
       {/*
        * Moderator javob beradigan savol bitta: da'vogar haqiqatan shu obyektning egasimi.
        * Shuning uchun obyektda ko'rsatilgan egasi va mas'ul shaxs raqami da'vogar yonida

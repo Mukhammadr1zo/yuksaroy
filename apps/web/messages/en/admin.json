@@ -282,7 +282,8 @@
         "AD_EXPIRED": "{n} active ads have expired",
         "AD_ENDING": "{n} ads end within 7 days",
         "DB_SLOW": "The database is slow: {ms} ms",
-        "DB_DOWN": "The database is not responding"
+        "DB_DOWN": "The database is not responding",
+        "NO_PROVIDER": "{n} new requests went to nobody in 24 hours: no matching provider found"
       },
       "alertGo": "Open",
       "money": "Money",
@@ -569,7 +570,8 @@
         "market-relist": "Relisted a request",
         "admin-subscription-remind": "Sent a subscription reminder by hand",
         "admin-task-assign": "Assigned a job to a teammate",
-        "admin-task-done": "Closed a task"
+        "admin-task-done": "Closed a task",
+        "request-fanout": "New request sent to providers"
       },
       "ent": {
         "ContactMessage": "Message",
@@ -663,7 +665,7 @@
       "offers": "Offers",
       "phone": "Phone",
       "description": "Description",
-      "noOffers": "No offers yet.",
+      "noOffers": "No offers yet",
       "noPrice": "no price given",
       "eta": "in {min} min",
       "awarded": "Chosen",
@@ -713,7 +715,8 @@
         "AWARDED": "Awarded",
         "DONE": "Completed",
         "CLOSED": "Closed",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "NO_OFFERS": "No offers yet"
       },
       "profileStatus": {
         "ACTIVE": "Active",

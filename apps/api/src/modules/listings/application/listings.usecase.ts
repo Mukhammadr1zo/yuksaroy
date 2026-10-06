@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { LISTING, REGION_CENTERS, SEARCH_LABELS, TransitionError, assertListingTransition, slugify, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
+import { LISTING, REGION_CENTERS, SEARCH_LABELS, TransitionError, assertListingTransition, slugify, storePhone, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
 import { uniqueSlug, type ListingRecord } from '../domain/listing-query';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { AdminNotify } from '../../organizations/application/admin-notify';
@@ -49,7 +49,7 @@ export class ListingsUseCase {
     const warnings = this.check(input);
     const point = await this.point(input);
     const slug = await uniqueSlug(slugify(input.title) || 'elon', (s) => this.repo.slugExists(s));
-    return { listing: await this.repo.create({ ...input, ...point, slug, orgId, ownerUserId: orgId ? null : userId, createdById: userId }), warnings };
+    return { listing: await this.repo.create({ ...input, contactPhone: storePhone(input.contactPhone), ...point, slug, orgId, ownerUserId: orgId ? null : userId, createdById: userId }), warnings };
   }
 
   /** Qisman yangilash: saqlangan + kelgan maydonlar birgalikda to'liq tekshiriladi. Holat o'zgarmaydi. */
@@ -59,7 +59,8 @@ export class ListingsUseCase {
     if (input.kind !== l.kind && l.orgId) await this.access.assertLister(userId, l.orgId, input.kind);
     const warnings = this.check(input);
     const point = await this.point(input);
-    return { listing: await this.repo.update(id, { ...input, ...point }), warnings };
+    // check() dan keyin: raqam yaroqli ekani u yerda tasdiqlangan, bu yerda faqat shakli
+    return { listing: await this.repo.update(id, { ...input, contactPhone: storePhone(input.contactPhone), ...point }), warnings };
   }
 
   /**
