@@ -1,9 +1,9 @@
 {
   "consent": {
-    "title": "Cookie consent",
-    "text": "May we remember the quiet time for adverts, the timing of the sign-up offer and a visit marker in your browser?",
-    "accept": "Allow",
-    "decline": "Do not allow",
-    "more": "Privacy"
+    "title": "Cookies",
+    "text": "We use cookies.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "policy": "Privacy policy"
   }
 }
