@@ -93,8 +93,9 @@ export function normalizePhone(raw: string): string | null {
  * yozilsa ularni solishtirib bo'lmaydi (da'vodagi telefon mosligi, bir raqam ortidagi
  * hisoblar). Nega tanilmagani qoladi: reestrda "71 299-12-34, 71 299-12-35" kabi ikki
  * raqamli yoki eski shakldagi yozuvlar bor, rad etsak yoki o'chirsak ma'lumot yo'qolardi.
- * Bazadagi eski qatorlar hali eski shaklda: solishtirishda ikkala tomon ham normalizePhone
- * dan o'tkaziladi, bazadagi qiymatga tayanilmaydi.
+ * Bazadagi eski qatorlar aynan shu qoida bilan tuzatilgan (20261006010000 migratsiyasi).
+ * Solishtirishda baribir ikkala tomon ham normalizePhone dan o'tadi: tanilmagan yozuvlar
+ * o'zgarmay qolgan.
  */
 export function storePhone(raw: string | null | undefined): string | null {
   const t = raw?.trim();
@@ -285,6 +286,37 @@ export function canOrderTransition(from: OrderStatus, to: OrderStatus, actor: Ac
 
 /** Hodisa (ARRIVED/WEIGHED/…) faqat shu holatlarda qayd etiladi. */
 export const ORDER_EVENT_STATUSES: readonly OrderStatus[] = ['CONFIRMED', 'IN_PROGRESS'];
+
+/**
+ * Qotib qolgan buyurtma: CONFIRMED yoki IN_PROGRESS da ORDER_STUCK_DAYS kun hech qanday
+ * harakat yo'q (holat o'zgarishi ham, "yetib keldi", "yuklandi" kabi hodisa ham). Egasi
+ * 2026-10-06 da tanladi: 7 kun. Shundan keyin admin bosh sahifasida ogohlantirish chiqadi
+ * va mijoz buyurtmani o'zi yopa oladi, ya'ni baho yoza oladi.
+ *
+ * Nega: DONE ni baholanadigan tomonning o'zi (terminal) bosadi. Yomon ishlagan terminal
+ * uchun eng foydali yo'l tugmani bosmaslik edi: buyurtma abadiy ochiq qolardi, mijoz
+ * baho yoza olmasdi va o'rtacha ball doim yuqori ko'rinardi.
+ *
+ * Bitta ta'rif ikki joyda ishlaydi: api dagi common/stuck-orders.ts (ogohlantirish sanog'i)
+ * va mijozning yopish huquqi. Biri o'zgarsa ikkinchisi ham shu funksiyalardan o'qisin.
+ */
+export const ORDER_STUCK_DAYS = 7;
+export const ORDER_STUCK_STATUSES: readonly OrderStatus[] = ['CONFIRMED', 'IN_PROGRESS'];
+
+/**
+ * Buyurtma qachondan beri harakatsiz: eng oxirgi hodisa, band qilingan slotning oxiri,
+ * tasdiq va yaratilgan paytdan eng kechi. Slot hisobga olinadi, chunki kelasi oyga band
+ * qilingan buyurtma qotgan emas, u shunchaki o'z kunini kutyapti.
+ */
+export function orderIdleSince(o: { lastActivityAt: Date | null; slotEndsAt: Date | null; confirmedAt: Date | null; createdAt: Date }): Date {
+  const ts = [o.lastActivityAt, o.slotEndsAt, o.confirmedAt, o.createdAt].filter((d): d is Date => !!d).map((d) => d.getTime());
+  return new Date(Math.max(...ts));
+}
+
+/** Mijoz qotgan buyurtmani o'zi yopa oladigan payt. Holat qotishi mumkin bo'lmasa null. */
+export function customerCloseAt(status: OrderStatus, idleSince: Date): Date | null {
+  return ORDER_STUCK_STATUSES.includes(status) ? new Date(idleSince.getTime() + ORDER_STUCK_DAYS * 86_400_000) : null;
+}
 
 /** Slot va SLA qoidalari: sonlar PlatformConfig'dan (bu yerda faqat chegaralar). */
 export const BOOKING = {

@@ -345,7 +345,11 @@ jobs:
           fi
 
           echo "== obrazlarni tortib olish =="
-          docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env pull
+          # Faqat o'zimizning uchta obraz. Baza obrazi (postgres:17-bookworm) suzuvchi teg:
+          # ilgari har deploy uni ham tortardi va yangi kichik versiya chiqqan kuni (2026-10-06,
+          # 17.11) baza deploy o'rtasida ogohlantirishsiz qayta ishga tushdi. Baza versiyasini
+          # ko'tarish alohida, ongli ish bo'lsin, kod deployining yon ta'siri emas.
+          docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env pull api web bot
 
           echo "== ko'tarish (api ishga tushganda migratsiyalarni o'zi qo'llaydi) =="
           docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env up -d --no-build

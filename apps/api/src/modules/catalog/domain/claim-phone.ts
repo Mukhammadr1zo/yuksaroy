@@ -9,8 +9,8 @@ import { normalizePhone } from '@yuksaroy/domain';
  * null: obyektda tanilgan raqam yo'q, ya'ni solishtirishning o'zi mumkin emas. Uni "mos
  * emas" bilan aralashtirmaymiz: u da'vogarga qarshi dalil bo'lib ko'rinardi.
  * Reestr qatorida bir nechta raqam bo'lishi mumkin ("71 299-12-34, 71 299-12-35"): har biri
- * alohida tekshiriladi. Ikkala tomon ham normalizePhone dan o'tadi, chunki bazadagi eski
- * qatorlar hali bir shaklda emas.
+ * alohida tekshiriladi. Ikkala tomon ham normalizePhone dan o'tadi: tanilmagan yozuvlar
+ * (masalan ikki raqamli) 20261006010000 migratsiyasidan keyin ham asl shaklida qolgan.
  */
 export function claimPhoneMatch(claimant: string, known: (string | null | undefined)[]): boolean | null {
   const mine = normalizePhone(claimant);
