@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { IsArray, IsDateString, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { AuditService } from '../../common/audit.service';
 import { ChatService } from './chat.service';
+import { NO_REPLY_ACTION } from './inquiry-status';
 
 class MessageDto {
   // Fayl biriktirilsa matn bo'sh bo'lishi mumkin; shakl tekshiruvi common/attachments.ts da
@@ -19,13 +20,22 @@ class StartDto {
   @IsOptional() @IsArray() attachments?: unknown[];
 }
 
-/** Yozishmalar: ro'yxat, tred va xabar yuborish. */
+class NoReplyDto {
+  // Tred javobidagi lastMessageAt aynan qaytariladi: shu orada yangi xabar kelgan bo'lsa amal
+  // bajarilmaydi. null faqat vaqti yo'q eski yozishmada; yuborilmasa null deb olinadi, ya'ni 409
+  @IsOptional() @IsDateString() lastMessageAt?: string | null;
+}
+
+/** Yozishmalar: ro'yxat, tred, xabar yuborish va "Javob shart emas". */
 @ApiTags('inquiries')
 @Controller('inquiries')
 @UseGuards(JwtGuard)
 @ApiCookieAuth('ys_access')
 export class ChatController {
-  constructor(private readonly chat: ChatService) {}
+  constructor(
+    private readonly chat: ChatService,
+    private readonly audit: AuditService,
+  ) {}
 
   /** `scope=owner`: menga kelganlar; `scope=mine`: men boshlaganlarim. */
   @Get()
@@ -53,6 +63,15 @@ export class ChatController {
   @Post(':id/messages')
   send(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: MessageDto) {
     return this.chat.send(userId, id, dto.text ?? '', dto.attachments);
+  }
+
+  /** "Javob shart emas": faqat qabul qiluvchi tomon, xabar yozilmaydi (egasi qarori, 2026-10-07). */
+  @Post(':id/no-reply') @HttpCode(200)
+  async noReply(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: NoReplyDto) {
+    const r = await this.chat.noReply(userId, id, dto.lastMessageAt ? new Date(dto.lastMessageAt) : null);
+    // Platforma navbatining yoshi shu qatorga qaraydi (inquiry-status.ts NO_REPLY_ACTION)
+    await this.audit.log({ actorId: userId, action: NO_REPLY_ACTION, entity: 'Inquiry', entityId: id });
+    return r;
   }
 }
 

@@ -38,10 +38,17 @@
       "cancel": "Bekor",
       "complete": "Yakunlash",
       "noShow": "Kelmadi",
+      "terminalCancel": "Bekor qilish",
+      "cancelReason": "Bekor qilish sababi (mijozga yuboriladi)",
+      "cancelPlaceholder": "Masalan: kran buzildi",
+      "back": "Orqaga",
       "err": {
         "TRANSITION_NOT_ALLOWED": "Buyurtma holati o'zgargan. Sahifani yangilang.",
         "ORDER_NOT_ACTIVE": "Buyurtma faol emas.",
         "NO_SHOW_TOO_LATE": "\"Kelmadi\" deb belgilash muddati o'tdi: buyurtmada {days} kun harakat bo'lmadi. Endi uni mijoz o'zi yopa oladi.",
+        "NO_SHOW_TOO_EARLY": "Band qilingan vaqt hali boshlanmadi, \"Kelmadi\" deb belgilab bo'lmaydi. Buyurtmani bajara olmasangiz, sabab yozib bekor qiling.",
+        "TERMINAL_CANCEL_TOO_LATE": "Band qilingan vaqt boshlandi, endi bekor qilib bo'lmaydi. Mijoz kelmagan bo'lsa, \"Kelmadi\" deb belgilang.",
+        "REASON_RESERVED": "Sababni o'z so'zlaringiz bilan yozing.",
         "failed": "Bajarilmadi. Qayta urinib ko'ring."
       }
     },

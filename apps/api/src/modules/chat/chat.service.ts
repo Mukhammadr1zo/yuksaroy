@@ -1,11 +1,11 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { notifyBoth } from '../../common/telegram';
 import { filesOrThrow, type Attachment } from '../../common/attachments';
 import { threadRole, type ThreadRole } from './domain/access';
-import { markInquiryMessage } from './inquiry-status';
+import { markInquiryMessage, markInquiryNoReply } from './inquiry-status';
 
 const MAX = 2000;
 
@@ -53,6 +53,11 @@ export class ChatService {
    *
    * Tartib oxirgi xabar bo'yicha: ilgari ochilish vaqti bo'yicha edi va javob
    * kelayotgan suhbat ro'yxat tubiga cho'kib ketardi.
+   *
+   * Kelganlarda javob kutayotgani (OPEN) bazaning o'zida tepaga: 200 chegarasi ularni kesib
+   * tashlamasin. Migratsiya (2026-10-07) qayta ochgan eski suhbatning oxirgi xabari eski, platforma
+   * navbati va bosh sahifadagi son esa shu ro'yxatga olib keladi. Holat faqat 'OPEN' yoki
+   * 'ANSWERED': matn tartibida 'OPEN' katta, shuning uchun desc.
    */
   async list(userId: string, scope: 'owner' | 'mine') {
     const where = scope === 'mine'
@@ -61,8 +66,10 @@ export class ChatService {
     const rows = await this.prisma.inquiry.findMany({
       where,
       include: ChatService.INCLUDE,
-      orderBy: [{ lastMessageAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
-      take: 200,
+      orderBy: [...(scope === 'owner' ? [{ status: 'desc' as const }] : []), { lastMessageAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+      // ponytail: kelganlarda 500, chunki migratsiya bir kunda ko'p eski suhbatni ochishi mumkin va
+      // javob kutayotganlarning eng eskisi aynan kesilib qolardi. Bundan oshsa sahifalash kerak.
+      take: scope === 'owner' ? 500 : 200,
     });
     const [unread, fromOrgs, asked] = await Promise.all([
       this.unreadCounts(userId, rows.map((r) => r.id)),
@@ -243,6 +250,8 @@ export class ChatService {
       status: inq.status,
       role,
       createdAt: inq.createdAt,
+      // "Javob shart emas" shuni qaytaradi: shu orada yangi xabar kelganini server shundan biladi (noReply)
+      lastMessageAt: inq.lastMessageAt,
       messages: messages.map((m) => ({
         id: m.id,
         text: m.text,
@@ -267,6 +276,25 @@ export class ChatService {
     await markInquiryMessage(this.prisma, inquiryId, msg.createdAt, role === 'owner');
     void this.notify(userId, inq, role, body || `${files.length} ta fayl`).catch(() => {});
     return { id: msg.id, text: msg.text, attachments: files, createdAt: msg.createdAt, mine: true, author: null };
+  }
+
+  /**
+   * "Javob shart emas": qabul qiluvchi tomon OPEN suhbatni xabar yozmasdan ANSWERED qiladi. Egasi qarori
+   * (2026-10-07): "rahmat" bilan tugagan suhbat "Javob kutilmoqda" da, platformaniki admin navbati va
+   * eslatmasida turib qolmasin. Mijoz yana yozsa markInquiryMessage uni odatdagidek qayta ochadi.
+   *
+   * Huquq javob yozishdagi bilan bir (threadRole 'owner'): obyekt egasi tarafi yoki platforma suhbatida
+   * platforma admini. Mijoz o'z savolini javobsiz deb yopa olmaydi.
+   *
+   * Yozuv shartli: faqat OPEN dan va lastMessageAt oyna ochilgandagidek bo'lsa. Shu orada mijoz yana
+   * yozgan yoki hamkasbi javob bergan bo'lsa 409: ko'rilmagan savol yopilib qolmasin.
+   */
+  async noReply(userId: string, inquiryId: string, lastMessageAt: Date | null) {
+    const { role } = await this.thread(userId, inquiryId);
+    if (role !== 'owner') throw new ForbiddenException({ code: 'NOT_RECEIVER' });
+    const { count } = await markInquiryNoReply(this.prisma, inquiryId, lastMessageAt);
+    if (!count) throw new ConflictException({ code: 'INQUIRY_CHANGED' });
+    return { id: inquiryId, status: 'ANSWERED' };
   }
 
   /** Xabar boshqa tomonga: saytdagi bildirishnoma va (bog'langan bo'lsa) Telegram. */

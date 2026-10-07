@@ -382,7 +382,7 @@
       "sortDemand": "Talab bo'yicha",
       "views30": "Ochilish, 30 kun",
       "openInquiries": "Javobsiz yozishma",
-      "demandNote": "Oxirgi 30 kunda sahifasi eng ko'p ochilgan 100 ta obyekt. Javobsiz yozishma - mijozning oxirgi xabariga hali javob yozilmagani (javobdan keyin qayta yozgani ham). Yuqoridagisiga birinchi qo'ng'iroq qilinadi.",
+      "demandNote": "Oxirgi 30 kunda sahifasi eng ko'p ochilgan 100 ta obyekt. Javobsiz yozishma - mijozning oxirgi xabariga hali javob yozilmagani (javobdan keyin qayta yozgani ham). \"Javob shart emas\" deb belgilangani kirmaydi. Yuqoridagisiga birinchi qo'ng'iroq qilinadi.",
       "ownerKindLabel": "Egasining turi",
       "ownerKindNote": "Bu filtr qatorlarni bitta ekranga yig'adi, hukm chiqarmaydi. Nomdan egani aniqlash aniq emas, shuning uchun ro'yxatni ko'zdan kechiring.",
       "ownerKinds": {
@@ -505,6 +505,7 @@
         "contact-reveal": "Telefon raqamini ko'rdi",
         "contact-deal": "Bitim raqamini ko'rdi",
         "inquiry-create": "E'lon egasiga so'rov yubordi",
+        "inquiry-noReply": "Suhbatni javob shart emas deb belgiladi",
         "invoice-paid": "Hisobni to'langan deb belgiladi",
         "listing-archive": "E'lonni arxivga oldi",
         "listing-create": "E'lon yaratdi",
@@ -583,7 +584,8 @@
         "admin-task-assign": "Ishni jamoadoshga biriktirdi",
         "admin-task-done": "Vazifani yopdi",
         "request-fanout": "Yangi so'rov ijrochilarga yuborildi",
-        "order-clientClose": "Qotgan buyurtmani yopdi"
+        "order-clientClose": "Qotgan buyurtmani yopdi",
+        "order-terminalCancel": "Terminal nomidan buyurtmani bekor qildi"
       },
       "ent": {
         "ContactMessage": "Murojaat",

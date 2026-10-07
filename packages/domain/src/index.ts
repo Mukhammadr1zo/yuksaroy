@@ -267,7 +267,9 @@ export const ORDER_TRANSITIONS: readonly { from: OrderStatus; to: OrderStatus; a
   { from: 'PENDING', to: 'EXPIRED', actors: ['SYSTEM'] },
   { from: 'PENDING', to: 'CANCELLED', actors: ['CLIENT', 'ADMIN'] },
   { from: 'CONFIRMED', to: 'IN_PROGRESS', actors: ['TERMINAL', 'ADMIN'] },
-  { from: 'CONFIRMED', to: 'CANCELLED', actors: ['CLIENT', 'TERMINAL', 'ADMIN'] }, // terminal: NO_SHOW kodi bilan
+  // Terminal: vaqt boshlanguncha sabab bilan (TERMINAL_CANCEL), keyin NO_SHOW kodi bilan. Vaqt sharti
+  // bu jadvalda yo'q: u OrderActionsUseCase da (common/stuck-orders.ts dagi chegaralar)
+  { from: 'CONFIRMED', to: 'CANCELLED', actors: ['CLIENT', 'TERMINAL', 'ADMIN'] },
   { from: 'IN_PROGRESS', to: 'DONE', actors: ['TERMINAL', 'ADMIN'] },
   // Mijoz faqat qotgan buyurtmani yopadi (pastdagi ORDER_STUCK_DAYS). Vaqt sharti bu jadvalda
   // yo'q: u OrderActionsUseCase.closeStuck da (customerCloseAt) va o'sha tekshiruv MAJBURIY.

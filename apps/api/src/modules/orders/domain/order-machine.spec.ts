@@ -20,7 +20,7 @@ describe('buyurtma holat-mashinasi', () => {
     expect(canOrderTransition('PENDING', 'CANCELLED', 'CLIENT')).toBe(true);
     // Tasdiqlangandan keyin ham bekor qilinadi (12 soat qoidasi use-case'da tekshiriladi)
     expect(canOrderTransition('CONFIRMED', 'CANCELLED', 'CLIENT')).toBe(true);
-    expect(canOrderTransition('CONFIRMED', 'CANCELLED', 'TERMINAL')).toBe(true); // NO_SHOW
+    expect(canOrderTransition('CONFIRMED', 'CANCELLED', 'TERMINAL')).toBe(true); // sabab bilan bekor yoki NO_SHOW (vaqt sharti close-stuck.spec da)
   });
 
   it('yakuniy holatlardan chiqish yo\'q va sakrash mumkin emas', () => {

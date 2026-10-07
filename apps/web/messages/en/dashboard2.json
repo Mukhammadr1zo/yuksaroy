@@ -38,10 +38,17 @@
       "cancel": "Cancel",
       "complete": "Complete",
       "noShow": "No show",
+      "terminalCancel": "Cancel order",
+      "cancelReason": "Reason for cancelling (sent to the customer)",
+      "cancelPlaceholder": "For example: crane broke down",
+      "back": "Back",
       "err": {
         "TRANSITION_NOT_ALLOWED": "The order status has changed. Refresh the page.",
         "ORDER_NOT_ACTIVE": "The order is not active.",
         "NO_SHOW_TOO_LATE": "It is too late to mark \"No show\": the order has had no activity for {days} days. The customer can now close it.",
+        "NO_SHOW_TOO_EARLY": "The booked time has not started yet, so you cannot mark \"No show\". If you cannot take the order, cancel it and give a reason.",
+        "TERMINAL_CANCEL_TOO_LATE": "The booked time has started, so the order can no longer be cancelled. If the customer did not arrive, mark \"No show\".",
+        "REASON_RESERVED": "Write the reason in your own words.",
         "failed": "Failed. Try again."
       }
     },

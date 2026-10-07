@@ -100,6 +100,10 @@ export interface OrderCard {
   slaConfirmUntil: string | null;
   /** Terminal "Kelmadi" ni shu paytgacha bosa oladi (faqat CONFIRMED da); qoida serverda, sayt faqat solishtiradi. */
   noShowUntil: string | null;
+  /** "Kelmadi" shu paytdan: band qilingan vaqt boshlanishi. null = pastki chegara yo'q (slotsiz). */
+  noShowFrom: string | null;
+  /** Terminal tasdiqlangan buyurtmani sabab yozib shu paytgacha bekor qila oladi (faqat CONFIRMED da). */
+  terminalCancelUntil: string | null;
 }
 export interface Order extends OrderCard {
   note: string | null; wagonNumbers: string[]; storageDays: number | null;

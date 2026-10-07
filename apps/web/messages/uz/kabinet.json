@@ -527,7 +527,11 @@
       "asPerson": "Shaxsan o'zim",
       "tooShort": "Birinchi xabar kamida 5 belgi bo'lsin.",
       "firstHint": "Enter yuboradi. Fayl ham biriktirsa bo'ladi.",
-      "enterHint": "Enter yuboradi, Shift+Enter yangi qator."
+      "enterHint": "Enter yuboradi, Shift+Enter yangi qator.",
+      "noReply": "Javob shart emas",
+      "noReplyHint": "Suhbat javob kutayotganlar ro'yxatidan chiqadi. Mijoz yana yozsa qaytadan ochiladi.",
+      "noReplyDone": "Suhbat javob kutayotganlar ro'yxatidan chiqdi.",
+      "noReplyChanged": "Suhbat shu orada o'zgardi. Qaytadan ko'rib chiqing."
     },
     "work": {
       "tab": {

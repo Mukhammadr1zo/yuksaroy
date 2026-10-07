@@ -249,7 +249,8 @@ export class AdminCatalogController {
       })).sort((a, b) => rank.get(a.id)!.i - rank.get(b.id)!.i); // Prisma IN tartibini saqlamaydi
       const pageRows = ranked.slice((p - 1) * l, p * l);
       // Javobsiz = obyekt tarafi javob qarzdor (OPEN): hali yozmagan yoki mijoz javobdan keyin
-      // yana yozgan (egasi qarori, 2026-10-07, chat.service send). Javob yozilsa ANSWERED, chiqadi
+      // yana yozgan (egasi qarori, 2026-10-07, chat.service send). Javob yozilsa yoki "Javob shart
+      // emas" bosilsa (chat.service noReply) ANSWERED, chiqadi. Izoh matni: admin.terminals.demandNote
       const open = pageRows.length
         ? await this.prisma.inquiry.groupBy({
             by: ['terminalId'],

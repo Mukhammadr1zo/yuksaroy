@@ -117,6 +117,7 @@ function ListView({ tab, setTab, counts, onChange }: { tab: string; setTab: (k: 
   const t = useTranslations('dashboard2.board');
   const [items, setItems] = useState<OrderCard[] | null>(null);
   const [err, setErr] = useState(false);
+  const [, setTick] = useState(0);
 
   const load = useCallback(async () => {
     const cur = TABS.find((x) => x.key === tab)!;
@@ -125,10 +126,11 @@ function ListView({ tab, setTab, counts, onChange }: { tab: string; setTab: (k: 
   }, [tab, onChange]);
 
   useEffect(() => { setItems(null); load().catch(() => setErr(true)); }, [load]);
-  // Faqat yangi talabnomalar navbati o'zi yangilanadi: boshqa bo'limlarda xodim ishlab turgan karta yo'qolmasin
+  // Faqat yangi talabnomalar navbati o'zi yangilanadi: boshqa bo'limlarda xodim ishlab turgan karta yo'qolmasin.
+  // U yerda ro'yxat faqat qayta chiziladi, ma'lumot olinmaydi: karta tugmalari vaqtga bog'liq (vaqt
+  // boshlanganda "Bekor qilish" o'rniga "Kelmadi"), taxtadagi kabi 30 s ichida almashsin
   useEffect(() => {
-    if (tab !== 'PENDING') return;
-    const timer = setInterval(() => void load().catch(() => {}), 30_000);
+    const timer = setInterval(() => { if (tab === 'PENDING') void load().catch(() => {}); else setTick((n) => n + 1); }, 30_000);
     return () => clearInterval(timer);
   }, [tab, load]);
 
@@ -162,7 +164,9 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
   const t = useTranslations('dashboard2.board');
   const [o, setO] = useState<OrderCard | Order>(card);
   const [busy, setBusy] = useState<string | null>(null);
-  const [rejecting, setRejecting] = useState(false);
+  // Sabab shakli qaysi holatda ochilgan bo'lsa faqat o'shanda ko'rinadi: taxta yangilanib holat
+  // o'zgarsa (hamkasb tasdiqladi), ochiq rad etish shakli bekor qilish shakliga aylanib qolmaydi
+  const [asking, setAsking] = useState<OrderStatus | null>(null);
   const [reason, setReason] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState<OrderEventCode[]>([]);
@@ -175,18 +179,40 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
     catch (e) {
       const code = e instanceof ApiError ? String(e.body?.code ?? '') : '';
       // WRONG_ACTOR ham "holat o'zgargan": eski sahifada CONFIRMED dan yakunlash bosilsa shu keladi
-      // (jadvalda CONFIRMED -> DONE endi faqat mijozniki), qayta urinish esa hech qachon yordam bermaydi
-      setErr(code === 'TRANSITION_NOT_ALLOWED' || code === 'TRANSITION_WRONG_ACTOR' ? t('err.TRANSITION_NOT_ALLOWED')
-        : code === 'ORDER_NOT_ACTIVE' ? t(`err.${code}`)
-        : code === 'NO_SHOW_TOO_LATE' ? t('err.NO_SHOW_TOO_LATE', { days: ORDER_STUCK_DAYS }) : t('err.failed'));
+      // (jadvalda CONFIRMED -> DONE endi faqat mijozniki), qayta urinish esa hech qachon yordam bermaydi.
+      // ORDER_STATE_CHANGED ham shu: shu orada mijoz bekor qildi yoki hamkasb boshqa tugmani bosdi
+      const key = code === 'TRANSITION_WRONG_ACTOR' || code === 'ORDER_STATE_CHANGED' ? 'TRANSITION_NOT_ALLOWED' : code;
+      setErr(key && t.has(`err.${key}`) ? t(`err.${key}`, { days: ORDER_STUCK_DAYS }) : t('err.failed'));
+      // Vaqt boshlanib qolgan: shakl yopiladi, xato matni ostida amallar qatori va unda "Kelmadi" chiqadi.
+      // Yozilgan matn reason da qoladi
+      if (code === 'TERMINAL_CANCEL_TOO_LATE') setAsking(null);
       // Optimistik belgi qaytariladi: tag hodisa kodi bilan bir xil, boshqa amallar uchun zararsiz
       setDone((d) => d.filter((x) => x !== tag));
     } finally { setBusy(null); }
   }
 
   const s = o.status;
-  // Muddatni server beradi (noShowUntil): undan keyin "Kelmadi" rad etiladi, shuning uchun tugma chiqmaydi
-  const noShow = s === 'CONFIRMED' && !(o.noShowUntil && Date.parse(o.noShowUntil) <= Date.now());
+  const now = Date.now();
+  // Chegaralarni server beradi (common/stuck-orders.ts), sayt faqat solishtiradi. Egasining 2026-10-07
+  // qarori: vaqt boshlanguncha "Bekor qilish" (sabab mijozga boradi), keyin noShowUntil gacha "Kelmadi"
+  // Bo'sh chegara serverdagi kabi "chegara yo'q" (order-actions terminalCancel), yashirish emas
+  const canCancel = s === 'CONFIRMED' && !(o.terminalCancelUntil && now >= Date.parse(o.terminalCancelUntil));
+  const noShow = s === 'CONFIRMED' && !(o.noShowFrom && now < Date.parse(o.noShowFrom)) && !(o.noShowUntil && Date.parse(o.noShowUntil) <= now);
+  // Rad etish (yangi talabnoma) va bekor qilish (tasdiqlangan) bitta shakl: ikkalasida sabab majburiy va mijozga boradi
+  const ask = s === 'PENDING'
+    ? { path: 'reject', label: t('rejectReason'), placeholder: t('rejectPlaceholder'), yes: t('reject'), no: t('cancel') }
+    : { path: 'terminal-cancel', label: t('cancelReason'), placeholder: t('cancelPlaceholder'), yes: t('terminalCancel'), no: t('back') };
+  const reasonForm = (
+    <div className="mt-3 space-y-2">
+      <label className="block text-sm font-semibold">{ask.label}
+        <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} placeholder={ask.placeholder} className="mt-1 w-full rounded-xl border border-field px-4 py-2.5 text-base font-normal" />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" disabled={!reason.trim() || busy === ask.path} onClick={() => act(ask.path, { reason: reason.trim() }, ask.path)} className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50">{ask.yes}</button>
+        <button type="button" onClick={() => setAsking(null)} className="rounded-full border border-line px-5 py-2 text-sm font-semibold hover:bg-sand">{ask.no}</button>
+      </div>
+    </div>
+  );
   return (
     <article className={`rounded-card border border-line bg-white ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -205,27 +231,19 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
       {err ? <p role="alert" className="mt-2 text-sm text-red-700">{err}</p> : null}
 
       {s === 'PENDING' ? (
-        rejecting ? (
-          <div className="mt-3 space-y-2">
-            <label className="block text-sm font-semibold">{t('rejectReason')}
-              <input autoFocus value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} placeholder={t('rejectPlaceholder')} className="mt-1 w-full rounded-xl border border-field px-4 py-2.5 text-base font-normal" />
-            </label>
-            <div className="flex gap-2">
-              <button type="button" disabled={!reason.trim() || busy === 'reject'} onClick={() => act('reject', { reason: reason.trim() }, 'reject')} className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50">{t('reject')}</button>
-              <button type="button" onClick={() => setRejecting(false)} className="rounded-full border border-line px-5 py-2 text-sm font-semibold hover:bg-sand">{t('cancel')}</button>
-            </div>
-          </div>
-        ) : (
+        asking === s ? reasonForm : (
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" disabled={busy === 'confirm'} onClick={() => act('confirm', {}, 'confirm')} className="rounded-full bg-teal px-6 py-2 text-sm font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98] disabled:opacity-60">
               {busy === 'confirm' ? t('confirming') : t('confirm')}
             </button>
-            <button type="button" onClick={() => setRejecting(true)} className="rounded-full border border-line px-5 py-2 text-sm font-semibold hover:bg-sand">{t('reject')}</button>
+            <button type="button" onClick={() => setAsking(s)} className="rounded-full border border-line px-5 py-2 text-sm font-semibold hover:bg-sand">{t('reject')}</button>
           </div>
         )
       ) : null}
 
-      {s === 'CONFIRMED' || s === 'IN_PROGRESS' ? (
+      {/* Shakl ochiq turganda vaqt boshlansa ham o'zi yopilmaydi (yozilayotgan matn yo'qolmasin). Server
+          TERMINAL_CANCEL_TOO_LATE bersa act() shaklni yopadi: xato matni ostida "Kelmadi" tugmasi chiqadi */}
+      {s === 'CONFIRMED' && asking === s ? reasonForm : s === 'CONFIRMED' || s === 'IN_PROGRESS' ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {EVENTS[o.operation].map((c) => (
             <button
@@ -237,18 +255,21 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
             </button>
           ))}
           {/* Ajratgich faqat ortidan tugma kelsa: aks holda qator oxirida yolg'iz chiziq qolardi */}
-          {s === 'IN_PROGRESS' || noShow ? <span className="mx-1 h-5 w-px bg-line" /> : null}
+          {s === 'IN_PROGRESS' || canCancel || noShow ? <span className="mx-1 h-5 w-px bg-line" /> : null}
           {/* Yakunlash faqat ish boshlangandan keyin: holat-mashinasida terminal CONFIRMED dan
               DONE ga o'ta olmaydi, birinchi hodisa (masalan "Yetib keldi") buyurtmani boshlaydi.
               Ilgari tugma CONFIRMED da ham turardi va har bosilganda xato berardi. */}
           {s === 'IN_PROGRESS' ? (
             <button type="button" disabled={busy === 'complete'} onClick={() => act('complete', {}, 'complete')} className="rounded-full bg-navy px-5 py-1.5 text-sm font-semibold text-white transition hover:bg-navy-2 disabled:opacity-60">{t('complete')}</button>
           ) : null}
+          {canCancel ? (
+            <button type="button" onClick={() => setAsking(s)} className="text-sm text-muted underline hover:text-red-700">{t('terminalCancel')}</button>
+          ) : null}
           {/* Muddat o'tgach tugma o'rnida sababi turadi: aks holda xodim "Kelmadi" nega yo'qolganini bilmaydi.
               Xato chiqib turganda yashirin: eski kartadagi tugma rad etilsa aynan shu matn qizilda turadi */}
           {noShow ? (
             <button type="button" disabled={busy === 'NO_SHOW'} onClick={() => act('events', { code: 'NO_SHOW' }, 'NO_SHOW')} className="text-sm text-muted underline hover:text-red-700">{t('noShow')}</button>
-          ) : s === 'CONFIRMED' && !err ? (
+          ) : s === 'CONFIRMED' && !canCancel && !err ? (
             <span className="basis-full text-xs text-muted">{t('err.NO_SHOW_TOO_LATE', { days: ORDER_STUCK_DAYS })}</span>
           ) : null}
         </div>

@@ -1,6 +1,6 @@
 // Javob shakllari. Pul - tiyin (Number), sana - ISO. Ichki id'lar chiqmaydi (createdById, tariffId - faqat egasiga kerak emas).
 import type { OrderRecord } from '../domain/ports';
-import { noShowUntil } from '../../../common/stuck-orders';
+import { noShowFrom, noShowUntil, terminalCancelUntil } from '../../../common/stuck-orders';
 
 export function orderCard(o: OrderRecord) {
   return {
@@ -13,7 +13,11 @@ export function orderCard(o: OrderRecord) {
     totalTiyin: o.totalTiyin,
     slot: o.slot ? { startsAt: o.slot.startsAt, endsAt: o.slot.endsAt, window: o.slot.window } : null,
     slaConfirmUntil: o.slaConfirmUntil,
-    // Terminal taxtasi "Kelmadi" tugmasini shu paytgacha ko'rsatadi; keyin server NO_SHOW_TOO_LATE beradi
+    // Terminal taxtasidagi tugmalar shu chegaralardan: vaqt boshlanguncha "Bekor qilish", keyin
+    // noShowUntil gacha "Kelmadi". Chegaradan tashqarida server TERMINAL_CANCEL_TOO_LATE,
+    // NO_SHOW_TOO_EARLY yoki NO_SHOW_TOO_LATE beradi
+    terminalCancelUntil: terminalCancelUntil(o),
+    noShowFrom: noShowFrom(o),
     noShowUntil: noShowUntil(o),
   };
 }

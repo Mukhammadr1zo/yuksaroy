@@ -176,7 +176,7 @@
         "addWindow": "Add window",
         "apply": "Open spots",
         "applied": "{days} days x {windows} windows: {slots} spots opened.",
-        "hint": "Existing spots get the new capacity; it cannot go below what is already booked."
+        "hint": "Existing spots get the new capacity; it cannot go below what is already booked. A booked spot keeps its time."
       },
       "grid": {
         "title": "Next 14 days",

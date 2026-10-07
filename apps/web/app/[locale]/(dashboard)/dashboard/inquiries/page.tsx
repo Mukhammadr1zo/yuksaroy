@@ -24,11 +24,10 @@ export default function InquiriesPage() {
 
   useEffect(() => {
     setItems(null); setErr(false);
+    // Tartib serverniki: kelganlarda javob kutayotgani tepada (chat.service list). Brauzerda
+    // saralash faqat kelgan 200 tasining ichida bo'lardi va undan eskisi ko'rinmay qolardi
     api<Inquiry[]>(`/inquiries?scope=${scope}`)
-      // Kelganlarda hali javob berilmaganlari tepada, qolgan tartib serverniki (oxirgi xabar).
-      // Platforma adminining "Javobsiz suhbat" navbati shu sahifaga olib keladi: sanalgan
-      // suhbat ro'yxatda darhol ko'rinsin, javob berilganlar orasida yo'qolib ketmasin.
-      .then((xs) => setItems(scope === 'owner' ? [...xs].sort((a, b) => Number(b.status === 'OPEN') - Number(a.status === 'OPEN')) : xs))
+      .then(setItems)
       .catch(() => setErr(true));
   }, [scope]);
 

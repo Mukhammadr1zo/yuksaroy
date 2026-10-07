@@ -527,7 +527,11 @@
       "asPerson": "Myself",
       "tooShort": "The first message must be at least 5 characters.",
       "firstHint": "Enter sends. You can attach files too.",
-      "enterHint": "Enter sends, Shift+Enter starts a new line."
+      "enterHint": "Enter sends, Shift+Enter starts a new line.",
+      "noReply": "No reply needed",
+      "noReplyHint": "The conversation leaves the list awaiting a reply. If the client writes again, it reopens.",
+      "noReplyDone": "Removed from the list awaiting a reply.",
+      "noReplyChanged": "The conversation changed in the meantime. Please look again."
     },
     "work": {
       "tab": {

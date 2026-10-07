@@ -128,6 +128,10 @@ export async function queueWhere(prisma: PrismaService, k: QueueKey): Promise<Re
  * suhbati eslatmaga hech tushmasdi. Status tarixi saqlanmaydi, shuning uchun xabarlardan sanaladi:
  * mijozdan boshqa yozuvchi faqat platforma (threadRole).
  *
+ * "Javob shart emas" (egasi qarori, 2026-10-07) ham javob o'rnida: xabar yozilmaydi, uning audit qatori
+ * (chat/inquiry-status.ts NO_REPLY_ACTION) olinadi. Aks holda keyin yana yozgan mijozning suhbati
+ * yopilgan "rahmat" dan beri kutgandek ko'rinib, eslatma darhol chiqardi.
+ *
  * Shart queueWhere bilan bir xil (raw SQL Prisma where ni ololmaydi): biri o'zgarsa ikkinchisi ham.
  * Admin id lari shu yerda qayta so'raladi (ikki kichik so'rov): where ning ichki shakliga bog'lanmaydi.
  */
@@ -139,7 +143,9 @@ async function waitingSince(prisma: PrismaService): Promise<Date | null> {
     WHERE i."toPlatform" AND i."status" = 'OPEN' AND i."fromUserId" <> ALL(${admins}::text[])
       AND m."fromUserId" = i."fromUserId"
       AND NOT EXISTS (SELECT 1 FROM "InquiryMessage" o
-        WHERE o."inquiryId" = i."id" AND o."fromUserId" <> i."fromUserId" AND o."createdAt" > m."createdAt")`;
+        WHERE o."inquiryId" = i."id" AND o."fromUserId" <> i."fromUserId" AND o."createdAt" > m."createdAt")
+      AND NOT EXISTS (SELECT 1 FROM "AuditLog" a
+        WHERE a."entity" = 'Inquiry' AND a."entityId" = i."id" AND a."action" = 'inquiry.noReply' AND a."createdAt" > m."createdAt")`;
   return r?.at ?? null;
 }
 

@@ -52,7 +52,9 @@ export function SlotsTab({ terminalId }: { terminalId: string | null }) {
   const days = Array.from({ length: 14 }, (_, i) => plusDays(today, i));
   const windows = [...new Set((slots ?? []).map((s) => s.window))].sort((a, b) => a - b);
   const byKey = new Map((slots ?? []).map((s) => [`${s.localDate}|${s.window}`, s]));
-  const timeOf = (w: number) => { const s = (slots ?? []).find((x) => x.window === w); return s ? `${uzTime(s.startsAt)}-${uzTime(s.endsAt)}` : String(w); };
+  // Oxirgi kunning sloti: band qilingan oyna eski vaqtida qoladi (mijozning vaqti unga aytmasdan
+  // surilmasin), shuning uchun eng erta slot eski vaqtni ko'rsatib, saqlangan yangi jadvalni yashirardi
+  const timeOf = (w: number) => { const s = [...(slots ?? [])].reverse().find((x) => x.window === w); return s ? `${uzTime(s.startsAt)}-${uzTime(s.endsAt)}` : String(w); };
   const dayLabel = (d: string) => uzDayShort(`${d}T06:00:00Z`);
 
   return (

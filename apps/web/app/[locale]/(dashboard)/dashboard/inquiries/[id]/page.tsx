@@ -6,14 +6,15 @@ import { useLocale, useTranslations } from 'next-intl';
 import { PaperPlaneRightIcon } from '@phosphor-icons/react';
 import { useParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { api, post } from '@/lib/api';
+import { ApiError, api, post } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { Err } from '@/components/tg/bits';
+import { BTN_GHOST } from '@/components/kabinet/bits';
 import { AttachmentButton, AttachmentChips, MessageFiles, useAttachments, type Attachment } from '@/components/chat/Attachments';
 
 type Msg = { id: string; text: string; attachments: Attachment[]; createdAt: string; mine: boolean; author: string | null };
 type Subject = { kind: 'listing' | 'terminal'; id: string; slug: string; title: string; sub: string | null };
-type Thread = { id: string; status: string; role: 'owner' | 'client'; createdAt: string; subject: Subject | null; messages: Msg[] };
+type Thread = { id: string; status: string; role: 'owner' | 'client'; createdAt: string; lastMessageAt: string | null; subject: Subject | null; messages: Msg[] };
 
 /** Ochiq oynada tez, fonda kamdan kam: har suhbat uchun soatiga 180 emas, 30 ta so'rov. */
 const POLL_ACTIVE = 8_000;
@@ -22,6 +23,7 @@ const POLL_HIDDEN = 120_000;
 export default function InquiryThreadPage() {
   const t = useTranslations('kabinet.chat');
   const tc = useTranslations('kabinet.common');
+  const ti = useTranslations('kabinet.inquiries');
   const locale = useLocale();
   const params = useParams<{ id: string }>();
   const id = params?.id as string;
@@ -31,13 +33,30 @@ export default function InquiryThreadPage() {
   const at = useAttachments();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // "Javob shart emas" bosilgandagi lastMessageAt: tasdiq qatori suhbatga yangi xabar kelguncha turadi
+  const [cleared, setCleared] = useState<string | null>();
+  const done = useRef<HTMLParagraphElement>(null);
   const end = useRef<HTMLDivElement>(null);
 
-  const load = useCallback(() => api<Thread>(`/inquiries/${id}/thread`).then(setThread).catch(() => setFailed(true)), [id]);
+  // So'rovlar raqamlanadi va javob faqat ko'rsatilganidan keyin ketgan so'rovdan olinadi: kechikib
+  // kelgan eski javob "Javob shart emas" ni yoki yuborilgan xabarni bosib ketmasin. "Faqat eng
+  // oxirgisi" emas: sekin internetda har javob keyingi yangilashdan keyin kelsa sahifa hech ochilmasdi
+  const seq = useRef(0);
+  const shown = useRef(0);
+  const load = useCallback(() => {
+    const n = ++seq.current;
+    return api<Thread>(`/inquiries/${id}/thread`)
+      .then((x) => { if (n > shown.current) { shown.current = n; setThread(x); setFailed(false); } })
+      // Xato faqat hali hech narsa ko'rsatilmagan bo'lsa: telefonda internet bir zum uzilsa ochiq
+      // suhbat "Yuklanmadi" ga almashib, keyingi muvaffaqiyatli yangilashda ham qaytmasdi
+      .catch(() => { if (shown.current === 0) setFailed(true); });
+  }, [id]);
 
   useEffect(() => { if (id) void load(); }, [id, load]);
   // Yangi xabar kelsa pastga tushadi
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [thread?.messages.length]);
+  // Bosilgan tugma yo'qoladi: fokus sahifa boshiga uchib ketmasin, tasdiq qatoriga o'tadi
+  useEffect(() => { if (cleared !== undefined) done.current?.focus(); }, [cleared]);
   // Yangilash tezligi ko'rinishga qarab: yopiq varaqda serverni behuda bezovta qilmaydi
   useEffect(() => {
     if (!id) return;
@@ -61,9 +80,35 @@ export default function InquiryThreadPage() {
     setBusy(true); setErr(null);
     try {
       const m = await post<Msg>(`/inquiries/${id}/messages`, { text: body, attachments: at.files });
+      // Yuborishdan oldin ketgan yangilashlar eskirdi: ularning javobi bu xabarsiz keladi
+      shown.current = seq.current;
       setThread((x) => (x ? { ...x, messages: [...x.messages, m] } : x));
       setText(''); at.clear();
+      // Holat serverdan: egasi javob yozsa "Javob kutilmoqda" keyingi so'rovgacha (8 s) osilib turmasin
+      void load();
     } catch { setErr(tc('failed')); } finally { setBusy(false); }
+  }
+
+  /**
+   * "Javob shart emas" (egasi qarori, 2026-10-07): xabar yozilmaydi, suhbat javob kutayotganlar
+   * ro'yxatidan chiqadi. Ko'rilgan lastMessageAt yuboriladi: shu orada mijoz yana yozgan bo'lsa server
+   * 409 qaytaradi va yangi holat darhol yuklanadi.
+   */
+  async function noReply() {
+    if (!thread || busy) return;
+    const seen = thread.lastMessageAt;
+    setBusy(true); setErr(null);
+    try {
+      await post(`/inquiries/${id}/no-reply`, { lastMessageAt: seen });
+      // Bosishdan oldin ketgan yangilash hali OPEN ni olib kelishi mumkin: u hisobga olinmaydi
+      shown.current = seq.current;
+      setThread((x) => (x ? { ...x, status: 'ANSWERED' } : x));
+      setCleared(seen);
+    } catch (e) {
+      const changed = e instanceof ApiError && e.status === 409;
+      setErr(changed ? t('noReplyChanged') : tc('failed'));
+      if (changed) void load();
+    } finally { setBusy(false); }
   }
 
   if (failed) return <p role="alert" className="text-sm text-red-700">{tc('loadFailed')}</p>;
@@ -101,6 +146,17 @@ export default function InquiryThreadPage() {
         ))}
         <div ref={end} />
       </div>
+
+      {/* Faqat qabul qiluvchi tomonga: mijoz o'z savolini yopa olmaydi (server ham rad etadi) */}
+      {thread.role === 'owner' && thread.status === 'OPEN' ? (
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="rounded-full bg-amber px-2.5 py-0.5 text-xs font-semibold text-ink">{ti('awaiting')}</span>
+          <button type="button" onClick={() => void noReply()} disabled={busy} aria-describedby="no-reply-hint" className={BTN_GHOST}>{t('noReply')}</button>
+          <p id="no-reply-hint" className="w-full text-xs text-muted">{t('noReplyHint')}</p>
+        </div>
+      ) : cleared !== undefined && cleared === thread.lastMessageAt ? (
+        <p ref={done} tabIndex={-1} role="status" className="mt-3 text-xs font-semibold text-teal-ink outline-none">{t('noReplyDone')}</p>
+      ) : null}
 
       <form onSubmit={send} className="mt-3">
         {/* Fayl ro'yxati qatordan tashqarida: aks holda telefonda yuborish tugmasini chetga surib yuborardi */}

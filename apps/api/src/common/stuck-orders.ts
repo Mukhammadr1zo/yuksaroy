@@ -16,10 +16,29 @@ export function closeAtOf(o: OrderRecord): Date | null {
 /**
  * "Kelmadi" shu paytgacha qabul qilinadi: mijozning yopish huquqi boshlanadigan payt. noShow dagi
  * tekshiruv ham, taxtadagi tugma (orderCard) ham shundan o'qiydi: qoida bitta, sayt faqat
- * solishtiradi. Faqat CONFIRMED da: terminal buyurtmani faqat shu holatdan bekor qila oladi.
+ * solishtiradi. Pastdagi ikki chegara ham shunday. Faqat CONFIRMED da: terminal buyurtmani faqat
+ * shu holatdan bekor qila oladi.
  */
 export function noShowUntil(o: OrderRecord): Date | null {
   return o.status === 'CONFIRMED' ? closeAtOf(o) : null;
+}
+
+/**
+ * "Kelmadi" shu paytdan qabul qilinadi: band qilingan vaqt boshlanishi. Egasining 2026-10-07 qarori:
+ * vaqt boshlanmasdan mijoz kechikkan emas, undan oldin terminal faqat sabab yozib bekor qiladi
+ * (terminalCancelUntil). Slotsiz buyurtmada pastki chegara yo'q, avvalgidek.
+ */
+export function noShowFrom(o: OrderRecord): Date | null {
+  return o.status === 'CONFIRMED' ? o.slot?.startsAt ?? null : null;
+}
+
+/**
+ * Terminal tasdiqlangan buyurtmani sabab yozib shu paytgacha bekor qila oladi: vaqt boshlanguncha,
+ * keyin "Kelmadi" ishlaydi. Slotsiz buyurtmada chegara noShowUntil bilan bir xil: kech bekor qilish
+ * ham, kech "Kelmadi" kabi, mijozning yopish va baho yozish huquqini o'chirib yuborardi.
+ */
+export function terminalCancelUntil(o: OrderRecord): Date | null {
+  return o.status === 'CONFIRMED' ? o.slot?.startsAt ?? closeAtOf(o) : null;
 }
 
 /**

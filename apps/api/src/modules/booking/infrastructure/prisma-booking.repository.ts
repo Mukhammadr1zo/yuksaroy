@@ -47,10 +47,14 @@ export class PrismaBookingRepository implements BookingRepository {
         const startsAt = uzLocalToUtc(date, w.start), endsAt = uzLocalToUtc(date, w.end);
         const existing = await this.prisma.timeSlot.findUnique({ where: { terminalId_localDate_window: { terminalId, localDate: toDateCol(date), window: w.window } } });
         if (existing && w.capacity < existing.booked + existing.held) throw new CapacityBelowBookedError();
+        // Band yoki ushlangan joyi bor oynaning vaqti o'zgarmaydi, faqat sig'imi: mijoz shu vaqtga yozilgan,
+        // "Kelmadi" va terminalning bekor qilishi ham shu vaqtdan hisoblanadi (egasining 2026-10-07 qarori).
+        // Ilgari egasi oynani surib mijozning vaqtini unga aytmasdan o'zgartirar va "Kelmadi" ni erta ochardi
+        const keepTime = existing && existing.booked + existing.held > 0;
         await this.prisma.timeSlot.upsert({
           where: { terminalId_localDate_window: { terminalId, localDate: toDateCol(date), window: w.window } },
           create: { terminalId, localDate: toDateCol(date), window: w.window, startsAt, endsAt, capacity: w.capacity },
-          update: { startsAt, endsAt, capacity: w.capacity },
+          update: keepTime ? { capacity: w.capacity } : { startsAt, endsAt, capacity: w.capacity },
         });
         n++;
       }

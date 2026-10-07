@@ -176,7 +176,7 @@
         "addWindow": "Oyna qo'shish",
         "apply": "Joylarni ochish",
         "applied": "{days} kun x {windows} oyna: {slots} ta joy ochildi.",
-        "hint": "Mavjud joylarning sig'imi yangilanadi; band qilinganidan pastga tushirib bo'lmaydi."
+        "hint": "Mavjud joylarning sig'imi yangilanadi; band qilinganidan pastga tushirib bo'lmaydi. Band qilingan joyning vaqti o'zgarmaydi."
       },
       "grid": {
         "title": "Keyingi 14 kun",

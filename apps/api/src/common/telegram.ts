@@ -91,6 +91,13 @@ const TEXTS = {
     ru: '❌ <b>Заказ {no} отклонён</b>\n{terminal}\nПричина: {reason}\n\n{url}',
     en: '❌ <b>Order {no} rejected</b>\n{terminal}\nReason: {reason}\n\n{url}',
   },
+  // Tasdiqlangan buyurtmani terminal vaqt boshlanguncha bekor qildi (2026-10-07 egasi qarori).
+  // orderRejected olinmadi: "rad etildi" tasdiq olgan mijozni chalg'itardi
+  orderCancelledByTerminal: {
+    uz: '❌ <b>Buyurtma {no} bekor qilindi</b>\n{terminal}\nTerminal bekor qildi. Sabab: {reason}\n\n{url}',
+    ru: '❌ <b>Заказ {no} отменён</b>\n{terminal}\nТерминал отменил заказ. Причина: {reason}\n\n{url}',
+    en: '❌ <b>Order {no} cancelled</b>\n{terminal}\nThe terminal cancelled it. Reason: {reason}\n\n{url}',
+  },
   orderExpired: {
     uz: "⌛ <b>Buyurtma {no} muddati o'tdi</b>\nTerminal belgilangan vaqtda javob bermadi.\n\n{url}",
     ru: '⌛ <b>Срок заказа {no} истёк</b>\nТерминал не ответил вовремя.\n\n{url}',

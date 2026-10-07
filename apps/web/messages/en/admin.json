@@ -382,7 +382,7 @@
       "sortDemand": "By demand",
       "views30": "Opens, 30 days",
       "openInquiries": "Unanswered",
-      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means the customer's latest message has no reply yet, including follow-ups after an earlier reply. Call from the top down.",
+      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means the customer's latest message has no reply yet, including follow-ups after an earlier reply. Conversations marked \"No reply needed\" are not counted. Call from the top down.",
       "ownerKindLabel": "Owner type",
       "ownerKindNote": "This filter gathers the rows onto one screen; it does not decide anything. Reading the owner from the name is not exact, so look through the list.",
       "ownerKinds": {
@@ -505,6 +505,7 @@
         "contact-reveal": "Viewed a phone number",
         "contact-deal": "Saw a deal number",
         "inquiry-create": "Sent a listing enquiry",
+        "inquiry-noReply": "Marked a conversation as no reply needed",
         "invoice-paid": "Marked an invoice paid",
         "listing-archive": "Archived a listing",
         "listing-create": "Created a listing",
@@ -583,7 +584,8 @@
         "admin-task-assign": "Assigned a job to a teammate",
         "admin-task-done": "Closed a task",
         "request-fanout": "New request sent to providers",
-        "order-clientClose": "Closed a stuck order"
+        "order-clientClose": "Closed a stuck order",
+        "order-terminalCancel": "Cancelled an order on behalf of the terminal"
       },
       "ent": {
         "ContactMessage": "Message",

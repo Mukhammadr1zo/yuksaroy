@@ -3,6 +3,7 @@
 // 7 kun sharti faqat shu use-case da turadi: o'tish jadvali mijozga DONE ni istalgan paytda
 // beradi. Shart tushib qolsa mijoz buyurtmani birinchi kunidayoq yopib, ish bajarilmasdan
 // terminalga baho qo'ya olardi.
+import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import type { OrderStatus } from '@yuksaroy/domain';
 import type { PrismaService } from '../../../common/prisma.service';
@@ -12,7 +13,7 @@ import type { NotificationsService } from '../../notifications/notifications.ser
 import type { HistoryEntry, OrderRecord, OrderRepository } from '../domain/ports';
 import type { OrderAccess } from './order-access';
 import { OrderActionsUseCase } from './order-actions.usecase';
-import { noShowUntil } from '../../../common/stuck-orders';
+import { noShowFrom, noShowUntil, terminalCancelUntil } from '../../../common/stuck-orders';
 
 const d = (s: string) => new Date(s);
 const ev = (at: string, code: string | null = null) =>
@@ -51,15 +52,25 @@ function setup(o: OrderRecord) {
   const access = {
     shipperOrgIds: async (userId: string) => (userId === 'u-mijoz' ? ['mijoz-org'] : []),
     isAdmin: async () => false,
-    assertTerminalOf: async () => {},
+    // Terminal xodimi faqat u-t: begona terminal amali haqiqiy OrderAccess dagi kabi rad etiladi
+    assertTerminalOf: async (userId: string) => { if (userId !== 'u-t') throw new ForbiddenException({ code: 'NOT_TERMINAL_STAFF' }); },
   } as unknown as OrderAccess;
   const documents = { onOrderCompleted: async (x: OrderRecord) => { issued.push(x.no); } } as unknown as IssueDocumentsUseCase;
-  const prisma = { terminal: { findUnique: async () => ({ orgId: 'terminal-org' }) } } as unknown as PrismaService;
-  // Oluvchi bo'sh qaytadi: notifyBoth shu yerda to'xtaydi, maqsad faqat kimga yuborilgani
-  const notifications = { recipients: async (t: unknown) => { targets.push(t); return []; } } as unknown as NotificationsService;
+  const prisma = {
+    terminal: { findUnique: async () => ({ orgId: 'terminal-org' }) },
+    user: { findMany: async () => [{ id: 'u-mijoz', locale: 'uz' }] },
+    telegramLink: { findMany: async () => [] },
+  } as unknown as PrismaService;
+  // Oluvchi faqat aniq foydalanuvchiga (userIds) qaytadi: mijozga ketgan sayt qo'ng'irog'i matni
+  // tekshiriladi. Tashkilotga yuborilganda bo'sh: notifyBoth to'xtaydi, maqsad faqat kimga yuborilgani
+  const pushed: { href: string; title: string; body: string | null }[] = [];
+  const notifications = {
+    recipients: async (t: { userIds?: string[] }) => { targets.push(t); return t.userIds ?? []; },
+    push: async (_ids: string[], n: { href: string; title: string; body: string | null }) => { pushed.push(n); },
+  } as unknown as NotificationsService;
   const released: string[] = [];
   const bookings = { release: async (_id: string, why: string) => { released.push(why); } } as unknown as BookingRepository;
-  return { uc: new OrderActionsUseCase(orders, bookings, access, documents, prisma, notifications), moves, issued, targets, added, released };
+  return { uc: new OrderActionsUseCase(orders, bookings, access, documents, prisma, notifications), moves, issued, targets, added, released, pushed };
 }
 
 describe('qotgan buyurtmani mijoz yopadi', () => {
@@ -143,5 +154,59 @@ describe('kech "Kelmadi" rad etiladi', () => {
 
   it("ish boshlangan buyurtmada muddat yo'q: u yerda tugma ham yo'q", () => {
     expect(noShowUntil(order())).toBeNull();
+  });
+});
+
+// Egasining 2026-10-07 qarori: vaqt boshlanmasdan mijoz kechikkan emas. Shart tushib qolsa terminal
+// o'zi voz kechgan buyurtmani ham "Kelmadi" deb yopib, aybni mijozga yozardi
+describe('vaqt boshlanguncha "Kelmadi" yo\'q, terminal sabab yozib bekor qiladi', () => {
+  // Tasdiqlangan, band qilingan vaqt 21-sentabr 03:00 da boshlanadi
+  const confirmed = () => order({ status: 'CONFIRMED', history: [ev('2026-09-20T08:00:00Z')] });
+  const before = d('2026-09-21T02:59:00Z');
+  const start = d('2026-09-21T03:00:00Z');
+
+  it('vaqt boshlanmasdan "Kelmadi" rad etiladi, boshlangach qabul qilinadi', async () => {
+    const f = setup(confirmed());
+    await expect(f.uc.noShow('u-t', 'YS-0001', before)).rejects.toMatchObject({ response: { code: 'NO_SHOW_TOO_EARLY' } });
+    expect(f.moves).toEqual([]);
+    expect(f.released).toEqual([]);
+    await f.uc.noShow('u-t', 'YS-0001', start);
+    expect(f.moves.map((m) => [m.to, m.entry.code])).toEqual([['CANCELLED', 'NO_SHOW']]);
+  });
+
+  it("vaqt boshlanguncha bekor qilinadi: alohida kod, joy bo'shaydi, sabab mijozga boradi", async () => {
+    const f = setup(confirmed());
+    const r = await f.uc.terminalCancel('u-t', 'YS-0001', '  Kran buzildi  ', before);
+    expect(r.status).toBe('CANCELLED');
+    expect(f.moves).toEqual([{
+      from: 'CONFIRMED', to: 'CANCELLED',
+      entry: { actorId: 'u-t', actorRole: 'TERMINAL', reason: 'Kran buzildi', code: 'TERMINAL_CANCEL' },
+      patch: { closedAt: before },
+    }]);
+    expect(f.released).toEqual(['CANCELLED']);
+    await new Promise((r) => setImmediate(r));
+    expect(f.targets).toEqual([{ userIds: ['u-mijoz'] }]);
+    expect(f.pushed).toEqual([expect.objectContaining({ href: '/dashboard/orders/YS-0001', body: expect.stringContaining('Kran buzildi') })]);
+  });
+
+  it("sababsiz, vaqt boshlangach yoki begona terminaldan bekor qilib bo'lmaydi", async () => {
+    const f = setup(confirmed());
+    await expect(f.uc.terminalCancel('u-t', 'YS-0001', '   ', before)).rejects.toMatchObject({ response: { code: 'REASON_REQUIRED' } });
+    // Tizim kodiga teng sabab sahifalarda tizim xabari bo'lib chiqardi: "mijoz belgilangan vaqtda kelmadi"
+    await expect(f.uc.terminalCancel('u-t', 'YS-0001', ' NO_SHOW ', before)).rejects.toMatchObject({ response: { code: 'REASON_RESERVED' } });
+    await expect(f.uc.terminalCancel('u-t', 'YS-0001', 'Kran buzildi', start)).rejects.toMatchObject({ response: { code: 'TERMINAL_CANCEL_TOO_LATE' } });
+    await expect(f.uc.terminalCancel('u-begona', 'YS-0001', 'Kran buzildi', before)).rejects.toMatchObject({ response: { code: 'NOT_TERMINAL_STAFF' } });
+    expect(f.moves).toEqual([]);
+    expect(f.released).toEqual([]);
+  });
+
+  it('taxtadagi chegaralar shu qoidadan; slotsiz buyurtmada bekor qilish "Kelmadi" muddatigacha', () => {
+    expect(noShowFrom(confirmed())).toEqual(start);
+    expect(terminalCancelUntil(confirmed())).toEqual(start);
+    const slotless = order({ status: 'CONFIRMED', slot: null, history: [ev('2026-09-20T08:00:00Z')] });
+    expect(noShowFrom(slotless)).toBeNull();
+    expect(terminalCancelUntil(slotless)).toEqual(noShowUntil(slotless));
+    // Ish boshlangan buyurtmada ikkalasi ham yo'q
+    expect([noShowFrom(order()), terminalCancelUntil(order())]).toEqual([null, null]);
   });
 });

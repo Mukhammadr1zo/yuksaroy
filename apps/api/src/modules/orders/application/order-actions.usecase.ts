@@ -4,7 +4,7 @@ import {
   type Actor, type OrderEventCode, type OrderStatus,
 } from '@yuksaroy/domain';
 import { PrismaService } from '../../../common/prisma.service';
-import { closeAtOf, noShowUntil } from '../../../common/stuck-orders';
+import { closeAtOf, noShowFrom, noShowUntil, terminalCancelUntil } from '../../../common/stuck-orders';
 import { notifyBoth, type NotifyKind } from '../../../common/telegram';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
@@ -12,7 +12,20 @@ import { ORDER_REPOSITORY, OrderStaleError, type OrderRecord, type OrderReposito
 import { OrderAccess } from './order-access';
 import { IssueDocumentsUseCase } from '../../documents/application/issue-documents.usecase';
 
-/** Buyurtma o'tishlari (6.5): tasdiq/rad - terminal, bekor va qotganini yopish - mijoz, hodisa/yakun - terminal, muddat - tizim. */
+/**
+ * Odam yozgan sabab (rad etish, bekor qilish): bo'shliqlarsiz, bo'sh bo'lsa null. Tizim o'zi yozadigan
+ * sabab kodiga aynan teng matn rad etiladi: uchala sahifa (kabinet, Telegram ilovasi, admin) tarixdagi
+ * sababni shu kodlar bo'yicha tarjima qiladi. Terminal "NO_SHOW" deb yozsa, vaqt boshlanmasdan mijozga
+ * "belgilangan vaqtda kelmadi" chiqib qolardi. Sahifalarga yangi tizim sababi qo'shilsa, shu yerga ham.
+ */
+const SYSTEM_REASONS = ['NO_SHOW', 'SLA_TIMEOUT', 'IDLE_CLOSED'];
+function typedReason(reason?: string): string | null {
+  const r = reason?.trim() || null;
+  if (r && SYSTEM_REASONS.includes(r)) throw new BadRequestException({ code: 'REASON_RESERVED' });
+  return r;
+}
+
+/** Buyurtma o'tishlari (6.5): tasdiq/rad - terminal, bekor va qotganini yopish - mijoz, hodisa/yakun va vaqtdan oldin bekor - terminal, muddat - tizim. */
 @Injectable()
 export class OrderActionsUseCase {
   constructor(
@@ -35,10 +48,11 @@ export class OrderActionsUseCase {
 
   async reject(userId: string, no: string, reason: string) {
     const o = await this.forTerminal(userId, no);
-    if (!reason?.trim()) throw new BadRequestException({ code: 'REASON_REQUIRED' });
-    const next = await this.move(o, 'REJECTED', 'TERMINAL', userId, { closedAt: new Date() }, reason.trim());
+    const why = typedReason(reason);
+    if (!why) throw new BadRequestException({ code: 'REASON_REQUIRED' });
+    const next = await this.move(o, 'REJECTED', 'TERMINAL', userId, { closedAt: new Date() }, why);
     if (o.slot) await this.bookings.release(o.slot.bookingId, 'REJECTED', new Date());
-    this.notifyClient(next, 'orderRejected', reason.trim());
+    this.notifyClient(next, 'orderRejected', why);
     return next;
   }
 
@@ -71,13 +85,45 @@ export class OrderActionsUseCase {
    * harakatsizlik beriladi; mijoz buyurtmani o'zi yopa oladigan paytdan boshlab "Kelmadi" rad
    * etiladi. Kech belgi mijozning yopish va baho yozish huquqini o'chirib yuborardi: bekor
    * qilingan buyurtmaga baho yozilmaydi.
+   *
+   * Egasining 2026-10-07 dagi ikkinchi qarori: band qilingan vaqt boshlanmasdan "Kelmadi" ham rad
+   * etiladi. Undan oldin mijoz hali kechikmagan; ilgari terminal buyurtmadan o'zi voz kechsa ham
+   * shu tugmani bosib aybni mijozga yozardi. Vaqtdan oldin yo'l - terminalCancel, sababi bilan.
    */
   async noShow(userId: string, no: string, now = new Date()) {
     const o = await this.forTerminal(userId, no);
+    const from = noShowFrom(o);
+    if (from && now < from) throw new ConflictException({ code: 'NO_SHOW_TOO_EARLY' });
     const until = noShowUntil(o);
     if (until && now >= until) throw new ConflictException({ code: 'NO_SHOW_TOO_LATE' });
     const next = await this.move(o, 'CANCELLED', 'TERMINAL', userId, { closedAt: new Date() }, 'NO_SHOW', 'NO_SHOW');
     if (o.slot) await this.bookings.release(o.slot.bookingId, 'NO_SHOW', new Date());
+    return next;
+  }
+
+  /**
+   * Terminal tasdiqlangan buyurtmani band qilingan vaqt boshlanguncha bekor qiladi (egasining
+   * 2026-10-07 qarori): sabab majburiy, CONFIRMED → CANCELLED, slot bo'shaydi va mijozga sabab
+   * bilan xabar ketadi. Muddat terminalCancelUntil da (common/stuck-orders.ts), taxtadagi tugma
+   * ham shundan o'qiydi. Holat tekshiruvi move() da: PENDING uchun yo'l reject, ish boshlangan
+   * buyurtmani esa bekor qilib bo'lmaydi.
+   *
+   * Tarixda alohida kod (TERMINAL_CANCEL), sabab esa odam yozgan matn. Kod faqat terminal vaqt
+   * boshlanishidan oldin bekor qilganini bildiradi, kim aybdorligini emas: mijoz vaqtga 12 soatdan
+   * kam qolganda o'zi bekor qila olmaydi va terminalga murojaat qiladi, bunday iltimos ham shu yo'ldan
+   * o'tadi. Hisobot uni NO_SHOW dan sabab matniga qaramasdan ajrata olsin. Kodsiz qator ham hozircha
+   * ajralardi (rol TERMINAL, kod bo'sh), lekin terminal bekor qilishining boshqa yo'li qo'shilsa ular
+   * jimgina qo'shilib ketardi.
+   */
+  async terminalCancel(userId: string, no: string, reason: string, now = new Date()) {
+    const o = await this.forTerminal(userId, no);
+    const why = typedReason(reason);
+    if (!why) throw new BadRequestException({ code: 'REASON_REQUIRED' });
+    const until = terminalCancelUntil(o);
+    if (until && now >= until) throw new ConflictException({ code: 'TERMINAL_CANCEL_TOO_LATE' });
+    const next = await this.move(o, 'CANCELLED', 'TERMINAL', userId, { closedAt: now }, why, 'TERMINAL_CANCEL');
+    if (o.slot) await this.bookings.release(o.slot.bookingId, 'CANCELLED', now);
+    this.notifyClient(next, 'orderCancelledByTerminal', why);
     return next;
   }
 
@@ -88,7 +134,7 @@ export class OrderActionsUseCase {
       const hoursLeft = (o.slot.startsAt.getTime() - Date.now()) / 3_600_000;
       if (hoursLeft < BOOKING.cancelBeforeHours) throw new ConflictException({ code: 'CANCEL_TOO_LATE', hoursBefore: BOOKING.cancelBeforeHours });
     }
-    const next = await this.move(o, 'CANCELLED', 'CLIENT', userId, { closedAt: new Date() }, reason?.trim() || null);
+    const next = await this.move(o, 'CANCELLED', 'CLIENT', userId, { closedAt: new Date() }, typedReason(reason));
     if (o.slot) await this.bookings.release(o.slot.bookingId, 'CANCELLED', new Date());
     return next;
   }

@@ -108,6 +108,14 @@ export class OrdersController {
     return publicOrder(o);
   }
 
+  /** Terminal tasdiqlangan buyurtmani vaqt boshlanguncha bekor qiladi: sabab majburiy va mijozga boradi. */
+  @Post(':no/terminal-cancel') @HttpCode(200)
+  async terminalCancel(@CurrentUserId() userId: string, @Param('no') no: string, @Body() dto: ReasonDto) {
+    const o = await this.actions.terminalCancel(userId, no, dto.reason);
+    await this.audit.log({ actorId: userId, action: 'order.terminalCancel', entity: 'Order', entityId: o.id, meta: { no, reason: dto.reason } });
+    return publicOrder(o);
+  }
+
   @Post(':no/events') @HttpCode(200)
   async event(@CurrentUserId() userId: string, @Param('no') no: string, @Body() dto: EventDto) {
     return publicOrder(await this.actions.addEvent(userId, no, dto.code, dto.payload));
