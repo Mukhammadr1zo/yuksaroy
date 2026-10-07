@@ -7,6 +7,7 @@
     "neighbours": "Neighbouring regions",
     "emptyNeighbours": "Nothing here yet, try neighbouring regions",
     "sortDefault": "Recommended",
+    "wordsMissed": "Nothing matched \"{words}\". Below are all terminals for the selected filter.",
     "also": "Also in this region",
     "more": "View all with filters: {count}",
     "mapNote": "Region boundary and objects. Siding points are placed by station, approximate.",

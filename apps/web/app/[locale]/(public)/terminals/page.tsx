@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { REGIONS, SERVICE_CODES, TERMINAL_KINDS, chipLabel, corridorRegions, parseQuery, type RegionCode, type SearchChip, type SearchLang } from '@yuksaroy/domain';
+import { REGIONS, SERVICE_CODES, TERMINAL_KINDS, catalogSearch, chipLabel, corridorRegions, parseQuery, type RegionCode, type SearchChip, type SearchLang } from '@yuksaroy/domain';
 import { sapi, qs } from '@/lib/server-api';
 import { pricePer } from '@/lib/format';
 import type { Page, TerminalCard as T } from '@/lib/types';
@@ -11,7 +11,7 @@ import { NearMeButton } from '@/components/catalog/NearMeButton';
 import { RegionChips } from '@/components/catalog/RegionChips';
 import { Impressions } from '@/components/catalog/Impressions';
 import { alt } from '@/lib/seo';
-import { MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
+import { MagnifyingGlassIcon, MapTrifoldIcon } from '@phosphor-icons/react/dist/ssr';
 import { Pagination } from '@/components/catalog/Pagination';
 
 export const revalidate = 60;
@@ -52,26 +52,39 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
     ...service.split(',').filter(Boolean).map((v) => chip('service', v)),
     ...(near ? [chip('near', radius || '25')] : []),
   ];
-  // Chiplar bor bo'lsa q tashlanadi: filtrlar aniq paramlarga aylangan, olib tashlash deterministik
-  const base = { region: corridor ? '' : region, service, kind, near, radius, corridor, bookable: raw.bookable, sort: raw.sort, q: chips.length ? '' : raw.q };
+  // Chiplar bor bo'lsa q o'rnida faqat filtrga aylanmagan so'zlar qoladi (tanilmagan so'z va
+  // viloyatdan aniqroq shahar): ilgari "Bekobod" butun Toshkent viloyatini ko'rsatardi.
+  // Qaror domen funksiyasida, chunki webda test yo'q
+  const words = catalogSearch(raw.q, p, chips.length > 0);
+  const page = Number(one(sp.page)) || 1;
+  // nearby: natija bo'sh va bitta viloyat so'ralganda API shu filtrlar bilan topgan eng yaqin viloyat
+  const list = (q: string) => sapi<Page<T> & { nearby?: { region: RegionCode; total: number } | null }>(`/terminals${qs({ region, service, kind, near, radius, bookable: raw.bookable, q, sort: raw.sort, page, limit: 12 })}`, 60);
+  const first = await list(words.q);
+  // So'zlar bilan hech narsa chiqmasa filtrning o'zi bilan qayta so'raymiz va buni ochiq aytamiz:
+  // bo'sh sahifa "bu viloyatda terminal yo'q" deb noto'g'ri tushunilardi
+  const missed = words.fallback && first.total === 0;
+  const data = missed ? await list('') : first;
+
+  const base = { region: corridor ? '' : region, service, kind, near, radius, corridor, bookable: raw.bookable, sort: raw.sort, q: words.q };
   const href = (over: Partial<typeof base> & { page?: number }) => `/terminals${qs({ ...base, ...over })}`;
   // Xarita sahifasiga joriy filtrlar bilan
   // free=1: bookable filtri xaritada ham saqlanadi (xaritadagi "Shu hududda ro'yxat" ning teskarisi)
-  const mapHref = `/map${qs({ cat: 'terminal', region: base.region, service, corridor, near, radius, free: raw.bookable ? '1' : '', q: base.q })}`;
+  // Xarita q dan faqat filtr oladi, nom bo'yicha qidirmaydi: so'zlar unga berilmaydi
+  const mapHref = `/map${qs({ cat: 'terminal', region: base.region, service, corridor, near, radius, free: raw.bookable ? '1' : '', q: chips.length ? '' : raw.q })}`;
   const remove = (c: SearchChip) =>
     c.type === 'corridor' ? href({ corridor: '' })
-    : c.type === 'region' ? href({ region: without(region, c.value) })
+    // Shahar so'zi ham ketadi, aks holda u viloyatni qayta tiklab chipni olib tashlatmasdi
+    : c.type === 'region' ? href({ region: without(region, c.value), q: words.withoutRegion })
     : c.type === 'service' ? href({ service: without(service, c.value) })
     : href({ near: '', radius: '' });
-
-  const page = Number(one(sp.page)) || 1;
-  // nearby: natija bo'sh va bitta viloyat so'ralganda API shu filtrlar bilan topgan eng yaqin viloyat
-  const data = await sapi<Page<T> & { nearby?: { region: RegionCode; total: number } | null }>(`/terminals${qs({ region, service, kind, near, radius, bookable: raw.bookable, q: base.q, sort: raw.sort, page, limit: 12 })}`, 60);
   const pages = Math.max(1, Math.ceil(data.total / data.limit));
   const s = data.summary;
+  // Qaror satri namunasiz (summary shunday keladi): haqiqiy son total - demo, namuna ro'yxatda belgisi
+  // bilan qoladi. Bot va yordamchi aytgan son ham shu. Egasi qarori (2026-10-07): nol sanoq chizilmaydi
+  const real = data.total - (s?.demo ?? 0);
   const decision = [
-    t('decision.terminals', { count: data.total }),
-    s && data.total ? t('decision.freeToday', { count: s.freeToday }) : null,
+    real > 0 ? t('decision.terminals', { count: real }) : null,
+    s?.freeToday ? t('decision.freeToday', { count: s.freeToday }) : null,
     s?.cheapestTiyin != null && s.cheapestUnit ? t('decision.cheapest', { price: pricePer(s.cheapestTiyin, s.cheapestUnit, locale) }) : null,
     s?.nearestKm != null ? t('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
   ].filter(Boolean).join(t('decision.separator'));
@@ -86,7 +99,8 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
       {/* Tur bu yerda yo'q: u quyidagi chiplar bilan tanlanadi. Ikkala boshqaruv qolsa
           ular bir-biriga zid ko'rinardi (chip "temir yo'l", ro'yxat esa "barcha turlar"). */}
       <form className="mt-6 grid gap-3 rounded-card border border-line bg-white p-4 md:grid-cols-[1.4fr_1.4fr_auto]" action="/terminals">
-        {Object.entries({ region: base.region, service, kind, near, radius, corridor, bookable: raw.bookable }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
+        {/* q ham: saralashni o'zgartirganda qidiruv so'zlari jimgina tushib qolmasin */}
+        {Object.entries({ region: base.region, service, kind, near, radius, corridor, bookable: raw.bookable, q: base.q }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
         <RegionFilter value={region} />
         <Sel name="service" value={service} label={tf('service.all')} options={SERVICE_CODES.map((x) => [x, ts(x)])} />
         <div className="flex gap-2">
@@ -131,11 +145,22 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
               <Link href={href({ bookable: '' })} aria-label={t('chips.remove', { label: chipLabel(chip('bookable', '1'), lang) })} className="rounded-full px-1.5 leading-none hover:bg-teal/15">×</Link>
             </span>
           ) : null}
-          {p?.unresolved.length ? <span className="text-xs text-muted">{t('chips.unresolved', { words: p.unresolved.join(', ') })}</span> : null}
+          {/* Qidiruv so'zlari ham chip: ro'yxatni ular ham toraytiradi, ko'rinmasa sabab yashirin qolardi.
+              Ular tanilmagan so'zlarni ham o'z ichiga oladi, shuning uchun "tushunilmadi" izohi faqat chipsiz holatda.
+              Uzun so'rov telefonda sahifani yonga surmasin: chip kenglikdan oshmaydi, matn qisqaradi. */}
+          {chips.length && base.q ? (
+            <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-teal-soft py-1 pl-3 pr-1.5 text-sm font-semibold text-teal-ink">
+              <MagnifyingGlassIcon size={14} weight="bold" aria-hidden="true" className="shrink-0" />
+              <span className="min-w-0 truncate" title={base.q}>{base.q}</span>
+              <Link href={href({ q: '' })} aria-label={t('chips.remove', { label: base.q })} className="shrink-0 rounded-full px-1.5 leading-none hover:bg-teal/15">×</Link>
+            </span>
+          ) : null}
+          {!chips.length && p?.unresolved.length ? <span className="text-xs text-muted">{t('chips.unresolved', { words: p.unresolved.join(', ') })}</span> : null}
         </div>
       ) : null}
+      {missed && data.items.length ? <p className="mt-4 rounded-card border border-amber/30 bg-amber-soft px-4 py-3 text-sm text-amber-ink wrap-anywhere">{th('wordsMissed', { words: words.q })}</p> : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        {data.items.length ? <p className="font-mono text-sm text-navy tabular-nums">{decision}</p> : <span />}
+        {data.items.length && decision ? <p className="font-mono text-sm text-navy tabular-nums">{decision}</p> : <span />}
         <Link href={mapHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink"><MapTrifoldIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewOnMap')}</Link>
       </div>
 

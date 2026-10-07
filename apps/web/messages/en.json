@@ -302,8 +302,9 @@
       "none": "No open spots today",
       "book": "Book a spot"
     },
-    "demoNote": "This is a demo terminal, here so you can try how the site works. Booking creates a real order, but there is no real owner to confirm it.",
-    "demoBadge": "Demo"
+    "demoNote": "This is a sample terminal, here so you can try how the site works. Booking creates a real order, but there is no real owner to confirm it.",
+    "demoNoChat": "No phone or chat: a sample has no real owner, so a message would reach no one.",
+    "demoBadge": "Sample"
   },
   "texnika": {
     "lead": "Shunting locomotives and wagons. The owner lists equipment for sale or rent and sets the terms.",

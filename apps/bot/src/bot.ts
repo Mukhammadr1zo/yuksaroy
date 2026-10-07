@@ -58,7 +58,7 @@ type ParseRes = {
   query: Record<string, string>;
   decision: { terminals: number; freeToday: number; cheapestTiyin: number | null; cheapestUnit: string | null; nearestKm: number | null };
 };
-type Card = { slug: string; name: string; kind: string; regionCode: string | null; fromPriceTiyin: number | null; freeToday?: number };
+type Card = { slug: string; name: string; kind: string; regionCode: string | null; fromPriceTiyin: number | null; freeToday?: number; isDemo?: boolean };
 
 // Chip va karta yorliqlari: domain SEARCH_LABELS nusxasi, bot domain paketiga bog'lanmaydi.
 // ponytail: yorliqlar takrorlangan, API chip.label qaytarsa shu jadval o'chadi
@@ -132,13 +132,15 @@ function chipLabel(c: Chip, lang: Lang): string {
 
 const T: Record<Lang, {
   som: string; filter: string; open: string; inApp: string; app: string; appHint: string; map: string; none: string; down: string; hint: string;
+  // Saytdagi "Namuna" yorlig'ining matni: Telegram da belgi chizib bo'lmaydi, shuning uchun so'z bilan
+  demo: string;
   terminals: (n: number) => string; free: (n: number) => string; cheapest: (p: string) => string; nearest: (km: number) => string; slots: (n: number) => string;
   // Kirish oqimi: /start dan kod kelguncha
   contactBtn: string; welcome: string; askPhone: string; askPhoneLogin: string; ownContactOnly: string;
   linkFailed: string; linkedApp: string; linkedCode: string; linkedNoCode: string; help: string;
 }> = {
   uz: {
-    som: "so'm", filter: 'Filtr', open: 'Ochish', inApp: 'Ilovada ochish', app: 'Ilovani ochish', map: 'Xaritada',
+    som: "so'm", filter: 'Filtr', open: 'Ochish', inApp: 'Ilovada ochish', app: 'Ilovani ochish', map: 'Xaritada', demo: 'Namuna, haqiqiy taklif emas',
     appHint: 'Mini ilova: qidiruv, bron va buyurtmalar Telegram ichida.',
     none: "Hech narsa topilmadi. Filtrni kengaytirib ko'ring.",
     down: "Server javob bermadi. Bir daqiqadan keyin qayta urinib ko'ring.",
@@ -157,7 +159,7 @@ const T: Record<Lang, {
     help: "YukSaroy: yuk logistikasi bozori.\n\nQidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\nVagon qayerda: vagon raqamini yuboring yoki /vagon 24567890 deb yozing. Oxirgi joylashuvi, stansiyasi va yuklangan yo bo'shligi chiqadi. Buning uchun telefon raqamingiz tasdiqlangan bo'lishi kerak.\n\nKirish: /start yuboring va telefon raqamingizni tasdiqlang. Platformada raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.",
   },
   ru: {
-    som: 'сум', filter: 'Фильтр', open: 'Открыть', inApp: 'В приложении', app: 'Открыть приложение', map: 'На карте',
+    som: 'сум', filter: 'Фильтр', open: 'Открыть', inApp: 'В приложении', app: 'Открыть приложение', map: 'На карте', demo: 'Образец, не настоящее предложение',
     appHint: 'Мини-приложение: поиск, бронирование и заказы внутри Telegram.',
     none: 'Ничего не найдено. Попробуйте расширить фильтр.',
     down: 'Сервер не ответил. Повторите через минуту.',
@@ -176,7 +178,7 @@ const T: Record<Lang, {
     help: 'YukSaroy: маркетплейс грузовой логистики.\n\nПоиск: напишите простыми словами, что нужно, или используйте /qidir. Бот покажет число терминалов, свободные места на сегодня и самый дешёвый тариф.\n\nГде вагон: отправьте номер вагона или напишите /vagon 24567890. Придёт последнее местоположение, станция и гружёный или порожний. Для этого нужен подтверждённый номер телефона.\n\nВход: отправьте /start и подтвердите номер. Когда введёте его на платформе, код придёт сюда и будет действовать 5 минут.',
   },
   en: {
-    som: 'UZS', filter: 'Filter', open: 'Open', inApp: 'In the app', app: 'Open the app', map: 'On map',
+    som: 'UZS', filter: 'Filter', open: 'Open', inApp: 'In the app', app: 'Open the app', map: 'On map', demo: 'Sample, not a real offer',
     appHint: 'Mini App: search, booking and orders inside Telegram.',
     none: 'Nothing found. Try widening the filter.',
     down: 'Server did not respond. Try again in a minute.',
@@ -332,8 +334,11 @@ async function search(ctx: Context, q: string, lang: Lang) {
 
   const d = parsed.decision;
   const decision = [
-    t.terminals(d.terminals),
-    d.terminals > 0 ? t.free(d.freeToday) : null,
+    // Nol sanoq yozilmaydi (egasi qarori 2026-10-07): sonlar namunasiz, faqat namuna topilganda
+    // "0 terminal" ostida Namuna kartalari turardi. Bo'sh joy ham ko'pincha 0, namuna kartasi esa
+    // "Bugun 8 ta bo'sh joy" deydi. freeToday > 0 bo'lsa terminal ham bor
+    d.terminals > 0 ? t.terminals(d.terminals) : null,
+    d.freeToday > 0 ? t.free(d.freeToday) : null,
     d.cheapestTiyin !== null ? t.cheapest(price(d.cheapestTiyin, d.cheapestUnit, lang)) : null,
     d.nearestKm !== null ? t.nearest(Math.round(d.nearestKm)) : null,
   ].filter(Boolean).join(' · ');
@@ -342,12 +347,15 @@ async function search(ctx: Context, q: string, lang: Lang) {
   const L = LABELS[lang];
   const body = cards.map((c, i) => [
     `${i + 1}. <b>${esc(c.name)}</b>`,
+    // Namuna saytdagidek belgilanadi: odam uni haqiqiy terminal deb joy so'ramasin. Yuqoridagi son uni sanamaydi
+    c.isDemo ? `<i>${esc(t.demo)}</i>` : null,
     [L.kind![c.kind] ?? c.kind, c.regionCode ? L.region![c.regionCode] ?? c.regionCode : null].filter(Boolean).join(' · '),
     c.fromPriceTiyin !== null ? price(c.fromPriceTiyin, 'PER_TON', lang) : null,
     typeof c.freeToday === 'number' ? t.slots(c.freeToday) : null,
   ].filter(Boolean).join('\n'));
 
-  const text = [`<b>${esc(decision)}</b>`, chips ? `${t.filter}: ${esc(chips)}` : null, '', body.length ? body.join('\n\n') : t.none].filter((x) => x !== null).join('\n');
+  // Qaror satri bo'sh bo'lsa (hamma son 0) qatori ham yo'q: bo'sh <b></b> chiqmasin
+  const text = [decision ? `<b>${esc(decision)}</b>` : null, chips ? `${t.filter}: ${esc(chips)}` : null, '', body.length ? body.join('\n\n') : t.none].filter((x) => x !== null).join('\n');
   // Har karta o'z qatorida: "Ilovada ochish N" web_app (https) yoki "Ochish N" sayt havolasi
   const rows = rowsOf([
     ...cards.map((c, i) => [appBtn(`${WEB_APP ? t.inApp : t.open} ${i + 1}`, `/terminals/${c.slug}`, lang)]),

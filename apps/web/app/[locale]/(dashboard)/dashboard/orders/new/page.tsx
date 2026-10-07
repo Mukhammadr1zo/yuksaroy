@@ -14,6 +14,7 @@ import { StationSearch, type StationPick } from '@/components/catalog/StationSea
 import { SlotGrid } from '@/components/order/SlotGrid';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { PriceLines, slotLabel } from '@/components/order/bits';
+import { DemoBadge } from '@/components/market/bits';
 
 type Membership = { orgId: string; roles: string[]; isOwner: boolean; org: { id: string; kind: string; name: string } };
 const EXTRAS: ServiceCode[] = SERVICE_CODES.filter((s) => s !== 'LOAD' && s !== 'UNLOAD');
@@ -276,7 +277,8 @@ function Wizard() {
                     className={`flex w-full items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${offer?.terminal.id === o.terminal.id ? 'border-teal bg-teal-soft' : 'border-line hover:bg-sand'}`}
                   >
                     <span className="min-w-0 wrap-anywhere">
-                      <span className="font-semibold">{o.terminal.name}</span>
+                      {/* Namuna terminal ham buyurtma oladi, lekin uni tasdiqlaydigan egasi yo'q: tanlashdan oldin ko'rinsin */}
+                      <span className="font-semibold">{o.terminal.name}</span>{o.terminal.isDemo ? <> <DemoBadge /></> : null}
                       <span className="block text-xs text-muted">{stationName(o.terminal)}{o.terminal.is24h ? ' · 24/7' : ''}{o.missing.length ? ` · ${t('missingTariff', { services: o.missing.map((m) => ts(m)).join(', ') })}` : ''}</span>
                     </span>
                     <span className="shrink-0 font-mono font-semibold tabular-nums">{som(o.totalTiyin, locale)}</span>
@@ -330,7 +332,7 @@ function Wizard() {
 
           {/* Telefonda hisob formadan yuqorida: tasdiq tugmasi jami summadan keyin ko'rinsin */}
           <aside className="rounded-card border border-line bg-white p-6 max-md:order-first">
-            <h2 className="text-lg font-bold">{offer.terminal.name}</h2>
+            <h2 className="text-lg font-bold">{offer.terminal.name}{offer.terminal.isDemo ? <> <DemoBadge /></> : null}</h2>
             <dl className="mt-3 space-y-1 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-muted">{t('row.operation')}</dt><dd>{ts(operation)}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-muted">{t('row.cargo')}</dt><dd className="text-right">{cargo?.name ?? t('notSpecified')}</dd></div>

@@ -7,7 +7,7 @@ import { randomBytes } from 'node:crypto';
 import { REGIONS, REGION_LABELS, URGENT_KINDS, URGENT_KIND_LABELS, formatUrgentNo, normalizePhone, type RegionCode, type SearchLang, type UrgentKind } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { env } from '../../common/env';
-import { logFanout } from '../../common/fanout';
+import { logFanout, sentCounts } from '../../common/fanout';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { notifyBoth } from '../../common/telegram';
@@ -97,8 +97,11 @@ export class UrgentController {
       });
     });
     await this.audit.log({ actorId: userId, action: 'urgent.create', entity: 'UrgentRequest', entityId: r.id, meta: { no: r.no, kind: r.kind, regionCode: r.regionCode } });
-    void this.notify(r).catch(() => {}); // javobni kutmaydi
-    return { ...r, statusUrl: statusUrl(r.statusToken), offers: [] };
+    // Oluvchilar xabardan OLDIN sanaladi: javob haqiqiy sonni aytadi. Qidiruv yiqilsa fanout o'zi
+    // jurnalga yozadi va adminlarni ogohlantiradi, son null. catch oxirgi to'siq: javob 500 bo'lmasin
+    const fan = await this.fanout(r).catch(() => null);
+    if (fan) void this.notify(r, fan.userIds).catch(() => {}); // javobni kutmaydi
+    return { ...r, statusUrl: statusUrl(r.statusToken), offers: [], sentReal: fan?.sentReal ?? null };
   }
 
   /** scope=mine: mening so'rovlarim (takliflar bilan); scope=provider: mening hududlarimdagi OCHIQ so'rovlar. */
@@ -106,8 +109,17 @@ export class UrgentController {
   async list(@CurrentUserId() userId: string, @Query('scope') scope?: string) {
     if (scope === 'provider') return this.providerList(userId);
     const rows = await this.prisma.urgentRequest.findMany({ where: { createdById: userId }, include: { offers: { orderBy: { createdAt: 'asc' } } }, orderBy: { createdAt: 'desc' }, take: 100 });
-    const orgs = await this.orgsOf(rows.flatMap((r) => r.offers));
-    return { items: rows.map((r) => ({ ...r, statusUrl: statusUrl(r.statusToken), offers: r.offers.map((o) => offerView(o, orgs)) })) };
+    // sentReal: tafsilot sahifasi "N ta ijrochiga yuborildi" ni shu ro'yxatdan o'qiydi. Son ishonchsiz bo'lsa null (sentCounts).
+    // listed: ijrochilar ro'yxatida hozir ko'rinadimi (providerList bilan bir shart). Sahifa "so'rovingiz
+    // ijrochilarga ko'rinib turadi" ni faqat shunda aytadi: yopilgan yoki 48 soatdan eski so'rovda bu yolg'on
+    const [orgs, sent] = await Promise.all([this.orgsOf(rows.flatMap((r) => r.offers)), sentCounts(this.prisma, 'UrgentRequest', rows.map((r) => r.id))]);
+    const fresh = new Date(Date.now() - URGENT_LIST_HOURS * 3_600_000);
+    return {
+      items: rows.map((r) => ({
+        ...r, statusUrl: statusUrl(r.statusToken), offers: r.offers.map((o) => offerView(o, orgs)),
+        sentReal: sent.get(r.id) ?? null, listed: r.status === 'OPEN' && r.createdAt >= fresh,
+      })),
+    };
   }
 
   @Post(':id/offers') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)
@@ -237,21 +249,42 @@ export class UrgentController {
   }
 
   /**
-   * Hudud va qo'shnilaridagi LOCO_SERVICE/CARRIER/ASSET_OWNER tashkilot egalariga xabar.
-   * Xato e'tiborsiz.
+   * Kim oladi: hudud va qo'shnilaridagi LOCO_SERVICE/CARRIER/ASSET_OWNER tashkilot a'zolari.
+   *
+   * Yuk bilan bitta qoida (market.service fanout): egasi ham, dispetcher ham; hududi kiritilmagan
+   * tashkilot butun mamlakatdan oladi, ijrochi ro'yxati (providerList) ham unga hammasini ko'rsatadi.
+   * Ilgari faqat egasi va faqat hududi to'g'ri kelgan tashkilot olardi: dispetcher shoshilinch
+   * so'rovni ro'yxatda ko'rsa ham, xabarini olmasdi. Namuna tashkilot va bloklangan hisob sanalmaydi.
+   *
+   * Yaratish paytida, xabardan OLDIN: javob haqiqiy sonni qaytaradi, jurnal ham shu yerda (logFanout,
+   * qidiruv yiqilsa ham).
+   */
+  private fanout(r: { id: string; no: string; kind: string; regionCode: string; stationName: string | null; createdById: string }) {
+    return logFanout(this.prisma, this.notifications, {
+      entity: 'UrgentRequest', id: r.id, no: r.no, createdById: r.createdById,
+      board: 'URGENT', region: r.regionCode, type: r.kind, what: (l) => kindLabel(r.kind, l), where: placeLine(r),
+      find: async () => {
+        const ms = await this.prisma.membership.findMany({
+          where: {
+            userId: { not: r.createdById }, user: { isActive: true },
+            org: { isDemo: false, kinds: { hasSome: [...PROVIDER_KINDS] }, OR: [{ regionCode: { in: notifyRegions(r.regionCode as RegionCode) } }, { regionCode: null }] },
+          },
+          select: { userId: true },
+          take: 500,
+        });
+        return [...new Set(ms.map((m) => m.userId))];
+      },
+    });
+  }
+
+  /**
+   * Xabar fanout topgan ijrochilarga. Xato e'tiborsiz.
    *
    * Ilgari bu yerda TelegramLink to'g'ridan-to'g'ri o'qilardi, ya'ni botni bog'lamagan
    * ijrochi shoshilinch so'rovni umuman ko'rmasdi. Endi notifyBoth: saytdagi qo'ng'iroq
    * ham qo'yiladi, matn esa oluvchining tilida ketadi.
    */
-  private async notify(r: { id: string; no: string; kind: string; regionCode: string; stationName: string | null; description: string; createdById: string }) {
-    const ms = await this.prisma.membership.findMany({
-      where: { isOwner: true, userId: { not: r.createdById }, org: { kinds: { hasSome: [...PROVIDER_KINDS] }, regionCode: { in: notifyRegions(r.regionCode as RegionCode) } } },
-      select: { userId: true },
-      take: 500,
-    });
-    const userIds = [...new Set(ms.map((m) => m.userId))];
-    await logFanout(this.prisma, 'UrgentRequest', r.id, { board: 'URGENT', region: r.regionCode, type: r.kind, sent: userIds.length });
+  private async notify(r: { id: string; no: string; kind: string; regionCode: string; stationName: string | null; description: string; createdById: string }, userIds: string[]) {
     if (!userIds.length) return;
     // Telegram tugmasi faqat https manzilni qabul qiladi: https da Mini App (web_app) tugmasi, localhost da matndagi havola yetarli
     // Tugma funksiya: oluvchilar til bo'yicha guruhlanadi, demak matn o'z tilida ketadi.

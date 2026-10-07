@@ -121,8 +121,10 @@ export default async function TerminalPage({ params }: Params) {
           {/* Raqam obunachiga, bosilganda: sahifa keshlangan, raqam brauzerdan olinadi (PhoneReveal) */}
           {t.hasPhone ? <span className="text-center"><PhoneReveal kind="terminal" targetId={t.id} next={`/terminals/${t.slug}`} /></span> : null}
           {/* Yozishma ham kerak: hujjat yuboriladi va kelishuv izi qoladi.
-              Egasi tasdiqlanmagan obyektda javobni platforma beradi. */}
-          <ChatLauncher target={{ kind: 'terminal', slug: t.slug, title: t.name, ownerless: registryOnly }} next={`/terminals/${t.slug}`} />
+              Egasi tasdiqlanmagan obyektda javobni platforma beradi. Namunaning egasi yo'q:
+              API ham yozishmani rad etadi (DEMO_TARGET), tugma o'rniga sababi yoziladi. */}
+          {t.isDemo ? <p className="rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{tr('demoNoChat')}</p>
+            : <ChatLauncher target={{ kind: 'terminal', slug: t.slug, title: t.name, ownerless: registryOnly }} next={`/terminals/${t.slug}`} />}
         </div>
       </header>
 

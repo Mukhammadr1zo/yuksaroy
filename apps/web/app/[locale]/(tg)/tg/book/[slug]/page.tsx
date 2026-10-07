@@ -17,6 +17,7 @@ import { SlaTimer } from '@/components/order/SlaTimer';
 import { PriceLines, slotLabel } from '@/components/order/bits';
 import { haptic, useClosingConfirmation, useMainButton } from '@/components/tg/TgProvider';
 import { CARD, CHIP, Err, INPUT, Row, Skeleton } from '@/components/tg/bits';
+import { DemoBadge } from '@/components/market/bits';
 
 const STEPS = ['cargo', 'slot', 'confirm'] as const;
 const shipper = (m: Membership) => m.isOwner || m.roles.includes('CLIENT') || m.roles.includes('FORWARDER');
@@ -134,7 +135,8 @@ export default function TgBookPage() {
 
   return (
     <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">
-      <p className="text-xs text-muted">{terminal?.name ?? '…'}</p>
+      {/* Namuna terminal har qadamda belgilanadi: buyurtma yaratiladi, lekin tasdiqlaydigan egasi yo'q */}
+      <p className="text-xs text-muted">{terminal?.name ?? '…'}{terminal?.isDemo ? <> <DemoBadge /></> : null}</p>
       <h1 className="font-display mt-0.5 text-xl font-bold">{t('title')}</h1>
       <ol className="mt-3 flex gap-1.5" aria-label={t('title')}>
         {STEPS.map((s, i) => (
@@ -172,10 +174,11 @@ export default function TgBookPage() {
         <div className="mt-4 space-y-3">
           <div className={`${CARD} p-4`}>
             <div className="flex items-baseline justify-between gap-3"><p className="min-w-0 truncate font-bold">{offer.terminal.name}</p><span className="font-mono font-semibold tabular-nums">{som(offer.totalTiyin, locale)}</span></div>
+            {offer.terminal.isDemo ? <div className="mt-1"><DemoBadge /></div> : null}
             {offers.length > 1 ? (
               <details className="mt-2 text-sm">
                 <summary className="cursor-pointer text-teal-ink">{t('otherOffers')} ({offers.length - 1})</summary>
-                <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between rounded-xl border border-line px-3 text-left"><span className="min-w-0 truncate">{o.terminal.name}</span><span className="font-mono tabular-nums">{som(o.totalTiyin, locale)}</span></button></li>)}</ul>
+                <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between gap-2 rounded-xl border border-line px-3 text-left"><span className="min-w-0 truncate">{o.terminal.name}</span>{o.terminal.isDemo ? <DemoBadge /> : null}<span className="ml-auto font-mono tabular-nums">{som(o.totalTiyin, locale)}</span></button></li>)}</ul>
               </details>
             ) : null}
           </div>
@@ -192,7 +195,7 @@ export default function TgBookPage() {
       {step === 2 && offer && hold ? (
         <div className="mt-4 space-y-3">
           <div className={`${CARD} p-4`}>
-            <h2 className="font-bold">{offer.terminal.name}</h2>
+            <h2 className="font-bold">{offer.terminal.name}{offer.terminal.isDemo ? <> <DemoBadge /></> : null}</h2>
             <dl className="mt-2">
               <Row k={t('operation')} v={t(operation)} />
               <Row k={t('summary.cargo')} v={cargo?.name ?? t('summary.noCargo')} />

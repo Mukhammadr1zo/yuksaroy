@@ -76,13 +76,17 @@ export default async function AssistantPage({ params }: Params) {
             <div className="absolute left-[54%] top-[44%] flex -translate-x-1/2 -translate-y-full flex-col items-center">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-white ring-2 ring-white"><MapPinIcon size={16} weight="fill" aria-hidden="true" /></span>
             </div>
-            <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-line bg-white/95 px-4 py-3">
-              <p className="text-xs font-semibold text-muted">{t('example.result')}</p>
-              <p className="mt-0.5 font-mono text-sm font-semibold text-navy tabular-nums">
-                {t('example.decision', { terminals: r.decision.terminals, free: r.decision.freeToday })}
-                {r.decision.cheapestTiyin ? ` · ${t('example.cheapest', { price: formatSom(r.decision.cheapestTiyin) })}` : ''}
-              </p>
-            </div>
+            {/* Sonlar namunasiz keladi. Egasi qarori (2026-10-07): nol sanoq chizilmaydi, shuning uchun
+                haqiqiy terminal topilmasa natija qutisi yo'q, bo'sh joy 0 bo'lsa xabar o'sha bo'lakni tashlaydi */}
+            {r.decision.terminals > 0 ? (
+              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-line bg-white/95 px-4 py-3">
+                <p className="text-xs font-semibold text-muted">{t('example.result')}</p>
+                <p className="mt-0.5 font-mono text-sm font-semibold text-navy tabular-nums">
+                  {t('example.decision', { terminals: r.decision.terminals, free: r.decision.freeToday })}
+                  {r.decision.cheapestTiyin ? ` · ${t('example.cheapest', { price: formatSom(r.decision.cheapestTiyin) })}` : ''}
+                </p>
+              </div>
+            ) : null}
           </div>
         </div>
         <Link href={href} className={`mt-4 inline-block ${BTN.outline}`}>{t('example.open')}</Link>

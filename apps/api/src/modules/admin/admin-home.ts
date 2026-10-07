@@ -49,7 +49,8 @@ export const DB_SLOW_MS = 300;
  * phonePlans: PHONE ruxsatli faol tarif soni. Nol bo'lsa hech kim obuna sotib ololmaydi,
  * faol tarif umuman yo'qmi yoki faqat vagon tarifi bormi, farqi yo'q.
  * Vagon manbasi: yarmi yoki ko'pi javobsiz bo'lsa bad, aks holda warn.
- * noProvider: 24 soatda hech kimga yuborilmagan yangi so'rovlar soni (common/fanout.ts).
+ * noProvider: 24 soatda birorta ham haqiqiy ijrochiga yetmagan yangi so'rovlar soni (adminlar va
+ * so'rov egasining hamkasblari sanalmaydi, oluvchilarni topish yiqilgani ham kiradi; common/fanout.ts).
  * Qaror aniq: o'sha viloyatda o'sha turdagi ijrochi topish yoki taklif qilish.
  * stuckOrders: 7 kun qimirlamagan buyurtmalar (common/stuck-orders.ts). Faqat son: eng
  * eskisining yoshi bitta count bilan chiqmaydi, buning uchun hamma qatorni o'qish kerak.

@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import { uzLocalToUtc } from '@yuksaroy/domain';
 import { queueStats } from '../../common/admin-queues';
 import { countByDay } from '../../common/day-counts';
-import { FANOUT_ACTION } from '../../common/fanout';
+import { noProviderWhere } from '../../common/fanout';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
@@ -88,8 +88,9 @@ export class AdminHomeController {
       }),
       safe('commission', () => this.commission()),
       safe('reveals', () => this.reveals(now)),
-      // 24 soatda hech kimga yuborilmagan yangi so'rovlar: sent son bo'lib yoziladi (common/fanout.ts)
-      safe('fanout', () => this.prisma.auditLog.count({ where: { action: FANOUT_ACTION, createdAt: { gte: since24h }, meta: { path: ['sent'], equals: 0 } } })),
+      // 24 soatda birorta ham haqiqiy ijrochiga yetmagan yangi so'rovlar: adminlarga ketgani
+      // sanalmaydi (sentReal), eski qatorda sent qaraladi. Shart common/fanout.ts da, yozuv bilan yonma-yon
+      safe('fanout', () => this.prisma.auditLog.count({ where: noProviderWhere(since24h) })),
       // Qotgan buyurtma: /admin/orders?status=STUCK aynan shu ro'yxat bilan ochiladi, son va ro'yxat bir xil
       safe('stuck', async () => (await stuckOrderIds(this.prisma, now)).length),
     ]);

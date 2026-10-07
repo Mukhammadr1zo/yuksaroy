@@ -10,6 +10,7 @@ import type { TerminalCard } from '@/lib/types';
 import type { Me } from '@/lib/types-auth';
 import type { ListingCard } from '@/lib/types-listing';
 import { cardSrc } from '@/components/catalog/CardPhoto';
+import { DemoBadge } from '@/components/market/bits';
 import { BOT, haptic, useTg } from './TgProvider';
 import { listingPrice, regionName, tgListingHref } from './labels';
 
@@ -45,15 +46,17 @@ export function Err({ children }: { children: ReactNode }) {
   return <p role="alert" className="rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{children}</p>;
 }
 
-/** Terminal qatori: nom, tur, viloyat, bugungi bo'sh slot (bitta qatorli tabletka), narx "dan", baho. Tor ustunda ham qatorlar sinmaydi. */
+/** Terminal qatori: nom (namuna bo'lsa "Namuna" yorlig'i), tur, viloyat, bugungi bo'sh slot (bitta qatorli tabletka), narx "dan", baho. Tor ustunda ham qatorlar sinmaydi. */
 export function TerminalRow({ t, lang }: { t: TerminalCard; lang: SearchLang }) {
   const L = SEARCH_LABELS[lang];
   const tt = useTranslations('card');
   const free = t.freeToday ?? 0;
   return (
     <Link href={`/tg/terminals/${t.slug}`} onClick={() => haptic()} className={`${CARD} block p-3 active:bg-sand`}>
+      {/* flex-1: yorliqlar o'ngda yonma-yon turadi, qisqa nomda o'rtaga suzib ketmaydi */}
       <div className="flex items-start justify-between gap-2">
-        <p className="min-w-0 truncate font-bold">{t.name}</p>
+        <p className="min-w-0 flex-1 truncate font-bold">{t.name}</p>
+        {t.isDemo ? <DemoBadge /> : null}
         {t.is24h ? <span className="shrink-0 rounded-full bg-teal-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-teal-ink">24/7</span> : null}
       </div>
       <p className="mt-0.5 truncate text-xs text-muted">{L.kind[t.kind]}</p>

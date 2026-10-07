@@ -146,12 +146,15 @@ describe("egasining ko'rinishi", () => {
     const c = ctl(db([request()], [offer('o1', 'p1')]));
     const owner = await c.one(req('live'), 'CR-1001');
     expect(owner).toMatchObject({ contactPhone: '+998901234567', offers: [{ id: 'o1' }] });
+    // Doskada turishi faqat egasiga: kabinet "doskada turadi" ni shundan aytadi (qiymati isListed spec'ida)
+    expect(owner).toHaveProperty('listed');
     const revoked = await c.one(req('revoked'), 'CR-1001');
     expect(revoked).not.toHaveProperty('contactPhone');
     expect(revoked).not.toHaveProperty('offers');
     expect(revoked).toMatchObject({ hasPhone: true, offersCount: 1 });
     const guest = await c.one(req(null), 'CR-1001');
     expect(guest).not.toHaveProperty('contactPhone');
+    expect(guest).not.toHaveProperty('listed');
   });
 });
 
@@ -220,5 +223,40 @@ describe('ish yakuni', () => {
     p.marketRequest.findUnique = async () => ({ ...reqs[0], status: 'AWARDED', offers: [] });
     await conflict(ctl(p).done('owner', 'r1'), 'MARKET_TRANSITION');
     expect(reqs[0]!.status).toBe('CLOSED');
+  });
+});
+
+/**
+ * Yaratish javobidagi son: "N ta tashuvchiga yuborildi" aynan shundan. Sanoq xabardan OLDIN,
+ * xabar esa fonda. Sanoq yiqilsa so'rov baribir yaratilgan: xato chiqmaydi, son null va
+ * xabar ketmaydi (ekran sonsiz gapiradi, yolg'on son aytmaydi).
+ */
+describe("yaratish javobi haqiqiy oluvchilar sonini aytadi", () => {
+  const svcDto = { board: 'SERVICE' as const, title: 'Ekspeditor kerak', description: 'Eksport hujjatlari', serviceType: 'FORWARDER', regionCode: 'UZ-AN' };
+  const setup = (fanout: () => Promise<{ userIds: string[]; sentReal: number }>) => {
+    const sentTo: string[][] = [];
+    const p: Any = {
+      $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn({
+        $queryRaw: async () => [{ nextval: 7n }],
+        marketRequest: { create: async ({ data }: Any) => ({ id: 'r7', status: 'OPEN', awardedOfferId: null, isDemo: false, createdAt: now, updatedAt: now, ...data }) },
+      }),
+      telegramLink: { findUnique: async () => null },
+    };
+    const m = { ...market, fanout, notifyNew: async (_r: unknown, ids: string[]) => { sentTo.push(ids); } } as unknown as MarketService;
+    return { c: new MarketController(prisma(p), audit, m, tokens, users, sessions), sentTo };
+  };
+
+  it('son fanout dan, xabar shu oluvchilarga', async () => {
+    const { c, sentTo } = setup(async () => ({ userIds: ['a', 'b'], sentReal: 2 }));
+    const r = await c.create('creator-1', svcDto);
+    expect(r).toMatchObject({ no: 'SR-7', sentReal: 2, telegramLinked: false });
+    expect(sentTo).toEqual([['a', 'b']]);
+  });
+
+  it('sanoq yiqilsa so\'rov qaytadi, son null, xabar yo\'q', async () => {
+    const { c, sentTo } = setup(async () => { throw new Error('baza'); });
+    const r = await c.create('creator-2', svcDto);
+    expect(r).toMatchObject({ no: 'SR-7', sentReal: null });
+    expect(sentTo).toEqual([]);
   });
 });

@@ -25,7 +25,8 @@ export default async function ForShippersPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const [t, th, stats] = await Promise.all([getTranslations('marketing.shippers'), getTranslations('how'), sapi<Stats>('/stats', 60).catch(() => null)]);
-  const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 })] : [];
+  // Egasi qarori (2026-10-07): nol sanoq chizilmaydi, 1 va undan ko'pi asl soni bilan (bosh sahifadagi Numbers kabi)
+  const facts = stats ? ([['terminals', stats.terminals], ['freeSlots', stats.freeSlotsToday ?? 0]] as const).filter(([, v]) => v > 0).map(([k, v]) => t(`facts.${k}`, { count: v })) : [];
   return (
     <>
       <Hero side="shippers" facts={facts} primary="/terminals" secondary="/quote" />

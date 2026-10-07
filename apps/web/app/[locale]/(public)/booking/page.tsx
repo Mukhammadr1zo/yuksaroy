@@ -8,6 +8,7 @@ import type { Page, QuoteResponse, Slot, Stats, TerminalCard } from '@/lib/types
 import { BTN, CtaBand } from '@/components/marketing/bits';
 import { alt } from '@/lib/seo';
 import { DashLink } from '@/components/site/DashLink';
+import { DemoBadge } from '@/components/market/bits';
 
 export const revalidate = 300;
 type Params = { params: Promise<{ locale: string }> };
@@ -27,10 +28,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { ...{ title: t('title'), description: t('description') }, ...alt(locale, '/booking') };
 }
 
-/** Eng arzon faol terminal (tarifi bor): jonli misol va slot tasmasi uchun. */
+/**
+ * Eng arzon faol terminal (tarifi bor): jonli misol va slot tasmasi uchun. Haqiqiy terminal
+ * namunadan oldin turadi: namuna faqat tarif e'lon qilgan haqiqiy terminal yo'q paytda chiqadi
+ * va sahifada "Namuna" belgisi bilan.
+ */
 async function pickTerminal() {
   const list = await sapi<Page<TerminalCard>>('/terminals?limit=50&sort=price', 300).catch(() => null);
-  return list?.items.filter((x) => x.status === 'ACTIVE' && x.tariffs?.length).sort((a, b) => (a.fromPriceTiyin ?? Infinity) - (b.fromPriceTiyin ?? Infinity))[0] ?? null;
+  return list?.items.filter((x) => x.status === 'ACTIVE' && x.tariffs?.length)
+    .sort((a, b) => Number(!!a.isDemo) - Number(!!b.isDemo) || (a.fromPriceTiyin ?? Infinity) - (b.fromPriceTiyin ?? Infinity))[0] ?? null;
 }
 
 /** Bron sahifasi: uch ustun, real terminal tarifidan jonli hisob (POST /quote), bo'sh slot tasmasi, holatlar zanjiri, CTA. */
@@ -50,7 +56,8 @@ export default async function BookingPage({ params }: Params) {
   for (const s of slots) byDay.set(s.localDate, [...(byDay.get(s.localDate) ?? []), s]);
   const day = byDay.has(today) ? today : [...byDay.keys()].sort().find((d) => byDay.get(d)!.some((s) => s.status === 'OPEN' && s.free > 0)) ?? null;
   const strip = day ? byDay.get(day)! : [];
-  const facts = stats ? [t('facts.terminals', { count: stats.terminals }), t('facts.freeSlots', { count: stats.freeSlotsToday ?? 0 })] : [];
+  // Egasi qarori (2026-10-07): nol sanoq chizilmaydi, 1 va undan ko'pi asl soni bilan (bosh sahifadagi Numbers kabi)
+  const facts = stats ? ([['terminals', stats.terminals], ['freeSlots', stats.freeSlotsToday ?? 0]] as const).filter(([, v]) => v > 0).map(([k, v]) => t(`facts.${k}`, { count: v })) : [];
   const commission = t('example.commission', { pct: (offer?.commissionPct ?? 0) / 100 });
 
   return (
@@ -89,7 +96,7 @@ export default async function BookingPage({ params }: Params) {
             <h2 className="font-display text-2xl font-bold text-navy md:text-3xl">{t('example.heading')}</h2>
             {term && offer ? (
               <>
-                <p className="mt-2 max-w-[62ch] text-muted">{t('example.lead', { terminal: term.name, weight: WEIGHT_T })}</p>
+                <p className="mt-2 max-w-[62ch] text-muted">{term.isDemo ? <><DemoBadge /> </> : null}{t('example.lead', { terminal: term.name, weight: WEIGHT_T })}</p>
                 <div className="mt-5 overflow-x-auto rounded-card border border-line">
                   <table className="w-full text-sm">
                     <thead className="bg-sand text-left font-mono text-xs text-muted">
@@ -124,7 +131,7 @@ export default async function BookingPage({ params }: Params) {
 
           {term ? (
             <aside className="rounded-card border border-line bg-sand p-5">
-              <h2 className="text-sm font-bold text-navy">{t('slots.heading', { terminal: term.name })}</h2>
+              <h2 className="text-sm font-bold text-navy">{t('slots.heading', { terminal: term.name })}{term.isDemo ? <> <DemoBadge /></> : null}</h2>
               {strip.length ? (
                 <>
                   <p className="mt-1 font-mono text-xs text-muted">{day === today ? t('slots.today') : uzDayShort(strip[0]!.startsAt)}</p>

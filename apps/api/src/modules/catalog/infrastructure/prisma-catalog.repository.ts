@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { distanceKm, uzLocalDate } from '@yuksaroy/domain';
+import { distanceKm, normalizeQuery, slugify, uzLocalDate } from '@yuksaroy/domain';
 import { Prisma } from '@prisma/client';
 import type { Rju, ServiceCode } from '@yuksaroy/domain';
 import { PrismaService } from '../../../common/prisma.service';
@@ -12,8 +12,8 @@ import {
 
 const stationSelect = { id: true, esrCode: true, nameUz: true, nameRu: true, rju: true, stationType: true, classRank: true, lat: true, lng: true } as const;
 const ci = (s: string) => ({ contains: s, mode: 'insensitive' as const });
-/** ʻ ’ ` → ': nomlar bazada to'g'ri apostrof bilan saqlanadi. */
-const apos = (s: string) => s.replace(/[ʻ’`]/g, "'");
+/** ʻ ’ ` va telefondagi U+2018, U+02BC → ': nomlar bazada to'g'ri apostrof bilan saqlanadi. */
+const apos = (s: string) => s.replace(/[ʻ’`\u2018\u02BC]/g, "'");
 
 const currentTariff = (now: Date): Prisma.TariffWhereInput => ({ validFrom: { lte: now }, OR: [{ validTo: null }, { validTo: { gt: now } }] });
 const terminalInclude = (now: Date) => ({
@@ -75,9 +75,33 @@ export const visibleCompany = (now: Date): Prisma.OrganizationWhereInput => ({
   OR: [{ kycStatus: 'VERIFIED' }, { terminals: { some: { OR: [{ status: 'ACTIVE' }, { claimStatus: 'APPROVED' }] } } }, { listings: { some: activeListing(now) } }],
 });
 
+/**
+ * Bitta so'zning matn sharti: lotin, o'zbek kirili va telefon apostrofi bir xil natija bersin.
+ * Har maydon yozilgani bilan ham, lotinchasi bilan ham solishtiriladi (Бекобод -> bekobod).
+ * Slug lotin "stansiya-nom", kirill nomli qatorni lotin so'z shu orqali topadi. Lekin reestr
+ * sluglarida х -> h, ё -> e qilingan (korhonasi, biokime), normalizeQuery esa x va yo beradi:
+ * shuning uchun ikkinchi slug varianti ham bor. yo' (йў) tegilmaydi, slugda u yo (yo'l -> yol).
+ * Rus imlosidagi nom (Фергана, Ташкент) hozircha qamrovdan tashqarida: u o'zbekcha nomga tushmaydi.
+ * ponytail: LIKE '%..%' indeks ishlatmaydi, ~1700 qatorni ko'rib chiqadi (millisekundlar), tartib va
+ * sahifa baribir bazada. Jadval o'n minglab qatorga yetsa pg_trgm GIN indeksi qo'shiladi.
+ */
+function textMatch(raw: string): Prisma.TerminalWhereInput[] {
+  const typed = apos(raw), lat = normalizeQuery(raw), slug = slugify(lat);
+  const alt = slugify(lat.replace(/x/g, 'h').replace(/yo(?!')/g, 'e'));
+  return [
+    ...(typed.toLowerCase() === lat ? [typed] : [typed, lat]).flatMap((s) => [
+      { name: ci(s) }, { address: ci(s) }, { stationNameRaw: ci(s) }, { ownerNameRaw: ci(s) },
+      { station: { OR: [{ nameUz: ci(s) }, { nameRu: ci(s) }] } },
+    ]),
+    // So'z faqat belgidan iborat bo'lsa slug bo'sh: contains '' hamma qatorni topardi
+    ...(slug ? [{ slug: { contains: slug } }] : []),
+    // Ikki harfli variant (yol -> el) deyarli har slugda bor: u qidiruvni kengaytirib yuborardi
+    ...(alt !== slug && alt.length > 2 ? [{ slug: { contains: alt } }] : []),
+  ];
+}
+
 /** Filtr shartlari: ro'yxat ham, sanoq ham shu bitta manbadan quriladi. Sof funksiya: DB'siz sinaladi. */
 export function terminalWhere(f: TerminalFilter): Prisma.TerminalWhereInput {
-  const q = f.q ? apos(f.q) : undefined;
   // Bo'sh ro'yxat = filtr yo'q
   const regions = f.region === undefined ? [] : ([] as string[]).concat(f.region);
   const services = f.service === undefined ? [] : ([] as ServiceCode[]).concat(f.service);
@@ -101,7 +125,11 @@ export function terminalWhere(f: TerminalFilter): Prisma.TerminalWhereInput {
       ...services.map((s) => ({ services: { some: { serviceCode: s, isEnabled: true } } })),
       // Ochiq katalog: egasi bor obyekt yoki reestrdan kelgan temir yo'l terminali
       ...(f.publicCatalog ? [{ OR: [{ orgId: { not: null } }, { kind: 'RAIL' as const }] }] : []),
-      ...(q ? [{ OR: [{ name: ci(q) }, { address: ci(q) }, { station: { nameUz: ci(q) } }, { stationNameRaw: ci(q) }] }] : []),
+      // Har so'z alohida va hammasi topilishi shart: sahifa shaharni lug'at nomi bilan yuboradi,
+      // so'rov esa aralash yozuvda keladi ("Qo'qon биокимё"). Ibora sifatida u na kirill nomga, na
+      // lotin maydonga mos kelardi. So'z tartibi ham ahamiyatsiz bo'ldi.
+      // 8 so'z chegarasi: har so'z ~14 shart, uzun q bazaga og'ir so'rov bo'lib ketmasin.
+      ...(f.q ? f.q.split(/\s+/).filter(Boolean).slice(0, 8).map((w) => ({ OR: textMatch(w) })) : []),
     ],
   };
 }
@@ -112,9 +140,11 @@ export class PrismaCatalogRepository implements CatalogRepository {
 
   // ── stansiya, yuk turi ──
   searchStations(q: string, rju: Rju | undefined, limit: number) {
-    const s = apos(q);
+    // Lotinchasi ham: o'zbekcha nom bazada lotinda, "Бекобод" deb yozgan odam ham topsin
+    const s = apos(q), lat = normalizeQuery(q);
+    const latin = lat && lat !== s.toLowerCase() ? [{ nameUz: ci(lat) }] : [];
     return this.prisma.station.findMany({
-      where: { rju, ...(s ? { OR: [{ nameUz: ci(s) }, { nameRu: ci(s) }, { esrCode: { startsWith: s } }] } : {}) },
+      where: { rju, ...(s ? { OR: [{ nameUz: ci(s) }, { nameRu: ci(s) }, { esrCode: { startsWith: s } }, ...latin] } : {}) },
       orderBy: [{ nameUz: 'asc' }], take: limit, select: stationSelect,
     });
   }
@@ -333,15 +363,20 @@ export class PrismaCatalogRepository implements CatalogRepository {
     // Tashriflar oxirgi 30 kun bo'yicha: bitta kunning soni juda o'zgaruvchan va
     // bosh sahifada u ishonch emas, tasodif ko'rsatardi
     const from = new Date(now.getTime() - 30 * 86_400_000);
+    // Namuna qatorlar hech qayerda sanalmaydi (egasining qoidasi): bu raqamlar bosh sahifada
+    // "platforma raqamlari" bo'lib turadi va ilgari 26 e'lon, 11 kompaniya va bugungi 40 bo'sh
+    // joyning deyarli hammasi namunadan yig'ilardi. Ro'yxatlarda namuna o'z belgisi bilan qoladi.
+    const real = { isDemo: false } as const;
     const [terminals, sidings, stations, listings, companies, free, visits, visitRows] = await Promise.all([
-      // terminals: ochiq katalog bilan bir xil son (egasi bor avto/aralash + butun temir yo'l reestri),
+      // terminals: ochiq katalog qamrovi (egasi bor avto/aralash + butun temir yo'l reestri),
       // aks holda bosh sahifa "2 terminal" deb turib katalog 1 700 ta ko'rsatardi.
       // sidings: faqat temir yo'l turi, admin panel uchun; ochiq sahifalar alohida ko'rsatmaydi.
-      this.prisma.terminal.count({ where: { status: 'ACTIVE', OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] } }),
-      this.prisma.terminal.count({ where: { status: 'ACTIVE', kind: 'RAIL' } }),
+      this.prisma.terminal.count({ where: { status: 'ACTIVE', ...real, OR: [{ orgId: { not: null } }, { kind: 'RAIL' }] } }),
+      this.prisma.terminal.count({ where: { status: 'ACTIVE', kind: 'RAIL', ...real } }),
       this.prisma.station.count(),
-      this.prisma.listing.count({ where: activeListing(now) }), this.prisma.organization.count({ where: visibleCompany(now) }),
-      this.freeToday({ terminal: { status: 'ACTIVE', orgId: { not: null } } }, now),
+      this.prisma.listing.count({ where: { ...activeListing(now), ...real } }),
+      this.prisma.organization.count({ where: { ...visibleCompany(now), ...real } }),
+      this.freeToday({ terminal: { status: 'ACTIVE', orgId: { not: null }, ...real } }, now),
       this.prisma.visit.aggregate({ _sum: { count: true }, where: { day: { gte: from } } }),
       this.prisma.visit.groupBy({ by: ['region'], where: { day: { gte: from }, region: { not: '' } }, _sum: { count: true } }),
     ]);

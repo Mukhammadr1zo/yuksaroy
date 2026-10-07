@@ -43,7 +43,7 @@
       "orders": "Ochiq buyurtmalarim",
       "ordersAll": "Barchasi",
       "urgent": "Shoshilinch so'rov",
-      "urgentHint": "Teplovoz, ta'mir yoki kran: takliflar bir soat ichida",
+      "urgentHint": "Teplovoz, ta'mir yoki kran: hududdagi ijrochilarga so'rov",
       "links": {
         "orders": "Buyurtmalar",
         "listings": "E'lonlarim",

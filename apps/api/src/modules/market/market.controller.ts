@@ -9,6 +9,7 @@ import { randomBytes } from 'node:crypto';
 import { LISTING, MARKET, MARKET_BOARDS, MARKET_STATUSES, REGIONS, SERVICE_TYPES, TRUCK_TYPES, normalizePhone, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
 import { PHOTO_URL } from '../../common/file-url';
 import { AuditService } from '../../common/audit.service';
+import { sentCounts } from '../../common/fanout';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { clampInt } from '../catalog/presentation/catalog.controller';
@@ -76,6 +77,7 @@ const inList = (list: readonly string[], v: string | undefined) => (v && list.in
  *
  * Sana Toshkent kuni bilan solishtiriladi va shartlar AND ichida: ro'yxatdagi viloyat
  * filtri OR ni band qilgan, shu yerga yozilsa ikkalasi bir-birini bosib qolardi.
+ * Bitta qator uchun shakli market.rules dagi isListed: biri o'zgarsa ikkinchisi ham.
  */
 export const visible = (now = new Date()) => ({
   status: 'OPEN',
@@ -137,8 +139,14 @@ export class MarketController {
       this.prisma.marketRequest.findMany({ where, include: { offers: { orderBy: [{ priceTiyin: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }] } }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], skip: (p - 1) * take, take }),
     ]);
     const offers = rows.flatMap((r) => r.offers);
-    const [orgs, users] = await Promise.all([this.market.orgsOf(offers), this.market.namesOf(offers.map((o) => o.providerUserId))]);
-    return { items: rows.map(({ offers, ...r }) => ({ ...requestView(r, offers.length, true), offers: offers.map((o) => offerView(o, orgs, users)) })), total, page: p, limit: take };
+    // sentReal: so'rov nechta haqiqiy ijrochiga ketgani (jurnaldan). Son ishonchsiz bo'lsa null (sentCounts)
+    const [orgs, users, sent] = await Promise.all([
+      this.market.orgsOf(offers), this.market.namesOf(offers.map((o) => o.providerUserId)), sentCounts(this.prisma, 'MarketRequest', rows.map((r) => r.id)),
+    ]);
+    return {
+      items: rows.map(({ offers, ...r }) => ({ ...requestView(r, offers.length, true), offers: offers.map((o) => offerView(o, orgs, users)), sentReal: sent.get(r.id) ?? null })),
+      total, page: p, limit: take,
+    };
   }
 
   /** Men yuborgan takliflar, so'rov qisqacha bilan. Sahifalanadi. */
@@ -209,13 +217,17 @@ export class MarketController {
     });
     const from = inList(SOURCES, dto.from);
     await this.audit.log({ actorId: userId, action: 'market.request.create', entity: 'MarketRequest', entityId: r.id, meta: { no: r.no, board: r.board, ...(from ? { from } : {}) } });
-    void this.market.notifyNew(r).catch(() => {});
+    // Oluvchilar xabardan OLDIN sanaladi: yakuniy ekran "N ta tashuvchiga yuborildi" ni haqiqiy son
+    // bilan aytadi. Qidiruv yiqilsa fanout o'zi jurnalga yozadi va adminlarni ogohlantiradi, son esa
+    // null (ekran sonsiz gapiradi). catch oxirgi to'siq: so'rov yaratilgan, javob 500 bo'lmasin
+    const fan = await this.market.fanout(r).catch(() => null);
+    if (fan) void this.market.notifyNew(r, fan.userIds).catch(() => {});
     // Kanal posti alohida: notifyNew mos odamlarga ketadi, kanal esa ochiq ro'yxat
     void this.market.postChannel(r).catch(() => {}); // javobni kutmaydi
     // Telegram bog'lanmagan bo'lsa formadagi yakuniy ekran buni bir marta eslatadi:
     // taklif xabari aynan Telegramga boradi va odam uni umuman ko'rmay qolardi
     const telegramLinked = !!(await this.prisma.telegramLink.findUnique({ where: { userId }, select: { userId: true } }));
-    return { ...requestView(r, 0, true), offers: [], telegramLinked };
+    return { ...requestView(r, 0, true), offers: [], telegramLinked, sentReal: fan?.sentReal ?? null };
   }
 
   @Post('requests/:id/offers') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)

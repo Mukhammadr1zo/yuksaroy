@@ -20,7 +20,7 @@ import { GoogleButton } from '@/components/auth/GoogleButton';
 import { PhoneOtp } from '@/components/auth/PhoneOtp';
 import { BTN_GHOST, BTN_PRIMARY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { PhotoUpload } from '@/components/kabinet/PhotoUpload';
-import { useMarketLabels } from './bits';
+import { useMarketLabels, useSentLine, type SentCount } from './bits';
 import { CopyLink } from './CopyLink';
 
 const BOT = process.env.NEXT_PUBLIC_BOT_USERNAME ?? 'yuksaroy_bot';
@@ -50,6 +50,7 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   const t = useTranslations('market.form');
   const te = useTranslations('market.err');
   const L = useMarketLabels();
+  const sentLine = useSentLine();
   const cargo = board === 'CARGO';
   const picked = (SERVICE_TYPES as readonly string[]).includes(serviceType ?? '') ? serviceType! : '';
   const [d, setD] = useState<Draft>(() => {
@@ -60,11 +61,22 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   const [errors, setErrors] = useState<FieldErrors>({});
   const [top, setTop] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<MarketRequest | null>(null);
+  const [done, setDone] = useState<(MarketRequest & SentCount) | null>(null);
   // Har muvaffaqiyatsiz yuborishda oshadi: xatolar to'plami bir xil bo'lsa ham
   // fokus qayta ko'chsin, aks holda ikkinchi urinishda effekt ishlamasdi.
   const [badTry, setBadTry] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
+  const doneRef = useRef<HTMLDivElement>(null);
+
+  // Yakuniy ekran uzun formaning o'rnini oladi: sahifa qisqaradi va brauzer pastda qoladi. Telefonda
+  // "E'lon qilindi" va "N ta tashuvchiga yuborildi" ekrandan yuqorida qolib, odam faqat footerni
+  // ko'rardi, kompyuterda esa xabarning usti yopishqoq sarlavha ostida edi (scroll-mt shundan).
+  // Fokus ham shu yerga: bosilgan tugma yo'qoladi va klaviatura bilan ishlagan odam sahifa boshiga tushardi
+  useEffect(() => {
+    if (!done) return;
+    doneRef.current?.scrollIntoView({ block: 'start' });
+    doneRef.current?.focus({ preventScroll: true });
+  }, [done]);
 
   // Fokus xatolar CHIZILGANDAN keyin ko'chadi: setState darhol DOM ga tushmaydi,
   // shu sababli qidiruv effekt ichida, ya'ni aria-invalid allaqachon turgan paytda.
@@ -105,7 +117,7 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
     try {
       // Sahifaga qayerdan kelingani (?from=terminals): server tanish belgini yaratish auditiga yozadi, ko'prik shu bilan o'lchanadi
       const from = new URLSearchParams(window.location.search).get('from') ?? undefined;
-      const r = await post<MarketRequest>('/market/requests', { ...body(), from });
+      const r = await post<MarketRequest & SentCount>('/market/requests', { ...body(), from });
       try { sessionStorage.removeItem(DRAFT_KEY(board)); } catch { /* yuborildi, qoralama endi kerak emas */ }
       setDone(r);
     } catch (e) {
@@ -148,8 +160,9 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   if (done) {
     const publicHref = cargo ? `/cargo/${done.no}` : `/services/requests/${done.no}`;
     return (
-      <div className="grid gap-4">
-        <Notice tone="ok"><span className="font-semibold">{t('done', { no: done.no })}</span> {t('doneBody')}</Notice>
+      <div ref={doneRef} tabIndex={-1} className="grid scroll-mt-32 gap-4 outline-none">
+        {/* Necha ijrochiga ketgani server sanagan son: hech kim bo'lmasa shuni ochiq aytadi */}
+        <Notice tone="ok"><span className="font-semibold">{t('done', { no: done.no })}</span> {sentLine(board, done.sentReal)} {t('doneBody')}</Notice>
         {/* Havola shu yerda: odam uni haydovchiga yuborsa, u kirmasdan holatni ko'radi */}
         {done.statusUrl ? <CopyLink url={done.statusUrl} /> : null}
         {/* Taklif xabari Telegramga boradi: bog'lanmagan odam uni umuman ko'rmay qolardi */}

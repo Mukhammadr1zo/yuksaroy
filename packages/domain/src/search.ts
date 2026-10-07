@@ -86,7 +86,8 @@ export interface SearchChip {
   value: string;
 }
 
-interface Entry { k: SearchChip['type'] | 'near' | 'bookable' | 'stop'; code?: string; lat?: number; lng?: number }
+/** name: shaharning o'zbekcha nomi (faqat nuqtasi bor joyda), nom bo'yicha qidiruvga shu shaklda ketadi. */
+interface Entry { k: SearchChip['type'] | 'near' | 'bookable' | 'stop'; code?: string; lat?: number; lng?: number; name?: string }
 
 const DICT = new Map<string, Entry[]>();
 const KEY_LANGS = new Map<string, string>(); // kalit -> 'uz' | 'ru' | 'en' birikmasi (til aniqlash uchun)
@@ -156,7 +157,7 @@ const PLACES: [RegionCode, number, number, string, string, string][] = [
   ['UZ-FA', 40.357, 71.285, 'rishton', 'риштан', 'rishtan'],
 ];
 for (const [code, lat, lng, uz, ru, en] of PLACES) {
-  const e: Entry = lat ? { k: 'region', code, lat, lng } : { k: 'region', code };
+  const e: Entry = lat ? { k: 'region', code, lat, lng, name: uz.split('|')[0] } : { k: 'region', code };
   add('uz', uz, e); add('ru', ru, e); add('en', en, e);
 }
 
@@ -269,6 +270,13 @@ export interface SearchFilters {
   lang: SearchLang;
   confidence: number;
   unresolved: string[];
+  /**
+   * Filtr chiplari bilan birga nom bo'yicha qidiruvga qoladigan so'zlar: tanilmagan so'z
+   * (yozilganicha) va viloyatdan aniqroq shahar ("Bekobod", "Qarshi"), agar u so'rovdagi yagona
+   * joy bo'lsa va lug'atda aniq topilgan bo'lsa. Viloyat bilan bir nomli shahar (Toshkent,
+   * Samarqand) chipning o'zi, koridor va radius nuqtasi esa filtr: ular yo'q.
+   */
+  words: string[];
   chips: SearchChip[];
 }
 
@@ -322,13 +330,13 @@ function lookup(cands: string[], len: number): { key: string; entries: Entry[] }
   return null;
 }
 
-interface RegionHit { code: RegionCode; lat?: number; lng?: number; from: boolean; to: boolean }
+interface RegionHit { code: RegionCode; lat?: number; lng?: number; from: boolean; to: boolean; i: number; name?: string; exact: boolean }
 
 export function parseQuery(q: string, opts: { lang?: SearchLang; near?: { lat: number; lng: number } } = {}): SearchFilters {
   const toks = tokenize(q);
   const n = toks.length;
   const state: ('none' | 'stop' | 'hit')[] = new Array(n).fill('none');
-  const hits: { i: number; len: number; suffix: string; entries: Entry[] }[] = [];
+  const hits: { i: number; len: number; suffix: string; entries: Entry[]; exact: boolean }[] = [];
   const qty: NonNullable<SearchFilters['qty']> = {};
   let km: number | null = null;
   let en = 0, uz = 0;
@@ -359,7 +367,10 @@ export function parseQuery(q: string, opts: { lang?: SearchLang; near?: { lat: n
       if (l.includes('uz') && !l.includes('en')) uz++;
       const stop = found.entries.every((e) => e.k === 'stop');
       for (let k = i; k < i + len; k++) state[k] = stop ? 'stop' : 'hit';
-      if (!stop) hits.push({ i, len, suffix: last.suffix, entries: found.entries });
+      // Aniq: kalitning o'zi yoki ruscha kelishik qo'shimchasi (Бекабаде). Taxminiy topilma
+      // (shahri -> Shahrixon, yangi -> Yangiyo'l) faqat viloyat filtri bo'ladi, nom qidiruviga kirmaydi
+      const exact = cands.some((c) => c.startsWith(found.key) && c.length - found.key.length <= 2);
+      if (!stop) hits.push({ i, len, suffix: last.suffix, entries: found.entries, exact });
       i += len - 1;
       break;
     }
@@ -378,7 +389,7 @@ export function parseQuery(q: string, opts: { lang?: SearchLang; near?: { lat: n
       switch (e.k) {
         case 'region':
           regionHits.push({
-            code: e.code as RegionCode, lat: e.lat, lng: e.lng,
+            code: e.code as RegionCode, lat: e.lat, lng: e.lng, i: h.i, name: e.name, exact: h.exact,
             from: h.suffix === 'dan' || next === 'dan' || prev === 'ot' || prev === 'from' || prev === 'mejdu',
             to: h.suffix === 'gacha' || next === 'gacha' || prev === 'do' || prev === 'to' || prev === '-'
               || (prev === 'i' && norms.slice(0, h.i).includes('mejdu'))
@@ -425,14 +436,41 @@ export function parseQuery(q: string, opts: { lang?: SearchLang; near?: { lat: n
   const matched = state.filter((s) => s === 'hit').length;
   const confidence = meaningful ? Math.round((matched / meaningful) * 100) / 100 : 0;
   const unresolved = toks.filter((_, i) => state[i] === 'none').map((t) => t.raw);
+  // Shahar so'zi qidiruvda qoladi, aks holda viloyat chipi "Bekobod" ni butun Toshkent viloyatiga
+  // aylantirardi. Faqat so'rovda bitta joy aniq aytilganda: "Chirchiq Toshkent" yoki "Bekobod
+  // Chirchiq" da so'z ikkinchi joyning qatorlarini yashirardi ("Toshkent viloyati Bekobod" esa
+  // bitta joy). Taxminiy topilma bu hisobga kirmaydi, u faqat viloyat filtri. Viloyat bilan bir
+  // nomli shahar qolmaydi: so'z qolsa ro'yxat nomida "Toshkent" bor obyektlargagina torayardi.
+  // Shahar o'zbekcha nomi bilan ketadi (Бекободда -> Bekobod); bosh harf faqat chipda ko'rinishi
+  // uchun, qidiruv katta-kichik harfga qaramaydi.
+  const sure = corridor ? [] : regionHits.filter((h) => h.exact && !(near && h === point));
+  const cities = sure.filter((h) => h.name && h.name !== normalizeQuery(SEARCH_LABELS.uz.region[h.code]));
+  const city = new Map<number, string>();
+  if (new Set(sure.map((h) => h.code)).size === 1 && new Set(cities.map((h) => h.name)).size === 1) {
+    for (const h of cities) city.set(h.i, h.name![0]!.toUpperCase() + h.name!.slice(1));
+  }
+  const words = toks.flatMap((t, i) => (state[i] === 'none' ? [t.raw] : city.has(i) ? [city.get(i)!] : []));
 
   const filters: SearchFilters = {
     category, regions, corridor, near, services, kind,
     qty: Object.keys(qty).length ? qty : null,
-    equipment, deal, bookable: bookable ? true : null, lang, confidence, unresolved, chips: [],
+    equipment, deal, bookable: bookable ? true : null, lang, confidence, unresolved, words, chips: [],
   };
   filters.chips = buildChips(filters);
   return filters;
+}
+
+/**
+ * /terminals sahifasining nom qidiruvi qarori. Sof funksiya: webda test ishga tushirgich yo'q.
+ * q: chip bo'lsa faqat filtrga aylanmagan so'zlar (words). U havolalarda doim qoladi, natija bo'sh
+ * chiqqanda ham: keyingi o'tishda (tur, saralash, sahifa) so'zlar qayta sinaladi, jimgina yo'qolmaydi.
+ * fallback: q bilan natija 0 bo'lsa filtrning o'zi bilan qayta so'raladi va bu ochiq aytiladi.
+ * withoutRegion: viloyat chipi olib tashlanganda shahar so'zi ketadi (u viloyatni qayta tiklardi),
+ * tanilmagan so'zlar qoladi.
+ */
+export function catalogSearch(rawQ: string, p: SearchFilters | null, hasChips: boolean): { q: string; fallback: boolean; withoutRegion: string } {
+  const q = hasChips ? (p?.words.join(' ') ?? '') : rawQ;
+  return { q, fallback: hasChips && q !== '', withoutRegion: p?.unresolved.join(' ') ?? '' };
 }
 
 function buildChips(f: SearchFilters): SearchChip[] {

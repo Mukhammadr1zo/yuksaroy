@@ -57,8 +57,11 @@ export interface Passport {
 
 
 export interface Page<T> { items: T[]; total: number; page: number; limit: number; summary?: ListSummary }
-/** Filtrlangan to'plam bo'yicha qaror satri (GET /terminals). */
-export interface ListSummary { freeToday: number; ratedCount?: number; cheapestTiyin: number | null; cheapestUnit: TariffUnit | null; nearestKm: number | null }
+/**
+ * Filtrlangan to'plam bo'yicha qaror satri (GET /terminals). Sonlar namunasiz; `demo` to'plamdagi
+ * namunalar soni: ro'yxat ularni belgisi bilan ko'rsatadi, haqiqiy son `total - demo`.
+ */
+export interface ListSummary { freeToday: number; ratedCount?: number; cheapestTiyin: number | null; cheapestUnit: TariffUnit | null; nearestKm: number | null; demo?: number }
 export interface Stats {
   terminals: number; sidings: number; stations: number; listings?: number; companies?: number; freeSlotsToday?: number;
   /** Ixtiyoriy: eski API bilan sahifa yiqilmasin */

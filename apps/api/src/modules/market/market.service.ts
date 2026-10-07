@@ -5,7 +5,7 @@ import { logFanout } from '../../common/fanout';
 import { PrismaService } from '../../common/prisma.service';
 import { esc, notifyBoth, sendTelegram, webUrl } from '../../common/telegram';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
-import { notifyRegions } from './market.rules';
+import { isListed, notifyRegions } from './market.rules';
 import { watchers } from '../watch/watchers';
 
 export type RequestRow = {
@@ -19,10 +19,13 @@ export type RequestRow = {
 export type OfferRow = { id: string; requestId: string; providerUserId: string; providerOrgId: string | null; priceTiyin: bigint | null; message: string | null; status: string; createdAt: Date };
 export type OrgRef = { id: string; name: string; slug: string | null; kycStatus: string };
 
-/** Ochiq javob: telefon va token yo'q, faqat hasPhone. Egasi uchun withPhone = true. */
+/**
+ * Ochiq javob: telefon va token yo'q, faqat hasPhone. Egasi uchun withPhone = true.
+ * Egasiga listed ham: kabinet "so'rovingiz doskada turadi" ni faqat shunda aytadi.
+ */
 export function requestView(r: RequestRow, offersCount: number, withPhone = false) {
   const { contactPhone, statusToken: _t, ...rest } = r;
-  return { ...rest, hasPhone: !!contactPhone?.trim(), ...(withPhone ? { contactPhone, statusUrl: webUrl(`/m/${r.statusToken}`) } : {}), offersCount };
+  return { ...rest, hasPhone: !!contactPhone?.trim(), ...(withPhone ? { contactPhone, statusUrl: webUrl(`/m/${r.statusToken}`), listed: isListed(r) } : {}), offersCount };
 }
 
 /** BigInt -> Number (JSON); tashkilot nomi bo'lsa qo'shiladi. */
@@ -55,6 +58,8 @@ const cargoLine = (r: RequestRow, l: string) => [
   r.trucksCount && r.trucksCount > 1 ? `${r.trucksCount} ${TRUCKS_WORD[lang(l)]}` : '',
   r.paymentTerm ? PAYMENT_TERM_LABELS[lang(l)][r.paymentTerm as PaymentTerm] ?? '' : '',
 ].filter(Boolean).join(', ');
+/** Yuk: yo'nalish; xizmat: viloyat. */
+const whereOf = (r: RequestRow) => (r.board === 'CARGO' ? `${region(r.fromRegion)} -> ${region(r.toRegion)}` : region(r.regionCode));
 const KIND: NotificationKind = 'market';
 
 /** Bozor uchun umumiy o'qishlar va bildirishnomalar. Xabar yuborish chaqiruvchini kuttirmaydi (void ... .catch). */
@@ -120,18 +125,40 @@ export class MarketService {
   }
 
   /**
-   * Yangi so'rov: yuk bo'lsa yuklash viloyati va qo'shnilaridagi (yoki hududsiz) tashuvchi tashkilot
-   * egalariga; xizmat bo'lsa o'sha turdagi faol profil egalariga. Saytda ham, Telegramda ham.
+   * Yangi so'rovni kim oladi (recipients) va necha haqiqiy ijrochiga ketdi.
+   *
+   * So'rov yaratilayotganda, xabardan OLDIN sanaladi: yaratish javobi mijozga haqiqiy sonni
+   * aytadi. Jurnal ham shu yerda (logFanout): birorta ham ijrochi bo'lmasa yoki qidiruv yiqilsa
+   * adminlar darhol biladi. Xabarning o'zi notifyNew da, fonda.
    */
-  async notifyNew(r: RequestRow): Promise<void> {
+  async fanout(r: RequestRow): Promise<{ userIds: string[]; sentReal: number | null }> {
+    const cargo = r.board === 'CARGO';
+    return logFanout(this.prisma, this.notifications, {
+      entity: 'MarketRequest', id: r.id, no: r.no, createdById: r.createdById, find: () => this.recipients(r),
+      board: cargo ? 'CARGO' : 'SERVICE', region: (cargo ? r.fromRegion : null) ?? r.regionCode, type: cargo ? r.truckType : r.serviceType,
+      what: (l) => (cargo ? cargoLine(r, l) : svc(l, r.serviceType)), where: whereOf(r),
+    });
+  }
+
+  /**
+   * Oluvchilar: yuk bo'lsa yuklash viloyati va qo'shnilaridagi (yoki hududsiz) tashuvchi tashkilot
+   * a'zolari, mashina e'loni egalari va shu yo'nalishni kuzatayotganlar; xizmat bo'lsa o'sha turdagi
+   * faol profil egalari.
+   */
+  private async recipients(r: RequestRow): Promise<string[]> {
     let userIds: string[];
     if (r.board === 'CARGO') {
       // Yuklash viloyati va qo'shnilari: yuk shu atrofdagi mashinalarga ko'rinadi
       const regions = notifyRegions((r.fromRegion ?? r.regionCode) as RegionCode);
       const [ms, trucks] = await Promise.all([
-        // isOwner sharti yo'q: dispetcher ham xabar olishi kerak, yukni u tanlaydi
+        // isOwner sharti yo'q: dispetcher ham xabar olishi kerak, yukni u tanlaydi.
+        // Namuna tashkilot va bloklangan hisob chetda: ular xabarni o'qimaydi, lekin oluvchi
+        // bo'lib sanalardi va hech kimga ketmagan so'rov bir necha odamga ketgandek ko'rinardi
         this.prisma.membership.findMany({
-          where: { userId: { not: r.createdById }, org: { kinds: { has: 'CARRIER' }, OR: [{ regionCode: { in: regions } }, { regionCode: null }] } },
+          where: {
+            userId: { not: r.createdById }, user: { isActive: true },
+            org: { isDemo: false, kinds: { has: 'CARRIER' }, OR: [{ regionCode: { in: regions } }, { regionCode: null }] },
+          },
           select: { userId: true }, take: 500,
         }),
         // Mashinasi bor odam tashkilotsiz ham bo'ladi: ro'yxatdan o'tish oqimi haydovchini
@@ -183,17 +210,21 @@ export class MarketService {
       });
       userIds = ps.map((p) => p.userId);
     }
-    userIds = [...new Set(userIds)];
-    const cargo = r.board === 'CARGO';
-    await logFanout(this.prisma, 'MarketRequest', r.id, {
-      board: cargo ? 'CARGO' : 'SERVICE', region: (cargo ? r.fromRegion : null) ?? r.regionCode, type: cargo ? r.truckType : r.serviceType, sent: userIds.length,
-    });
+    // Bloklangan hisob sanalmaydi va xabar olmaydi: bloklash e'lon va profilni yopmaydi,
+    // ya'ni mashina egasi yoki profil orqali u ro'yxatga baribir kirib kelardi.
+    // Bitta so'rov uchala manbani (a'zo, mashina egasi, profil) birdan yopadi
+    const ids = [...new Set(userIds)];
+    return ids.length ? (await this.prisma.user.findMany({ where: { id: { in: ids }, isActive: true }, select: { id: true } })).map((u) => u.id) : [];
+  }
+
+  /** Yangi so'rov xabari fanout topgan odamlarga: saytda ham, Telegramda ham. */
+  async notifyNew(r: RequestRow, userIds: readonly string[]): Promise<void> {
     if (!userIds.length) return;
     const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
-    const where = r.board === 'CARGO' ? `${region(r.fromRegion)} -> ${region(r.toRegion)}` : region(r.regionCode);
+    const where = whereOf(r);
 
     await notifyBoth(this.prisma, this.notifications, {
-      target: { userIds },
+      target: { userIds: [...userIds] },
       kind: r.board === 'CARGO' ? 'marketCargoNew' : 'marketServiceNew',
       inApp: KIND,
       href,

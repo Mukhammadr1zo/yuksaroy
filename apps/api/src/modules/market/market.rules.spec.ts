@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MARKET_STATUSES } from '@yuksaroy/domain';
-import { MARKET_TRANSITIONS, canMarketTransition, cargoTitle, formatMarketNo, offerDenial, validateRequest } from './market.rules';
+import { MARKET_TRANSITIONS, canMarketTransition, cargoTitle, formatMarketNo, isListed, offerDenial, validateRequest } from './market.rules';
 
 describe('bozor holatlari', () => {
   it("jadval to'liq, yakuniy holatdan chiqib bo'lmaydi", () => {
@@ -119,5 +119,28 @@ describe("namuna so'rovga taklif", () => {
     expect(offerDenial(demo, 'u-other', [])).toBe('DEMO_TARGET');
     // Haqiqiy so'rovda bayroq yo'q yoki false: qoida aralashmaydi
     expect(offerDenial({ ...demo, isDemo: false }, 'u-other', [])).toBeNull();
+  });
+});
+
+/** Kabinet "so'rovingiz doskada turadi" ni faqat shunda aytadi: ochiq doska (visible) bilan bir qoida. */
+describe("doskada ko'rinadimi (isListed)", () => {
+  const now = new Date('2026-10-07T10:00:00Z');
+  const r = (over: { status?: string; createdAt?: Date; loadDate?: Date | null } = {}) => ({ status: 'OPEN', createdAt: new Date('2026-10-01T00:00:00Z'), loadDate: null, ...over });
+
+  it("ochiq, yangi va yuklash kuni o'tmagan so'rov doskada; bugungi kun ham", () => {
+    expect(isListed(r(), now)).toBe(true);
+    expect(isListed(r({ loadDate: new Date('2026-10-07T00:00:00Z') }), now)).toBe(true);
+  });
+
+  it("bekor qilingan, sanasi o'tgan yoki 30 kundan eski so'rov doskada emas", () => {
+    expect(isListed(r({ status: 'CANCELLED' }), now)).toBe(false);
+    expect(isListed(r({ status: 'AWARDED' }), now)).toBe(false);
+    expect(isListed(r({ loadDate: new Date('2026-10-06T00:00:00Z') }), now)).toBe(false);
+    expect(isListed(r({ createdAt: new Date('2026-09-01T00:00:00Z') }), now)).toBe(false);
+  });
+
+  it('kun Toshkent bilan almashadi: UTC kechqurun Toshkentda ertangi kun', () => {
+    // 20:00 UTC = Toshkentda ertasi 01:00, ya'ni 7-oktabrdagi yuklash allaqachon o'tgan
+    expect(isListed(r({ loadDate: new Date('2026-10-07T00:00:00Z') }), new Date('2026-10-07T20:00:00Z'))).toBe(false);
   });
 });

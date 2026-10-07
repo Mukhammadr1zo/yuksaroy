@@ -21,7 +21,7 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
       <h1 className="font-display text-3xl font-bold">{t('heading')}</h1>
       <p className="mt-2 text-muted">{t('lead.prefix')} <span className="font-mono">{t('lead.formula')}</span>{t('lead.suffix')}</p>
       <div className="mt-6 rounded-card border border-line bg-white p-5">
-        <QuickQuote terminalId={tt?.id} terminalName={tt?.name} />
+        <QuickQuote terminalId={tt?.id} terminalName={tt?.name} terminalDemo={tt?.isDemo} />
       </div>
       <p className="mt-4 text-xs text-muted">{t('disclaimer')}</p>
     </div>

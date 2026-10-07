@@ -9,6 +9,7 @@ import type { QuoteOffer, QuoteResponse } from '@/lib/types';
 import { CargoSearch, type CargoPick } from './CargoSearch';
 import { StationSearch, type StationPick } from './StationSearch';
 import { DashLink } from '@/components/site/DashLink';
+import { DemoBadge } from '@/components/market/bits';
 
 const EXTRAS: ServiceCode[] = ['WEIGH', 'STORAGE', 'CONTAINER', 'SVX', 'LAST_MILE', 'SHUNTING'];
 type Tone = 'light' | 'dark';
@@ -20,8 +21,9 @@ const INPUT: Record<Tone, string> = {
 /**
  * «Tez hisob», login'siz. compact: hero (stansiya + yuk + vazn). To'liq: /quote (operatsiya, qo'shimchalar, kunlar).
  * terminalId berilsa, faqat shu terminal uchun. tone=dark, to'q fon (landing) uchun.
+ * terminalDemo: namuna terminal (/booking misoli va namuna sahifasidan keladi), nomi yonida "Namuna".
  */
-export function QuickQuote({ compact = false, terminalId, terminalName, tone = 'light' }: { compact?: boolean; terminalId?: string; terminalName?: string; tone?: Tone }) {
+export function QuickQuote({ compact = false, terminalId, terminalName, terminalDemo, tone = 'light' }: { compact?: boolean; terminalId?: string; terminalName?: string; terminalDemo?: boolean; tone?: Tone }) {
   const t = useTranslations('quote');
   const tb = useTranslations('booking.quick');
   const ts = useTranslations('service');
@@ -59,7 +61,7 @@ export function QuickQuote({ compact = false, terminalId, terminalName, tone = '
     <div>
       <form onSubmit={calc} className={compact ? 'grid gap-3 md:grid-cols-[1.2fr_1.2fr_.7fr_auto]' : 'grid gap-4'}>
         {terminalId ? (
-          <p className={`rounded-xl px-4 py-3 text-sm ${compact ? 'md:col-span-2' : ''} ${dark ? 'bg-white/10' : 'bg-teal-soft'}`}>{t('terminalPrefix')} <b>{terminalName}</b></p>
+          <p className={`rounded-xl px-4 py-3 text-sm ${compact ? 'md:col-span-2' : ''} ${dark ? 'bg-white/10' : 'bg-teal-soft'}`}>{t('terminalPrefix')} <b>{terminalName}</b>{terminalDemo ? <> <DemoBadge /></> : null}</p>
         ) : (
           <StationSearch value={station} onChange={setStation} placeholder={t('station.placeholder')} inputClassName={INPUT[tone]} />
         )}
@@ -135,6 +137,8 @@ function Offer({ o, full, dark }: { o: QuoteOffer; full: boolean; dark: boolean 
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 wrap-anywhere">
           <Link href={`/terminals/${o.terminal.slug}`} className="font-bold hover:text-teal-ink">{o.terminal.name}</Link>
+          {/* Namuna narxi ham ko'rinadi, lekin buyurtmani tasdiqlaydigan egasi yo'q: bron qilishdan oldin bilinsin */}
+          {o.terminal.isDemo ? <> <DemoBadge /></> : null}
           <p className={`text-xs ${muted}`}>{tk(o.terminal.kind)}, {stationName(o.terminal)}{o.terminal.is24h ? ', 24/7' : ''}{!o.terminal.claimed ? t('offer.approxTariff') : ''}</p>
         </div>
         <p className={`font-display text-xl font-bold tabular-nums ${dark ? 'text-white' : 'text-navy'}`}>{som(o.totalTiyin, locale)}</p>

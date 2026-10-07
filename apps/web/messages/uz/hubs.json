@@ -7,6 +7,7 @@
     "neighbours": "Qo'shni viloyatlar",
     "emptyNeighbours": "Bu viloyatda hozircha yo'q, qo'shni viloyatlar",
     "sortDefault": "Tavsiya etilgan",
+    "wordsMissed": "\"{words}\" bo'yicha hech narsa topilmadi. Quyida tanlangan filtr bo'yicha barcha terminallar.",
     "also": "Shu viloyatda yana",
     "more": "Barchasini filtr bilan ko'rish: {count} ta",
     "mapNote": "Viloyat chegarasi va obyektlar. Shahobcha yo'l nuqtalari stansiya bo'yicha, taxminiy.",

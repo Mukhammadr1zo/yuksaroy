@@ -43,7 +43,7 @@
       "orders": "My open orders",
       "ordersAll": "All",
       "urgent": "Urgent request",
-      "urgentHint": "Locomotive, repair or crane: offers within an hour",
+      "urgentHint": "Locomotive, repair or crane: a request to providers in your region",
       "links": {
         "orders": "Orders",
         "listings": "My listings",

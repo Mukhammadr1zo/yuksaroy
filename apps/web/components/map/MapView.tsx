@@ -12,6 +12,7 @@ import { CalendarCheckIcon, CrosshairIcon, ListBulletsIcon, MagnifyingGlassIcon,
 import { LISTING_LABELS, REGIONS, REGION_CENTERS, SEARCH_LABELS, chipLabel, distanceKm, formatSom, type PriceUnit, type RegionCode, type SearchLang, type TerminalKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { pricePer } from '@/lib/format';
+import { DemoBadge } from '@/components/market/bits';
 import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers, z } from './mapStyle';
 import { addPinIcons } from './pinIcons';
 import { FREE_CHIP, KINDS, effective, inArea, materialize, parseState, toParams, withoutChip, type Area, type Kind, type MapState } from './state';
@@ -23,6 +24,7 @@ setWorkerUrl(WORKER_URL);
 interface Props {
   id: string; kind: FeatKind; accuracy: 'exact' | 'station' | 'region'; name: string; slug?: string; terminalKind?: string; regionCode: string;
   count?: number; listingKind?: string; deal?: 'RENT' | 'SALE'; priceTiyin?: number; priceUnit?: string; freeToday?: number; fromPriceTiyin?: number;
+  isDemo?: boolean;
 }
 interface Obj { key: string; p: Props; lng: number; lat: number }
 type Listed = Obj & { km: number | null };
@@ -412,15 +414,19 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
     scrollTo.current = null;
     document.getElementById(`obj-${k}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
-  const terms = listed.filter((o) => o.p.kind === 'terminal');
+  // Qaror satri namunasiz (/terminals dagi summary bilan bir qoida): namuna pin va qatorda "Namuna"
+  // belgisi bilan qoladi, lekin son, bo'sh joy va narxga kirmaydi. Egasi qarori (2026-10-07): nol sanoq chizilmaydi
+  const real = listed.filter((o) => !o.p.isDemo);
+  const terms = real.filter((o) => o.p.kind === 'terminal');
   const cheapest = Math.min(...terms.map((o) => o.p.fromPriceTiyin).filter((n): n is number => n != null));
+  const freeCount = terms.filter((o) => (o.p.freeToday ?? 0) > 0).length;
   const decision = [
-    t('decision.objects', { count: listed.length }),
+    real.length ? t('decision.objects', { count: real.length }) : null,
     // Chip yoqilganda bu bo'lak chiqmaydi: filtr allaqachon faqat bo'sh joyi borlarni qoldirgan,
     // ya'ni bu son yuqoridagi "N obyekt ko'rinishda" bilan aynan teng bo'lardi
-    !eff.free && terms.length ? tc('decision.freeToday', { count: terms.filter((o) => (o.p.freeToday ?? 0) > 0).length }) : null,
+    !eff.free && freeCount ? tc('decision.freeToday', { count: freeCount }) : null,
     Number.isFinite(cheapest) ? tc('decision.cheapest', { price: pricePer(cheapest, 'PER_TON', locale) }) : null,
-    eff.near && listed[0]?.km != null ? tc('decision.nearest', { km: Math.round(listed[0].km) }) : null,
+    eff.near && real[0]?.km != null ? tc('decision.nearest', { km: Math.round(real[0].km) }) : null,
   ].filter(Boolean).join(tc('decision.separator'));
 
   /**
@@ -524,8 +530,9 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
     <div className="flex items-start gap-3 rounded-card border border-line bg-white p-3">
       <KindBadge kind={o.p.kind} className="mt-0.5" />
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <p className="truncate font-bold">{o.p.name}</p>
+        <div className="flex items-start gap-2">
+          <p className="min-w-0 flex-1 truncate font-bold">{o.p.name}</p>
+          {o.p.isDemo ? <DemoBadge /> : null}
           {o.km != null ? <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{Math.round(o.km)} km</span> : null}
         </div>
         <p className="text-xs text-muted">{kindLabel(o)} · {region(o)}</p>
@@ -702,7 +709,10 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
         {popObj && pos ? (
           <div className="pointer-events-none absolute z-10 w-64 -translate-x-1/2 -translate-y-full" style={{ left: Math.min(Math.max(pos.x, 136), (el.current?.clientWidth ?? 400) - 136), top: pos.y - 16 }}>
             <div className="pointer-events-auto rounded-card border border-line bg-white p-3 text-ink">
-              <p className="truncate font-bold">{popObj.p.name}</p>
+              <div className="flex items-start gap-2">
+                <p className="min-w-0 flex-1 truncate font-bold">{popObj.p.name}</p>
+                {popObj.p.isDemo ? <DemoBadge /> : null}
+              </div>
               <p className="mt-0.5 text-xs text-muted">{kindLabel(popObj)} · {region(popObj)}</p>
               {priceLine(popObj) ? <p className="mt-1 font-mono text-xs text-navy tabular-nums">{priceLine(popObj)}</p> : null}
               {popKm != null ? <p className="mt-1 font-mono text-xs tabular-nums text-muted">{t('popup.distance', { km: Math.round(popKm) })}</p> : null}

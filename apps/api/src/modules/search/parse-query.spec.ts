@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   REGIONS, REGION_ADJACENCY, URGENT_KINDS, URGENT_KIND_LABELS, URGENT_OFFER_STATUSES, URGENT_STATUSES, YORDAMCHI,
-  chipLabel, corridorRegions, formatUrgentNo, normalizeQuery, parseQuery,
+  catalogSearch, chipLabel, corridorRegions, formatUrgentNo, normalizeQuery, parseQuery, slugify,
 } from '@yuksaroy/domain';
 
 describe('koridor grafi', () => {
@@ -22,6 +22,101 @@ describe('normalizeQuery', () => {
     expect(normalizeQuery('  Тошкент   Қўқон ')).toBe("toshkent qo'qon");
     expect(normalizeQuery('Ташкент Хорезм Джизак')).toBe('tashkent xorezm djizak');
     expect(normalizeQuery('Qoʻqon Farg’ona')).toBe("qo'qon farg'ona");
+  });
+});
+
+// Bitta joyning har xil yozuvi bitta kalitga tushadi: katalog qidiruvi slug bo'yicha shunga tayanadi
+// (slug lotin "stansiya-nom"). Rus imlosidagi nom (Фергана, Ташкент) hozircha qamrovdan tashqarida:
+// u boshqa so'z ("fergana"), o'zbekcha slugga tushmaydi.
+describe('normalizeQuery + slugify: lotin, kirill va telefon apostrofi', () => {
+  const key = (s: string) => slugify(normalizeQuery(s));
+  it.each<[string, string[]]>([
+    ['bekobod', ['Bekobod', 'BEKOBOD', 'Бекобод']],
+    ['fargona', ["Farg'ona", 'Farg\u2018ona', 'Farg\u2019ona', 'Farg\u02BBona', 'Farg\u02BCona', 'Farg`ona', 'Fargona', 'Фарғона']],
+    ['qarshi-neft', ['qarshi neft', 'Qarshi  Neft', 'Қарши нефт', 'ҚАРШИ НЕФТ']],
+  ])('%s', (slug, variants) => {
+    for (const v of variants) expect(key(v)).toBe(slug);
+  });
+
+  it("normalizeQuery hamma apostrofni ' ga aylantiradi", () => {
+    for (const a of ['\u2018', '\u2019', '\u02BB', '\u02BC', '`']) expect(normalizeQuery(`Farg${a}ona`)).toBe("farg'ona");
+  });
+
+  it('slugify telefon apostrofini ham tashlaydi: yangi slug ikki xil chiqmasin', () => {
+    expect(slugify('Farg\u2018ona')).toBe('fargona');
+    expect(slugify('Farg\u02BCona')).toBe('fargona');
+  });
+});
+
+describe("parseQuery.words: filtrga aylanmagan so'zlar nom qidiruvida qoladi", () => {
+  it("viloyatdan aniqroq shahar o'zbekcha nomi bilan qoladi (rus imlosidagi lug'at so'zi ham)", () => {
+    for (const q of ['Bekobod', 'bekobod', 'Бекобод', 'Бекободда', 'Бекабад']) {
+      const f = parseQuery(q);
+      expect(f.regions).toEqual(['UZ-TO']);
+      expect(f.words).toEqual(['Bekobod']);
+    }
+  });
+
+  it("tanilmagan so'z yozilganicha va tartib bilan", () => {
+    expect(parseQuery('qarshi neft').words).toEqual(['Qarshi', 'neft']);
+    expect(parseQuery('Қарши нефт').words).toEqual(['Qarshi', 'нефт']);
+    expect(parseQuery('asdf qwerty').words).toEqual(['asdf', 'qwerty']);
+  });
+
+  it("viloyat bilan bir nomli shahar va viloyat nomi qolmaydi: aks holda ro'yxat nomigagina torayardi", () => {
+    for (const q of ['Toshkent', 'Toshkent shahri', 'Samarqand viloyati', "Farg'ona", 'Farg\u2018ona', 'Toshkentda konteyner']) {
+      expect(parseQuery(q).words).toEqual([]);
+    }
+  });
+
+  it("radius nuqtasi va koridor uchlari filtr, so'z emas", () => {
+    expect(parseQuery('Bekobod 30 km').words).toEqual([]);
+    expect(parseQuery('Termizdan Toshkentgacha neft').words).toEqual(['neft']);
+  });
+
+  it("ruscha kelishik qo'shimchasi bilan ham shahar (kalit + 1-2 harf)", () => {
+    expect(parseQuery('в Бекабаде').words).toEqual(['Bekobod']);
+    expect(parseQuery('Чирчике').words).toEqual(['Chirchiq']);
+  });
+
+  // Lug'atning taxminiy moslashi (5 harfli prefiks) oddiy so'zni shaharga aylantiradi. U faqat
+  // viloyat filtri bo'lib qoladi: nom filtriga aylansa ro'yxat boshqa shaharga torayardi
+  // ("Samarqand shahri" -> 2 ta Shahrixon qatori) va izohda odam yozmagan so'z chiqardi.
+  it("taxminiy topilma so'zga aylanmaydi: shahri, yangi, katta, olmalar", () => {
+    for (const q of ['Samarqand shahri', 'Navoiy shahri', 'Buxoro shahridagi ombor', 'Toshkentda yangi terminal', 'katta ombor', 'olmalar']) {
+      expect(parseQuery(q).words).toEqual([]);
+    }
+  });
+
+  it("shahar so'zi faqat so'rovda bitta joy aytilganda: aks holda ikkinchi joyning qatorlari yashirinardi", () => {
+    for (const q of ['Chirchiq Toshkent', 'Bekobod Samarqand', 'Bekobod Chirchiq']) expect(parseQuery(q).words).toEqual([]);
+    // Viloyat va uning shahri bitta joy
+    expect(parseQuery('Toshkent viloyati Bekobod').words).toEqual(['Bekobod']);
+    // Taxminiy topilma (shahri -> Andijon) joy sanog'iga kirmaydi
+    expect(parseQuery('Qarshi shahri').words).toEqual(['Qarshi']);
+  });
+});
+
+describe("catalogSearch: /terminals sahifasining nom qidiruvi qarori", () => {
+  const run = (q: string, hasChips = parseQuery(q).chips.length > 0) => catalogSearch(q, parseQuery(q), hasChips);
+
+  it("chip yo'q: q yozilganicha ketadi, zaxira so'rov yo'q (filtrsiz qayta so'rash ma'nosiz)", () => {
+    expect(run('asdf qwerty')).toEqual({ q: 'asdf qwerty', fallback: false, withoutRegion: 'asdf qwerty' });
+    expect(catalogSearch('', null, false)).toEqual({ q: '', fallback: false, withoutRegion: '' });
+  });
+
+  it("chip bor: q o'rnida so'zlar; so'z bo'lsa natija 0 chiqqanda filtrning o'zi bilan qayta so'raladi", () => {
+    expect(run('Бекобод')).toEqual({ q: 'Bekobod', fallback: true, withoutRegion: '' });
+    expect(run('Қўқон биокимё')).toMatchObject({ q: "Qo'qon биокимё", fallback: true });
+    // Hamma so'z filtrga aylangan: q bo'sh, qayta so'rash yo'q
+    expect(run('Andijon konteyner')).toEqual({ q: '', fallback: false, withoutRegion: '' });
+  });
+
+  it("viloyat chipi olib tashlanganda shahar so'zi ketadi (viloyatni qayta tiklamasin), tanilmagan so'z qoladi", () => {
+    expect(run('qarshi neft').withoutRegion).toBe('neft');
+    expect(run('Bekobod').withoutRegion).toBe('');
+    // Havoladagi q (so'zlar) qayta tahlil qilinganda ham shu natija
+    expect(run(run('Қарши нефт').q)).toEqual({ q: 'Qarshi нефт', fallback: true, withoutRegion: 'нефт' });
   });
 });
 

@@ -6,9 +6,21 @@ import { EQUIPMENT_KINDS, REGIONS, RJUS, SEARCH_CATEGORIES, SERVICE_CODES, TERMI
 import { parseCorridor } from '../../listings/domain/listing-query';
 import { PrismaListingRepository } from '../../listings/infrastructure/prisma-listing.repository';
 import { nearestRegionWith } from '../domain/nearest-region';
-import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
+import { CATALOG_REPOSITORY, type CatalogRepository, type GeoNear, type TerminalRecord } from '../domain/ports';
 import { mapFeatures, parseBbox } from './map-geojson';
 import { byDefault, fromPriceTiyin, publicTerminal, publicTerminalCard, summarize } from './mappers';
+
+/**
+ * Qaror satri (bugun bo'sh joy, eng arzon, eng yaqin, baho) faqat haqiqiy obyektlardan.
+ * Namuna terminal ro'yxatda o'z belgisi bilan qoladi, lekin sonlarga kirmaydi: aks holda
+ * "3 tasida bugun bo'sh joy, eng arzon 130 000 so'm" butunlay namunadan yig'ilardi.
+ * `demo`: to'plamdagi namunalar soni. Ro'yxat va sahifalash `total` da qoladi,
+ * haqiqiy son esa `total - demo` (namuna doim egali, shuning uchun egali to'plamda hammasi bor).
+ */
+export function realSummary(rows: TerminalRecord[], free: Record<string, number>, near?: GeoNear, services: ServiceCode[] = []) {
+  const real = rows.filter((t) => !t.isDemo);
+  return { ...summarize(real, free, near, services), demo: rows.length - real.length };
+}
 
 /** Ro'yxatdan tanlash: noto'g'ri qiymat = filtr yo'q. */
 export const pickIn = <T extends string>(v: string | undefined, list: readonly T[]): T | undefined => (list as readonly string[]).includes(v ?? '') ? (v as T) : undefined;
@@ -76,7 +88,7 @@ export class CatalogController {
     const unknownKind = !!kind?.trim() && pickIn(kind, TERMINAL_KINDS) === undefined;
     const unknownService = !!service?.trim() && services.length === 0;
     if (unknownRegion || unknownKind || unknownService) {
-      return { items: [], total: 0, page: p, limit: l, summary: summarize([], {}, geo, services) };
+      return { items: [], total: 0, page: p, limit: l, summary: realSummary([], {}, geo, services) };
     }
     const base = {
       ...stationParam(station), rju: pickIn(rju, RJUS), kind: pickIn(kind, TERMINAL_KINDS),
@@ -109,7 +121,7 @@ export class CatalogController {
       return {
         items: all.slice((p - 1) * l, p * l).map((t) => publicTerminalCard(t, free[t.id] ?? 0, geo)),
         total: all.length, page: p, limit: l,
-        summary: summarize(all, free, geo, services),
+        summary: realSummary(all, free, geo, services),
       };
     }
 
@@ -158,7 +170,7 @@ export class CatalogController {
     return {
       items: pageRows.map((t) => publicTerminalCard(t, free[t.id] ?? 0, geo)),
       total, page: p, limit: l,
-      summary: summarize(rich, free, geo, services),
+      summary: realSummary(rich, free, geo, services),
       nearby,
     };
   }

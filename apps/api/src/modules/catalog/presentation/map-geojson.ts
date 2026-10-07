@@ -17,6 +17,8 @@ export interface MapFeature {
     id: string; kind: MapKind; accuracy: 'exact' | 'station' | 'region'; name: string; regionCode: string | null;
     slug?: string; terminalKind?: string; freeToday?: number; fromPriceTiyin?: number | null;
     count?: number;
+    /** Namuna (terminal yoki e'lon): xarita uni "Namuna" deb belgilaydi va qaror satrida sanamaydi */
+    isDemo?: boolean;
     listingKind?: string; deal?: string | null; priceTiyin?: number | null; priceUnit?: string | null; owner?: { type: string; name: string };
   };
 }
@@ -31,7 +33,7 @@ const point = (lng: number, lat: number, properties: MapFeature['properties']): 
 
 export function terminalFeature(t: TerminalRecord, freeToday: number): MapFeature | null {
   if (t.lat == null || t.lng == null) return null;
-  return point(t.lng, t.lat, { id: t.id, kind: 'terminal', accuracy: 'exact', name: t.name, slug: t.slug, terminalKind: t.kind, regionCode: t.regionCode, freeToday, fromPriceTiyin: fromPriceTiyin(t) });
+  return point(t.lng, t.lat, { id: t.id, kind: 'terminal', accuracy: 'exact', name: t.name, slug: t.slug, terminalKind: t.kind, regionCode: t.regionCode, freeToday, fromPriceTiyin: fromPriceTiyin(t), isDemo: t.isDemo });
 }
 
 /** Shahobcha yo'lning o'z koordinatasi yo'q: stansiya nuqtasi, soni bilan. */
@@ -46,7 +48,7 @@ export function listingFeature(l: ListingRecord): MapFeature | null {
   const owner = listingOwner(l);
   return point(c.lng, c.lat, {
     id: l.id, kind: l.kind === 'TRUCK' ? 'truck' : 'equipment', accuracy: linked ? 'exact' : 'region', name: l.title, slug: l.slug, regionCode: l.regionCode,
-    listingKind: l.kind, deal: l.deal, priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, owner: { type: owner.type, name: owner.name },
+    listingKind: l.kind, deal: l.deal, priceTiyin: l.priceTiyin, priceUnit: l.priceUnit, owner: { type: owner.type, name: owner.name }, isDemo: l.isDemo,
   });
 }
 

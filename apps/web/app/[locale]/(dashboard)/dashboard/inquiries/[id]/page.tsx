@@ -24,6 +24,7 @@ export default function InquiryThreadPage() {
   const t = useTranslations('kabinet.chat');
   const tc = useTranslations('kabinet.common');
   const ti = useTranslations('kabinet.inquiries');
+  const tterm = useTranslations('terminal');
   const locale = useLocale();
   const params = useParams<{ id: string }>();
   const id = params?.id as string;
@@ -86,7 +87,10 @@ export default function InquiryThreadPage() {
       setText(''); at.clear();
       // Holat serverdan: egasi javob yozsa "Javob kutilmoqda" keyingi so'rovgacha (8 s) osilib turmasin
       void load();
-    } catch { setErr(tc('failed')); } finally { setBusy(false); }
+    } catch (e) {
+      // Namuna bilan avval ochilgan yozishma: server xabarni qabul qilmaydi, sababi ochiq aytiladi
+      setErr(e instanceof ApiError && e.body?.code === 'DEMO_TARGET' ? tterm('demoNoChat') : tc('failed'));
+    } finally { setBusy(false); }
   }
 
   /**

@@ -268,6 +268,20 @@ const TEXTS = {
     ru: '⏳ <b>Очередь ждёт</b>\n{list}\n\n{url}',
     en: '⏳ <b>Queue is waiting</b>\n{list}\n\n{url}',
   },
+  // Adminlarga, darhol: yangi so'rov birorta ham haqiqiy ijrochiga bormadi (common/fanout.ts).
+  // {what} oluvchining tilida (yuk, xizmat turi yoki shoshilinch ish), havola panelda shu so'rov
+  adminNoProvider: {
+    uz: "⚠️ <b>So'rov {no} birorta ham ijrochiga bormadi</b>\n{what} · {where}\nBu hududda hozircha mos ijrochi yo'q, mijoz javob kutmoqda.\n\n{url}",
+    ru: '⚠️ <b>Заявка {no} не ушла ни одному исполнителю</b>\n{what} · {where}\nВ этом регионе пока нет подходящих исполнителей, клиент ждёт ответа.\n\n{url}',
+    en: '⚠️ <b>Request {no} reached no provider</b>\n{what} · {where}\nThere is no matching provider in this region yet, the customer is waiting.\n\n{url}',
+  },
+  // Adminlarga, darhol: oluvchilarni topishda xato bo'ldi va so'rov hech kimga ketmadi (common/fanout.ts).
+  // Sabab hudud emas, tizim: adminNoProvider dagi "hududda ijrochi yo'q" bu yerda noto'g'ri yo'lga boshlardi
+  adminFanoutFailed: {
+    uz: "⚠️ <b>So'rov {no} hech kimga yuborilmadi</b>\n{what} · {where}\nOluvchilarni topishda xato bo'ldi, sababi Tizim sahifasida. Mijoz javob kutmoqda.\n\n{url}",
+    ru: '⚠️ <b>Заявка {no} никому не отправлена</b>\n{what} · {where}\nПри поиске получателей произошла ошибка, причина на странице Система. Клиент ждёт ответа.\n\n{url}',
+    en: '⚠️ <b>Request {no} was not sent to anyone</b>\n{what} · {where}\nFinding recipients failed, the cause is on the System page. The customer is waiting.\n\n{url}',
+  },
   // Jamoadoshga: sizga vazifa biriktirildi. {due} butun satr (DUE_LINE): notifyParts bo'sh qatorni tashlaydi
   adminTask: {
     uz: '📌 <b>Sizga vazifa biriktirildi</b>\n{what}\nKim: {by}\n{due}\n\n{url}',
@@ -380,6 +394,8 @@ export async function notifyBoth(
     card?: { title: string; body?: string | null };
     /** Telegram xabariga tugma (masalan Mini App). Sayt qo'ng'irog'iga ta'sir qilmaydi. */
     replyMarkup?: ReplyMarkup;
+    /** false: faqat sayt qo'ng'irog'i. Takroriy ogohlantirish chatBucket ni (soatiga 5 ta) yeb qo'ymasin */
+    telegram?: boolean;
   },
 ): Promise<void> {
   const userIds = [...new Set(await notifications.recipients(o.target))].filter((id) => id !== o.target.exceptUserId);
@@ -394,6 +410,6 @@ export async function notifyBoth(
     for (const [l, ids] of byLocale) await notifications.push(ids, { kind: o.inApp, href: o.href, ...notifyParts(o.kind, l, varsOf(l)) });
   })().catch(() => {});
   // Oluvchilar yuqorida aniqlangan: bu yerda ulardan Telegram bog'laganlari qoladi
-  const tg = notifyTelegram(prisma, { userIds }, o.kind, (l) => varsOf(lang(l)), o.replyMarkup).catch(() => 0);
+  const tg = o.telegram === false ? 0 : notifyTelegram(prisma, { userIds }, o.kind, (l) => varsOf(lang(l)), o.replyMarkup).catch(() => 0);
   await Promise.all([bell, tg]);
 }

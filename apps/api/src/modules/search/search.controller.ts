@@ -5,8 +5,7 @@ import type { FastifyRequest } from 'fastify';
 import { parseQuery, type SearchLang } from '@yuksaroy/domain';
 import { IpBucket } from '../../common/ip-bucket';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../catalog/domain/ports';
-import { geoNear } from '../catalog/presentation/catalog.controller';
-import { summarize } from '../catalog/presentation/mappers';
+import { geoNear, realSummary } from '../catalog/presentation/catalog.controller';
 import { TokenService } from '../identity/application/token.service';
 import { optionalUserId } from '../identity/presentation/jwt.guard';
 import { Yordamchi, mergeFilters, needsLlm } from './yordamchi';
@@ -58,9 +57,9 @@ export class SearchController {
     // Hech narsa tanilmasa matn nom/manzil bo'yicha qidiruvga tushadi, aks holda q ro'yxatni bo'shatib qo'yadi
     const q = filters.chips.length ? undefined : dto.q.trim();
     const scope = { region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near, q };
-    // Son ochiq katalog qamrovi bo'yicha (reestr ham kiradi): yordamchi aytgan raqam
-    // u tuzgan havoladagi raqam bilan bir xil bo'lishi kerak. Qaror satri esa egali obyektlardan:
-    // tarif, slot va baho faqat ularda bo'ladi.
+    // Son ochiq katalog qamrovi bo'yicha (reestr ham kiradi), namunasiz: yordamchi aytgan raqam
+    // u tuzgan havoladagi /terminals sahifasidagi `total - summary.demo` bilan bir xil bo'lishi kerak.
+    // Qaror satri esa egali obyektlardan: tarif, slot va baho faqat ularda bo'ladi.
     const [all, total] = await Promise.all([
       this.repo.listTerminals({ ...scope, owned: true }, now),
       this.repo.countTerminals({ ...scope, publicCatalog: true }),
@@ -75,6 +74,8 @@ export class SearchController {
     if (near) { query.near = `${near.lng},${near.lat}`; query.radius = String(near.radiusKm); }
     if (q) query.q = q;
 
-    return { filters, chips: filters.chips, query, decision: { terminals: total, ...summarize(all, free, near, filters.services) }, source, quota };
+    // Namuna egali to'plamda (all) to'liq bor, shuning uchun jamidan ayirish aniq haqiqiy sonni beradi
+    const s = realSummary(all, free, near, filters.services);
+    return { filters, chips: filters.chips, query, decision: { ...s, terminals: total - s.demo }, source, quota };
   }
 }

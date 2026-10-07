@@ -62,3 +62,16 @@ describe('mapFeatures filtrlari', () => {
     expect(parseBbox('69,41,70,42')).toEqual([69, 41, 70, 42]);
   });
 });
+
+// Xarita namunani "Namuna" deb belgilaydi va qaror satrida sanamaydi: belgi shu xususiyatdan
+describe('namuna belgisi', () => {
+  it("terminal va e'lon isDemo ni olib boradi, shahobcha guruhida yo'q", () => {
+    const demo = { ...term('d', 'UZ-TK', 41.2, 69.24), isDemo: true } as TerminalRecord;
+    expect(terminalFeature(demo, 6)!.properties.isDemo).toBe(true);
+    expect(terminalFeature({ ...demo, isDemo: false } as TerminalRecord, 0)!.properties.isDemo).toBe(false);
+    expect(listingFeature(listing({ isDemo: true }))!.properties.isDemo).toBe(true);
+    expect(listingFeature(listing({ isDemo: false }))!.properties.isDemo).toBe(false);
+    const all = mapFeatures({ terminals: [demo], free: {}, sidings, listings: [] }, { cats: ['terminal'] });
+    expect(all.features.filter((f) => f.properties.kind === 'siding').every((f) => f.properties.isDemo === undefined)).toBe(true);
+  });
+});

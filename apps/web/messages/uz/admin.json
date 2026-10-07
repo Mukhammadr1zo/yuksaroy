@@ -287,7 +287,7 @@
         "AD_ENDING": "{n} ta reklama 7 kunda tugaydi",
         "DB_SLOW": "Baza sekin javob beryapti: {ms} ms",
         "DB_DOWN": "Baza javob bermayapti",
-        "NO_PROVIDER": "{n} ta yangi so'rov 24 soatda hech kimga yuborilmadi: mos ijrochi topilmadi",
+        "NO_PROVIDER": "{n} ta yangi so'rov 24 soatda birorta ham ijrochiga bormadi: mos ijrochi topilmadi. Adminlar va so'rov egasining o'z hamkasblari sanalmaydi",
         "STUCK_ORDERS": "{n} ta buyurtma {days} kundan beri qimirlamadi: terminal bilan bog'laning yoki holatini o'zingiz o'zgartiring"
       },
       "alertGo": "Ochish",
@@ -583,7 +583,7 @@
         "admin-subscription-remind": "Obuna eslatmasini qo'lda yubordi",
         "admin-task-assign": "Ishni jamoadoshga biriktirdi",
         "admin-task-done": "Vazifani yopdi",
-        "request-fanout": "Yangi so'rov ijrochilarga yuborildi",
+        "request-fanout": "Yangi so'rov: nechta ijrochiga ketgani",
         "order-clientClose": "Qotgan buyurtmani yopdi",
         "order-terminalCancel": "Terminal nomidan buyurtmani bekor qildi"
       },

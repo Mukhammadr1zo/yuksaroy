@@ -26,8 +26,8 @@ export class ChatService {
   ) {}
 
   private static readonly INCLUDE = {
-    listing: { select: { id: true, slug: true, title: true, kind: true } },
-    terminal: { select: { id: true, slug: true, name: true, kind: true } },
+    listing: { select: { id: true, slug: true, title: true, kind: true, isDemo: true } },
+    terminal: { select: { id: true, slug: true, name: true, kind: true, isDemo: true } },
   } as const;
 
   /** Yozishma va ko'ruvchining roli. Huquq qarori domain/access.ts da. */
@@ -144,15 +144,18 @@ export class ChatService {
     return Object.fromEntries(orgs.map((o) => [o.id, o.name]));
   }
 
-  /** Terminalni slug yoki id bo'yicha topish; yopiq obyektga yozib bo'lmaydi. */
+  /** Terminalni slug yoki id bo'yicha topish; yopiq yoki namuna obyektga yozib bo'lmaydi. */
   private async openTerminal(slugOrId: string) {
     const terminal = await this.prisma.terminal.findFirst({
       where: { OR: [{ slug: slugOrId }, { id: slugOrId }] },
-      select: { id: true, name: true, slug: true, orgId: true, status: true },
+      select: { id: true, name: true, slug: true, orgId: true, status: true, isDemo: true },
     });
     // Yashirilgan yoki qoralama terminal katalogda ko'rinmaydi, demak unga yozib ham
     // bo'lmasligi kerak: e'lon yo'lida ham xuddi shunday tekshiruv bor.
     if (!terminal || terminal.status !== 'ACTIVE') throw new NotFoundException({ code: 'TERMINAL_NOT_FOUND' });
+    // Namunaning haqiqiy egasi yo'q: xabar hech kimga bormaydi, shartlarda ham "namunaga hech
+    // qachon xabar yuborilmaydi" deyilgan. E'lon yo'li (listings.usecase inquire) bilan bir xil kod.
+    if (terminal.isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
     return terminal;
   }
 
@@ -269,6 +272,9 @@ export class ChatService {
     // Faqat fayl yuborish ham xabar: matn majburiy emas
     if (!body && !files.length) throw new BadRequestException({ code: 'MESSAGE_EMPTY' });
     const { inq, role } = await this.thread(userId, inquiryId);
+    // Namuna bilan avval ochilgan yozishma (yangisi openTerminal va e'lon yo'lida yopilgan): egasi
+    // yo'q, xabar hech kimga yetmaydi. Shartlar "namunaga hech qachon xabar yuborilmaydi" deydi
+    if (inq.terminal?.isDemo || inq.listing?.isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
     const msg = await this.prisma.inquiryMessage.create({
       data: { inquiryId, fromUserId: userId, text: body, attachments: files as unknown as object, readBy: [userId] },
     });

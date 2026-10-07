@@ -197,7 +197,7 @@
         "query": "Toshkentda bugun bo'sh joy konteyner",
         "chips": "Tushunilgan filtrlar",
         "result": "Natija",
-        "decision": "{terminals} terminal · bugun {free} bo'sh",
+        "decision": "{terminals} terminal{free, plural, =0 {} other { · bugun # bo'sh}}",
         "cheapest": "eng arzon {price}",
         "open": "Xaritada ochish",
         "source": {

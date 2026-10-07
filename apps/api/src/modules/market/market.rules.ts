@@ -1,4 +1,4 @@
-import { MARKET, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
+import { MARKET, uzLocalDate, type MarketBoard, type MarketStatus } from '@yuksaroy/domain';
 
 // Taklif tanlash va hudud+qo'shnilar shoshilinch so'rovlar bilan bir xil: qayta yozilmaydi
 export { awardOffers, notifyRegions } from '../urgent/urgent.rules';
@@ -22,6 +22,14 @@ export const formatMarketNo = (board: MarketBoard, seq: number): string => `${bo
 
 /** Ro'yxatda ko'rinish chegarasi: shu sanadan eski OPEN so'rov tushib qoladi. */
 export const staleBefore = (now = new Date()): Date => new Date(now.getTime() - MARKET.staleDays * 86_400_000);
+
+/**
+ * So'rov hozir ochiq doskada ko'rinadimi: market.controller dagi visible() shartining bitta qator
+ * uchun shakli (ochiq, eskirmagan, yuklash sanasi Toshkent kuni bilan o'tmagan). Kabinet "so'rovingiz
+ * doskada turadi" ni faqat shunda aytadi: bekor qilingan yoki sanasi o'tgan so'rovda bu yolg'on.
+ */
+export const isListed = (r: { status: string; createdAt: Date; loadDate: Date | null }, now = new Date()): boolean =>
+  r.status === 'OPEN' && r.createdAt >= staleBefore(now) && (!r.loadDate || r.loadDate >= new Date(`${uzLocalDate(now)}T00:00:00Z`));
 
 // Maydon tekshiruvi domen paketida: bir xil qoida mijozda ham, serverda ham ishlaydi
 export { cargoTitle, validateRequest, type FieldError, type RequestInput } from '@yuksaroy/domain';

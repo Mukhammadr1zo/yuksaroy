@@ -287,7 +287,7 @@
         "AD_ENDING": "{n} ads end within 7 days",
         "DB_SLOW": "The database is slow: {ms} ms",
         "DB_DOWN": "The database is not responding",
-        "NO_PROVIDER": "{n} new requests went to nobody in 24 hours: no matching provider found",
+        "NO_PROVIDER": "{n, plural, one {# new request} other {# new requests}} reached no provider in 24 hours: no matching provider found. Admins and the requester's own colleagues do not count",
         "STUCK_ORDERS": "{n, plural, one {# order has} other {# orders have}} had no activity for {days, plural, one {# day} other {# days}}: contact the terminal or change the status yourself"
       },
       "alertGo": "Open",
@@ -583,7 +583,7 @@
         "admin-subscription-remind": "Sent a subscription reminder by hand",
         "admin-task-assign": "Assigned a job to a teammate",
         "admin-task-done": "Closed a task",
-        "request-fanout": "New request sent to providers",
+        "request-fanout": "New request: how many providers got it",
         "order-clientClose": "Closed a stuck order",
         "order-terminalCancel": "Cancelled an order on behalf of the terminal"
       },

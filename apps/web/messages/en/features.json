@@ -197,7 +197,7 @@
         "query": "Free container spot in Tashkent today",
         "chips": "Understood filters",
         "result": "Result",
-        "decision": "{terminals, plural, one {# terminal} other {# terminals}} · {free} free today",
+        "decision": "{terminals, plural, one {# terminal} other {# terminals}}{free, plural, =0 {} other { · # free today}}",
         "cheapest": "cheapest {price}",
         "open": "Open on the map",
         "source": {

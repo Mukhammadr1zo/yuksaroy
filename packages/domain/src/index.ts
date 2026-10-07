@@ -208,9 +208,13 @@ export function formatSom(tiyin: number, lang: SearchLang = 'uz'): string {
   return `${som.toLocaleString(lang === 'en' ? 'en-US' : 'ru-RU').replace(/[  ]/g, ' ')} ${CURRENCY_WORD[lang]}`;
 }
 
-/** "Toshkent-tovar" → "toshkent-tovar". */
+/**
+ * "Toshkent-tovar" → "toshkent-tovar". Apostrofning hamma shakli (telefondagi U+2018 va U+02BC ham)
+ * tashlanadi: aks holda "Farg'ona" va telefonda yozilgan shakli ikki xil slug berardi.
+ * Kirillni o'zi o'girmaydi: kerak bo'lsa avval normalizeQuery (orgSlug, katalog qidiruvi shunday).
+ */
 export function slugify(s: string): string {
-  return s.toLowerCase().replace(/[ʻ'`’]/g, '').normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return s.toLowerCase().replace(/[ʻ'`’\u2018\u02BC]/g, '').normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 // ───────────────────────── Booking + Orders (S3) ─────────────────────────

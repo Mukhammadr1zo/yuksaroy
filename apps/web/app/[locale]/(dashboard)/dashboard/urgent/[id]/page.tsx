@@ -10,11 +10,17 @@ import { asList, offerName, type UrgentRequest } from '@/lib/types-urgent';
 import { BTN_GHOST, BTN_NAVY, Notice } from '@/components/kabinet/bits';
 import { OfferStatusPill, UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
 
+/**
+ * Ro'yxatda keladi. sentReal: so'rov nechta haqiqiy ijrochiga ketgani (son ishonchsiz bo'lsa null).
+ * listed: ochiq va ijrochilar ro'yxatida hozir ko'rinadimi.
+ */
+type Item = UrgentRequest & { sentReal?: number | null; listed?: boolean };
+
 /** GET /urgent/:id bo'lmasa (shartnomada alohida tafsilot yo'li yo'q) ro'yxatdan topiladi. */
-async function loadOne(id: string): Promise<UrgentRequest | null> {
-  try { return await api<UrgentRequest>(`/urgent/${id}`); }
+async function loadOne(id: string): Promise<Item | null> {
+  try { return await api<Item>(`/urgent/${id}`); }
   catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; }
-  return asList<UrgentRequest>(await api<unknown>('/urgent?scope=mine')).find((r) => r.id === id) ?? null;
+  return asList<Item>(await api<unknown>('/urgent?scope=mine')).find((r) => r.id === id) ?? null;
 }
 
 export default function UrgentDetailPage() {
@@ -23,7 +29,7 @@ export default function UrgentDetailPage() {
   const locale = useLocale();
   const tc = useTranslations('kabinet.common');
   const L = useUrgentLabels();
-  const [r, setR] = useState<UrgentRequest | null | undefined>(undefined);
+  const [r, setR] = useState<Item | null | undefined>(undefined);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -90,7 +96,13 @@ export default function UrgentDetailPage() {
 
       <section className="mt-8">
         <h2 className="text-lg font-bold">{t('offers')} <span className="font-mono text-sm text-muted">{offers.length}</span></h2>
-        {offers.length === 0 ? <p className="mt-2 rounded-card border border-dashed border-line bg-white p-6 text-sm text-muted">{t('noOffers')}</p> : null}
+        {/* Yaratilgandan keyin odam shu yerga tushadi: necha ijrochiga ketgani server sanagan son.
+            "Ijrochilarga ko'rinib turadi" faqat ochiq va 48 soatdan yangi so'rovda (listed) */}
+        {offers.length === 0 ? (
+          <p className="mt-2 rounded-card border border-dashed border-line bg-white p-6 text-sm text-muted">
+            {t('noOffers')} {r.sentReal == null ? null : r.sentReal ? t('sent', { count: r.sentReal }) : t('sentNone')} {r.sentReal === 0 && r.listed ? t('stillVisible') : null}
+          </p>
+        ) : null}
         <ul className="mt-3 space-y-2">
           {offers.map((o) => (
             <li key={o.id} className={`rounded-card border bg-white p-4 ${o.status === 'AWARDED' ? 'border-teal' : 'border-line'}`}>

@@ -49,9 +49,11 @@ export default async function TgSearchPage({ params, searchParams }: { params: P
     const d = await sapi<Page<TerminalCard>>(`/terminals${qs({ region, service: p?.services.join(','), kind: p?.kind, near, radius, bookable: p?.bookable ? '1' : '', sort: 'rating', limit: 20 })}`, 60);
     const s = d.summary;
     total = d.total; shown = d.items.length;
+    // /terminals bilan bir xil: sonlar namunasiz (total - demo), nol sanoq chizilmaydi (egasi qarori 2026-10-07)
+    const real = d.total - (s?.demo ?? 0);
     decision = [
-      tc('decision.terminals', { count: d.total }),
-      s && d.total ? tc('decision.freeToday', { count: s.freeToday }) : null,
+      real > 0 ? tc('decision.terminals', { count: real }) : null,
+      s?.freeToday ? tc('decision.freeToday', { count: s.freeToday }) : null,
       s?.cheapestTiyin != null && s.cheapestUnit ? tc('decision.cheapest', { price: pricePer(s.cheapestTiyin, s.cheapestUnit, locale) }) : null,
       s?.nearestKm != null ? tc('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
     ].filter(Boolean).join(tc('decision.separator'));

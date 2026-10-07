@@ -64,6 +64,16 @@
   },
   "market": {
     "demo": "Namuna",
+    "sent": {
+      "cargo": "{count} ta tashuvchiga yuborildi.",
+      "service": "{count} ta ijrochiga yuborildi.",
+      "noneCargo": "Bu hududda hali tashuvchi yo'q.",
+      "noneService": "Bu hududda hali ijrochi yo'q.",
+      "noneCargoPast": "Yuborilgan paytda bu hududda tashuvchi yo'q edi.",
+      "noneServicePast": "Yuborilgan paytda bu hududda ijrochi yo'q edi.",
+      "onBoardCargo": "So'rovingiz doskada turadi.",
+      "onBoardService": "So'rovingiz ro'yxatda turadi."
+    },
     "status": {
       "OPEN": "Ochiq",
       "AWARDED": "Ijrochi tanlangan",
@@ -116,7 +126,7 @@
       "authSubmit": "Tasdiqlash va yuborish",
       "authBack": "So'rovga qaytish",
       "done": "E'lon qilindi: {no}",
-      "doneBody": "Ijrochilarga xabar ketdi. Takliflar kabinetingizda ko'rinadi, Telegram bog'langan bo'lsa u yerga ham keladi.",
+      "doneBody": "Takliflar kabinetingizda ko'rinadi, Telegram bog'langan bo'lsa u yerga ham keladi.",
       "viewMine": "Takliflarni ko'rish",
       "viewPublic": "E'lonni ko'rish",
       "volumeM3": "Hajm, m3 (ixtiyoriy)",
@@ -185,7 +195,7 @@
       "toCargo": "Yuk bozori",
       "toServices": "Xizmatlar markazi",
       "offersCount": "{count} ta taklif",
-      "noOffers": "Hali taklif yo'q. Ijrochilarga xabar ketdi.",
+      "noOffers": "Hali taklif yo'q.",
       "award": "Tanlash",
       "awarding": "Tanlanmoqda",
       "awardedNote": "Ijrochi tanlandi. Ish tugagach Ish bajarildi tugmasini bosing.",

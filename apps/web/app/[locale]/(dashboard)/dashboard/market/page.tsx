@@ -12,7 +12,7 @@ import { Pager } from '@/components/admin/kit';
 import { BTN_GHOST, BTN_NAVY, BTN_PRIMARY, CHIP, INPUT, Notice } from '@/components/kabinet/bits';
 import { KycBadge, PhoneBadge } from '@/components/catalog/KycBadge';
 import { CopyLink } from '@/components/market/CopyLink';
-import { DemoBadge, MarketPhone, MarketStatusPill, OfferStatusPill, useMarketLabels } from '@/components/market/bits';
+import { DemoBadge, MarketPhone, MarketStatusPill, OfferStatusPill, useMarketLabels, useSentLine, type SentCount } from '@/components/market/bits';
 import { ProfileForm } from '@/components/market/ProfileForm';
 import { requestHref } from '@/components/market/RequestCard';
 
@@ -61,10 +61,13 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   // Bajarilgan ish soni xizmat kartasidagi bilan bir xil matn: nomfaza ham bitta
   const tg = useTranslations('services.grid');
   const L = useMarketLabels();
-  const [items, setItems] = useState<MarketRequest[] | null>(null);
+  const sentLine = useSentLine();
+  const [items, setItems] = useState<(MarketRequest & SentCount)[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(focusId);
+  // Amal javobida son yo'q (u faqat ro'yxatda): qatordagi son saqlanib, qolgani yangilanadi
+  const replace = (id: string, r: MarketRequest) => setItems((xs) => (xs ?? []).map((x) => (x.id === id ? { ...x, ...r } : x)));
   const [copied, setCopied] = useState<string | null>(null);
   // Qayta e'lon qilish uchun yozilayotgan sana: so'rov id si bo'yicha, bir vaqtda bittasi ochiq
   const [relistDate, setRelistDate] = useState<Record<string, string>>({});
@@ -72,7 +75,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    api<Paged<MarketRequest>>(`/market/requests/mine?page=${page}&limit=${PAGE}`).then((r) => { setItems(r.items); setTotal(r.total); }).catch(() => { setErr(tc('loadFailed')); setItems([]); });
+    api<Paged<MarketRequest & SentCount>>(`/market/requests/mine?page=${page}&limit=${PAGE}`).then((r) => { setItems(r.items); setTotal(r.total); }).catch(() => { setErr(tc('loadFailed')); setItems([]); });
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setOpen(focusId); if (focusId) document.getElementById(`mr-${focusId}`)?.scrollIntoView({ block: 'center' }); }, [focusId, items?.length]);
 
@@ -85,8 +88,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
     if (what === 'award' && !window.confirm(t('confirmAward'))) return;
     setBusy(offerId ?? `${id}:${what}`); setErr(null);
     try {
-      const r = await post<MarketRequest>(`/market/requests/${id}/${what}`, offerId ? { offerId } : {});
-      setItems((xs) => (xs ?? []).map((x) => (x.id === id ? r : x)));
+      replace(id, await post<MarketRequest>(`/market/requests/${id}/${what}`, offerId ? { offerId } : {}));
     } catch { setErr(tc('failed')); } finally { setBusy(null); }
   }
   /** Sanasi o'tgan yukni yangi sana bilan doskaga qaytarish: raqam va takliflar o'sha joyida qoladi. */
@@ -95,8 +97,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
     if (!loadDate) return;
     setBusy(`${id}:relist`); setErr(null);
     try {
-      const r = await post<MarketRequest>(`/market/requests/${id}/relist`, { loadDate });
-      setItems((xs) => (xs ?? []).map((x) => (x.id === id ? r : x)));
+      replace(id, await post<MarketRequest>(`/market/requests/${id}/relist`, { loadDate }));
       setRelistDate((d) => ({ ...d, [id]: '' }));
     } catch { setErr(t('err.RELIST_NOT_ALLOWED')); } finally { setBusy(null); }
   }
@@ -160,7 +161,9 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                   {r.statusUrl ? (
                     <CopyLink url={r.statusUrl} className="mt-3" />
                   ) : null}
-                  {offers.length === 0 ? <p className="mt-3 rounded-card border border-dashed border-line p-4 text-sm text-muted">{t('noOffers')}</p> : null}
+                  {/* Taklif yo'q paytda: so'rov nechta ijrochiga ketgani (hech kim bo'lmasa shuni ochiq aytadi).
+                      O'tgan zamonda, "doskada turadi" esa faqat so'rov hozir doskada bo'lsa */}
+                  {offers.length === 0 ? <p className="mt-3 rounded-card border border-dashed border-line p-4 text-sm text-muted">{t('noOffers')} {sentLine(r.board, r.sentReal, { now: false, listed: r.listed === true })}</p> : null}
                   <ul className="mt-3 space-y-2">
                     {offers.map((o) => (
                       <li key={o.id} className={`rounded-card border p-3 ${o.status === 'AWARDED' ? 'border-teal' : 'border-line'}`}>

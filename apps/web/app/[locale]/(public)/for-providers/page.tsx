@@ -25,7 +25,11 @@ export default async function ForProvidersPage({ params }: Params) {
   const { locale } = await params;
   setRequestLocale(locale);
   const [t, stats, sub] = await Promise.all([getTranslations('marketing.providers'), sapi<Stats>('/stats', 60).catch(() => null), subscriptionPrice()]);
-  const facts = stats ? [t('facts.companies', { count: stats.companies ?? 0 }), t('facts.listings', { count: stats.listings ?? 0 }), t('facts.terminals', { count: stats.terminals })] : [];
+  // Egasi qarori (2026-10-07): nol sanoq chizilmaydi, 1 va undan ko'pi asl soni bilan (/for-shippers kabi).
+  // /stats endi namunasiz: kompaniya va e'lon soni haqiqiy, ya'ni hozircha juda kichik
+  const facts = stats
+    ? ([['companies', stats.companies ?? 0], ['listings', stats.listings ?? 0], ['terminals', stats.terminals]] as const).filter(([, v]) => v > 0).map(([k, v]) => t(`facts.${k}`, { count: v }))
+    : [];
   return (
     <>
       <Hero side="providers" facts={facts} primary="/dashboard/listings/new" secondary="/dashboard/terminals/new" />

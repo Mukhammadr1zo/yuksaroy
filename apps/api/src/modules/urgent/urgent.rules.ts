@@ -1,6 +1,6 @@
 import { REGION_ADJACENCY, type RegionCode, type UrgentStatus } from '@yuksaroy/domain';
 
-/** Bildirishnoma oladigan tashkilot turlari (egasi Telegram bog'lagan bo'lsa). */
+/** Shoshilinch so'rovning ijrochilari: shu turdagi tashkilot a'zolari xabar oladi va taklif bera oladi. */
 export const PROVIDER_KINDS = ['LOCO_SERVICE', 'CARRIER', 'ASSET_OWNER'] as const;
 
 /** Holat o'tishlari: egasi OPEN dan taklif tanlaydi (AWARDED) yoki yopadi; AWARDED faqat yopiladi. */

@@ -38,12 +38,16 @@ export default function TgHome() {
   const [orders, setOrders] = useState<OrderCard[] | null>(null);
 
   useEffect(() => {
-    // Sanoqlar: /stats (terminal, shahobcha ham shu ichida) + e'lonlar turi bo'yicha ikki qisqa so'rov
+    // Sanoqlar: /stats (terminal, shahobcha ham shu ichida, namunasiz) + e'lonlar turi bo'yicha ikki so'rov.
+    // E'lonlar jamisi namunani ham sanaydi: sahifadagi namunalar ayiriladi (sanoq faqat haqiqiy e'lon).
+    // ponytail: 50 ta qator (API chegarasi); namuna 50 dan keyingi sahifaga tushsa son shunchaga ortadi.
+    // API namunasiz sonni bersa bu ayirish o'chadi.
+    const real = (p: ListingPage | null) => (p ? p.total - p.items.filter((x) => x.isDemo).length : 0);
     Promise.all([
       api<Stats>('/stats').catch(() => null),
-      api<ListingPage>(`/listings?kind=${EQUIPMENT_KINDS.join(',')}&limit=1`).catch(() => null),
-      api<ListingPage>('/listings?kind=TRUCK&limit=1').catch(() => null),
-    ]).then(([s, eq, tr]) => setCounts({ terminal: s?.terminals ?? 0, equipment: eq?.total ?? 0, truck: tr?.total ?? 0 }));
+      api<ListingPage>(`/listings?kind=${EQUIPMENT_KINDS.join(',')}&limit=50`).catch(() => null),
+      api<ListingPage>('/listings?kind=TRUCK&limit=50').catch(() => null),
+    ]).then(([s, eq, tr]) => setCounts({ terminal: s?.terminals ?? 0, equipment: real(eq), truck: real(tr) }));
     api<Page<TerminalCard>>('/terminals?bookable=1&limit=6').then((r) => setBookable(r.items)).catch(() => setBookable([]));
     api<Page<OrderCard>>('/orders?scope=client&status=PENDING,CONFIRMED,IN_PROGRESS&limit=3').then((r) => setOrders(r.items)).catch(() => setOrders([]));
   }, []);
@@ -73,7 +77,9 @@ export default function TgHome() {
             <Icon size={24} weight="duotone" className="text-teal" aria-hidden="true" />
             <div>
               <p className="text-sm font-bold">{t(`cats.${key}`)}</p>
-              <p className="font-mono text-xs text-muted tabular-nums">{counts ? counts[key] : '…'}</p>
+              {/* Egasi qarori (2026-10-07): nol sanoq chizilmaydi, 1 va undan ko'pi asl soni bilan. Qator joyi
+                  qoladi (min-h-4): aks holda justify-between nomni pastga surib, qo'shni plitkadan past qo'yardi */}
+              <p className="min-h-4 font-mono text-xs text-muted tabular-nums">{counts ? counts[key] || null : '…'}</p>
             </div>
           </Link>
         ))}

@@ -197,7 +197,7 @@
         "query": "Свободное место под контейнер сегодня в Ташкенте",
         "chips": "Распознанные фильтры",
         "result": "Результат",
-        "decision": "{terminals, plural, one {# терминал} few {# терминала} other {# терминалов}} · сегодня свободно {free}",
+        "decision": "{terminals, plural, one {# терминал} few {# терминала} other {# терминалов}}{free, plural, =0 {} other { · сегодня свободно #}}",
         "cheapest": "дешевле всего {price}",
         "open": "Открыть на карте",
         "source": {

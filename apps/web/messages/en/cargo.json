@@ -64,6 +64,16 @@
   },
   "market": {
     "demo": "Sample",
+    "sent": {
+      "cargo": "Sent to {count, plural, one {# carrier} other {# carriers}}.",
+      "service": "Sent to {count, plural, one {# provider} other {# providers}}.",
+      "noneCargo": "There are no carriers in this region yet.",
+      "noneService": "There are no providers in this region yet.",
+      "noneCargoPast": "When it was sent, there were no carriers in this region.",
+      "noneServicePast": "When it was sent, there were no providers in this region.",
+      "onBoardCargo": "Your request stays on the board.",
+      "onBoardService": "Your request stays in the list."
+    },
     "status": {
       "OPEN": "Open",
       "AWARDED": "Provider chosen",
@@ -116,7 +126,7 @@
       "authSubmit": "Confirm and send",
       "authBack": "Back to the request",
       "done": "Posted: {no}",
-      "doneBody": "Providers have been notified. Offers will show in your dashboard, and in Telegram if it is linked.",
+      "doneBody": "Offers will show in your dashboard, and in Telegram if it is linked.",
       "viewMine": "See offers",
       "viewPublic": "Open the post",
       "volumeM3": "Volume, m3 (optional)",
@@ -185,7 +195,7 @@
       "toCargo": "Cargo board",
       "toServices": "Services centre",
       "offersCount": "{count} offers",
-      "noOffers": "No offers yet. Providers have been notified.",
+      "noOffers": "No offers yet.",
       "award": "Choose",
       "awarding": "Choosing",
       "awardedNote": "Provider chosen. When the work is done, press Work completed.",
