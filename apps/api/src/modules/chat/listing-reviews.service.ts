@@ -17,7 +17,10 @@ export class ListingReviewsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Ochiq ro'yxat: o'rtacha faqat REVIEW.minToShow dan keyin ko'rsatiladi (bitta bahodan o'rtacha ma'nosiz). */
+  /**
+   * Ochiq ro'yxat: o'rtacha faqat REVIEW.minToShow dan keyin ko'rsatiladi (bitta bahodan o'rtacha ma'nosiz).
+   * excluded izohlar ham ro'yxatda (terminal bahosidagi kabi), o'rtacha va son esa keshdan, ularsiz.
+   */
   async list(slug: string, page = 1, limit = 20) {
     const l = await this.prisma.listing.findUnique({ where: { slug }, select: { id: true, status: true, ratingAvg: true, ratingCount: true } });
     if (!l || l.status !== 'ACTIVE') throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
@@ -78,7 +81,11 @@ export class ListingReviewsService {
     const l = await this.prisma.listing.findUnique({ where: { id: listingId }, select: { id: true, title: true, slug: true, kind: true, orgId: true, ownerUserId: true, ratingAvg: true, ratingCount: true } });
     if (!l) throw new NotFoundException({ code: 'LISTING_NOT_FOUND' });
     // Bitta qorovul, ikkita chaqiruv nuqtasi (ikkinchisi eligibility): forma ham
-    // chizilmaydi, yuborilgani ham o'tmaydi
+    // chizilmaydi, yuborilgani ham o'tmaydi.
+    // Ikki qoida ataylab har xil, birlashtirmang: yangi o'z izohi shu yerda rad etiladi,
+    // qorovul chiqqan 2026-10-03 gacha yozilganlari esa o'chirilmagan - excluded bo'lib
+    // ko'rinadi, reytingga kirmaydi (egasi qarori, 2026-10-06). Terminaldagidek "yozib,
+    // excluded qilib qo'yish" bu yerga ko'chirilmaydi.
     if (await this.ownSide(userId, l)) throw new ForbiddenException({ code: 'SELF_REVIEW' });
     if (!(await this.answered(userId, listingId))) throw new ForbiddenException({ code: 'NO_CONTACT' });
     const dup = await this.prisma.listingReview.findUnique({ where: { listingId_userId: { listingId, userId } }, select: { id: true } });

@@ -207,7 +207,9 @@
     "count": "{count} ta obyekt",
     "empty": {
       "title": "Bu filtr bo'yicha terminal topilmadi.",
+      "nearby": "Eng yaqin natija: {region}, <n>{count} ta terminal</n>",
       "reset": "Filtrni tozalash",
+      "market": "Yoki so'rov qoldiring: tashuvchilar va ekspeditorlar o'zlari taklif yuboradi.",
       "owner": "Terminal sizniki bo'lsa: obyektni katalogga faqat egasi qo'shadi, tarif va joylar sizning nazoratingizda.",
       "ownerCta": "Terminalimni qo'shish",
       "ownerSignup": "Ro'yxatdan o'tish"
@@ -320,12 +322,6 @@
       "3": "Doimiy yo'nalish bo'yicha tashuvchilar",
       "4": "Terminaldan omborgacha yetkazib berish"
     }
-  },
-  "empty": {
-    "title": "Bu bo'limda hali e'lon yo'q",
-    "body": "Katalog ochiq, e'lonlarni egalarning o'zi qo'shadi. Birinchi bo'lib qo'shsangiz, sizni qidiruvda birinchi topishadi.",
-    "cta": "E'lon joylash",
-    "examplesHeading": "Bu yerga nimalar qo'shiladi"
   },
   "quote": {
     "heading": "Narx hisobi",

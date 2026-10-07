@@ -203,6 +203,7 @@
         "timeline": "Tarix",
         "documents": "Hujjatlar",
         "noDocs": "Hujjat hali yo'q: akt va hisob buyurtma yakunlangach chiqadi.",
+        "noDocsDone": "Bu buyurtma bo'yicha akt va hisob tuzilmagan.",
         "openDoc": "Brauzerda ochish",
         "docHint": "Hujjat brauzerda ochiladi, havola 10 daqiqa amal qiladi.",
         "invoice": "Hisob {no}",
@@ -212,6 +213,12 @@
         "cancelYes": "Ha, bekor qilinsin",
         "cancelNo": "Yo'q",
         "cancelNote": "Joy boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi.",
+        "close": "Buyurtmani yopish",
+        "closeLead": "Terminal {days} kundan beri buyurtmani yopmadi. Ish bajarilgan bo'lsa, uni o'zingiz yopib, baho qoldirishingiz mumkin.",
+        "closeConfirm": "Buyurtma yakunlangan deb belgilanadi, uni qayta ochib bo'lmaydi. Akt va hisob tuzilmaydi. Yopilsinmi?",
+        "closeLater": "Buyurtmada yangi harakat bo'lmasa, {date} dan boshlab uni o'zingiz yopib, baho qoldirishingiz mumkin.",
+        "closeFailed": "Buyurtmani yopib bo'lmadi. Qayta urinib ko'ring.",
+        "closeChanged": "Shu orada buyurtmada o'zgarish bo'ldi, sahifa yangilandi.",
         "hint": {
           "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa joy avtomatik bo'shaydi.",
           "CONFIRMED": "Joy siz uchun band. Belgilangan vaqtda yetib boring.",
@@ -226,6 +233,11 @@
           "TERMINAL": "terminal",
           "SYSTEM": "tizim",
           "ADMIN": "administrator"
+        },
+        "reason": {
+          "IDLE_CLOSED": "{days} kun harakat bo'lmagani uchun mijoz yopdi",
+          "SLA_TIMEOUT": "Terminal belgilangan vaqtda javob bermadi",
+          "NO_SHOW": "Mijoz belgilangan vaqtda kelmadi"
         },
         "err": {
           "CANCEL_TOO_LATE": "Joy boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",

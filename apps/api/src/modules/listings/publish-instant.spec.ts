@@ -13,7 +13,7 @@ import type { PrismaListingRepository } from './infrastructure/prisma-listing.re
 import type { ListingAccess } from './application/listing-access';
 import { ListingsUseCase } from './application/listings.usecase';
 
-type Status = { status: string; publishedAt?: Date; expiresAt?: Date; rejectReason: string | null };
+type Status = { status: string; publishedAt?: Date; expiresAt?: Date; expiryRemindedAt?: null; rejectReason: string | null };
 
 const listing = (over: Partial<ListingRecord> = {}): ListingRecord => ({
   id: 'l1', slug: 'l1', orgId: null, ownerUserId: 'driver', createdById: 'driver', kind: 'TRUCK', deal: null, status: 'DRAFT',
@@ -97,6 +97,13 @@ describe("e'lon yuborilganda", () => {
     const { svc, saved } = setup(listing({ orgId: 'o1', ownerUserId: null, kind: 'WAGON', ownerUser: null }), 0, 'PENDING');
     await svc.publish('boss', 'l1');
     expect(saved[0].status).toBe('PENDING_REVIEW');
+  });
+
+  // Belgi bitta muddatniki: tozalanmasa qayta chiqqan e'lon keyingi muddatda eslatma olmasdi
+  it('qayta chiqqan e\'londa muddat eslatmasi belgisi tozalanadi', async () => {
+    const { svc, saved } = setup(listing({ status: 'EXPIRED' }), 0);
+    await svc.publish('driver', 'l1');
+    expect(saved[0]).toMatchObject({ status: 'ACTIVE', expiryRemindedAt: null });
   });
 
   it('muddati o\'tgan faol e\'lonlar chegaraga kirmaydi', async () => {

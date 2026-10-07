@@ -48,6 +48,7 @@ const QUEUES: Record<string, { label: string; href: string }> = {
   urgentOpen: { label: 'pendingUrgent', href: '/admin/urgent?status=OPEN' },
   contactNew: { label: 'pendingContact', href: '/admin/moderation?tab=contact' },
   reportsNew: { label: 'pendingReports', href: '/admin/moderation?tab=reports' },
+  platformInquiriesOpen: { label: 'pendingInquiries', href: '/dashboard/inquiries' },
 };
 
 const HOUR = 3_600_000;
@@ -201,7 +202,7 @@ export default function AdminSystemPage() {
             })()}
           </Block>
 
-          {/* 4. Navbatlar: 9 qator, eng eskisining yoshi bosh sahifadagi o'lchov bilan (ageOf) */}
+          {/* 4. Navbatlar: 10 qator, eng eskisining yoshi bosh sahifadagi o'lchov bilan (ageOf) */}
           <Block title={ts('queues')}>
             {!data.queues ? failed(ts('queues')) : (
               <ul className="mt-1 divide-y divide-line/70">

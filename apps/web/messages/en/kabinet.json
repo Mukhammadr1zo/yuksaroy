@@ -222,7 +222,8 @@
         "mine": "Browse terminals"
       },
       "fromPrivate": "Private person",
-      "openListing": "Open listing"
+      "openListing": "Open listing",
+      "awaiting": "Awaiting reply"
     },
     "org": {
       "title": "Organization",

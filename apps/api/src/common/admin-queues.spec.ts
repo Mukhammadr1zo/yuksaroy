@@ -3,7 +3,7 @@
 // Nega muhim: har navbatni eslatmaga qo'shsak, ogohlantirish har kuni keladi va odam
 // unga qarashni to'xtatadi. Shuning uchun ro'yxat ataylab qisqa.
 import { describe, expect, it } from 'vitest';
-import { QUEUE_DEF, QUEUE_KEYS, TASK_ENTITIES, queueOf, staleQueues, type QueueKey, type QueueStat } from './admin-queues';
+import { QUEUE_DEF, QUEUE_KEYS, TASK_ENTITIES, queueOf, queueWhere, staleQueues, type QueueKey, type QueueStat } from './admin-queues';
 
 /** Navbat sharti bitta joyda: vazifa yopilishi ham, badge ham shu jadvaldan. */
 describe('QUEUE_DEF', () => {
@@ -18,6 +18,15 @@ describe('QUEUE_DEF', () => {
       expect(QUEUE_DEF[k].oldest, k).toBeTruthy();
       expect(queueOf(QUEUE_DEF[k].entity)).toBe(k);
     }
+  });
+});
+
+describe('queueWhere', () => {
+  it("platforma suhbatidan adminning o'zi boshlagani chiqariladi, boshqa navbat o'zgarmaydi", async () => {
+    // O'z tredida admin mijoz: javobi statusni o'zgartirmaydi, navbatda qolsa eslatma har kuni kelardi
+    const prisma = { membership: { findMany: async () => [{ userId: 'adm' }] }, user: { findMany: async () => [] } } as never;
+    expect(await queueWhere(prisma, 'platformInquiriesOpen')).toEqual({ toPlatform: true, status: 'OPEN', fromUserId: { notIn: ['adm'] } });
+    expect(await queueWhere(prisma, 'listingsPendingReview')).toBe(QUEUE_DEF.listingsPendingReview.where);
   });
 });
 
@@ -50,6 +59,13 @@ describe('kutib qolgan navbatlar', () => {
     s.ordersPending = { count: 5, oldest: daysAgo(100) };
     s.urgentOpen = { count: 5, oldest: daysAgo(100) };
     expect(staleQueues(s, now, 2)).toEqual([]);
+  });
+
+  it("egasiz obyektga yozilgan javobsiz suhbat eslatmaga tushadi", () => {
+    // Unga platformadan boshqa hech kim javob bermaydi: eslatmasiz bosh sahifada jim turardi
+    const s = empty();
+    s.platformInquiriesOpen = { count: 1, oldest: daysAgo(4) };
+    expect(staleQueues(s, now, 2)).toEqual([{ key: 'platformInquiriesOpen', days: 4 }]);
   });
 
   it("soni nol bo'lsa sana bo'lsa ham chiqmaydi", () => {

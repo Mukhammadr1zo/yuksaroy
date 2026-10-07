@@ -202,7 +202,7 @@ model AdminNote {
 /// assigneeId/assignedById da FK yo'q (AdminNote va AuditLog kabi): hisob anonimlashsa iz qolsin.
 model AdminTask {
   id           String    @id @default(cuid())
-  /// TASK_ENTITIES: Listing | Organization | Terminal | PremiumOrder | Subscription | Order | UrgentRequest | ContactMessage | Report
+  /// TASK_ENTITIES: Listing | Organization | Terminal | PremiumOrder | Subscription | Order | UrgentRequest | ContactMessage | Report | Inquiry
   entity       String
   entityId     String
   assigneeId   String
@@ -749,6 +749,9 @@ model Listing {
   premiumUntil   DateTime?      @db.Timestamptz(3)
   publishedAt    DateTime?      @db.Timestamptz(3)
   expiresAt      DateTime?      @db.Timestamptz(3)
+  /// Muddat tugashi eslatmasi yuborilgan vaqt; bo'sh = shu muddat uchun hali ketmagan.
+  /// Belgi yuborishdan oldin qo'yiladi va yangi muddat bilan (activate) tozalanadi.
+  expiryRemindedAt DateTime?    @db.Timestamptz(3)
   rejectReason   String?
   views          Int            @default(0)
   createdAt      DateTime       @default(now()) @db.Timestamptz(3)
@@ -870,6 +873,13 @@ model ListingReview {
   rating     Int // 1..5
   text       String? // <= 1000 belgi
   reply      String?
+  /// Review.excluded bilan bir ma'no: izoh ko'rinadi, reytingga kirmaydi.
+  /// Faqat qorovul chiqqan 2026-10-03 gacha e'lon egasi yoki uning tashkiloti a'zosi
+  /// yozgan eski izohlar (migratsiya 20261006020000, egasi qarori 2026-10-06).
+  /// Yangisi bu yerga tushmaydi: ListingReviewsService.create uni SELF_REVIEW bilan rad
+  /// etadi. Ikki qoida ataylab har xil, birlashtirmang: eskisi o'chirilmaydi, yangisi
+  /// "excluded qilib saqlash" ga o'tkazilmaydi.
+  excluded   Boolean   @default(false)
   repliedAt  DateTime? @db.Timestamptz(3)
   createdAt  DateTime  @default(now()) @db.Timestamptz(3)
 

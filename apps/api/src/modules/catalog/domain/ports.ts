@@ -133,6 +133,8 @@ export interface CatalogRepository {
   listTerminals(f: TerminalFilter, now: Date): Promise<TerminalRecord[]>;
   /** Filtrga tushgan obyektlarning haqiqiy soni (sahifadagi emas). */
   countTerminals(f: TerminalFilter): Promise<number>;
+  /** Yuqoridagi son viloyat kesimida (bitta groupBy); viloyati bo'sh qatorlar kirmaydi. */
+  countTerminalsByRegion(f: TerminalFilter): Promise<Record<string, number>>;
   /** Bugungi (Toshkent kuni) ochiq slotlardagi bo'sh joylar yig'indisi, terminal id bo'yicha. Yo'q id = 0. */
   freeTodayByTerminal(terminalIds: string[], now: Date): Promise<Record<string, number>>;
   findTerminalBySlug(slug: string, now: Date): Promise<TerminalRecord | null>;

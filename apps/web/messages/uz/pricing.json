@@ -32,12 +32,11 @@
     },
     "team": {
       "name": "Jamoa",
-      "price": "Kelishiladi",
+      "price": "Obuna narxida",
       "note": "bitta tashkilotning xodimlariga",
       "f1": "Har bir xodim o'z obunasiga buyurtma beradi",
       "f2": "Tashkilot bitta o'tkazma qiladi, kvitansiya ham bitta",
-      "f3": "3 kishidan boshlab chegirma kelishiladi",
-      "cta": "Chegirma so'rash"
+      "cta": "Savol berish"
     },
     "commission": {
       "heading": "Bron komissiyasi",
@@ -59,7 +58,7 @@
       "q6": "Narxlar mehmonlardan yashiriladimi?",
       "a6": "Yo'q. Tariflar va e'lon narxlari login'siz ochiq. Faqat telefon raqamini ko'rish va so'rov yuborish uchun kabinet kerak.",
       "q7": "Jamoa bo'lib qanday to'laymiz?",
-      "a7": "Har bir xodim obuna sahifasida o'z buyurtmasini beradi va PAY raqamini oladi. Tashkilot bitta o'tkazma qiladi, to'lov izohiga shu raqamlarning hammasini vergul bilan yozadi. Biz har bir buyurtmani alohida tasdiqlaymiz, obunalar bir kunda yoqiladi. 3 kishidan boshlab chegirma uchun oldin bog'laning: summa kelishilgandan keyin o'tkazma qilinadi."
+      "a7": "Har bir xodim obuna sahifasida o'z buyurtmasini beradi va PAY raqamini oladi. Tashkilot bitta o'tkazma qiladi, to'lov izohiga shu raqamlarning hammasini vergul bilan yozadi. Biz har bir buyurtmani alohida tasdiqlaymiz, obunalar bir kunda yoqiladi."
     }
   }
 }

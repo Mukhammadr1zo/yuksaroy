@@ -103,6 +103,8 @@ export interface Order extends OrderCard {
   note: string | null; wagonNumbers: string[]; storageDays: number | null;
   subtotalTiyin: number; commissionPct: number; commissionPayer: CommissionPayer; commissionTiyin: number;
   confirmedAt: string | null; closedAt: string | null;
+  /** Mijoz qotgan buyurtmani shu paytdan o'zi yopa oladi. Faqat mijoz tomoniga, faqat GET :no da; boshqa holda null. */
+  closeAt: string | null;
   items: OrderLine[]; timeline: OrderTimelineEntry[];
 }
 export type { BookingStatus, OrderStatus };

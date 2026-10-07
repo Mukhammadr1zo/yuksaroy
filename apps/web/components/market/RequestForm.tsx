@@ -103,7 +103,9 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
   async function send() {
     setBusy(true); setTop(null);
     try {
-      const r = await post<MarketRequest>('/market/requests', body());
+      // Sahifaga qayerdan kelingani (?from=terminals): server tanish belgini yaratish auditiga yozadi, ko'prik shu bilan o'lchanadi
+      const from = new URLSearchParams(window.location.search).get('from') ?? undefined;
+      const r = await post<MarketRequest>('/market/requests', { ...body(), from });
       try { sessionStorage.removeItem(DRAFT_KEY(board)); } catch { /* yuborildi, qoralama endi kerak emas */ }
       setDone(r);
     } catch (e) {

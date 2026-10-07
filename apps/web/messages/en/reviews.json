@@ -2,7 +2,7 @@
   "reviews": {
     "heading": "Reviews",
     "summary": "{avg} · {count} reviews",
-    "none": "No reviews",
+    "none": "No rating yet",
     "hidden": "{count} ratings, average shown from {min}",
     "noneBody": "No reviews yet. Only the shipper of a completed order can leave one.",
     "order": "order",

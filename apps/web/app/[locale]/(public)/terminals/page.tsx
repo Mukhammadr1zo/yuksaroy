@@ -32,7 +32,7 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
   const { locale } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [sp, t, tf, tt, tn, tk, ts, th, tl] = await Promise.all([searchParams, getTranslations('catalog'), getTranslations('filter'), getTranslations('terminals'), getTranslations('nav'), getTranslations('kind'), getTranslations('service'), getTranslations('hubs'), getTranslations('listing')]);
+  const [sp, t, tf, tt, tn, tk, ts, th, tl, tr] = await Promise.all([searchParams, getTranslations('catalog'), getTranslations('filter'), getTranslations('terminals'), getTranslations('nav'), getTranslations('kind'), getTranslations('service'), getTranslations('hubs'), getTranslations('listing'), getTranslations('region')]);
   const raw = { region: one(sp.region), kind: one(sp.kind), service: one(sp.service), q: one(sp.q), near: one(sp.near), radius: one(sp.radius), corridor: one(sp.corridor), sort: one(sp.sort), bookable: one(sp.bookable) === '1' ? '1' : '' };
 
   // Yordamchi: q lug'at orqali filtrlarga aylanadi; aniq URL parametrlari parse natijasidan ustun
@@ -65,7 +65,8 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
     : href({ near: '', radius: '' });
 
   const page = Number(one(sp.page)) || 1;
-  const data = await sapi<Page<T>>(`/terminals${qs({ region, service, kind, near, radius, bookable: raw.bookable, q: base.q, sort: raw.sort, page, limit: 12 })}`, 60);
+  // nearby: natija bo'sh va bitta viloyat so'ralganda API shu filtrlar bilan topgan eng yaqin viloyat
+  const data = await sapi<Page<T> & { nearby?: { region: RegionCode; total: number } | null }>(`/terminals${qs({ region, service, kind, near, radius, bookable: raw.bookable, q: base.q, sort: raw.sort, page, limit: 12 })}`, 60);
   const pages = Math.max(1, Math.ceil(data.total / data.limit));
   const s = data.summary;
   const decision = [
@@ -141,10 +142,25 @@ export default async function TerminalsPage({ params, searchParams }: { params: 
       {data.items.length === 0 && data.total === 0 ? (
         <div className="mt-6 rounded-card border border-dashed border-line p-10 text-center text-muted">
           <p>{tt('empty.title')}</p>
+          {data.nearby ? (
+            <p className="mt-3"><Link href={href({ region: data.nearby.region, corridor: '' })} className="font-semibold text-teal-ink underline">
+              {/* <n>: son so'zidan ajralib keyingi qatorga tushmasin ("3 / ta terminal") */}
+              {tt.rich('empty.nearby', { region: tr(data.nearby.region), count: data.nearby.total, n: (c) => <span className="whitespace-nowrap">{c}</span> })}
+            </Link></p>
+          ) : null}
           <Link href="/terminals" className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tt('empty.reset')}</Link>
+          {/* Bu yerga bosh sahifa qidiruvi ham tushadi, ya'ni ko'pincha yuk egasi keladi: asosiy chiqish
+              bozorga. ?from=terminals so'rov yaratilganda auditga yoziladi, ko'prik shu bilan o'lchanadi.
+              Kuzatuv tugmasi ataylab yo'q: WATCH_KINDS faqat CARGO va LISTING. */}
+          <p className="mt-6 border-t border-line pt-5 text-sm">{tt('empty.market')}</p>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <Link href="/cargo/new?from=terminals" className="inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{tn('add.cargo.title')}</Link>
+            <Link href="/services/request?from=terminals" className="inline-block rounded-full border border-navy px-6 py-2.5 font-semibold text-navy transition hover:bg-sand active:scale-[0.98]">{tn('add.serviceRequest.title')}</Link>
+          </div>
+          {/* Egasiga taklif qoladi, lekin oddiy havola: yuqoridagi yuk egasi tugmalari bilan bellashmasin */}
           <p className="mt-6 border-t border-line pt-5 text-sm">{tt('empty.owner')}</p>
-          <AuthOnly guest={<Link href="/signup?next=%2Fdashboard%2Fterminals%2Fnew" className="mt-3 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{tt('empty.ownerSignup')}</Link>}>
-            <Link href="/dashboard/terminals/new" className="mt-3 inline-block rounded-full bg-teal px-6 py-2.5 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{tt('empty.ownerCta')}</Link>
+          <AuthOnly guest={<Link href="/signup?next=%2Fdashboard%2Fterminals%2Fnew" className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tt('empty.ownerSignup')}</Link>}>
+            <Link href="/dashboard/terminals/new" className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tt('empty.ownerCta')}</Link>
           </AuthOnly>
         </div>
       ) : (

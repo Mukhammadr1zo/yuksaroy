@@ -207,7 +207,9 @@
     "count": "{count} facilities",
     "empty": {
       "title": "No terminals found for this filter.",
+      "nearby": "Nearest results: {region}, <n>{count, plural, one {# terminal} other {# terminals}}</n>",
       "reset": "Clear filter",
+      "market": "Or post a request: carriers and forwarders will send you offers.",
       "owner": "If the terminal is yours: only the owner adds it to the catalog, tariffs and spots stay under your control.",
       "ownerCta": "Add my terminal",
       "ownerSignup": "Sign up"
@@ -320,12 +322,6 @@
       "3": "Carriers on regular routes",
       "4": "Delivery from the terminal to the warehouse"
     }
-  },
-  "empty": {
-    "title": "No listings in this section yet",
-    "body": "The catalog is open, owners add their own listings. Add yours first and you will be the first one found in search.",
-    "cta": "Post a listing",
-    "examplesHeading": "What goes here"
   },
   "quote": {
     "heading": "Price calculation",

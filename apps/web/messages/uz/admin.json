@@ -267,6 +267,7 @@
       "wallNote": "Devorda to'xtaganlar obunachiga aylanmasa narx yoki bepul oyna o'zgartiriladi.",
       "pendingContact": "Javobsiz murojaat",
       "pendingReports": "Yangi shikoyat",
+      "pendingInquiries": "Javobsiz suhbat",
       "work": "Bugungi ish",
       "workEmpty": "Navbat bo'sh.",
       "age": {
@@ -283,7 +284,8 @@
         "AD_ENDING": "{n} ta reklama 7 kunda tugaydi",
         "DB_SLOW": "Baza sekin javob beryapti: {ms} ms",
         "DB_DOWN": "Baza javob bermayapti",
-        "NO_PROVIDER": "{n} ta yangi so'rov 24 soatda hech kimga yuborilmadi: mos ijrochi topilmadi"
+        "NO_PROVIDER": "{n} ta yangi so'rov 24 soatda hech kimga yuborilmadi: mos ijrochi topilmadi",
+        "STUCK_ORDERS": "{n} ta buyurtma {days} kundan beri qimirlamadi: terminal bilan bog'laning yoki holatini o'zingiz o'zgartiring"
       },
       "alertGo": "Ochish",
       "money": "Pul",
@@ -424,6 +426,7 @@
       "items": "Qatorlar",
       "operation": "Amal / yo'nalish",
       "wagons": "Vagon",
+      "stuck": "{days} kun qimirlamagan",
       "op": {
         "LOAD": "Yuklash",
         "UNLOAD": "Tushirish"
@@ -432,6 +435,11 @@
         "LOCAL": "Ichki",
         "IMPORT": "Import",
         "EXPORT": "Eksport"
+      },
+      "reasonCode": {
+        "IDLE_CLOSED": "{days} kun harakat bo'lmagani uchun mijoz yopdi",
+        "SLA_TIMEOUT": "Terminal belgilangan vaqtda javob bermadi",
+        "NO_SHOW": "Mijoz belgilangan vaqtda kelmadi"
       }
     },
     "orgs": {
@@ -571,7 +579,8 @@
         "admin-subscription-remind": "Obuna eslatmasini qo'lda yubordi",
         "admin-task-assign": "Ishni jamoadoshga biriktirdi",
         "admin-task-done": "Vazifani yopdi",
-        "request-fanout": "Yangi so'rov ijrochilarga yuborildi"
+        "request-fanout": "Yangi so'rov ijrochilarga yuborildi",
+        "order-clientClose": "Qotgan buyurtmani yopdi"
       },
       "ent": {
         "ContactMessage": "Murojaat",
@@ -794,6 +803,16 @@
       "renewals": "Uzaytirish",
       "empty": "Hali tasdiqlangan to'lov yo'q.",
       "noPremium": "Bu davrda Premium to'lovi bo'lmagan.",
+      "ads": "Reklama",
+      "noAds": "Bu davrda boshlangan pullik reklama yo'q: reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
+      "deals": {
+        "title": "Platformadagi bitimlar",
+        "lead": "Bu bizning pulimiz emas va tushumga qo'shilmaydi: yuk, xizmat va shoshilinch so'rovlarda mijoz tanlagan taklif narxi, tanlangan oy bo'yicha. Narxsiz taklif bitim bo'lib sanaladi, hajmga kirmaydi.",
+        "count": "Bitimlar",
+        "volume": "Hajm",
+        "empty": "Oxirgi 12 oyda bitim bo'lmagan.",
+        "decision": "Bitimlar soni: platforma odamlarga ish olib kelyaptimi. Hajm o'sib, tushum o'smasa: obuna narxini yoki bitimdan haq olishni ko'rib chiqing."
+      },
       "tabs": {
         "overview": "Umumiy",
         "expiring": "Tugayotganlar",
@@ -820,10 +839,11 @@
         "mrr": "Oylik xarajat (server, jamoa, reklama) bilan solishtiring: MRR undan past bo'lsa narx yoki jalb, yuqori bo'lsa jamoani kengaytirish mumkin.",
         "mrrEnd": "Uzaytirmasa oy oxirida shuncha qoladi: farq qo'ng'iroq ro'yxatining bahosi.",
         "atRisk": "Shu odamlar bilan oy tugaguncha gaplashilmasa MRR shuncha tushadi. Ro'yxat: Tugayotganlar.",
-        "revenue": "Kassa: narx, tarif va reklama siyosati shu songa qarab. Tushum MRR dan past bo'lsa to'lovlar kechikyapti:",
+        "revenue": "Kassa: narx, tarif va reklama siyosati shu songa qarab. Shu oyning obuna puli (jadvalda Obuna ustuni) MRR dan past bo'lsa to'lovlar kechikyapti:",
         "col": {
           "total": "Jami: shu oy xarajatni qopladimi.",
           "subs": "Obuna va Premium: pul qaysi mahsulotdan keladi; Premium ketma-ket nol bo'lsa uning navbatini yopish mumkin.",
+          "ads": "Reklama: sotilgan reklama narxi, reklama boshlangan oyga yoziladi. Ketma-ket nol bo'lsa reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
           "payments": "To'lovlar soni: qo'lda tasdiqlash qachon og'irlik qila boshlaydi.",
           "renewals": "Uzaytirish: pul yangi odamdanmi, qolgandanmi; kuch jalbgami, ushlab qolishgami.",
           "mrr": "MRR: takroriy pul, bir martalik emas; o'sish shunga qarab o'lchanadi.",

@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { EQUIPMENT_KINDS, REGIONS, RJUS, SEARCH_CATEGORIES, SERVICE_CODES, TERMINAL_KINDS, distanceKm, type ListingKind, type Rju, type ServiceCode, type TerminalKind } from '@yuksaroy/domain';
 import { parseCorridor } from '../../listings/domain/listing-query';
 import { PrismaListingRepository } from '../../listings/infrastructure/prisma-listing.repository';
+import { nearestRegionWith } from '../domain/nearest-region';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
 import { mapFeatures, parseBbox } from './map-geojson';
 import { byDefault, fromPriceTiyin, publicTerminal, publicTerminalCard, summarize } from './mappers';
@@ -145,10 +146,20 @@ export class CatalogController {
       );
     }
     const free = await this.repo.freeTodayByTerminal([...pageRows, ...rich].map((t) => t.id), now);
+    /*
+     * Bo'sh natijada eng yaqin, natijasi bor viloyat (sahifa unga havola beradi): o'sha
+     * filtrlar bilan bitta groupBy, faqat natija bo'sh va bitta viloyat so'ralganda.
+     * Koridorda (bir nechta viloyat) "eng yaqin" noaniq. Radius va "bugun bo'sh" yuqoridagi
+     * yo'ldan qaytadi: bo'sh joy hisoblangan qiymat, uni groupBy sanay olmaydi.
+     */
+    const nearby = total === 0 && regions.length === 1
+      ? nearestRegionWith(regions[0]!, await this.repo.countTerminalsByRegion({ ...base, region: undefined }))
+      : null;
     return {
       items: pageRows.map((t) => publicTerminalCard(t, free[t.id] ?? 0, geo)),
       total, page: p, limit: l,
       summary: summarize(rich, free, geo, services),
+      nearby,
     };
   }
 

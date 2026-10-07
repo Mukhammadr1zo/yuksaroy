@@ -32,7 +32,7 @@ export function sortWork(stats: Record<QueueKey, QueueStat>): WorkRow[] {
 }
 
 export type Alert = {
-  code: 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN' | 'NO_PROVIDER';
+  code: 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN' | 'NO_PROVIDER' | 'STUCK_ORDERS';
   tone: 'warn' | 'bad';
   n?: number;
   of?: number;
@@ -51,6 +51,8 @@ export const DB_SLOW_MS = 300;
  * Vagon manbasi: yarmi yoki ko'pi javobsiz bo'lsa bad, aks holda warn.
  * noProvider: 24 soatda hech kimga yuborilmagan yangi so'rovlar soni (common/fanout.ts).
  * Qaror aniq: o'sha viloyatda o'sha turdagi ijrochi topish yoki taklif qilish.
+ * stuckOrders: 7 kun qimirlamagan buyurtmalar (common/stuck-orders.ts). Faqat son: eng
+ * eskisining yoshi bitta count bilan chiqmaydi, buning uchun hamma qatorni o'qish kerak.
  */
 export function alertsOf(i: {
   phonePlans: number | null;
@@ -58,6 +60,7 @@ export function alertsOf(i: {
   ads: { expired: number; ending: number } | null;
   db: { ok: boolean; ms?: number };
   noProvider?: number | null;
+  stuckOrders?: number | null;
 }): Alert[] {
   const out: Alert[] = [];
   if (!i.db.ok) out.push({ code: 'DB_DOWN', tone: 'bad' });
@@ -67,6 +70,7 @@ export function alertsOf(i: {
   if (i.ads && i.ads.expired > 0) out.push({ code: 'AD_EXPIRED', tone: 'warn', n: i.ads.expired });
   if (i.ads && i.ads.ending > 0) out.push({ code: 'AD_ENDING', tone: 'warn', n: i.ads.ending });
   if (i.noProvider) out.push({ code: 'NO_PROVIDER', tone: 'warn', n: i.noProvider });
+  if (i.stuckOrders) out.push({ code: 'STUCK_ORDERS', tone: 'warn', n: i.stuckOrders });
   return out;
 }
 

@@ -2,7 +2,7 @@
   "reviews": {
     "heading": "Baholar",
     "summary": "{avg} · {count} baho",
-    "none": "Baho yo'q",
+    "none": "Reyting hali yo'q",
     "hidden": "{count} baho, {min} tadan keyin ko'rsatiladi",
     "noneBody": "Hali baho yo'q. Baho faqat yakunlangan buyurtmadan keyin, yuk egasi tomonidan beriladi.",
     "order": "buyurtma",

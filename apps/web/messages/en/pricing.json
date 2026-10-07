@@ -32,12 +32,11 @@
     },
     "team": {
       "name": "Team",
-      "price": "Negotiated",
+      "price": "Same as subscription",
       "note": "for staff of one organization",
       "f1": "Every employee orders their own subscription",
       "f2": "The organization makes one transfer with one receipt",
-      "f3": "From 3 people the discount is negotiated",
-      "cta": "Ask for a discount"
+      "cta": "Ask a question"
     },
     "commission": {
       "heading": "Booking commission",
@@ -59,7 +58,7 @@
       "q6": "Are prices hidden from guests?",
       "a6": "No. Tariffs and listing prices are open without login. An account is needed only to see the phone number and send an inquiry.",
       "q7": "How do we pay as a team?",
-      "a7": "Every employee places their own order on the subscription page and gets a PAY number. The organization makes one transfer and lists all those numbers, separated by commas, in the payment note. We confirm each order separately and the subscriptions switch on the same day. For the discount from 3 people get in touch first: the transfer is made once the amount is agreed."
+      "a7": "Every employee places their own order on the subscription page and gets a PAY number. The organization makes one transfer and lists all those numbers, separated by commas, in the payment note. We confirm each order separately and the subscriptions switch on the same day."
     }
   }
 }

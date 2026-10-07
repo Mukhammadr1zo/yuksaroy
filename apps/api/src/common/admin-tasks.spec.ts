@@ -25,7 +25,7 @@ describe('staleTaskIds', () => {
 });
 
 describe('taskHref', () => {
-  it("9 tur, har biri o'z sahifasiga", () => {
+  it("10 tur, har biri o'z sahifasiga", () => {
     expect(taskHref('Listing', 'a')).toBe('/admin/listings/a');
     expect(taskHref('Organization', 'a')).toBe('/admin/orgs/a');
     expect(taskHref('Terminal', 'a')).toBe('/admin/terminals/a');
@@ -35,6 +35,7 @@ describe('taskHref', () => {
     expect(taskHref('UrgentRequest', 'a', 'UR-7')).toBe('/admin/urgent?q=UR-7');
     expect(taskHref('ContactMessage', 'a')).toBe('/admin/moderation?tab=contact#a');
     expect(taskHref('Report', 'a')).toBe('/admin/moderation?tab=reports#a');
+    expect(taskHref('Inquiry', 'a')).toBe('/dashboard/inquiries/a');
   });
 
   it("obyekt o'chirilgan (no yo'q): havola id bilan", () => {
@@ -60,7 +61,7 @@ describe('dueAtOf', () => {
 
 describe('TASK_ENTITIES', () => {
   it("har biri queueOf bilan topiladi va navbatning entity si o'ziga qaytadi", () => {
-    expect(TASK_ENTITIES).toHaveLength(9);
+    expect(TASK_ENTITIES).toHaveLength(10);
     for (const e of TASK_ENTITIES) {
       const k = queueOf(e);
       expect(k, e).toBeTruthy();

@@ -87,7 +87,8 @@ export class ListingsUseCase {
    * yangi hodisa (kuzatuv xabari) faqat bittasiga qo'shilib qolishi mumkin edi.
    */
   private async activate(l: ListingRecord, ownerUserId: string, now: Date) {
-    const out = await this.repo.setStatus(l.id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), rejectReason: null });
+    // Eslatma belgisi eski muddatniki: qolib ketsa yangi muddat tugashida egasi eslatma olmasdi
+    const out = await this.repo.setStatus(l.id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), expiryRemindedAt: null, rejectReason: null });
     // Obuna e'lonni ham ko'taradi: alohida Premium sotib olish yo'q
     await this.subs.raiseListing(ownerUserId, l.id);
     // Kuzatuvchilar xabarini kutmaymiz: e'lon chiqishi xabar yo'liga bog'liq emas

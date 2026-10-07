@@ -66,4 +66,11 @@ describe('ogohlantirishlar', () => {
     expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, noProvider: 0 })).toEqual([]);
     expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, noProvider: null })).toEqual([]);
   });
+
+  it("qotgan buyurtma warn va so'rovdan keyin turadi; nol yoki yiqilgan blok jim", () => {
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, stuckOrders: 2 })).toEqual([{ code: 'STUCK_ORDERS', tone: 'warn', n: 2 }]);
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, noProvider: 1, stuckOrders: 4 }).map((a) => a.code)).toEqual(['NO_PROVIDER', 'STUCK_ORDERS']);
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, stuckOrders: 0 })).toEqual([]);
+    expect(alertsOf({ phonePlans: 1, wagon: null, ads: null, db: ok, stuckOrders: null })).toEqual([]);
+  });
 });

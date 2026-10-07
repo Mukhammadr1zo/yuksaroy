@@ -269,6 +269,12 @@ export const ORDER_TRANSITIONS: readonly { from: OrderStatus; to: OrderStatus; a
   { from: 'CONFIRMED', to: 'IN_PROGRESS', actors: ['TERMINAL', 'ADMIN'] },
   { from: 'CONFIRMED', to: 'CANCELLED', actors: ['CLIENT', 'TERMINAL', 'ADMIN'] }, // terminal: NO_SHOW kodi bilan
   { from: 'IN_PROGRESS', to: 'DONE', actors: ['TERMINAL', 'ADMIN'] },
+  // Mijoz faqat qotgan buyurtmani yopadi (pastdagi ORDER_STUCK_DAYS). Vaqt sharti bu jadvalda
+  // yo'q: u OrderActionsUseCase.closeStuck da (customerCloseAt) va o'sha tekshiruv MAJBURIY.
+  // Jadvalning o'zi mijozga DONE ni istalgan paytda ruxsat beradi, shuning uchun mijoz tomonida
+  // canOrderTransition dan tugma chiqarilmasin: UI serverdan kelgan closeAt ga qaraydi
+  { from: 'CONFIRMED', to: 'DONE', actors: ['CLIENT'] },
+  { from: 'IN_PROGRESS', to: 'DONE', actors: ['CLIENT'] },
 ];
 
 export { TransitionError } from './transition';
@@ -297,19 +303,29 @@ export const ORDER_EVENT_STATUSES: readonly OrderStatus[] = ['CONFIRMED', 'IN_PR
  * uchun eng foydali yo'l tugmani bosmaslik edi: buyurtma abadiy ochiq qolardi, mijoz
  * baho yoza olmasdi va o'rtacha ball doim yuqori ko'rinardi.
  *
- * Bitta ta'rif ikki joyda ishlaydi: api dagi common/stuck-orders.ts (ogohlantirish sanog'i)
- * va mijozning yopish huquqi. Biri o'zgarsa ikkinchisi ham shu funksiyalardan o'qisin.
+ * Bitta ta'rif ikki joyda ishlaydi: api dagi common/stuck-orders.ts (ogohlantirish sanog'i
+ * va admin ro'yxatidagi filtr) va mijozning yopish huquqi. Ikkalasi ham qarorni shu yerdagi
+ * orderIdleSince ga beradi, bazadagi shart faqat nomzodlarni toraytiradi.
  */
 export const ORDER_STUCK_DAYS = 7;
 export const ORDER_STUCK_STATUSES: readonly OrderStatus[] = ['CONFIRMED', 'IN_PROGRESS'];
 
 /**
- * Buyurtma qachondan beri harakatsiz: eng oxirgi hodisa, band qilingan slotning oxiri,
- * tasdiq va yaratilgan paytdan eng kechi. Slot hisobga olinadi, chunki kelasi oyga band
- * qilingan buyurtma qotgan emas, u shunchaki o'z kunini kutyapti.
+ * Buyurtma qachondan beri harakatsiz: eng oxirgi hodisa, xizmat tugaydigan payt, tasdiq va
+ * yaratilgan paytdan eng kechi. Slot hisobga olinadi, chunki kelasi oyga band qilingan
+ * buyurtma qotgan emas, u shunchaki o'z kunini kutyapti.
+ *
+ * Pullik saqlash (storageDays) xizmat vaqtini cho'zadi: yuk omborda turgan kunlarda
+ * terminalning hech narsa bosmasligi tabiiy. Ilgari saqlash hisobga olinmasdi va mijoz
+ * yuki hali omborda turgan buyurtmani "qotgan" deb yopa olardi; shundan keyin terminal uni
+ * yakunlay olmas va saqlash kunlari uchun akt ham, hisob ham tuzilmasdi. storageDays
+ * majburiy maydon: chaqiruvchi uni unutib qo'ysa kompilyator to'xtatsin.
  */
-export function orderIdleSince(o: { lastActivityAt: Date | null; slotEndsAt: Date | null; confirmedAt: Date | null; createdAt: Date }): Date {
-  const ts = [o.lastActivityAt, o.slotEndsAt, o.confirmedAt, o.createdAt].filter((d): d is Date => !!d).map((d) => d.getTime());
+export function orderIdleSince(o: { lastActivityAt: Date | null; slotEndsAt: Date | null; confirmedAt: Date | null; createdAt: Date; storageDays: number | null }): Date {
+  // Saqlash slot tugagandan boshlanadi; slot bo'lmasa tasdiqdan, u ham bo'lmasa yaratilgan paytdan
+  const start = o.slotEndsAt ?? o.confirmedAt ?? o.createdAt;
+  const serviceEnd = o.storageDays && o.storageDays > 0 ? new Date(start.getTime() + o.storageDays * 86_400_000) : o.slotEndsAt;
+  const ts = [o.lastActivityAt, serviceEnd, o.confirmedAt, o.createdAt].filter((d): d is Date => !!d).map((d) => d.getTime());
   return new Date(Math.max(...ts));
 }
 

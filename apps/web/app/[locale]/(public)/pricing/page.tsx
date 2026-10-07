@@ -28,6 +28,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
  * Bepul va Jamoa kartalari matndan iborat: e'lon soni chegarasi kodda yo'q, do'kon sahifasi
  * faqat egalikni so'raydi, jamoa hisobi esa qurilmagan (har kim o'zi buyurtma beradi,
  * tashkilot bitta o'tkazma qiladi).
+ *
+ * Chegirma yo'q (egasining 2026-10-06 qarori): jamoa ham obuna narxini to'laydi. Shuning
+ * uchun Jamoa kartasida kelishiladigan narx yoki chegirma va'dasi turmaydi, tugmasi esa
+ * savol uchun Murojaat sahifasiga olib boradi.
  */
 type Card = { key: string; name: string; priceSom: number | null; note: string; features: string[]; href: string; cta: string; hot: boolean };
 
@@ -53,7 +57,7 @@ export default async function PricingPage({ params }: Params) {
       features: p.features[locale] ?? p.features.uz ?? [], href: '/dashboard/subscription', cta: t('subscription.cta'), hot: i === hotIdx,
     }))
     : [fromI18n('subscription', 5, '/dashboard/subscription', sub.pricePerMonthSom)];
-  const cards = [fromI18n('free', 4, '/dashboard/listings/new', null), ...planCards, fromI18n('team', 3, '/contact?topic=partner', null)];
+  const cards = [fromI18n('free', 4, '/dashboard/listings/new', null), ...planCards, fromI18n('team', 2, '/contact?topic=question', null)];
 
   return (
     <>

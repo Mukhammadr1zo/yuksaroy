@@ -203,6 +203,7 @@
         "timeline": "History",
         "documents": "Documents",
         "noDocs": "No documents yet: the act and invoice appear after the order is completed.",
+        "noDocsDone": "No act or invoice was issued for this order.",
         "openDoc": "Open in browser",
         "docHint": "The document opens in the browser; the link is valid for 10 minutes.",
         "invoice": "Invoice {no}",
@@ -212,6 +213,12 @@
         "cancelYes": "Yes, cancel",
         "cancelNo": "No",
         "cancelNote": "Cancellation is unavailable less than 12 hours before the spot starts.",
+        "close": "Close the order",
+        "closeLead": "The terminal has not closed this order for {days} days. If the work is done, you can close it yourself and leave a review.",
+        "closeConfirm": "The order will be marked as completed and cannot be reopened. No act or invoice will be issued. Close it?",
+        "closeLater": "If nothing happens on the order before then, from {date} you can close it yourself and leave a review.",
+        "closeFailed": "Could not close the order. Please try again.",
+        "closeChanged": "The order changed in the meantime. The page has been updated.",
         "hint": {
           "PENDING": "Waiting for the terminal to confirm. Otherwise the spot is released automatically.",
           "CONFIRMED": "The spot is reserved for you. Arrive at the scheduled time.",
@@ -226,6 +233,11 @@
           "TERMINAL": "terminal",
           "SYSTEM": "system",
           "ADMIN": "administrator"
+        },
+        "reason": {
+          "IDLE_CLOSED": "Closed by the customer after {days} days without activity",
+          "SLA_TIMEOUT": "The terminal did not respond in time",
+          "NO_SHOW": "The customer did not arrive at the scheduled time"
         },
         "err": {
           "CANCEL_TOO_LATE": "Less than 12 hours before the spot, cancellation is unavailable. Contact the terminal.",

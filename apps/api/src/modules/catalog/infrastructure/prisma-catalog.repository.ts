@@ -133,6 +133,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
   countTerminals(f: TerminalFilter) {
     return this.prisma.terminal.count({ where: terminalWhere(f) });
   }
+  async countTerminalsByRegion(f: TerminalFilter) {
+    const rows = await this.prisma.terminal.groupBy({ by: ['regionCode'], where: terminalWhere(f), _count: { _all: true } });
+    return Object.fromEntries(rows.filter((r) => r.regionCode).map((r) => [r.regionCode!, r._count._all]));
+  }
 
   async listTerminals(f: TerminalFilter, now: Date) {
     // Sukut tartib: egasi bor obyektlar oldinda (reestr qatori ulardan keyin), keyin baho va nom.

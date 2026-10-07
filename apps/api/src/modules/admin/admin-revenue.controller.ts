@@ -11,7 +11,7 @@ import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { REMIND_ACTION, remindBlockedAt, remindDayStart } from '../subscription/remind-manual';
 import { mergeMonths, snapshot, subscriptionMonths, type RevenueRow } from './money';
-import { monthBack, monthKey, monthlyRevenue } from './revenue';
+import { adSales, monthBack, monthKey, monthlyDeals, monthlyRevenue } from './revenue';
 
 const DAY = 86_400_000;
 const EXPIRING_DAYS = ['7', '14', '30'] as const;
@@ -34,7 +34,7 @@ const num = (v: bigint | null | undefined) => (v == null ? null : Number(v));
 const som = (t: number | null) => (t == null ? null : t / 100);
 
 const MONTHS_CSV: CsvCols<RevenueRow> = {
-  month: (r) => r.month, totalSom: (r) => r.totalTiyin / 100, subsSom: (r) => r.subsTiyin / 100, premiumSom: (r) => r.premiumTiyin / 100,
+  month: (r) => r.month, totalSom: (r) => r.totalTiyin / 100, subsSom: (r) => r.subsTiyin / 100, premiumSom: (r) => r.premiumTiyin / 100, adsSom: (r) => r.adsTiyin / 100,
   payments: (r) => r.payments, renewals: (r) => r.renewals, mrrSom: (r) => r.mrrTiyin / 100,
   activeUsers: (r) => r.activeUsers, newUsers: (r) => r.newUsers, churnedUsers: (r) => r.churnedUsers,
 };
@@ -76,26 +76,61 @@ export class AdminRevenueController {
    * Obuna pool bitta: to'langan va endsAt 12 oy oldingi oy boshidan keyin. Tushum ustunlari
    * ham shundan (paidAt <= endsAt, ya'ni oxirgi 12 oyda to'langan qator poolda bor): MRR va
    * tushum bir to'plamdan hisoblanadi, ikkisi bir-biriga zid chiqmaydi. Premium bugungidek.
+   * Reklama boshlangan oyi bo'yicha (adSales, bosh sahifa kartasi bilan bitta qoida).
+   * deals tushum emas: alohida ro'yxat, ekranda ham alohida blok.
    * ponytail: pool xotirada, take 20000; yuz minglab to'lovchi bo'lsa SQL ga o'tadi.
    */
   @Get()
   async overview(@CurrentUserId() userId: string, @Query('format') format?: string, @Res({ passthrough: true }) reply?: FastifyReply) {
     const now = new Date();
-    const [pool, prems] = await Promise.all([
+    const from = uzLocalToUtc(`${monthBack(monthKey(now), 12)}-01`, '00:00');
+    const [pool, prems, ads, deals] = await Promise.all([
       this.prisma.subscription.findMany({
-        where: { paidAt: { not: null }, endsAt: { gte: uzLocalToUtc(`${monthBack(monthKey(now), 12)}-01`, '00:00') } },
+        where: { paidAt: { not: null }, endsAt: { gte: from } },
         select: { userId: true, paidAt: true, startsAt: true, endsAt: true, amountTiyin: true, months: true },
         orderBy: { endsAt: 'desc' },
         take: 20_000,
       }),
       // 400 kun: 12 to'liq oy chetidan chiqmasin; orderBy majburiy, chegara eng ESKI qatorlarni tashlasin
       this.prisma.premiumOrder.findMany({ where: { paidAt: { gte: new Date(now.getTime() - 400 * DAY) } }, select: { paidAt: true, amountTiyin: true }, orderBy: { paidAt: 'desc' }, take: 5000 }),
+      this.prisma.adPlacement.findMany({ where: adSales(from, now), select: { startsAt: true, pricePaidSom: true }, orderBy: { startsAt: 'desc' }, take: 5000 }),
+      this.deals(from, now),
     ]);
-    const months = mergeMonths(monthlyRevenue(pool, prems, now), subscriptionMonths(pool, now));
+    const months = mergeMonths(monthlyRevenue(pool, prems, ads, now), subscriptionMonths(pool, now));
     if (format === 'csv') {
       return sendCsv({ reply: reply!, audit: this.audit, actorId: userId, resource: 'revenue-months', filters: {}, total: months.length, rows: async () => months, cols: MONTHS_CSV });
     }
-    return { now: snapshot(pool, now), months };
+    return { now: snapshot(pool, now), months, deals };
+  }
+
+  /**
+   * Platformadagi bitimlar: yuk, xizmat va shoshilinch so'rovlarda tanlangan taklif narxi.
+   *
+   * Tanlash vaqti faqat auditda (market.award, urgent.award, meta.offerId): so'rovda awardedAt
+   * yo'q, updatedAt keyingi yopishda siljiydi, taklifning createdAt i esa taklif berilgan kun.
+   * Har tanlashga bitta qator: OPEN -> AWARDED bir marta o'tadi. Taklif keyin ham AWARDED
+   * qoladi (so'rov DONE yoki CLOSED bo'lsa ham), so'rov o'chsa taklif bilan birga ketadi.
+   * Ikkala jadvalga bitta id ro'yxati: cuid lar jadvallar aro ham takrorlanmaydi.
+   */
+  private async deals(from: Date, now: Date) {
+    const awards = await this.prisma.auditLog.findMany({
+      where: { action: { in: ['market.award', 'urgent.award'] }, createdAt: { gte: from } },
+      select: { meta: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+      take: 20_000,
+    });
+    const at = new Map<string, Date>();
+    for (const a of awards) {
+      const id = (a.meta as { offerId?: unknown } | null)?.offerId;
+      if (typeof id === 'string') at.set(id, a.createdAt);
+    }
+    const where = { id: { in: [...at.keys()] }, status: 'AWARDED' };
+    const select = { id: true, priceTiyin: true } as const;
+    const [market, urgent] = await Promise.all([
+      this.prisma.marketOffer.findMany({ where, select }),
+      this.prisma.urgentOffer.findMany({ where, select }),
+    ]);
+    return monthlyDeals([...market, ...urgent].map((o) => ({ at: at.get(o.id)!, priceTiyin: o.priceTiyin })), now);
   }
 
   /**

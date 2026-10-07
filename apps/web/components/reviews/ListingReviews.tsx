@@ -49,6 +49,7 @@ export function ListingReviews({ listingId, slug }: { listingId: string; slug: s
           : <span className="font-mono text-sm text-muted">{count ? t('hidden', { count, min: page?.minToShow ?? 3 }) : t('none')}</span>}
       </div>
 
+      {/* Terminal sahifasidagi kabi: ro'yxatda barcha izohlar (reytingga kirmaydiganlari ham), count esa faqat hisobga kirganlari */}
       {page && page.total > 0 ? (
         <ul className="mt-3 space-y-3">
           {page.items.map((x) => (

@@ -8,13 +8,14 @@ import { FANOUT_ACTION } from '../../common/fanout';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
+import { stuckOrderIds } from '../../common/stuck-orders';
 import { JwtGuard } from '../identity/presentation/jwt.guard';
 import { dayKeys } from '../impressions/day-series';
 import { ImpressionsService } from '../impressions/impressions.service';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { alertsOf, fillSeries, growthPair, revealFunnel, sortWork } from './admin-home';
-import { monthWindow } from './revenue';
+import { adSales, monthWindow } from './revenue';
 
 const DAY = 86_400_000;
 
@@ -61,7 +62,7 @@ export class AdminHomeController {
     };
     const in7 = new Date(now.getTime() + 7 * DAY);
     const since24h = new Date(now.getTime() - DAY);
-    const [db, work, money, growth, series, phonePlans, wagon, ads, commission, reveals, noProvider] = await Promise.all([
+    const [db, work, money, growth, series, phonePlans, wagon, ads, commission, reveals, noProvider, stuckOrders] = await Promise.all([
       this.pingDb(),
       safe('work', async () => sortWork(await queueStats(this.prisma, true))),
       safe('money', () => this.money(now, in7)),
@@ -89,6 +90,8 @@ export class AdminHomeController {
       safe('reveals', () => this.reveals(now)),
       // 24 soatda hech kimga yuborilmagan yangi so'rovlar: sent son bo'lib yoziladi (common/fanout.ts)
       safe('fanout', () => this.prisma.auditLog.count({ where: { action: FANOUT_ACTION, createdAt: { gte: since24h }, meta: { path: ['sent'], equals: 0 } } })),
+      // Qotgan buyurtma: /admin/orders?status=STUCK aynan shu ro'yxat bilan ochiladi, son va ro'yxat bir xil
+      safe('stuck', async () => (await stuckOrderIds(this.prisma, now)).length),
     ]);
     return {
       db,
@@ -96,7 +99,7 @@ export class AdminHomeController {
       money,
       growth,
       series,
-      alerts: alertsOf({ phonePlans, wagon, ads, db, noProvider }),
+      alerts: alertsOf({ phonePlans, wagon, ads, db, noProvider, stuckOrders }),
       // Uch oylik tarix ataylab yo'q: qaror ikkita songa qaraydi
       commission,
       // Raqam ochish voronkasi, 30 kun. Bepul oyna o'chiq ekan brauzer kartani chizmaydi.
@@ -106,7 +109,8 @@ export class AdminHomeController {
   }
 
   /**
-   * Tushum faqat egaga: shu oy va o'tgan oy, paidAt bo'yicha, Toshkent oyi (monthWindow).
+   * Tushum faqat egaga: shu oy va o'tgan oy, Toshkent oyi (monthWindow). Obuna va Premium
+   * paidAt bo'yicha, reklama boshlangan kuni bo'yicha (adSales: Tushum sahifasi bilan bitta qoida).
    * Mijoz isOwner bo'lmasa bu yo'lni so'ramaydi. Alohida yo'l, chunki qolgan bloklar
    * operatorga ham ochiq va bitta javobda "ega bo'lsa qo'sh" sharti xatoga moyil.
    */
@@ -115,16 +119,21 @@ export class AdminHomeController {
   async revenue() {
     const now = new Date();
     const { start, prevStart } = monthWindow(now);
-    const [subNow, premNow, subPrev, premPrev] = await Promise.all([
+    const [subNow, premNow, adNow, subPrev, premPrev, adPrev] = await Promise.all([
       this.prisma.subscription.aggregate({ where: { paidAt: { gte: start, lt: now } }, _sum: { amountTiyin: true }, _count: { _all: true } }),
       this.prisma.premiumOrder.aggregate({ where: { paidAt: { gte: start, lt: now } }, _sum: { amountTiyin: true }, _count: { _all: true } }),
+      this.prisma.adPlacement.aggregate({ where: adSales(start, now), _sum: { pricePaidSom: true } }),
       this.prisma.subscription.aggregate({ where: { paidAt: { gte: prevStart, lt: start } }, _sum: { amountTiyin: true } }),
       this.prisma.premiumOrder.aggregate({ where: { paidAt: { gte: prevStart, lt: start } }, _sum: { amountTiyin: true } }),
+      this.prisma.adPlacement.aggregate({ where: adSales(prevStart, start), _sum: { pricePaidSom: true } }),
     ]);
     const som = (v: bigint | null) => Number(v ?? 0n); // BigInt JSON ga chiqmaydi
+    // Reklama so'mda (Int): * 100 tiyinga, natija 2^53 dan ancha past, ya'ni aniq
+    const ad = (v: number | null) => (v ?? 0) * 100;
     return {
-      thisMonthTiyin: som(subNow._sum.amountTiyin) + som(premNow._sum.amountTiyin),
-      prevMonthTiyin: som(subPrev._sum.amountTiyin) + som(premPrev._sum.amountTiyin),
+      thisMonthTiyin: som(subNow._sum.amountTiyin) + som(premNow._sum.amountTiyin) + ad(adNow._sum.pricePaidSom),
+      prevMonthTiyin: som(subPrev._sum.amountTiyin) + som(premPrev._sum.amountTiyin) + ad(adPrev._sum.pricePaidSom),
+      // Reklama sanalmaydi: bu qo'lda tasdiqlangan to'lovlar soni (Tushum sahifasidagi ustun bilan bir xil)
       payments: subNow._count._all + premNow._count._all,
     };
   }

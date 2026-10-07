@@ -9,6 +9,7 @@ import { BOOKING_REPOSITORY, type BookingRepository } from '../booking/domain/po
 import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
 import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PrismaService } from '../../common/prisma.service';
+import { stuckOrderIds } from '../../common/stuck-orders';
 import { notifyBoth } from '../../common/telegram';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -112,10 +113,14 @@ export class AdminOpsController {
     const take = clampInt(limit, 30, 1, 100);
     const text = q?.trim();
     const idList = parseIds(ids);
+    // STUCK holat emas, filtr: bosh sahifadagi STUCK_ORDERS sanagan buyurtmalar, o'sha ro'yxat bilan.
+    // AND ichida: pastdagi ?ids filtri ham id kalitini ishlatadi va uni bosib qolmasin
+    const stuck = status === 'STUCK' ? await stuckOrderIds(this.prisma, new Date()) : null;
     const where: Prisma.OrderWhereInput = {
       ...(text ? { no: like(text) } : {}),
       // Noto'g'ri holat nomi Prisma da xato bo'lardi: ro'yxatda bo'lmasa filtr e'tiborsiz qoladi
-      ...(status && (ORDER_STATUSES as readonly string[]).includes(status) ? { status: status as OrderStatus } : {}),
+      ...(stuck ? { AND: [{ id: { in: stuck } }] }
+        : status && (ORDER_STATUSES as readonly string[]).includes(status) ? { status: status as OrderStatus } : {}),
       ...(terminalId ? { terminalId } : {}),
       ...(orgId ? { shipperOrgId: orgId } : {}),
       ...(idList ? { id: { in: idList } } : {}),
@@ -279,7 +284,12 @@ export class AdminOpsController {
     return { items: rows.map((r) => ({ ...r, author: names.get(r.userId) ?? null })), total, page: p, limit: take };
   }
 
-  /** Listing ham ratingAvg/ratingCount ni keshlaydi, shuning uchun bu yerda ham qayta hisoblanadi. */
+  /**
+   * Listing ham ratingAvg/ratingCount ni keshlaydi, shuning uchun bu yerda ham qayta hisoblanadi.
+   * excluded qatorlar (o'z e'loniga yozilgan eski izoh) hisobdan tashqarida: aks holda
+   * birinchi o'chirishdayoq ular reytingga qaytib kirardi. Migratsiya
+   * 20261006020000_listing_review_excluded shu formulani SQL da takrorlaydi.
+   */
   @Delete('listing-reviews/:id')
   async deleteListingReview(@CurrentUserId() userId: string, @Param('id') id: string) {
     const r = await this.prisma.listingReview.findUnique({ where: { id }, select: { listingId: true, rating: true } });
@@ -287,7 +297,7 @@ export class AdminOpsController {
     const old = await this.prisma.listing.findUnique({ where: { id: r.listingId }, select: { ratingAvg: true, ratingCount: true } });
     const next = await this.prisma.$transaction(async (tx) => {
       await tx.listingReview.delete({ where: { id } });
-      const a = await tx.listingReview.aggregate({ where: { listingId: r.listingId }, _avg: { rating: true }, _count: { _all: true } });
+      const a = await tx.listingReview.aggregate({ where: { listingId: r.listingId, excluded: false }, _avg: { rating: true }, _count: { _all: true } });
       const avg = round2(a._avg.rating ?? 0);
       const count = a._count._all;
       await tx.listing.update({ where: { id: r.listingId }, data: { ratingAvg: avg, ratingCount: count } });

@@ -222,7 +222,8 @@
         "mine": "Terminallarni ko'rish"
       },
       "fromPrivate": "Xususiy shaxs",
-      "openListing": "E'lonni ochish"
+      "openListing": "E'lonni ochish",
+      "awaiting": "Javob kutilmoqda"
     },
     "org": {
       "title": "Tashkilot",

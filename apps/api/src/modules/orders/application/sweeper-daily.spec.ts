@@ -28,7 +28,7 @@ function setup(o: { dailyFails?: boolean } = {}) {
     session: o.dailyFails ? { deleteMany: async () => { throw new Error('baza yotibdi'); } } : del('session'),
     otpCode: del('otpCode'),
     notification: del('notification'),
-    // Muddati o'tgan e'lon alohida spec da: bu yerda ro'yxat bo'sh.
+    // Muddati o'tgan va tugayotgan e'lon alohida spec da: bu yerda ro'yxat bo'sh.
     // deleteMany EMAS, shuning uchun calls ga tushmaydi
     listing: { findMany: async () => { listingReads += 1; return []; }, updateMany: async () => ({ count: 0 }) },
     // Vazifa yopilishi har tikda: ochiq vazifa yo'q, so'rov shu bilan tugaydi
@@ -95,11 +95,11 @@ describe('kunlik tozalash', () => {
 });
 
 /** Faqat stub qo'shilsa, chaqiruv keyin tushib qolsa ham testlar yashil qolardi: xato tick ichida yutiladi. */
-it("kunlik sikl muddati o'tgan e'lonlarni ham ko'radi", async () => {
+it("kunlik sikl muddati o'tgan va tugayotgan e'lonlarni ham ko'radi", async () => {
   const { svc, reads } = setup();
   await svc.tick();
   await svc.tick();
-  expect(reads()).toBe(1); // tikda emas, sutkada bir marta
+  expect(reads()).toBe(2); // tikda emas, sutkada bir marta: muddati o'tganlar va eslatma
 });
 
 /** Tizim sahifasi uchun natija: sikl tugadimi, qancha vaqt oldi, nima qildi. */

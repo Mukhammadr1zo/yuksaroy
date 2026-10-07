@@ -177,6 +177,14 @@
         "start": "Cancel the order",
         "hint": "Cancellation is not possible less than 12 hours before the spot starts."
       },
+      "close": {
+        "lead": "The terminal has not closed this order for {days} days. If the work is done, you can close it yourself and leave a review.",
+        "start": "Close the order",
+        "confirm": "The order will be marked as completed and cannot be reopened. No act or invoice will be issued.",
+        "yes": "Yes, close it",
+        "no": "No",
+        "later": "If nothing happens on the order before then, from {date} you can close it yourself and leave a review."
+      },
       "statusHint": {
         "PENDING": "Waiting for terminal confirmation. Without it the spot is released automatically.",
         "CONFIRMED": "The spot is booked for you. Arrive at the agreed time.",
@@ -191,6 +199,11 @@
         "TERMINAL": "terminal",
         "SYSTEM": "system",
         "ADMIN": "administrator"
+      },
+      "reason": {
+        "IDLE_CLOSED": "Closed by the customer after {days} days without activity",
+        "SLA_TIMEOUT": "The terminal did not respond in time",
+        "NO_SHOW": "The customer did not arrive at the scheduled time"
       },
       "org": "Organization",
       "cargoOptional": "Cargo type (optional)",
@@ -224,6 +237,8 @@
         "cancelTooLate": "Less than 12 hours before the spot starts, cancellation is not possible. Contact the terminal.",
         "cancelNotAllowed": "Cancellation is not possible in this status.",
         "cancelFailed": "Not cancelled. Please try again.",
+        "closeFailed": "Could not close the order. Please try again.",
+        "closeChanged": "The order changed in the meantime. The page has been updated.",
         "SLOT_FULL": "No places left in this window. Choose another one.",
         "SLOT_CLOSED": "This window is closed.",
         "SLOT_PAST": "This window has passed.",

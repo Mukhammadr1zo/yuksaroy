@@ -177,6 +177,14 @@
         "start": "Buyurtmani bekor qilish",
         "hint": "Joy boshlanishiga 12 soatdan kam qolganda bekor qilib bo'lmaydi."
       },
+      "close": {
+        "lead": "Terminal {days} kundan beri buyurtmani yopmadi. Ish bajarilgan bo'lsa, uni o'zingiz yopib, baho qoldirishingiz mumkin.",
+        "start": "Buyurtmani yopish",
+        "confirm": "Buyurtma yakunlangan deb belgilanadi, uni qayta ochib bo'lmaydi. Akt va hisob tuzilmaydi.",
+        "yes": "Ha, yopilsin",
+        "no": "Yo'q",
+        "later": "Buyurtmada yangi harakat bo'lmasa, {date} dan boshlab uni o'zingiz yopib, baho qoldirishingiz mumkin."
+      },
       "statusHint": {
         "PENDING": "Terminal tasdig'i kutilmoqda. Tasdiqlanmasa joy avtomatik bo'shaydi.",
         "CONFIRMED": "Joy siz uchun band. Belgilangan vaqtda yetib boring.",
@@ -191,6 +199,11 @@
         "TERMINAL": "terminal",
         "SYSTEM": "tizim",
         "ADMIN": "administrator"
+      },
+      "reason": {
+        "IDLE_CLOSED": "{days} kun harakat bo'lmagani uchun mijoz yopdi",
+        "SLA_TIMEOUT": "Terminal belgilangan vaqtda javob bermadi",
+        "NO_SHOW": "Mijoz belgilangan vaqtda kelmadi"
       },
       "org": "Tashkilot",
       "cargoOptional": "Yuk turi (ixtiyoriy)",
@@ -224,6 +237,8 @@
         "cancelTooLate": "Joy boshlanishiga 12 soatdan kam qoldi, bekor qilib bo'lmaydi. Terminal bilan bog'laning.",
         "cancelNotAllowed": "Bu holatda bekor qilib bo'lmaydi.",
         "cancelFailed": "Bekor qilinmadi. Qayta urinib ko'ring.",
+        "closeFailed": "Buyurtmani yopib bo'lmadi. Qayta urinib ko'ring.",
+        "closeChanged": "Shu orada buyurtmada o'zgarish bo'ldi, sahifa yangilandi.",
         "SLOT_FULL": "Bu oynada joy qolmadi. Boshqasini tanlang.",
         "SLOT_CLOSED": "Bu oyna yopiq.",
         "SLOT_PAST": "Bu oyna o'tib ketdi.",

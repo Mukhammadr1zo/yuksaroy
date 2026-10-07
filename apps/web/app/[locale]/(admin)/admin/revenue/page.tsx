@@ -24,15 +24,18 @@ import { useAdminMe } from '@/components/admin/context';
 
 type Person = { id: string; fullName: string | null; phone: string | null };
 type RevenueMonth = {
-  month: string; totalTiyin: number; subsTiyin: number; premiumTiyin: number; payments: number; renewals: number;
+  month: string; totalTiyin: number; subsTiyin: number; premiumTiyin: number; adsTiyin: number; payments: number; renewals: number;
   mrrTiyin: number; activeUsers: number; newUsers: number; churnedUsers: number;
   /** Joriy oy: oy oxirigacha uzaytirganlar keyin qo'shiladi */
   forecast: boolean;
 };
+type DealMonth = { month: string; deals: number; volumeTiyin: number };
 type Revenue = {
   now: { mrrTiyin: number; activeUsers: number; mrrEndTiyin: number; activeEndUsers: number; atRiskUsers: number; atRiskTiyin: number };
   /** 12 oy, yangisi birinchi, to'lovsiz oy nol bilan */
   months: RevenueMonth[];
+  /** Platformadagi bitimlar: tushum emas, 12 oy, yangisi birinchi */
+  deals: DealMonth[];
 };
 type Expiring = {
   id: string; no: string; months: number; amountTiyin: number; endsAt: string; remindedAt: string | null; lastManualAt: string | null; remindedToday: boolean;
@@ -61,10 +64,12 @@ const F0 = { tab: 'overview', days: 7, q: '', diff: '', kind: '', page: 1 };
 type Exp = { path: string; filters: Record<string, string | number | undefined>; total: number };
 type TabProps = { f: typeof F0; set: (patch: Partial<typeof F0>) => void; onExport: (tab: Tab, e: Exp) => void };
 /** Har ustunga bir qator izoh: son nimaga kerakligi jadval ostida turadi. */
-const LEGEND = ['total', 'subs', 'payments', 'renewals', 'mrr', 'active', 'new', 'churned'] as const;
+const LEGEND = ['total', 'subs', 'ads', 'payments', 'renewals', 'mrr', 'active', 'new', 'churned'] as const;
 
 const chip = (on: boolean) => `shrink-0 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors duration-150 ${on ? 'bg-navy text-white' : 'border border-line bg-white text-muted hover:border-teal hover:text-ink'}`;
 const daysLeft = (iso: string) => Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / DAY));
+// Oy kaliti "2026-09": kun o'rtasi olinadi, shunda hech bir mintaqada oy chegarasidan sakramaydi
+const monthLabel = (m: string, locale: string) => uzMonthYear(new Date(`${m}-01T12:00:00Z`), locale);
 
 /** Foiz farqi nishoni (bosh sahifadagi nusxasi). Oldingi nol bo'lsa foiz yo'q: "yangi". warnAt: shundan past tushish sariq. */
 function Delta({ cur, prev, warnAt }: { cur: number; prev: number; warnAt: number }) {
@@ -158,7 +163,7 @@ export default function AdminRevenuePage() {
   );
 }
 
-/** Umumiy: to'rt karta (hozir, oy oxiri, xavf, shu oy tushum) va 12 oylik jadval. */
+/** Umumiy: to'rt karta (hozir, oy oxiri, xavf, shu oy tushum), 12 oylik jadval va ostida, alohida, platformadagi bitimlar. */
 function Overview({ onExport }: { onExport: TabProps['onExport'] }) {
   const tr = useTranslations('admin.revenue');
   const locale = useLocale();
@@ -184,22 +189,31 @@ function Overview({ onExport }: { onExport: TabProps['onExport'] }) {
     );
   }
   const { now, months } = data;
-  // Hech qachon to'lov bo'lmagan: nol kartalar qaror bermaydi, bitta bo'sh holat yetadi
+  // Hech qachon to'lov bo'lmagan: nol kartalar qaror bermaydi, bitta bo'sh holat yetadi.
+  // Bitimlar baribir chiziladi: ular tushumga bog'liq emas
   if (months.every((m) => !m.totalTiyin && !m.mrrTiyin)) {
-    return <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tr('empty')}</div>;
+    return (
+      <>
+        <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tr('empty')}</div>
+        <Deals rows={data.deals} />
+      </>
+    );
   }
   const cur = months[0]!;
   const prev = months[1];
   const hasPremium = months.some((m) => m.premiumTiyin > 0);
-  // Oy kaliti "2026-09": kun o'rtasi olinadi, shunda hech bir mintaqada oy chegarasidan sakramaydi
-  const label = (m: string) => uzMonthYear(new Date(`${m}-01T12:00:00Z`), locale);
+  const hasAds = months.some((m) => m.adsTiyin > 0);
   const cols: Col<RevenueMonth>[] = [
-    { key: 'month', head: tr('month'), cell: (r) => <span className="inline-flex flex-wrap items-center gap-1.5">{label(r.month)}{r.forecast ? <Pill tone="neutral">{tr('forecast')}</Pill> : null}</span> },
+    { key: 'month', head: tr('month'), cell: (r) => <span className="inline-flex flex-wrap items-center gap-1.5">{monthLabel(r.month, locale)}{r.forecast ? <Pill tone="neutral">{tr('forecast')}</Pill> : null}</span> },
     { key: 'total', head: tr('total'), num: true, cell: (r) => som(r.totalTiyin, locale) },
     { key: 'subs', head: tr('subs'), num: true, cell: (r) => som(r.subsTiyin, locale) },
     ...(hasPremium ? [{ key: 'premium', head: tr('premium'), num: true, cell: (r: RevenueMonth) => som(r.premiumTiyin, locale) }] : []),
-    { key: 'payments', head: tr('payments'), num: true, cell: (r) => num(r.payments, locale) },
-    { key: 'renewals', head: tr('renewals'), num: true, cell: (r) => num(r.renewals, locale) },
+    ...(hasAds ? [{ key: 'ads', head: tr('ads'), num: true, cell: (r: RevenueMonth) => som(r.adsTiyin, locale) }] : []),
+    // Ikki sanoq sukut bo'yicha yashirin (Ustunlar menyusidan qaytadi): reklama ustuni qo'shilgach
+    // jadval 1280 px da sahifani yon tomonga surardi. Pul va o'sish ustunlari ko'rinib qoladi,
+    // bu ikkalasi esa tasdiqlash ishining hajmi, oylik qarorga kamroq kerak.
+    { key: 'payments', head: tr('payments'), num: true, hidden: true, cell: (r) => num(r.payments, locale) },
+    { key: 'renewals', head: tr('renewals'), num: true, hidden: true, cell: (r) => num(r.renewals, locale) },
     { key: 'mrr', head: tr('cols.mrr'), num: true, cell: (r) => som(r.mrrTiyin, locale) },
     { key: 'active', head: tr('cols.active'), num: true, cell: (r) => num(r.activeUsers, locale) },
     { key: 'new', head: tr('cols.new'), num: true, cell: (r) => num(r.newUsers, locale) },
@@ -223,10 +237,36 @@ function Overview({ onExport }: { onExport: TabProps['onExport'] }) {
 
       <DataTable cols={cols} rows={months} keyOf={(r) => r.month} empty={tr('empty')} screen="revenue" />
       <ul className="mt-3 space-y-1 text-xs text-muted">
-        {LEGEND.map((k) => <li key={k}>{tr(`decision.col.${k}`)}</li>)}
+        {LEGEND.filter((k) => k !== 'ads' || hasAds).map((k) => <li key={k}>{tr(`decision.col.${k}`)}</li>)}
         {!hasPremium ? <li>{tr('noPremium')}</li> : null}
+        {!hasAds ? <li>{tr('noAds')}</li> : null}
       </ul>
+      <Deals rows={data.deals} />
     </>
+  );
+}
+
+/**
+ * Platformadagi bitimlar: tushum jadvalidan ATAYLAB alohida, o'z sarlavhasi bilan. Bu bizning
+ * pulimiz emas (mijoz ijrochiga to'laydi): bir jadvalda tursa ko'z uni tushumga qo'shib o'qirdi.
+ * 12 oy hammasi nol bo'lsa jadval o'rniga bitta bo'sh satr va qaror matni yo'q: nolga qarab qaror chiqmaydi.
+ */
+function Deals({ rows }: { rows: DealMonth[] }) {
+  const tr = useTranslations('admin.revenue');
+  const locale = useLocale();
+  const any = rows.some((r) => r.deals > 0);
+  const cols: Col<DealMonth>[] = [
+    { key: 'month', head: tr('month'), cell: (r) => monthLabel(r.month, locale) },
+    { key: 'deals', head: tr('deals.count'), num: true, cell: (r) => num(r.deals, locale) },
+    { key: 'volume', head: tr('deals.volume'), num: true, cell: (r) => som(r.volumeTiyin, locale) },
+  ];
+  return (
+    <section className="mt-8 border-t border-line pt-5">
+      <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{tr('deals.title')}</h2>
+      <p className="mt-1 text-sm text-ink">{tr('deals.lead')}</p>
+      <DataTable cols={cols} rows={any ? rows : []} keyOf={(r) => r.month} empty={tr('deals.empty')} />
+      {any ? <p className="mt-2 text-xs text-muted">{tr('deals.decision')}</p> : null}
+    </section>
   );
 }
 

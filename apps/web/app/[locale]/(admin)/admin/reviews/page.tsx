@@ -29,9 +29,9 @@ import {
 type Tab = 'terminal' | 'listing';
 /** URL dagi holat: sukut qiymat manzilga yozilmaydi. tab bo'sh bo'lsa listingId dan aniqlanadi. */
 const F0 = { tab: '', q: '', terminalId: '', listingId: '', page: 1 };
-type Base = { id: string; rating: number; text: string | null; reply: string | null; createdAt: string; author: string | null };
+type Base = { id: string; rating: number; text: string | null; reply: string | null; createdAt: string; author: string | null; excluded: boolean };
 type TerminalReview = Base & {
-  orderNo: string; excluded: boolean;
+  orderNo: string;
   terminal: { id: string; name: string; slug: string };
   org: { id: string; name: string } | null;
 };
@@ -132,8 +132,9 @@ function ReviewTable({ rows, onDelete }: { rows: Review[]; onDelete: (id: string
     { key: 'rating', head: tv('rating'), num: true, cell: (r) => (
       <div className="flex flex-col items-end gap-1">
         <Stars n={r.rating} />
-        {/* Arms-length: buyurtmachi va terminal egasi bir tomon bo'lsa baho reytingga kirmaydi */}
-        {isTerminal(r) && r.excluded ? <Pill tone="warn">{tv('excluded')}</Pill> : null}
+        {/* Reytingga kirmaydi: terminalda buyurtmachi va terminal egasi bir tomon, e'londa egasi
+            yoki uning tashkiloti a'zosi qorovul chiqqan 2026-10-03 gacha yozgan izoh */}
+        {r.excluded ? <Pill tone="warn">{tv('excluded')}</Pill> : null}
       </div>
     ) },
     { key: 'target', head: tv('target'), cell: (r) => (isTerminal(r) ? (

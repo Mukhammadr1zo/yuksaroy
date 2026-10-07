@@ -1,5 +1,5 @@
 import { uzLocalDate, uzLocalToUtc, type SearchLang } from '@yuksaroy/domain';
-import { QUEUE_DEF, TASK_ENTITIES, queueOf, tbl, type TaskEntity } from './admin-queues';
+import { QUEUE_DEF, TASK_ENTITIES, queueOf, queueWhere, tbl, type TaskEntity } from './admin-queues';
 import type { PrismaService } from './prisma.service';
 
 /**
@@ -37,6 +37,8 @@ export function taskHref(entity: TaskEntity, id: string, no?: string | null): st
     case 'UrgentRequest': return `/admin/urgent?q=${key}`;
     case 'ContactMessage': return `/admin/moderation?tab=contact#${id}`;
     case 'Report': return `/admin/moderation?tab=reports#${id}`;
+    // Panelda yozishma ekrani yo'q: javob kabinetdagi tredda yoziladi (QUEUE_HREF bilan bir joy)
+    case 'Inquiry': return `/dashboard/inquiries/${id}`;
   }
 }
 
@@ -63,15 +65,19 @@ export async function taskTitles(prisma: PrismaService, entity: TaskEntity, ids:
     case 'UrgentRequest': for (const r of await prisma.urgentRequest.findMany({ ...w, select: { id: true, no: true } })) put(r.id, r.no, r.no); break;
     case 'ContactMessage': for (const r of await prisma.contactMessage.findMany({ ...w, select: { id: true, name: true, topic: true } })) put(r.id, `${r.name}: ${r.topic}`); break;
     case 'Report': for (const r of await prisma.report.findMany({ ...w, select: { id: true, targetTitle: true } })) put(r.id, r.targetTitle); break;
+    // Obyekt nomi yolg'iz yetmaydi: bitta obyektga bir necha mijoz yozadi, savolning o'zi qaysi suhbatligini aytadi
+    case 'Inquiry':
+      for (const r of await prisma.inquiry.findMany({ ...w, select: { id: true, message: true, terminal: { select: { name: true } } } })) put(r.id, r.terminal ? `${r.terminal.name}: ${r.message}` : r.message);
+      break;
   }
   return out;
 }
 
-/** Berilgan id lardan hali navbatda turganlari (QUEUE_DEF sharti bilan). */
+/** Berilgan id lardan hali navbatda turganlari (queueWhere: badge bilan bir xil shart). */
 export async function inQueue(prisma: PrismaService, entity: TaskEntity, ids: string[]): Promise<Set<string>> {
   if (!ids.length) return new Set();
-  const d = QUEUE_DEF[queueOf(entity)];
-  const rows = await tbl(prisma, d.model).findMany({ where: { AND: [d.where, { id: { in: ids } }] }, select: { id: true } });
+  const k = queueOf(entity);
+  const rows = await tbl(prisma, QUEUE_DEF[k].model).findMany({ where: { AND: [await queueWhere(prisma, k), { id: { in: ids } }] }, select: { id: true } });
   return new Set(rows.map((r) => r.id as string));
 }
 

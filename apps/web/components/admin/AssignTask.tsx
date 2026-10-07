@@ -21,7 +21,7 @@ import { phoneDisplay } from '@/components/ui/fields';
 import { BTN, BTN_GHOST, INPUT, Notice, Pill, Popover, RowMenu, errText } from '@/components/admin/kit';
 import { useAdminMe } from '@/components/admin/context';
 
-export type TaskEntity = 'Listing' | 'Organization' | 'Terminal' | 'PremiumOrder' | 'Subscription' | 'Order' | 'UrgentRequest' | 'ContactMessage' | 'Report';
+export type TaskEntity = 'Listing' | 'Organization' | 'Terminal' | 'PremiumOrder' | 'Subscription' | 'Order' | 'UrgentRequest' | 'ContactMessage' | 'Report' | 'Inquiry';
 type Person = { id: string; fullName: string | null; phone: string | null };
 /** GET /admin/tasks qatori (api.json). queue = serverdagi QueueKey, bosh sahifadagi WORK_LABEL kaliti. */
 export type Task = {

@@ -1,16 +1,16 @@
 'use client';
-// Buyurtma tafsiloti: holat, faktlar, muzlatilgan narx, tarix, hujjatlar (brauzerda ochiladi), bekor qilish, DONE bo'lsa baho.
+// Buyurtma tafsiloti: holat, faktlar, muzlatilgan narx, tarix, hujjatlar (brauzerda ochiladi), bekor qilish, qotganini yopish, DONE bo'lsa baho.
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ORDER_EVENT_LABELS, ORDER_STATUS_LABELS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
+import { ORDER_EVENT_LABELS, ORDER_STATUS_LABELS, ORDER_STUCK_DAYS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
 import type { Order } from '@/lib/types';
 import { PriceLines, StatusPill, dateTime, slotLabel } from '@/components/order/bits';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { OrderReview } from '@/components/reviews/OrderReview';
 import { confirmTg, haptic, useTg } from '@/components/tg/TgProvider';
-import { BTN_GHOST, CARD, Err, INPUT, Row, Skeleton, useLang } from '@/components/tg/bits';
+import { BTN, BTN_GHOST, CARD, Err, INPUT, Row, Skeleton, useLang } from '@/components/tg/bits';
 
 type Docs = { documents: { id: string; no: string; kind: string; kindLabel: string; status: string }[]; invoice: { no: string; status: string; statusLabel: string; amountTiyin: number } | null };
 
@@ -24,13 +24,15 @@ export default function TgOrderPage() {
   const { tg } = useTg();
   const [o, setOrder] = useState<Order | null>(null);
   const [docs, setDocs] = useState<Docs | null>(null);
+  // Yuklanmagan ro'yxat bo'sh ro'yxat emas: aks holda tarmoq xatosi "akt va hisob tuzilmagan" bo'lib o'qilardi
+  const [docsFailed, setDocsFailed] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
 
   const load = useCallback(() => api<Order>(`/orders/${no}`).then(setOrder).catch((e) => setErr(e instanceof ApiError && e.status === 404 ? t('notFound') : tc('failed'))), [no, t, tc]);
-  useEffect(() => { void load(); api<Docs>(`/orders/${no}/documents`).then(setDocs).catch(() => setDocs({ documents: [], invoice: null })); }, [load, no]);
+  useEffect(() => { void load(); api<Docs>(`/orders/${no}/documents`).then(setDocs).catch(() => setDocsFailed(true)); }, [load, no]);
   useEffect(() => {
     if (o?.status !== 'PENDING') return;
     const i = setInterval(() => void load(), 20_000);
@@ -42,6 +44,15 @@ export default function TgOrderPage() {
     setBusy(true); setErr(null);
     try { setOrder(await post<Order>(`/orders/${no}/cancel`, { reason: reason.trim() || undefined })); setAsking(false); haptic('medium'); }
     catch (e) { const code = e instanceof ApiError ? String(e.body?.code ?? '') : ''; setErr(code && td.has(`err.${code}`) ? td(`err.${code}`) : tc('failed')); }
+    finally { setBusy(false); }
+  }
+  // Rad etilsa buyurtma qayta o'qiladi: shu orada terminal yopgan yoki yangi harakat yozgan bo'lishi mumkin.
+  // 409 da qayta urinish yordam bermaydi, shuning uchun xabari boshqa (sayt kabinetidagi kabi)
+  async function closeOrder() {
+    if (!(await confirmTg(tg, td('closeConfirm')))) return;
+    setBusy(true); setErr(null);
+    try { setOrder(await post<Order>(`/orders/${no}/close`, {})); haptic('medium'); }
+    catch (e) { setErr(td(e instanceof ApiError && e.status === 409 ? 'closeChanged' : 'closeFailed')); void load(); }
     finally { setBusy(false); }
   }
   // Hujjat tashqi brauzerda ochiladi: u yerda sessiya yo'q, shuning uchun qisqa muddatli imzolangan havola olinadi
@@ -56,7 +67,12 @@ export default function TgOrderPage() {
 
   if (err && !o) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err}</main>;
   if (!o) return <main id="main" className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
-  const cancellable = o.status === 'PENDING' || o.status === 'CONFIRMED';
+  // closeAt faqat mijoz tomoniga keladi; qoidalar sayt kabinetidagi buyurtma sahifasi bilan bir xil
+  const now = Date.now();
+  const closeAt = o.closeAt ? new Date(o.closeAt) : null;
+  const closable = !!closeAt && closeAt.getTime() <= now;
+  const cancellable = (o.status === 'PENDING' || o.status === 'CONFIRMED') && !closable;
+  const closeLater = !!closeAt && !closable && (!o.slot || Date.parse(o.slot.endsAt) < now);
 
   return (
     <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
@@ -91,7 +107,8 @@ export default function TgOrderPage() {
 
       <section className={`${CARD} mt-3 p-4`}>
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{td('documents')}</h2>
-        {!docs ? <Skeleton n={1} h="h-10" /> : docs.documents.length === 0 ? <p className="mt-1 text-sm text-muted">{td('noDocs')}</p> : (
+        {/* Mijoz yopgan buyurtmaga hujjat tuzilmaydi: "yakunlangach chiqadi" degan va'da u yerda yolg'on bo'lardi */}
+        {docsFailed ? <p className="mt-1 text-sm text-muted">{tc('loadFailed')}</p> : !docs ? <Skeleton n={1} h="h-10" /> : docs.documents.length === 0 ? <p className="mt-1 text-sm text-muted">{td(o.status === 'DONE' ? 'noDocsDone' : 'noDocs')}</p> : (
           <ul className="mt-2 divide-y divide-line">
             {docs.documents.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 py-2 text-sm">
@@ -113,7 +130,8 @@ export default function TgOrderPage() {
               <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-teal" />
               <p className="text-sm font-semibold">{(h.code && ORDER_EVENT_LABELS[lang][h.code as OrderEventCode]) || (h.toStatus && ORDER_STATUS_LABELS[lang][h.toStatus as OrderStatus]) || h.code}</p>
               <p className="font-mono text-xs text-muted">{dateTime(h.at)}{h.actorRole && td.has(`actor.${h.actorRole}`) ? ` · ${td(`actor.${h.actorRole}`)}` : ''}</p>
-              {h.reason ? <p className="mt-0.5 text-sm text-muted">{h.reason}</p> : null}
+              {/* Tizim sabablari kod bo'lib yoziladi: tarjimasi bo'lsa shu, aks holda odam yozgan matn */}
+              {h.reason ? <p className="mt-0.5 text-sm text-muted">{td.has(`reason.${h.reason}`) ? td(`reason.${h.reason}`, { days: ORDER_STUCK_DAYS }) : h.reason}</p> : null}
             </li>
           ))}
         </ol>
@@ -132,6 +150,14 @@ export default function TgOrderPage() {
           ) : <button type="button" onClick={() => setAsking(true)} className={`${BTN_GHOST} text-red-700`}>{td('cancel')}</button>}
           <p className="mt-2 text-xs text-muted">{td('cancelNote')}</p>
         </section>
+      ) : null}
+      {closable ? (
+        <section className={`${CARD} mt-4 p-4`}>
+          <p className="text-sm">{td('closeLead', { days: ORDER_STUCK_DAYS })}</p>
+          <button type="button" onClick={closeOrder} disabled={busy} className={`${BTN} mt-3`}>{td('close')}</button>
+        </section>
+      ) : closeAt && closeLater ? (
+        <p className="mt-4 text-xs text-muted">{td('closeLater', { date: dateTime(closeAt, lang) })}</p>
       ) : null}
       {o.status === 'DONE' ? <section className={`${CARD} mt-4 p-4`}><OrderReview no={o.no} shipperOrgId={o.shipper.id} /></section> : null}
     </main>

@@ -32,6 +32,15 @@ describe('buyurtma holat-mashinasi', () => {
     expect(canOrderTransition('CONFIRMED', 'DONE', 'TERMINAL')).toBe(false); // avval IN_PROGRESS
   });
 
+  // Qotgan buyurtmani mijoz yopadi; 7 kun sharti jadvalda emas, use-case da (close-stuck.spec)
+  it("mijoz DONE ga faqat CONFIRMED va IN_PROGRESS dan o'tkaza oladi", () => {
+    expect(canOrderTransition('CONFIRMED', 'DONE', 'CLIENT')).toBe(true);
+    expect(canOrderTransition('IN_PROGRESS', 'DONE', 'CLIENT')).toBe(true);
+    expect(canOrderTransition('PENDING', 'DONE', 'CLIENT')).toBe(false);
+    // Terminal uchun eski qoida o'zgarmadi: avval IN_PROGRESS
+    expect(canOrderTransition('CONFIRMED', 'DONE', 'TERMINAL')).toBe(false);
+  });
+
   it('to\'liq yo\'l: PENDING → CONFIRMED → IN_PROGRESS → DONE', () => {
     const path: OrderStatus[] = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'DONE'];
     for (let i = 0; i < path.length - 1; i++) {

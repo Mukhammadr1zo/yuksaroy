@@ -106,10 +106,10 @@ describe('snapshot', () => {
 describe('mergeMonths', () => {
   it('to\'lovsiz oy nol bilan chiqadi, tushum ustunlari mos oyga tushadi, joriy oy prognoz', () => {
     const subs = subscriptionMonths([], NOW);
-    const rev: RevenueMonth[] = [{ month: '2026-08', totalTiyin: 5, subsTiyin: 3, premiumTiyin: 2, payments: 2, renewals: 1 }];
+    const rev: RevenueMonth[] = [{ month: '2026-08', totalTiyin: 6, subsTiyin: 3, premiumTiyin: 2, adsTiyin: 1, payments: 2, renewals: 1 }];
     const m = mergeMonths(rev, subs);
     expect(m).toHaveLength(12);
-    expect(m[0]).toMatchObject({ month: '2026-09', totalTiyin: 0, payments: 0, forecast: true });
-    expect(m[1]).toMatchObject({ month: '2026-08', totalTiyin: 5, subsTiyin: 3, premiumTiyin: 2, payments: 2, renewals: 1, forecast: false });
+    expect(m[0]).toMatchObject({ month: '2026-09', totalTiyin: 0, adsTiyin: 0, payments: 0, forecast: true });
+    expect(m[1]).toMatchObject({ month: '2026-08', totalTiyin: 6, subsTiyin: 3, premiumTiyin: 2, adsTiyin: 1, payments: 2, renewals: 1, forecast: false });
   });
 });

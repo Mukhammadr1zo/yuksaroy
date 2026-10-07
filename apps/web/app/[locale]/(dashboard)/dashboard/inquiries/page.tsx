@@ -24,7 +24,12 @@ export default function InquiriesPage() {
 
   useEffect(() => {
     setItems(null); setErr(false);
-    api<Inquiry[]>(`/inquiries?scope=${scope}`).then(setItems).catch(() => setErr(true));
+    api<Inquiry[]>(`/inquiries?scope=${scope}`)
+      // Kelganlarda hali javob berilmaganlari tepada, qolgan tartib serverniki (oxirgi xabar).
+      // Platforma adminining "Javobsiz suhbat" navbati shu sahifaga olib keladi: sanalgan
+      // suhbat ro'yxatda darhol ko'rinsin, javob berilganlar orasida yo'qolib ketmasin.
+      .then((xs) => setItems(scope === 'owner' ? [...xs].sort((a, b) => Number(b.status === 'OPEN') - Number(a.status === 'OPEN')) : xs))
+      .catch(() => setErr(true));
   }, [scope]);
 
   return (
@@ -64,6 +69,10 @@ export default function InquiriesPage() {
               ) : null}
               {i.unread > 0 ? (
                 <span className="rounded-full bg-teal px-2 py-0.5 font-mono text-xs font-bold text-white" aria-label={tch('unread', { count: i.unread })}>{i.unread}</span>
+              ) : null}
+              {/* OPEN: qabul qiluvchi tomon hali bir marta ham javob yozmagan */}
+              {scope === 'owner' && i.status === 'OPEN' ? (
+                <span className="rounded-full bg-amber px-2.5 py-0.5 text-xs font-semibold text-ink">{t('awaiting')}</span>
               ) : null}
               <span className="ml-auto font-mono text-xs text-muted">{uzDateTime(i.lastMessageAt ?? i.createdAt, locale)}</span>
             </div>

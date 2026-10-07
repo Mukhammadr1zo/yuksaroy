@@ -8,7 +8,7 @@ import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain
 import { ORDER_REPOSITORY, type OrderRepository } from '../domain/ports';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { remindExpiring } from '../../subscription/expiry-reminder';
-import { expireListings } from '../../listings/application/expire-listings';
+import { expireListings, remindExpiringListings } from '../../listings/application/expire-listings';
 import { AdminNotify } from '../../organizations/application/admin-notify';
 import { OrderActionsUseCase } from './order-actions.usecase';
 
@@ -117,6 +117,9 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
       // ochilardi, unga xabar yozish mumkin edi va egasi uni qaytara olmasdi
       r.expired = await expireListings(this.prisma, this.notifications, now).catch(() => 0);
       if (r.expired) this.log.log(`e'lon muddati o'tdi: ${r.expired}`);
+      // Muddati tugashiga uch kun qolgan e'lon egasiga eslatma; takrorlanishni e'lon qatoridagi belgi to'sadi
+      const listingReminded = await remindExpiringListings(this.prisma, this.notifications, now).catch(() => 0);
+      if (listingReminded) this.log.log(`e'lon eslatmasi: ${listingReminded}`);
       // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
       // catch argumentni ham qamrasin: queueStats yiqilsa u .catch dan tashqarida qolib,
       // butun kunlik siklni uzib yuborardi

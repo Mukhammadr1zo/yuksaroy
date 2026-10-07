@@ -90,7 +90,8 @@ export class OrdersController {
 
   @Get(':no')
   async get(@CurrentUserId() userId: string, @Param('no') no: string) {
-    return publicOrder(await this.listing.getForUser(userId, no));
+    const o = await this.listing.getForUser(userId, no);
+    return publicOrder(o, await this.actions.closeAtFor(userId, o));
   }
 
   @Post(':no/confirm') @HttpCode(200)
@@ -123,6 +124,14 @@ export class OrdersController {
   async cancel(@CurrentUserId() userId: string, @Param('no') no: string, @Body() dto: CancelDto) {
     const o = await this.actions.cancel(userId, no, dto?.reason);
     await this.audit.log({ actorId: userId, action: 'order.cancel', entity: 'Order', entityId: o.id, meta: { no } });
+    return publicOrder(o);
+  }
+
+  /** Mijoz qotgan buyurtmani o'zi yopadi: ruxsat va vaqt sharti use-case ichida. */
+  @Post(':no/close') @HttpCode(200)
+  async close(@CurrentUserId() userId: string, @Param('no') no: string) {
+    const o = await this.actions.closeStuck(userId, no);
+    await this.audit.log({ actorId: userId, action: 'order.clientClose', entity: 'Order', entityId: o.id, meta: { no } });
     return publicOrder(o);
   }
 }

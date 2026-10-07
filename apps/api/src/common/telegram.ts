@@ -96,6 +96,13 @@ const TEXTS = {
     ru: '⌛ <b>Срок заказа {no} истёк</b>\nТерминал не ответил вовремя.\n\n{url}',
     en: '⌛ <b>Order {no} expired</b>\nThe terminal did not respond in time.\n\n{url}',
   },
+  // Terminal egalariga: buyurtma {days} kun harakatsiz turdi va mijoz uni o'zi yopdi. Hujjat
+  // haqidagi gap ataylab bor: oddiy yakunda akt va hisob o'zi tuziladi, bu yerda esa yo'q
+  orderClosedByClient: {
+    uz: "🔒 <b>Buyurtma {no} mijoz tomonidan yopildi</b>\n{terminal}\n{days} kun davomida buyurtmada harakat bo'lmadi, mijoz uni o'zi yakunladi. Akt va hisob tuzilmadi.\n\n{url}",
+    ru: '🔒 <b>Клиент закрыл заказ {no}</b>\n{terminal}\nПо заказу {days} дн. не было действий, клиент завершил его сам. Акт и счёт не сформированы.\n\n{url}',
+    en: '🔒 <b>The customer closed order {no}</b>\n{terminal}\nThere was no activity on the order for {days} days, so the customer completed it. No act or invoice was issued.\n\n{url}',
+  },
   claimApproved: {
     uz: "✅ <b>Da'vo tasdiqlandi</b>\n{object}\n\n{url}",
     ru: '✅ <b>Заявка на объект одобрена</b>\n{object}\n\n{url}',
@@ -173,6 +180,13 @@ const TEXTS = {
     uz: "⌛ <b>E'lon muddati tugadi</b>\n{title}{more}\nKatalogdan tushdi. Qayta yuborsangiz yana {days} kun turadi.\n\nQayta yuborish: {url}",
     ru: '⌛ <b>Срок объявления истёк</b>\n{title}{more}\nОно ушло из каталога. Отправьте снова, и оно провисит ещё {days} дней.\n\nОтправить снова: {url}',
     en: '⌛ <b>Listing has expired</b>\n{title}{more}\nIt is out of the catalogue. Resubmit it and it stays for another {days} days.\n\nResubmit: {url}',
+  },
+  // Egasiga: muddat tugashiga uch kun qoldi. Faol e'lonni uzaytirish hozircha yo'q (ACTIVE dan
+  // qayta yuborish o'tish jadvalida yo'q), shuning uchun matn tugagach qayta yuborishni aytadi
+  listingExpiring: {
+    uz: "⏳ <b>E'lon muddati tugayapti</b>\n{title}{more}\n{left} kun ichida katalogdan tushadi. Shundan keyin qayta yuborsangiz, yana {days} kun turadi.\n\nE'lonlarim: {url}",
+    ru: '⏳ <b>Срок объявления заканчивается</b>\n{title}{more}\nВ течение {left} дней оно уйдёт из каталога. После этого отправьте его снова, и оно провисит ещё {days} дней.\n\nМои объявления: {url}',
+    en: '⏳ <b>Listing is about to expire</b>\n{title}{more}\nIt leaves the catalogue within {left} days. After that, resubmit it and it stays for another {days} days.\n\nMy listings: {url}',
   },
   // Kuzatuv: odam bo'sh natija ekranida "chiqqanda xabar bering" degan edi
   watchListingNew: {

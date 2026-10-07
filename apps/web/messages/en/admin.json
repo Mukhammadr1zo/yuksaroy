@@ -267,6 +267,7 @@
       "wallNote": "If the people who stop at the wall do not subscribe, change the price or the free window.",
       "pendingContact": "Unanswered message",
       "pendingReports": "New report",
+      "pendingInquiries": "Unanswered chat",
       "work": "Today's work",
       "workEmpty": "The queue is empty.",
       "age": {
@@ -283,7 +284,8 @@
         "AD_ENDING": "{n} ads end within 7 days",
         "DB_SLOW": "The database is slow: {ms} ms",
         "DB_DOWN": "The database is not responding",
-        "NO_PROVIDER": "{n} new requests went to nobody in 24 hours: no matching provider found"
+        "NO_PROVIDER": "{n} new requests went to nobody in 24 hours: no matching provider found",
+        "STUCK_ORDERS": "{n, plural, one {# order has} other {# orders have}} had no activity for {days, plural, one {# day} other {# days}}: contact the terminal or change the status yourself"
       },
       "alertGo": "Open",
       "money": "Money",
@@ -424,6 +426,7 @@
       "items": "Lines",
       "operation": "Operation / direction",
       "wagons": "Wagons",
+      "stuck": "No activity for {days, plural, one {# day} other {# days}}",
       "op": {
         "LOAD": "Loading",
         "UNLOAD": "Unloading"
@@ -432,6 +435,11 @@
         "LOCAL": "Domestic",
         "IMPORT": "Import",
         "EXPORT": "Export"
+      },
+      "reasonCode": {
+        "IDLE_CLOSED": "Closed by the customer after {days} days without activity",
+        "SLA_TIMEOUT": "The terminal did not respond in time",
+        "NO_SHOW": "The customer did not arrive at the scheduled time"
       }
     },
     "orgs": {
@@ -571,7 +579,8 @@
         "admin-subscription-remind": "Sent a subscription reminder by hand",
         "admin-task-assign": "Assigned a job to a teammate",
         "admin-task-done": "Closed a task",
-        "request-fanout": "New request sent to providers"
+        "request-fanout": "New request sent to providers",
+        "order-clientClose": "Closed a stuck order"
       },
       "ent": {
         "ContactMessage": "Message",
@@ -794,6 +803,16 @@
       "renewals": "Renewals",
       "empty": "No confirmed payments yet.",
       "noPremium": "There were no Premium payments in this period.",
+      "ads": "Ads",
+      "noAds": "No paid ad started in this period: push ad sales or remove the ad slots.",
+      "deals": {
+        "title": "Deals on the platform",
+        "lead": "This is not our money and is not part of revenue: the price of the offer the customer picked in cargo, service and urgent requests, by the month it was picked. An offer without a price counts as a deal but not toward the volume.",
+        "count": "Deals",
+        "volume": "Volume",
+        "empty": "No deals in the last 12 months.",
+        "decision": "Number of deals: is the platform bringing people work. If volume grows but revenue does not, review the subscription price or consider a fee on deals."
+      },
       "tabs": {
         "overview": "Overview",
         "expiring": "Expiring",
@@ -820,10 +839,11 @@
         "mrr": "Compare with monthly costs (server, team, ads): if MRR is below them, work on price or acquisition; if above, the team can grow.",
         "mrrEnd": "If nobody renews, this much remains at month end: the gap is what the call list is worth.",
         "atRisk": "If these people are not contacted before the month ends, MRR drops by this much. The list: Expiring.",
-        "revenue": "The cash line: price, plan and ad policy follow this number. If revenue is below MRR, payments are running late:",
+        "revenue": "The cash line: price, plan and ad policy follow this number. If this month's subscription money (the Subscriptions column in the table) is below MRR, payments are running late:",
         "col": {
           "total": "Total: did this month cover the costs.",
           "subs": "Subscriptions and Premium: which product the money comes from; if Premium is zero month after month, its queue can be closed.",
+          "ads": "Ads: the price of sold ads, counted in the month the ad starts. If it is zero month after month, push ad sales or remove the ad slots.",
           "payments": "Number of payments: when manual confirmation starts to weigh.",
           "renewals": "Renewals: is the money from new people or from those who stayed; effort goes to acquisition or to retention.",
           "mrr": "MRR: recurring money, not one-off; growth is measured by it.",

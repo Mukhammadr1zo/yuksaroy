@@ -39,7 +39,12 @@ class CreateRequestDto {
   /** Yukning surati. Faqat o'z serverimizdagi manzil: begona rasm sahifada chizilmasin */
   @IsOptional() @IsArray() @ArrayMaxSize(LISTING.maxPhotos) @Matches(PHOTO_URL, { each: true }) @MaxLength(500, { each: true }) photos?: string[];
   @IsOptional() @IsString() orgId?: string;
+  /** Qaysi sahifadan kelgani (?from=). IsIn ham, MaxLength ham yo'q: reklama havolasidagi begona yoki uzun belgi so'rovni 400 bilan yiqitmasin. Qiymat saqlanmaydi, faqat SOURCES bilan solishtiriladi */
+  @IsOptional() @IsString() from?: string;
 }
+
+/** Bozorga ko'priklar: bo'sh terminal katalogi (/terminals). Audit shu belgi bilan sanaydi. */
+const SOURCES = ['terminals'] as const;
 
 class OfferDto {
   @IsOptional() @IsInt() @Min(0) @Max(1_000_000_000_000) priceTiyin?: number;
@@ -202,7 +207,8 @@ export class MarketController {
         },
       });
     });
-    await this.audit.log({ actorId: userId, action: 'market.request.create', entity: 'MarketRequest', entityId: r.id, meta: { no: r.no, board: r.board } });
+    const from = inList(SOURCES, dto.from);
+    await this.audit.log({ actorId: userId, action: 'market.request.create', entity: 'MarketRequest', entityId: r.id, meta: { no: r.no, board: r.board, ...(from ? { from } : {}) } });
     void this.market.notifyNew(r).catch(() => {});
     // Kanal posti alohida: notifyNew mos odamlarga ketadi, kanal esa ochiq ro'yxat
     void this.market.postChannel(r).catch(() => {}); // javobni kutmaydi

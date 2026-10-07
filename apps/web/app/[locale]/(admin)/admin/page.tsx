@@ -13,6 +13,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { ORDER_STUCK_DAYS } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { num, som, uzDate, uzDateTime } from '@/lib/format';
@@ -23,7 +24,7 @@ import { dueTone, type Task } from '@/components/admin/AssignTask';
 import { Sparkline } from '@/components/admin/Sparkline';
 
 type Pair = { last7: number; prev7: number };
-type AlertCode = 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN' | 'NO_PROVIDER';
+type AlertCode = 'NO_ACTIVE_PLAN' | 'WAGON_UPSTREAM' | 'AD_EXPIRED' | 'AD_ENDING' | 'DB_SLOW' | 'DB_DOWN' | 'NO_PROVIDER' | 'STUCK_ORDERS';
 type Home = {
   db: { ok: boolean; ms?: number };
   /** count > 0 navbatlar, eng uzoq kutgani birinchi */
@@ -46,13 +47,15 @@ type MyTasks = { items: Task[]; summary: { open: number; overdue: number } };
 const WORK_LABEL: Record<string, string> = {
   listingsPendingReview: 'pendingListings', orgsPendingKyc: 'pendingKyc', terminalClaimsPending: 'pendingClaims',
   premiumPending: 'pendingPremium', subscriptionPending: 'pendingSubscription', ordersPending: 'pendingOrders',
-  urgentOpen: 'pendingUrgent', contactNew: 'pendingContact', reportsNew: 'pendingReports',
+  urgentOpen: 'pendingUrgent', contactNew: 'pendingContact', reportsNew: 'pendingReports', platformInquiriesOpen: 'pendingInquiries',
 };
 /** Ogohlantirishdan qaror sahifasiga. Baza haqidagisi Tizim sahifasiga, u faqat egada bor: operatorga havola yo'q (serverga qarash kerak). */
 const ALERT_HREF: Partial<Record<AlertCode, string>> = {
   NO_ACTIVE_PLAN: '/admin/plans?new=1', WAGON_UPSTREAM: '/admin/audit?action=wagon.search', AD_EXPIRED: '/admin/ads', AD_ENDING: '/admin/ads',
   // Jurnalda har so'rovning viloyati, turi va necha odamga ketgani: qayerda ijrochi yo'qligi shundan ko'rinadi
   NO_PROVIDER: '/admin/audit?action=request.fanout',
+  // Server sanagan shart bilan aynan o'sha buyurtmalar: majburiy holat tugmasi shu ro'yxatning varag'ida
+  STUCK_ORDERS: '/admin/orders?status=STUCK',
 };
 const alertHref = (code: AlertCode, isOwner: boolean) => (code === 'DB_SLOW' || code === 'DB_DOWN' ? (isOwner ? '/admin/system' : undefined) : ALERT_HREF[code]);
 const GROWTH = [
@@ -240,7 +243,7 @@ export default function AdminHomePage() {
             const href = alertHref(a.code, isOwner);
             return (
               <Notice key={a.code} tone={a.tone === 'bad' ? 'err' : 'warn'}>
-                {th(`alert.${a.code}`, { n: a.n ?? 0, of: a.of ?? 0, ms: a.ms ?? 0 })}
+                {th(`alert.${a.code}`, { n: a.n ?? 0, of: a.of ?? 0, ms: a.ms ?? 0, days: ORDER_STUCK_DAYS })}
                 {href ? <Link href={href} className="ml-2 font-semibold underline">{th('alertGo')}</Link> : null}
               </Notice>
             );

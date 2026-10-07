@@ -84,7 +84,7 @@ export function mergeMonths(revenue: readonly RevenueMonth[], subs: readonly Sub
     const r = by.get(s.month);
     return {
       ...s,
-      totalTiyin: r?.totalTiyin ?? 0, subsTiyin: r?.subsTiyin ?? 0, premiumTiyin: r?.premiumTiyin ?? 0,
+      totalTiyin: r?.totalTiyin ?? 0, subsTiyin: r?.subsTiyin ?? 0, premiumTiyin: r?.premiumTiyin ?? 0, adsTiyin: r?.adsTiyin ?? 0,
       payments: r?.payments ?? 0, renewals: r?.renewals ?? 0,
       forecast: i === 0,
     };

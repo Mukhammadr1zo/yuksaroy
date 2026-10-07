@@ -1,14 +1,14 @@
 'use client';
-// Buyurtma tafsiloti: holat, muzlatilgan narx, tarix. Mijoz uchun yagona harakat: bekor qilish.
+// Buyurtma tafsiloti: holat, muzlatilgan narx, tarix. Mijoz harakatlari: bekor qilish va qotgan buyurtmani yopish.
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { ORDER_EVENT_LABELS, ORDER_STATUS_LABELS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
+import { ORDER_EVENT_LABELS, ORDER_STATUS_LABELS, ORDER_STUCK_DAYS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
 import { num } from '@/lib/format';
 import type { Order } from '@/lib/types';
-import { useLang } from '@/components/kabinet/bits';
+import { BTN_GHOST, BTN_NAVY, useLang } from '@/components/kabinet/bits';
 import { PriceLines, StatusPill, dateTime, slotLabel } from '@/components/order/bits';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { OrderReview } from '@/components/reviews/OrderReview';
@@ -30,6 +30,7 @@ export default function OrderPage() {
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
+  const [askClose, setAskClose] = useState(false);
   const [docs, setDocs] = useState<OrderDoc[]>([]);
 
   // 404 va server xatosi bir xil ko'rsatilardi: bron qilgan mijoz "buyurtma yo'q" deb o'ylardi
@@ -58,10 +59,27 @@ export default function OrderPage() {
     } finally { setBusy(false); }
   }
 
+  // Rad etilsa buyurtma qayta o'qiladi: shu orada terminal yopgan yoki yangi harakat yozgan
+  // bo'lishi mumkin, sahifa eski tugmani emas, serverdagi holatni ko'rsatsin. 409 (ORDER_STATE_CHANGED,
+  // TRANSITION_NOT_ALLOWED, CLOSE_TOO_EARLY) da qayta urinish yordam bermaydi: "qayta urining" demaymiz
+  async function closeOrder() {
+    setBusy(true); setErr(null);
+    try { setOrder(await post<Order>(`/orders/${no}/close`, {})); setAskClose(false); }
+    catch (e) { setErr(t(e instanceof ApiError && e.status === 409 ? 'err.closeChanged' : 'err.closeFailed')); setAskClose(false); void load(); }
+    finally { setBusy(false); }
+  }
+
   if (err && !o) return <div className="mx-auto max-w-3xl px-6 py-16"><p className="text-muted">{err}</p><Link href="/dashboard/orders" className="mt-4 inline-block underline">{t('backToOrders')}</Link></div>;
   if (!o) return <div className="mx-auto max-w-3xl px-6 py-16 text-muted">{t('loading')}</div>;
 
-  const cancellable = o.status === 'PENDING' || o.status === 'CONFIRMED';
+  // closeAt ni server faqat mijoz tomoniga beradi: sahifani ochgan terminal xodimi tugmani ko'rmaydi
+  const now = Date.now();
+  const closeAt = o.closeAt ? new Date(o.closeAt) : null;
+  const closable = !!closeAt && closeAt.getTime() <= now;
+  // Yopish mumkin bo'lganda slot ancha o'tgan: bekor qilish baribir rad etiladi, tugmasi chiqmaydi
+  const cancellable = (o.status === 'PENDING' || o.status === 'CONFIRMED') && !closable;
+  // Sana slot tugagach aytiladi: undan oldin ish hali oldinda va bu gap shovqin bo'lardi
+  const closeLater = !!closeAt && !closable && (!o.slot || Date.parse(o.slot.endsAt) < now);
   const entryLabel = (to: OrderStatus | null, code: string | null) =>
     (code && ORDER_EVENT_LABELS[lang][code as OrderEventCode]) || (to && ORDER_STATUS_LABELS[lang][to]) || code || t('updated');
 
@@ -117,6 +135,27 @@ export default function OrderPage() {
             </div>
           ) : null}
 
+          {closable ? (
+            <div className="mt-6 border-t border-line pt-4">
+              {askClose ? (
+                <div className="space-y-3">
+                  <p className="text-sm">{t('close.confirm')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={closeOrder} disabled={busy} className={BTN_NAVY}>{t('close.yes')}</button>
+                    <button type="button" onClick={() => setAskClose(false)} className={BTN_GHOST}>{t('close.no')}</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm">{t('close.lead', { days: ORDER_STUCK_DAYS })}</p>
+                  <button type="button" onClick={() => setAskClose(true)} className={`mt-3 ${BTN_NAVY}`}>{t('close.start')}</button>
+                </>
+              )}
+            </div>
+          ) : closeAt && closeLater ? (
+            <p className="mt-6 border-t border-line pt-4 text-xs text-muted">{t('close.later', { date: dateTime(closeAt, locale) })}</p>
+          ) : null}
+
           {o.status === 'DONE' ? <div className="mt-6 border-t border-line pt-4"><OrderReview no={o.no} shipperOrgId={o.shipper.id} /></div> : null}
         </section>
 
@@ -151,7 +190,8 @@ export default function OrderPage() {
                   <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-teal" />
                   <p className="text-sm font-semibold">{entryLabel(h.toStatus, h.code)}</p>
                   <p className="font-mono text-xs text-muted">{dateTime(h.at, locale)}{h.actorRole ? ` · ${t.has(`actor.${h.actorRole}`) ? t(`actor.${h.actorRole}`) : h.actorRole}` : ''}</p>
-                  {h.reason ? <p className="mt-0.5 text-sm text-muted">{h.reason}</p> : null}
+                  {/* Tizim sabablari kod bo'lib yoziladi (IDLE_CLOSED, SLA_TIMEOUT): tarjimasi bo'lsa shu, aks holda odam yozgan matn */}
+                  {h.reason ? <p className="mt-0.5 text-sm text-muted">{t.has(`reason.${h.reason}`) ? t(`reason.${h.reason}`, { days: ORDER_STUCK_DAYS }) : h.reason}</p> : null}
                 </li>
               ))}
             </ol>

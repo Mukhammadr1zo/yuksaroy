@@ -5,7 +5,7 @@
 // tashkilot va terminal sahifalari ?orgId= / ?terminalId= bilan.
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ORDER_STATUSES, ORDER_STATUS_LABELS, type OrderStatus } from '@yuksaroy/domain';
+import { ORDER_STATUSES, ORDER_STATUS_LABELS, ORDER_STUCK_DAYS, type OrderStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { num, som, uzDateTime } from '@/lib/format';
@@ -40,8 +40,9 @@ export default function AdminOrdersPage() {
   const lang = useLang();
 
   const { f, set, reset } = useListQuery(F0);
-  // Bosh sahifadagi "tasdiq kutayotgan" havolasi ?status=PENDING bilan keladi; noto'g'ri qiymat "hammasi" bo'lib qoladi
-  const filters = { ...f, status: isStatus(f.status) ? f.status : '', open: undefined };
+  // Bosh sahifadagi "tasdiq kutayotgan" havolasi ?status=PENDING bilan keladi; noto'g'ri qiymat "hammasi" bo'lib qoladi.
+  // STUCK holat emas, filtr: bosh sahifa ogohlantirishi shu bilan keladi, shartni server hal qiladi
+  const filters = { ...f, status: isStatus(f.status) || f.status === 'STUCK' ? f.status : '', open: undefined };
   const { data, pages, loading, err, reload } = useAdminList<Row>(PATH, { ...filters, limit: LIMIT });
   const [q, setQ] = useState(f.q);
   useEffect(() => setQ(f.q), [f.q]);
@@ -76,6 +77,7 @@ export default function AdminOrdersPage() {
           <select value={filters.status} onChange={(e) => set({ status: e.target.value })} className={INPUT}>
             <option value="">{tc('all')}</option>
             {ORDER_STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS_LABELS[lang][s]}</option>)}
+            <option value="STUCK">{to('stuck', { days: ORDER_STUCK_DAYS })}</option>
           </select>
         </Labeled>
         <button type="submit" className={BTN}>{tc('apply')}</button>
@@ -181,7 +183,8 @@ function OrderDrawer({ no, onClose, onChanged }: { no: string; onClose: () => vo
                   <span className="font-semibold">{h.toStatus ? ORDER_STATUS_LABELS[lang][h.toStatus] : h.code}</span>
                   {h.actorRole ? <span className="font-mono text-[11px] text-muted">{h.actorRole}</span> : null}
                   <span className="ml-auto font-mono text-xs tabular-nums text-muted">{uzDateTime(h.at, locale)}</span>
-                  {h.reason ? <span className="basis-full text-xs text-muted">{h.reason}</span> : null}
+                  {/* Ma'lum sabab kodi odam tilida, erkin matn (bekor qilish sababi) o'zicha */}
+                  {h.reason ? <span className="basis-full text-xs text-muted">{to.has(`reasonCode.${h.reason}`) ? to(`reasonCode.${h.reason}`, { days: ORDER_STUCK_DAYS }) : h.reason}</span> : null}
                 </li>
               ))}
             </ul>

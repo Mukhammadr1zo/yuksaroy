@@ -100,7 +100,7 @@ export class PrismaListingRepository {
   async update(id: string, d: ListingWrite) {
     return toRecord(await this.prisma.listing.update({ where: { id }, data: writeData(d), include }));
   }
-  async setStatus(id: string, d: { status: ListingStatus; publishedAt?: Date; expiresAt?: Date; rejectReason: string | null }) {
+  async setStatus(id: string, d: { status: ListingStatus; publishedAt?: Date; expiresAt?: Date; expiryRemindedAt?: null; rejectReason: string | null }) {
     return toRecord(await this.prisma.listing.update({ where: { id }, data: d, include }));
   }
   async remove(id: string) { await this.prisma.listing.delete({ where: { id } }); }

@@ -174,7 +174,10 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
     try { setO(await post<Order>(`/orders/${card.no}/${path}`, body)); onDone(); }
     catch (e) {
       const code = e instanceof ApiError ? String(e.body?.code ?? '') : '';
-      setErr(code === 'TRANSITION_NOT_ALLOWED' || code === 'ORDER_NOT_ACTIVE' ? t(`err.${code}`) : t('err.failed'));
+      // WRONG_ACTOR ham "holat o'zgargan": eski sahifada CONFIRMED dan yakunlash bosilsa shu keladi
+      // (jadvalda CONFIRMED -> DONE endi faqat mijozniki), qayta urinish esa hech qachon yordam bermaydi
+      setErr(code === 'TRANSITION_NOT_ALLOWED' || code === 'TRANSITION_WRONG_ACTOR' ? t('err.TRANSITION_NOT_ALLOWED')
+        : code === 'ORDER_NOT_ACTIVE' ? t(`err.${code}`) : t('err.failed'));
       // Optimistik belgi qaytariladi: tag hodisa kodi bilan bir xil, boshqa amallar uchun zararsiz
       setDone((d) => d.filter((x) => x !== tag));
     } finally { setBusy(null); }
@@ -231,7 +234,12 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
             </button>
           ))}
           <span className="mx-1 h-5 w-px bg-line" />
-          <button type="button" disabled={busy === 'complete'} onClick={() => act('complete', {}, 'complete')} className="rounded-full bg-navy px-5 py-1.5 text-sm font-semibold text-white transition hover:bg-navy-2 disabled:opacity-60">{t('complete')}</button>
+          {/* Yakunlash faqat ish boshlangandan keyin: holat-mashinasida terminal CONFIRMED dan
+              DONE ga o'ta olmaydi, birinchi hodisa (masalan "Yetib keldi") buyurtmani boshlaydi.
+              Ilgari tugma CONFIRMED da ham turardi va har bosilganda xato berardi. */}
+          {s === 'IN_PROGRESS' ? (
+            <button type="button" disabled={busy === 'complete'} onClick={() => act('complete', {}, 'complete')} className="rounded-full bg-navy px-5 py-1.5 text-sm font-semibold text-white transition hover:bg-navy-2 disabled:opacity-60">{t('complete')}</button>
+          ) : null}
           {s === 'CONFIRMED' ? (
             <button type="button" disabled={busy === 'NO_SHOW'} onClick={() => act('events', { code: 'NO_SHOW' }, 'NO_SHOW')} className="text-sm text-muted underline hover:text-red-700">{t('noShow')}</button>
           ) : null}
