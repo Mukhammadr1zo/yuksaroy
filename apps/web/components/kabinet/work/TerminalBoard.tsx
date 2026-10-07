@@ -4,7 +4,7 @@
 import { Link } from '@/i18n/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ORDER_EVENT_LABELS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
+import { ORDER_EVENT_LABELS, ORDER_STUCK_DAYS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
 import { som, uzTime } from '@/lib/format';
 import type { Order, OrderCard, Page } from '@/lib/types';
@@ -177,13 +177,16 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
       // WRONG_ACTOR ham "holat o'zgargan": eski sahifada CONFIRMED dan yakunlash bosilsa shu keladi
       // (jadvalda CONFIRMED -> DONE endi faqat mijozniki), qayta urinish esa hech qachon yordam bermaydi
       setErr(code === 'TRANSITION_NOT_ALLOWED' || code === 'TRANSITION_WRONG_ACTOR' ? t('err.TRANSITION_NOT_ALLOWED')
-        : code === 'ORDER_NOT_ACTIVE' ? t(`err.${code}`) : t('err.failed'));
+        : code === 'ORDER_NOT_ACTIVE' ? t(`err.${code}`)
+        : code === 'NO_SHOW_TOO_LATE' ? t('err.NO_SHOW_TOO_LATE', { days: ORDER_STUCK_DAYS }) : t('err.failed'));
       // Optimistik belgi qaytariladi: tag hodisa kodi bilan bir xil, boshqa amallar uchun zararsiz
       setDone((d) => d.filter((x) => x !== tag));
     } finally { setBusy(null); }
   }
 
   const s = o.status;
+  // Muddatni server beradi (noShowUntil): undan keyin "Kelmadi" rad etiladi, shuning uchun tugma chiqmaydi
+  const noShow = s === 'CONFIRMED' && !(o.noShowUntil && Date.parse(o.noShowUntil) <= Date.now());
   return (
     <article className={`rounded-card border border-line bg-white ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -233,15 +236,20 @@ function OrderRow({ card, onDone, compact }: { card: OrderCard; onDone: () => vo
               {ORDER_EVENT_LABELS[lang][c]}
             </button>
           ))}
-          <span className="mx-1 h-5 w-px bg-line" />
+          {/* Ajratgich faqat ortidan tugma kelsa: aks holda qator oxirida yolg'iz chiziq qolardi */}
+          {s === 'IN_PROGRESS' || noShow ? <span className="mx-1 h-5 w-px bg-line" /> : null}
           {/* Yakunlash faqat ish boshlangandan keyin: holat-mashinasida terminal CONFIRMED dan
               DONE ga o'ta olmaydi, birinchi hodisa (masalan "Yetib keldi") buyurtmani boshlaydi.
               Ilgari tugma CONFIRMED da ham turardi va har bosilganda xato berardi. */}
           {s === 'IN_PROGRESS' ? (
             <button type="button" disabled={busy === 'complete'} onClick={() => act('complete', {}, 'complete')} className="rounded-full bg-navy px-5 py-1.5 text-sm font-semibold text-white transition hover:bg-navy-2 disabled:opacity-60">{t('complete')}</button>
           ) : null}
-          {s === 'CONFIRMED' ? (
+          {/* Muddat o'tgach tugma o'rnida sababi turadi: aks holda xodim "Kelmadi" nega yo'qolganini bilmaydi.
+              Xato chiqib turganda yashirin: eski kartadagi tugma rad etilsa aynan shu matn qizilda turadi */}
+          {noShow ? (
             <button type="button" disabled={busy === 'NO_SHOW'} onClick={() => act('events', { code: 'NO_SHOW' }, 'NO_SHOW')} className="text-sm text-muted underline hover:text-red-700">{t('noShow')}</button>
+          ) : s === 'CONFIRMED' && !err ? (
+            <span className="basis-full text-xs text-muted">{t('err.NO_SHOW_TOO_LATE', { days: ORDER_STUCK_DAYS })}</span>
           ) : null}
         </div>
       ) : null}

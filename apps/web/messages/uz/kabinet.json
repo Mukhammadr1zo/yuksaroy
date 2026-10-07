@@ -88,6 +88,7 @@
         "PENDING_REVIEW": "Tekshiruvga yuborildi",
         "ACTIVE": "E'lon faol"
       },
+      "extended": "{date} gacha uzaytirildi",
       "cargoOpen": "{region}: {count} ta ochiq yuk"
     },
     "form": {
@@ -450,7 +451,7 @@
         },
         "expiring": {
           "title": "{count} ta e'lon muddati tugayapti",
-          "body": "Bir hafta ichida katalogdan tushadi"
+          "body": "Bir hafta ichida katalogdan tushadi. Qayta yuborsangiz yana 90 kun turadi"
         },
         "drafts": {
           "title": "{count} ta qoralama",

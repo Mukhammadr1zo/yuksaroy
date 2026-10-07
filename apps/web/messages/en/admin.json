@@ -168,7 +168,10 @@
     },
     "err": {
       "AD_NOT_FOUND": "Ad not found",
+      "AD_PAID_AT": "Enter the new payment date.",
+      "AD_PAID_AT_FUTURE": "The paid date cannot be later than today",
       "AD_RANGE": "The end date must be after the start date",
+      "AD_STALE": "The ad changed after you opened it, for example an earlier save already went through. The list is refreshed: open the row again and check it.",
       "BAD_ASSIGNEE": "This person is not a panel staff member.",
       "BAD_ENTITY": "Unknown object type.",
       "BAD_ROLE": "Invalid role.",
@@ -379,7 +382,7 @@
       "sortDemand": "By demand",
       "views30": "Opens, 30 days",
       "openInquiries": "Unanswered",
-      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means no reply has been sent yet. Call from the top down.",
+      "demandNote": "The 100 objects whose pages were opened most in the last 30 days. Unanswered means the customer's latest message has no reply yet, including follow-ups after an earlier reply. Call from the top down.",
       "ownerKindLabel": "Owner type",
       "ownerKindNote": "This filter gathers the rows onto one screen; it does not decide anything. Reading the owner from the name is not exact, so look through the list.",
       "ownerKinds": {
@@ -804,7 +807,7 @@
       "empty": "No confirmed payments yet.",
       "noPremium": "There were no Premium payments in this period.",
       "ads": "Ads",
-      "noAds": "No paid ad started in this period: push ad sales or remove the ad slots.",
+      "noAds": "No ad was paid for in this period: push ad sales or remove the ad slots.",
       "deals": {
         "title": "Deals on the platform",
         "lead": "This is not our money and is not part of revenue: the price of the offer the customer picked in cargo, service and urgent requests, by the month it was picked. An offer without a price counts as a deal but not toward the volume.",
@@ -843,7 +846,7 @@
         "col": {
           "total": "Total: did this month cover the costs.",
           "subs": "Subscriptions and Premium: which product the money comes from; if Premium is zero month after month, its queue can be closed.",
-          "ads": "Ads: the price of sold ads, counted in the month the ad starts. If it is zero month after month, push ad sales or remove the ad slots.",
+          "ads": "Ads: the price of sold ads, counted in the month it was paid (older ads with no paid date: in the month they start). If it is zero month after month, push ad sales or remove the ad slots.",
           "payments": "Number of payments: when manual confirmation starts to weigh.",
           "renewals": "Renewals: is the money from new people or from those who stayed; effort goes to acquisition or to retention.",
           "mrr": "MRR: recurring money, not one-off; growth is measured by it.",
@@ -975,6 +978,18 @@
       "endsAt": "Ends",
       "buyer": "Buyer",
       "price": "Paid, UZS",
+      "paidAt": "Paid on",
+      "paidAtHint": "The Revenue page counts the money in this date's month. If empty, in the month the ad starts.",
+      "renew": {
+        "ask": "Is this a new payment?",
+        "yes": "Yes, a renewal: the buyer paid again",
+        "no": "No, a correction: no new money came in",
+        "hint": "If yes, enter only the new payment as the price: the earlier payment ({sum} UZS) stays in its month as a separate Draft row in the list. Do not delete it, or that month's revenue drops.",
+        "price": "New payment, UZS",
+        "paidAt": "New payment date",
+        "saved": "Saved. The earlier payment stays in the list as a separate Draft row."
+      },
+      "deleteWarn": "This row's money also disappears from the Revenue page.",
       "delaySec": "Delay, seconds",
       "showSec": "Show for, seconds",
       "quietHours": "Quiet hours",
@@ -1008,6 +1023,7 @@
         "ACTIVE": "Active"
       },
       "media": "Banner file",
+      "mediaPick": "Choose file",
       "mediaHint": "An image, a GIF or a silent video (mp4, webm). On the page the video plays muted and loops. 1.5 MB at most: instead of an animated image (GIF) give an mp4 or a webm, several times lighter at the same quality.",
       "mediaRemove": "Remove the file",
       "mediaPreview": "Uploaded ad file",

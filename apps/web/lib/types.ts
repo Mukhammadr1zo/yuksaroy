@@ -98,6 +98,8 @@ export interface OrderCard {
   weightKg: number; wagonCount: number; totalTiyin: number;
   slot: { startsAt: string; endsAt: string; window: number } | null;
   slaConfirmUntil: string | null;
+  /** Terminal "Kelmadi" ni shu paytgacha bosa oladi (faqat CONFIRMED da); qoida serverda, sayt faqat solishtiradi. */
+  noShowUntil: string | null;
 }
 export interface Order extends OrderCard {
   note: string | null; wagonNumbers: string[]; storageDays: number | null;

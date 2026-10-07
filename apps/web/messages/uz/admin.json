@@ -168,7 +168,10 @@
     },
     "err": {
       "AD_NOT_FOUND": "Reklama topilmadi",
+      "AD_PAID_AT": "Yangi to'lov sanasini kiriting.",
+      "AD_PAID_AT_FUTURE": "To'langan sana bugundan keyin bo'lmasin",
       "AD_RANGE": "Tugash sanasi boshlanishdan keyin bo'lishi kerak",
+      "AD_STALE": "Reklama siz ochgandan keyin o'zgargan, masalan oldingi saqlash aslida o'tgan. Ro'yxat yangilandi: qatorni qayta ochib tekshiring.",
       "BAD_ASSIGNEE": "Bu odam panel xodimi emas.",
       "BAD_ENTITY": "Noma'lum obyekt turi.",
       "BAD_ROLE": "Noto'g'ri rol.",
@@ -379,7 +382,7 @@
       "sortDemand": "Talab bo'yicha",
       "views30": "Ochilish, 30 kun",
       "openInquiries": "Javobsiz yozishma",
-      "demandNote": "Oxirgi 30 kunda sahifasi eng ko'p ochilgan 100 ta obyekt. Javobsiz yozishma - hali hech javob berilmagani. Yuqoridagisiga birinchi qo'ng'iroq qilinadi.",
+      "demandNote": "Oxirgi 30 kunda sahifasi eng ko'p ochilgan 100 ta obyekt. Javobsiz yozishma - mijozning oxirgi xabariga hali javob yozilmagani (javobdan keyin qayta yozgani ham). Yuqoridagisiga birinchi qo'ng'iroq qilinadi.",
       "ownerKindLabel": "Egasining turi",
       "ownerKindNote": "Bu filtr qatorlarni bitta ekranga yig'adi, hukm chiqarmaydi. Nomdan egani aniqlash aniq emas, shuning uchun ro'yxatni ko'zdan kechiring.",
       "ownerKinds": {
@@ -804,7 +807,7 @@
       "empty": "Hali tasdiqlangan to'lov yo'q.",
       "noPremium": "Bu davrda Premium to'lovi bo'lmagan.",
       "ads": "Reklama",
-      "noAds": "Bu davrda boshlangan pullik reklama yo'q: reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
+      "noAds": "Bu davrda to'langan reklama yo'q: reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
       "deals": {
         "title": "Platformadagi bitimlar",
         "lead": "Bu bizning pulimiz emas va tushumga qo'shilmaydi: yuk, xizmat va shoshilinch so'rovlarda mijoz tanlagan taklif narxi, tanlangan oy bo'yicha. Narxsiz taklif bitim bo'lib sanaladi, hajmga kirmaydi.",
@@ -843,7 +846,7 @@
         "col": {
           "total": "Jami: shu oy xarajatni qopladimi.",
           "subs": "Obuna va Premium: pul qaysi mahsulotdan keladi; Premium ketma-ket nol bo'lsa uning navbatini yopish mumkin.",
-          "ads": "Reklama: sotilgan reklama narxi, reklama boshlangan oyga yoziladi. Ketma-ket nol bo'lsa reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
+          "ads": "Reklama: sotilgan reklama narxi, pul to'langan oyga yoziladi (to'langan sanasi yozilmagan eski reklama boshlangan oyiga). Ketma-ket nol bo'lsa reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
           "payments": "To'lovlar soni: qo'lda tasdiqlash qachon og'irlik qila boshlaydi.",
           "renewals": "Uzaytirish: pul yangi odamdanmi, qolgandanmi; kuch jalbgami, ushlab qolishgami.",
           "mrr": "MRR: takroriy pul, bir martalik emas; o'sish shunga qarab o'lchanadi.",
@@ -975,6 +978,18 @@
       "endsAt": "Tugaydi",
       "buyer": "Sotib oluvchi",
       "price": "To'langan, so'm",
+      "paidAt": "To'langan sana",
+      "paidAtHint": "Tushum sahifasida pul shu sananing oyiga yoziladi. Bo'sh bo'lsa, reklama boshlangan oyga.",
+      "renew": {
+        "ask": "Bu yangi to'lovmi?",
+        "yes": "Ha, uzaytirish: sotib oluvchi yana to'ladi",
+        "no": "Yo'q, tuzatish: yangi pul kelmadi",
+        "hint": "Ha desangiz, narxga faqat yangi to'lovni yozing: oldingi to'lov ({sum} so'm) o'z oyida qoladi va ro'yxatda alohida Qoralama qator bo'lib turadi. Uni o'chirmang, aks holda o'sha oyning tushumi kamayadi.",
+        "price": "Yangi to'lov, so'm",
+        "paidAt": "Yangi to'lov sanasi",
+        "saved": "Saqlandi. Oldingi to'lov ro'yxatda alohida Qoralama qator bo'lib qoldi."
+      },
+      "deleteWarn": "Bu qatorning puli Tushum sahifasidan ham o'chadi.",
       "delaySec": "Kechikish, soniya",
       "showSec": "Turish muddati, soniya",
       "quietHours": "Jim vaqt, soat",
@@ -1008,6 +1023,7 @@
         "ACTIVE": "Faol"
       },
       "media": "Banner fayli",
+      "mediaPick": "Fayl tanlash",
       "mediaHint": "Rasm, GIF yoki ovozsiz video (mp4, webm). Video sahifada ovozsiz va o'zi aylanib turadi. Eng ko'pi 1,5 MB: aylanadigan rasm (GIF) o'rniga mp4 yoki webm bering, bir xil sifatda bir necha barobar yengil.",
       "mediaRemove": "Faylni olib tashlash",
       "mediaPreview": "Yuklangan reklama fayli",

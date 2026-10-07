@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightIcon } from '@phosphor-icons/react';
+import { canExtendListing } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { uzDate } from '@/lib/format';
@@ -15,7 +16,6 @@ type Summary = { terminals: number; byStatus: Record<string, number> };
 type Subs = { active: boolean; endsAt: string | null };
 type Task = { key: string; count?: number; href: string; tone?: 'warn' };
 
-const WEEK = 7 * 86_400_000;
 // Serverdagi eslatma oynasi bilan bir xil: uch kun
 const SUB_WARN = 3 * 86_400_000;
 
@@ -51,8 +51,9 @@ export default function NowPage() {
       if (open) list.push({ key: 'inquiries', count: open, href: '/dashboard/inquiries' });
       const unpaid = docs.items.filter((d) => d.kind === 'INVOICE' && (d.status === 'ISSUED' || d.status === 'OVERDUE')).length;
       if (unpaid) list.push({ key: 'invoices', count: unpaid, href: '/dashboard/documents' });
-      const expiring = listings.filter((l) => l.status === 'ACTIVE' && l.expiresAt && new Date(l.expiresAt).getTime() - now < WEEK).length;
-      if (expiring) list.push({ key: 'expiring', count: expiring, href: '/dashboard/objects' });
+      // Oyna "Qayta yuborish" uzaytiradigan oyna bilan bitta qoida, havola o'sha tugma turgan sahifaga
+      const expiring = listings.filter((l) => canExtendListing(l.status, l.expiresAt, new Date(now))).length;
+      if (expiring) list.push({ key: 'expiring', count: expiring, href: '/dashboard/listings' });
       // Muddati tugagan e'lon: qaytarish bitta bosish, lekin uni eslatadigan joy shu.
       // Havola /dashboard/listings ga: "Qayta yuborish" tugmasi faqat o'sha sahifada.
       const expired = listings.filter((l) => l.status === 'EXPIRED').length;

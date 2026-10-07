@@ -186,7 +186,7 @@ export class AdminOpsController {
     // ayta olmaydi. Qoidani chetlab o'tishning yagona izi shu sabab.
     if (closing && !reason) throw new BadRequestException({ code: 'REASON_REQUIRED' });
     await this.prisma.$transaction([
-      this.prisma.order.update({ where: { id: o.id }, data: { status: to, ...(closing || to === 'DONE' ? { closedAt: new Date() } : {}), ...(to === 'CONFIRMED' ? { confirmedAt: new Date() } : {}) } }),
+      this.prisma.order.update({ where: { id: o.id }, data: { status: to, ...statusDates(o.status, to, new Date()) } }),
       this.prisma.orderStatusHistory.create({
         data: { orderId: o.id, fromStatus: o.status, toStatus: to, actorId: userId, actorRole: 'PLATFORM_ADMIN', reason },
       }),
@@ -494,4 +494,18 @@ export class AdminOpsController {
     const users = await this.prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, fullName: true, phone: true } });
     return new Map(users.map((u) => [u.id, u]));
   }
+}
+
+/**
+ * Admin holatni qo'lda o'zgartirganda yoziladigan sanalar: faqat HAQIQIY o'tishda.
+ *
+ * Admin formasida joriy holat oldindan tanlangan va bir xil holatda saqlash ham ishlaydi (slotni
+ * qayta moslash uchun). Ilgari shunday saqlash closedAt ni bugunga surardi: terminal o'tgan oy
+ * yakunlagan buyurtma komissiya sanog'ida (closedAt oyi bo'yicha) joriy oyga ko'chib qolardi.
+ */
+export function statusDates(from: OrderStatus, to: OrderStatus, now: Date): { closedAt?: Date; confirmedAt?: Date } {
+  if (from === to) return {};
+  if (to === 'DONE' || to === 'CANCELLED' || to === 'REJECTED' || to === 'EXPIRED') return { closedAt: now };
+  if (to === 'CONFIRMED') return { confirmedAt: now };
+  return {};
 }

@@ -77,7 +77,7 @@ export async function expireListings(prisma: PrismaService, notifications: Notif
  * Naqsh obuna eslatmasidan (expiry-reminder.ts): belgi e'lonning o'z qatorida va
  * YUBORISHDAN OLDIN qo'yiladi. Sikl qayta ishlasa ham xabar takrorlanmaydi; yuborish
  * yiqilsa bitta eslatma yo'qoladi, bu esa ikkita xabardan yaxshiroq. Belgi bitta muddatniki:
- * e'lon qayta faol bo'lganda activate() uni tozalaydi va keyingi muddatda yana eslatiladi.
+ * e'lon qayta faol bo'lganda yoki uzaytirilganda activate() uni tozalaydi va keyingi muddatda yana eslatiladi.
  */
 export async function remindExpiringListings(prisma: PrismaService, notifications: NotificationsService, now = new Date()): Promise<number> {
   const until = new Date(now.getTime() + REMIND_DAYS * 86_400_000);

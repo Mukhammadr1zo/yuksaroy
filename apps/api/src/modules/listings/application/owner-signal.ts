@@ -51,13 +51,9 @@ export function seenBucket(last: Date | null, now: Date): Seen | null {
   return days >= 14 ? 'away' : null;
 }
 
-/** Guruhlash natijasidan qator. Chegaradan past bo'lsa null (qator chizilmaydi). */
-export function repliedRow(rows: readonly { status: string; _count: { _all: number } }[]): OwnerSignal['replied'] {
-  const of = rows.reduce((a, r) => a + r._count._all, 0);
-  if (of < MIN_THREADS) return null;
-  // Faqat ANSWERED sanaladi; boshqa har qanday holat "javob berilmagan" tarafda qoladi
-  const answered = rows.find((r) => r.status === 'ANSWERED')?._count._all ?? 0;
-  return { of, answered };
+/** Sanoqdan qator. Chegaradan past bo'lsa null (qator chizilmaydi). */
+export function repliedRow(c: { of: number; answered: number }): OwnerSignal['replied'] {
+  return c.of < MIN_THREADS ? null : { of: c.of, answered: c.answered };
 }
 
 type Owner = { isDemo?: boolean; orgId: string | null; ownerUserId: string | null };
@@ -73,24 +69,33 @@ type Owner = { isDemo?: boolean; orgId: string | null; ownerUserId: string | nul
  */
 export async function ownerSignal(prisma: PrismaService, l: Owner, now = new Date()): Promise<OwnerSignal> {
   if (l.isDemo) return SIGNAL_NONE;
-  const to: Prisma.InquiryWhereInput | null = l.orgId
-    ? { toOrgId: l.orgId }
+  const to = l.orgId
+    ? Prisma.sql`i."toOrgId" = ${l.orgId}`
     : l.ownerUserId
-      ? { toUserId: l.ownerUserId }
+      ? Prisma.sql`i."toUserId" = ${l.ownerUserId}`
       : null;
   if (!to) return SIGNAL_NONE;
   // Egasi tarafi kim: tashkilot bo'lsa a'zolari, shaxsiy e'lon bo'lsa egasining o'zi
   const who: Prisma.SessionWhereInput = l.orgId
     ? { user: { memberships: { some: { orgId: l.orgId } } } }
     : { userId: l.ownerUserId! };
-  const [session, threads] = await Promise.all([
+  const [session, [threads]] = await Promise.all([
     // Bekor qilingan sessiya ham sanaladi: chiqib ketgan bo'lsa ham o'sha kuni kirgan.
     // Rotatsiya har yangilashda yangi qator yozadi, ya'ni eng kattasi = oxirgi faollik.
     // ponytail: mavjud @@index([userId]) yetadi, qatorlar 30 kunda tozalanadi.
     // Sessiya jadvali kattalashsa @@index([userId, createdAt]) qo'shiladi (o'lchab).
     prisma.session.aggregate({ where: who, _max: { createdAt: true } }),
-    // ponytail: nisbat umrbod. Oyna kerak bo'lsa shu yerga createdAt: { gte } qo'shiladi
-    prisma.inquiry.groupBy({ by: ['status'], where: to, _count: { _all: true } }),
+    // Javob bergan = yozishmada mijozdan boshqa odamning kamida bitta xabari bor (threadRole:
+    // mijozdan boshqa yozuvchi faqat egasi tarafi; baho huquqidagi answered() ham shunday).
+    // status ataylab o'qilmaydi: egasi qarori (2026-10-07) bilan mijoz yana yozsa suhbat OPEN ga
+    // qaytadi va "rahmat" bilan tugagan, javob olgan suhbat javobsiz bo'lib sanalardi.
+    // ponytail: nisbat umrbod. Oyna kerak bo'lsa shu yerga i."createdAt" >= ... qo'shiladi
+    prisma.$queryRaw<{ of: number; answered: number }[]>(Prisma.sql`
+      SELECT COUNT(*)::int AS "of",
+        COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM "InquiryMessage" m WHERE m."inquiryId" = i."id" AND m."fromUserId" <> i."fromUserId"
+        ))::int AS "answered"
+      FROM "Inquiry" i WHERE ${to}`),
   ]);
   return { seen: seenBucket(session._max.createdAt, now), replied: repliedRow(threads) };
 }

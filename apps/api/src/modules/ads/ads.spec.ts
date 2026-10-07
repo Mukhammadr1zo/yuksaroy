@@ -43,7 +43,7 @@ const BOTTOM: Ad = { ...AD, id: 'b1', placement: 'site-bottom', title: 'Ichki no
  * Panel tomoni: soxta prisma, chunki bu yerda tekshirilayotgani baza emas, pastki banner
  * sharti. Vaqt oralig'i to'g'ri, ya'ni faqat shu shart yiqitadi.
  */
-function admin(cur?: Partial<Ad> & { startsAt: Date; endsAt: Date }) {
+function admin(cur?: Partial<Ad> & { startsAt: Date; endsAt: Date; updatedAt?: Date }) {
   const saved: Record<string, unknown>[] = [];
   const prisma = {
     adPlacement: {
@@ -51,6 +51,7 @@ function admin(cur?: Partial<Ad> & { startsAt: Date; endsAt: Date }) {
       findUnique: async () => cur ?? null,
       update: async (a: { data: Record<string, unknown> }) => { saved.push(a.data); return { id: 'a1', ...a.data }; },
     },
+    $transaction: async (ops: Promise<unknown>[]) => Promise.all(ops),
   } as never;
   const audit = { log: async () => {} } as never;
   const c = new AdsAdminController(prisma, audit, {} as never);
@@ -181,5 +182,65 @@ describe('pastki banner', () => {
     await g.c.rails(g.req, 'yoq-til');
     // Tanilmagan til = filtr yo'q: banner yo'qolib qolmaydi
     expect(g.calls[0]!.where.OR).toBeUndefined();
+  });
+});
+
+/**
+ * To'langan sana va uzaytirish (egasi qarori, 2026-10-07: reklama puli to'langan oyga).
+ * Qatorda bitta narx va bitta sana: uzaytirishda oldingi to'lov Qoralama nusxaga o'tadi,
+ * aks holda u o'z oyidan ketardi.
+ */
+describe("to'langan sana va uzaytirish", () => {
+  const SOLD = { ...AD, status: 'ACTIVE', paidAt: null, startsAt: new Date(RANGE.startsAt), endsAt: new Date(RANGE.endsAt) };
+
+  it("sana Date bo'lib yoziladi, bo'sh qiymat null", async () => {
+    // Prisma satrda faqat to'liq vaqtni oladi, DTO esa "2026-10-07" ni ham o'tkazadi
+    const f = admin();
+    await f.c.create('u1', { ...NEW_BOTTOM, body: 'Matn', imageUrl: '/u/b.jpg', paidAt: '2026-10-07' } as never);
+    expect(f.saved[0]!.paidAt).toEqual(new Date('2026-10-07T00:00:00Z'));
+    const g = admin(SOLD);
+    await g.c.update('u1', 'a1', { paidAt: null } as never);
+    expect(g.saved[0]!.paidAt).toBeNull();
+  });
+
+  it("uzaytirish: oldingi to'lov Qoralama nusxada o'z sanasi bilan qoladi, yangisi shu qatorga", async () => {
+    const f = admin(SOLD);
+    await f.c.update('u1', 'a1', { pricePaidSom: 600_000, paidAt: '2026-10-05', endsAt: '2026-12-01T00:00:00.000Z', renew: true } as never);
+    expect(f.saved).toHaveLength(2);
+    const [live, kept] = f.saved;
+    expect(live).toMatchObject({ pricePaidSom: 600_000, paidAt: new Date('2026-10-05T00:00:00Z') });
+    // Prisma noma'lum maydonni rad etadi: renew bazaga ketmaydi
+    expect(live).not.toHaveProperty('renew');
+    expect(kept).toMatchObject({ pricePaidSom: 500_000, paidAt: null, status: 'DRAFT', startsAt: SOLD.startsAt, endsAt: SOLD.endsAt });
+    expect(kept).not.toHaveProperty('id');
+  });
+
+  it("tuzatishda va bepul qatorda nusxa yo'q; sanasiz uzaytirish rad etiladi", async () => {
+    const f = admin(SOLD);
+    await f.c.update('u1', 'a1', { pricePaidSom: 550_000 } as never);
+    expect(f.saved).toHaveLength(1);
+    const g = admin({ ...SOLD, pricePaidSom: 0 });
+    await g.c.update('u1', 'a1', { pricePaidSom: 300_000, paidAt: '2026-10-07', renew: true } as never);
+    expect(g.saved).toHaveLength(1);
+    // Sanasiz yangi pul eski to'lov oyiga tushib qolardi
+    await expect(admin(SOLD).c.update('u1', 'a1', { pricePaidSom: 600_000, renew: true } as never)).rejects.toThrow();
+  });
+
+  it("forma ko'rgan nusxa eskirgan bo'lsa hech narsa yozilmaydi", async () => {
+    // Birinchi uzaytirish o'tgan, javobi yo'qolgan: qayta bosilgan Saqlash eski versiyani yuboradi.
+    // O'tkazilsa yangi to'lov ikkinchi Qoralama nusxaga ko'chib, tushumda ikki marta sanalardi
+    const RENEW = { pricePaidSom: 600_000, paidAt: '2026-10-05', endsAt: '2026-12-01T00:00:00.000Z', renew: true, expectUpdatedAt: '2026-10-01T08:00:00.000Z' };
+    const f = admin({ ...SOLD, pricePaidSom: 600_000, updatedAt: new Date('2026-10-05T09:00:00Z') });
+    await expect(f.c.update('u1', 'a1', RENEW as never)).rejects.toMatchObject({ response: { code: 'AD_STALE' } });
+    expect(f.saved).toHaveLength(0);
+    const g = admin({ ...SOLD, updatedAt: new Date('2026-10-01T08:00:00Z') });
+    await g.c.update('u1', 'a1', RENEW as never);
+    expect(g.saved).toHaveLength(2);
+  });
+
+  it("bugundan keyingi to'langan sana rad etiladi", async () => {
+    // Sana tanlagich qo'lda yozilgan yilni o'tkazadi; tushum esa kelajak sanani hali sanamaydi
+    await expect(admin().c.create('u1', { ...NEW_BOTTOM, body: 'Matn', imageUrl: '/u/b.jpg', paidAt: '2099-10-07' } as never)).rejects.toMatchObject({ response: { code: 'AD_PAID_AT_FUTURE' } });
+    await expect(admin(SOLD).c.update('u1', 'a1', { paidAt: '2099-10-07' } as never)).rejects.toMatchObject({ response: { code: 'AD_PAID_AT_FUTURE' } });
   });
 });

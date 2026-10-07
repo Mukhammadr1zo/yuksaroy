@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, PayloadTooLargeException, Post, Query, Req, UnsupportedMediaTypeException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, PayloadTooLargeException, Post, Query, Req, UnsupportedMediaTypeException, UseGuards } from '@nestjs/common';
 import { ApiConsumes, ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
-import { IsDateString, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
-import { AD_BOTTOM, AD_LOCALES, AD_PLACEMENTS, AD_RAILS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
+import { IsBoolean, IsDateString, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { AD_BOTTOM, AD_LOCALES, AD_PLACEMENTS, AD_RAILS, AD_STATUSES, uzLocalDate, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { PrismaService } from '../../common/prisma.service';
 import { ImpressionsService } from '../impressions/impressions.service';
@@ -24,6 +24,8 @@ class AdCreateDto {
   @IsString() @MaxLength(500) href!: string;
   @IsOptional() @IsString() @MaxLength(200) buyer?: string;
   @IsOptional() @IsInt() @Min(0) pricePaidSom?: number;
+  /** To'langan sana: tushum pulni shu oyga yozadi (revenue.ts adSales). null = bo'sh, ya'ni boshlangan oyga. */
+  @IsOptional() @IsDateString() paidAt?: string | null;
   @IsIn(AD_STATUSES) status!: AdStatus;
   // Chegaralar: 0 kechikish = darhol chiqadi, 120 soniyadan keyin odam sahifadan ketgan
   // bo'ladi. showSec 0 = odam yopgunicha turadi. Jim vaqt eng kami 1 soat, eng ko'pi
@@ -35,7 +37,12 @@ class AdCreateDto {
   @IsDateString() startsAt!: string;
   @IsDateString() endsAt!: string;
 }
-class AdUpdateDto extends PartialType(AdCreateDto) {}
+class AdUpdateDto extends PartialType(AdCreateDto) {
+  /** Uzaytirish: sotib oluvchi yana to'ladi. Nima bo'lishi update da yozilgan. */
+  @IsOptional() @IsBoolean() renew?: boolean;
+  /** Forma ochilgandagi updatedAt: qator o'shandan beri o'zgargan bo'lsa yozuv rad etiladi (AD_STALE). */
+  @IsOptional() @IsDateString() expectUpdatedAt?: string;
+}
 
 /**
  * Banner uchun ruxsat etilgan turlar: rasm, harakatlanuvchi rasm va ovozsiz video.
@@ -205,11 +212,25 @@ export class AdsAdminController {
   async create(@CurrentUserId() userId: string, @Body() dto: AdCreateDto) {
     const data = range(dto.startsAt, dto.endsAt);
     requireBottomMedia(dto);
-    const a = await this.prisma.adPlacement.create({ data: { ...dto, ...data } });
-    await this.audit.log({ actorId: userId, action: 'admin.ad.create', entity: 'AdPlacement', entityId: a.id, meta: { placement: a.placement, buyer: a.buyer, pricePaidSom: a.pricePaidSom } });
+    const a = await this.prisma.adPlacement.create({ data: { ...dto, ...data, ...paid(dto.paidAt) } });
+    await this.audit.log({ actorId: userId, action: 'admin.ad.create', entity: 'AdPlacement', entityId: a.id, meta: { placement: a.placement, buyer: a.buyer, pricePaidSom: a.pricePaidSom, paidAt: a.paidAt } });
     return a;
   }
 
+  /**
+   * renew = uzaytirish: sotib oluvchi yana to'ladi. Egasi qarori, 2026-10-07: reklama puli
+   * to'langan oyga yoziladi.
+   *
+   * Qatorda bitta narx va bitta to'langan sana turadi. Uzaytirish oddiy tahrir bo'lsa
+   * oldingi to'lov o'z oyidan ketardi (narx almashsa yo'qoladi, qo'shilsa yangi oyga
+   * ko'chadi). Shuning uchun oldingi to'lov shu qatorning Qoralama nusxasiga o'tadi (o'z
+   * narxi, sanasi va muddati bilan, ya'ni o'z oyida qoladi), yangisi esa shu qatorga yoziladi.
+   * Nega nusxa eskisiga, yangisiga emas: ko'rinib turgan reklama, uning sanog'i va muddat
+   * ogohlantirishi uzilmasin. Qoralama: u chizilmaydi va ogohlantirishga tushmaydi, tushum esa
+   * holatga qaramaydi.
+   *
+   * Bitta tranzaksiya: yarmi yozilib qolsa pul ikki marta sanalardi yoki yo'qolardi.
+   */
   @Patch(':id')
   @UseGuards(PlatformOwnerGuard)
   async update(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: AdUpdateDto) {
@@ -225,8 +246,22 @@ export class AdsAdminController {
       body: dto.body ?? cur.body,
       imageUrl: dto.imageUrl ?? cur.imageUrl,
     });
-    const a = await this.prisma.adPlacement.update({ where: { id }, data: { ...dto, ...range(startsAt, endsAt) } });
+    const { renew, expectUpdatedAt, ...rest } = dto;
+    // Sanasiz uzaytirish yangi pulni eski to'lov oyiga yozib qo'yardi
+    if (renew && !rest.paidAt) throw new BadRequestException({ code: 'AD_PAID_AT', field: 'paidAt' });
+    // Forma ko'rgan nusxa bazadagisi emas: javobi yo'qolgan saqlash qayta bosilsa yoki eski varaqdan
+    // saqlansa, oldingi to'lov ikkinchi marta nusxalanardi yoki yangi to'lov eskisi bilan yopilardi,
+    // ya'ni tushum pulni ikki marta sanardi. where dagi updatedAt esa o'qish bilan yozuv orasiga
+    // kirgan bir vaqtdagi ikkinchi so'rovni to'xtatadi (P2025: tranzaksiya nusxani ham bekor qiladi).
+    if (expectUpdatedAt && new Date(expectUpdatedAt).getTime() !== cur.updatedAt.getTime()) throw new ConflictException({ code: 'AD_STALE' });
+    const write = this.prisma.adPlacement.update({ where: { id, updatedAt: cur.updatedAt }, data: { ...rest, ...range(startsAt, endsAt), ...paid(rest.paidAt) } });
+    const { id: _id, createdAt: _c, updatedAt: _u, ...old } = cur;
+    // Bepul qatorda ko'chiradigan to'lov yo'q: oddiy tahrir
+    const [a, kept] = renew && cur.pricePaidSom > 0
+      ? await this.prisma.$transaction([write, this.prisma.adPlacement.create({ data: { ...old, status: 'DRAFT' } })])
+      : [await write, null];
     await this.audit.log({ actorId: userId, action: 'admin.ad.update', entity: 'AdPlacement', entityId: id, meta: { fields: Object.keys(dto) } });
+    if (kept) await this.audit.log({ actorId: userId, action: 'admin.ad.create', entity: 'AdPlacement', entityId: kept.id, meta: { placement: kept.placement, buyer: kept.buyer, pricePaidSom: kept.pricePaidSom, paidAt: kept.paidAt, renewOf: id } });
     return a;
   }
 
@@ -273,4 +308,19 @@ function range(startsAt: string, endsAt: string) {
   const e = new Date(endsAt);
   if (!(e > s)) throw new BadRequestException({ code: 'AD_RANGE', field: 'endsAt' });
   return { startsAt: s, endsAt: e };
+}
+
+/**
+ * To'langan sana bazaga: kelmasa tegilmaydi, null bo'shatadi, qolgani Date. Nega Date: DTO
+ * "2026-10-07" ni ham qabul qiladi, Prisma esa satrda faqat to'liq vaqtni oladi.
+ *
+ * Bugundan keyingi sana rad etiladi (formadagi max bilan bir qoida): sana tanlagich qo'lda
+ * yozilgan yilni o'tkazib yuboradi, tushum esa kelajak sanani o'sha kun kelguncha sanamaydi,
+ * ya'ni 2026 o'rniga 2027 yozilsa pul jim yo'qolardi. Vaqt bilan emas, Toshkent kuni bilan
+ * solishtiriladi: forma bugungi sanani UTC yarim tuni qilib yuboradi (Toshkentda 05:00), ya'ni
+ * 00:00 dan 05:00 gacha u hozirdan keyin turadi va bugun rad etilib qolardi.
+ */
+function paid(v: string | null | undefined) {
+  if (v && uzLocalDate(new Date(v)) > uzLocalDate(new Date())) throw new BadRequestException({ code: 'AD_PAID_AT_FUTURE', field: 'paidAt' });
+  return v === undefined ? {} : { paidAt: v ? new Date(v) : null };
 }

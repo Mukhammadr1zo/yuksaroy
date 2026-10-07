@@ -70,7 +70,7 @@ export default function InquiriesPage() {
               {i.unread > 0 ? (
                 <span className="rounded-full bg-teal px-2 py-0.5 font-mono text-xs font-bold text-white" aria-label={tch('unread', { count: i.unread })}>{i.unread}</span>
               ) : null}
-              {/* OPEN: qabul qiluvchi tomon hali bir marta ham javob yozmagan */}
+              {/* OPEN: qabul qiluvchi tomon javob qarzdor - hali yozmagan yoki mijoz javobdan keyin yana yozgan (2026-10-07) */}
               {scope === 'owner' && i.status === 'OPEN' ? (
                 <span className="rounded-full bg-amber px-2.5 py-0.5 text-xs font-semibold text-ink">{t('awaiting')}</span>
               ) : null}

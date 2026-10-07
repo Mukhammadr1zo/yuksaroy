@@ -3,7 +3,7 @@
 // Nega muhim: har navbatni eslatmaga qo'shsak, ogohlantirish har kuni keladi va odam
 // unga qarashni to'xtatadi. Shuning uchun ro'yxat ataylab qisqa.
 import { describe, expect, it } from 'vitest';
-import { QUEUE_DEF, QUEUE_KEYS, TASK_ENTITIES, queueOf, queueWhere, staleQueues, type QueueKey, type QueueStat } from './admin-queues';
+import { QUEUE_DEF, QUEUE_KEYS, TASK_ENTITIES, queueOf, queueStats, queueWhere, staleQueues, type QueueKey, type QueueStat } from './admin-queues';
 
 /** Navbat sharti bitta joyda: vazifa yopilishi ham, badge ham shu jadvaldan. */
 describe('QUEUE_DEF', () => {
@@ -72,5 +72,43 @@ describe('kutib qolgan navbatlar', () => {
     const s = empty();
     s.orgsPendingKyc = { count: 0, oldest: daysAgo(10) };
     expect(staleQueues(s, now, 2)).toEqual([]);
+  });
+});
+
+/**
+ * Javobdan keyin mijoz yana yozsa platforma suhbati navbatga qaytadi (egasi qarori, 2026-10-07).
+ * Yosh mijozning javobsiz birinchi xabaridan: createdAt dan sanalsa qayta ochilgan bir oylik suhbat
+ * bir oy kutgandek ko'rinardi, lastMessageAt dan sanalsa har "javob bormi?" eslatmani yana surardi.
+ * Qaysi xabar javobsiz birinchi ekanini SQL hal qiladi (haqiqiy Postgres da tekshirilgan); bu yerda
+ * yosh ustundan emas, shu so'rovdan olinishi qotiriladi.
+ */
+describe('platforma suhbati yoshi', () => {
+  // Navbatda bitta OPEN suhbat, qolgan navbatlar bo'sh. Ustunlar ataylab chalg'itadi:
+  // yosh createdAt yoki lastMessageAt dan olinsa testlardan biri yiqiladi
+  const fake = (firstUnanswered: Date) => {
+    const calls: unknown[][] = [];
+    const none = { count: async () => 0, findFirst: async () => null };
+    const prisma = {
+      listing: none, organization: none, terminal: none, premiumOrder: none, subscription: none,
+      order: none, urgentRequest: none, contactMessage: none, report: none,
+      inquiry: { count: async () => 1, findFirst: async () => ({ createdAt: daysAgo(30), lastMessageAt: new Date(now.getTime() - 3_600_000) }) },
+      membership: { findMany: async () => [{ userId: 'adm' }] }, user: { findMany: async () => [] },
+      $queryRaw: async (_sql: TemplateStringsArray, ...values: unknown[]) => { calls.push(values); return [{ at: firstUnanswered }]; },
+    } as never;
+    return { prisma, calls };
+  };
+
+  it("hech javob olmagan suhbatga mijoz bir soat oldin yana yozgan: yosh birinchi xabaridan, eslatma chiqadi", async () => {
+    const { prisma, calls } = fake(daysAgo(3));
+    const st = await queueStats(prisma, true);
+    expect(st.platformInquiriesOpen).toEqual({ count: 1, oldest: daysAgo(3) });
+    expect(staleQueues(st, now, 2)).toEqual([{ key: 'platformInquiriesOpen', days: 3 }]);
+    // Adminning o'zi boshlagani yoshga ham kirmaydi: shart queueWhere niki bilan bir xil
+    expect(calls).toEqual([[['adm']]]);
+  });
+
+  it("bir oylik suhbatga javobdan keyin bir soat oldin yozilgan savol: eslatma chiqmaydi", async () => {
+    const st = await queueStats(fake(new Date(now.getTime() - 3_600_000)).prisma, true);
+    expect(staleQueues(st, now, 2)).toEqual([]);
   });
 });

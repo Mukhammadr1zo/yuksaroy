@@ -6,7 +6,7 @@ const sub = (paidAt: string, som: number, startsAt?: string) => ({
   paidAt: new Date(paidAt), startsAt: startsAt ? new Date(startsAt) : null, amountTiyin: BigInt(som * 100),
 });
 const prem = (paidAt: string, som: number) => ({ paidAt: new Date(paidAt), amountTiyin: BigInt(som * 100) });
-const ad = (startsAt: string, som: number) => ({ startsAt: new Date(startsAt), pricePaidSom: som });
+const ad = (startsAt: string, som: number, paidAt?: string) => ({ startsAt: new Date(startsAt), paidAt: paidAt ? new Date(paidAt) : null, pricePaidSom: som });
 const deal = (at: string, som: number | null) => ({ at: new Date(at), priceTiyin: som == null ? null : BigInt(som * 100) });
 
 describe('oy chegarasi Toshkent bo\'yicha', () => {
@@ -76,10 +76,41 @@ describe('reklama puli', () => {
     expect(r.adsTiyin).toBe(214_748_364_700);
   });
 
-  it("holat qaralmaydi, boshlanmagan reklama sanalmaydi, bepul qator tushmaydi", () => {
+  it("holat qaralmaydi, bepul qator tushmaydi; to'langan sana oynada, sanasiz eski qatorda boshlanish", () => {
     const a = new Date('2026-09-01T00:00:00Z');
     const b = new Date('2026-09-15T00:00:00Z');
-    expect(adSales(a, b)).toEqual({ pricePaidSom: { gt: 0 }, startsAt: { gte: a, lt: b } });
+    expect(adSales(a, b)).toEqual({
+      pricePaidSom: { gt: 0 },
+      OR: [{ paidAt: { gte: a, lt: b } }, { paidAt: null, startsAt: { gte: a, lt: b } }],
+    });
+  });
+
+  /**
+   * Egasi qarori, 2026-10-07: pul to'langan oyga. Sanasi yo'q qator (ustundan oldingi)
+   * boshlangan oyida qoladi, ya'ni o'tgan oylar o'zgarmaydi.
+   */
+  it("to'langan oyga yoziladi, sanasi yo'q eski qator boshlangan oyiga", () => {
+    const rows = monthlyRevenue([], [], [
+      // Oldindan to'langan: avgustda pul keldi, sentabrda boshlanadi
+      ad('2026-09-01T00:00:00Z', 500_000, '2026-08-25T00:00:00Z'),
+      ad('2026-07-01T00:00:00Z', 300_000),
+    ], NOW);
+    expect(rows.map((r) => [r.month, r.adsTiyin])).toEqual([['2026-08', 50_000_000], ['2026-07', 30_000_000]]);
+  });
+
+  it("uzaytirish: oldingi to'lov o'z oyida, yangisi to'langan oyida", () => {
+    // Uzaytirishdan keyin ikki qator: Qoralama nusxa (eski, sanasiz) va ko'rinib turgan qator
+    const rows = monthlyRevenue([], [], [
+      ad('2026-08-01T00:00:00Z', 500_000),
+      ad('2026-08-01T00:00:00Z', 500_000, '2026-09-03T00:00:00Z'),
+    ], NOW);
+    expect(rows.map((r) => [r.month, r.adsTiyin])).toEqual([['2026-09', 50_000_000], ['2026-08', 50_000_000]]);
+  });
+
+  it("to'langan sana ham Toshkent oyi bilan kesiladi", () => {
+    // 31-avgust 20:00 UTC = 1-sentabr 01:00 Toshkent
+    const [r] = monthlyRevenue([], [], [ad('2026-08-01T00:00:00Z', 100, '2026-08-31T20:00:00Z')], NOW);
+    expect(r.month).toBe('2026-09');
   });
 });
 

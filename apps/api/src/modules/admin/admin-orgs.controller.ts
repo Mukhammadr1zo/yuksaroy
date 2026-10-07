@@ -9,6 +9,7 @@ import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
 import { orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PLATFORM_ROLES } from './team/team.rules';
 import { PrismaService } from '../../common/prisma.service';
+import { notClientClosed } from '../../common/stuck-orders';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
@@ -173,7 +174,8 @@ export class AdminOrgsController {
       this.prisma.premiumOrder.aggregate({ where: { orgId: id, paidAt: { not: null } }, _sum: { amountTiyin: true } }),
       this.prisma.subscription.aggregate({ where: { userId: { in: userIds }, paidAt: { not: null } }, _sum: { amountTiyin: true } }),
       this.prisma.order.aggregate({ where: { shipperOrgId: id }, _count: { _all: true }, _max: { createdAt: true } }),
-      this.prisma.order.aggregate({ where: { shipperOrgId: id, status: 'DONE' }, _count: { _all: true }, _sum: { totalTiyin: true, commissionTiyin: true } }),
+      // Mijoz o'zi yopgani bajarilgan summaga ham, komissiyaga ham kirmaydi (notClientClosed)
+      this.prisma.order.aggregate({ where: { shipperOrgId: id, status: 'DONE', ...notClientClosed }, _count: { _all: true }, _sum: { totalTiyin: true, commissionTiyin: true } }),
     ]);
     return {
       premium: premium.map((p) => ({ ...p, amountTiyin: n(p.amountTiyin) })),

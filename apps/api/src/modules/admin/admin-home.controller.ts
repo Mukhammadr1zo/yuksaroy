@@ -8,7 +8,7 @@ import { FANOUT_ACTION } from '../../common/fanout';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
-import { stuckOrderIds } from '../../common/stuck-orders';
+import { notClientClosed, stuckOrderIds } from '../../common/stuck-orders';
 import { JwtGuard } from '../identity/presentation/jwt.guard';
 import { dayKeys } from '../impressions/day-series';
 import { ImpressionsService } from '../impressions/impressions.service';
@@ -110,7 +110,8 @@ export class AdminHomeController {
 
   /**
    * Tushum faqat egaga: shu oy va o'tgan oy, Toshkent oyi (monthWindow). Obuna va Premium
-   * paidAt bo'yicha, reklama boshlangan kuni bo'yicha (adSales: Tushum sahifasi bilan bitta qoida).
+   * paidAt bo'yicha, reklama to'langan oyi bo'yicha, sanasi yo'q eski qator boshlangan oyi bo'yicha
+   * (adSales: Tushum sahifasi bilan bitta qoida).
    * Mijoz isOwner bo'lmasa bu yo'lni so'ramaydi. Alohida yo'l, chunki qolgan bloklar
    * operatorga ham ochiq va bitta javobda "ega bo'lsa qo'sh" sharti xatoga moyil.
    */
@@ -204,11 +205,12 @@ export class AdminHomeController {
   private async commission() {
     const { start, prevStart } = monthWindow();
     // status DONE shart: closedAt rad etilgan, bekor qilingan va muddati o'tgan
-    // buyurtmaga ham yoziladi, ular esa chegaraga sanalmasligi kerak
+    // buyurtmaga ham yoziladi, ular esa chegaraga sanalmasligi kerak. Mijoz o'zi yopgani ham
+    // sanalmaydi (notClientClosed, 2026-10-07): ishni terminal tasdiqlamagan
     const [cfg, thisMonth, prevMonth] = await Promise.all([
       this.config.get(),
-      this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: start } } }),
-      this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: prevStart, lt: start } } }),
+      this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: start }, ...notClientClosed } }),
+      this.prisma.order.count({ where: { status: 'DONE', closedAt: { gte: prevStart, lt: start }, ...notClientClosed } }),
     ]);
     return { thisMonth, prevMonth, threshold: cfg.commissionThresholdOrders };
   }

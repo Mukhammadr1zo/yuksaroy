@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { customerCloseAt, orderIdleSince } from '@yuksaroy/domain';
 import type { PrismaService } from './prisma.service';
-import { stuckOrderIds } from './stuck-orders';
+import { notClientClosed, stuckOrderIds } from './stuck-orders';
 
 const d = (s: string) => new Date(s);
 const idle = (o: Partial<Parameters<typeof orderIdleSince>[0]>) =>
@@ -52,5 +52,27 @@ describe('stuckOrderIds', () => {
     expect(ids).toEqual(['qotgan', 'saqlash-tugagan']);
     // Bazadagi shart faqat zarur shartlar: chegara bir xil
     expect(where).toMatchObject({ createdAt: { lte: d('2026-10-01T00:00:00Z') }, history: { none: { at: { gt: d('2026-10-01T00:00:00Z') } } } });
+  });
+});
+
+describe('notClientClosed', () => {
+  // Prisma dagi none/some/not ma'nosi xotirada: buyurtma tarixiga qarab pul va komissiyaga kiradimi
+  type Row = { fromStatus: string; toStatus: string; actorRole: string };
+  const fits = (h: Row, f: object) => Object.entries(f).every(([k, v]) => (typeof v === 'object' ? h[k as keyof Row] !== v.not : h[k as keyof Row] === v));
+  const counts = (rows: Row[]) => notClientClosed.OR.some(({ history: { none, some } }) =>
+    none ? !rows.some((h) => fits(h, none)) : !!some && rows.some((h) => fits(h, some)));
+  const done = (actorRole: string, fromStatus = 'IN_PROGRESS'): Row => ({ fromStatus, toStatus: 'DONE', actorRole });
+
+  it("mijoz o'zi yopgani sanalmaydi, terminal yoki admin yakunlagani sanaladi", () => {
+    expect(counts([done('TERMINAL')])).toBe(true);
+    expect(counts([done('PLATFORM_ADMIN')])).toBe(true);
+    // closeStuck yozadigan qator
+    expect(counts([done('CLIENT')])).toBe(false);
+    // Admin qayta ochdi, terminal yakunladi: ishni terminal tasdiqladi, yana sanaladi
+    expect(counts([done('CLIENT'), { fromStatus: 'DONE', toStatus: 'IN_PROGRESS', actorRole: 'PLATFORM_ADMIN' }, done('TERMINAL')])).toBe(true);
+    // Admin formasida DONE -> DONE saqlash yakunlash emas: mijoz yopgani pulga qaytmaydi
+    expect(counts([done('CLIENT'), done('PLATFORM_ADMIN', 'DONE')])).toBe(false);
+    // Tarixida DONE yo'q: shart boshqa sanoqqa qo'shilsa ham hech narsani to'smaydi
+    expect(counts([])).toBe(true);
   });
 });

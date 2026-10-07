@@ -2,10 +2,10 @@
 // E'lonlarim: jadval + har qator uchun holatga mos harakatlar (e'lon berish, arxivlash, tahrirlash, qoralamani o'chirish).
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { LISTING_OWNER_LABELS, canListingTransition } from '@yuksaroy/domain';
+import { LISTING_OWNER_LABELS, canExtendListing, canListingTransition } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
-import { som, uzDateTime } from '@/lib/format';
+import { som, uzDate, uzDateTime } from '@/lib/format';
 import { listingHref, type OwnerListing } from '@/lib/types-kabinet';
 import { BTN_GHOST, BTN_NAVY, ListingStatusPill, Notice, errText, useLang, useListingLabels } from '@/components/kabinet/bits';
 import { OpenCargoLink } from '@/components/kabinet/OpenCargoLink';
@@ -37,9 +37,14 @@ export default function MyListingsPage() {
       if (what === 'delete') { await api(`/listings/${l.id}`, { method: 'DELETE' }); setItems((xs) => xs?.filter((x) => x.id !== l.id) ?? null); setLive(null); }
       else {
         const r = await post<OwnerListing>(`/listings/${l.id}/${what}`, {});
-        setItems((xs) => xs?.map((x) => (x.id === l.id ? r : x)) ?? null);
+        // Javobda ko'rishlar soni 0 (u faqat /listings/mine da qo'shiladi): qatordagi son qoladi
+        setItems((xs) => xs?.map((x) => (x.id === l.id ? { ...r, views: x.views } : x)) ?? null);
         setLive(what === 'publish' ? r : null);
-        if (what === 'publish') setOk(`${l.title}: ${t(r.status === 'ACTIVE' ? 'published.ACTIVE' : 'published.PENDING_REVIEW')}`);
+        if (what === 'publish') {
+          // Faol e'lon uzaytirilganda holat o'zgarmaydi: egasiga yangi tugash sanasi aytiladi
+          const done = l.status === 'ACTIVE' && r.status === 'ACTIVE' && r.expiresAt ? t('extended', { date: uzDate(r.expiresAt, lang) }) : t(r.status === 'ACTIVE' ? 'published.ACTIVE' : 'published.PENDING_REVIEW');
+          setOk(`${l.title}: ${done}`);
+        }
       }
     } catch (e) { setErr(errText(e, te, te.has, tc('failed'))); } finally { setBusy(null); }
   }
@@ -64,12 +69,16 @@ export default function MyListingsPage() {
 
       {items && items.length ? (
         <div className="mt-6 overflow-x-auto rounded-card border border-line bg-white">
-          <table className="w-full min-w-[980px] text-sm">
+          {/*
+            "Kim nomidan" alohida ustun emas, nom ostida: jadval 1097 px edi, kabinet kartasi esa
+            har qanday ekranda 1016 px, ya'ni amallar ustuni (shu jumladan "Qayta yuborish") doim
+            kartadan chiqib, yarmi ko'rinmay turardi.
+          */}
+          <table className="w-full min-w-[860px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-muted">
               <tr className="border-b border-line">
                 <th scope="col" className="px-4 py-3 font-semibold">{t('col.title')}</th>
                 <th scope="col" className="px-4 py-3 font-semibold">{t('col.kind')}</th>
-                <th scope="col" className="px-4 py-3 font-semibold">{t('col.owner')}</th>
                 <th scope="col" className="px-4 py-3 font-semibold">{t('col.status')}</th>
                 <th scope="col" className="px-4 py-3 font-semibold">{tp('col')}</th>
                 <th scope="col" className="px-4 py-3 text-right font-semibold">{t('col.price')}</th>
@@ -80,17 +89,19 @@ export default function MyListingsPage() {
             </thead>
             <tbody>
               {items.map((l) => {
-                const publishable = canListingTransition(l.status, 'PENDING_REVIEW', 'OWNER');
+                // Faol e'lon oxirgi 7 kunida ham shu tugma bilan uzaytiriladi: qoida API bilan bitta
+                const extendable = canExtendListing(l.status, l.expiresAt);
+                const publishable = extendable || canListingTransition(l.status, 'PENDING_REVIEW', 'OWNER');
                 const archivable = canListingTransition(l.status, 'ARCHIVED', 'OWNER');
                 return (
                   <tr key={l.id} className="border-b border-line/70 align-top last:border-0">
                     <td className="px-4 py-3">
                       <Link href={`/dashboard/listings/${l.id}`} className="font-semibold hover:underline">{l.title}</Link>
+                      <p className="mt-0.5 text-xs text-muted">{l.owner.type === 'org' ? l.owner.name : LISTING_OWNER_LABELS[lang].person}</p>
                       {l.status === 'REJECTED' && l.rejectReason ? <p className="mt-0.5 text-xs text-red-700">{t('rejectReason')}: {l.rejectReason}</p> : null}
-                      {l.status === 'ACTIVE' && l.expiresAt ? <p className="mt-0.5 font-mono text-xs text-muted">{t('expires')} {uzDateTime(l.expiresAt, lang)}</p> : null}
+                      {l.status === 'ACTIVE' && l.expiresAt ? <p className={`mt-0.5 font-mono text-xs ${extendable ? 'font-semibold text-amber-ink' : 'text-muted'}`}>{t('expires')} <span className="whitespace-nowrap">{uzDateTime(l.expiresAt, lang)}</span></p> : null}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">{L.kind[l.kind]}{l.deal ? <span className="text-muted"> · {td(l.deal)}</span> : null}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{l.owner.type === 'org' ? l.owner.name : <span className="text-muted">{LISTING_OWNER_LABELS[lang].person}</span>}</td>
                     <td className="px-4 py-3"><ListingStatusPill status={l.status} /></td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {/* E'lonni alohida ko'tarish sotilmaydi: obuna egasining barcha e'lonlarini ko'taradi */}

@@ -1,9 +1,10 @@
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  BOOKING, ORDER_EVENT_STATUSES, ORDER_STUCK_DAYS, TransitionError, assertOrderTransition, customerCloseAt, orderIdleSince,
+  BOOKING, ORDER_EVENT_STATUSES, ORDER_STUCK_DAYS, TransitionError, assertOrderTransition,
   type Actor, type OrderEventCode, type OrderStatus,
 } from '@yuksaroy/domain';
 import { PrismaService } from '../../../common/prisma.service';
+import { closeAtOf, noShowUntil } from '../../../common/stuck-orders';
 import { notifyBoth, type NotifyKind } from '../../../common/telegram';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { BOOKING_REPOSITORY, type BookingRepository } from '../../booking/domain/ports';
@@ -63,9 +64,18 @@ export class OrderActionsUseCase {
     return next;
   }
 
-  /** Mijoz kelmadi: CONFIRMED → CANCELLED, sabab kodi NO_SHOW, slot bo'shaydi. */
-  async noShow(userId: string, no: string) {
+  /**
+   * Mijoz kelmadi: CONFIRMED → CANCELLED, sabab kodi NO_SHOW, slot bo'shaydi.
+   *
+   * Egasining 2026-10-07 qarori: terminalga vaqt oynasi va undan keyin ORDER_STUCK_DAYS kun
+   * harakatsizlik beriladi; mijoz buyurtmani o'zi yopa oladigan paytdan boshlab "Kelmadi" rad
+   * etiladi. Kech belgi mijozning yopish va baho yozish huquqini o'chirib yuborardi: bekor
+   * qilingan buyurtmaga baho yozilmaydi.
+   */
+  async noShow(userId: string, no: string, now = new Date()) {
     const o = await this.forTerminal(userId, no);
+    const until = noShowUntil(o);
+    if (until && now >= until) throw new ConflictException({ code: 'NO_SHOW_TOO_LATE' });
     const next = await this.move(o, 'CANCELLED', 'TERMINAL', userId, { closedAt: new Date() }, 'NO_SHOW', 'NO_SHOW');
     if (o.slot) await this.bookings.release(o.slot.bookingId, 'NO_SHOW', new Date());
     return next;
@@ -178,14 +188,4 @@ export class OrderActionsUseCase {
     if (!o) throw new NotFoundException({ code: 'ORDER_NOT_FOUND' });
     return o;
   }
-}
-
-/**
- * Domain dagi yagona qoida (orderIdleSince + customerCloseAt) buyurtma yozuviga qo'llanadi.
- * Hodisa ham, holat o'zgarishi ham tarixga tushadi, shuning uchun oxirgi harakat - tarixning
- * eng kech qatori (tartibga tayanmaydi).
- */
-function closeAtOf(o: OrderRecord): Date | null {
-  const last = o.history.length ? new Date(Math.max(...o.history.map((h) => h.at.getTime()))) : null;
-  return customerCloseAt(o.status, orderIdleSince({ lastActivityAt: last, slotEndsAt: o.slot?.endsAt ?? null, confirmedAt: o.confirmedAt, createdAt: o.createdAt, storageDays: o.storageDays }));
 }

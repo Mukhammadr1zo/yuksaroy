@@ -111,5 +111,7 @@ describe("muddati tugayotgan e'lon eslatmasi", () => {
     expect(f.pushed[0].title).toContain('tugayapti');
     expect(f.pushed[0].body).toContain('Kran l1 va yana 2 ta');
     expect(f.pushed[0].body).toContain('3 kun ichida');
+    // Oxirgi 7 kunda tugma faol e'lonni uzaytiradi: eslatma qaysi tugmani bosishni aytadi
+    expect(f.pushed[0].body).toContain('"Qayta yuborish" tugmasini');
   });
 });

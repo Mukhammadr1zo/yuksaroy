@@ -12,6 +12,7 @@ import type { NotificationsService } from '../../notifications/notifications.ser
 import type { HistoryEntry, OrderRecord, OrderRepository } from '../domain/ports';
 import type { OrderAccess } from './order-access';
 import { OrderActionsUseCase } from './order-actions.usecase';
+import { noShowUntil } from '../../../common/stuck-orders';
 
 const d = (s: string) => new Date(s);
 const ev = (at: string, code: string | null = null) =>
@@ -56,7 +57,9 @@ function setup(o: OrderRecord) {
   const prisma = { terminal: { findUnique: async () => ({ orgId: 'terminal-org' }) } } as unknown as PrismaService;
   // Oluvchi bo'sh qaytadi: notifyBoth shu yerda to'xtaydi, maqsad faqat kimga yuborilgani
   const notifications = { recipients: async (t: unknown) => { targets.push(t); return []; } } as unknown as NotificationsService;
-  return { uc: new OrderActionsUseCase(orders, {} as BookingRepository, access, documents, prisma, notifications), moves, issued, targets, added };
+  const released: string[] = [];
+  const bookings = { release: async (_id: string, why: string) => { released.push(why); } } as unknown as BookingRepository;
+  return { uc: new OrderActionsUseCase(orders, bookings, access, documents, prisma, notifications), moves, issued, targets, added, released };
 }
 
 describe('qotgan buyurtmani mijoz yopadi', () => {
@@ -113,5 +116,32 @@ describe('qotgan buyurtmani mijoz yopadi', () => {
     const f = setup(order());
     expect(await f.uc.closeAtFor('u-mijoz', order())).toEqual(d('2026-09-28T05:00:00Z'));
     expect(await f.uc.closeAtFor('u-terminal', order())).toBeNull();
+  });
+});
+
+describe('kech "Kelmadi" rad etiladi', () => {
+  // Tasdiqlangan, slot 21-sentabr 05:00 da tugagan, keyin jim: mijoz 28-sentabr 05:00 dan yopa oladi
+  const confirmed = () => order({ status: 'CONFIRMED', history: [ev('2026-09-20T08:00:00Z')] });
+
+  it("mijoz yopa oladigan paytdan boshlab terminal belgilay olmaydi, taxtadagi tugma ham shu paytgacha", async () => {
+    const f = setup(confirmed());
+    expect(noShowUntil(confirmed())).toEqual(d('2026-09-28T05:00:00Z'));
+    await expect(f.uc.noShow('u-t', 'YS-0001', d('2026-09-28T05:00:00Z')))
+      .rejects.toMatchObject({ response: { code: 'NO_SHOW_TOO_LATE' } });
+    // Taxtadagi tugma hodisa yo'li orqali boradi: u ham to'xtaydi
+    await expect(f.uc.addEvent('u-t', 'YS-0001', 'NO_SHOW')).rejects.toMatchObject({ response: { code: 'NO_SHOW_TOO_LATE' } });
+    expect(f.moves).toEqual([]);
+    expect(f.released).toEqual([]);
+  });
+
+  it("muddat ichida odatdagidek: bekor, sabab NO_SHOW, joy bo'shaydi", async () => {
+    const f = setup(confirmed());
+    await f.uc.noShow('u-t', 'YS-0001', d('2026-09-28T04:59:00Z'));
+    expect(f.moves.map((m) => [m.from, m.to, m.entry.code])).toEqual([['CONFIRMED', 'CANCELLED', 'NO_SHOW']]);
+    expect(f.released).toEqual(['NO_SHOW']);
+  });
+
+  it("ish boshlangan buyurtmada muddat yo'q: u yerda tugma ham yo'q", () => {
+    expect(noShowUntil(order())).toBeNull();
   });
 });

@@ -48,7 +48,10 @@ export class ListingsOwnerController {
     return { ...ownerListing(listing), warnings };
   }
 
-  /** DRAFT/REJECTED/ARCHIVED/EXPIRED -> PENDING_REVIEW; tasdiqlangan tashkilot yoki telefoni tasdiqlangan haydovchi darhol ACTIVE. */
+  /**
+   * DRAFT/REJECTED/ARCHIVED/EXPIRED -> PENDING_REVIEW; tasdiqlangan tashkilot yoki telefoni tasdiqlangan haydovchi darhol ACTIVE.
+   * Faol e'lon oxirgi 7 kunida shu yerda uzaytiriladi va shu audit qatoriga tushadi (2026-10-07 egasi qarori).
+   */
   @Post('listings/:id/publish')
   @HttpCode(200)
   async publish(@CurrentUserId() userId: string, @Param('id') id: string) {

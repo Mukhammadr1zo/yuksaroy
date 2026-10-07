@@ -1203,6 +1203,12 @@ model AdPlacement {
   /// Kim sotib oldi va qancha to'ladi. Faqat panelda ko'rinadi, ommaviy javobda yo'q.
   buyer        String?
   pricePaidSom Int      @default(0)
+  /// Pul qachon to'langan: tushum reklama pulini shu sananing Toshkent oyiga yozadi (admin/revenue.ts
+  /// adSales). Egasi qarori, 2026-10-07. Bo'sh = shu ustundan oldingi qator: u boshlangan oyiga
+  /// (startsAt) yoziladi, shuning uchun o'tgan oylarning tushumi o'zgarmaydi.
+  /// Bir qator = bir to'lov: uzaytirishda oldingi to'lov alohida Qoralama qatorga ko'chadi
+  /// (ads.controller update).
+  paidAt       DateTime? @db.Timestamptz(3)
   status       String   @default("DRAFT") // AD_STATUSES: DRAFT | ACTIVE
   /// Pastki banner vaqtlari (AD_BOTTOM_DEFAULTS). Boshqa joylar bu sonlarni o'qimaydi.
   /// Bazada, chunki bu sotuv shartnomasining bir qismi: o'zgarishi uchun deploy kutilmaydi.

@@ -41,6 +41,7 @@
       "err": {
         "TRANSITION_NOT_ALLOWED": "Buyurtma holati o'zgargan. Sahifani yangilang.",
         "ORDER_NOT_ACTIVE": "Buyurtma faol emas.",
+        "NO_SHOW_TOO_LATE": "\"Kelmadi\" deb belgilash muddati o'tdi: buyurtmada {days} kun harakat bo'lmadi. Endi uni mijoz o'zi yopa oladi.",
         "failed": "Bajarilmadi. Qayta urinib ko'ring."
       }
     },

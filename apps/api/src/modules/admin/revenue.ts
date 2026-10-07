@@ -37,27 +37,32 @@ export function monthBack(key: string, back: number) {
 
 type Sub = { paidAt: Date | null; startsAt: Date | null; amountTiyin: bigint };
 type Prem = { paidAt: Date | null; amountTiyin: bigint };
-type Ad = { startsAt: Date; pricePaidSom: number };
+type Ad = { startsAt: Date; paidAt: Date | null; pricePaidSom: number };
 export type RevenueMonth = { month: string; totalTiyin: number; subsTiyin: number; premiumTiyin: number; adsTiyin: number; payments: number; renewals: number };
 
 /**
- * Sotilgan reklama shu oynada: reklama puli u BOSHLANGAN oyga yoziladi (startsAt).
+ * Sotilgan reklama shu oynada: pul TO'LANGAN oyga yoziladi (paidAt). Egasi qarori, 2026-10-07.
  *
- * Nega to'lov sanasi emas: reklama modulida u yo'q. pricePaidSom panel varag'idagi oddiy son,
- * istalgan keyingi tahrirda yozilishi yoki o'zgarishi mumkin (forma har safar hamma maydonni
- * yuboradi, audit esa faqat maydon nomini yozadi). createdAt ham emas: yangi reklama sukutda
- * Qoralama, ya'ni qator sotuvdan oldin ochiladi, uning sanasi esa panelda hech qayerda
- * ko'rinmaydi. startsAt ni ega har sotuvga o'zi qo'yadi, reklamalar ro'yxati shu bo'yicha
- * saralangan va narx yonida turadi: oyning reklama puli qaysi qatorlardan yig'ilganini ega
- * o'sha ro'yxatdan tekshiradi. Reklama oldindan to'lanadi, ya'ni boshlanishdan uzoq emas.
+ * Ilgari pul boshlangan oyga (startsAt) yozilardi, chunki to'lov sanasi yo'q edi, va eski
+ * qatorga yozilgan uzaytirish birinchi oyga tushib qolardi. Endi panel formasi narx yonida
+ * to'langan sanani so'raydi (narx yozilganda sukutda bugun).
+ *
+ * paidAt bo'sh = ustun qo'shilishidan oldingi qator: u avvalgidek boshlangan oyiga tushadi.
+ * Nega bo'sh qatorlar to'ldirilmadi: to'lov kuni hech qayerda yozilmagan, taxmin qilsak
+ * o'tgan oylarning ega ko'rgan tushumi o'zgarardi. Shu sababli OR: shart bitta joyda,
+ * bosh sahifa kartasi ham, Tushum sahifasi ham shu funksiyadan o'qiydi.
  *
  * Holat qaralmaydi: u faqat ko'rsatishni boshqaradi, muddati tugab Qoralamaga qaytarilgan
- * reklamaning puli baribir kelgan. Boshlanmagani (lt: hozir) hali sanalmaydi.
+ * reklamaning puli baribir kelgan. Kelajak sanasi (lt: hozir) hali sanalmaydi.
  *
- * ponytail: bir qator = bir sotuv. Uzaytirish eski qatorga yozilsa hammasi birinchi oyga
- * tushadi, o'chirilgan reklama puli tarixdan ketadi; kerak bo'lsa paidAt li to'lov qatori.
+ * ponytail: bir qator = bir to'lov. Uzaytirishda oldingi to'lov alohida Qoralama qatorga
+ * ko'chadi (ads.controller update, renew). O'chirilgan qatorning puli tarixdan ketadi;
+ * bunga ehtiyoj tug'ilsa alohida to'lov jadvali kerak bo'ladi.
  */
-export const adSales = (gte: Date, lt: Date) => ({ pricePaidSom: { gt: 0 }, startsAt: { gte, lt } });
+export const adSales = (gte: Date, lt: Date) => ({
+  pricePaidSom: { gt: 0 },
+  OR: [{ paidAt: { gte, lt } }, { paidAt: null, startsAt: { gte, lt } }],
+});
 
 export function monthlyRevenue(subs: Sub[], prems: Prem[], ads: Ad[], now = new Date()): RevenueMonth[] {
   const first = monthBack(monthKey(now), 11); // to'liq bo'lmagan 13-oy varaqqa tushmasin
@@ -86,7 +91,8 @@ export function monthlyRevenue(subs: Sub[], prems: Prem[], ads: Ad[], now = new 
     r.premiumTiyin += v; r.totalTiyin += v; r.payments += 1;
   }
   for (const a of ads) {
-    const k = monthKey(a.startsAt);
+    // adSales bilan bitta qoida: to'langan oy, sanasi yo'q eski qatorda boshlangan oy
+    const k = monthKey(a.paidAt ?? a.startsAt);
     if (k < first) continue;
     const r = row(k);
     // Ustun Int (32 bit): * 100 ham 2^53 dan ancha past, ya'ni Number aniq, kasr chiqmaydi

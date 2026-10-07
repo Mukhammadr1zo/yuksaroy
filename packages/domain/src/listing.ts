@@ -16,7 +16,7 @@ export type TruckType = (typeof TRUCK_TYPES)[number];
 export const PRICE_UNITS = ['TOTAL', 'PER_MONTH', 'PER_DAY', 'PER_HOUR', 'PER_KM', 'PER_TON', 'PER_TRIP'] as const;
 export type PriceUnit = (typeof PRICE_UNITS)[number];
 
-export const LISTING = { expireDays: 90, maxPhotos: 10, maxRoutes: 20 } as const;
+export const LISTING = { expireDays: 90, extendWindowDays: 7, maxPhotos: 10, maxRoutes: 20 } as const;
 
 /** Narx birligi qaysi bitimda mumkin. Avto (TRUCK) uchun deal yo'q. */
 export const PRICE_UNITS_FOR: { RENT: readonly PriceUnit[]; SALE: readonly PriceUnit[]; TRUCK: readonly PriceUnit[] } = {
@@ -67,6 +67,22 @@ export function assertListingTransition(from: ListingStatus, to: ListingStatus, 
 
 export function canListingTransition(from: ListingStatus, to: ListingStatus, actor: ListingActor): boolean {
   try { assertListingTransition(from, to, actor); return true; } catch { return false; }
+}
+
+/**
+ * Faol e'lonni egasi muddatining oxirgi 7 kunida "Qayta yuborish" bilan uzaytira oladimi.
+ *
+ * 2026-10-07 egasi qarori: yana 90 kun, qayta yuborilgandek katalog boshiga, tekshiruvsiz
+ * (e'lon allaqachon katalogda). Boshga chiqishi ataylab: aks holda e'lonni tugashiga qo'yib,
+ * keyin qayta yuborish foydaliroq bo'lardi. Holat ACTIVE qoladi, shuning uchun o'tish
+ * jadvaliga kirmaydi. Muddati o'tib bo'lgan e'lon (kunlik sikl hali EXPIRED qilmagan)
+ * uzaytirilmaydi: sikl uni yangi muddatni ko'rmasdan EXPIRED ga surib yuborishi mumkin.
+ * API tekshiruvi ham, kabinet tugmasi ham shu bitta qoidadan.
+ */
+export function canExtendListing(status: ListingStatus, expiresAt: Date | string | null, now = new Date()): boolean {
+  if (status !== 'ACTIVE' || !expiresAt) return false;
+  const left = new Date(expiresAt).getTime() - now.getTime();
+  return left > 0 && left <= LISTING.extendWindowDays * 86_400_000;
 }
 
 // ───────────────────────── Kiritish va qoidalar ─────────────────────────

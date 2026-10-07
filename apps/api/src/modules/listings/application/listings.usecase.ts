@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { LISTING, REGION_CENTERS, SEARCH_LABELS, TransitionError, assertListingTransition, slugify, storePhone, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
+import { Prisma } from '@prisma/client';
+import { LISTING, REGION_CENTERS, SEARCH_LABELS, TransitionError, assertListingTransition, canExtendListing, slugify, storePhone, validateListing, type ListingActor, type ListingInput, type ListingStatus, type RegionCode } from '@yuksaroy/domain';
 import { uniqueSlug, type ListingRecord } from '../domain/listing-query';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { AdminNotify } from '../../organizations/application/admin-notify';
@@ -10,6 +11,7 @@ import { PrismaListingRepository } from '../infrastructure/prisma-listing.reposi
 import { ListingAccess } from './listing-access';
 import { watchers } from '../../watch/watchers';
 import { filesOrThrow } from '../../../common/attachments';
+import { markInquiryMessage } from '../../chat/inquiry-status';
 
 /** Saqlangan yozuvdan domen kiritmasi (PATCH da birlashtirish va qayta tekshirish uchun). */
 export function inputOf(l: ListingRecord): ListingInput {
@@ -66,13 +68,19 @@ export class ListingsUseCase {
   /**
    * Egasi yuboradi: tasdiqlangan tashkilot yoki telefoni tasdiqlangan yakka haydovchi
    * darhol ACTIVE (SYSTEM), qolganlari PENDING_REVIEW.
+   *
+   * Faol e'lon oxirgi 7 kunida shu yerda uzaytiriladi (canExtendListing, 2026-10-07 egasi
+   * qarori): tekshiruvsiz, qayta yuborilgandek. Alohida endpoint qilinmadi: listing.publish
+   * audit qatori uzaytirishni ham sanasin, eslatma (12-qadam) ko'rsatkichi shunga qaraydi.
+   * Oynadan tashqarida faol e'lon avvalgidek o'tish xatosini oladi.
    */
   async publish(userId: string, id: string) {
     const l = await this.owned(userId, id);
-    this.transition(l, 'PENDING_REVIEW', 'OWNER');
     const now = new Date();
+    if (canExtendListing(l.status, l.expiresAt, now)) return this.activate(l, userId, now);
+    this.transition(l, 'PENDING_REVIEW', 'OWNER');
     if (!(await this.instant(l, userId, now))) {
-      const out = await this.repo.setStatus(id, { status: 'PENDING_REVIEW', rejectReason: null });
+      const out = await this.save(l, { status: 'PENDING_REVIEW', rejectReason: null });
       void this.adminNotify.queued('listingsPendingReview', l.title, l.id, userId).catch(() => {});
       return out;
     }
@@ -80,20 +88,37 @@ export class ListingsUseCase {
   }
 
   /**
-   * E'lon faol bo'ladigan YAGONA joy: egasi yuborganda ham, admin tasdiqlaganda ham
-   * shu yerdan o'tadi.
+   * E'lon faol bo'ladigan YAGONA joy: egasi yuborganda ham, admin tasdiqlaganda ham,
+   * faol e'lon uzaytirilganda ham shu yerdan o'tadi.
    *
    * Nega bitta joyga yig'ildi: holat yozuvi va obunaga ko'tarish ikki nusxa edi va
    * yangi hodisa (kuzatuv xabari) faqat bittasiga qo'shilib qolishi mumkin edi.
    */
   private async activate(l: ListingRecord, ownerUserId: string, now: Date) {
-    // Eslatma belgisi eski muddatniki: qolib ketsa yangi muddat tugashida egasi eslatma olmasdi
-    const out = await this.repo.setStatus(l.id, { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), expiryRemindedAt: null, rejectReason: null });
+    // Arxivdan muddati ichida qaytgan e'lon o'z sanasi va joyi bilan qaytadi. Aks holda
+    // arxivlab qayta yuborish istalgan kuni yangi 90 kun va katalog boshini berardi, ya'ni
+    // uzaytirishning oxirgi 7 kun qoidasi (2026-10-07) chetlab o'tilardi
+    const resume = l.status === 'ARCHIVED' && !!l.expiresAt && l.expiresAt > now;
+    // Eslatma belgisi eski muddatniki: qolib ketsa yangi muddat tugashida egasi eslatma olmasdi.
+    // publishedAt katalog tartibi: uzaytirilgan e'lon ham qayta yuborilgandek boshga chiqadi
+    const out = await this.save(l, resume
+      ? { status: 'ACTIVE', rejectReason: null }
+      : { status: 'ACTIVE', publishedAt: now, expiresAt: expiry(now), expiryRemindedAt: null, rejectReason: null });
     // Obuna e'lonni ham ko'taradi: alohida Premium sotib olish yo'q
     await this.subs.raiseListing(ownerUserId, l.id);
-    // Kuzatuvchilar xabarini kutmaymiz: e'lon chiqishi xabar yo'liga bog'liq emas
-    void this.notifyWatchers(l, now).catch(() => {});
+    // Kuzatuvchilar xabarini kutmaymiz: e'lon chiqishi xabar yo'liga bog'liq emas.
+    // Uzaytirilgan yoki arxivdan qaytgan e'lon kuzatuvchi uchun yangi emas: xabar esa
+    // kuzatuvning kunlik yagona xabarini band qilib, chindan yangi e'lonni to'sib qo'yardi
+    if (l.status !== 'ACTIVE' && !resume) void this.notifyWatchers(l, now).catch(() => {});
     return out;
+  }
+
+  /** Holat yozuvi. Qator o'qilgandan beri o'zgargan bo'lsa (repo sharti) 409: sahifani yangilash kerak. */
+  private async save(l: ListingRecord, d: Parameters<PrismaListingRepository['setStatus']>[1]) {
+    try { return await this.repo.setStatus(l, d); } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') throw new ConflictException({ code: 'TRANSITION_NOT_ALLOWED', from: l.status, to: d.status });
+      throw e;
+    }
   }
 
   /**
@@ -155,7 +180,7 @@ export class ListingsUseCase {
   async archive(userId: string, id: string) {
     const l = await this.owned(userId, id);
     this.transition(l, 'ARCHIVED', 'OWNER');
-    return this.repo.setStatus(id, { status: 'ARCHIVED', rejectReason: null });
+    return this.save(l, { status: 'ARCHIVED', rejectReason: null });
   }
 
   async remove(userId: string, id: string) {
@@ -177,7 +202,7 @@ export class ListingsUseCase {
     // Namuna e'lon egasi faol hisob emas: unga yozilgan xabarni hech kim o'qimaydi
     const who = l.isDemo ? null : { orgIds: [l.orgId], userIds: [l.ownerUserId ?? l.createdById] };
     if (!approve) {
-      const out = await this.repo.setStatus(id, { status: to, rejectReason: reason });
+      const out = await this.save(l, { status: to, rejectReason: reason });
       if (who) void this.notify(who, 'listingRejected', { title: l.title, reason: reason ?? '' });
       return out;
     }
@@ -205,8 +230,9 @@ export class ListingsUseCase {
     // Ilovalar birinchi xabarga ham ilashadi: narx so'rayotgan odam hujjatni o'sha zahoti yuboradi
     const files = filesOrThrow(rawAttachments);
     if (open) {
-      await this.prisma.inquiryMessage.create({ data: { inquiryId: open.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
-      await this.prisma.inquiry.update({ where: { id: open.id }, data: { lastMessageAt: new Date() } });
+      const msg = await this.prisma.inquiryMessage.create({ data: { inquiryId: open.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
+      // Yozuvchi bu yerda doim mijoz (qidiruv fromUserId bo'yicha): javob olgan suhbat qayta ochiladi
+      await markInquiryMessage(this.prisma, open.id, msg.createdAt, false);
       void this.notifyOwner(l, userId, orgId, text, open.id).catch(() => {});
       return open;
     }
@@ -214,8 +240,8 @@ export class ListingsUseCase {
     // eski yozishma yangi egaga ochilmaydi.
     const inquiry = await this.repo.createInquiry({ listingId, fromOrgId: orgId, fromUserId: userId, message: text, toOrgId: l.orgId, toUserId: l.ownerUserId });
     // So'rovning o'zi yozishmaning birinchi xabari: keyin ikki tomon shu tredda gaplashadi
-    await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
-    await this.prisma.inquiry.update({ where: { id: inquiry.id }, data: { lastMessageAt: new Date() } });
+    const first = await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
+    await markInquiryMessage(this.prisma, inquiry.id, first.createdAt, false);
     void this.notifyOwner(l, userId, orgId, text, inquiry.id).catch(() => {}); // javobni kutmaydi
     return inquiry;
   }

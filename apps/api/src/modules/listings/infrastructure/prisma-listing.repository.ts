@@ -100,8 +100,14 @@ export class PrismaListingRepository {
   async update(id: string, d: ListingWrite) {
     return toRecord(await this.prisma.listing.update({ where: { id }, data: writeData(d), include }));
   }
-  async setStatus(id: string, d: { status: ListingStatus; publishedAt?: Date; expiresAt?: Date; expiryRemindedAt?: null; rejectReason: string | null }) {
-    return toRecord(await this.prisma.listing.update({ where: { id }, data: d, include }));
+  /**
+   * Holat o'qilgan qatorga shartli yoziladi: o'tish ham, uzaytirish oynasi ham o'sha o'qishdan
+   * chiqqan. Orada admin tortib olgan, sikl tugatgan yoki ikkinchi bosish uzaytirib qo'ygan
+   * bo'lsa, yozuv P2025 bilan to'xtaydi. Shartsiz yozuv admin sababini o'chirib, e'lonni
+   * katalogga qaytarib qo'yardi.
+   */
+  async setStatus(was: Pick<ListingRecord, 'id' | 'status' | 'expiresAt'>, d: { status: ListingStatus; publishedAt?: Date; expiresAt?: Date; expiryRemindedAt?: null; rejectReason: string | null }) {
+    return toRecord(await this.prisma.listing.update({ where: { id: was.id, status: was.status, expiresAt: was.expiresAt }, data: d, include }));
   }
   async remove(id: string) { await this.prisma.listing.delete({ where: { id } }); }
   /** Bog'langan obyekt nuqtasi; obyekt yo'q yoki egasiz bo'lsa null. */

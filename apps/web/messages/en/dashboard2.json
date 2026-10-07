@@ -41,6 +41,7 @@
       "err": {
         "TRANSITION_NOT_ALLOWED": "The order status has changed. Refresh the page.",
         "ORDER_NOT_ACTIVE": "The order is not active.",
+        "NO_SHOW_TOO_LATE": "It is too late to mark \"No show\": the order has had no activity for {days} days. The customer can now close it.",
         "failed": "Failed. Try again."
       }
     },

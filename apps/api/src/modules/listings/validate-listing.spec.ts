@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CLAIM_STATUS_LABELS, KYC_STATUS_LABELS, LISTING, LISTING_LABELS, LISTING_OWNER_LABELS, LISTING_RULES, LISTING_STATUSES, LISTING_TRANSITIONS,
-  ORG_KINDS, ORG_KIND_LABELS, TransitionError, assertListingTransition, canListingTransition, orgSlug, validateListing,
+  ORG_KINDS, ORG_KIND_LABELS, TransitionError, assertListingTransition, canExtendListing, canListingTransition, orgSlug, validateListing,
   type ListingInput, type ListingStatus,
 } from '@yuksaroy/domain';
 
@@ -124,6 +124,23 @@ describe('e\'lon holat-mashinasi', () => {
     expect(canListingTransition('ACTIVE', 'PENDING_REVIEW', 'OWNER')).toBe(false);
     // ACTIVE ga faqat PENDING_REVIEW orqali
     expect(LISTING_TRANSITIONS.filter((t) => t.to === 'ACTIVE').every((t) => t.from === 'PENDING_REVIEW')).toBe(true);
+  });
+
+  // 2026-10-07 egasi qarori: faol e'lon muddatining oxirgi 7 kunida uzaytiriladi
+  it("uzaytirish: faqat faol e'lon, muddat tugashidan oldingi 7 kun ichida", () => {
+    const now = new Date('2026-10-07T09:00:00Z');
+    const inDays = (d: number) => new Date(now.getTime() + d * 86_400_000);
+    expect(LISTING.extendWindowDays).toBe(7);
+    expect(canExtendListing('ACTIVE', inDays(3), now)).toBe(true);
+    expect(canExtendListing('ACTIVE', inDays(7), now)).toBe(true);
+    // Kabinet sanani satr holida beradi
+    expect(canExtendListing('ACTIVE', inDays(1).toISOString(), now)).toBe(true);
+    expect(canExtendListing('ACTIVE', inDays(7.01), now)).toBe(false);
+    // Muddati o'tib bo'lgan, lekin sikl hali EXPIRED qilmagan e'lon: sikl bilan poyga bo'lmasin
+    expect(canExtendListing('ACTIVE', now, now)).toBe(false);
+    expect(canExtendListing('ACTIVE', inDays(-1), now)).toBe(false);
+    expect(canExtendListing('ACTIVE', null, now)).toBe(false);
+    for (const s of LISTING_STATUSES.filter((x) => x !== 'ACTIVE')) expect(canExtendListing(s, inDays(3), now)).toBe(false);
   });
 });
 

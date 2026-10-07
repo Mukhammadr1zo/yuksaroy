@@ -64,11 +64,12 @@ export type QueueModel = 'listing' | 'organization' | 'terminal' | 'premiumOrder
  * degan savolga ikki joyda ikki xil javob bo'lmasin.
  *
  * "Kutish boshlangan" maydon har jadvalda boshqacha: tashkilot uchun tasdiq so'ralgan
- * vaqt, qolganlari uchun yaratilgan vaqt. Terminal da'vosida alohida maydon yo'q, shuning
- * uchun oxirgi o'zgarish vaqti olinadi: admin qatorni tahrir qilsa yosh nolga qaytadi,
- * bu ma'lum kamchilik.
+ * vaqt, suhbat uchun mijozning javobsiz birinchi xabari (ustun emas, waitingSince hisoblaydi),
+ * qolganlari uchun yaratilgan vaqt.
+ * Terminal da'vosida alohida maydon yo'q, shuning uchun oxirgi o'zgarish vaqti olinadi:
+ * admin qatorni tahrir qilsa yosh nolga qaytadi, bu ma'lum kamchilik.
  */
-export const QUEUE_DEF: Record<QueueKey, { entity: TaskEntity; model: QueueModel; where: Record<string, unknown>; oldest: 'createdAt' | 'kycRequestedAt' | 'updatedAt' }> = {
+export const QUEUE_DEF: Record<QueueKey, { entity: TaskEntity; model: QueueModel; where: Record<string, unknown>; oldest: 'createdAt' | 'kycRequestedAt' | 'updatedAt' | 'waitingSince' }> = {
   listingsPendingReview: { entity: 'Listing', model: 'listing', where: { status: 'PENDING_REVIEW' }, oldest: 'createdAt' },
   orgsPendingKyc: { entity: 'Organization', model: 'organization', where: { kycStatus: 'PENDING' }, oldest: 'kycRequestedAt' },
   terminalClaimsPending: { entity: 'Terminal', model: 'terminal', where: { claimStatus: 'PENDING' }, oldest: 'updatedAt' },
@@ -78,11 +79,10 @@ export const QUEUE_DEF: Record<QueueKey, { entity: TaskEntity; model: QueueModel
   urgentOpen: { entity: 'UrgentRequest', model: 'urgentRequest', where: { status: 'OPEN' }, oldest: 'createdAt' },
   contactNew: { entity: 'ContactMessage', model: 'contactMessage', where: { handledAt: null }, oldest: 'createdAt' },
   reportsNew: { entity: 'Report', model: 'report', where: { status: 'NEW' }, oldest: 'createdAt' },
-  // Egasiz obyektga yozilgan va hali javob olmagan yozishma (adminning o'zi boshlagani queueWhere da
-  // chiqariladi). Platforma bir marta yozsa status ANSWERED bo'ladi va qaytib OPEN ga tushmaydi:
-  // mijozning keyingi savoli navbatga qaytmaydi, uni faqat kabinetdagi o'qilmagan xabar belgisi
-  // ko'rsatadi. Bu ma'lum kamchilik.
-  platformInquiriesOpen: { entity: 'Inquiry', model: 'inquiry', where: { toPlatform: true, status: 'OPEN' }, oldest: 'createdAt' },
+  // Egasiz obyektga yozilgan va platforma javobini kutayotgan yozishma (adminning o'zi boshlagani
+  // queueWhere da chiqariladi). Egasi qarori (2026-10-07): javobdan keyin mijoz yana yozsa suhbat
+  // OPEN ga qaytadi va shu navbatga qayta tushadi (chat.service send). Yoshi pastdagi waitingSince da.
+  platformInquiriesOpen: { entity: 'Inquiry', model: 'inquiry', where: { toPlatform: true, status: 'OPEN' }, oldest: 'waitingSince' },
 };
 
 /** Obyekt turidan navbat kaliti (TASK_ENTITIES bilan birga-bir, spec tekshiradi). */
@@ -106,8 +106,8 @@ export type QueueStat = { count: number; oldest: Date | null };
  * vazifa yopilishi (inQueue) ham shu yerdan o'tadi, ya'ni shart baribir bitta.
  *
  * Platforma suhbatidan adminning o'zi boshlagani chiqariladi: unda platforma javobini hech kim
- * kutmaydi. O'z tredida admin mijoz bo'lib qoladi (threadRole), javobi statusni o'zgartirmaydi,
- * kabinetdagi "Kelgan" ro'yxati ham uni ko'rsatmaydi: navbatda qolsa, masalan sinab yozilgan
+ * kutmaydi. O'z tredida admin mijoz bo'lib qoladi (threadRole): har xabari suhbatni OPEN ga
+ * qaytaradi, kabinetdagi "Kelgan" ro'yxati esa uni ko'rsatmaydi: navbatda qolsa, masalan sinab yozilgan
  * suhbat, kunlik eslatmada har kuni chiqardi va uni yopishning yo'li yo'q edi. Inquiry da User
  * bog'lanishi yo'q, shuning uchun admin id lari oldin olinadi (rol va telefon ro'yxati,
  * PlatformAdmin bilan bitta ta'rif). Bazadagi eski qatorlarga tegish shart emas.
@@ -118,17 +118,45 @@ export async function queueWhere(prisma: PrismaService, k: QueueKey): Promise<Re
   return { ...where, fromUserId: { notIn: await new PlatformAdmin(prisma).adminUserIds() } };
 }
 
-/** Har navbatning soni va (oldest bo'lsa) eng eskisining sanasi. So'rovlar: count + findFirst orderBy oldest asc. */
+/**
+ * Platforma suhbatlaridan eng uzoq kutganining kutish boshi: mijozning platforma oxirgi javobidan
+ * keyingi birinchi xabari (javob umuman bo'lmasa, birinchi xabari).
+ *
+ * Egasi qarori (2026-10-07): javob olgan suhbatga mijoz yana yozsa u navbatga qaytadi. createdAt
+ * bilan qayta ochilgan eski suhbat bir oy kutgandek ko'rinib, eslatma darhol chiqardi; lastMessageAt
+ * bilan esa mijozning har "javob bormi?" xabari yoshni nolga qaytarardi va tez-tez yozgan mijozning
+ * suhbati eslatmaga hech tushmasdi. Status tarixi saqlanmaydi, shuning uchun xabarlardan sanaladi:
+ * mijozdan boshqa yozuvchi faqat platforma (threadRole).
+ *
+ * Shart queueWhere bilan bir xil (raw SQL Prisma where ni ololmaydi): biri o'zgarsa ikkinchisi ham.
+ * Admin id lari shu yerda qayta so'raladi (ikki kichik so'rov): where ning ichki shakliga bog'lanmaydi.
+ */
+async function waitingSince(prisma: PrismaService): Promise<Date | null> {
+  const admins = await new PlatformAdmin(prisma).adminUserIds();
+  const [r] = await prisma.$queryRaw<{ at: Date | null }[]>`
+    SELECT MIN(m."createdAt") AS "at"
+    FROM "InquiryMessage" m JOIN "Inquiry" i ON i."id" = m."inquiryId"
+    WHERE i."toPlatform" AND i."status" = 'OPEN' AND i."fromUserId" <> ALL(${admins}::text[])
+      AND m."fromUserId" = i."fromUserId"
+      AND NOT EXISTS (SELECT 1 FROM "InquiryMessage" o
+        WHERE o."inquiryId" = i."id" AND o."fromUserId" <> i."fromUserId" AND o."createdAt" > m."createdAt")`;
+  return r?.at ?? null;
+}
+
+/** Har navbatning soni va (oldest bo'lsa) eng eskisining sanasi. So'rovlar: count + findFirst orderBy oldest asc (suhbatda waitingSince). */
 export async function queueStats(prisma: PrismaService, oldest: boolean): Promise<Record<QueueKey, QueueStat>> {
   const rows = await Promise.all(QUEUE_KEYS.map(async (k) => {
     const d = QUEUE_DEF[k];
     const t = tbl(prisma, d.model);
     const where = await queueWhere(prisma, k);
-    const [count, first] = await Promise.all([
+    const col = d.oldest;
+    const [count, at] = await Promise.all([
       t.count({ where }),
-      oldest ? t.findFirst({ where, orderBy: { [d.oldest]: 'asc' }, select: { [d.oldest]: true } }) : null,
+      !oldest ? null
+        : col === 'waitingSince' ? waitingSince(prisma)
+          : t.findFirst({ where, orderBy: { [col]: 'asc' }, select: { [col]: true } }).then((r) => (r?.[col] as Date | undefined) ?? null),
     ]);
-    return [k, { count, oldest: (first?.[d.oldest] as Date | undefined) ?? null }] as const;
+    return [k, { count, oldest: at }] as const;
   }));
   return Object.fromEntries(rows) as Record<QueueKey, QueueStat>;
 }

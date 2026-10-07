@@ -11,6 +11,7 @@ import { AuditService } from '../../common/audit.service';
 import { CSV_MAX, sendCsv, type CsvCols } from '../../common/csv';
 import { BULK_MAX, orderByOf, parseIds, type SortAllow } from '../../common/list-sort';
 import { PrismaService } from '../../common/prisma.service';
+import { notClientClosed } from '../../common/stuck-orders';
 import { clampInt, pickIn } from '../catalog/presentation/catalog.controller';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { dayKeys } from '../impressions/day-series';
@@ -247,8 +248,8 @@ export class AdminCatalogController {
         select: LIST_SELECT,
       })).sort((a, b) => rank.get(a.id)!.i - rank.get(b.id)!.i); // Prisma IN tartibini saqlamaydi
       const pageRows = ranked.slice((p - 1) * l, p * l);
-      // Javobsiz = hech javob berilmagan yozishma: obyekt tarafi bir marta yozsa
-      // status ANSWERED bo'ladi va bu yerga tushmaydi
+      // Javobsiz = obyekt tarafi javob qarzdor (OPEN): hali yozmagan yoki mijoz javobdan keyin
+      // yana yozgan (egasi qarori, 2026-10-07, chat.service send). Javob yozilsa ANSWERED, chiqadi
       const open = pageRows.length
         ? await this.prisma.inquiry.groupBy({
             by: ['terminalId'],
@@ -290,7 +291,8 @@ export class AdminCatalogController {
       noteCount(this.prisma, 'Terminal', id),
       this.prisma.impression.aggregate({ where: { kind: 'terminal', targetId: id, surface: 'detail', day: { gte: new Date(dayKeys(new Date())[0]!) } }, _sum: { count: true } }),
       this.prisma.inquiry.count({ where: { terminalId: id, status: 'OPEN' } }),
-      this.prisma.order.aggregate({ where: { terminalId: id, status: 'DONE' }, _count: { _all: true }, _sum: { totalTiyin: true } }),
+      // Terminal aylanmasi: mijoz o'zi yopgani kirmaydi (notClientClosed)
+      this.prisma.order.aggregate({ where: { terminalId: id, status: 'DONE', ...notClientClosed }, _count: { _all: true }, _sum: { totalTiyin: true } }),
       this.prisma.order.count({ where: { terminalId: id, status: 'PENDING' } }),
     ]);
     return {

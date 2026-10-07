@@ -76,7 +76,8 @@ export class AdminRevenueController {
    * Obuna pool bitta: to'langan va endsAt 12 oy oldingi oy boshidan keyin. Tushum ustunlari
    * ham shundan (paidAt <= endsAt, ya'ni oxirgi 12 oyda to'langan qator poolda bor): MRR va
    * tushum bir to'plamdan hisoblanadi, ikkisi bir-biriga zid chiqmaydi. Premium bugungidek.
-   * Reklama boshlangan oyi bo'yicha (adSales, bosh sahifa kartasi bilan bitta qoida).
+   * Reklama to'langan oyi bo'yicha, sanasi yo'q eski qator boshlangan oyi bo'yicha (adSales,
+   * bosh sahifa kartasi bilan bitta qoida; 2026-10-07 gacha faqat boshlangan oy edi).
    * deals tushum emas: alohida ro'yxat, ekranda ham alohida blok.
    * ponytail: pool xotirada, take 20000; yuz minglab to'lovchi bo'lsa SQL ga o'tadi.
    */
@@ -93,7 +94,7 @@ export class AdminRevenueController {
       }),
       // 400 kun: 12 to'liq oy chetidan chiqmasin; orderBy majburiy, chegara eng ESKI qatorlarni tashlasin
       this.prisma.premiumOrder.findMany({ where: { paidAt: { gte: new Date(now.getTime() - 400 * DAY) } }, select: { paidAt: true, amountTiyin: true }, orderBy: { paidAt: 'desc' }, take: 5000 }),
-      this.prisma.adPlacement.findMany({ where: adSales(from, now), select: { startsAt: true, pricePaidSom: true }, orderBy: { startsAt: 'desc' }, take: 5000 }),
+      this.prisma.adPlacement.findMany({ where: adSales(from, now), select: { startsAt: true, paidAt: true, pricePaidSom: true }, orderBy: { startsAt: 'desc' }, take: 5000 }),
       this.deals(from, now),
     ]);
     const months = mergeMonths(monthlyRevenue(pool, prems, ads, now), subscriptionMonths(pool, now));

@@ -5,6 +5,7 @@ import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { notifyBoth } from '../../common/telegram';
 import { filesOrThrow, type Attachment } from '../../common/attachments';
 import { threadRole, type ThreadRole } from './domain/access';
+import { markInquiryMessage } from './inquiry-status';
 
 const MAX = 2000;
 
@@ -63,11 +64,15 @@ export class ChatService {
       orderBy: [{ lastMessageAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
       take: 200,
     });
-    const [unread, fromOrgs] = await Promise.all([this.unreadCounts(userId, rows.map((r) => r.id)), this.orgNames(rows.map((r) => r.fromOrgId))]);
+    const [unread, fromOrgs, asked] = await Promise.all([
+      this.unreadCounts(userId, rows.map((r) => r.id)),
+      this.orgNames(rows.map((r) => r.fromOrgId)),
+      this.lastAsked(rows.filter((r) => r.status === 'OPEN').map((r) => r.id)),
+    ]);
     return rows.map((r) => ({
       id: r.id,
       subject: ChatService.subject(r),
-      message: r.message,
+      message: asked[r.id] ?? r.message,
       status: r.status,
       fromOrgName: r.fromOrgId ? (fromOrgs[r.fromOrgId] ?? null) : null,
       createdAt: r.createdAt,
@@ -106,6 +111,23 @@ export class ChatService {
       _count: { _all: true },
     });
     return Object.fromEntries(rows.map((r) => [r.inquiryId, r._count._all]));
+  }
+
+  /**
+   * Javob kutayotgan (OPEN) suhbat qatoridagi matn: mijozning oxirgi xabari. Inquiry.message birinchi
+   * xabar va o'zgarmaydi: egasi qarori (2026-10-07) bilan qayta ochilgan suhbatda "Javob kutilmoqda"
+   * yonida allaqachon javob berilgan savol turardi, kutayotgan savol esa ro'yxatda ko'rinmasdi.
+   * Javob olgan suhbatda avvalgidek birinchi xabar, ya'ni so'rovning o'zi. Matnsiz (faqat fayl)
+   * xabar o'tkaziladi. DISTINCT ON: har suhbatdan bitta qator bazada tanlanadi, xabarlar xotiraga olinmaydi.
+   */
+  private async lastAsked(ids: string[]): Promise<Record<string, string>> {
+    if (!ids.length) return {};
+    const rows = await this.prisma.$queryRaw<{ id: string; text: string }[]>`
+      SELECT DISTINCT ON (m."inquiryId") m."inquiryId" AS "id", m."text"
+      FROM "InquiryMessage" m JOIN "Inquiry" i ON i."id" = m."inquiryId"
+      WHERE m."inquiryId" = ANY(${ids}::text[]) AND m."fromUserId" = i."fromUserId" AND m."text" <> ''
+      ORDER BY m."inquiryId", m."createdAt" DESC`;
+    return Object.fromEntries(rows.map((r) => [r.id, r.text]));
   }
 
   private async orgNames(ids: (string | null)[]): Promise<Record<string, string>> {
@@ -241,7 +263,8 @@ export class ChatService {
     const msg = await this.prisma.inquiryMessage.create({
       data: { inquiryId, fromUserId: userId, text: body, attachments: files as unknown as object, readBy: [userId] },
     });
-    await this.prisma.inquiry.update({ where: { id: inquiryId }, data: { lastMessageAt: msg.createdAt, status: role === 'owner' ? 'ANSWERED' : inq.status } });
+    // Holat qoidasi (mijozning keyingi savoli suhbatni qayta ochadi) inquiry-status.ts da
+    await markInquiryMessage(this.prisma, inquiryId, msg.createdAt, role === 'owner');
     void this.notify(userId, inq, role, body || `${files.length} ta fayl`).catch(() => {});
     return { id: msg.id, text: msg.text, attachments: files, createdAt: msg.createdAt, mine: true, author: null };
   }

@@ -11,8 +11,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { AD_BOTTOM, AD_BOTTOM_DEFAULTS, AD_LOCALES, AD_PLACEMENTS, AD_STATUSES, type AdPlacement, type AdStatus } from '@yuksaroy/domain';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { api, authHeaders, post } from '@/lib/api';
-import { num, uzDate } from '@/lib/format';
+import { ApiError, api, authHeaders, post } from '@/lib/api';
+import { num, uzDate, uzToday } from '@/lib/format';
 import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, INPUT, Labeled, Notice, PageHead, Pill, Toolbar, errText } from '@/components/admin/kit';
 import { useAdminMe } from '@/components/admin/context';
 // isVideo shu yerdan: ko'rsatish va kichik nusxa bitta qoidadan yursin, ikki joyda yozilmasin
@@ -22,6 +22,8 @@ import { isVideo } from '@/components/site/AdSlot';
 type Ad = {
   id: string; placement: AdPlacement; title: string; body: string | null; imageUrl: string | null; href: string;
   buyer: string | null; pricePaidSom: number; status: AdStatus; startsAt: string; endsAt: string;
+  /** Tushum pulni shu sananing oyiga yozadi; bo'sh (2026-10-07 dan oldingi qator) bo'lsa boshlangan oyiga. */
+  paidAt: string | null;
   /**
    * Bu to'rttasi faqat pastki banner uchun ishlaydi: u o'zi chiqib, o'zi ketadigan yagona joy.
    * locale bo'sh bo'lsa hamma tilda chiqadi; banner yozuvi rasm ichida bo'lgani uchun
@@ -31,7 +33,8 @@ type Ad = {
 };
 /** Sanoq serverdan keladi: 30 kunlik va butun davr uchun ko'rildi/bosildi/yopildi. */
 type Stats = { views: number; clicks: number; views30: number; clicks30: number; closes: number; closes30: number };
-type Row = Ad & { stats?: Stats };
+/** updatedAt saqlashda serverga qayta yuboriladi: u qator varaq ochilgandan beri o'zgarmaganini shu bilan tekshiradi. */
+type Row = Ad & { stats?: Stats; updatedAt: string };
 type Draft = Omit<Ad, 'id'>;
 
 const ZERO: Stats = { views: 0, clicks: 0, views30: 0, clicks30: 0, closes: 0, closes30: 0 };
@@ -53,7 +56,7 @@ const LOCALE_LABEL: Record<string, string> = { uz: "O'zbekcha", ru: 'Русск�
 const day = (d: Date) => d.toISOString().slice(0, 10);
 const NEW = (): Draft => ({
   placement: 'terminal-aside', title: '', body: '', imageUrl: '', href: '',
-  buyer: '', pricePaidSom: 0, status: 'DRAFT',
+  buyer: '', pricePaidSom: 0, paidAt: '', status: 'DRAFT',
   startsAt: day(new Date()), endsAt: day(new Date(Date.now() + 30 * 86_400_000)),
   // Sukut qiymat domain dan: panel, server va sahifa bitta sondan yursin, uchta joyda yozilmasin
   ...AD_BOTTOM_DEFAULTS, locale: '',
@@ -69,7 +72,8 @@ export default function AdminAdsPage() {
   const [f, setF] = useState({ placement: '', status: '' });
   // Qobiqdan: /auth/me qayta so'ralmaydi
   const { isOwner } = useAdminMe();
-  const [sheet, setSheet] = useState<{ id: string | null; d: Draft; s?: Stats } | null>(null);
+  // was: bazadagi holati (yangi to'lov savoli shunga qarab); renew va renewPaidAt: o'sha savolning javobi
+  const [sheet, setSheet] = useState<{ id: string | null; d: Draft; s?: Stats; was?: Row; renew?: boolean; renewPaidAt?: string } | null>(null);
   const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [upBusy, setUpBusy] = useState(false);
@@ -108,6 +112,25 @@ export default function AdminAdsPage() {
   const bottom = sheet?.d.placement === AD_BOTTOM;
   // Ko'rsatish uchun media shart: tugma ham, AdPreview ham shu bitta qiymatdan yuradi
   const media = sheet?.d.imageUrl?.trim() ?? '';
+  /*
+   * Yangi to'lov savoli. Egasi qarori, 2026-10-07: reklama puli to'langan oyga yoziladi,
+   * qatorda esa bitta narx va bitta sana turadi. Uzaytirish hozir shunday yoziladi: shu
+   * qator ochiladi, tugash sanasi cho'ziladi, narx yoziladi. Oddiy tahrir bo'lib saqlansa
+   * oldingi to'lov o'z oyidan ketardi, shuning uchun aynan shu yo'lda (pulli qatorda narx
+   * o'zgarsa yoki muddat cho'zilsa) savol chiqadi va javobsiz saqlanmaydi. "Ha" da server
+   * oldingi to'lovni Qoralama nusxaga ko'chiradi (ads.controller update), "Yo'q" oddiy tahrir.
+   * Narxi o'zgarmagan uzaytirish ham muddat orqali ushlanadi.
+   */
+  const was = sheet?.was;
+  const ask = !!sheet && !!was && was.pricePaidSom > 0 && sheet.d.pricePaidSom > 0
+    && (sheet.d.pricePaidSom !== was.pricePaidSom || sheet.d.endsAt.slice(0, 10) > was.endsAt.slice(0, 10));
+  // "Ha" da sana maydoni yangi to'lovniki: qatorning o'z sanasiga tegilmaydi, savol yo'qolsa o'shanisi qaytadi
+  const renewing = ask && sheet?.renew === true;
+  const choose = (renew: boolean) => setSheet((s) => (s ? { ...s, renew, renewPaidAt: s.renewPaidAt ?? uzToday() } : s));
+  // Savol narx maydoni ostida chiqadi va varaqning ko'rinmaydigan qismida qolardi, "Saqlash" esa
+  // sababsiz kulrang bo'lib turardi: savol paydo bo'lganda ko'rinadigan joyga suriladi
+  const askRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (ask) askRef.current?.scrollIntoView({ block: 'nearest' }); }, [ask]);
 
   /**
    * Banner faylini yuklash: brend rasm yoki qisqa video beradi, havola emas.
@@ -136,12 +159,19 @@ export default function AdminAdsPage() {
     setBusy(true);
     setNote(null);
     const d = sheet.d;
+    const paidAt = renewing ? sheet.renewPaidAt : d.paidAt;
     // Bo'sh matnlar yuborilmaydi: bazada null qolsin, bo'sh qator emas
     const body = {
       placement: d.placement, title: d.title.trim(), href: d.href.trim(), status: d.status,
       startsAt: new Date(d.startsAt).toISOString(), endsAt: new Date(d.endsAt).toISOString(),
       body: d.body?.trim() || undefined, imageUrl: d.imageUrl?.trim() || undefined,
       buyer: d.buyer?.trim() || undefined, pricePaidSom: Number(d.pricePaidSom) || 0,
+      // Sana ham boshlanish kabi UTC yarim tuni: Toshkentda o'sha kunning 05:00 i, ya'ni oy
+      // to'g'ri chiqadi. Bo'sh sana null: tushum qatorni boshlangan oyiga yozadi
+      paidAt: paidAt ? new Date(paidAt).toISOString() : null,
+      ...(renewing ? { renew: true } : {}),
+      // Yangi reklamada yo'q (undefined so'rovga tushmaydi)
+      expectUpdatedAt: sheet.was?.updatedAt,
       // Uchtasi har doim yuboriladi: joyni keyin pastki bannerga o'zgartirganda son yo'q bo'lib
       // qolmasin. Kechikish va turish muddatida 0 haqiqiy qiymat (darhol chiqadi, o'zi
       // yopilmaydi), jim vaqtda esa yo'q: maydon bo'shatilsa server qaytarib yuborardi,
@@ -156,9 +186,15 @@ export default function AdminAdsPage() {
       if (sheet.id) await api(`/admin/ads/${sheet.id}`, { method: 'PATCH', body: JSON.stringify(body) });
       else await post('/admin/ads', body);
       setSheet(null);
-      setNote({ tone: 'ok', text: tc('saved') });
+      // Uzaytirishdan keyin ro'yxatda bir xil nomli Qoralama qator paydo bo'ladi: takror deb o'chirilmasin
+      setNote({ tone: 'ok', text: renewing ? ta('renew.saved') : tc('saved') });
       load();
-    } catch (e) { setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) }); } finally { setBusy(false); }
+    } catch (e) {
+      // Qator varaq ochilgandan keyin o'zgargan (ko'pincha javobi yetmagan saqlash aslida o'tgan):
+      // bu shakl bilan qayta saqlab bo'lmaydi, shuning uchun varaq yopiladi va ro'yxat yangilanadi
+      if (e instanceof ApiError && (e.body as { code?: string } | null)?.code === 'AD_STALE') { setSheet(null); load(); }
+      setNote({ tone: 'err', text: errText(e, t, t.has, tc('saveFailed')) });
+    } finally { setBusy(false); }
   }
 
   async function remove() {
@@ -225,7 +261,14 @@ export default function AdminAdsPage() {
     { key: 'closes', head: ta('closes'), num: true, cell: (r) => (r.placement === AD_BOTTOM ? statCell((r.stats ?? ZERO).closes30, (r.stats ?? ZERO).closes) : '') },
     { key: 'range', head: ta('range'), cell: (r) => <span className="font-mono text-xs">{uzDate(r.startsAt, locale)} - {uzDate(r.endsAt, locale)}</span> },
     { key: 'buyer', head: ta('buyer'), cell: (r) => r.buyer ?? '' },
-    { key: 'price', head: ta('price'), num: true, cell: (r) => (r.pricePaidSom ? num(r.pricePaidSom, locale) : '') },
+    // To'langan sana narx ostida: oyning reklama puli qaysi qatorlardan yig'ilganini ega shu ro'yxatdan
+    // tekshiradi. Sanasi yo'q eski qator boshlangan oyiga tushadi, u Muddati ustunida turibdi
+    { key: 'price', head: ta('price'), num: true, cell: (r) => (r.pricePaidSom ? (
+      <span className="block">
+        <span className="block">{num(r.pricePaidSom, locale)}</span>
+        {r.paidAt ? <span className="block font-mono text-[11px] text-muted">{uzDate(r.paidAt, locale)}</span> : null}
+      </span>
+    ) : '') },
   ];
 
   const opt = (v: string, label: string) => <option key={v} value={v}>{label}</option>;
@@ -256,7 +299,7 @@ export default function AdminAdsPage() {
       <p className="mt-1 text-xs text-muted">{ta('subNote')}</p>
 
       {/* screen: boshqa keng jadvallar kabi Ustunlar menyusi chiqsin, operator keraksiz ustunni yashira olsin */}
-      <DataTable cols={cols} rows={rows ?? []} keyOf={(r) => r.id} empty={tc('empty')} screen="ads" onRow={isOwner ? (r) => { setNote(null); setSheet({ id: r.id, d: { ...r }, s: r.stats ?? ZERO }); } : undefined} />
+      <DataTable cols={cols} rows={rows ?? []} keyOf={(r) => r.id} empty={tc('empty')} screen="ads" onRow={isOwner ? (r) => { setNote(null); setSheet({ id: r.id, d: { ...r }, s: r.stats ?? ZERO, was: r }); } : undefined} />
 
       {/* Har son yonida qaror: bu ustunlar nimani hal qilishini aytadi, aks holda son bezak bo'lib qoladi */}
       <p className="mt-2 text-xs text-muted">{ta('decision.views')} {ta('decision.clicks')} {ta('decision.ctr')} {ta('decision.closes')}</p>
@@ -271,13 +314,16 @@ export default function AdminAdsPage() {
             {sheet.id ? (
               <div className="mr-auto flex flex-col items-start gap-1">
                 <AuditLink entity="AdPlacement" id={sheet.id} />
+                {/* Bazadagi narx bo'yicha: o'chirish shu qatorning pulini tushumdan ham olib ketadi */}
+                {sheet.was?.pricePaidSom ? <span className="text-xs text-muted">{ta('deleteWarn')}</span> : null}
                 <ConfirmButton label={tc('delete')} confirm={tc('confirm')} onRun={remove} />
               </div>
             ) : null}
             <button type="button" className={BTN_GHOST} onClick={() => setSheet(null)}>{tc('cancel')}</button>
             {/* Pastki bannerda fayl ham, matn ham shart: ekranda faqat rasm ko'rinadi, matn esa
-                ekran o'quvchi uchun yagona tavsif. Bittasi bo'sh banner foydasiz chiqardi. */}
-            <button type="button" className={BTN} disabled={busy || !sheet.d.title.trim() || !sheet.d.href.trim() || (bottom && (!sheet.d.body?.trim() || !sheet.d.imageUrl?.trim()))} onClick={save}>{sheet.id ? tc('save') : tc('create')}</button>
+                ekran o'quvchi uchun yagona tavsif. Bittasi bo'sh banner foydasiz chiqardi.
+                Yangi to'lov savoli ham shunday: javobsiz yoki sanasiz uzaytirish pulni noto'g'ri oyga yozardi. */}
+            <button type="button" className={BTN} disabled={busy || !sheet.d.title.trim() || !sheet.d.href.trim() || (bottom && (!sheet.d.body?.trim() || !sheet.d.imageUrl?.trim())) || (ask && (sheet.renew === undefined || (renewing && !sheet.renewPaidAt)))} onClick={save}>{sheet.id ? tc('save') : tc('create')}</button>
           </>
         ) : null}
       >
@@ -330,8 +376,11 @@ export default function AdminAdsPage() {
             <Labeled label={ta('href')} className="block">
               <input className={INPUT} value={sheet.d.href} maxLength={500} onChange={(e) => set({ href: e.target.value })} placeholder="https://" />
             </Labeled>
+            {/* Brauzerning o'z fayl tugmasi brauzer tilida yozadi (o'zbekcha panelda "Выберите файл"):
+                saytdagi boshqa fayl tanlashlar kabi input yashirin, tugma o'zimizniki */}
             <Labeled label={ta('media')} className="block">
-              <input ref={file} type="file" accept={ACCEPT} className={INPUT} disabled={upBusy} onChange={(e) => upload(e.target.files?.[0])} />
+              <input ref={file} type="file" accept={ACCEPT} hidden onChange={(e) => upload(e.target.files?.[0])} />
+              <button type="button" className={BTN_GHOST} disabled={upBusy} onClick={() => file.current?.click()}>{ta('mediaPick')}</button>
             </Labeled>
             <p className="text-xs text-muted">{ta('mediaHint')}</p>
             {/* Qoidalar fayl tanlash yonida va har doim ochiq: yig'ilgan ro'yxat o'qilmaydi,
@@ -363,6 +412,46 @@ export default function AdminAdsPage() {
                 <input type="date" className={INPUT} value={sheet.d.endsAt.slice(0, 10)} onChange={(e) => set({ endsAt: e.target.value })} />
               </Labeled>
             </div>
+            {/* Sotuv muddat ostida: uzaytirishda tugash sanasi, narx va to'langan sana bir joyda
+                o'zgaradi va yangi to'lov savoli ularning yonida chiqadi. Sotuv ma'lumoti faqat
+                panelda: ommaviy javobda u yo'q. */}
+            <Labeled label={ta('buyer')} className="block">
+              <input className={INPUT} value={sheet.d.buyer ?? ''} maxLength={200} onChange={(e) => set({ buyer: e.target.value })} />
+            </Labeled>
+            {/* Narx yozilganda sana bo'sh bo'lsa sukutda bugun, Toshkent kuni: tushum oyi ham
+                Toshkent bo'yicha. Pulli qatorda emas: u yerda sanani yangi to'lov savoli hal qiladi.
+                Kelajak sanasi tanlanmaydi: tushum uni o'sha kun kelguncha sanamaydi. */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* "Ha" da narx faqat yangi to'lov: oldingisi nusxada qoladi, jami yozilsa ikki marta sanalardi */}
+              <Labeled label={ta(renewing ? 'renew.price' : 'price')} className="block">
+                <input type="number" min={0} className={INPUT} value={sheet.d.pricePaidSom} onChange={(e) => {
+                  const v = Number(e.target.value);
+                  set({ pricePaidSom: v, ...(v > 0 && !sheet.d.paidAt && !was?.pricePaidSom ? { paidAt: uzToday() } : {}) });
+                }} />
+              </Labeled>
+              <Labeled label={ta(renewing ? 'renew.paidAt' : 'paidAt')} className="block">
+                <input type="date" max={uzToday()} className={INPUT} value={(renewing ? sheet.renewPaidAt : sheet.d.paidAt)?.slice(0, 10) ?? ''} onChange={(e) => {
+                  const v = e.target.value;
+                  if (renewing) setSheet((s) => (s ? { ...s, renewPaidAt: v } : s)); else set({ paidAt: v });
+                }} />
+              </Labeled>
+            </div>
+            {/* "Ha" da bo'sh sana bilan saqlanmaydi: "bo'sh bo'lsa boshlangan oyga" degan eslatma bu yerda yolg'on bo'lardi */}
+            <p className="-mt-1 text-xs text-muted">{renewing ? t('err.AD_PAID_AT') : ta('paidAtHint')}</p>
+            {ask ? (
+              <div ref={askRef} role="radiogroup" aria-labelledby="ad-renew" className="rounded-xl border border-line bg-white p-3">
+                <p id="ad-renew" className="text-sm font-semibold text-navy">{ta('renew.ask')}</p>
+                {([true, false] as const).map((v) => (
+                  <label key={String(v)} className="mt-2 flex items-start gap-2 text-sm">
+                    <input type="radio" name="ad-renew" className="mt-1" checked={sheet.renew === v} onChange={() => choose(v)} />
+                    <span>{ta(v ? 'renew.yes' : 'renew.no')}</span>
+                  </label>
+                ))}
+                {/* Oldingi summa ko'rinib tursin: narx maydoni ustidan yozilgach u varaqda boshqa joyda yo'q,
+                    jami yozishga o'rgangan ega esa birinchi to'lovni ikki marta sanab qo'yardi */}
+                <p className="mt-2 text-xs text-muted">{ta('renew.hint', { sum: num(was.pricePaidSom, locale) })}</p>
+              </div>
+            ) : null}
             {/* Til beshta joyning hammasi uchun: banner yozuvi rasm ichida, ya'ni yon
                 ustun va terminal yon bloki uchun ham "qaysi tilga qo'yiladi" degan
                 tanlov kerak. Ilgari bu maydon pastki banner shartining ichida turardi
@@ -420,13 +509,6 @@ export default function AdminAdsPage() {
               <select className={INPUT} value={sheet.d.status} onChange={(e) => set({ status: e.target.value as AdStatus })}>
                 {AD_STATUSES.map((s) => opt(s, ta(`st.${s}`)))}
               </select>
-            </Labeled>
-            {/* Sotuv ma'lumoti faqat panelda: ommaviy javobda u yo'q */}
-            <Labeled label={ta('buyer')} className="block">
-              <input className={INPUT} value={sheet.d.buyer ?? ''} maxLength={200} onChange={(e) => set({ buyer: e.target.value })} />
-            </Labeled>
-            <Labeled label={ta('price')} className="block">
-              <input type="number" min={0} className={INPUT} value={sheet.d.pricePaidSom} onChange={(e) => set({ pricePaidSom: Number(e.target.value) })} />
             </Labeled>
           </div>
         ) : null}

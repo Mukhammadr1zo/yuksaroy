@@ -181,12 +181,13 @@ const TEXTS = {
     ru: '⌛ <b>Срок объявления истёк</b>\n{title}{more}\nОно ушло из каталога. Отправьте снова, и оно провисит ещё {days} дней.\n\nОтправить снова: {url}',
     en: '⌛ <b>Listing has expired</b>\n{title}{more}\nIt is out of the catalogue. Resubmit it and it stays for another {days} days.\n\nResubmit: {url}',
   },
-  // Egasiga: muddat tugashiga uch kun qoldi. Faol e'lonni uzaytirish hozircha yo'q (ACTIVE dan
-  // qayta yuborish o'tish jadvalida yo'q), shuning uchun matn tugagach qayta yuborishni aytadi
+  // Egasiga: muddat tugashiga uch kun qoldi. Oxirgi 7 kunda "Qayta yuborish" faol e'lonni
+  // uzaytiradi (canExtendListing, 2026-10-07 egasi qarori): matn tugashini kutmasdan bosishni aytadi.
+  // Tugma nomi kabinetdagi yorliq bilan aynan bir xil (kabinet.listings.republish)
   listingExpiring: {
-    uz: "⏳ <b>E'lon muddati tugayapti</b>\n{title}{more}\n{left} kun ichida katalogdan tushadi. Shundan keyin qayta yuborsangiz, yana {days} kun turadi.\n\nE'lonlarim: {url}",
-    ru: '⏳ <b>Срок объявления заканчивается</b>\n{title}{more}\nВ течение {left} дней оно уйдёт из каталога. После этого отправьте его снова, и оно провисит ещё {days} дней.\n\nМои объявления: {url}',
-    en: '⏳ <b>Listing is about to expire</b>\n{title}{more}\nIt leaves the catalogue within {left} days. After that, resubmit it and it stays for another {days} days.\n\nMy listings: {url}',
+    uz: "⏳ <b>E'lon muddati tugayapti</b>\n{title}{more}\n{left} kun ichida katalogdan tushadi. \"Qayta yuborish\" tugmasini bossangiz, yana {days} kun turadi.\n\nE'lonlarim: {url}",
+    ru: '⏳ <b>Срок объявления заканчивается</b>\n{title}{more}\nВ течение {left} дней оно уйдёт из каталога. Нажмите "Отправить снова", и оно провисит ещё {days} дней.\n\nМои объявления: {url}',
+    en: '⏳ <b>Listing is about to expire</b>\n{title}{more}\nIt leaves the catalogue within {left} days. Press "Resubmit" and it stays for another {days} days.\n\nMy listings: {url}',
   },
   // Kuzatuv: odam bo'sh natija ekranida "chiqqanda xabar bering" degan edi
   watchListingNew: {

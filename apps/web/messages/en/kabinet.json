@@ -88,6 +88,7 @@
         "PENDING_REVIEW": "Sent for review",
         "ACTIVE": "Listing is active"
       },
+      "extended": "Extended until {date}",
       "cargoOpen": "{region}: {count, plural, one {# open load} other {# open loads}}"
     },
     "form": {
@@ -450,7 +451,7 @@
         },
         "expiring": {
           "title": "{count} listings are about to expire",
-          "body": "They leave the catalogue within a week"
+          "body": "They leave the catalogue within a week. Resubmit and they stay for another 90 days"
         },
         "drafts": {
           "title": "{count} drafts",
