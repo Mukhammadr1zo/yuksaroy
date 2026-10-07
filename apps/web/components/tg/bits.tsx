@@ -9,6 +9,7 @@ import { pricePer } from '@/lib/format';
 import type { TerminalCard } from '@/lib/types';
 import type { Me } from '@/lib/types-auth';
 import type { ListingCard } from '@/lib/types-listing';
+import { cardSrc } from '@/components/catalog/CardPhoto';
 import { BOT, haptic, useTg } from './TgProvider';
 import { listingPrice, regionName, tgListingHref } from './labels';
 
@@ -78,7 +79,7 @@ export function ListingRow({ l, lang }: { l: ListingCard; lang: SearchLang }) {
     : [L.kind[l.kind], l.year, l.condition ? L.condition[l.condition] : null];
   return (
     <Link href={tgListingHref(l)} onClick={() => haptic()} className={`${CARD} flex gap-3 p-3 active:bg-sand`}>
-      <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">{l.photo ? <img src={l.photo} alt="" className="h-full w-full object-cover" /> : null}</div>
+      <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">{l.photo ? <img src={cardSrc(l.photo)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : null}</div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className="min-w-0 truncate font-bold">{l.title}</p>

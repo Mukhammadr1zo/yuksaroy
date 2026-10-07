@@ -39,8 +39,11 @@ export default async function MapPage({ params, searchParams }: Params & { searc
     sapi<ListingPage>('/listings?limit=50', 60).catch(() => null),
   ]);
   const cards: Record<string, ReactNode> = {};
-  // Mayoq karta bilan birga o'rnatiladi: MapView faqat ko'rinishdagi kartalarni chizadi, shuning uchun sanoq aniq
-  for (const x of terms?.items ?? []) cards[`terminal:${x.id}`] = <><TerminalCard t={x} /><Impressions kind="terminal" ids={[x.id]} surface="map" /></>;
+  // Mayoq karta bilan birga o'rnatiladi: MapView faqat ko'rinishdagi kartalarni chizadi, ro'yxatni esa bo'lib
+  // (oxiriga surilganda) chizadi, shuning uchun sanoq aniq: ro'yxatda hali chizilmagan karta sanalmaydi.
+  // Koordinatasiz terminal xaritada o'z nuqtasi bilan turmaydi (reestr shahobchasi stansiya guruhida), ya'ni
+  // kartasi hech qachon chizilmaydi: birinchi 50 tadan ko'pi shunday edi va faqat sahifa yukini oshirardi
+  for (const x of terms?.items ?? []) if (x.lat != null && x.lng != null) cards[`terminal:${x.id}`] = <><TerminalCard t={x} /><Impressions kind="terminal" ids={[x.id]} surface="map" /></>;
   for (const l of lists?.items ?? []) cards[`${l.kind === 'TRUCK' ? 'truck' : 'equipment'}:${l.id}`] = <><ListingCard l={l} /><Impressions kind="listing" ids={[l.id]} surface="map" /></>;
 
   return (

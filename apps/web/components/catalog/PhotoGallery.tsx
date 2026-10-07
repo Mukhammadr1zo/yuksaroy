@@ -68,7 +68,8 @@ export function PhotoGallery({ photos, alt, fallback, aspect = 'aspect-[16/10]',
     <div className={className}>
       <div className={`group relative ${aspect} overflow-hidden rounded-card border border-line bg-sand`} onTouchStart={onStart} onTouchEnd={onEnd}>
         <button type="button" onClick={() => setOpen(true)} aria-label={t('openFull')} className="block h-full w-full cursor-zoom-in">
-          <img src={photos[i]} alt={label(i)} className="h-full w-full object-cover" />
+          {/* Sahifaning asosiy surati (LCP): lazy emas, aksincha birinchi navbatda yuklansin */}
+          <img src={photos[i]} alt={label(i)} fetchPriority="high" className="h-full w-full object-cover" />
         </button>
         {n > 1 ? (
           <>
@@ -90,7 +91,7 @@ export function PhotoGallery({ photos, alt, fallback, aspect = 'aspect-[16/10]',
               key={p} type="button" onClick={() => setI(k)} aria-label={t('photoN', { n: k + 1 })} aria-current={k === i}
               className={`h-16 w-24 shrink-0 overflow-hidden rounded-xl border-2 transition ${k === i ? 'border-teal' : 'border-line opacity-70 hover:opacity-100'}`}
             >
-              <img src={p} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <img src={p} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
             </button>
           ))}
         </div>
@@ -125,7 +126,7 @@ export function PhotoGallery({ photos, alt, fallback, aspect = 'aspect-[16/10]',
                     key={p} type="button" onClick={() => setI(k)} aria-label={t('photoN', { n: k + 1 })} aria-current={k === i}
                     className={`h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition ${k === i ? 'border-teal' : 'border-white/25 opacity-60 hover:opacity-100'}`}
                   >
-                    <img src={p} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <img src={p} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>

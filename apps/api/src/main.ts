@@ -8,11 +8,12 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { mkdirSync } from 'node:fs';
+import { basename } from 'node:path';
 import { UPLOADS_DIR, UPLOAD_MAX_BYTES } from './modules/listings/presentation/uploads.controller';
 import { AppModule } from './app.module';
 import { env } from './common/env';
 import { parseTrustProxy, securityHeaders } from './common/security';
-import { isPrivateFileRequest } from './common/upload-visibility';
+import { isPrivateFilePath, isPrivateFileRequest } from './common/upload-visibility';
 import { TokenService } from './modules/identity/application/token.service';
 import { optionalUserId } from './modules/identity/presentation/jwt.guard';
 
@@ -58,7 +59,18 @@ async function bootstrap() {
   // Yuklashlar: multipart (bitta fayl, 10 MB) va statik berish /v1/files/<yyyy>/<mm>/<nom>
   await app.register(fastifyMultipart as any, { limits: { fileSize: UPLOAD_MAX_BYTES, files: 1 } });
   mkdirSync(UPLOADS_DIR, { recursive: true });
-  await app.register(fastifyStatic as any, { root: UPLOADS_DIR, prefix: '/v1/files/', decorateReply: false, index: false, list: false });
+  /*
+   * Kesh: send sukut bo'yicha "public, max-age=0" yozardi, ya'ni har surat har safar qayta
+   * so'ralardi. Ochiq fayl nomi tasodifiy va hech qachon qayta ishlatilmaydi (storeFile), shuning
+   * uchun mazmuni o'zgarmaydi: 30 kun, immutable. Maxfiy fayl (pasport, dalil, yozishma)
+   * umuman saqlanmaydi: umumiy kompyuterda diskda nusxa qolmasin va har ko'rishda sessiya
+   * qorovuldan qayta o'tsin. basename: diskdagi yo'l Windowsda teskari chiziq bilan keladi.
+   */
+  await app.register(fastifyStatic as any, {
+    root: UPLOADS_DIR, prefix: '/v1/files/', decorateReply: false, index: false, list: false, cacheControl: false,
+    setHeaders: (res: { setHeader(k: string, v: string): void }, file: string) =>
+      res.setHeader('cache-control', isPrivateFilePath(basename(file)) ? 'private, no-store' : 'public, max-age=2592000, immutable'),
+  });
   app.setGlobalPrefix('v1');
   app.enableCors({ origin: env.WEB_ORIGIN, credentials: true });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));

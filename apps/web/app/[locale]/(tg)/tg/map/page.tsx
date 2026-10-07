@@ -23,8 +23,9 @@ export default async function TgMapPage({ params, searchParams }: { params: Prom
     sapi<ListingPage>('/listings?limit=50', 60).catch(() => null),
   ]);
   const cards: Record<string, ReactNode> = {};
-  // key: MapView kartalarni massivda chizadi
-  for (const x of terms?.items ?? []) cards[`terminal:${x.id}`] = <TerminalRow key={x.id} t={x} lang={lang} />;
+  // key: MapView kartalarni massivda chizadi. Koordinatasiz terminal (reestr shahobchasi) xaritada stansiya
+  // guruhida turadi, kartasi hech qachon chizilmaydi: sahifa yukini oshirmasin
+  for (const x of terms?.items ?? []) if (x.lat != null && x.lng != null) cards[`terminal:${x.id}`] = <TerminalRow key={x.id} t={x} lang={lang} />;
   for (const l of lists?.items ?? []) cards[`${l.kind === 'TRUCK' ? 'truck' : 'equipment'}:${l.id}`] = <ListingRow key={l.id} l={l} lang={lang} />;
   return (
     <main id="main" className="flex h-[var(--tg-vh,100dvh)] flex-col">

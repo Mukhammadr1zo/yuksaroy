@@ -2,19 +2,14 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { JetBrains_Mono, Manrope, Unbounded } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { OG_LOCALE, SITE } from '@/lib/seo';
 import '../globals.css';
+// Shriftlar (qaysi og'irlik, nima preload qilinadi va nega) shu faylda; 404 sahifasi ham shuni oladi
+import { fontVars } from '../fonts';
 import { SkipLink } from '@/components/site/SkipLink';
 import { VisitBeacon } from '@/components/site/VisitBeacon';
 import { CookieConsent } from '@/components/site/CookieConsent';
-
-// next/font: build vaqtida yuklanadi, self-host, layout shift yo'q (CLS ≤ .05)
-// Kirill subseti uchala shriftda ham bor, ya'ni rus tili qo'shimcha fayl talab qilmaydi.
-const display = Unbounded({ subsets: ['latin', 'cyrillic'], weight: ['600', '700'], variable: '--font-unbounded', display: 'swap' });
-const body = Manrope({ subsets: ['latin', 'cyrillic'], weight: ['400', '500', '600', '700', '800'], variable: '--font-manrope', display: 'swap' });
-const mono = JetBrains_Mono({ subsets: ['latin', 'cyrillic'], weight: ['400', '600'], variable: '--font-jetbrains', display: 'swap' });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -55,7 +50,7 @@ export default async function RootLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang={locale} className={fontVars}>
       <body>
         <NextIntlClientProvider>
           {/* Hamma narsadan oldin: birinchi Tab aynan shu havolaga tushsin */}

@@ -204,7 +204,7 @@ function ListingRow({ l, onDone, ...tk }: { l: OwnerListing; onDone: (d: Decisio
       {l.photos.length ? (
         <div className="mt-2 flex gap-2 overflow-x-auto">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {l.photos.slice(0, 6).map((p) => <img key={p} src={p} alt="" className="h-20 w-28 shrink-0 rounded-xl border border-line object-cover" />)}
+          {l.photos.slice(0, 6).map((p) => <img key={p} src={p} alt="" loading="lazy" decoding="async" className="h-20 w-28 shrink-0 rounded-xl border border-line object-cover" />)}
         </div>
       ) : null}
       {l.contactPhone ? <p className="mt-2 font-mono text-xs text-muted">{t('contact')}: {l.contactPhone}</p> : null}

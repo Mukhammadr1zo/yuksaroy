@@ -131,7 +131,7 @@ function General({ d, reload }: { d: Detail; reload: () => Promise<void> }) {
           {d.photos.map((p, i) => {
             const alt = ta('photoOf', { name: d.title });
             // eslint-disable-next-line @next/next/no-img-element
-            return <a key={p} href={p} target="_blank" rel="noopener noreferrer" className="shrink-0"><img src={p} alt={d.photos.length > 1 ? `${alt} (${i + 1}/${d.photos.length})` : alt} className="h-28 w-40 rounded-xl border border-line object-cover" /></a>;
+            return <a key={p} href={p} target="_blank" rel="noopener noreferrer" className="shrink-0"><img src={p} alt={d.photos.length > 1 ? `${alt} (${i + 1}/${d.photos.length})` : alt} loading="lazy" decoding="async" className="h-28 w-40 rounded-xl border border-line object-cover" /></a>;
           })}
         </div>
       ) : null}

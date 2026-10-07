@@ -3,6 +3,7 @@
 // URL holati (kamera c,z: replaceState; filtr: pushState), hover va bosish, mobil pastki panel (peek / half / full),
 // hudud chizish (ko'pburchak, ?area= base64url; tashqaridagi obyekt xira va ro'yxatdan chiqadi, API aralashmaydi).
 // compact: landing mobil tasmasi (interaktiv emas, bosish -> /map). Nuqtalar /v1/map-objects.geojson dan, 404 bo'lsa bo'sh.
+// Ro'yxat bo'lib chiziladi (LIST_PAGE): ilgari ko'rinishdagi yuzlab qator va ulardagi rasmlar birdan chizilardi.
 import { LngLatBounds, Map as MLMap, NavigationControl, setWorkerUrl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLocale, useTranslations } from 'next-intl';
@@ -14,6 +15,7 @@ import { pricePer } from '@/lib/format';
 import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers, z } from './mapStyle';
 import { addPinIcons } from './pinIcons';
 import { FREE_CHIP, KINDS, effective, inArea, materialize, parseState, toParams, withoutChip, type Area, type Kind, type MapState } from './state';
+import { StripFrame } from './StripFrame';
 
 setWorkerUrl(WORKER_URL);
 
@@ -43,6 +45,10 @@ const catOf = (k: FeatKind): Kind => (k === 'siding' ? 'terminal' : k);
 const CAT_PATH: Record<Kind, string> = { terminal: '/terminals', equipment: '/equipment', truck: '/carriers' };
 /** Stansiya yozuvi sayt tiliga ergashadi; nomi yo'q bo'lsa o'zbekchasi qoladi. */
 const STATION_NAME: Record<string, string> = { uz: 'name', ru: 'nameRu', en: 'nameEn' };
+/** Ro'yxat shuncha qatordan chiziladi, oxiri ko'rinishga yaqinlashganda yana shuncha qo'shiladi. */
+const LIST_PAGE = 20;
+/** Stansiya doiralari shu masshtabdan ko'rinadi (qatlam minzoom va yuklash sharti bir qiymat). */
+const STATION_ZOOM = 5.5;
 const SNAP = { peek: '96px', half: '45%', full: '85%' } as const;
 const SNAP_K = { peek: 0, half: 0.45, full: 0.85 } as const;
 const ORDER = ['peek', 'half', 'full'] as const;
@@ -85,8 +91,11 @@ const href = (o: Obj) =>
 const keyOf = (e: MapLayerMouseEvent) => { const p = e.features?.[0]?.properties; return p ? `${p.kind}:${p.id}` : null; };
 const inRegion = (o: Obj, regions: RegionCode[]) => !regions.length || regions.includes(o.p.regionCode as RegionCode);
 
-/** only: faqat shu kalitlar (`kind:id`) chiziladi, masalan do'kon sahifasida tashkilot obyektlari. */
-export function MapView({ initial, cards, compact = false, only }: { initial: MapState; cards?: Record<string, ReactNode>; compact?: boolean; only?: string[] }) {
+/**
+ * only: faqat shu kalitlar (`kind:id`) chiziladi, masalan do'kon sahifasida tashkilot obyektlari.
+ * bare (compact bilan): faqat xarita qatlami; ramkani (StripFrame) chaqiruvchi o'zi chizadi, bosh sahifa shunday qiladi.
+ */
+export function MapView({ initial, cards, compact = false, bare = false, only }: { initial: MapState; cards?: Record<string, ReactNode>; compact?: boolean; bare?: boolean; only?: string[] }) {
   const locale = useLocale();
   const lang = locale as SearchLang;
   const t = useTranslations('map');
@@ -97,6 +106,9 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const [ready, setReady] = useState(false);
+  // Ixcham tasma birinchi to'liq chizilgandan keyin ko'rinadi (load emas, idle): plitka va temir yo'l
+  // yarim holda ko'rinmaydi, bosh sahifada esa ostidagi rasm bilan almashuvi sezilmaydi
+  const [shown, setShown] = useState(false);
   const [objs, setObjs] = useState<Obj[] | null>(null);
   // Kamera holatga kirmaydi: URL yozishda xaritadan olinadi (moveend har safar filtr effektini uyg'otmasin)
   const [s, setS] = useState<MapState>({ ...initial, c: null, z: null });
@@ -122,6 +134,12 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   const draftRef = useRef(draft);
   draftRef.current = draft;
   const finishRef = useRef<() => void>(() => {});
+  const [limit, setLimit] = useState(LIST_PAGE);
+  const listRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
+  // Pin bosilganda ro'yxatda shu qatorga suriladi: qator hali chizilmagan bo'lishi mumkin, shuning uchun render'dan keyin
+  const scrollTo = useRef<string | null>(null);
+  const regionsAsked = useRef(false);
 
   // 1) Xarita: asos, qatlamlar, hodisalar, geojson yuklash
   useEffect(() => {
@@ -171,9 +189,13 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
       map.addLayer({ id: 'ys-sel', type: 'circle', source: 'sel', paint: { 'circle-radius': 15, 'circle-color': 'transparent', 'circle-stroke-width': 3, 'circle-stroke-color': PIN.siding } });
       // Stansiya qatlami: katalog birligi emas, orientir. Shuning uchun klastersiz, bosilmaydi
       // va obyekt pinlari ostida turadi. Faqat rasmiy ro'yxatdagi stansiyalar keladi.
-      map.addSource('stations', { type: 'geojson', data: EMPTY });
+      // Fayl manzil bilan beriladi: maplibre uni o'z worker'ida yuklab o'qiydi, asosiy oqim band bo'lmaydi.
+      // Qimirlamaydigan tasma (ixcham, kamera berilgan) stansiya masshtabidan uzoqda bo'lsa ular
+      // baribir ko'rinmaydi, shuning uchun so'ralmaydi ham (bosh sahifa).
+      const stationsSeen = !compact || !initial.c || (initial.z ?? 0) >= STATION_ZOOM;
+      map.addSource('stations', { type: 'geojson', data: stationsSeen ? '/api/v1/stations.geojson' : EMPTY });
       map.addLayer({
-        id: 'ys-station', type: 'circle', source: 'stations', minzoom: 5.5,
+        id: 'ys-station', type: 'circle', source: 'stations', minzoom: STATION_ZOOM,
         paint: {
           'circle-radius': z(6, 2, 12, 4), 'circle-color': '#FFFFFF',
           'circle-stroke-width': 1.4, 'circle-stroke-color': '#7C8698', 'circle-opacity': 0.9,
@@ -188,15 +210,6 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
         },
         paint: { 'text-color': '#5A6373', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.3 },
       }, sym);
-
-      // Stansiyalar alohida so'raladi: kamdan-kam o'zgaradi, obyektlardan uzoqroq keshlanadi
-      fetch('/api/v1/stations.geojson', { signal: ctl.signal })
-        .then((r) => (r.ok ? r.json() : EMPTY))
-        .catch(() => EMPTY)
-        .then((d: FC) => {
-          if (ctl.signal.aborted) return;
-          (map.getSource('stations') as GeoJSONSource | undefined)?.setData(d);
-        });
 
       await addPinIcons(map);
       // Qatlam tartibi: terminal eng ustida (shahobcha klasterlari ko'p, terminalni yopmasin)
@@ -215,8 +228,10 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
         map.on('click', k, (e) => {
           const key = keyOf(e);
           if (!key || draftRef.current) return;
-          setSel(key); setHov(null);
-          document.getElementById(`obj-${key}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          // Surish render'dan keyin (effektda): qator ro'yxatning hali chizilmagan qismida bo'lishi mumkin.
+          // bump: o'sha pin qayta bosilsa ham (sel o'zgarmaydi) render bo'lib, ro'yxat yana suriladi
+          scrollTo.current = key;
+          setSel(key); setHov(null); bump((x) => x + 1);
         });
         map.on('mousemove', k, (e) => { if (draftRef.current) return; const key = keyOf(e); if (key) setHov(key); map.getCanvas().style.cursor = 'pointer'; });
         map.on('mouseleave', k, () => { setHov(null); if (!draftRef.current) map.getCanvas().style.cursor = ''; });
@@ -233,11 +248,10 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
         });
         map.on('dblclick', (e) => { if (draftRef.current) { e.preventDefault(); finishRef.current(); } });
       }
-      // Viloyat poligonlari (/v1/regions.geojson): 404 bo'lsa qoplama yo'q, qolgani ishlayveradi; compact: qoplama chizilmaydi, yuklanmaydi.
-      if (!compact) fetch('/api/v1/regions.geojson', { signal: ctl.signal }).then((r) => (r.ok ? r.json() : EMPTY)).catch(() => EMPTY)
-        .then((d: FC) => { if (mapRef.current === map) (map.getSource('regions') as GeoJSONSource).setData(d); });
+      // Viloyat poligonlari (160 KB) birinchi viloyat yoki yo'l filtrida yuklanadi: pastdagi effekt
       setBounds(map.getBounds());
       setReady(true);
+      if (compact) map.once('idle', () => setShown(true));
     });
 
     // Kamera -> URL (300 ms kechikish) va ko'rinishdagi obyektlar
@@ -317,6 +331,16 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, objs, eff]);
 
+  // Viloyat poligonlari (/v1/regions.geojson, 160 KB) faqat viloyat yoki yo'l filtrida ko'rinadi:
+  // ilgari har ochilishda yuklanardi, endi birinchi shunday filtrda bir marta, worker o'qiydi.
+  // 404 bo'lsa qoplama bo'sh qoladi, qolgani ishlayveradi. Ixcham tasmada filtr yo'q, yuklanmaydi.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || regionsAsked.current || !(eff.corridor.length || eff.regions.length)) return;
+    regionsAsked.current = true;
+    (map.getSource('regions') as GeoJSONSource).setData('/api/v1/regions.geojson');
+  }, [ready, eff]);
+
   // Tanlangan pin atrofida halqa
   const byKey = useMemo(() => new Map((objs ?? []).map((o) => [o.key, o])), [objs]);
   useEffect(() => {
@@ -364,6 +388,30 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
     if (eff.near) listed.sort((a, b) => a.km! - b.km!);
     return { listed, counts };
   }, [objs, bounds, eff]);
+
+  // Ro'yxat bo'lib chiziladi. Butun mamlakat ko'rinishida ro'yxatda yuzlab qator bor edi: hammasi
+  // har surish va har hoverda qayta chizilar, kartalardagi rasmlar esa ko'rinmasa ham birdan yuklanardi.
+  // Tartib va sanoq o'zgarmaydi; oxiri ko'rinishga 800px yaqinlashganda yana LIST_PAGE qator qo'shiladi.
+  // Tanlangan pin qatori har doim chiziladi (ro'yxat unga suriladi).
+  // ponytail: limit faqat o'sadi (xaritani surganda ro'yxat qisqarib sakramasin); uzun seansda og'irlashsa filtr o'zgarganda tiklanadi
+  const selIdx = sel ? listed.findIndex((o) => o.key === sel) : -1;
+  const end = Math.max(limit, selIdx + 1);
+  const more = end < listed.length;
+  useEffect(() => { if (selIdx >= limit) setLimit(selIdx + 1); }, [selIdx, limit]);
+  useEffect(() => {
+    const node = moreRef.current;
+    if (!more || !node) return;
+    // Har o'sishdan keyin yangi kuzatuvchi: oxiri hali ham yaqin bo'lsa darhol yana qo'shadi
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) setLimit((n) => n + LIST_PAGE); }, { root: listRef.current, rootMargin: '800px 0px' });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [more, end]);
+  useEffect(() => {
+    const k = scrollTo.current;
+    if (!k) return;
+    scrollTo.current = null;
+    document.getElementById(`obj-${k}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
   const terms = listed.filter((o) => o.p.kind === 'terminal');
   const cheapest = Math.min(...terms.map((o) => o.p.fromPriceTiyin).filter((n): n is number => n != null));
   const decision = [
@@ -465,19 +513,12 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
   // "Mening yonimda" yoqilgan bo'lsa popupda ham masofa turadi: ro'yxatdagi bilan bir xil hisob
   const popKm = popObj && eff.near ? distanceKm(eff.near[1], eff.near[0], popObj.lat, popObj.lng) : null;
   const pos = popObj && mapRef.current ? mapRef.current.project([popObj.lng, popObj.lat]) : null;
-  const fade = `transition-opacity duration-500 ${ready ? 'opacity-100' : 'opacity-0'}`;
+  const fade = `transition-opacity duration-500 ${(compact ? shown : ready) ? 'opacity-100' : 'opacity-0'}`;
+  // O'lcham inline style'da (LightMap'dagi usul): maplibre-gl.css dagi qatlamsiz `.maplibregl-map{position:relative}`
+  // Tailwind'ning absolute klassini yengadi, quti yaratilishda 0px bo'lib xarita 300px zaxira o'lchamda chizilardi
+  const layer = <div ref={el} style={{ position: 'absolute', inset: 0 }} className={fade} />;
 
-  if (compact) {
-    return (
-      <div className="relative h-[300px] overflow-hidden rounded-card border border-line bg-sand">
-        <div ref={el} className={`absolute inset-0 ${fade}`} />
-        <Link href="/map" aria-label={t('strip.aria')} className="absolute inset-0 z-10">
-          <span className="absolute bottom-3 right-3 rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white">{t('open')}</span>
-          <span className="absolute bottom-1.5 left-2.5 font-mono text-[9px] text-muted/80">© OpenStreetMap, © CARTO</span>
-        </Link>
-      </div>
-    );
-  }
+  if (compact) return bare ? layer : <StripFrame>{layer}</StripFrame>;
 
   const row = (o: Listed) => (
     <div className="flex items-start gap-3 rounded-card border border-line bg-white p-3">
@@ -515,7 +556,7 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
           />
           <p className="line-clamp-2 px-4 pb-2 font-mono text-sm text-navy tabular-nums">{decision}</p>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
+        <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
           <form
             onSubmit={(e) => { e.preventDefault(); apply({ ...s, q: String(new FormData(e.currentTarget).get('q') ?? '').trim(), region: '', corridor: '', near: null, radius: 0, free: false, cat: [] }, true); }}
             className="mx-4 mt-4 flex items-center gap-2 rounded-full border border-line bg-white p-1 focus-within:border-teal focus-within:ring-2 focus-within:ring-teal/25"
@@ -604,21 +645,24 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
               <button type="button" onClick={() => frame(focusRef.current, true)} className="mt-3 text-sm font-semibold text-teal-ink underline">{t('empty.zoomOut')}</button>
             </div>
           ) : (
-            // ponytail: virtualizatsiya yo'q; 1000+ qator bo'lsa qo'shiladi
-            <ol className="space-y-3 px-4 pt-3">
-              {listed.map((o) => (
-                <li key={o.key} id={`obj-${o.key}`} onMouseEnter={() => setHov(o.key)} onMouseLeave={() => setHov(null)} className={`rounded-card ${sel === o.key ? 'ring-2 ring-teal ring-offset-2' : ''}`}>
-                  {cards?.[o.key] ?? row(o)}
-                  {o.p.accuracy === 'region' ? <p className="mt-1 px-1 text-[11px] text-amber-ink">{t('approxRegion')}</p> : null}
-                </li>
-              ))}
-            </ol>
+            // ponytail: virtualizatsiya yo'q, faqat bo'lib chizish (LIST_PAGE); chizilgan qatorlar ming-minglab bo'lsa qo'shiladi
+            <>
+              <ol className="space-y-3 px-4 pt-3">
+                {listed.slice(0, end).map((o) => (
+                  <li key={o.key} id={`obj-${o.key}`} onMouseEnter={() => setHov(o.key)} onMouseLeave={() => setHov(null)} className={`rounded-card ${sel === o.key ? 'ring-2 ring-teal ring-offset-2' : ''}`}>
+                    {cards?.[o.key] ?? row(o)}
+                    {o.p.accuracy === 'region' ? <p className="mt-1 px-1 text-[11px] text-amber-ink">{t('approxRegion')}</p> : null}
+                  </li>
+                ))}
+              </ol>
+              {more ? <div ref={moreRef} aria-hidden="true" className="h-px" /> : null}
+            </>
           )}
         </div>
       </section>
 
       <div className="relative min-w-0 flex-1">
-        <div ref={el} className={`absolute inset-0 ${fade}`} />
+        {layer}
 
         {/* Legenda: uch toifa (shahobcha terminal ichida) + attributsiya (ODbL, CARTO) */}
         <ul aria-label={t('legend.aria')} className="pointer-events-none absolute bottom-[calc(var(--sheet)+12px)] left-3 z-10 flex max-w-[calc(100%-80px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-line bg-white/90 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.08em] text-muted transition-[bottom] duration-300">

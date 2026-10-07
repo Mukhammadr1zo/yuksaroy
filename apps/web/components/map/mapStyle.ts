@@ -1,5 +1,6 @@
 // Umumiy xarita asosi: hero (LightMap) va /map (MapView) bir xil uslub, yo'l qatlamlari va pin qatlamlarini ishlatadi.
 // Bu yerdagi qiymatlar LightMap'dan ko'chirildi, hero ko'rinishi o'zgarmagan.
+// Uslub, asos qatlamlari yoki yozuvlar o'zgarsa bosh sahifa tasmasining rasmlari qayta yasaladi: scripts/strip-poster.mjs
 import type { ExpressionSpecification, LayerSpecification, Map as MLMap } from 'maplibre-gl';
 
 /** CARTO Positron nusxasi, standardrail.com ishlatadigan mapbox light-v11 ranglariga bo'yalgan (public/map/light.json,

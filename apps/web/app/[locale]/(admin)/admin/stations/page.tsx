@@ -194,10 +194,11 @@ export default function AdminStationsPage() {
         <button type="button" className={BTN_GHOST} onClick={() => { setQ(''); setF({ q: '', rju: '', listed: '', coords: '', page: 1 }); }}>{tc('reset')}</button>
       </Toolbar>
 
+      {/* Izoh font-body da: sarlavha shrifti faqat 700 da yuklanadi (app/fonts.ts), unda oddiy og'irlik yo'q */}
       {loading ? <p className="mt-4 text-sm text-muted">{tc('loading')}</p>
         : err ? <Notice tone="err">{tc('loadFailed')}</Notice>
         : data && f.coords === '0'
-          ? <p className="mt-4 font-display text-2xl font-bold text-navy">{tc('total', { count: left })} <span className="text-sm font-normal text-muted">{ts('noCoords')}</span></p>
+          ? <p className="mt-4 font-display text-2xl font-bold text-navy">{tc('total', { count: left })} <span className="font-body text-sm font-normal text-muted">{ts('noCoords')}</span></p>
           : data ? <p className="mt-4 font-mono text-xs text-muted">{tc('total', { count: data.total })}</p> : null}
       {note ? <Notice tone={note.tone}>{note.text}</Notice> : null}
 

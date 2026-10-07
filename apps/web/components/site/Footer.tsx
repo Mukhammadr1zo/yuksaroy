@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/navigation';
+// Oddiy Link emas: futer pastga surilganda 20 ta marshrut birdan oldindan yuklanardi
+import { IntentLink as Link } from './IntentLink';
 import { Logo } from './Logo';
 import { EntityDetails } from './EntityDetails';
 

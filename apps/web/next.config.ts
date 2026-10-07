@@ -63,6 +63,21 @@ const config: NextConfig = {
   async rewrites() {
     return [{ source: '/api/v1/:path*', destination: `${API}/v1/:path*` }];
   },
+  /*
+   * public/ dagi fayllarga Next sukut bo'yicha `max-age=0` beradi: brauzer har sahifada
+   * namuna suratlarni qayta so'rardi. Bu sarlavha fayl berilishidan oldin qo'yiladi va Next
+   * o'zinikini faqat sarlavha yo'q bo'lsa yozadi (standalone serverda ham shu yo'l).
+   * Bir hafta, immutable emas: nomda xesh yo'q, surat almashsa ko'pi bilan bir haftada yangilanadi.
+   * Telefondagi bosh sahifa xaritasining rasmi ham shunday: u birinchi ekranda, qayta kirganda
+   * serverdan tasdiq kutmasdan chizilsin. /map dagi boshqa fayllar (light.json) bunga kirmaydi.
+   */
+  async headers() {
+    const week = [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' }];
+    return [
+      { source: '/demo/:path*', headers: week },
+      { source: '/map/:file(strip-[a-z]{2}\\.webp)', headers: week },
+    ];
+  },
   async redirects() {
     // Har bir eski yo'l: prefiksiz (uz) va /:locale bilan, oddiy va ichki (:path*)
     const prefixes = ['', '/:locale(uz|ru|en)'];

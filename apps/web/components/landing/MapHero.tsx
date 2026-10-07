@@ -9,10 +9,39 @@ import { ArrowRightIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { num } from '@/lib/format';
 import type { MapState } from '@/components/map/state';
+import { StripFrame } from '@/components/map/StripFrame';
 
 const LightMap = dynamic(() => import('./LightMap'), { ssr: false });
 const MapStrip = dynamic(() => import('@/components/map/MapView').then((m) => m.MapView), { ssr: false });
-const NO_STATE: MapState = { cat: [], region: '', corridor: '', near: null, radius: 0, q: '', c: null, z: null };
+/**
+ * Telefon tasmasining kadri qat'iy: tasma interaktiv emas, demak ostidagi rasm bilan piksel-piksel mos
+ * (public/map/strip-{til}.webp, 574x298 @2x). Rasmni scripts/strip-poster.mjs yasaydi: kadr, tasma o'lchami,
+ * light.json yoki mapStyle.ts dagi asos qatlamlari o'zgarsa qayta yuritiladi. Ilgari kadr nuqtalar
+ * chegarasidan hisoblanardi va minZoom 4.5 ga tirab qolardi, ya'ni markaz o'sha chegaraning o'rtasi edi:
+ * shahobchali stansiyalar 58.1..73.0 E, 37.2..43.4 N (seed reestri).
+ */
+const STRIP: MapState = { cat: [], region: '', corridor: '', near: null, radius: 0, q: '', c: [65.5, 40.3], z: 4.5 };
+/** 1x1 shaffof GIF: keng ekranda tasma yashirin, rasm umuman yuklanmasin. */
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+/**
+ * Brauzer bo'shaganda true: xarita kutubxonasi (maplibre, ~260 KB) va nuqtalar so'rovi gidratatsiya
+ * va birinchi bosish bilan bir vaqtda asosiy oqimni band qilmasin. "Ko'rinishga yaqinlashganda" sharti
+ * bu yerda hech narsani kechiktirmasdi: hero xaritasi ham, telefon tasmasi ham birinchi ekranda.
+ */
+function useIdle() {
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    // Safari da requestIdleCallback yo'q
+    if (typeof window.requestIdleCallback !== 'function') {
+      const t = window.setTimeout(() => setIdle(true), 200);
+      return () => window.clearTimeout(t);
+    }
+    const id = window.requestIdleCallback(() => setIdle(true), { timeout: 2000 });
+    return () => window.cancelIdleCallback(id);
+  }, []);
+  return idle;
+}
 
 /** lg va undan keng: fon xaritasi (desktop hero); torroq: fon sand, qidiruv ostida 300px xarita tasmasi. null = hali noma'lum (SSR). */
 function useWide() {
@@ -45,12 +74,15 @@ export function MapHero({ terminals }: { terminals: number | null }) {
   const tm = useTranslations('map');
   const locale = useLocale();
   const wide = useWide();
+  const idle = useIdle();
 
   return (
     <section className="relative min-h-[min(760px,100dvh)] overflow-hidden bg-sand">
-      {/* Fon xaritasi faqat lg da (desktop hero o'zgarmagan); telefonda o'rniga pastdagi tasma */}
+      {/* Fon xaritasi faqat lg da (desktop hero o'zgarmagan); telefonda o'rniga pastdagi tasma.
+          Kadri jonli nuqtalar va oyna kengligidan hisoblanadi, shuning uchun bu yerda rasm qo'yilmaydi
+          (almashuvda sakrardi): xarita oldingidek qum fon ustida paydo bo'ladi, faqat brauzer bo'shagach */}
       <div className="absolute inset-0">
-        {wide ? <LightMap /> : null}
+        {wide && idle ? <LightMap /> : null}
       </div>
 
       {/* Matn ustuni ostidagi oqartirish: xarita qanday bo'lsa ham matn o'qiladi */}
@@ -94,9 +126,16 @@ export function MapHero({ terminals }: { terminals: number | null }) {
           </form>
           <p className="mt-2.5 font-mono text-[12px] text-teal-ink">{t('search.note')}</p>
 
-          {/* Telefon: 300px xarita tasmasi, bosish -> /map (kengligi aniqlangunga qadar sand plastina) */}
+          {/* Telefon: 300px xarita tasmasi, bosish -> /map. Ramka, tugma va xaritaning rasmi darhol
+              (server HTML), jonli xarita brauzer bo'shagach ustiga chiqadi: asos bir xil, faqat pinlar qo'shiladi */}
           <div className="mt-5 lg:hidden">
-            {wide === false ? <MapStrip compact initial={NO_STATE} /> : <div className="h-[300px] rounded-card border border-line bg-sand" />}
+            <StripFrame>
+              <picture>
+                <source media="(min-width: 1024px)" srcSet={BLANK} />
+                <img src={`/map/strip-${locale}.webp`} alt="" width={1148} height={596} className="absolute inset-0 h-full w-full object-cover" />
+              </picture>
+              {wide === false && idle ? <MapStrip compact bare initial={STRIP} /> : null}
+            </StripFrame>
           </div>
 
           <p className="mt-7 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">{t('browse.heading')}</p>

@@ -11,8 +11,18 @@ import type { TerminalKind } from '@yuksaroy/domain';
 const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); };
 const SKIES = [['#0E3A4A', '#12566B'], ['#123A52', '#17607F'], ['#0F3F45', '#166B66'], ['#14304A', '#1B5473']] as const;
 
+/**
+ * Kartadagi surat manzili. Karta suratni eng ko'pi 112x84 da chizadi, namuna surat esa
+ * 1200 px li va 80-250 KB: xarita ro'yxati shu sababli megabaytlab yuklardi. Namuna
+ * suratlarning kichik nusxasi public/demo/thumb da (336x252 ni to'liq qoplaydi, ya'ni 3x
+ * ekranda ham xira emas, o'rtacha 17 KB). Yuklangan fayllarning kichik nusxasi yo'q, ular
+ * o'zgarmaydi. Yangi namuna surat qo'shilsa thumb dagi nusxasi ham qo'shilsin.
+ */
+export const cardSrc = (url: string) => url.replace(/^\/demo\/([\w-]+\.jpg)$/, '/demo/thumb/$1');
+
 export function CardPhoto({ kind, slug, photo, alt = '', className = '' }: { kind: TerminalKind; slug: string; photo?: string | null; className?: string; alt?: string }) {
-  if (photo) return <img src={photo} alt={alt} className={`h-full w-full object-cover ${className}`} />;
+  // lazy: ro'yxatda va xarita yon panelida o'nlab karta, ekrandan tashqaridagisi kutib tursin
+  if (photo) return <img src={cardSrc(photo)} alt={alt} loading="lazy" decoding="async" className={`h-full w-full object-cover ${className}`} />;
   const i = hash(slug) % SKIES.length;
   const [top, bottom] = SKIES[i]!;
   const id = `cp${i}`;

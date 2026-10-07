@@ -2,7 +2,8 @@
 // Sarlavhaning o'ng tomoni: mehmonga "Kirish", kirgan foydalanuvchiga qo'shish, bildirishnoma va menyu.
 // Sayt qobig'i o'zgarmaydi, faqat shu qism almashadi.
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+// Mehmonning "Kirish" tugmasi ham sarlavhada, har sahifada: oldindan yuklash faqat niyat bilinganda
+import { IntentLink as Link } from './IntentLink';
 import { AddMenu } from './AddMenu';
 import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';

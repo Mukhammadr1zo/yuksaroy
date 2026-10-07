@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/navigation';
+// Oddiy Link emas: bu havolalar har sahifada ko'rinadi, oldindan yuklash faqat niyat bilinganda
+import { IntentLink as Link } from './IntentLink';
 import { Logo } from './Logo';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { AuthArea } from './AuthArea';

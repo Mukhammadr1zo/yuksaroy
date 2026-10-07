@@ -1,4 +1,3 @@
-import { Link } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type ListingKind, type PriceUnit, type RegionCode, type SearchLang } from '@yuksaroy/domain';
 import { EyeIcon, PhoneIcon, SealCheckIcon, TrainIcon, TrainRegionalIcon, TruckIcon } from '@phosphor-icons/react/dist/ssr';
@@ -6,6 +5,9 @@ import { num } from '@/lib/format';
 import type { ListingCard as L } from '@/lib/types-listing';
 import { CompareCheck } from '@/components/compare/CompareCheck';
 import { PremiumBadge } from './PremiumBadge';
+import { cardSrc } from './CardPhoto';
+import { CardPending } from './CardPending';
+import { IntentLink } from '@/components/site/IntentLink';
 
 /** Kartadagi va tafsilotdagi umumiy yordamchilar: havola, narx, viloyat nomi, tur ikonkasi. */
 export const listingHref = (l: Pick<L, 'kind' | 'slug'>) => `${l.kind === 'TRUCK' ? '/carriers' : '/equipment'}/${l.slug}`;
@@ -41,12 +43,13 @@ export async function ListingCard({ l }: { l: L }) {
   // Solishtirish belgisi Link tashqarisida (a ichida input bo'lmasin): karta pastida joy, belgi o'ng burchakda
   return (
     <div className="relative min-w-0">
-    <Link href={listingHref(l)} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:border-teal">
+    <IntentLink href={listingHref(l)} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:border-teal">
       <div className="relative h-[84px] w-[112px] shrink-0 overflow-hidden rounded-xl bg-sand">
-        {l.photo ? <img src={l.photo} alt="" className="h-full w-full object-cover" /> : (
+        {l.photo ? <img src={cardSrc(l.photo)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : (
           <div className="flex h-full w-full items-center justify-center text-navy/40"><Icon size={36} weight="duotone" aria-hidden="true" /></div>
         )}
         {l.deal ? <span className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold ${l.deal === 'RENT' ? 'bg-teal text-white' : 'bg-navy text-white'}`}>{SEARCH_LABELS[lang].deal[l.deal]}</span> : null}
+        <CardPending />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
@@ -89,7 +92,7 @@ export async function ListingCard({ l }: { l: L }) {
         </div>
         {l.object ? <p className="mt-1 truncate text-[11px] text-teal-ink">{t('atTerminal', { name: l.object.name })}</p> : null}
       </div>
-    </Link>
+    </IntentLink>
     <CompareCheck cat={truck ? 'carriers' : 'equipment'} slug={l.slug} name={l.title} className="absolute bottom-3 right-3" />
     </div>
   );

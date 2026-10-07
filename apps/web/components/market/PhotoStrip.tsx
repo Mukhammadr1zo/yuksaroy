@@ -19,7 +19,7 @@ export function PhotoStrip({ photos, alt }: { photos: string[] | undefined; alt:
           <a href={url} target="_blank" rel="noopener" className="block h-full w-full outline-none focus-visible:ring-2 focus-visible:ring-teal/40">
             {/* Bir nechta surat bo'lsa tartib raqami ham: aks holda hamma havola bir xil nomda bo'lardi */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt={n > 1 ? `${alt} (${i + 1}/${n})` : alt} loading="lazy" className="h-full w-full object-cover" />
+            <img src={url} alt={n > 1 ? `${alt} (${i + 1}/${n})` : alt} loading="lazy" decoding="async" className="h-full w-full object-cover" />
           </a>
         </li>
       ))}

@@ -1,10 +1,11 @@
-import { Link } from '@/i18n/navigation';
 import { REVIEW } from '@yuksaroy/domain';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { hoursSummary, num, pricePer } from '@/lib/format';
 import type { TerminalCard as T } from '@/lib/types';
 import { CompareCheck } from '@/components/compare/CompareCheck';
 import { CardPhoto } from '@/components/catalog/CardPhoto';
+import { CardPending } from '@/components/catalog/CardPending';
+import { IntentLink } from '@/components/site/IntentLink';
 
 // Kartadagi tarif ustuni: shu tartibda, bor bo'lganlari
 const STACK = ['LOAD', 'UNLOAD', 'STORAGE'] as const;
@@ -29,9 +30,10 @@ export async function TerminalCard({ t }: { t: T }) {
   // Solishtirish belgisi Link tashqarisida (a ichida input bo'lmasin): karta pastida 36px joy, belgi o'ng burchakda
   return (
     <div className="relative min-w-0">
-    <Link href={`/terminals/${t.slug}`} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:-translate-y-0.5 hover:shadow-md">
+    <IntentLink href={`/terminals/${t.slug}`} className="group flex h-full min-w-0 gap-4 rounded-card border border-line bg-white p-4 pb-10 text-ink transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative h-[72px] w-20 shrink-0 overflow-hidden rounded-t-[48px] rounded-b-md bg-navy sm:w-[96px]">
         <CardPhoto kind={t.kind} slug={t.slug} photo={t.photos[0]} />
+        <CardPending />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
@@ -87,7 +89,7 @@ export async function TerminalCard({ t }: { t: T }) {
         )}
         {!t.claimed && !t.rail ? <p className="mt-1 text-[11px] text-amber-ink">{c('card.unverifiedPassport')}</p> : null}
       </div>
-    </Link>
+    </IntentLink>
     <CompareCheck cat="terminals" slug={t.slug} name={t.name} className="absolute bottom-3 right-3" />
     </div>
   );

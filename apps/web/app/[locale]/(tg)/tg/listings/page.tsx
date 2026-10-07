@@ -8,6 +8,7 @@ import { api, post } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import type { OwnerListing } from '@/lib/types-kabinet';
 import { ListingStatusPill } from '@/components/kabinet/bits';
+import { cardSrc } from '@/components/catalog/CardPhoto';
 import { haptic, useTg } from '@/components/tg/TgProvider';
 import { BTN, CARD, Empty, Err, Skeleton, listingPrice, useLang } from '@/components/tg/bits';
 
@@ -55,7 +56,7 @@ export default function TgListingsPage() {
           <ul className="space-y-2">
             {items.map((l) => (
               <li key={l.id} className={`${CARD} flex gap-3 p-3`}>
-                <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">{l.photo ? <img src={l.photo} alt="" className="h-full w-full object-cover" /> : null}</div>
+                <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">{l.photo ? <img src={cardSrc(l.photo)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : null}</div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2"><p className="truncate font-bold">{l.title}</p><ListingStatusPill status={l.status} /></div>
                   <p className="mt-0.5 truncate text-xs text-muted">{L.kind[l.kind]} · {l.priceTiyin != null ? listingPrice(l.priceTiyin, l.priceUnit, lang) : tc('onRequest')}</p>
