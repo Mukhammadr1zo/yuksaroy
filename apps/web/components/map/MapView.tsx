@@ -553,12 +553,17 @@ export function MapView({ initial, cards, compact = false, only }: { initial: Ma
             })}
           </div>
 
+          {/*
+            Ro'yxatning eng kam kengligi bor (11rem): ilgari min-w-0 edi va ikki tugma qatorni
+            egallaganda ro'yxat qisqarib, "Butun respublika" ikki qatorga bo'linib qirqilardi.
+            Endi joy yetmasa tugmalar keyingi qatorga o'tadi. nowrap: base-select matnni bo'ladi.
+          */}
           <div className="flex flex-wrap gap-2 px-4 pt-3">
             <select
               value={eff.regions.length === 1 ? eff.regions[0] : ''}
               onChange={(e) => apply({ ...materialize(s, eff), region: e.target.value, corridor: '' }, true)}
               aria-label={tf('region.all')}
-              className="min-w-0 flex-1 rounded-xl border border-field bg-white px-3 py-2.5 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25"
+              className="min-w-[11rem] flex-1 whitespace-nowrap rounded-xl border border-field bg-white px-3 py-2.5 text-sm outline-none focus:border-teal focus:ring-2 focus:ring-teal/25"
             >
               <option value="">{tf('region.all')}</option>
               {REGIONS.map((r) => <option key={r} value={r}>{tr(r)}</option>)}
