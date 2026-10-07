@@ -12,7 +12,7 @@ import { UPLOADS_DIR, UPLOAD_MAX_BYTES } from './modules/listings/presentation/u
 import { AppModule } from './app.module';
 import { env } from './common/env';
 import { parseTrustProxy, securityHeaders } from './common/security';
-import { isPrivateFilePath } from './common/upload-visibility';
+import { isPrivateFileRequest } from './common/upload-visibility';
 import { TokenService } from './modules/identity/application/token.service';
 import { optionalUserId } from './modules/identity/presentation/jwt.guard';
 
@@ -50,8 +50,7 @@ async function bootstrap() {
    */
   const tokens = app.get(TokenService, { strict: false });
   fastify.addHook('onRequest', (req: any, reply: any, done: (e?: Error) => void) => {
-    const url: string = req.url ?? '';
-    if (!url.startsWith('/v1/files/') || !isPrivateFilePath(url)) { done(); return; }
+    if (!isPrivateFileRequest(req.url ?? '')) { done(); return; }
     if (optionalUserId(req, tokens)) { done(); return; }
     void reply.code(401).send({ code: 'NO_TOKEN' });
   });

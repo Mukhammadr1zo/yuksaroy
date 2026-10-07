@@ -26,3 +26,21 @@ export function isPrivateFilePath(pathname: string): boolean {
   const name = clean.split('/').pop() ?? '';
   return name.startsWith(PRIVATE_PREFIX);
 }
+
+/**
+ * Kelgan so'rov maxfiy faylgami: statik yo'lning oldidagi qorovul shunga qaraydi (main.ts).
+ *
+ * Xom manzil emas, bir marta ochilgani (decode) tekshiriladi, chunki yo'naltirgich (find-my-way)
+ * ham yo'lni ochib, faylni ochilgan nom bo'yicha beradi. Ilgari xom manzil tekshirilardi va
+ * "%64_..." (d harfi), "d%5F...", "10%2Fd_..." yoki "/v1/%66iles/..." qorovuldan o'tib, maxfiy
+ * faylni sessiyasiz berardi (2026-10-07 da takrorlab ko'rildi). nginx ning /v1/ yo'li manzilni
+ * xom holda uzatadi, ya'ni bu tashqaridan ham ishlardi.
+ *
+ * Ochib bo'lmaydigan (buzuq %) manzil maxfiy deb olinadi: yo'naltirgich uni baribir 400 bilan rad
+ * etadi, shubhali so'rov esa hech qachon faylga yetmasin.
+ */
+export function isPrivateFileRequest(rawUrl: string): boolean {
+  let path: string;
+  try { path = decodeURIComponent(rawUrl.split('?')[0]!); } catch { return true; }
+  return path.startsWith('/v1/files/') && isPrivateFilePath(path);
+}

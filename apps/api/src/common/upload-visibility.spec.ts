@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PRIVATE_PREFIX, isPrivateFilePath } from './upload-visibility';
+import { PRIVATE_PREFIX, isPrivateFilePath, isPrivateFileRequest } from './upload-visibility';
 
 /*
  * Bu funksiya xavfsizlik qarorini qabul qiladi: statik yo'lning oldidagi qorovul faqat
@@ -35,5 +35,29 @@ describe('isPrivateFilePath', () => {
 
   it('belgi qiymati kutilganidek', () => {
     expect(PRIVATE_PREFIX).toBe('d_');
+  });
+});
+
+describe('isPrivateFileRequest', () => {
+  const H = '0123456789abcdef01234567.pdf';
+
+  it('oddiy maxfiy va ommaviy manzil', () => {
+    expect(isPrivateFileRequest(`/v1/files/2026/10/d_${H}`)).toBe(true);
+    expect(isPrivateFileRequest(`/v1/files/2026/10/d_${H}?x=1`)).toBe(true);
+    expect(isPrivateFileRequest(`/v1/files/2026/10/${H}`)).toBe(false);
+    // Fayl yo'li bo'lmasa qorovul aralashmaydi
+    expect(isPrivateFileRequest('/v1/listings/d_abc')).toBe(false);
+  });
+
+  it("shifrlangan manzil qorovuldan o'tolmaydi", () => {
+    // Bularning hammasini yo'naltirgich d_... ga ochib, faylni sessiyasiz berardi (2026-10-07)
+    expect(isPrivateFileRequest(`/v1/files/2026/10/%64_${H}`)).toBe(true);
+    expect(isPrivateFileRequest(`/v1/files/2026/10/d%5F${H}`)).toBe(true);
+    expect(isPrivateFileRequest(`/v1/files/2026/10%2Fd_${H}`)).toBe(true);
+    expect(isPrivateFileRequest(`/v1/%66iles/2026/10/d_${H}`)).toBe(true);
+  });
+
+  it('buzuq manzil shubhali deb olinadi', () => {
+    expect(isPrivateFileRequest(`/v1/files/2026/10/x%zz/../%64_${H}`)).toBe(true);
   });
 });
