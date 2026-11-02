@@ -9,6 +9,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { OrderAccess } from '../orders/application/order-access';
+import { SubscriptionService } from '../subscription/subscription.service';
 import { AD_SURFACES, ImpressionsService, type AdSurface, type ImpressionKind } from './impressions.service';
 
 export class ImpressionItemDto {
@@ -61,6 +62,7 @@ export class ImpressionsController {
     private readonly prisma: PrismaService,
     private readonly listings: ListingsUseCase,
     private readonly access: OrderAccess,
+    private readonly subs: SubscriptionService,
   ) {}
 
   @Post('events/impressions') @HttpCode(200)
@@ -92,10 +94,30 @@ export class ImpressionsController {
     return { ok: true };
   }
 
+  /**
+   * Egasi ko'rsatkichlari faqat obunachiga. Egasi qarori, 2026-11-02: ko'rsatkichlar
+   * hamma uchun ochiq bo'lishi rad etildi, ular obunaning bir qismi (pricing.json a2).
+   *
+   * Server tekshiradi, faqat ekran emas: aks holda manzilni qo'lda ochgan odam raqamlarni olardi.
+   * Qaysi ruxsat: telefon ham, vagon ham emas, HAR QANDAY faol obuna. Ko'rsatkichlar e'lon
+   * egasiga kerak, vagon tarifli odam ham egasi bo'lishi mumkin; tarifga alohida belgi yo'q.
+   * Javob telefon devori bilan bir shaklda (SUBSCRIPTION_REQUIRED, 402, narx): ekranda bitta
+   * qaror shoxi. Narx telefonni ochadigan eng arzon tarifniki, bu ham telefon devori bilan bir xil.
+   *
+   * Egalik tekshiruvidan KEYIN chaqiriladi: begona obyektni so'ragan odam devorga urilgan
+   * deb sanalmasin (u 403 oladi).
+   */
+  private async requireSubscriber(userId: string) {
+    if (await this.subs.active(userId)) return;
+    void this.impressions.paywallHit(userId, 'metrics').catch(() => {});
+    throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', kind: 'metrics', priceSom: await this.subs.priceFor('PHONE') }, 402);
+  }
+
   /** E'lon egasi: yuzalar bo'yicha ko'rsatishlar + so'rovlar (30 kun) + jami ko'rishlar. */
   @Get('listings/:id/analytics') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
   async listing(@CurrentUserId() userId: string, @Param('id') id: string) {
-    const l = await this.listings.owned(userId, id);
+    await this.listings.owned(userId, id);
+    await this.requireSubscriber(userId);
     const now = new Date();
     const [s, inquiries, views] = await Promise.all([
       this.impressions.series('listing', id, now),
@@ -110,6 +132,7 @@ export class ImpressionsController {
   @Get('terminals/:id/analytics') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
   async terminal(@CurrentUserId() userId: string, @Param('id') id: string) {
     await this.access.assertTerminalOf(userId, id);
+    await this.requireSubscriber(userId);
     const now = new Date(), gte = since30(now);
     const [s, inquiries, orders] = await Promise.all([
       this.impressions.series('terminal', id, now),

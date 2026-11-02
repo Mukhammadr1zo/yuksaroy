@@ -102,6 +102,11 @@ function setup(opts: {
       if (opts.recordFails) throw new Error('baza yiqildi');
       opts.calls?.push(...items);
     },
+    // Devor endi alohida jadvalga yoziladi (PaywallHit); dedup bazada, uni paywall-hit.spec.ts qotiradi
+    paywallHit: async (userId: string, kind: string) => {
+      if (opts.recordFails) throw new Error('baza yiqildi');
+      opts.calls?.push({ wall: kind, userId });
+    },
   } as unknown as ImpressionsService;
   return new ContactsController(prisma, config, audit, subs, impressions);
 }
@@ -301,7 +306,7 @@ describe('kunlik kvota auditdan', () => {
  * ko'rmaydi. Shu maxraj bo'lmasa narx, bepul oyna va devor joyi haqidagi uchala qaror
  * ham tusmol bilan qilinadi.
  *
- * Qator FAQAT shu yerda, serverda yoziladi: ommaviy mayoq yo'lida 'wall' yo'q va u
+ * Qator FAQAT shu yerda, serverda yoziladi (PaywallHit): ommaviy mayoq yo'lida devor yo'q va u
  * yerdan kelgan son bir so'rovda shishirilib qo'yilardi.
  */
 describe("telefon devorining sanog'i", () => {
@@ -309,7 +314,7 @@ describe("telefon devorining sanog'i", () => {
     const calls: Record<string, unknown>[] = [];
     const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, calls });
     expect(await refusal(() => c.reveal('u-wall-1', 'terminal', 't1'))).toMatchObject({ status: 402 });
-    expect(calls).toEqual([{ kind: 'wall', targetId: 'phone', surface: 'view' }]);
+    expect(calls).toEqual([{ wall: 'phone', userId: 'u-wall-1' }]);
   });
 
   it("raqam ochilganda devor sanog'i yozilmaydi", async () => {
@@ -325,18 +330,13 @@ describe("telefon devorining sanog'i", () => {
     expect(await refusal(() => c.reveal('u-wall-3', 'terminal', 't1'))).toMatchObject({ status: 402, code: 'SUBSCRIPTION_REQUIRED' });
   });
 
-  /*
-   * Son URINISHNI emas, ODAMNI sanaydi: bu yo'lda devordan oldin hech qanday chegara
-   * yo'q (kunlik chegara devordan keyin tekshiriladi), ya'ni sahifani besh marta
-   * yangilagan odam maxrajni besh barobar shishirib qo'yardi, obuna soni esa haqiqiy
-   * odamlar bo'yicha qolardi.
-   */
-  it("bir odam kuniga bir marta: qayta bosilganda qator qo'shilmaydi", async () => {
+  // Kuniga bir martalik dedup kontrollerda emas bazada (noyob kalit): paywall-hit.spec.ts
+  it("har 402 da yozuv so'raladi, takrorni baza to'sadi", async () => {
     const calls: Record<string, unknown>[] = [];
     const c = setup({ terminal: { id: 't1', phone: '+998901234567' }, subscriber: false, calls });
     await refusal(() => c.reveal('u-wall-4', 'terminal', 't1'));
     await refusal(() => c.reveal('u-wall-4', 'terminal', 't1'));
-    expect(calls).toHaveLength(1);
+    expect(calls).toEqual([{ wall: 'phone', userId: 'u-wall-4' }, { wall: 'phone', userId: 'u-wall-4' }]);
   });
 
   it("bitim raqamida devor ham, sanoq ham yo'q", async () => {
@@ -344,5 +344,26 @@ describe("telefon devorining sanog'i", () => {
     const c = setup({ request: { status: 'AWARDED', contactPhone: '+998901234567', awardedTo: 'w' }, subscriber: false, calls });
     expect((await c.reveal('w', 'request', 'CR-1')).phone).toBe('+998901234567');
     expect(calls).toHaveLength(0);
+  });
+});
+
+/**
+ * Buyurtmachi raqami (2026-11-02 egasi qarori): g'olib faqat buyurtmachi tanlash paytida tasdiqlagan
+ * (yoki so'rovga o'zi yozgan) raqamni ko'radi. Tasdiqlanmagan bo'lsa hisob raqami o'zi ochilmaydi.
+ */
+describe('tanlangan ijrochi buyurtmachi raqamini ko\'radi', () => {
+  it('raqam tasdiqlangan: g\'olibga bepul beriladi', async () => {
+    const c = setup({ request: { status: 'AWARDED', contactPhone: '+998931112233', awardedTo: 'w' }, subscriber: false });
+    await expect(c.reveal('w', 'request', 'CR-1')).resolves.toMatchObject({ phone: '+998931112233' });
+  });
+
+  it('buyurtmachi rad etgan (raqam yo\'q): phone null, 402 emas va hisob raqami berilmaydi', async () => {
+    const c = setup({ request: { status: 'AWARDED', contactPhone: null, awardedTo: 'w' }, subscriber: false });
+    await expect(c.reveal('w', 'request', 'CR-1')).resolves.toEqual({ phone: null });
+  });
+
+  it('tanlanmagan ijrochi tasdiqlangan raqamni ham olmaydi', async () => {
+    const c = setup({ request: { status: 'AWARDED', contactPhone: '+998931112233', awardedTo: 'w' }, subscriber: true });
+    await expect(c.reveal('boshqa', 'request', 'CR-1')).rejects.toMatchObject({ status: 404 });
   });
 });

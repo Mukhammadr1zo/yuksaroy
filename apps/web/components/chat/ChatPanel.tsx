@@ -14,7 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ChatCircleDotsIcon, PaperPlaneRightIcon, XIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
-import { api, hasSession, post } from '@/lib/api';
+import { ApiError, api, hasSession, post } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { AttachmentButton, AttachmentChips, MessageFiles, useAttachments, type Attachment } from './Attachments';
 
@@ -126,7 +126,7 @@ function ChatPanel({ target, next, onClose }: { target: ChatTarget; next: string
         setThreadId(inq.id);
       }
       setText(''); at.clear();
-    } catch { setErr(tc('failed')); } finally { setBusy(false); }
+    } catch (e) { setErr(e instanceof ApiError && e.body?.code === 'CHAT_LIMIT' ? t('err.CHAT_LIMIT') : tc('failed')); } finally { setBusy(false); }
   }
 
   // Birinchi xabarda matn shart: egasiga kontekstsiz fayl tushsa savol tug'diradi

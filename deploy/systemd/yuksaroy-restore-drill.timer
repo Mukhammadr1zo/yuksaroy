@@ -1,0 +1,13 @@
+[Unit]
+Description=YukSaroy tiklash mashqi har oyning 1-kuni
+Documentation=file:///opt/yuksaroy/docs/runbooks/zaxira.md
+
+[Timer]
+# Server soati UTC. Zaxira 21:30 da olinadi, mashq undan keyin
+OnCalendar=*-*-01 22:30:00
+# Server o'chiq bo'lsa, yoqilgach o'tkazib yuborilgan mashq bajariladi
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

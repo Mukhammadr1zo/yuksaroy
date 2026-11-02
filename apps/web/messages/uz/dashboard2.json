@@ -1,5 +1,11 @@
 {
   "dashboard2": {
+    "adminTerminal": {
+      "open": "Admin: obyekt sahifasi",
+      "registryOwner": "Reestrdagi egasi",
+      "contact": "Mas'ul shaxs",
+      "none": "yo'q"
+    },
     "nav": {
       "documents": "Hujjatlar"
     },

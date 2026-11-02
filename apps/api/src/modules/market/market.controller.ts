@@ -46,8 +46,12 @@ class CreateRequestDto {
 
 /** Bozorga ko'priklar: bo'sh terminal katalogi (/terminals), bo'sh tashuvchilar ro'yxati (/carriers), namuna e'lon sahifasi. Audit shu belgi bilan sanaydi. */
 const SOURCES = ['terminals', 'carriers', 'demo'] as const;
+/** Taklif manbai: Telegram Mini App yoki ulashilgan havola. Boshqasi (yoki bo'sh) = sayt. */
+const OFFER_SOURCES = ['tg', 'share'] as const;
 
 class OfferDto {
+  /** Taklif qayerdan keldi: 'tg' (Mini App), 'share' (ulashilgan havola); bo'sh = sayt. Faqat SOURCES bilan solishtiriladi */
+  @IsOptional() @IsString() from?: string;
   @IsOptional() @IsInt() @Min(0) @Max(1_000_000_000_000) priceTiyin?: number;
   @IsOptional() @IsString() @MaxLength(1000) message?: string;
   @IsOptional() @IsString() orgId?: string;
@@ -55,6 +59,12 @@ class OfferDto {
 
 class AwardDto {
   @IsString() offerId!: string;
+  /**
+   * Buyurtmachi tanlash paytida tasdiqlagan raqam (2026-11-02 egasi qarori). So'rovda yozilgan raqam
+   * bo'lmasa forma hisob raqami bilan to'ldirilgan holda so'raydi; rad etsa bu maydon yuborilmaydi.
+   * Hisob raqami O'ZI HECH QACHON ochilmaydi: ijrochi faqat shu yerda tasdiqlangan raqamni ko'radi.
+   */
+  @IsOptional() @IsString() @MaxLength(20) sharePhone?: string;
 }
 
 class RelistDto {
@@ -258,7 +268,7 @@ export class MarketController {
       }
       throw e;
     }
-    await this.audit.log({ actorId: userId, action: 'market.offer', entity: 'MarketOffer', entityId: o.id, meta: { requestId: id, priceTiyin: dto.priceTiyin ?? null } });
+    await this.audit.log({ actorId: userId, action: 'market.offer', entity: 'MarketOffer', entityId: o.id, meta: { requestId: id, priceTiyin: dto.priceTiyin ?? null, from: inList(OFFER_SOURCES, dto.from) ?? 'web' } });
     const [orgs, users] = await Promise.all([this.market.orgsOf([o]), this.market.namesOf([userId])]);
     const view = offerView(o, orgs, users);
     void this.market.notifyOffer(r, view.providerName).catch(() => {});
@@ -271,17 +281,26 @@ export class MarketController {
     if (!canMarketTransition(r.status, 'AWARDED')) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to: 'AWARDED' });
     const winner = r.offers.find((o) => o.id === dto.offerId);
     if (!winner || winner.status !== 'SENT') throw new ConflictException({ code: 'OFFER_NOT_SENT' });
+    // Yozuvdagi raqam bo'lsa u buyurtmachining o'zi yozgani: yana so'ralmaydi. Bo'lmasa faqat tasdiqlangan raqam saqlanadi
+    let sharePhone: string | null = null;
+    if (!r.contactPhone?.trim() && dto.sharePhone?.trim()) {
+      sharePhone = normalizePhone(dto.sharePhone);
+      if (!sharePhone) throw new BadRequestException({ code: 'VALIDATION', errors: { sharePhone: 'phone' } });
+    }
+    // Rad etiladiganlar o'qilgan ro'yxatdan: orada kelgan taklif ham rad bo'ladi, lekin unga xabar bormaydi (ponytail: kam uchraydi)
+    const declined = r.offers.filter((o) => o.status === 'SENT' && o.id !== dto.offerId).map((o) => o.providerUserId);
     // Har yozuv o'qilgan holatga shartlangan: ikki parallel tanlash (yoki tanlash + bekor) faqat bittasi o'tadi.
     // Avval so'rov qatori qulflanadi, keyin takliflar shart bilan (yodda saqlangan ro'yxat emas): orada kelgan taklif ham rad bo'ladi.
     await this.prisma.$transaction(async (tx) => {
-      const req = await tx.marketRequest.updateMany({ where: { id, status: r.status }, data: { status: 'AWARDED', awardedOfferId: dto.offerId } });
+      const req = await tx.marketRequest.updateMany({ where: { id, status: r.status }, data: { status: 'AWARDED', awardedOfferId: dto.offerId, ...(sharePhone ? { contactPhone: sharePhone } : {}) } });
       if (!req.count) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to: 'AWARDED' });
       const won = await tx.marketOffer.updateMany({ where: { id: dto.offerId, requestId: id, status: 'SENT' }, data: { status: 'AWARDED' } });
       if (!won.count) throw new ConflictException({ code: 'OFFER_NOT_SENT' });
       await tx.marketOffer.updateMany({ where: { requestId: id, status: 'SENT' }, data: { status: 'DECLINED' } });
     });
-    await this.audit.log({ actorId: userId, action: 'market.award', entity: 'MarketRequest', entityId: id, meta: { offerId: dto.offerId } });
+    await this.audit.log({ actorId: userId, action: 'market.award', entity: 'MarketRequest', entityId: id, meta: { offerId: dto.offerId, phoneShared: !!(sharePhone || r.contactPhone?.trim()) } });
     void this.market.notifyAward(r, winner.providerUserId).catch(() => {});
+    void this.market.notifyDeclined(r, declined, 'awarded').catch(() => {});
     return this.mineOne(id);
   }
 
@@ -346,9 +365,22 @@ export class MarketController {
     const r = await this.owned(userId, id);
     if (!canMarketTransition(r.status, to)) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to });
     // Yozuv o'qilgan holatga shartlangan: orada tanlash o'tib ketgan bo'lsa AWARDED -> CANCELLED bo'lib qolmaydi
-    const { count } = await this.prisma.marketRequest.updateMany({ where: { id, status: r.status }, data: { status: to } });
+    // Holat va ochiq takliflar bitta tranzaksiyada: orada jarayon o'lsa YOPILGAN so'rovda SENT taklif qolib ketmasin
+    const closing = to === 'CLOSED' || to === 'CANCELLED';
+    // Tranzaksiyadan oldin olinadi: keyin holat DECLINED bo'lib, kimga aytishni bilib bo'lmaydi
+    const open = r.offers.filter((o) => o.status === 'SENT').map((o) => o.providerUserId);
+    const count = await this.prisma.$transaction(async (tx) => {
+      const { count: c } = await tx.marketRequest.updateMany({ where: { id, status: r.status }, data: { status: to } });
+      if (c && closing) await tx.marketOffer.updateMany({ where: { requestId: id, status: 'SENT' }, data: { status: 'DECLINED' } });
+      return c;
+    });
     if (!count) throw new ConflictException({ code: 'MARKET_TRANSITION', from: r.status, to });
     await this.audit.log({ actorId: userId, action: `market.${to.toLowerCase()}`, entity: 'MarketRequest', entityId: id });
+    // Yopilgan yoki bekor qilingan so'rovda ochiq takliflar egalariga aytiladi. Bajarildi (DONE) da
+    // ochiq taklif qolmagan: tanlashda hammasi rad bo'lgan
+    if (closing) {
+      void this.market.notifyDeclined(r, open, 'closed').catch(() => {});
+    }
     return this.mineOne(id);
   }
 

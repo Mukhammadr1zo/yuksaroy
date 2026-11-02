@@ -11,6 +11,7 @@ import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { REMIND_ACTION, remindBlockedAt, remindDayStart } from '../subscription/remind-manual';
 import { mergeMonths, snapshot, subscriptionMonths, type RevenueRow } from './money';
+import { paywallFunnel } from './paywall';
 import { adSales, monthBack, monthKey, monthlyDeals, monthlyRevenue } from './revenue';
 
 const DAY = 86_400_000;
@@ -101,7 +102,34 @@ export class AdminRevenueController {
     if (format === 'csv') {
       return sendCsv({ reply: reply!, audit: this.audit, actorId: userId, resource: 'revenue-months', filters: {}, total: months.length, rows: async () => months, cols: MONTHS_CSV });
     }
-    return { now: snapshot(pool, now), months, deals };
+    return { now: snapshot(pool, now), months, deals, paywall: await this.paywall(now) };
+  }
+
+  /**
+   * Devor -> obuna (oxirgi 30 kun): devorga urilgan odamlar, ulardan nechtasi shundan keyin obuna
+   * buyurtmasini yaratgan va nechtasi to'lagan; telefon, vagon va ko'rsatkichlar alohida qator.
+   * Hisob qoidasi paywall.ts da. Manba PaywallHit (odam + kun + devor), davr bosh sahifa kartasi
+   * bilan bir xil, ya'ni ikki joydagi "devorda to'xtaganlar" soni mos keladi.
+   * ponytail: odamlar xotirada (take 50 000), buyurtmalar ham shu odamlar bo'yicha (take 50 000).
+   */
+  private async paywall(now: Date) {
+    const from = new Date(now.getTime() - 30 * DAY);
+    const hits = await this.prisma.paywallHit.groupBy({
+      by: ['userId', 'kind'],
+      where: { day: { gte: new Date(from.toISOString().slice(0, 10)) } },
+      _min: { day: true },
+      orderBy: [{ userId: 'asc' }, { kind: 'asc' }],
+      take: 50_000,
+    });
+    const ids = [...new Set(hits.map((h) => h.userId))];
+    const subs = ids.length
+      ? await this.prisma.subscription.findMany({
+          where: { userId: { in: ids }, createdAt: { gte: new Date(from.getTime() - DAY) } }, // -1 kun: birinchi urilgan kun Toshkent 00:00 dan boshlanadi
+          select: { userId: true, grants: true, createdAt: true, status: true, paidAt: true },
+          take: 50_000,
+        })
+      : [];
+    return paywallFunnel(hits.map((h) => ({ userId: h.userId, kind: h.kind, firstDay: h._min.day!.toISOString().slice(0, 10) })), subs);
   }
 
   /**

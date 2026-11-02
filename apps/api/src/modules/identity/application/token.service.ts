@@ -64,6 +64,15 @@ export class TokenService {
     if (s) await this.sessions.revoke(s.id);
   }
 
+  /**
+   * Parol almashdi, tiklandi yoki telefon o'zgardi: eski parol/raqamni bilgan begona sessiyasi tirik qolmasin
+   * (egasi qarori, 2026-11-02). Joriy qurilma (keepSid) qoladi, tiklashda esa hammasi yopilib yangi juft beriladi.
+   */
+  async revokeOthers(userId: string, keepSid: string | undefined) {
+    if (keepSid) await this.sessions.revokeOthersForUser(userId, keepSid);
+    else await this.sessions.revokeAllForUser(userId);
+  }
+
   verifyAccess(token: string): AccessClaims {
     return this.jwt.verify<AccessClaims>(token, { secret: env.JWT_SECRET });
   }

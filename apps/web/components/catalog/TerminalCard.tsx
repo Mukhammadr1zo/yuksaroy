@@ -6,6 +6,7 @@ import { CompareCheck } from '@/components/compare/CompareCheck';
 import { CardPhoto } from '@/components/catalog/CardPhoto';
 import { CardPending } from '@/components/catalog/CardPending';
 import { IntentLink } from '@/components/site/IntentLink';
+import { KycBadge } from '@/components/catalog/KycBadge';
 
 // Kartadagi tarif ustuni: shu tartibda, bor bo'lganlari
 const STACK = ['LOAD', 'UNLOAD', 'STORAGE'] as const;
@@ -88,6 +89,10 @@ export async function TerminalCard({ t }: { t: T }) {
           </div>
         )}
         {!t.claimed && !t.rail ? <p className="mt-1 text-[11px] text-amber-ink">{c('card.unverifiedPassport')}</p> : null}
+        {/* Egasi qarori (2026-11-02): tasdiqlanmagan tashkilot ham nashr qila oladi, lekin kartada aytiladi */}
+        {t.claimed && t.orgName && !t.isDemo ? (
+          <p className="mt-1">{t.orgVerified ? <KycBadge kyc="VERIFIED" /> : <span className="text-[11px] text-muted">{c('claim.orgUnverified')}</span>}</p>
+        ) : null}
       </div>
     </IntentLink>
     <CompareCheck cat="terminals" slug={t.slug} name={t.name} className="absolute bottom-3 right-3" />

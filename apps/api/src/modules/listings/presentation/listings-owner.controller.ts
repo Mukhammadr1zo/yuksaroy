@@ -3,6 +3,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { ImpressionsService } from '../../impressions/impressions.service';
+import { takeNewChat } from '../../chat/chat-limits';
 import { ListingAccess } from '../application/listing-access';
 import { ListingsUseCase } from '../application/listings.usecase';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
@@ -79,6 +80,7 @@ export class ListingsOwnerController {
   /** Narx so'rash: xabar e'lon egasiga; tashkilot ixtiyoriy. */
   @Post('listings/:id/inquiries')
   async inquire(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: InquiryDto) {
+    takeNewChat(userId);
     const i = await this.listings.inquire(userId, id, dto.message, dto.orgId ?? null, dto.attachments);
     await this.audit.log({ actorId: userId, action: 'inquiry.create', entity: 'Inquiry', entityId: i.id, meta: { listingId: id, orgId: dto.orgId ?? null } });
     return i;

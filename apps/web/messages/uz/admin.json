@@ -267,7 +267,8 @@
       "revealWindow": "Bepul oyna: {n} ta.",
       "wallPhone": "telefon devorida to'xtadi",
       "wallWagon": "vagon devorida to'xtadi",
-      "wallNote": "Devorda to'xtaganlar obunachiga aylanmasa narx yoki bepul oyna o'zgartiriladi.",
+      "wallMetrics": "ko'rsatkichlar devorida to'xtadi",
+      "wallNote": "Devorda to'xtaganlar odam bo'yicha sanaladi: bir odam kuniga bir marta, faqat kirgan odam (mehmon emas). Obunachiga aylanmasa narx yoki bepul oyna o'zgartiriladi.",
       "pendingContact": "Javobsiz murojaat",
       "pendingReports": "Yangi shikoyat",
       "pendingInquiries": "Javobsiz suhbat",
@@ -810,6 +811,16 @@
       "noPremium": "Bu davrda Premium to'lovi bo'lmagan.",
       "ads": "Reklama",
       "noAds": "Bu davrda to'langan reklama yo'q: reklama joylarini sotishga kuch bering yoki ularni olib tashlang.",
+      "paywall": {
+        "title": "Devordan obunagacha",
+        "lead": "Oxirgi 30 kunda to'lov devoriga urilgan odamlar: ularning nechtasi shundan keyin obuna buyurtmasini yaratgan va nechtasi to'lagan. Faqat kirgan odam sanaladi.",
+        "wall": "Devor",
+        "people": "Devorga urildi",
+        "ordered": "Buyurtma yaratdi",
+        "paid": "To'ladi",
+        "kind": { "phone": "Telefon", "wagon": "Vagon", "metrics": "Ko'rsatkichlar" },
+        "decision": "Urilganlar ko'p, buyurtma kam bo'lsa: narx yoki obuna sahifasi to'sqinlik qilyapti. Buyurtma bor, to'lov yo'q bo'lsa: to'lov izohi va tasdiq kutishini tekshiring."
+      },
       "deals": {
         "title": "Platformadagi bitimlar",
         "lead": "Bu bizning pulimiz emas va tushumga qo'shilmaydi: yuk, xizmat va shoshilinch so'rovlarda mijoz tanlagan taklif narxi, tanlangan oy bo'yicha. Narxsiz taklif bitim bo'lib sanaladi, hajmga kirmaydi.",

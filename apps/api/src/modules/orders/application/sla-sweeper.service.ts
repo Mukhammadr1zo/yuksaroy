@@ -1,5 +1,5 @@
+import { uzLocalDate } from '@yuksaroy/domain';
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
-import { queueStats, staleQueues } from '../../../common/admin-queues';
 import { closeStaleTasks } from '../../../common/admin-tasks';
 import { IdempotencyService } from '../../../common/idempotency.service';
 import { PrismaService } from '../../../common/prisma.service';
@@ -9,7 +9,7 @@ import { ORDER_REPOSITORY, type OrderRepository } from '../domain/ports';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { remindExpiring } from '../../subscription/expiry-reminder';
 import { expireListings, remindExpiringListings } from '../../listings/application/expire-listings';
-import { AdminNotify } from '../../organizations/application/admin-notify';
+import { sendDailyDigest } from './admin-digest';
 import { OrderActionsUseCase } from './order-actions.usecase';
 
 const TICK_MS = 30_000;
@@ -19,8 +19,6 @@ const DAY_MS = 86_400_000;
 const KEEP_SESSIONS_DAYS = 30;
 const KEEP_OTP_DAYS = 1;
 const KEEP_READ_NOTIFICATIONS_DAYS = 90;
-/** Navbatdagi ish shuncha kundan oshsa adminlarga eslatiladi. */
-const STALE_DAYS = 2;
 
 /**
  * Muddatlar: 10 daqiqalik band qilishlar bo'shatiladi, 30 daqiqada tasdiqlanmagan
@@ -39,7 +37,6 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
     private readonly actions: OrderActionsUseCase,
     private readonly prisma: PrismaService,
     private readonly idempotency: IdempotencyService,
-    private readonly adminNotify: AdminNotify,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -75,12 +72,28 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
         this.lastDaily = now.getTime();
         await this.daily(now);
       }
+      // Kunlik xulosa alohida: 09:00 (Toshkent) dan keyin, kuniga bir marta, belgi bazada (deploy qayta yubormaydi)
+      await this.digest(now);
     } catch (e) {
       this.log.error(`sweep xatosi: ${(e as Error).message}`);
     } finally {
       this.running = false;
     }
     return { holds, orders: expired };
+  }
+
+  /** Tikda arzon: bugun hal bo'lgan bo'lsa xotiradagi kun belgisi bazaga borishni ham to'xtatadi. */
+  private digestDay = '';
+  private async digest(now: Date) {
+    const day = uzLocalDate(now);
+    if (this.digestDay === day) return;
+    try {
+      const r = await sendDailyDigest(this.prisma, this.notifications, now);
+      if (r !== 'early') this.digestDay = day;
+      if (r === 'sent') this.log.log('kunlik xulosa yuborildi');
+    } catch (e) {
+      this.log.error(`kunlik xulosa xatosi: ${(e as Error).message}`);
+    }
   }
 
   /**
@@ -120,16 +133,6 @@ export class SlaSweeperService implements OnModuleInit, OnModuleDestroy {
       // Muddati tugashiga uch kun qolgan e'lon egasiga eslatma; takrorlanishni e'lon qatoridagi belgi to'sadi
       const listingReminded = await remindExpiringListings(this.prisma, this.notifications, now).catch(() => 0);
       if (listingReminded) this.log.log(`e'lon eslatmasi: ${listingReminded}`);
-      // Navbatda unutilib qolgan ish: ikki kundan oshsa adminlarga bir marta eslatiladi
-      // catch argumentni ham qamrasin: queueStats yiqilsa u .catch dan tashqarida qolib,
-      // butun kunlik siklni uzib yuborardi
-      await queueStats(this.prisma, true)
-        .then((st) => {
-          const stale = staleQueues(st, now, STALE_DAYS);
-          r.stale = stale.length;
-          return this.adminNotify.stale(stale);
-        })
-        .catch(() => {});
       const total = r.keys + r.sessions + r.codes + r.notes;
       if (total) {
         this.log.log(`kunlik tozalash: kalit ${r.keys}, sessiya ${r.sessions}, kod ${r.codes}, bildirishnoma ${r.notes}`);

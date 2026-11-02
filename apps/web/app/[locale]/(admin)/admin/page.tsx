@@ -34,7 +34,7 @@ type Home = {
   series: { days: string[]; visits: number[]; reveals: number[]; wagon: number[]; orders: number[] } | null;
   alerts: { code: AlertCode; tone: 'warn' | 'bad'; n?: number; of?: number; ms?: number }[];
   commission: { thisMonth: number; prevMonth: number; threshold: number } | null;
-  reveals: { people: number; reveals: number; subscribers: number; freeReveals: number; freeTotal: number; walls: { phone: number; wagon: number } } | null;
+  reveals: { people: number; reveals: number; subscribers: number; freeReveals: number; freeTotal: number; walls: { phone: number; wagon: number; metrics: number } } | null;
   /** Yiqilgan bloklar nomi: bo'sh bo'lsa hammasi joyida */
   failed: string[];
 };
@@ -219,9 +219,9 @@ export default function AdminHomePage() {
   const over = !!c && peak > c.threshold;
   const near = !!c && peak >= c.threshold * 0.8;
 
-  // To'lov devorida to'xtagan odamlar, ikki devor jami: karta shu son bor bo'lganda ham
+  // To'lov devorida to'xtagan odamlar, uch devor jami: karta shu son bor bo'lganda ham
   // chiziladi, bepul oyna o'chiq bo'lsa ham - maxraj narx qarori uchun aynan shu paytda kerak
-  const wall = home?.reveals ? home.reveals.walls.phone + home.reveals.walls.wagon : 0;
+  const wall = home?.reveals ? home.reveals.walls.phone + home.reveals.walls.wagon + home.reveals.walls.metrics : 0;
 
   const pendAge = home?.money?.pendingPay.oldestAt ? ageOf(home.money.pendingPay.oldestAt) : null;
   const link = 'text-xs font-semibold text-teal-ink hover:underline';
@@ -372,7 +372,7 @@ export default function AdminHomePage() {
             <dl className="mt-1 grid grid-cols-2 gap-2">
               {([['revealPeople', home.reveals.people], ['revealSubscribers', home.reveals.subscribers],
                  ['revealCount', home.reveals.reveals], ['revealFree', home.reveals.freeReveals],
-                 ['wallPhone', home.reveals.walls.phone], ['wallWagon', home.reveals.walls.wagon]] as const).map(([k, v]) => (
+                 ['wallPhone', home.reveals.walls.phone], ['wallWagon', home.reveals.walls.wagon], ['wallMetrics', home.reveals.walls.metrics]] as const).map(([k, v]) => (
                 <div key={k} className="min-w-0">
                   <dd className="font-display text-xl font-bold tabular-nums text-navy">{num(v, locale)}</dd>
                   <dt className="text-xs text-muted">{th(k)}</dt>

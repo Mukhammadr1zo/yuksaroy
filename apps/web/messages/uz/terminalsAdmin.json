@@ -106,6 +106,7 @@
       "currentStatus": "Holat",
       "openPublic": "Ochiq sahifa",
       "err": {
+        "TERMINAL_HIDDEN_BY_ADMIN": "Bu obyektni admin yashirgan. Qayta ochish uchun biz bilan bog'laning.",
         "STATION_REQUIRED": "Stansiyani tanlang.",
         "STATION_NOT_FOUND": "Stansiya topilmadi.",
         "NAME_REQUIRED": "Nomini kiriting (kamida 2 belgi).",

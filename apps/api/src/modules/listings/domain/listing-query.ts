@@ -1,5 +1,5 @@
 // E'lon domeni: yozuv shakli va sof yordamchilar (slug, koridor, qaror qatori). Framework va Prisma yo'q.
-import { LISTING_OWNER_LABELS, REGIONS, cheapestByUnit, corridorRegions, distanceKm, type Condition, type DealKind, type KycStatus, type ListingKind, type ListingStatus, type PriceUnit, type RegionCode } from '@yuksaroy/domain';
+import { LISTING_OWNER_LABELS, normalizePhone, REGIONS, cheapestByUnit, corridorRegions, distanceKm, type Condition, type DealKind, type KycStatus, type ListingKind, type ListingStatus, type PriceUnit, type RegionCode } from '@yuksaroy/domain';
 
 export interface Route { from: RegionCode; to: RegionCode }
 
@@ -25,10 +25,20 @@ export interface ListingRecord {
   } | null;
 }
 
+/**
+ * "Telefon tasdiqlangan" faqat e'londa ko'rsatilgan raqam egasining OTP bilan tasdiqlangan hisob raqamiga teng
+ * bo'lsa (egasi qarori, 2026-11-02). Ilgari hisobda raqam borligining o'zi belgi berardi, e'londagi raqam esa
+ * boshqa, tasdiqlanmagan bo'lishi mumkin edi.
+ */
+export function phoneIsVerified(listingPhone: string | null | undefined, accountPhone: string | null | undefined): boolean {
+  if (!listingPhone || !accountPhone) return false;
+  return (normalizePhone(listingPhone) ?? listingPhone.trim()) === (normalizePhone(accountPhone) ?? accountPhone.trim());
+}
+
 /** Ochiq egasi bloki: tashkilot (KYC) yoki yakka shaxs (telefon OTP orqali biriktirilgan = tasdiqlangan). */
-export function listingOwner(l: Pick<ListingRecord, 'org' | 'ownerUser'>) {
+export function listingOwner(l: Pick<ListingRecord, 'org' | 'ownerUser'> & { contactPhone?: string | null }) {
   if (l.org) return { type: 'org' as const, name: l.org.name, slug: l.org.slug, kyc: l.org.kycStatus };
-  return { type: 'person' as const, name: l.ownerUser?.fullName || LISTING_OWNER_LABELS.uz.person, phoneVerified: l.ownerUser?.phone != null };
+  return { type: 'person' as const, name: l.ownerUser?.fullName || LISTING_OWNER_LABELS.uz.person, phoneVerified: phoneIsVerified(l.contactPhone, l.ownerUser?.phone) };
 }
 
 /** `A>B` -> koridor viloyatlari (BFS yo'li). Noto'g'ri kod = filtr yo'q. */

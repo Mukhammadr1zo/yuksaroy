@@ -4,7 +4,7 @@ import { IsString, MaxLength } from 'class-validator';
 import { Prisma } from '@prisma/client';
 import { normalizeWagonNo } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
-import { DailyBucket, IpBucket } from '../../common/ip-bucket';
+import { IpBucket } from '../../common/ip-bucket';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
@@ -34,14 +34,6 @@ type Stored = { current: WagonEvent | null; fetchedAt: string };
 const searchBucket = new IpBucket(30, 3_600_000);
 // Keshdan javob beradigan so'rov ham baza ishi va audit qatori: bo'ron uchun keng chegara
 const floodBucket = new IpBucket(120, 3_600_000);
-/**
- * Devor sanog'i: bir odam bir kunda BITTA qator. Telefon devoridagi bilan bitta qoida
- * (contacts.controller.ts), aks holda ikki devor yonma-yon qo'yilganda ularning sonlari
- * boshqa-boshqa narsani o'lchab turardi: bu yerda soatiga 120 ta urinish, u yerda esa
- * cheksiz. Son esa ODAM soni bo'lishi kerak: obuna soni ham odam bo'yicha.
- */
-const wallDaily = new DailyBucket();
-
 /**
  * Vagon qidiruvi. Egasining qoidasi: birinchi qidiruv(lar) hammaga bepul, keyin obuna.
  * Bir xil vagon 6 soat ichida qayta so'ralsa natija bazadan olinadi (upstream tinch turadi),
@@ -135,13 +127,12 @@ export class WagonController {
     const own = !!ownRow;
     if (!own && !canSearch(q.subscriber, q.freeUsed, q.freeTotal)) {
       /*
-       * Devorning MAXRAJI: shu yerda to'xtab ketgan ODAM sanaladi, kuniga bir marta.
-       * Telefon devori bilan bitta jadvalda (kind='wall'), ya'ni ikki devorni yonma-yon
-       * qo'yib qaysi biri odamni ko'proq to'xtatayotgani ko'rinadi.
+       * Devorning MAXRAJI: shu yerda to'xtab ketgan ODAM sanaladi, kuniga bir marta
+       * (PaywallHit noyob kaliti: odam+kun+devor bazada). Telefon va ko'rsatkichlar devori bilan bitta jadval.
        *
        * Javob kutilmaydi va xato yutiladi: u kvota emas, o'lchov.
        */
-      if (wallDaily.take(userId, 1).ok) void this.impressions.record([{ kind: 'wall', targetId: 'wagon', surface: 'view' }]).catch(() => {});
+      void this.impressions.paywallHit(userId, 'wagon').catch(() => {});
       throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', ...q }, 402);
     }
 

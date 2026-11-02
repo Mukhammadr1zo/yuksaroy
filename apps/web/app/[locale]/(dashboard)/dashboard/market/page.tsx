@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { regionRouteKm, type KycStatus } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
-import { api, post } from '@/lib/api';
+import { ApiError, api, post } from '@/lib/api';
 import { km, som, somPerKm, uzDateTime, uzToday } from '@/lib/format';
 import type { MarketOffer, MarketRequest, Paged, ServiceProfileCard } from '@/lib/types-market';
 import { Pager } from '@/components/admin/kit';
@@ -71,6 +71,10 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   const [copied, setCopied] = useState<string | null>(null);
   // Qayta e'lon qilish uchun yozilayotgan sana: so'rov id si bo'yicha, bir vaqtda bittasi ochiq
   const [relistDate, setRelistDate] = useState<Record<string, string>>({});
+  // Tanlashdan oldingi savol (2026-11-02): so'rovda raqam yozilmagan bo'lsa buyurtmachidan tanlangan ijrochiga
+  // raqam ulashish so'raladi. Maydon hisob raqami bilan to'ldiriladi, lekin u o'zi HECH QACHON ochilmaydi
+  const [ask, setAsk] = useState<{ offerId: string; phone: string } | null>(null);
+  const [accountPhone, setAccountPhone] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -79,17 +83,26 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setOpen(focusId); if (focusId) document.getElementById(`mr-${focusId}`)?.scrollIntoView({ block: 'center' }); }, [focusId, items?.length]);
 
-  async function act(id: string, what: 'award' | 'close' | 'cancel' | 'done', offerId?: string) {
+  async function act(id: string, what: 'award' | 'close' | 'cancel' | 'done', offerId?: string, sharePhone?: string) {
     if (what === 'close' && !window.confirm(t('confirmClose'))) return;
     if (what === 'cancel' && !window.confirm(t('confirmCancel'))) return;
     // Bajarildi yakuniy: ortga qaytarib bo'lmaydi va ijrochining hisobiga yoziladi
     if (what === 'done' && !window.confirm(t('confirmDone'))) return;
-    // Tanlash qaytarib bo'lmaydigan qadam: qolgan takliflar yopiladi va raqamlar ochiladi
-    if (what === 'award' && !window.confirm(t('confirmAward'))) return;
+    // Tanlash qaytarib bo'lmaydigan qadam: qolgan takliflar yopiladi. Raqam so'ralgan bo'lsa (ask) panelning o'zi tasdiq
+    if (what === 'award' && !ask && !window.confirm(t('confirmAward'))) return;
     setBusy(offerId ?? `${id}:${what}`); setErr(null);
     try {
-      replace(id, await post<MarketRequest>(`/market/requests/${id}/${what}`, offerId ? { offerId } : {}));
-    } catch { setErr(tc('failed')); } finally { setBusy(null); }
+      replace(id, await post<MarketRequest>(`/market/requests/${id}/${what}`, offerId ? { offerId, ...(sharePhone ? { sharePhone } : {}) } : {}));
+      setAsk(null);
+    } catch (e) { setErr(e instanceof ApiError && e.body?.errors?.sharePhone ? t('awardPhoneBad') : tc('failed')); } finally { setBusy(null); }
+  }
+  /** Raqam yozilmagan so'rovda tanlash oldidan savol ochiladi, yozilgan bo'lsa oddiy tasdiq (u raqam allaqachon buyurtmachining o'zidan). */
+  function startAward(r: MarketRequest, offerId: string) {
+    if (r.contactPhone?.trim()) { void act(r.id, 'award', offerId); return; }
+    setAsk({ offerId, phone: accountPhone ?? '' });
+    if (accountPhone === null) {
+      api<{ phone: string | null }>('/auth/me').then((m) => { setAccountPhone(m.phone ?? ''); setAsk((a) => (a && !a.phone ? { ...a, phone: m.phone ?? '' } : a)); }).catch(() => setAccountPhone(''));
+    }
   }
   /** Sanasi o'tgan yukni yangi sana bilan doskaga qaytarish: raqam va takliflar o'sha joyida qoladi. */
   async function relist(id: string) {
@@ -157,6 +170,7 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                     </div>
                   ) : null}
                   {r.status === 'AWARDED' ? <div className="mt-3"><Notice tone="ok">{t('awardedNote')}</Notice></div> : null}
+                  {(r.status === 'AWARDED' || r.status === 'DONE') && !r.contactPhone?.trim() && !r.isDemo ? <div className="mt-3"><Notice tone="warn">{t('noPhoneShared')}</Notice></div> : null}
                   {r.status === 'DONE' ? <div className="mt-3"><Notice tone="ok">{t('doneNote')}</Notice></div> : null}
                   {r.statusUrl ? (
                     <CopyLink url={r.statusUrl} className="mt-3" />
@@ -182,7 +196,21 @@ function Requests({ focusId, t, tc }: { focusId: string | null; t: T; tc: T }) {
                           {o.priceTiyin != null && routeKm != null ? ` · ${somPerKm(o.priceTiyin, routeKm, locale)}` : ''}
                         </p>
                         {o.message ? <p className="mt-1 whitespace-pre-line text-sm text-ink/85 wrap-anywhere">{o.message}</p> : null}
-                        {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => act(r.id, 'award', o.id)} disabled={busy !== null} className={`${BTN_NAVY} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}
+                        {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => startAward(r, o.id)} disabled={busy !== null} className={`${BTN_NAVY} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}
+                        {ask?.offerId === o.id ? (
+                          <div className="mt-3 rounded-card border border-teal/40 bg-sand p-3">
+                            <p className="text-sm font-semibold">{t('awardAsk')}</p>
+                            <p className="mt-1 text-xs text-muted">{t('awardAskHint')}</p>
+                            <label htmlFor={`ap-${o.id}`} className="mt-2 block text-xs font-semibold text-muted">{t('awardPhone')}</label>
+                            <input id={`ap-${o.id}`} type="tel" inputMode="tel" autoComplete="tel" maxLength={20} value={ask.phone}
+                              onChange={(e) => setAsk({ offerId: o.id, phone: e.target.value })} className={`${INPUT} mt-1 font-mono`} />
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button type="button" disabled={busy !== null || !ask.phone.trim()} onClick={() => act(r.id, 'award', o.id, ask.phone.trim())} className={BTN_NAVY}>{t('awardShare')}</button>
+                              <button type="button" disabled={busy !== null} onClick={() => act(r.id, 'award', o.id)} className={BTN_GHOST}>{t('awardNoShare')}</button>
+                              <button type="button" disabled={busy !== null} onClick={() => setAsk(null)} className={BTN_GHOST}>{t('awardBack')}</button>
+                            </div>
+                          </div>
+                        ) : null}
                         {/* Tanlangandan keyin halqa yopiladi: g'olibning raqami shu yerda ochiladi.
                             Ish bajarilgan deb belgilangach ham qoladi: hisob-kitob keyinroq bo'ladi */}
                         {(r.status === 'AWARDED' || r.status === 'DONE') && o.status === 'AWARDED' && !r.isDemo ? (

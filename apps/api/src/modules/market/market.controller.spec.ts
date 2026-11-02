@@ -74,7 +74,7 @@ function db(reqs: Req[], offers: Off[], profiles: Prof[] = []) {
 }
 
 const audit = { log: async () => {} } as unknown as AuditService;
-const market = { orgsOf: async () => new Map(), namesOf: async () => new Map(), memberOrgId: async () => null, activeServiceTypes: async () => [], notifyAward: async () => {}, notifyOffer: async () => {}, notifyNew: async () => {}, postChannel: async () => {} } as unknown as MarketService;
+const market = { orgsOf: async () => new Map(), namesOf: async () => new Map(), memberOrgId: async () => null, activeServiceTypes: async () => [], notifyAward: async () => {}, notifyDeclined: async () => {}, notifyOffer: async () => {}, notifyNew: async () => {}, postChannel: async () => {} } as unknown as MarketService;
 // Token = sessiya nomi: "live" tirik, "revoked" bekor qilingan, boshqasi noto'g'ri imzo
 const tokens = { verifyAccess: (t: string) => { if (t === 'live' || t === 'revoked') return { sub: 'owner', sid: t }; throw new Error('TOKEN_INVALID'); } } as unknown as TokenService;
 const users = { findById: async (id: string) => ({ id, isActive: true }) } as unknown as UserRepository;
@@ -285,5 +285,97 @@ describe("so'rov manbai auditga yoziladi", () => {
 
   it('begona qiymat yozilmaydi', async () => {
     expect(await run('reklama')).not.toHaveProperty('from');
+  });
+});
+
+/**
+ * Tanlash lahzasi (2026-11-02): tanlanmaganlarga rad javobi, yopishda ochiq takliflar rad bo'ladi va
+ * egalariga aytiladi, buyurtmachi raqamini faqat o'zi tasdiqlasa saqlanadi.
+ */
+describe('tanlash va yopish xabarlari', () => {
+  type Call = { kind: 'award' | 'declined'; to: string[]; why?: string };
+  const spyMarket = (calls: Call[]) => ({
+    ...market,
+    notifyAward: async (_r: unknown, id: string) => { calls.push({ kind: 'award', to: [id] }); },
+    notifyDeclined: async (_r: unknown, ids: string[], why: string) => { calls.push({ kind: 'declined', to: ids, why }); },
+  }) as unknown as MarketService;
+  const make = (reqs: Req[], offers: Off[], calls: Call[], a: AuditService = audit) => new MarketController(prisma(db(reqs, offers)), a, spyMarket(calls), tokens, users, sessions);
+  // Soxta findUnique takliflarni to'liq qaytaradi, kontroller esa faqat id/status/providerUserId ni o'qiydi
+
+  it("tanlanmagan ijrochilarga rad javobi, g'olibga alohida xabar", async () => {
+    const calls: Call[] = [];
+    await make([request()], [offer('o1', 'p1'), offer('o2', 'p2'), offer('o3', 'p3')], calls).award('owner', 'r1', { offerId: 'o2' });
+    await Promise.resolve();
+    expect(calls).toContainEqual({ kind: 'award', to: ['p2'] });
+    expect(calls).toContainEqual({ kind: 'declined', to: ['p1', 'p3'], why: 'awarded' });
+  });
+
+  it("yopishda ochiq takliflar DECLINED bo'ladi va egalariga \"yopildi\" deyiladi", async () => {
+    const calls: Call[] = [];
+    const offers = [offer('o1', 'p1'), offer('o2', 'p2')];
+    await make([request()], offers, calls).close('owner', 'r1');
+    expect(offers.map((o) => o.status)).toEqual(['DECLINED', 'DECLINED']);
+    expect(calls).toEqual([{ kind: 'declined', to: ['p1', 'p2'], why: 'closed' }]);
+  });
+
+  it('bekor qilishda ham shunday', async () => {
+    const calls: Call[] = [];
+    const offers = [offer('o1', 'p1')];
+    await make([request()], offers, calls).cancel('owner', 'r1');
+    expect(offers[0]!.status).toBe('DECLINED');
+    expect(calls).toEqual([{ kind: 'declined', to: ['p1'], why: 'closed' }]);
+  });
+
+  it("bajarildi (DONE) da hech kimga xabar yo'q va g'olib taklifi o'zgarmaydi", async () => {
+    const calls: Call[] = [];
+    const offers = [offer('o1', 'p1', 'AWARDED')];
+    await make([request({ status: 'AWARDED', awardedOfferId: 'o1' })], offers, calls).done('owner', 'r1');
+    expect(offers[0]!.status).toBe('AWARDED');
+    expect(calls).toEqual([]);
+  });
+
+  it("so'rovda raqam yo'q: buyurtmachi tasdiqlagan raqam saqlanadi (normallashgan) va auditga phoneShared", async () => {
+    const reqs = [request({ contactPhone: null })];
+    const metas: Any[] = [];
+    const a = { log: async (e: Any) => { metas.push(e.meta); } } as unknown as AuditService;
+    await make(reqs, [offer('o1', 'p1')], [], a).award('owner', 'r1', { offerId: 'o1', sharePhone: '90 123 45 67' });
+    expect(reqs[0]!.contactPhone).toBe('+998901234567');
+    expect(metas[0]).toMatchObject({ phoneShared: true });
+  });
+
+  it("buyurtmachi rad etsa hech narsa saqlanmaydi: hisob raqami o'zi ochilmaydi", async () => {
+    const reqs = [request({ contactPhone: null })];
+    const metas: Any[] = [];
+    const a = { log: async (e: Any) => { metas.push(e.meta); } } as unknown as AuditService;
+    await make(reqs, [offer('o1', 'p1')], [], a).award('owner', 'r1', { offerId: 'o1' });
+    await make([request({ contactPhone: null })], [offer('o1', 'p1')], [], a).award('owner', 'r1', { offerId: 'o1', sharePhone: '   ' });
+    expect(reqs[0]!.contactPhone).toBeNull();
+    expect(metas.map((m) => m.phoneShared)).toEqual([false, false]);
+  });
+
+  it("yozilgan raqam bo'lsa ustidan yozilmaydi", async () => {
+    const reqs = [request()];
+    await make(reqs, [offer('o1', 'p1')], []).award('owner', 'r1', { offerId: 'o1', sharePhone: '+998931112233' });
+    expect(reqs[0]!.contactPhone).toBe('+998901234567');
+  });
+
+  it("noto'g'ri raqam 400 bilan qaytadi va tanlash o'tmaydi", async () => {
+    const reqs = [request({ contactPhone: null })];
+    await expect(make(reqs, [offer('o1', 'p1')], []).award('owner', 'r1', { offerId: 'o1', sharePhone: '123' })).rejects.toMatchObject({ status: 400 });
+    expect(reqs[0]!.status).toBe('OPEN');
+  });
+});
+
+describe('taklif manbai auditga yoziladi', () => {
+  const run = async (from?: string) => {
+    const metas: Any[] = [];
+    const a = { log: async (e: Any) => { metas.push(e.meta); } } as unknown as AuditService;
+    await new MarketController(prisma(db([request()], [])), a, market, tokens, users, sessions).offer(`p-${from}`, 'r1', { from });
+    return metas[0];
+  };
+  it.each(['tg', 'share'])('%s yoziladi', async (from) => { expect(await run(from)).toMatchObject({ from }); });
+  it("bo'sh yoki begona qiymat = web", async () => {
+    expect(await run()).toMatchObject({ from: 'web' });
+    expect(await run('reklama')).toMatchObject({ from: 'web' });
   });
 });

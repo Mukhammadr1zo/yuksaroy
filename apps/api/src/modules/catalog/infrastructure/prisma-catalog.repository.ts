@@ -18,7 +18,7 @@ const apos = (s: string) => s.replace(/[ʻ’`\u2018\u02BC]/g, "'");
 const currentTariff = (now: Date): Prisma.TariffWhereInput => ({ validFrom: { lte: now }, OR: [{ validTo: null }, { validTo: { gt: now } }] });
 const terminalInclude = (now: Date) => ({
   station: { select: stationSelect },
-  org: { select: { name: true } },
+  org: { select: { name: true, kycStatus: true } },
   services: { orderBy: { serviceCode: 'asc' as const } },
   tariffs: { where: currentTariff(now), orderBy: [{ serviceCode: 'asc' as const }, { cargoGroupCode: 'asc' as const }] },
 });
@@ -31,7 +31,7 @@ const toTariff = (t: Prisma.TariffGetPayload<object>): TariffRecord => ({
   minTiyin: t.minTiyin === null ? null : Number(t.minTiyin), note: t.note, createdAt: t.createdAt,
 });
 const toTerminal = (t: TerminalRow): TerminalRecord => ({
-  id: t.id, orgId: t.orgId, orgName: t.org?.name ?? null, stationId: t.stationId, station: t.station, regionCode: t.regionCode,
+  id: t.id, orgId: t.orgId, orgName: t.org?.name ?? null, orgKyc: t.org?.kycStatus ?? null, stationId: t.stationId, station: t.station, regionCode: t.regionCode,
   kind: t.kind, slug: t.slug, name: t.name, description: t.description, address: t.address, phone: t.phone, lat: t.lat, lng: t.lng,
   is24h: t.is24h, hours: (t.hours as WeekHours | null) ?? null, passport: (t.passport as Record<string, unknown> | null) ?? null,
   photos: t.photos, status: t.status, claimedAt: t.claimedAt, isDemo: t.isDemo, ratingAvg: t.ratingAvg, ratingCount: t.ratingCount,

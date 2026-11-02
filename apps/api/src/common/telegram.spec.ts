@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SearchLang } from '@yuksaroy/domain';
-import { TG_MAX, clip, notifyTelegram, notifyText, sendTelegram } from './telegram';
+import { TG_MAX, clip, notifyTelegram, notifyText, personLabel, sendTelegram } from './telegram';
+import { runtime } from './runtime';
 import type { PrismaService } from './prisma.service';
 
 describe('notifyText', () => {
@@ -111,5 +112,61 @@ describe('notifyTelegram tugmasi', () => {
     const prisma = { telegramLink: { findMany: async () => [{ chatId: 779003n, user: { locale: 'en' } }] } } as unknown as PrismaService;
     await notifyTelegram(prisma, { userIds: ['a'] }, 'urgentNew', { no: 'UR-2', what: 'x', where: 'y', message: 'z', url: 'https://x' }, { text: 'bitta' });
     expect(sent[0].reply_markup).toEqual({ text: 'bitta' });
+  });
+});
+
+/**
+ * Muhim xabarlar o'z chelagida (2026-11-02): chat oqimi buyurtma xabarini yutib yubormasin,
+ * chegaradan oshgani esa tur bo'yicha sanalsin (Tizim sahifasi shuni ko'rsatadi).
+ */
+describe('muhim xabarlar alohida chelakda', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const ok = () => vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200 })));
+
+  it("chat xabarlari 5 tadan keyin to'xtaydi, lekin orderNew shu chatga baribir boradi", async () => {
+    ok();
+    for (let i = 0; i < 5; i++) await sendTelegram(['779001'], 'chat', undefined, 'inquiryMessage');
+    expect(await sendTelegram(['779001'], 'chat', undefined, 'inquiryMessage')).toBe(0);
+    expect(await sendTelegram(['779001'], 'buyurtma', undefined, 'orderNew')).toBe(1);
+    expect(await sendTelegram(['779001'], 'navbat', undefined, 'adminQueue')).toBe(1);
+    expect(await sendTelegram(['779001'], 'ijrochi yoq', undefined, 'adminNoProvider')).toBe(1);
+  });
+
+  it("muhim xabarning ham chegarasi bor, lekin 5 emas", async () => {
+    ok();
+    let sent = 0;
+    for (let i = 0; i < 25; i++) sent += await sendTelegram(['779002'], 'x', undefined, 'orderNew');
+    expect(sent).toBe(20);
+  });
+
+  it("chegaradan oshgan xabar tur bo'yicha sanaladi, turi yo'q bo'lsa other", async () => {
+    ok();
+    const m = runtime.telegram.skippedByKind;
+    const chat0 = m.inquiryMessage ?? 0, other0 = m.other ?? 0;
+    for (let i = 0; i < 7; i++) await sendTelegram(['779103'], 'x', undefined, 'inquiryMessage');
+    expect(m.inquiryMessage).toBe(chat0 + 2);
+    for (let i = 0; i < 6; i++) await sendTelegram(['779104'], 'x');
+    expect(m.other).toBe(other0 + 1);
+  });
+});
+
+describe('ismsiz odam "Mijoz" deb ataladi', () => {
+  it('ism bo\'lsa ism, bo\'lmasa uch tilda Mijoz', () => {
+    expect(personLabel('Ali', 'uz')).toBe('Ali');
+    expect(personLabel(null, 'uz')).toBe('Mijoz');
+    expect(personLabel('  ', 'ru')).toBe('Клиент');
+    expect(personLabel(undefined, 'en')).toBe('Client');
+  });
+});
+
+describe('tanlash shablonlari', () => {
+  it('marketDeclined va marketClosed uch tilda, havola oxirida', () => {
+    for (const l of ['uz', 'ru', 'en']) {
+      for (const k of ['marketDeclined', 'marketClosed'] as const) {
+        const t = notifyText(k, l, { no: 'CR-1', title: 'Sement', url: 'https://x/cargo/CR-1' });
+        expect(t).toContain('CR-1');
+        expect(t.endsWith('https://x/cargo/CR-1')).toBe(true);
+      }
+    }
   });
 });

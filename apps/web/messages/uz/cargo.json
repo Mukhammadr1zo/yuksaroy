@@ -55,7 +55,13 @@
       "volume": "Hajm",
       "trucks": "Mashinalar soni",
       "payment": "To'lov sharti",
-      "distance": "Masofa (taxminan)"
+      "distance": "Masofa (taxminan)",
+      "chosenTitle": "Sizni tanlashdi",
+      "chosenLead": "Buyurtmachi sizni tanladi va raqamini ulashdi. Raqamni ko'rish uchun tugmani bosing.",
+      "chosenNoPhone": "Buyurtmachi sizni tanladi, lekin raqamini ulashmadi. U siz bilan o'zi bog'lanishi mumkin.",
+      "myOfferTitle": "Sizning taklifingiz",
+      "share": "Telegramda ulashish",
+      "shareText": "Yuk: {title}"
     },
     "new": {
       "title": "Yuk e'lon qilish",
@@ -138,7 +144,9 @@
       "tgHint": "Telegram bog'lanmagan: takliflar haqida xabar bormaydi.",
       "tgCta": "Botni ochish",
       "photos": "Yukning surati",
-      "photosHint": "Ijrochi nimani olib ketishini ko'rib, aniq taklif beradi."
+      "photosHint": "Ijrochi nimani olib ketishini ko'rib, aniq taklif beradi.",
+      "shareTg": "Telegramda ulashish",
+      "shareText": "So'rov {no}"
     },
     "offer": {
       "price": "Narx (so'm)",
@@ -256,8 +264,16 @@
       "err": {
         "RELIST_NOT_ALLOWED": "So'rovni qaytarib bo'lmadi. Sahifani yangilang."
       },
-      "confirmAward": "Shu ijrochini tanlaysizmi? Raqamlaringiz bir-biringizga ochiladi, qolgan takliflar yopiladi.",
-      "winnerPhone": "Tanlangan ijrochining raqami"
+      "confirmAward": "Shu ijrochini tanlaysizmi? So'rovga yozgan raqamingiz unga ochiladi, qolgan takliflar yopiladi.",
+      "winnerPhone": "Tanlangan ijrochining raqami",
+      "awardAsk": "Raqamingizni ijrochiga ko'rsatamizmi?",
+      "awardAskHint": "Tanlangan ijrochi shu raqamni ko'radi va sizga qo'ng'iroq qiladi. Hisobingizdagi raqam o'zi ochilmaydi. Xohlamasangiz, raqamsiz tanlang: qolgan takliflar baribir yopiladi.",
+      "awardPhone": "Ijrochiga ko'rsatiladigan raqam",
+      "awardShare": "Raqamni ko'rsatib tanlash",
+      "awardNoShare": "Raqamsiz tanlash",
+      "awardBack": "Bekor",
+      "awardPhoneBad": "Raqam noto'g'ri. Masalan: +998 90 123 45 67",
+      "noPhoneShared": "Siz ijrochiga raqam ko'rsatmadingiz. U sizga qo'ng'iroq qila olmaydi: uning raqami yuqorida."
     }
   }
 }

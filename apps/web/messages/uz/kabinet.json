@@ -514,7 +514,8 @@
         "FILE_TYPE": "Faqat rasm (JPEG, PNG, WebP) yoki hujjat (PDF, DOCX, XLSX).",
         "FILE_TOO_LARGE": "Fayl 10 MB dan katta.",
         "FILE_CONTENT_MISMATCH": "Fayl ichidagi ma'lumot turiga mos kelmadi.",
-        "RATE_LIMITED": "Juda ko'p fayl yuklandi. Bir soatdan keyin urinib ko'ring."
+        "RATE_LIMITED": "Juda ko'p fayl yuklandi. Bir soatdan keyin urinib ko'ring.",
+        "CHAT_LIMIT": "Bir soatda juda ko'p yozishma yuborildi. Birozdan keyin qayta urinib ko'ring."
       },
       "write": "Yozish",
       "windowTitle": "{title} bilan yozishma",

@@ -87,6 +87,10 @@ function setup(opts: {
     { log: async () => {} } as unknown as AuditService,
     upstream,
     {
+      paywallHit: async (_u: string, kind: string) => {
+        if (opts.wallFails) throw new Error('baza yiqildi');
+        opts.walls?.push({ kind });
+      },
       record: async (items: Record<string, unknown>[]) => {
         if (opts.wallFails) throw new Error('baza yiqildi');
         opts.walls?.push(...items);
@@ -276,7 +280,7 @@ describe("vagon devorining sanog'i", () => {
     const walls: Record<string, unknown>[] = [];
     const { c } = setup({ freeTotal: 0, walls });
     expect(await status(c.search('w-wall-1', { no: '5100001' }))).toBe(402);
-    expect(walls).toEqual([{ kind: 'wall', targetId: 'wagon', surface: 'view' }]);
+    expect(walls).toEqual([{ kind: 'wagon' }]);
   });
 
   it("o'tib ketgan qidiruvda devor sanog'i yozilmaydi", async () => {
@@ -303,11 +307,12 @@ describe("vagon devorining sanog'i", () => {
    * ya'ni maxraj urinish bo'yicha sanalsa nisbat bir necha barobar past chiqib, narx
    * va bepul oyna haqidagi qaror teskari tomonga olinardi.
    */
-  it("bir odam kuniga bir marta: ikkinchi urinishda qator qo'shilmaydi", async () => {
+  // Kunlik noyoblik endi bazada (PaywallHit PK, paywall-hit.spec.ts): kontroller har urinishda chaqiradi
+  it("har 402 da paywallHit chaqiriladi, takrorni baza o'zi tashlaydi", async () => {
     const walls: Record<string, unknown>[] = [];
     const { c } = setup({ freeTotal: 0, walls });
     expect(await status(c.search('w-wall-5', { no: '5500001' }))).toBe(402);
     expect(await status(c.search('w-wall-5', { no: '5500002' }))).toBe(402);
-    expect(walls).toHaveLength(1);
+    expect(walls).toHaveLength(2);
   });
 });

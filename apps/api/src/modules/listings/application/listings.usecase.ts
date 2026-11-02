@@ -6,7 +6,7 @@ import { NotificationsService } from '../../notifications/notifications.service'
 import { AdminNotify } from '../../organizations/application/admin-notify';
 import { SubscriptionService } from '../../subscription/subscription.service';
 import { PrismaService } from '../../../common/prisma.service';
-import { notifyBoth } from '../../../common/telegram';
+import { notifyBoth, personLabel } from '../../../common/telegram';
 import { PrismaListingRepository } from '../infrastructure/prisma-listing.repository';
 import { ListingAccess } from './listing-access';
 import { watchers } from '../../watch/watchers';
@@ -255,13 +255,14 @@ export class ListingsUseCase {
   private async notifyOwner(l: ListingRecord, fromUserId: string, fromOrgId: string | null, message: string, inquiryId: string) {
     const from = fromOrgId
       ? ((await this.prisma.organization.findUnique({ where: { id: fromOrgId }, select: { name: true } }))?.name ?? '')
-      : await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true, phone: true } }).then((u) => u?.fullName || u?.phone || '');
+      : await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true } }).then((u) => u?.fullName ?? null);
     await notifyBoth(this.prisma, this.notifications, {
       target: { orgIds: [l.orgId], userIds: [l.ownerUserId], exceptUserId: fromUserId },
       kind: 'inquiry',
       inApp: 'inquiry',
       href: `/dashboard/inquiries/${inquiryId}`,
-      vars: { title: l.title, from, message: message.slice(0, 500) },
+      // Ismsiz odam telefon bilan emas, "Mijoz" deb chiqadi (2026-11-02)
+      vars: (loc) => ({ title: l.title, from: personLabel(from, loc), message: message.slice(0, 500) }),
       card: { title: l.title, body: message.slice(0, 200) },
     });
   }

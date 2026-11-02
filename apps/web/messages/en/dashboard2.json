@@ -1,5 +1,11 @@
 {
   "dashboard2": {
+    "adminTerminal": {
+      "open": "Admin: object page",
+      "registryOwner": "Registry owner",
+      "contact": "Person in charge",
+      "none": "none"
+    },
     "nav": {
       "documents": "Documents"
     },

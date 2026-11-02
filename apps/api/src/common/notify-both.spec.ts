@@ -65,7 +65,7 @@ describe('notifyBoth', () => {
     await notifyBoth(f.prisma, f.notifications, { ...base, target: { userIds: ['a', 'b', 'c'] } });
     expect(f.pushed.length).toBe(2);
     expect(f.pushed.find((p) => p.ids.length === 2)?.ids).toEqual(['a', 'c']);
-    expect(f.pushed.some((p) => p.title.includes('Ваше предложение'))).toBe(true);
+    expect(f.pushed.some((p) => p.title.includes('Вас выбрали'))).toBe(true);
   });
 
   it('card berilsa bitta yozuv va matn aynan shundan', async () => {

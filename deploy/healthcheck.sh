@@ -30,6 +30,44 @@ notify() {
     --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$1" || true
 }
 
+# --- Zaxira va bot tekshiruvlari (2026-11-02). Har hodisa uchun BIR marta xabar:
+# holat $STATE_DIR/alert.<kalit> faylida, muammo hal bo'lganda fayl o'chadi.
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/yuksaroy}"
+BOT_CONTAINER="${BOT_CONTAINER:-yuksaroy-bot-1}"
+incident() { # incident <kalit> <id> <matn>: id o'zgarmaguncha qayta yozmaydi
+  local f="$STATE_DIR/alert.$1"
+  [ "$(cat "$f" 2>/dev/null)" = "$2" ] && return 0
+  notify "$3"; echo "$2" > "$f"
+}
+resolved() { rm -f "$STATE_DIR/alert.$1"; }
+
+# 1) eng yangi dump 26 soatdan eski yoki oldingisining yarmidan kichik
+mapfile -t DUMPS < <(ls -t "$BACKUP_DIR"/db_*.dump 2>/dev/null | head -2)
+if [ "${#DUMPS[@]}" -eq 0 ]; then
+  incident backup none "Zaxira topilmadi: $BACKUP_DIR da db_*.dump yo'q."
+elif [ -n "$(find "${DUMPS[0]}" -mmin +1560)" ]; then
+  incident backup "${DUMPS[0]}" "Zaxira eskirgan: eng yangisi $(basename "${DUMPS[0]}"), 26 soatdan oldin."
+elif [ "${#DUMPS[@]}" -eq 2 ] && [ "$(( $(stat -c %s "${DUMPS[0]}") * 2 ))" -lt "$(stat -c %s "${DUMPS[1]}")" ]; then
+  incident backup "${DUMPS[0]}" "Zaxira shubhali: $(basename "${DUMPS[0]}") oldingisining yarmidan kichik."
+else
+  resolved backup
+fi
+
+# 2) bot konteyneri ishlayaptimi, 3) qayta ishga tushishlar soni oshdimi
+if command -v docker >/dev/null 2>&1; then
+  running="$(docker inspect -f '{{.State.Running}}' "$BOT_CONTAINER" 2>/dev/null || echo missing)"
+  if [ "$running" = true ]; then
+    resolved bot
+    rc="$(docker inspect -f '{{.RestartCount}}' "$BOT_CONTAINER" 2>/dev/null || echo 0)"
+    last="$(cat "$STATE_DIR/bot.restarts" 2>/dev/null || echo "$rc")"
+    # Qayta ishga tushish aylanishida har 5 daqiqada yozmaslik uchun kuniga bir marta
+    [ "$rc" -gt "$last" ] && incident botrestart "$(date +%F)" "Bot qayta ishga tushdi (RestartCount $last dan $rc ga). docker logs $BOT_CONTAINER"
+    echo "$rc" > "$STATE_DIR/bot.restarts"
+  else
+    incident bot "$running" "Bot konteyneri ishlamayapti ($BOT_CONTAINER: $running)."
+  fi
+fi
+
 code() { local c; c="$(curl -sS -k -o /dev/null -m 15 -w '%{http_code}' "$1" 2>/dev/null)"; echo "${c:-000}"; }
 
 WEB="$(code "$BASE/")"

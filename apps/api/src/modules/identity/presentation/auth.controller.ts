@@ -13,7 +13,7 @@ import { TokenService, ACCESS_TTL_SEC, REFRESH_TTL_SEC } from '../application/to
 import { BadCredentialsError, LoginLockedError, NoPasswordError, OtpInvalidError, PhoneTakenError } from '../domain/errors';
 import { deleteConfirmed } from '../domain/account';
 import { DeleteMeDto, GoogleLoginDto, LoginDto, RequestOtpDto, ResetPasswordDto, SetPasswordDto, TelegramLinkDto, TelegramWebAppDto, UpdateMeDto, VerifyOtpDto } from './dto';
-import { ACCESS_COOKIE, REFRESH_COOKIE, SESSION_FLAG_COOKIE, CurrentUserId, JwtGuard, optionalUserId } from './jwt.guard';
+import { ACCESS_COOKIE, REFRESH_COOKIE, SESSION_FLAG_COOKIE, CurrentUserId, JwtGuard, optionalUserId, readAccessToken } from './jwt.guard';
 import { InternalGuard } from './internal.guard';
 import { USER_REPOSITORY, type UserPatch, type UserRecord, type UserRepository } from '../domain/ports';
 import { PlatformAdmin } from '../../organizations/application/platform-admin';
@@ -32,6 +32,12 @@ const consumeIpBucket = new IpBucket(15, 600_000);   // bitta IP 10 daqiqada 15 
 const consumePhoneBucket = new IpBucket(8, 600_000);  // bitta raqamga 10 daqiqada 8 tekshiruv
 const otpPhoneBucket = new IpBucket(5, 3_600_000);    // bitta raqamga soatiga 5 kod so'rovi (Telegram toshqini)
 /** Chelak oshsa 429; kalit sifatida IP. */
+/** Joriy sessiya id si (access token ichida): "boshqa qurilmalarni yop" amallarida o'zi qolishi uchun. */
+const sidOf = (req: FastifyRequest, tokens: TokenService): string | undefined => {
+  const t = readAccessToken(req);
+  if (!t) return undefined;
+  try { return tokens.verifyAccess(t).sid; } catch { return undefined; }
+};
 const limit = (b: IpBucket, req: FastifyRequest) => { if (!b.take(req.ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
 /** Telefon bo'yicha cheklov: bitta IP butun tarmoqni bloklamaydi, bitta raqam nishonlanmaydi. */
 const limitPhone = (b: IpBucket, phone: string | null) => { if (phone && !b.take(phone)) throw new HttpException({ code: 'RATE_LIMITED' }, 429); };
@@ -115,7 +121,7 @@ export class AuthController {
 
   @Post('password/set') @HttpCode(200) @UseGuards(JwtGuard)
   async passwordSet(@CurrentUserId() userId: string, @Body() dto: SetPasswordDto, @Req() req: FastifyRequest) {
-    const u = await this.password.setPasswordChecked(userId, dto.password, dto.currentPassword);
+    const u = await this.password.setPasswordChecked(userId, dto.password, dto.currentPassword, sidOf(req, this.tokens));
     await this.audit.log({ actorId: userId, action: 'auth.password.set', ip: req.ip });
     return publicUser(u, await perms(this.admin, userId));
   }
@@ -183,7 +189,10 @@ export class AuthController {
 
   /** Telefon almashtirish: kod YANGI raqamga (o'sha OTP oqimi), keyin /phone/change kod bilan. */
   @Post('phone/change/request') @HttpCode(200) @UseGuards(JwtGuard)
-  async phoneChangeRequest(@CurrentUserId() userId: string, @Body() dto: RequestOtpDto) {
+  async phoneChangeRequest(@CurrentUserId() userId: string, @Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
+    // otp/request bilan bir xil to'siqlar: bu yo'l ham shu OTP oqimini ishga tushiradi (Telegram toshqini, kod terish)
+    limit(otpBucket, req);
+    limitPhone(otpPhoneBucket, normalizePhone(dto.phone));
     const phone = normalizePhone(dto.phone);
     const me = await this.users.findById(userId);
     if (phone && me?.phone === phone) throw new HttpException({ code: 'SAME_PHONE' }, 400);
@@ -196,6 +205,8 @@ export class AuthController {
     try {
       const phone = await this.verifyOtp.consume(dto.phone, dto.code);
       const u = await this.users.claimPhone(userId, phone);
+      // Telefon kirish kaliti: eski raqam bilan ochilgan boshqa qurilmalar yopiladi
+      await this.tokens.revokeOthers(userId, sidOf(req, this.tokens));
       await this.audit.log({ actorId: userId, action: 'auth.phone.change', ip: req.ip });
       return publicUser(u, await perms(this.admin, userId));
     } catch (e) {

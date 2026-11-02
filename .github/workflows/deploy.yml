@@ -341,7 +341,8 @@ jobs:
             # Skript .env ni o'qimaydi, o'z sukut qiymatlarini ishlatadi. Agar .env da
             # POSTGRES_USER yoki POSTGRES_DB o'zgartirilsa, shu yerda ovoz chiqarib
             # yiqiladi. Konteynerlarga hali tegilmagan bo'ladi.
-            bash deploy/backup.sh
+            # OFFSITE=0: shifrlangan Telegram nusxasi kuniga bir marta (taymer) ketadi, har deployda emas
+            OFFSITE=0 bash deploy/backup.sh
           fi
 
           echo "== obrazlarni tortib olish =="
@@ -389,3 +390,18 @@ jobs:
           done
           echo "prod javob bermayapti"
           exit 1
+
+      # Bosh sahifa tirik bo'lib, katalog yiqilgan bo'lishi mumkin (2026-11-02 reja). Uchta
+      # yo'l ham 200 bermasa ish qizil: ro'yxat sahifasi, ro'yxat API si va bitta terminal sahifasi.
+      - name: Katalog tekshiruvi
+        run: |
+          SITE="${{ vars.SITE_URL || 'https://yuksaroy.uz' }}"
+          slug=$(curl -fsS --max-time 15 "$SITE/api/v1/terminals?limit=1" | jq -r '.items[0].slug // empty') || slug=""
+          if [ -z "$slug" ]; then echo "terminal slug olinmadi (API javobi bo'sh yoki xato)"; exit 1; fi
+          bad=0
+          for path in "/terminals" "/api/v1/terminals?limit=1" "/terminals/$slug"; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SITE$path") || code=000
+            echo "$path -> $code"
+            [ "$code" = "200" ] || bad=1
+          done
+          [ "$bad" = "0" ] || { echo "katalog tekshiruvi o'tmadi"; exit 1; }

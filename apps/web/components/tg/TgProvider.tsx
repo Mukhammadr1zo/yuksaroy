@@ -92,6 +92,8 @@ export function routeOfStartParam(sp: string): string | null {
   if (kind === 'terminal') return `/tg/terminals/${v}`;
   if (kind === 'listing') return `/tg/equipment/${v}`; // TRUCK bo'lsa sahifa /tg/carriers ga o'tkazadi
   if (kind === 'urgent') return `/tg/urgent/${v}`;
+  // Yuk xabaridagi "Taklif yuborish" tugmasi sahifani o'zi ochadi; cargo_<raqam> ulashilgan havola uchun
+  if (kind === 'cargo') return `/tg/cargo/${encodeURIComponent(v)}`;
   if (kind === 'order') return `/tg/orders/${v}`;
   if (kind === 'search') {
     try { return `/tg/search?q=${encodeURIComponent(new TextDecoder().decode(Uint8Array.from(atob(v.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0))))}`; } catch { return null; }

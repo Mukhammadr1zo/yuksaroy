@@ -72,7 +72,11 @@
       "created": "Qoldirilgan",
       "description": "Nima kerak",
       "phone": "Buyurtmachi telefoni",
-      "offerTitle": "Taklif yuborish"
+      "offerTitle": "Taklif yuborish",
+      "chosenTitle": "Sizni tanlashdi",
+      "chosenLead": "Buyurtmachi sizni tanladi va raqamini ulashdi. Raqamni ko'rish uchun tugmani bosing.",
+      "chosenNoPhone": "Buyurtmachi sizni tanladi, lekin raqamini ulashmadi. U siz bilan o'zi bog'lanishi mumkin.",
+      "myOfferTitle": "Sizning taklifingiz"
     }
   }
 }

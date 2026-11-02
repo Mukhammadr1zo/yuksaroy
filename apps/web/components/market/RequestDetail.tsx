@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { PhotoStrip } from './PhotoStrip';
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowRightIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, TelegramLogoIcon } from '@phosphor-icons/react';
 import { Link } from '@/i18n/navigation';
 import { api, hasSession } from '@/lib/api';
 import { regionRouteKm } from '@yuksaroy/domain';
 import { km, uzDate, uzDateTime } from '@/lib/format';
 import type { MarketRequest } from '@/lib/types-market';
-import { Notice } from '@/components/kabinet/bits';
+import { BTN_GHOST, Notice } from '@/components/kabinet/bits';
 import { DemoBadge, MarketPhone, MarketStatusPill, useMarketLabels } from './bits';
 import { OfferForm } from './OfferForm';
 import { requestHref } from './RequestCard';
@@ -38,6 +38,12 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
       .catch(() => {});
     return () => { alive = false; };
   }, [r.no, r.isDemo]);
+  // Tanlangan ijrochi: sahifa unga "Sizni tanlashdi" deydi (2026-11-02). Yopilgan deb aldamaydi
+  const won = me?.myOffer?.status === 'AWARDED' && (r.status === 'AWARDED' || r.status === 'DONE');
+  // Ulashish havolasi brauzerda yig'iladi (domen sahifadan); ?from=share ni OfferForm auditga yozadi
+  const [origin, setOrigin] = useState('');
+  useEffect(() => setOrigin(window.location.origin), []);
+  const shareHref = origin ? `https://t.me/share/url?url=${encodeURIComponent(`${origin}${next}?from=share`)}&text=${encodeURIComponent(t('shareText', { title: r.title }))}` : null;
   // Faqat yuk so'rovida: xizmat so'rovida yo'nalish yo'q
   const routeKm = cargo ? regionRouteKm(r.fromRegion, r.toRegion) : null;
   const facts: [string, React.ReactNode][] = cargo
@@ -91,9 +97,17 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
       ) : null}
       <PhotoStrip photos={r.photos} alt={ta('photoOf', { name: r.title })} />
 
-      {/* Raqam serverda OPEN, AWARDED va DONE so'rovga ochiladi; oxirgi ikkisida faqat tanlangan
-          ijrochiga: ish bajarilgach ham hisob-kitob uchun kerak. Yopiq so'rovda "yo'q" deb aldamaydi */}
-      {r.hasPhone && !r.isDemo && (r.status === 'OPEN' || ((r.status === 'AWARDED' || r.status === 'DONE') && me?.myOffer?.status === 'AWARDED')) ? (
+      {/* Tanlangan ijrochi: nima bo'lgani va buyurtmachi raqami. Raqam faqat buyurtmachi tanlash paytida
+          tasdiqlagan bo'lsa bor (hasPhone); rad etgan bo'lsa shuni ochiq aytadi. ish bajarilgach ham qoladi */}
+      {won && !r.isDemo ? (
+        <section className="mt-4 rounded-card border border-teal bg-teal-soft/40 p-4" aria-live="polite">
+          <h2 className="font-display text-lg font-bold text-navy">{t('chosenTitle')}</h2>
+          <p className="mt-1 text-sm text-ink/85">{r.hasPhone ? t('chosenLead') : t('chosenNoPhone')}</p>
+          {r.hasPhone ? <div className="mt-3"><MarketPhone kind="request" targetId={r.id} next={next} /></div> : null}
+        </section>
+      ) : null}
+      {/* Ochiq so'rovda raqam har kirgan obunachiga ochiq: taklif berish uchun kerak */}
+      {r.hasPhone && !r.isDemo && r.status === 'OPEN' ? (
         <section className="mt-4 rounded-card border border-line bg-white p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{t('phone')}</h2>
           <div className="mt-2"><MarketPhone kind="request" targetId={r.id} next={next} /></div>
@@ -101,14 +115,22 @@ export function RequestDetail({ r }: { r: MarketRequest }) {
       ) : null}
 
       <section className="mt-8 rounded-card border border-teal/40 bg-sand p-5">
-        <h2 className="font-display text-xl font-bold text-navy">{t('offerTitle')}</h2>
-        {cargo ? <p className="mt-1 text-sm text-muted">{t('offerLead')}</p> : null}
+        <h2 className="font-display text-xl font-bold text-navy">{me?.myOffer ? t('myOfferTitle') : t('offerTitle')}</h2>
+        {cargo && !me?.myOffer ? <p className="mt-1 text-sm text-muted">{t('offerLead')}</p> : null}
         <div className="mt-4">
           {r.isDemo ? <><OfferForm request={r} next={next} preview /><p className="mt-3 text-sm text-muted">{td('demoNote')}</p></>
-            : r.status !== 'OPEN' && cargo ? <Notice tone="warn">{t('closedNote')}</Notice>
+            : r.status !== 'OPEN' && cargo && !me?.myOffer ? <Notice tone="warn">{t('closedNote')}</Notice>
             : <OfferForm request={r} next={next} me={me} />}
         </div>
       </section>
+      {/* Ochiq yukni ulashish: oddiy t.me havolasi, ochilgan odam Telegramda guruh yoki do'stni tanlaydi */}
+      {cargo && !r.isDemo && r.status === 'OPEN' && shareHref ? (
+        <div className="mt-6">
+          <a href={shareHref} target="_blank" rel="noreferrer" className={`${BTN_GHOST} inline-flex items-center gap-2`}>
+            <TelegramLogoIcon size={18} aria-hidden="true" />{t('share')}
+          </a>
+        </div>
+      ) : null}
       {r.isDemo ? null : <div className="mt-8"><ReportButton kind="request" targetId={r.id} /></div>}
     </div>
   );

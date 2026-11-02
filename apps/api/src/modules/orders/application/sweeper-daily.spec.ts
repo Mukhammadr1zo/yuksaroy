@@ -10,7 +10,6 @@ import { runtime } from '../../../common/runtime';
 import type { IdempotencyService } from '../../../common/idempotency.service';
 import type { BookingRepository } from '../../booking/domain/ports';
 import type { OrderRepository } from '../domain/ports';
-import type { AdminNotify } from '../../organizations/application/admin-notify';
 import type { NotificationsService } from '../../notifications/notifications.service';
 import type { OrderActionsUseCase } from './order-actions.usecase';
 import { SlaSweeperService } from './sla-sweeper.service';
@@ -40,11 +39,9 @@ function setup(o: { dailyFails?: boolean } = {}) {
   const bookings = { releaseExpired: async () => 0 } as unknown as BookingRepository;
   const orders = { findExpired: async () => [] } as unknown as OrderRepository;
   const actions = { expire: async () => {} } as unknown as OrderActionsUseCase;
-  // Adminlarga eslatma alohida tekshiriladi: bu yerda faqat tozalash
-  const adminNotify = { stale: async () => {} } as unknown as AdminNotify;
   // Obuna eslatmasi alohida spec da: soxta prisma da remindExpiring yiqiladi va yutiladi
   const notifications = { recipients: async () => [], push: async () => {} } as unknown as NotificationsService;
-  return { svc: new SlaSweeperService(bookings, orders, actions, prisma, idempotency, adminNotify, notifications), calls, purged, reads: () => listingReads };
+  return { svc: new SlaSweeperService(bookings, orders, actions, prisma, idempotency, notifications), calls, purged, reads: () => listingReads };
 }
 
 const DAY = 86_400_000;

@@ -19,7 +19,7 @@ export const runtime = {
   startedAt: new Date(),
   /** Kunlik sikl oxirgi yugurishi (sla-sweeper daily yozadi). null = jarayon boshlanganidan beri yugurmagan */
   daily: null as DailyRun | null,
-  telegram: { lastOkAt: null as Date | null, lastFailAt: null as Date | null, lastFailStatus: null as number | null, okSinceStart: 0, failSinceStart: 0 },
+  telegram: { lastOkAt: null as Date | null, lastFailAt: null as Date | null, lastFailStatus: null as number | null, okSinceStart: 0, failSinceStart: 0, skippedByKind: {} as Record<string, number> },
 };
 export const startedAt = runtime.startedAt;
 
@@ -43,4 +43,13 @@ export function recordTelegram(ok: boolean, status?: number, at = new Date()): v
     t.lastFailStatus = status ?? null;
     t.failSinceStart++;
   }
+}
+
+/**
+ * Chegaradan oshgani uchun YUBORILMAGAN xabar, tur bo'yicha (2026-11-02): oldin u jim yo'qolardi,
+ * Tizim sahifasi esa faqat yuborilgan va yiqilganlarni ko'rardi. Kalit - xabar turi (NotifyKind) yoki 'other'.
+ */
+export function recordTelegramSkipped(kind: string): void {
+  const m = runtime.telegram.skippedByKind;
+  m[kind] = (m[kind] ?? 0) + 1;
 }

@@ -3,7 +3,7 @@ import { PAYMENT_TERM_LABELS, REGION_LABELS, SERVICE_TYPE_LABELS, TRUCKS_WORD, u
 import { env } from '../../common/env';
 import { logFanout } from '../../common/fanout';
 import { PrismaService } from '../../common/prisma.service';
-import { esc, notifyBoth, sendTelegram, webUrl } from '../../common/telegram';
+import { esc, notifyBoth, personLabel, sendTelegram, webUrl } from '../../common/telegram';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
 import { isListed, notifyRegions } from './market.rules';
 import { watchers } from '../watch/watchers';
@@ -61,6 +61,10 @@ const cargoLine = (r: RequestRow, l: string) => [
 /** Yuk: yo'nalish; xizmat: viloyat. */
 const whereOf = (r: RequestRow) => (r.board === 'CARGO' ? `${region(r.fromRegion)} -> ${region(r.toRegion)}` : region(r.regionCode));
 const KIND: NotificationKind = 'market';
+/** Telegramdagi "Taklif yuborish" tugmasi matni (shoshilinch so'rovdagi bilan bir xil). */
+const OFFER_BTN: Record<SearchLang, string> = { uz: 'Taklif yuborish', ru: 'Предложить', en: 'Make an offer' };
+/** So'rov sahifasi: yuk va xizmat har xil joyda ochiladi. */
+const hrefOf = (r: { board: string; no: string }) => (r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`);
 
 /** Bozor uchun umumiy o'qishlar va bildirishnomalar. Xabar yuborish chaqiruvchini kuttirmaydi (void ... .catch). */
 @Injectable()
@@ -220,8 +224,13 @@ export class MarketService {
   /** Yangi so'rov xabari fanout topgan odamlarga: saytda ham, Telegramda ham. */
   async notifyNew(r: RequestRow, userIds: readonly string[]): Promise<void> {
     if (!userIds.length) return;
-    const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
+    const href = hrefOf(r);
     const where = whereOf(r);
+    // Yuk xabari bir bosishda taklif beradigan Mini App sahifasini ochadi (2026-11-02): shoshilinch so'rovdagi kabi.
+    // Tugma faqat https da: Telegram boshqa manzilni qabul qilmaydi, localhost da matndagi havola yetarli
+    const replyMarkup = r.board === 'CARGO' && env.WEB_ORIGIN.startsWith('https://')
+      ? (l: SearchLang) => ({ inline_keyboard: [[{ text: OFFER_BTN[l], web_app: { url: `${env.WEB_ORIGIN}/tg/cargo/${r.no}` } }]] })
+      : undefined;
 
     await notifyBoth(this.prisma, this.notifications, {
       target: { userIds: [...userIds] },
@@ -230,6 +239,7 @@ export class MarketService {
       href,
       vars: (l) => ({ no: r.no, title: r.title.slice(0, 200), where, what: r.board === 'CARGO' ? cargoLine(r, l) : svc(l, r.serviceType) }),
       card: { title: `${r.no} · ${r.title}`, body: where },
+      replyMarkup,
     });
   }
 
@@ -266,7 +276,8 @@ export class MarketService {
       kind: 'marketOffer',
       inApp: KIND,
       href,
-      vars: { no: r.no, title: r.title.slice(0, 200), from: from ?? '' },
+      // Ismsiz taklifchi telefon bilan emas, "Mijoz" deb ataladi (2026-11-02)
+      vars: (l) => ({ no: r.no, title: r.title.slice(0, 200), from: personLabel(from, l) }),
       card: { title: `${r.no} · ${r.title}`, body: from },
     });
   }
@@ -276,12 +287,29 @@ export class MarketService {
    * Havola so'rov sahifasiga boradi, chunki buyurtmachining raqami aynan o'sha yerda ochiladi.
    */
   async notifyAward(r: RequestRow, providerUserId: string): Promise<void> {
-    const href = r.board === 'CARGO' ? `/cargo/${r.no}` : `/services/requests/${r.no}`;
+    const href = hrefOf(r);
     await notifyBoth(this.prisma, this.notifications, {
       target: { userIds: [providerUserId] },
       kind: 'marketAward',
       inApp: KIND,
       href,
+      vars: { no: r.no, title: r.title.slice(0, 200) },
+    });
+  }
+
+  /**
+   * Tanlanmagan ijrochilarga: "tanlanmadi" (boshqasi tanlandi) yoki "so'rov yopildi" (hech kim tanlanmadi).
+   * Rad javobi ham yuboriladi: jimlik "hali qaror yo'q" deb o'qiladi va ijrochi resursini bo'sh ushlab turadi
+   * (shoshilinch so'rovdagi qoida, 2026-11-02).
+   */
+  async notifyDeclined(r: RequestRow, providerUserIds: readonly string[], why: 'awarded' | 'closed'): Promise<void> {
+    const userIds = [...new Set(providerUserIds)].filter((id) => id !== r.createdById);
+    if (!userIds.length) return;
+    await notifyBoth(this.prisma, this.notifications, {
+      target: { userIds },
+      kind: why === 'awarded' ? 'marketDeclined' : 'marketClosed',
+      inApp: KIND,
+      href: hrefOf(r),
       vars: { no: r.no, title: r.title.slice(0, 200) },
     });
   }

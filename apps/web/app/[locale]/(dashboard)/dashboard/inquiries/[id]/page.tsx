@@ -10,10 +10,13 @@ import { ApiError, api, post } from '@/lib/api';
 import { uzDateTime } from '@/lib/format';
 import { Err } from '@/components/tg/bits';
 import { BTN_GHOST } from '@/components/kabinet/bits';
+import { useMe } from '@/components/site/useMe';
 import { AttachmentButton, AttachmentChips, MessageFiles, useAttachments, type Attachment } from '@/components/chat/Attachments';
 
 type Msg = { id: string; text: string; attachments: Attachment[]; createdAt: string; mine: boolean; author: string | null };
 type Subject = { kind: 'listing' | 'terminal'; id: string; slug: string; title: string; sub: string | null };
+/** Admin uchun: obyektning reestrdagi egasi va mas'ul shaxsi (GET /admin/catalog/terminals/:id, boshqalarga so'ralmaydi). */
+type AdminTerminal = { ownerNameRaw: string | null; contactName: string | null; contactPhone: string | null };
 type Thread = { id: string; status: string; role: 'owner' | 'client'; createdAt: string; lastMessageAt: string | null; subject: Subject | null; messages: Msg[] };
 
 /** Ochiq oynada tez, fonda kamdan kam: har suhbat uchun soatiga 180 emas, 30 ta so'rov. */
@@ -25,6 +28,8 @@ export default function InquiryThreadPage() {
   const tc = useTranslations('kabinet.common');
   const ti = useTranslations('kabinet.inquiries');
   const tterm = useTranslations('terminal');
+  const ta = useTranslations('dashboard2.adminTerminal');
+  const me = useMe();
   const locale = useLocale();
   const params = useParams<{ id: string }>();
   const id = params?.id as string;
@@ -35,6 +40,7 @@ export default function InquiryThreadPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   // "Javob shart emas" bosilgandagi lastMessageAt: tasdiq qatori suhbatga yangi xabar kelguncha turadi
+  const [adminT, setAdminT] = useState<AdminTerminal | null>(null);
   const [cleared, setCleared] = useState<string | null>();
   const done = useRef<HTMLParagraphElement>(null);
   const end = useRef<HTMLDivElement>(null);
@@ -54,6 +60,12 @@ export default function InquiryThreadPage() {
   }, [id]);
 
   useEffect(() => { if (id) void load(); }, [id, load]);
+  // Platforma adminiga obyekt sahifasiga havola va reestr ma'lumoti: javob berishdan oldin kim bilan gaplashayotganini ko'radi
+  const subjectId = thread?.subject?.kind === 'terminal' ? thread.subject.id : null;
+  useEffect(() => {
+    if (!me?.isPlatformAdmin || !subjectId) return;
+    api<AdminTerminal>(`/admin/catalog/terminals/${subjectId}`).then(setAdminT).catch(() => {});
+  }, [me?.isPlatformAdmin, subjectId]);
   // Yangi xabar kelsa pastga tushadi
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [thread?.messages.length]);
   // Bosilgan tugma yo'qoladi: fokus sahifa boshiga uchib ketmasin, tasdiq qatoriga o'tadi
@@ -136,6 +148,18 @@ export default function InquiryThreadPage() {
           </Link>
         ) : null}
       </div>
+
+      {me?.isPlatformAdmin && subjectId ? (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-card border border-line bg-sand/60 px-3 py-2 text-xs">
+          <Link href={`/admin/terminals/${subjectId}`} className="font-semibold text-teal-ink hover:underline">{ta('open')}</Link>
+          {adminT ? (
+            <>
+              <span className="min-w-0 wrap-anywhere text-muted">{ta('registryOwner')}: <span className="text-ink">{adminT.ownerNameRaw ?? ta('none')}</span></span>
+              <span className="min-w-0 wrap-anywhere text-muted">{ta('contact')}: <span className="text-ink">{adminT.contactName || adminT.contactPhone ? [adminT.contactName, adminT.contactPhone].filter(Boolean).join(', ') : ta('none')}</span></span>
+            </>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-4 space-y-2 rounded-card border border-line bg-white p-3 sm:p-4">
         {thread.messages.map((m) => (

@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { TelegramLogoIcon } from '@phosphor-icons/react';
 import { PAYMENT_TERMS, REGIONS, SERVICE_TYPES, TRUCK_TYPES, validateRequest, type MarketBoard, type ServiceType } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, clearAuthedCache, hasSession, post } from '@/lib/api';
@@ -191,6 +192,15 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
             <a href={`https://t.me/${BOT}`} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-4">{t('tgCta')}</a>
           </Notice>
         ) : null}
+        {/* Yuborilgan so'rovni Telegramda tashuvchilarga o'zi tarqatishi mumkin: oddiy t.me havolasi, ?from=share taklif manbasini o'lchaydi */}
+        <div>
+          <a
+            href={`https://t.me/share/url?url=${encodeURIComponent(`${window.location.origin}${publicHref}?from=share`)}&text=${encodeURIComponent(t('shareText', { no: done.no }))}`}
+            target="_blank" rel="noreferrer" className={`${BTN_GHOST} inline-flex items-center gap-2`}
+          >
+            <TelegramLogoIcon size={18} aria-hidden="true" />{t('shareTg')}
+          </a>
+        </div>
         <div className="flex flex-wrap gap-2">
           <Link href={`/dashboard/market?tab=requests&id=${done.id}`} className={BTN_PRIMARY}>{t('viewMine')}</Link>
           <Link href={publicHref} className={BTN_GHOST}>{t('viewPublic')}</Link>

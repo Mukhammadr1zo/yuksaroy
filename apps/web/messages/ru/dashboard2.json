@@ -1,5 +1,11 @@
 {
   "dashboard2": {
+    "adminTerminal": {
+      "open": "Админ: страница объекта",
+      "registryOwner": "Владелец по реестру",
+      "contact": "Ответственное лицо",
+      "none": "нет"
+    },
     "nav": {
       "documents": "Документы"
     },

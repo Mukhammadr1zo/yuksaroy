@@ -20,6 +20,7 @@ import { PhotoGallery } from '@/components/catalog/PhotoGallery';
 import { ClaimObject } from '@/components/catalog/ClaimObject';
 import { RailPassportCard } from '@/components/catalog/RailPassport';
 import { ReportButton } from '@/components/site/ReportButton';
+import { KycBadge } from '@/components/catalog/KycBadge';
 import { AdSlot } from '@/components/site/AdSlot';
 
 export const revalidate = 300;
@@ -118,6 +119,10 @@ export default async function TerminalPage({ params }: Params) {
                 amber faqat fon bo'ladi, matn esa amber-ink. */}
             {registryOnly ? <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">{t.claimStatus === 'PENDING' ? tcl('pendingBadge') : tcl('registryBadge')}</span>
               : !t.claimed ? <span className="rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{tr('badge.unverifiedPassport')}</span> : null}
+            {/* Egasi qarori (2026-11-02): tasdiqlanmagan tashkilot ham nashr qila oladi, sahifa buni ochiq aytadi */}
+            {t.claimed && t.orgName && !t.isDemo
+              ? (t.orgVerified ? <KycBadge kyc="VERIFIED" size="md" /> : <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">{tcl('orgUnverified')}</span>)
+              : null}
             {registryOnly ? null : <a href="#reviews" className={`rounded-full border border-line bg-white px-3 py-1 font-mono text-xs font-semibold tabular-nums ${t.ratingAvg != null ? 'text-navy' : 'text-muted'}`}>{t.ratingAvg != null ? `★ ${t.ratingAvg.toFixed(1)} (${t.ratingCount})` : t.ratingCount ? trv('hidden', { count: t.ratingCount, min: REVIEW.minToShow }) : trv('none')}</a>}
           </div>
           <h1 className="font-display mt-3 text-3xl font-bold md:text-4xl">{t.name}</h1>

@@ -20,6 +20,8 @@
     "dayTitle": "{day}: {n} ko'rsatish",
     "empty": "Oxirgi 30 kunda ko'rsatish yo'q. Obyekt faol bo'lganda katalog, xarita, solishtirish va bot ko'rsatishlari shu yerda yig'iladi.",
     "loading": "Yuklanmoqda",
+    "locked": "Ko'rsatkichlar obunachilarga ochiq: oxirgi 30 kunda nechta odam ko'rgani, telefonni ochgani va so'rov yozgani shu yerda ko'rinadi.",
+    "lockedCta": "Tariflarni ko'rish",
     "loadFailed": "Ko'rsatkichlarni yuklab bo'lmadi.",
     "back": "E'lonlarga qaytish",
     "link": "Ko'rsatkichlar",

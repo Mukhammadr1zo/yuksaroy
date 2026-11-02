@@ -43,11 +43,14 @@ export class PasswordUseCase {
   }
 
   /** Profilda parolni o'rnatish/almashtirish: parol allaqachon bo'lsa joriyini tekshiradi. */
-  async setPasswordChecked(userId: string, password: string, current?: string) {
+  async setPasswordChecked(userId: string, password: string, current?: string, keepSid?: string) {
     const u = await this.users.findById(userId);
     if (!u) throw new BadCredentialsError();
     if (u.passwordHash && !(current && (await argon2.verify(u.passwordHash, current)))) throw new BadCredentialsError();
-    return this.setPassword(userId, password);
+    const next = await this.setPassword(userId, password);
+    // Boshqa qurilmalardagi sessiyalar yopiladi; joriysi qoladi
+    await this.tokens.revokeOthers(userId, keepSid);
+    return next;
   }
 
   /** OTP tasdiqlanadi, parol yangilanadi, kirish natijasi qaytadi (cookie controllerda). */
@@ -55,6 +58,8 @@ export class PasswordUseCase {
     const phone = await this.verifyOtp.consume(rawPhone, code);
     const existing = (await this.users.findByPhone(phone)) ?? (await this.users.createByPhone(phone));
     const user = await this.setPassword(existing.id, password);
+    // Tiklash odatda parol yo'qolgani yoki o'g'irlangani uchun: eski hamma sessiya yopiladi, faqat shu kirish qoladi
+    await this.tokens.revokeOthers(user.id, undefined);
     const pair = await this.tokens.issuePair(user.id, ctx);
     return { user, ...pair };
   }

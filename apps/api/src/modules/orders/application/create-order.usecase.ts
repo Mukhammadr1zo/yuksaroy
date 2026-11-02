@@ -97,7 +97,8 @@ export class CreateOrderUseCase {
     });
     // Terminal egalariga xabar: tasdiqlash muddati shu yerdan boshlanadi
     void notifyBoth(this.prisma, this.notifications, {
-      target: { orgIds: [terminal.orgId], ownersOnly: true },
+      // Dispetcher ham tasdiqlay oladi, demak xabarni ham oladi (2026-11-02): chat xabarlari ham barcha a'zolarga ketadi
+      target: { orgIds: [terminal.orgId] },
       kind: 'orderNew',
       inApp: 'orderNew',
       href: '/dashboard/terminal',

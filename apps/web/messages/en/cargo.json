@@ -55,7 +55,13 @@
       "volume": "Volume",
       "trucks": "Number of trucks",
       "payment": "Payment terms",
-      "distance": "Distance (approximate)"
+      "distance": "Distance (approximate)",
+      "chosenTitle": "You were chosen",
+      "chosenLead": "The customer chose you and shared a number. Press the button to see it.",
+      "chosenNoPhone": "The customer chose you but did not share a number. They can contact you themselves.",
+      "myOfferTitle": "Your offer",
+      "share": "Share on Telegram",
+      "shareText": "Cargo: {title}"
     },
     "new": {
       "title": "Post cargo",
@@ -138,7 +144,9 @@
       "tgHint": "Telegram is not linked: you will not get offer notifications.",
       "tgCta": "Open the bot",
       "photos": "Cargo photos",
-      "photosHint": "The carrier sees what to move and gives an accurate offer."
+      "photosHint": "The carrier sees what to move and gives an accurate offer.",
+      "shareTg": "Share on Telegram",
+      "shareText": "Request {no}"
     },
     "offer": {
       "price": "Price (UZS)",
@@ -256,8 +264,16 @@
       "err": {
         "RELIST_NOT_ALLOWED": "The request could not be reposted. Refresh the page."
       },
-      "confirmAward": "Choose this provider? Your numbers open to each other and the other offers close.",
-      "winnerPhone": "The chosen provider's number"
+      "confirmAward": "Choose this provider? The number from the request will be shown to them and the other offers will be closed.",
+      "winnerPhone": "The chosen provider's number",
+      "awardAsk": "Show your number to the provider?",
+      "awardAskHint": "The chosen provider will see this number and call you. The number on your account is never shown by itself. If you prefer, choose without a number: the other offers are closed anyway.",
+      "awardPhone": "Number for the provider",
+      "awardShare": "Choose and show number",
+      "awardNoShare": "Choose without a number",
+      "awardBack": "Cancel",
+      "awardPhoneBad": "Invalid number. For example: +998 90 123 45 67",
+      "noPhoneShared": "You did not show a number to the provider. They cannot call you: their number is shown above."
     }
   }
 }

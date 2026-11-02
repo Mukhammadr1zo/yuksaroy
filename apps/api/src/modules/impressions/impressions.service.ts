@@ -4,24 +4,16 @@ import { PrismaService } from '../../common/prisma.service';
 import { dayKeys, daySeries } from './day-series';
 
 /*
- * 'wall': to'lov devoriga urilgan odam. Bu konversiyaning MAXRAJI: obuna soni ko'rinadi,
- * devorda to'xtab ketganlar esa ko'rinmasdi, ya'ni narx, bepul oyna va devor joyi
- * haqidagi uchala qaror ham tusmol bilan qilinardi.
+ * 'wall' (eski): to'lov devori sanog'i endi bu jadvalda EMAS, PaywallHit da (paywallHit() pastda).
+ * Egasi qarori 2026-11-02: devorga urilgan ODAM bazada, bir odam + kun + devor = bitta qator,
+ * takrorni noyob kalit to'sadi. Ilgari bu yerda xotira chelagi (DailyBucket) turardi va har
+ * deploy sanoqni nolga qaytarardi. 'wall' turi faqat eski qatorlar va hali ko'chmagan chaqiruvchi
+ * (wagon.controller.ts) tipi buzilmasligi uchun qoldi: yangi kod uni YOZMAYDI.
  *
- * targetId devor nomi: 'phone' (raqam ochish) va 'wagon' (vagon qidiruvi). Bitta
- * jadvalda, chunki ikkisi yonma-yon qo'yilsa qaysi devor odamni ko'proq to'xtatayotgani
- * ko'rinadi.
- *
- * DIQQAT: 'wall' ommaviy DTO ga (impressions.controller.ts) QO'SHILMAYDI. O'sha yo'l
- * kirishsiz, ya'ni begona odam devor sonini bir so'rovda shishirib yuborardi va qaror
- * uchun yaroqsiz bo'lib qolardi. Bu son FAQAT serverda, 402 tashlanadigan joyda,
- * bir odam uchun kuniga bir marta yoziladi (wallDaily chelagi) - obuna soni ham ODAM
- * bo'yicha, ya'ni surat bilan maxraj bitta birlikda bo'lishi kerak.
- *
- * O'qiladigan joy: admin boshsahifasidagi raqam ochish kartasi (admin-home.controller.ts
- * reveals()), telefon va vagon devori alohida qator. Yozilib hech qayerda ko'rinmagan
- * son hech qanday qarorni qo'llab-quvvatlamaydi, shuning uchun o'quvchi bilan birga keldi.
+ * 'wall' ommaviy DTO ga (impressions.controller.ts) hech qachon QO'SHILMAYDI: u yo'l kirishsiz.
  */
+/** Qaysi devor: telefon raqami, vagon qidiruvi, egasi ko'rsatkichlari. */
+export type PaywallKind = 'phone' | 'wagon' | 'metrics';
 export type ImpressionKind = 'listing' | 'terminal' | 'org' | 'ad' | 'wall';
 export interface ImpressionItem { kind: ImpressionKind; targetId: string; surface: string }
 
@@ -79,6 +71,18 @@ export class ImpressionsService {
       }),
     );
     return { accepted: items.length };
+  }
+
+  /**
+   * Devorga urilgan odamni yozadi: (userId, kind, Toshkent kuni) noyob kalit, ya'ni bir odam
+   * bir kunda bir devorga necha marta urilsa ham BITTA qator. Takrorni xotira emas baza to'sadi
+   * (ON CONFLICT DO NOTHING), shuning uchun deploy va ko'p nusxa sanoqni buzmaydi.
+   *
+   * Mehmon sanalmaydi: uch yo'lning hammasi kirishni talab qiladi, barqaror mehmon kaliti yo'q
+   * (IP bitta mobil operator ortida minglab odam). Xato chaqiruvchida yutiladi: bu o'lchov, kvota emas.
+   */
+  async paywallHit(userId: string, kind: PaywallKind, now = new Date()) {
+    await this.prisma.paywallHit.createMany({ data: [{ userId, kind, day: new Date(uzLocalDate(now)) }], skipDuplicates: true });
   }
 
   /**

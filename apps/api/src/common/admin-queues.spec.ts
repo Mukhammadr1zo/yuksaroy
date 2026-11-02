@@ -43,6 +43,13 @@ describe('kutib qolgan navbatlar', () => {
     expect(staleQueues(s, now, 2)).toEqual([{ key: 'listingsPendingReview', days: 3 }]);
   });
 
+  it("contactNew 24 soat va'dasi tufayli 1 kundan chiqadi (30 soatlik murojaat)", () => {
+    const s = empty();
+    s.contactNew = { count: 1, oldest: new Date(now.getTime() - 30 * 3_600_000) };
+    s.reportsNew = { count: 1, oldest: new Date(now.getTime() - 30 * 3_600_000) };
+    expect(staleQueues(s, now, 2)).toEqual([{ key: 'contactNew', days: 1 }]);
+  });
+
   it('eng uzoq kutgani birinchi turadi', () => {
     const s = empty();
     s.listingsPendingReview = { count: 1, oldest: daysAgo(3) };

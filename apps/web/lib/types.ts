@@ -39,6 +39,8 @@ export interface TerminalCard {
   claimStatus?: ClaimStatus;
   /** Namuna terminal: sahifada belgi va izoh chiqadi, telefon berilmaydi. */
   isDemo?: boolean;
+  /** Tashkilot tasdiqlangan (VERIFIED): kartada belgi, aks holda "tasdiqlanmagan" izohi. */
+  orgVerified?: boolean;
   // Ro'yxat qo'shimchalari: joriy umumiy tariflar (max 6), bugungi bo'sh slotlar, near bo'lsa masofa
   tariffs?: CardTariff[]; freeToday?: number; distanceKm?: number | null;
 }

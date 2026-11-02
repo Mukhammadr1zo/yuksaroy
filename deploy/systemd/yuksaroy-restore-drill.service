@@ -1,0 +1,14 @@
+[Unit]
+# Oylik tiklash mashqi: eng yangi zaxira vaqtinchalik postgres konteynerida tiklanadi.
+# Skript: deploy/restore-drill.sh. Ishlayotgan bazaga tegmaydi.
+Description=YukSaroy zaxirani tiklash mashqi
+Documentation=file:///opt/yuksaroy/docs/runbooks/zaxira.md
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# bash orqali: yangi fayl serverda ijro huquqisiz kelishi mumkin (203/EXEC)
+ExecStart=/bin/bash /opt/yuksaroy/deploy/restore-drill.sh
+Nice=10
+IOSchedulingClass=idle

@@ -72,7 +72,11 @@
       "created": "Posted",
       "description": "What is needed",
       "phone": "Requester phone",
-      "offerTitle": "Send an offer"
+      "offerTitle": "Send an offer",
+      "chosenTitle": "You were chosen",
+      "chosenLead": "The customer chose you and shared a number. Press the button to see it.",
+      "chosenNoPhone": "The customer chose you but did not share a number. They can contact you themselves.",
+      "myOfferTitle": "Your offer"
     }
   }
 }

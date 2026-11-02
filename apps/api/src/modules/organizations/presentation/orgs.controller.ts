@@ -7,6 +7,7 @@ import { KYC_STATUSES, ORG_KINDS, REGIONS, ROLES, normalizePhone, type KycStatus
 import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AdminNotify } from '../application/admin-notify';
 import { CreateOrgUseCase } from '../application/create-org.usecase';
+import { noticeRenamedVerifiedOrg } from '../application/org-rename-notice';
 import { ORG_REPOSITORY, type OrganizationRepository, type Storefront } from '../domain/ports';
 import { filterRoles, rolesForKinds } from '../domain/rules';
 import { AuditService } from '../../../common/audit.service';
@@ -86,7 +87,10 @@ export class OrgsController {
 
   @Patch('orgs/:id')
   async update(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: UpdateOrgDto) {
+    // Nom o'zgarishini solishtirish uchun eski qator; topilmasa update o'zi rad etadi
+    const prev = dto.name !== undefined ? await this.orgs.findById(id) : null;
     const org = await this.createOrg.update(userId, id, dto);
+    if (prev) await noticeRenamedVerifiedOrg(this.prisma, this.notifications, prev, dto.name, userId);
     await this.audit.log({ actorId: userId, action: 'org.update', entity: 'Organization', entityId: id, meta: { fields: Object.keys(dto) } });
     return org;
   }

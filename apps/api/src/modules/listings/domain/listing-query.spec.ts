@@ -59,8 +59,13 @@ describe('listingOwner', () => {
   it("tashkilot: nom, slug, KYC; shaxs: ism va telefon tasdig'i; ismsiz shaxs = 'Yakka haydovchi'", () => {
     expect(listingOwner({ org: { name: 'Temir Yol MChJ', slug: 'temir-yol', kycStatus: 'VERIFIED' }, ownerUser: null }))
       .toEqual({ type: 'org', name: 'Temir Yol MChJ', slug: 'temir-yol', kyc: 'VERIFIED' });
-    expect(listingOwner({ org: null, ownerUser: { fullName: 'Akmal', phone: '+998901234567' } }))
+    expect(listingOwner({ org: null, ownerUser: { fullName: 'Akmal', phone: '+998901234567' }, contactPhone: '+998 90 123 45 67' }))
       .toEqual({ type: 'person', name: 'Akmal', phoneVerified: true });
+    // E'londagi raqam hisobnikidan boshqa yoki yo'q: belgi yo'q (egasi qarori, 2026-11-02)
+    expect(listingOwner({ org: null, ownerUser: { fullName: 'Akmal', phone: '+998901234567' }, contactPhone: '+998907654321' }))
+      .toMatchObject({ phoneVerified: false });
+    expect(listingOwner({ org: null, ownerUser: { fullName: 'Akmal', phone: '+998901234567' }, contactPhone: null }))
+      .toMatchObject({ phoneVerified: false });
     expect(listingOwner({ org: null, ownerUser: { fullName: null, phone: null } }))
       .toEqual({ type: 'person', name: 'Yakka haydovchi', phoneVerified: false });
   });

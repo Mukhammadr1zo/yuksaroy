@@ -36,7 +36,10 @@ type Revenue = {
   months: RevenueMonth[];
   /** Platformadagi bitimlar: tushum emas, 12 oy, yangisi birinchi */
   deals: DealMonth[];
+  /** Oxirgi 30 kun: devorga urilgan odam, shundan keyin buyurtma yaratgan va to'lagan (hammasi ODAM) */
+  paywall: PaywallRow[];
 };
+type PaywallRow = { kind: 'phone' | 'wagon' | 'metrics'; people: number; ordered: number; paid: number };
 type Expiring = {
   id: string; no: string; months: number; amountTiyin: number; endsAt: string; remindedAt: string | null; lastManualAt: string | null; remindedToday: boolean;
   user: Person; plan: { code: string; name: Record<string, string> } | null;
@@ -195,6 +198,7 @@ function Overview({ onExport }: { onExport: TabProps['onExport'] }) {
     return (
       <>
         <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{tr('empty')}</div>
+        <Paywall rows={data.paywall} />
         <Deals rows={data.deals} />
       </>
     );
@@ -241,8 +245,34 @@ function Overview({ onExport }: { onExport: TabProps['onExport'] }) {
         {!hasPremium ? <li>{tr('noPremium')}</li> : null}
         {!hasAds ? <li>{tr('noAds')}</li> : null}
       </ul>
+      <Paywall rows={data.paywall} />
       <Deals rows={data.deals} />
     </>
+  );
+}
+
+/**
+ * Devordan obunagacha: oxirgi 30 kunda devorga urilgan odamlar, ulardan nechtasi buyurtma yaratgan va nechtasi to'lagan.
+ * Uch qator (telefon, vagon, ko'rsatkichlar), to'rt ustun: 1280 px da yon tomonga surilmaydi. Hech kim urilmagan
+ * bo'lsa blok chizilmaydi: nolga qarab qaror chiqmaydi.
+ */
+function Paywall({ rows }: { rows: PaywallRow[] }) {
+  const tr = useTranslations('admin.revenue.paywall');
+  const locale = useLocale();
+  if (!rows.some((r) => r.people > 0)) return null;
+  const cols: Col<PaywallRow>[] = [
+    { key: 'wall', head: tr('wall'), cell: (r) => tr(`kind.${r.kind}`) },
+    { key: 'people', head: tr('people'), num: true, cell: (r) => num(r.people, locale) },
+    { key: 'ordered', head: tr('ordered'), num: true, cell: (r) => num(r.ordered, locale) },
+    { key: 'paid', head: tr('paid'), num: true, cell: (r) => num(r.paid, locale) },
+  ];
+  return (
+    <section className="mt-8 border-t border-line pt-5">
+      <h2 className="font-mono text-[11px] font-semibold uppercase tracking-wide text-muted">{tr('title')}</h2>
+      <p className="mt-1 text-sm text-ink">{tr('lead')}</p>
+      <DataTable cols={cols} rows={rows} keyOf={(r) => r.kind} empty="" />
+      <p className="mt-2 text-xs text-muted">{tr('decision')}</p>
+    </section>
   );
 }
 

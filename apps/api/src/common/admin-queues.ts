@@ -176,14 +176,20 @@ export async function queueStats(prisma: PrismaService, oldest: boolean): Promis
  * Egasiz obyektga yozilgan suhbat ataylab kiritilgan: unga platformadan boshqa hech kim javob
  * bermaydi, eslatmasiz esa navbat bosh sahifada turadi-yu, hech kimni turtmaydi.
  */
-const WATCHED: readonly QueueKey[] = ['listingsPendingReview', 'orgsPendingKyc', 'terminalClaimsPending', 'platformInquiriesOpen'];
+const WATCHED: readonly QueueKey[] = ['listingsPendingReview', 'orgsPendingKyc', 'terminalClaimsPending', 'platformInquiriesOpen', 'contactNew', 'reportsNew'];
 
-/** `days` kundan uzoq kutayotgan navbatlar, eng eskisidan boshlab. */
+/**
+ * Sayt va'da qilgan muddat `days` dan qisqa bo'lgan navbatlar: murojaat shakli "24 soat ichida javob beramiz"
+ * deydi (contact.json), shuning uchun u 1 kundan chiqadi (egasi qarori, 2026-11-02 ko'rik).
+ */
+const PROMISED_DAYS: Partial<Record<QueueKey, number>> = { contactNew: 1 };
+
+/** `days` kundan (va'dali navbatda undan qisqa muddatdan) uzoq kutayotgan navbatlar, eng eskisidan boshlab. */
 export function staleQueues(stats: Record<QueueKey, QueueStat>, now: Date, days: number): { key: QueueKey; days: number }[] {
   return WATCHED.flatMap((key) => {
     const at = stats[key].oldest;
     if (!at || !stats[key].count) return [];
     const waited = Math.floor((now.getTime() - at.getTime()) / 86_400_000);
-    return waited >= days ? [{ key, days: waited }] : [];
+    return waited >= Math.min(days, PROMISED_DAYS[key] ?? days) ? [{ key, days: waited }] : [];
   }).sort((a, b) => b.days - a.days);
 }

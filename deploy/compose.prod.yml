@@ -2,6 +2,11 @@
 # Ishga tushirish: cd /opt/yuksaroy && docker compose -f deploy/compose.prod.yml --env-file .env up -d --build
 name: yuksaroy
 
+# Loglar journald ga (2026-11-02): konteyner qayta yaratilganda (har deployda) docker json-file
+# logi yo'qolardi, journald da esa server jurnalida qoladi. Ko'rish: journalctl CONTAINER_NAME=yuksaroy-api-1
+x-logging: &journald
+  driver: journald
+
 services:
   db:
     image: postgres:17-bookworm
@@ -26,6 +31,7 @@ services:
       args:
         GIT_SHA: ${GIT_SHA:-}
     restart: unless-stopped
+    logging: *journald
     env_file: [../.env]
     environment:
       NODE_ENV: production
@@ -57,6 +63,7 @@ services:
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
         NEXT_PUBLIC_GIT_SHA: ${GIT_SHA:-}
     restart: unless-stopped
+    logging: *journald
     environment:
       NODE_ENV: production
       # Server komponentlar va /api/v1 rewrite ichki tarmoq orqali
@@ -74,6 +81,7 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.bot
     restart: unless-stopped
+    logging: *journald
     env_file: [../.env]
     environment:
       NODE_ENV: production

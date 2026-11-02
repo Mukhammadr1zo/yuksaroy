@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { PrismaService } from '../../common/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PlatformAdmin } from '../organizations/application/platform-admin';
-import { notifyBoth } from '../../common/telegram';
+import { notifyBoth, personLabel } from '../../common/telegram';
 import { filesOrThrow, type Attachment } from '../../common/attachments';
 import { threadRole, type ThreadRole } from './domain/access';
 import { markInquiryMessage, markInquiryNoReply } from './inquiry-status';
@@ -226,14 +226,15 @@ export class ChatService {
   private async notifyNew(fromUserId: string, inquiryId: string, terminal: { name: string; orgId: string | null }, text: string) {
     const to = (terminal.orgId ? await this.notifications.recipients({ orgIds: [terminal.orgId] }) : await this.platform.adminUserIds()).filter((id) => id !== fromUserId);
     if (!to.length) return;
-    const from = await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true, phone: true } }).then((u) => u?.fullName || u?.phone || '');
+    const from = await this.prisma.user.findUnique({ where: { id: fromUserId }, select: { fullName: true } }).then((u) => u?.fullName ?? null);
     const href = `/dashboard/inquiries/${inquiryId}`;
     await notifyBoth(this.prisma, this.notifications, {
       target: { userIds: to },
       kind: 'inquiry',
       inApp: 'inquiry',
       href,
-      vars: { title: terminal.name, from, message: text.slice(0, 500) },
+      // Ismsiz odam telefon bilan emas, "Mijoz" deb chiqadi (2026-11-02): raqamni ulashish uning qarori
+      vars: (l) => ({ title: terminal.name, from: personLabel(from, l), message: text.slice(0, 500) }),
       card: { title: terminal.name, body: text.slice(0, 200) },
     });
   }

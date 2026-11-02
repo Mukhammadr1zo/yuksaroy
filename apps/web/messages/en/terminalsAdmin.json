@@ -106,6 +106,7 @@
       "currentStatus": "Status",
       "openPublic": "Public page",
       "err": {
+        "TERMINAL_HIDDEN_BY_ADMIN": "An admin hid this object. Contact us to reopen it.",
         "STATION_REQUIRED": "Pick a station.",
         "STATION_NOT_FOUND": "Station not found.",
         "NAME_REQUIRED": "Enter a name (at least 2 characters).",

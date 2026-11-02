@@ -2,7 +2,7 @@ import type { SearchLang } from '@yuksaroy/domain';
 import { env } from './env';
 import { IpBucket } from './ip-bucket';
 import type { PrismaService } from './prisma.service';
-import { recordTelegram } from './runtime';
+import { recordTelegram, recordTelegramSkipped } from './runtime';
 // Faqat tur: qurilishda yo'qoladi, shuning uchun modul aylanishi paydo bo'lmaydi
 import type { NotificationKind, NotificationsService } from '../modules/notifications/notifications.service';
 
@@ -10,6 +10,13 @@ import type { NotificationKind, NotificationsService } from '../modules/notifica
 export const TG_MAX = 3500;
 // Bitta chatga soatiga 5 xabar: spam va Telegram 429 dan himoya
 const chatBucket = new IpBucket(5, 3_600_000);
+/**
+ * Muhim xabarlar o'z chelagida (2026-11-02): yangi buyurtma, admin navbati va "ijrochi topilmadi"
+ * ogohlantirishi. Ilgari barcha tur bitta 5 talik chelakni bo'lishardi, ya'ni chat xabarlari
+ * oqimi buyurtma xabarini yutib yuborar edi va terminal egasi tasdiqlash muddatini bilmay qolardi.
+ */
+export const IMPORTANT_KINDS: readonly string[] = ['orderNew', 'adminQueue', 'adminNoProvider', 'adminFanoutFailed'];
+const importantBucket = new IpBucket(20, 3_600_000);
 
 /** HTML parse_mode uchun: foydalanuvchi matnidagi belgilar. */
 export const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -35,9 +42,15 @@ export type ReplyMarkup = Markup | ((l: SearchLang) => Markup);
  * hech narsa bermasdi. Chindan kerak bo'lsa javob tanasidagi `description` o'qiladi
  * ('blocked by the user' va 'user is deactivated' - ha, qolgani - yo'q).
  */
-export async function sendTelegram(chatIds: readonly (bigint | string)[], text: string, replyMarkup?: Markup): Promise<number> {
+export async function sendTelegram(chatIds: readonly (bigint | string)[], text: string, replyMarkup?: Markup, kind?: string): Promise<number> {
   const body = clip(text);
-  const allowed = chatIds.map(String).filter((id) => chatBucket.take(id));
+  const bucket = kind && IMPORTANT_KINDS.includes(kind) ? importantBucket : chatBucket;
+  // Chegaradan oshgan xabar tur bo'yicha sanaladi: Tizim sahifasi jim yo'qolgan xabarni ko'rsin
+  const allowed = chatIds.map(String).filter((id) => {
+    if (bucket.take(id)) return true;
+    recordTelegramSkipped(kind ?? 'other');
+    return false;
+  });
   let sent = 0;
   await Promise.all(
     allowed.map((chat_id) =>
@@ -137,9 +150,21 @@ const TEXTS = {
     en: '💬 <b>You have a new offer</b>\n{no} · {title}\n{from}\n\nView: {url}',
   },
   marketAward: {
-    uz: '✅ <b>Taklifingiz tanlandi</b>\n{no} · {title}\nRaqamlaringiz bir-biringizga ochildi.\n\n{url}',
-    ru: '✅ <b>Ваше предложение выбрано</b>\n{no} · {title}\nНомера открыты друг для друга.\n\n{url}',
-    en: '✅ <b>Your offer was chosen</b>\n{no} · {title}\nYou can now see each other\'s numbers.\n\n{url}',
+    uz: "✅ <b>Sizni tanlashdi</b>\n{no} · {title}\nBuyurtmachi raqamini ulashgan bo'lsa, sahifada ko'rinadi.\n\n{url}",
+    ru: '✅ <b>Вас выбрали</b>\n{no} · {title}\nЕсли заказчик поделился номером, он виден на странице.\n\n{url}',
+    en: '✅ <b>You were chosen</b>\n{no} · {title}\nIf the customer shared a number, it is shown on the page.\n\n{url}',
+  },
+  // Tanlanmagan ijrochiga (2026-11-02): jimlik "hali qaror yo'q" deb o'qiladi. Matn urgentDeclined dan olingan
+  marketDeclined: {
+    uz: "➖ <b>Taklifingiz tanlanmadi</b>\n{no} · {title}\nBoshqa ijrochi tanlandi.\n\n{url}",
+    ru: '➖ <b>Ваше предложение не выбрано</b>\n{no} · {title}\nВыбран другой исполнитель.\n\n{url}',
+    en: '➖ <b>Your offer was not chosen</b>\n{no} · {title}\nAnother provider was chosen.\n\n{url}',
+  },
+  // So'rov egasi uni yopdi yoki bekor qildi: ochiq takliflar egalariga (bajarildi holatida yuborilmaydi)
+  marketClosed: {
+    uz: "➖ <b>So'rov yopildi</b>\n{no} · {title}\nBuyurtmachi so'rovni yopdi, taklifingiz endi kerak emas.\n\n{url}",
+    ru: '➖ <b>Запрос закрыт</b>\n{no} · {title}\nЗаказчик закрыл запрос, ваше предложение больше не нужно.\n\n{url}',
+    en: '➖ <b>Request closed</b>\n{no} · {title}\nThe customer closed the request, your offer is no longer needed.\n\n{url}',
   },
   /*
    * Shoshilinch so'rov: bu yagona joy, u yerda odam telefon yonida HOZIR javob kutadi.
@@ -274,6 +299,12 @@ const TEXTS = {
     ru: '⏳ <b>Очередь ждёт</b>\n{list}\n\n{url}',
     en: '⏳ <b>Queue is waiting</b>\n{list}\n\n{url}',
   },
+  // Adminlarga: kunlik xulosa (modules/orders/application/admin-digest.ts), kuniga bir marta
+  adminDigest: {
+    uz: "📋 <b>Kunlik xulosa</b>\n{list}\n\n{url}",
+    ru: '📋 <b>Сводка за день</b>\n{list}\n\n{url}',
+    en: '📋 <b>Daily summary</b>\n{list}\n\n{url}',
+  },
   // Adminlarga, darhol: yangi so'rov birorta ham haqiqiy ijrochiga bormadi (common/fanout.ts).
   // {what} oluvchining tilida (yuk, xizmat turi yoki shoshilinch ish), havola panelda shu so'rov
   adminNoProvider: {
@@ -304,6 +335,13 @@ export const NOTIFY_KINDS = Object.keys(TEXTS) as NotifyKind[];
 export function notifyText(kind: NotifyKind, locale: string | null | undefined, vars: Vars): string {
   return clip(fill(TEXTS[kind][lang(locale)], vars, esc));
 }
+
+/**
+ * Ismsiz odam kim deb ataladi (2026-11-02 egasi qarori): bildirishnomada telefon raqami chiqmaydi,
+ * chunki raqamni odam ulashishni o'zi hal qiladi (bozorda ham shunday). Ism bor bo'lsa ism.
+ */
+const CLIENT_WORD: Record<SearchLang, string> = { uz: 'Mijoz', ru: 'Клиент', en: 'Client' };
+export const personLabel = (name: string | null | undefined, l: SearchLang): string => name?.trim() || CLIENT_WORD[l];
 
 /** Sayt havolasi (WEB_ORIGIN + yo'l). */
 export const webUrl = (path: string) => `${env.WEB_ORIGIN}${path}`;
@@ -358,7 +396,7 @@ export async function notifyTelegram(prisma: PrismaService, target: NotifyTarget
   let sent = 0;
   for (const [locale, chats] of byLocale) {
     const markup = typeof replyMarkup === 'function' ? replyMarkup(lang(locale)) : replyMarkup;
-    sent += await sendTelegram(chats, notifyText(kind, locale, typeof vars === 'function' ? vars(locale) : vars), markup);
+    sent += await sendTelegram(chats, notifyText(kind, locale, typeof vars === 'function' ? vars(locale) : vars), markup, kind);
   }
   return sent;
 }

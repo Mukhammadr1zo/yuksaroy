@@ -101,3 +101,27 @@ Zaxirasiz tiklab bo'lmaydigan narsalar: hujjat raqamlari ketma-ketligi (`doc_seq
 - **API 500, `P1001`**: baza ko'tarilmagan (`docker compose ps db`), yoki `DATABASE_URL` da host `db` emas.
 - **Bot javob bermaydi**: `docker compose logs bot`. `Wrong HTTP URL` bo'lsa `WEB_URL` ommaviy https emas. `409` bo'lsa bitta token ikki joyda ishlayapti.
 - **Kirish kodi noto'g'ri deydi**: `JWT_SECRET` almashtirilgan (OTP kodlari shu bilan xeshlanadi). Foydalanuvchi yangi kod so'rasin.
+
+## Qo'lda orqaga qaytarish
+
+Deploy yiqilsa yoki yangi versiya yomon chiqsa, oldingi commit obraziga qaytiladi. Obrazlar GHCR da commit SHA tegi bilan turadi (`ghcr.io/mukhammadr1zo/yuksaroy-{api,web,bot}:<sha>`). Oldingi SHA ni GitHub Actions tarixidan yoki `git log` dan oling.
+
+```bash
+ssh <foydalanuvchi>@<server>
+cd /opt/yuksaroy
+# 1) GHCR ga kirish (token: repo egasining read:packages huquqli PAT)
+export DOCKER_CONFIG=$HOME/.docker-yuksaroy
+echo '<PAT>' | docker login ghcr.io -u <github-login> --password-stdin
+# 2) oldingi tegni tortib, shu bilan ko'tarish (migratsiyalar orqaga qaytmaydi: sxemani buzgan
+#    migratsiya bo'lsa avval /var/backups/yuksaroy dan baza tiklanadi, docs/runbooks/zaxira.md)
+export IMAGE_TAG=<oldingi-sha>
+docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env pull api web bot
+docker compose -f deploy/compose.prod.yml -f deploy/compose.vps.yml --env-file .env up -d --no-build
+# 3) tekshirish
+curl -fsS http://127.0.0.1:4310/v1/health && curl -fsS -o /dev/null http://127.0.0.1:3310/ && echo sog\'lom
+rm -rf "$DOCKER_CONFIG"
+```
+
+Eski obraz serverda hali bo'lsa (`docker images | grep yuksaroy`), `pull` o'tkazib yuborilib to'g'ridan-to'g'ri `up -d --no-build` ham ishlaydi. Deploy oxirida eski obrazlar tozalanadi, shuning uchun ko'pincha tortish kerak bo'ladi.
+
+Deploydan keyin "Katalog tekshiruvi" qadami `/terminals`, `/api/v1/terminals?limit=1` va bitta terminal sahifasini tekshiradi; qizil bo'lsa avval shu yerdagi qadamlarni bajaring.

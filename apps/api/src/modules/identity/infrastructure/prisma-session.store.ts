@@ -29,6 +29,9 @@ export class PrismaSessionStore implements SessionStore {
   async revoke(id: string) {
     await this.prisma.session.update({ where: { id }, data: { revokedAt: new Date() } });
   }
+  async revokeOthersForUser(userId: string, keepId: string) {
+    await this.prisma.session.updateMany({ where: { userId, revokedAt: null, id: { not: keepId } }, data: { revokedAt: new Date() } });
+  }
   async revokeAllForUser(userId: string) {
     await this.prisma.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
   }

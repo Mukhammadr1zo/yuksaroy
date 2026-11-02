@@ -20,6 +20,8 @@
     "dayTitle": "{day}: {n} impressions",
     "empty": "No impressions in the last 30 days. Once the object is active, catalog, map, compare and bot impressions are collected here.",
     "loading": "Loading",
+    "locked": "Analytics are open to subscribers: here you see how many people viewed, opened the phone and sent an inquiry in the last 30 days.",
+    "lockedCta": "See plans",
     "loadFailed": "Could not load analytics.",
     "back": "Back to listings",
     "link": "Analytics",

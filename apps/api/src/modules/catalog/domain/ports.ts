@@ -1,6 +1,6 @@
 import type { Attachment } from '../../../common/attachments';
 // catalog: domen portlari. Framework va Prisma bu faylda yo'q.
-import type { ClaimStatus, Rju, ServiceCode, TariffUnit, TerminalKind, TerminalStatus } from '@yuksaroy/domain';
+import type { ClaimStatus, KycStatus, Rju, ServiceCode, TariffUnit, TerminalKind, TerminalStatus } from '@yuksaroy/domain';
 
 export interface StationRecord {
   id: string; esrCode: string | null; nameUz: string; nameRu: string | null; rju: Rju;
@@ -49,6 +49,8 @@ export interface TerminalRecord {
     registryNo: number | null; stationNameRaw: string | null; esrCode: string | null; rju: Rju | null;
     ownerNameRaw: string | null; lengthM: number | null; loadCapacity: number; unloadCapacity: number;
   }) | null;
+  /** Tashkilotning tasdiq holati: sahifa va kartada "tasdiqlanmagan" yorlig'i uchun (egasi qarori, 2026-11-02) */
+  orgKyc?: KycStatus | null;
   id: string; orgId: string | null; orgName: string | null; stationId: string | null; station: StationRecord | null;
   kind: TerminalKind; slug: string; name: string; description: string | null; address: string | null; phone: string | null;
   lat: number | null; lng: number | null; is24h: boolean; hours: WeekHours | null; passport: Record<string, unknown> | null;

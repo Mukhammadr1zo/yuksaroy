@@ -63,6 +63,7 @@ model User {
   listings      Listing[] // yakka haydovchi e'lonlari (ownerUserId)
   notifications Notification[]
   subscriptions Subscription[]
+  paywallHits   PaywallHit[]
   serviceProfiles ServiceProfile[]
   marketRequests  MarketRequest[]
   wagonSearches   WagonSearch[]
@@ -899,6 +900,24 @@ model Impression {
   count    Int      @default(0)
 
   @@unique([kind, targetId, day, surface])
+}
+
+/// To'lov devoriga urilgan ODAM: bir odam, bir kun, bir devor uchun bitta qator.
+/// Egasi qarori 2026-11-02: sanoq xotirada emas bazada (ilgari har deploy nolga qaytarardi)
+/// va takrorni noyob kalitning o'zi to'sadi. Faqat kirgan odam sanaladi: devorga olib
+/// boradigan uch yo'l (telefon, vagon, ko'rsatkichlar) ham kirishni talab qiladi, mehmon
+/// uchun barqaror kalit yo'q (IP bitta operator ortida minglab odam).
+model PaywallHit {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 'phone' | 'wagon' | 'metrics'
+  kind      String
+  /// Toshkent kuni
+  day       DateTime @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([userId, kind, day])
+  @@index([kind, day])
 }
 
 /// Kunlik tashriflar: bir kun va bir joy uchun bitta qator.

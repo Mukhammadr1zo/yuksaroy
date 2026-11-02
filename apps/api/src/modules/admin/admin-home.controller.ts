@@ -15,6 +15,7 @@ import { ImpressionsService } from '../impressions/impressions.service';
 import { PlatformAdminGuard } from '../organizations/presentation/platform-admin.guard';
 import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner.guard';
 import { alertsOf, fillSeries, growthPair, revealFunnel, sortWork } from './admin-home';
+import { wallPeople } from './paywall';
 import { adSales, monthWindow } from './revenue';
 
 const DAY = 86_400_000;
@@ -232,25 +233,25 @@ export class AdminHomeController {
         : Promise.resolve([] as { userId: string }[]),
       this.config.get(),
       /*
-       * Konversiyaning MAXRAJI: to'lov devorida to'xtab ketgan odam. Yuqoridagi to'rt
+       * Konversiyaning MAXRAJI: to'lov devorida to'xtab ketgan ODAM. Yuqoridagi to'rt
        * son faqat suratni beradi, ya'ni "narxni tushiraymi yoki bepul oynani
        * kengaytiraymi" degan savolga javob chiqmasdi.
        *
-       * Qator serverda, 402 tashlanadigan joyda, bir odam uchun kuniga bir marta
-       * yoziladi (contacts.controller.ts va wagon.controller.ts), ya'ni bu son ham
-       * yuqoridagi "odam ochdi" kabi ODAM sanog'i.
-       *
-       * Impression.day kun aniqligida saqlanadi: chegara kun boshiga tushiriladi, aks
-       * holda eng chekka kun yarmi tushib qolardi.
+       * Manba PaywallHit (egasi qarori, 2026-11-02): bir odam + kun + devor = bitta qator,
+       * takrorni baza to'sadi. Bu son OCHILISH emas, ODAM: bir odam davr ichida bir devorga
+       * ko'p kun urilsa ham bir marta sanaladi (guruhlash [kind, userId] bo'yicha, keyin
+       * kind bo'yicha qatorlar soni). Faqat kirgan odam sanaladi, mehmon emas. Eski
+       * Impression(kind='wall') qatorlari o'qilmaydi: ular boshqa birlik edi.
+       * ponytail: guruhlash xotirada, take 50 000; shundan ko'p odam bo'lsa COUNT(DISTINCT) SQL ga.
        */
-      this.prisma.impression.groupBy({
-        by: ['targetId'],
-        where: { kind: 'wall', day: { gte: new Date(from.toISOString().slice(0, 10)) } },
-        _sum: { count: true },
+      this.prisma.paywallHit.groupBy({
+        by: ['kind', 'userId'],
+        where: { day: { gte: new Date(from.toISOString().slice(0, 10)) } },
+        orderBy: [{ kind: 'asc' }, { userId: 'asc' }],
+        take: 50_000,
       }),
     ]);
-    const walls = { phone: 0, wagon: 0 };
-    for (const w of wallRows) if (w.targetId === 'phone' || w.targetId === 'wagon') walls[w.targetId] = w._sum.count ?? 0;
+    const walls = wallPeople(wallRows);
     // freeTotal sonlar YONIDA: qaror "N ni oshiraymi" degan savol, hozirgi N
     // ko'rinmasa to'rt son bilan javob berib bo'lmaydi
     return { ...revealFunnel(by, new Set(subs.map((sb) => sb.userId))), freeTotal: cfg.phoneRevealFree, walls };

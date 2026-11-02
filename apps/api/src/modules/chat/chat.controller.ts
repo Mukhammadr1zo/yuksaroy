@@ -3,6 +3,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
 import { AuditService } from '../../common/audit.service';
+import { takeMessage, takeNewChat } from './chat-limits';
 import { ChatService } from './chat.service';
 import { NO_REPLY_ACTION } from './inquiry-status';
 
@@ -62,6 +63,7 @@ export class ChatController {
 
   @Post(':id/messages')
   send(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: MessageDto) {
+    takeMessage(userId);
     return this.chat.send(userId, id, dto.text ?? '', dto.attachments);
   }
 
@@ -88,6 +90,7 @@ export class TerminalInquiryController {
 
   @Post('terminals/:slug/inquiries')
   async start(@CurrentUserId() userId: string, @Param('slug') slug: string, @Body() dto: StartDto) {
+    takeNewChat(userId);
     const i = await this.chat.startTerminal(userId, slug, dto.message, dto.orgId ?? null, dto.attachments);
     await this.audit.log({ actorId: userId, action: 'inquiry.create', entity: 'Inquiry', entityId: i.id, meta: { terminal: slug, orgId: dto.orgId ?? null } });
     return i;

@@ -38,6 +38,9 @@ function store(rows: Row[]) {
       return { id: created.id };
     },
     revoke: async () => {},
+    revokeOthersForUser: async (userId, keepId) => {
+      for (const r of rows) if (r.userId === userId && r.id !== keepId && !r.revokedAt) r.revokedAt = new Date();
+    },
     revokeAllForUser: async (userId) => {
       revokedAll.push(userId);
       for (const r of rows) if (!r.revokedAt) r.revokedAt = new Date();

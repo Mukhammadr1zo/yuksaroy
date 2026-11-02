@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { IMPRESSION_SURFACES, type ImpressionSurface } from '@yuksaroy/domain';
-import { api } from '@/lib/api';
+import { Link } from '@/i18n/navigation';
+import { ApiError, api } from '@/lib/api';
 import { uzDate } from '@/lib/format';
 import type { Analytics } from '@/lib/types-trust';
 
@@ -15,8 +16,22 @@ export function AnalyticsPanel({ path, kind }: { path: string; kind: 'listing' |
   const locale = useLocale();
   const t = useTranslations('analytics');
   const [a, setA] = useState<Analytics | null | undefined>(undefined);
-  useEffect(() => { setA(undefined); api<Analytics>(path).then(setA).catch(() => setA(null)); }, [path]);
+  // 402: ko'rsatkichlar obunachiga (egasi qarori, 2026-11-02). Raqam o'rniga qisqa izoh va tariflarga havola;
+  // qulf serverda ham turadi, bu faqat odamga sababini aytadi.
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    setA(undefined); setLocked(false);
+    api<Analytics>(path).then(setA).catch((e) => { if (e instanceof ApiError && e.status === 402) setLocked(true); setA(null); });
+  }, [path]);
   if (a === undefined) return <p className="text-sm text-muted">{t('loading')}</p>;
+  if (locked) {
+    return (
+      <div className="rounded-card border border-line bg-white p-4">
+        <p className="text-sm text-ink">{t('locked')}</p>
+        <Link href="/pricing" className="mt-3 inline-block text-sm font-semibold text-teal-ink hover:underline">{t('lockedCta')}</Link>
+      </div>
+    );
+  }
   if (a === null) return <p role="alert" className="text-sm text-red-700">{t('loadFailed')}</p>;
 
   const max = Math.max(1, ...a.days.map(sum));

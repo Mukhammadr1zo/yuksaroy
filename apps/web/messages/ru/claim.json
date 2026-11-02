@@ -1,5 +1,6 @@
 {
   "claim": {
+    "orgUnverified": "Организация не подтверждена",
     "registryNo": "Номер объекта",
     "station": "Станция",
     "region": "Регион",

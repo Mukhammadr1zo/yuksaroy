@@ -12,8 +12,10 @@ import type { MarketOffer, MarketRequest } from '@/lib/types-market';
 import { BTN_NAVY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { OfferStatusPill } from './bits';
 
-export function OfferForm({ request, next, preview = false, me = null }: {
+export function OfferForm({ request, next, preview = false, me = null, source }: {
   request: MarketRequest; next: string; preview?: boolean;
+  /** Taklif qayerdan keldi: 'tg' Mini App sahifasi beradi; bo'sh bo'lsa ?from=share dan o'qiladi, boshqasi = sayt. Server auditga yozadi. */
+  source?: 'tg' | 'share';
   /** Brauzerda o'qilgan so'rov: o'z taklifim va "bu mening so'rovim" shundan. Ota komponent beradi. */
   me?: MarketRequest | null;
 }) {
@@ -45,7 +47,9 @@ export function OfferForm({ request, next, preview = false, me = null }: {
     e.preventDefault();
     setBusy(true); setErr(null);
     try {
+      const from = source ?? (new URLSearchParams(window.location.search).get('from') === 'share' ? 'share' : undefined);
       const o = await post<MarketOffer>(`/market/requests/${request.id}/offers`, {
+        from,
         priceTiyin: price ? Math.round(Number(price) * 100) : undefined,
         message: message.trim() || undefined,
       });

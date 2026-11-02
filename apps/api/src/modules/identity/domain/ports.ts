@@ -77,6 +77,8 @@ export interface SessionStore {
   rotate(oldId: string, next: { refreshHash: string; expiresAt: Date }): Promise<{ id: string }>;
   revoke(id: string): Promise<void>;
   revokeAllForUser(userId: string): Promise<void>;
+  /** Parol yoki telefon almashganda: joriy qurilmadan boshqa hamma sessiya yopiladi. */
+  revokeOthersForUser(userId: string, keepId: string): Promise<void>;
 }
 
 export const USER_REPOSITORY = Symbol('UserRepository');
