@@ -194,7 +194,7 @@
       "lead": "The assistant turns a query into filters: region, service, equipment type, date. It never invents objects, prices or availability; it relies only on catalog data.",
       "example": {
         "heading": "Real example",
-        "query": "Free container spot in Tashkent today",
+        "query": "Rail terminal in Samarkand",
         "chips": "Understood filters",
         "result": "Result",
         "decision": "{terminals, plural, one {# terminal} other {# terminals}}{free, plural, =0 {} other { · # free today}}",

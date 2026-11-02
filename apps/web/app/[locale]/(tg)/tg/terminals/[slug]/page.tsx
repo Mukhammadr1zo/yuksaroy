@@ -101,7 +101,7 @@ export default async function TgTerminalPage({ params }: Params) {
       </section>
       )}
 
-      {registryOnly ? null : <TerminalCta slug={x.slug} lat={x.lat} lng={x.lng} />}
+      {registryOnly ? null : <TerminalCta id={x.id} slug={x.slug} lat={x.lat} lng={x.lng} hasPhone={x.hasPhone} isDemo={!!x.isDemo} />}
     </main>
   );
 }

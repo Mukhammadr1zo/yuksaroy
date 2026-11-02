@@ -107,15 +107,16 @@ export default async function TerminalPage({ params }: Params) {
           <h1 className="font-display mt-3 text-3xl font-bold md:text-4xl">{t.name}</h1>
           <p className="mt-2 text-muted">{station ? <>{station} {tr('station.suffix')} </> : null}{t.station?.esrCode ?? t.rail?.esrCode ? <span className="font-mono">({t.station?.esrCode ?? t.rail?.esrCode})</span> : null}{t.station?.rju ?? t.rail?.rju ? <> · {trj((t.station?.rju ?? t.rail?.rju)!)} {tr('rju.suffix')}</> : null}{t.address ? ` · ${t.address}` : ''}</p>
           {t.description ? <p className="mt-4 text-ink/85">{t.description}</p> : null}
-          {/* Namuna terminal: bron ishlaydi (sinab ko'rish uchun), lekin tasdiqlaydigan egasi yo'q */}
+          {/* Namuna terminal: egasi yo'q, joy band qilinmaydi (egasi qarori, 2026-10-07) */}
           {t.isDemo ? <p className="mt-3 rounded-xl border border-dashed border-line bg-sand px-4 py-3 text-sm text-muted">{tr('demoNote')}</p> : null}
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-64">
           <PhotoGallery photos={t.photos} alt={t.name} fallback={<CardPhoto kind={t.kind} slug={t.slug} alt={t.name} />} />
           {registryOnly ? null : (
             <>
-              <Link href={`/quote?terminal=${t.id}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>
-              <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>
+              <Link href={`/quote?terminal=${t.slug}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>
+              {t.isDemo ? <p className="rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{tr('demoNoBook')}</p>
+                : <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>}
             </>
           )}
           {/* Raqam obunachiga, bosilganda: sahifa keshlangan, raqam brauzerdan olinadi (PhoneReveal) */}
@@ -203,7 +204,8 @@ export default async function TerminalPage({ params }: Params) {
                 })}
               </ul>
             )}
-            <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{tr('slots.book')}</DashLink>
+            {t.isDemo ? <p className="mt-3 text-sm text-muted">{tr('demoNoBook')}</p>
+              : <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{tr('slots.book')}</DashLink>}
           </section>
           <section hidden={registryOnly} className="rounded-card border border-line bg-white p-5">
             <h2 className="text-sm font-bold">{tr('hours.heading')}</h2>

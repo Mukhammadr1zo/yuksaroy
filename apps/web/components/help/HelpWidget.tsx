@@ -111,6 +111,9 @@ export function HelpWidget() {
 
   return (
     <>
+      {/* Telefonda tugma kichik (40px) va sahifa oxirida unga joy qoladi: kartalar va pastki havolalar
+          ostida qolmaydi. Spacer ichki oqimda, tugma esa fixed (2026-11-02) */}
+      <div className="h-14 sm:hidden" aria-hidden="true" />
       <button
         type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="help-widget" aria-label={t('open')}
         // display faqat bitta joydan keladi: asosiy ro'yxatda ham inline-flex bo'lsa,
@@ -119,7 +122,7 @@ export function HelpWidget() {
         // Pastki masofaga --ad-bottom qo'shiladi: pastdan chiquvchi reklama banneri ko'rinib
         // turgan bo'lsa tugma uning ustiga ko'chadi. O'lchamni banner o'zi yozadi (AdSlot.tsx),
         // shunda balandlik bitta joyda hisoblanadi va uch joyda takrorlanmaydi.
-        className={`fixed bottom-[calc(1.5rem_+_var(--ad-bottom,0px))] right-4 z-40 h-12 items-center gap-2 rounded-full bg-navy pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 ${cornerBusy ? 'hidden sm:inline-flex' : 'inline-flex'}`}
+        className={`fixed bottom-[calc(1.5rem_+_var(--ad-bottom,0px))] right-3 z-40 h-10 w-10 items-center justify-center gap-2 rounded-full bg-navy text-sm font-semibold text-white shadow-lg transition hover:bg-navy-2 active:scale-[0.98] sm:right-6 sm:h-12 sm:w-auto sm:justify-start sm:pl-3 sm:pr-4 max-sm:[html[data-consent-bar]_&]:hidden ${cornerBusy ? 'hidden sm:inline-flex' : 'inline-flex'}`}
       >
         <ChatCircleDotsIcon size={22} weight="fill" aria-hidden="true" />
         <span className="hidden sm:inline">{t('open')}</span>

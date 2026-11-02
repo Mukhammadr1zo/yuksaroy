@@ -39,16 +39,14 @@ export default function TgHome() {
 
   useEffect(() => {
     // Sanoqlar: /stats (terminal, shahobcha ham shu ichida, namunasiz) + e'lonlar turi bo'yicha ikki so'rov.
-    // E'lonlar jamisi namunani ham sanaydi: sahifadagi namunalar ayiriladi (sanoq faqat haqiqiy e'lon).
-    // ponytail: 50 ta qator (API chegarasi); namuna 50 dan keyingi sahifaga tushsa son shunchaga ortadi.
-    // API namunasiz sonni bersa bu ayirish o'chadi.
-    const real = (p: ListingPage | null) => (p ? p.total - p.items.filter((x) => x.isDemo).length : 0);
+    // Haqiqiy son = total - summary.demo (API butun filtrlangan to'plamdagi namunani sanaydi)
+    const real = (p: ListingPage | null) => (p ? p.total - (p.summary.demo ?? 0) : 0);
     Promise.all([
       api<Stats>('/stats').catch(() => null),
-      api<ListingPage>(`/listings?kind=${EQUIPMENT_KINDS.join(',')}&limit=50`).catch(() => null),
-      api<ListingPage>('/listings?kind=TRUCK&limit=50').catch(() => null),
+      api<ListingPage>(`/listings?kind=${EQUIPMENT_KINDS.join(',')}&limit=1`).catch(() => null),
+      api<ListingPage>('/listings?kind=TRUCK&limit=1').catch(() => null),
     ]).then(([s, eq, tr]) => setCounts({ terminal: s?.terminals ?? 0, equipment: real(eq), truck: real(tr) }));
-    api<Page<TerminalCard>>('/terminals?bookable=1&limit=6').then((r) => setBookable(r.items)).catch(() => setBookable([]));
+    api<Page<TerminalCard>>('/terminals?bookable=1&limit=6').then((r) => setBookable(r.items.filter((x) => !x.isDemo))) // 2026-11-02: namunaga joy band qilinmaydi, "bo'sh joyli" qatorida ham chiqmaydi.catch(() => setBookable([]));
     api<Page<OrderCard>>('/orders?scope=client&status=PENDING,CONFIRMED,IN_PROGRESS&limit=3').then((r) => setOrders(r.items)).catch(() => setOrders([]));
   }, []);
 

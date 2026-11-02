@@ -31,6 +31,7 @@ function Wizard() {
   const locale = useLocale();
   const t = useTranslations('dashboard2.order');
   const ts = useTranslations('service');
+  const ttm = useTranslations('terminal');
   const ta = useTranslations('a11y');
   const [step, setStep] = useState(0);
   // Terminal sahifasidan kelgan bo'lsa (?terminal=slug) stansiya va terminal oldindan tanlanadi
@@ -112,7 +113,7 @@ function Wizard() {
       if (!r.offers.length) setErr(t('err.noOffers'));
       else {
         setOffer(null); setSlots([]); setStep(1);
-        const p = preset ? r.offers.find((o) => o.terminal.slug === preset) : null;
+        const p = preset ? r.offers.find((o) => o.terminal.slug === preset && !o.terminal.isDemo) : null;
         if (p) void pickOffer(p); // terminal sahifasidan kelgan bo'lsa slot jadvali darrov ochiladi
       }
     } catch (e) { setErr(msg(e, t)); } finally { setBusy(false); }
@@ -273,13 +274,14 @@ function Wizard() {
               {offers.map((o) => (
                 <li key={o.terminal.id}>
                   <button
-                    type="button" onClick={() => pickOffer(o)} aria-pressed={offer?.terminal.id === o.terminal.id}
-                    className={`flex w-full items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${offer?.terminal.id === o.terminal.id ? 'border-teal bg-teal-soft' : 'border-line hover:bg-sand'}`}
+                    type="button" onClick={() => pickOffer(o)} aria-pressed={offer?.terminal.id === o.terminal.id} disabled={!!o.terminal.isDemo}
+                    className={`flex w-full items-center justify-between gap-4 rounded-xl border p-4 text-left transition disabled:cursor-not-allowed disabled:bg-sand disabled:opacity-80 ${offer?.terminal.id === o.terminal.id ? 'border-teal bg-teal-soft' : 'border-line hover:bg-sand'}`}
                   >
                     <span className="min-w-0 wrap-anywhere">
-                      {/* Namuna terminal ham buyurtma oladi, lekin uni tasdiqlaydigan egasi yo'q: tanlashdan oldin ko'rinsin */}
+                      {/* Namuna terminal tanlanmaydi: egasi yo'q, API ham rad etadi (DEMO_TARGET, egasi qarori 2026-10-07) */}
                       <span className="font-semibold">{o.terminal.name}</span>{o.terminal.isDemo ? <> <DemoBadge /></> : null}
                       <span className="block text-xs text-muted">{stationName(o.terminal)}{o.terminal.is24h ? ' · 24/7' : ''}{o.missing.length ? ` · ${t('missingTariff', { services: o.missing.map((m) => ts(m)).join(', ') })}` : ''}</span>
+                      {o.terminal.isDemo ? <span className="mt-1 block text-xs text-muted">{ttm('demoNoBook')}</span> : null}
                     </span>
                     <span className="shrink-0 font-mono font-semibold tabular-nums">{som(o.totalTiyin, locale)}</span>
                   </button>

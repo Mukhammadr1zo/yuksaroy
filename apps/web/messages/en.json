@@ -302,7 +302,8 @@
       "none": "No open spots today",
       "book": "Book a spot"
     },
-    "demoNote": "This is a sample terminal, here so you can try how the site works. Booking creates a real order, but there is no real owner to confirm it.",
+    "demoNote": "This is a sample terminal: it shows what the site looks like and is not a real facility.",
+    "demoNoBook": "This is a sample terminal, so a place cannot be booked here: it has no real owner and an order would reach no one.",
     "demoNoChat": "No phone or chat: a sample has no real owner, so a message would reach no one.",
     "demoBadge": "Sample"
   },

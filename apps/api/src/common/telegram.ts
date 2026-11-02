@@ -262,6 +262,12 @@ const TEXTS = {
     ru: '🔔 <b>{queue}</b>\n{what}\n\n{url}',
     en: '🔔 <b>{queue}</b>\n{what}\n\n{url}',
   },
+  // Adminlarga: da'vo egasi raqami reestrdagi raqamga mos kelgani uchun O'ZI tasdiqlandi (qaytarib olish mumkin)
+  adminClaimAuto: {
+    uz: "✅ <b>Da'vo o'zi tasdiqlandi</b>\n{what}\nDa'vogar raqami reestrdagi raqamga mos keldi. Noto'g'ri bo'lsa, panelda qaytarib oling.\n\n{url}",
+    ru: '✅ <b>Заявка подтверждена автоматически</b>\n{what}\nНомер заявителя совпал с номером в реестре. Если это ошибка, отмените в панели.\n\n{url}',
+    en: '✅ <b>Claim approved automatically</b>\n{what}\nThe claimant phone matched the registry phone. If this is wrong, revoke it in the panel.\n\n{url}',
+  },
   // Adminlarga: navbat kutib qolgan (kuniga bir marta, kunlarda)
   adminStale: {
     uz: "⏳ <b>Navbat kutib qolgan</b>\n{list}\n\n{url}",

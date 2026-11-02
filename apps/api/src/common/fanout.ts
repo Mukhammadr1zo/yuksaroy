@@ -71,7 +71,7 @@ export async function logFanout(
       : [],
   ]);
   const notReal = new Set([...admins, ...team]);
-  const sentReal = userIds.filter((id) => !notReal.has(id)).length;
+  const sentReal = await countCompanies(prisma, userIds.filter((id) => !notReal.has(id)));
   await prisma.auditLog.create({
     data: { action: FANOUT_ACTION, entity: f.entity, entityId: f.id, meta: { board: f.board, region: f.region, type: f.type, sent: userIds.length, sentReal, ...(found ? {} : { failed: true }) } },
   }).catch(() => { /* jurnal ixtiyoriy, xabar muhimroq */ });
@@ -88,6 +88,30 @@ export async function logFanout(
     }).catch(() => {});
   }
   return { userIds, sentReal: found ? sentReal : null };
+}
+
+/**
+ * 2026-10-07 egasi qarori: "N ta tashuvchiga yuborildi" odamni emas, KORXONANI sanaydi. Bir
+ * tashkilotning ikki xodimi bitta, tashkilotsiz haydovchi ham bitta. Eski qatorlarda sentReal
+ * odam soni edi: u o'zgarmaydi va o'sha kabi o'qiladi. Tashkilotlar o'qilmasa odam soni olinadi.
+ */
+export async function countCompanies(prisma: PrismaService, userIds: readonly string[]): Promise<number> {
+  if (!userIds.length) return 0;
+  let ms;
+  try {
+    // Namuna tashkilot a'zoligi sanalmaydi (demo-siz qoida), aks holda oluvchi unga ham "korxona" bo'lib qo'shilardi
+    ms = await prisma.membership.groupBy({ by: ['userId', 'orgId'] as ['userId', 'orgId'], orderBy: { userId: 'asc' }, where: { userId: { in: [...userIds] }, org: { isDemo: false } } });
+  } catch { return userIds.length; }
+  // Umumiy tashkilot orqali bog'langan odamlar bitta korxona (union-find): son hech qachon odam sonidan oshmaydi
+  const parent = new Map<string, string>(userIds.map((u) => [u, u]));
+  const find = (x: string): string => { let r = x; while (parent.get(r) !== r) r = parent.get(r)!; return r; };
+  const firstOf = new Map<string, string>();
+  for (const m of ms) {
+    const seen = firstOf.get(m.orgId);
+    if (seen === undefined) firstOf.set(m.orgId, m.userId);
+    else parent.set(find(m.userId), find(seen));
+  }
+  return new Set(userIds.map(find)).size;
 }
 
 /**

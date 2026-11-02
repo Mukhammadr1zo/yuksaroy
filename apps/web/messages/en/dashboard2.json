@@ -250,6 +250,7 @@
         "SLOT_FULL": "No places left in this window. Choose another one.",
         "SLOT_CLOSED": "This window is closed.",
         "SLOT_PAST": "This window has passed.",
+        "DEMO_TARGET": "This is a sample terminal, so a place cannot be booked here.",
         "HOLD_EXPIRED": "The hold has expired. Pick the window again.",
         "HOLD_ALREADY_USED": "An order has already been placed for this spot.",
         "HOLD_NOT_EXTENDABLE": "The hold can be extended only once.",

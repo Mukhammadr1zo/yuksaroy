@@ -14,8 +14,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function QuotePage({ searchParams }: { searchParams: Promise<{ terminal?: string }> }) {
   const { terminal } = await searchParams;
   const t = await getTranslations('quote');
-  // ponytail: terminal nomi uchun id → slug qidiruvi yo'q; ro'yxatdan topamiz (≤ 200 obyekt)
-  const tt = terminal ? await sapiOrNull<{ items: TerminalDetail[] }>('/terminals?limit=50').then((r) => r?.items.find((x) => x.id === terminal) ?? null) : null;
+  // Slug bo'yicha to'g'ridan-to'g'ri: ilgari ro'yxatning birinchi 50 tasidan qidirilib, qolganlari topilmasdi.
+  // Eski havolalar id bilan keladi (booking va terminal sahifasi), shuning uchun slug topilmasa
+  // eski yo'l qoladi; ular slug berishga o'tgach u olib tashlanadi.
+  // cuid (id) slug emas: u bilan ortiqcha so'rov yuborilmaydi
+  const isId = !!terminal && /^c[a-z0-9]{24}$/.test(terminal);
+  const tt = terminal
+    ? (isId ? null : await sapiOrNull<TerminalDetail>(`/terminals/${encodeURIComponent(terminal)}`))
+      ?? (await sapiOrNull<{ items: TerminalDetail[] }>('/terminals?limit=50'))?.items.find((x) => x.id === terminal) ?? null
+    : null;
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <h1 className="font-display text-3xl font-bold">{t('heading')}</h1>

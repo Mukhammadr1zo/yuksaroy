@@ -302,7 +302,8 @@
       "none": "Bugun ochiq joy yo'q",
       "book": "Joy band qilish"
     },
-    "demoNote": "Bu namuna terminal: sayt qanday ishlashini sinab ko'rish uchun. Joy band qilsangiz haqiqiy buyurtma yaratiladi, lekin uni tasdiqlaydigan haqiqiy egasi yo'q.",
+    "demoNote": "Bu namuna terminal: sayt qanday ko'rinishini ko'rsatish uchun qo'yilgan, haqiqiy obyekt emas.",
+    "demoNoBook": "Bu namuna terminal, bu yerda joy band qilib bo'lmaydi: uning haqiqiy egasi yo'q, buyurtma hech kimga bormaydi.",
     "demoNoChat": "Telefon va yozishma yo'q: namunaning haqiqiy egasi yo'q, xabar hech kimga bormaydi.",
     "demoBadge": "Namuna"
   },

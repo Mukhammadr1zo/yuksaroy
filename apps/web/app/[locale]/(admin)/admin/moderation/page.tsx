@@ -22,6 +22,7 @@ import { Decide, type Decision } from '@/components/admin/Decide';
 import { AssignTask, type Task, type TaskEntity } from '@/components/admin/AssignTask';
 import { useAdminMe } from '@/components/admin/context';
 import { MessageFiles } from '@/components/chat/Attachments';
+import { AutoClaims } from '@/components/admin/AutoClaims';
 
 type Tab = 'listings' | 'kyc' | 'claims' | 'premium' | 'subscription' | 'contact' | 'reports';
 const TABS: Tab[] = ['listings', 'kyc', 'claims', 'premium', 'subscription', 'contact', 'reports'];
@@ -169,6 +170,7 @@ export default function ModerationPage() {
         : !loaded ? <p className="mt-5 text-sm text-muted">{err ? tc('loadFailed') : tc('loading')}</p>
         : counts[tab] === 0 ? <div className={`${CARD} mt-5 border-dashed px-6 py-12 text-center text-sm text-muted`}>{emptyText}</div>
         : <ul className="mt-5 space-y-3">{rows}</ul>}
+      {tab === 'claims' && !mine ? <AutoClaims /> : null}
       {mine ? <p className="mt-3 text-xs text-muted">{t('tasks.decision.mine')}</p> : null}
       {tab === 'premium' || tab === 'contact' ? <p className="mt-3 text-xs text-muted">{tp(tab === 'premium' ? 'admin.lead' : 'messages.lead')}</p> : null}
       {tab === 'subscription' ? <p className="mt-3 text-xs text-muted">{tsb('admin.lead')}</p> : null}

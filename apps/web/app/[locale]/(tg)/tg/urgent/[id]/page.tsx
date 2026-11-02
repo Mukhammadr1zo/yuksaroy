@@ -16,7 +16,7 @@ import { BTN, BTN_GHOST, CARD, Err, Row, Skeleton } from '@/components/tg/bits';
  */
 type Item = UrgentRequest & { sentReal?: number | null; listed?: boolean };
 
-/** GET /urgent/:id yo'q: ro'yxatdan topiladi (kabinet bilan bir xil). */
+/** GET /urgent/:id (egasi yoki admin); 404 bo'lsa ro'yxatdan qidiriladi (kabinet bilan bir xil). */
 async function loadOne(id: string): Promise<Item | null> {
   try { return await api<Item>(`/urgent/${id}`); }
   catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; }

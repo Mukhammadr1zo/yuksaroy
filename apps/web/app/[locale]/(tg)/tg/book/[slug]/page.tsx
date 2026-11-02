@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { OPERATIONS, type Operation } from '@yuksaroy/domain';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError, api, authHeaders, post } from '@/lib/api';
 import { som } from '@/lib/format';
 import type { Hold, Order, QuoteOffer, QuoteResponse, Slot, TerminalDetail } from '@/lib/types';
@@ -16,7 +16,7 @@ import { SlotGrid } from '@/components/order/SlotGrid';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { PriceLines, slotLabel } from '@/components/order/bits';
 import { haptic, useClosingConfirmation, useMainButton } from '@/components/tg/TgProvider';
-import { CARD, CHIP, Err, INPUT, Row, Skeleton } from '@/components/tg/bits';
+import { BTN_GHOST, CARD, CHIP, Err, INPUT, Row, Skeleton } from '@/components/tg/bits';
 import { DemoBadge } from '@/components/market/bits';
 
 const STEPS = ['cargo', 'slot', 'confirm'] as const;
@@ -27,6 +27,7 @@ export default function TgBookPage() {
   const t = useTranslations('tg.book');
   const locale = useLocale();
   const tc = useTranslations('tg.common');
+  const tt = useTranslations('terminal');
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [terminal, setTerminal] = useState<TerminalDetail | null>(null);
@@ -67,11 +68,13 @@ export default function TgBookPage() {
     setBusy(true);
     try {
       const r = await post<QuoteResponse>('/quote', { stationId: station.id, operation, cargoCode: cargo?.code, weightKg, wagonCount: Number(wagons) || 1, services: [] });
-      const mine = r.offers.find((o) => o.terminal.slug === slug) ?? null;
-      setOffers(r.offers);
-      if (!mine && !r.offers.length) return setErr(t('noOffer'));
+      // Namuna takliflarda joy band qilinmaydi (egasi qarori, 2026-10-07): ro'yxatga ham, tanlovga ham kirmaydi
+      const real = r.offers.filter((o) => !o.terminal.isDemo);
+      const mine = real.find((o) => o.terminal.slug === slug) ?? null;
+      setOffers(real);
+      if (!real.length) return setErr(t('noOffer'));
       haptic();
-      await pickOffer(mine ?? r.offers[0]!);
+      await pickOffer(mine ?? real[0]!);
       setStep(1);
     } catch (e) { fail(e); } finally { setBusy(false); }
   }
@@ -130,8 +133,19 @@ export default function TgBookPage() {
   const main = step === 0 ? { text: busy ? t('quoting') : t('quote'), onClick: () => void toSlots(), disabled: !orgs }
     : step === 1 ? { text: t('next'), onClick: () => { haptic(); setStep(2); }, disabled: !hold }
     : { text: busy ? t('sending') : t('submit'), onClick: () => void submit(), disabled: !hold };
-  useMainButton({ ...main, busy });
+  useMainButton({ ...main, busy, show: !terminal?.isDemo });
   const selectedSlot = useMemo(() => slots.find((s) => s.id === hold?.slotId) ?? null, [slots, hold]);
+
+  // Namuna terminalga to'g'ridan-to'g'ri havola ochilsa: shakl o'rniga izoh (API ham rad etadi, DEMO_TARGET)
+  if (terminal?.isDemo) {
+    return (
+      <main id="main" className="mx-auto max-w-md space-y-3 px-4 pb-28 pt-4">
+        <p className="text-xs text-muted">{terminal.name} <DemoBadge /></p>
+        <p className="rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{tt('demoNoBook')}</p>
+        <Link href={`/tg/terminals/${slug}`} className={BTN_GHOST}>{tc('back')}</Link>
+      </main>
+    );
+  }
 
   return (
     <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">

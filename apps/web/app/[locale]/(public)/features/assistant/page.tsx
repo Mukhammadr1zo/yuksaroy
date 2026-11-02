@@ -16,11 +16,11 @@ type Parsed = {
   decision: { terminals: number; freeToday: number; cheapestTiyin: number | null };
   source?: 'dictionary' | 'llm';
 };
-// Statik zaxira: API javob bermasa ham misol ko'rinadi (real so'rovning lug'at natijasi)
+// Misol: haqiqiy natijasi bor so'rov (2026-11-02; namuna qatorlari sanalmaydi, xizmat+viloyat hozircha bo'sh). Statik zaxira: API javob bermasa ham misol ko'rinadi (real so'rovning lug'at natijasi)
 const FALLBACK: Parsed = {
-  filters: { bookable: true, confidence: 0.8 },
-  chips: [{ key: 'region:UZ-TK', type: 'region', value: 'UZ-TK' }, { key: 'service:CONTAINER', type: 'service', value: 'CONTAINER' }, { key: 'bookable:1', type: 'bookable', value: '1' }],
-  query: { region: 'UZ-TK', service: 'CONTAINER' },
+  filters: { bookable: false, confidence: 0.8 },
+  chips: [{ key: 'region:UZ-SA', type: 'region', value: 'UZ-SA' }, { key: 'kind:RAIL', type: 'kind', value: 'RAIL' }],
+  query: { region: 'UZ-SA', kind: 'RAIL' },
   decision: { terminals: 0, freeToday: 0, cheapestTiyin: null },
 };
 

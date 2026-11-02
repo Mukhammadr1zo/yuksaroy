@@ -37,7 +37,7 @@ export interface ListingDetail extends ListingCard {
    */
   signal?: { seen: 'today' | 'week' | 'away' | null; replied: { of: number; answered: number } | null };
 }
-export interface ListingSummary { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null; onRequest: number; nearestKm: number | null }
+export interface ListingSummary { cheapestTiyin: number | null; cheapestUnit: PriceUnit | null; onRequest: number; nearestKm: number | null; demo: number }
 export interface ListingPage { items: ListingCard[]; total: number; page: number; limit: number; summary: ListingSummary }
 
 export interface CompanyCard {

@@ -45,7 +45,7 @@ export default async function BookingPage({ params }: Params) {
   setRequestLocale(locale);
   const today = uzToday();
   const to = new Date(Date.parse(today) + 14 * 864e5).toISOString().slice(0, 10);
-  const [t, ts, stats, term] = await Promise.all([getTranslations('booking'), getTranslations('service'), sapi<Stats>('/stats', 60).catch(() => null), pickTerminal()]);
+  const [t, ts, tt, stats, term] = await Promise.all([getTranslations('booking'), getTranslations('service'), getTranslations('terminal'), sapi<Stats>('/stats', 60).catch(() => null), pickTerminal()]);
   const [quote, slots] = term ? await Promise.all([
     spost<QuoteResponse>('/quote', { terminalId: term.id, operation: 'LOAD', weightKg: WEIGHT_T * 1000, wagonCount: 1, services: ['WEIGH'] }).catch(() => null),
     sapi<Slot[]>(`/terminals/${term.id}/slots?from=${today}&to=${to}`, 60).catch(() => [] as Slot[]),
@@ -122,7 +122,7 @@ export default async function BookingPage({ params }: Params) {
                 </div>
                 <p className="mt-3 text-xs text-muted">{t('example.note')}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <Link href={`/quote?terminal=${term.id}`} className="rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-2">{t('cta.quote')}</Link>
+                  <Link href={`/quote?terminal=${term.slug}`} className="rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-2">{t('cta.quote')}</Link>
                   <Link href={`/terminals/${term.slug}`} className="rounded-full border border-line bg-white px-5 py-2.5 text-sm font-semibold text-navy transition hover:border-teal">{t('cta.terminal')}</Link>
                 </div>
               </>
@@ -150,7 +150,9 @@ export default async function BookingPage({ params }: Params) {
                 </>
               ) : <p className="mt-2 text-sm text-muted">{t('slots.none')}</p>}
               {/* Mehmon ro'yxatdan o'tish sahifasiga boradi (kabinet manzili ko'rsatilmaydi) */}
-              <DashLink href={`/dashboard/orders/new?terminal=${term.slug}`} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{t('slots.book')}</DashLink>
+              {/* Namuna terminalda joy band qilinmaydi (egasi qarori, 2026-10-07): tugma o'rniga sababi */}
+              {term.isDemo ? <p className="mt-4 text-sm text-muted">{tt('demoNoBook')}</p>
+                : <DashLink href={`/dashboard/orders/new?terminal=${term.slug}`} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{t('slots.book')}</DashLink>}
             </aside>
           ) : null}
         </div>

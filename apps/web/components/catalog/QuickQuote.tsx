@@ -131,6 +131,7 @@ function Offer({ o, full, dark }: { o: QuoteOffer; full: boolean; dark: boolean 
   const ts = useTranslations('service');
   const tu = useTranslations('unit');
   const tk = useTranslations('kind');
+  const tdm = useTranslations('terminal');
   const muted = dark ? 'text-white/60' : 'text-muted';
   return (
     <div className={`rounded-xl border p-4 ${dark ? 'border-white/15 bg-white/5' : 'border-line bg-white'}`}>
@@ -163,8 +164,10 @@ function Offer({ o, full, dark }: { o: QuoteOffer; full: boolean; dark: boolean 
       <div className="mt-3 flex gap-2">
         <Link href={`/terminals/${o.terminal.slug}`} className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${dark ? 'border-white/20 hover:bg-white/10' : 'border-line hover:bg-sand'}`}>{tb('passport')}</Link>
         {/* Kirmaganni proxy /login?next=... ga yuboradi; kirgan vizardga shu terminal bilan tushadi */}
-        <DashLink href={`/dashboard/orders/new?terminal=${o.terminal.slug}`} className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white ${dark ? 'bg-teal hover:bg-teal-ink' : 'bg-navy hover:bg-navy-2'}`}>{t('offer.book')}</DashLink>
+        {/* 2026-10-07 egasi qarori: namuna terminalga buyurtma bermaydi, havola o'rniga izoh */}
+        {o.terminal.isDemo ? null : <DashLink href={`/dashboard/orders/new?terminal=${o.terminal.slug}`} className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white ${dark ? 'bg-teal hover:bg-teal-ink' : 'bg-navy hover:bg-navy-2'}`}>{t('offer.book')}</DashLink>}
       </div>
+      {o.terminal.isDemo ? <p className="mt-2 text-xs text-muted">{tdm('demoNoBook')}</p> : null}
     </div>
   );
 }

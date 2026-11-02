@@ -17,6 +17,7 @@
     "submit": "Da'vo yuborish",
     "sending": "Yuborilmoqda",
     "sent": "Da'vo yuborildi. Operator tekshiradi, natija kabinetdagi Mening obyektlarim bo'limida ko'rinadi.",
+    "autoDone": "Raqamingiz obyektdagi raqamga mos keldi, obyekt sizniki. Kabinetdagi Mening obyektlarim bo'limida.",
     "already": "Bu yo'lga da'vo allaqachon berilgan.",
     "err": "Yuborilmadi, qayta urinib ko'ring.",
     "how": "Da'vo qanday ishlaydi",
@@ -65,6 +66,11 @@
     "noOrgAuto": "Tashkilotingiz da'vo bilan birga ochiladi, nomini keyin kabinetda o'zgartirasiz.",
     "phoneMine": "Bu mening raqamim, yopilsin",
     "phoneMineNote": "Formada o'z raqamingizni yozing: obyektdagi raqam bilan solishtiramiz.",
-    "phoneMineText": "Bu raqam meniki: {ref}. Katalogda ko'rinmasin, yopishingizni so'rayman. O'z raqamim:"
+    "phoneMineText": "Bu raqam meniki: {ref}. Katalogda ko'rinmasin, yopishingizni so'rayman. O'z raqamim:",
+    "autoTitle": "O'zi tasdiqlanganlar",
+    "autoHint": "Da'vogar raqami obyektdagi raqamga mos kelgani uchun adminni kutmasdan tasdiqlangan. Noto'g'ri bo'lsa, qaytarib oling: tashkilot obyektga egalikni yo'qotadi.",
+    "autoRevoke": "Qaytarib olish",
+    "autoRevokeConfirm": "Rostdan qaytarasizmi?",
+    "autoRevoked": "Qaytarib olindi, obyekt egasiz qoldi."
   }
 }

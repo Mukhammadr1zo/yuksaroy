@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { EQUIPMENT_KINDS, REGIONS, chipLabel, corridorRegions, parseQuery, type RegionCode, type SearchCategory, type SearchChip, type SearchLang } from '@yuksaroy/domain';
+import { EQUIPMENT_KINDS, REGIONS, catalogSearch, chipLabel, corridorRegions, parseQuery, type RegionCode, type SearchCategory, type SearchChip, type SearchLang } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { qs, sapi } from '@/lib/server-api';
 import { pricePer } from '@/lib/format';
@@ -46,7 +46,12 @@ export default async function TgSearchPage({ params, searchParams }: { params: P
   let total = 0, shown = 0, failed = false;
   try {
   if (cat === 'terminal') {
-    const d = await sapi<Page<TerminalCard>>(`/terminals${qs({ region, service: p?.services.join(','), kind: p?.kind, near, radius, bookable: p?.bookable ? '1' : '', sort: 'rating', limit: 20 })}`, 60);
+    // /terminals bilan bir xil: chip bo'lsa ham filtrga aylanmagan so'zlar (shahar, nom) qoladi,
+    // so'z bilan 0 chiqsa faqat filtr bilan qayta so'raladi (egasi qarori 2026-10-07)
+    const words = catalogSearch(q, p, chips.length > 0);
+    const ask = (w: string) => sapi<Page<TerminalCard>>(`/terminals${qs({ region, service: p?.services.join(','), kind: p?.kind, near, radius, bookable: p?.bookable ? '1' : '', q: w, sort: 'rating', limit: 20 })}`, 60);
+    const first = await ask(words.q);
+    const d = words.fallback && first.total === 0 ? await ask('') : first;
     const s = d.summary;
     total = d.total; shown = d.items.length;
     // /terminals bilan bir xil: sonlar namunasiz (total - demo), nol sanoq chizilmaydi (egasi qarori 2026-10-07)
@@ -63,8 +68,11 @@ export default async function TgSearchPage({ params, searchParams }: { params: P
     const d = await sapi<ListingPage>(`/listings${qs({ kind, deal: p?.deal, region, near, radius, corridor: cFrom && cTo ? `${cFrom}>${cTo}` : '', sort: near ? 'nearest' : 'new', limit: 20 })}`, 60);
     const s = d.summary;
     total = d.total; shown = d.items.length;
+    // Namunasiz son: summary.demo butun filtrlangan to'plamdagi namunalar; nol bo'lsa qator chizilmaydi
+    // demo turi lib/types-listing.ts da ham bo'lishi kerak (demo qatori ishlab chiqadi); u yo'q bo'lsa 0
+    const real = d.total - (s.demo ?? 0);
     decision = [
-      tl('count', { count: d.total }),
+      real > 0 ? tl('count', { count: real }) : null,
       s.onRequest ? tl('onRequest', { count: s.onRequest }) : null,
       s.cheapestTiyin != null ? tl('cheapest', { price: listingPrice(s.cheapestTiyin, s.cheapestUnit, lang) }) : null,
       s.nearestKm != null ? tl('nearest', { km: Math.round(s.nearestKm) }) : null,

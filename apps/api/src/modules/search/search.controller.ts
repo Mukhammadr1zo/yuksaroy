@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, Inject, Ip, Post, Req } from '@nestjs/commo
 import { ApiTags } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, Length, Matches } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
-import { parseQuery, type SearchLang } from '@yuksaroy/domain';
+import { catalogSearch, parseQuery, type SearchLang } from '@yuksaroy/domain';
 import { IpBucket } from '../../common/ip-bucket';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../catalog/domain/ports';
 import { geoNear, realSummary } from '../catalog/presentation/catalog.controller';
@@ -54,16 +54,18 @@ export class SearchController {
 
     const now = new Date();
     const near = filters.near ?? undefined;
-    // Hech narsa tanilmasa matn nom/manzil bo'yicha qidiruvga tushadi, aks holda q ro'yxatni bo'shatib qo'yadi
-    const q = filters.chips.length ? undefined : dto.q.trim();
-    const scope = { region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near, q };
+    // Chip bo'lsa ham filtrga aylanmagan so'zlar (shahar, nom) qoladi: "Bekobod" butun viloyatni sanamasin.
+    // /terminals sahifasi bilan bir xil qaror (catalogSearch); egasi qarori 2026-10-07
+    const words = catalogSearch(dto.q.trim(), filters, filters.chips.length > 0);
+    let q: string | undefined = words.q || undefined;
+    const base = { region: filters.regions, service: filters.services, kind: filters.kind ?? undefined, near };
+    // So'z bilan 0 chiqsa viloyat bo'yicha sanaymiz (sahifa ham shunday qiladi va buni ochiq aytadi)
+    let total = await this.repo.countTerminals({ ...base, q, publicCatalog: true });
+    if (q && words.fallback && total === 0) { q = undefined; total = await this.repo.countTerminals({ ...base, publicCatalog: true }); }
     // Son ochiq katalog qamrovi bo'yicha (reestr ham kiradi), namunasiz: yordamchi aytgan raqam
     // u tuzgan havoladagi /terminals sahifasidagi `total - summary.demo` bilan bir xil bo'lishi kerak.
     // Qaror satri esa egali obyektlardan: tarif, slot va baho faqat ularda bo'ladi.
-    const [all, total] = await Promise.all([
-      this.repo.listTerminals({ ...scope, owned: true }, now),
-      this.repo.countTerminals({ ...scope, publicCatalog: true }),
-    ]);
+    const all = await this.repo.listTerminals({ ...base, q, owned: true }, now);
     const free = await this.repo.freeTodayByTerminal(all.map((t) => t.id), now);
 
     // /terminals va GET /v1/terminals uchun URL parametrlari
@@ -72,7 +74,7 @@ export class SearchController {
     if (filters.services.length) query.service = filters.services.join(',');
     if (filters.kind) query.kind = filters.kind;
     if (near) { query.near = `${near.lng},${near.lat}`; query.radius = String(near.radiusKm); }
-    if (q) query.q = q;
+    if (words.q) query.q = words.q; // havolada so'z qoladi: sahifa o'zi zaxiraga tushadi
 
     // Namuna egali to'plamda (all) to'liq bor, shuning uchun jamidan ayirish aniq haqiqiy sonni beradi
     const s = realSummary(all, free, near, filters.services);

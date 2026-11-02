@@ -12,6 +12,7 @@ import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { notifyBoth } from '../../common/telegram';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { PlatformAdmin } from '../organizations/application/platform-admin';
 import { NotificationsService, type NotificationKind } from '../notifications/notifications.service';
 import { PROVIDER_KINDS, awardOffers, canUrgentTransition, notifyRegions } from './urgent.rules';
 
@@ -78,7 +79,12 @@ const placeLine = (r: { regionCode: string; stationName: string | null }) =>
 @ApiTags('urgent')
 @Controller('urgent')
 export class UrgentController {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditService, private readonly notifications: NotificationsService) {}
+  // Admin tekshiruvi holatsiz (faqat prisma va env), shuning uchun modulga yangi bog'lanish qo'shilmaydi
+  private readonly platform: PlatformAdmin;
+
+  constructor(private readonly prisma: PrismaService, private readonly audit: AuditService, private readonly notifications: NotificationsService) {
+    this.platform = new PlatformAdmin(prisma);
+  }
 
   @Post() @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)
   async create(@CurrentUserId() userId: string, @Body() dto: CreateUrgentDto) {
@@ -108,7 +114,12 @@ export class UrgentController {
   @Get() @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
   async list(@CurrentUserId() userId: string, @Query('scope') scope?: string) {
     if (scope === 'provider') return this.providerList(userId);
-    const rows = await this.prisma.urgentRequest.findMany({ where: { createdById: userId }, include: { offers: { orderBy: { createdAt: 'asc' } } }, orderBy: { createdAt: 'desc' }, take: 100 });
+    return this.listMine({ createdById: userId });
+  }
+
+  /** Ro'yxat va tafsilot bir shaklda: sentReal va listed ikkalasida ham bir xil hisoblanadi. */
+  private async listMine(where: { createdById: string } | { id: string }) {
+    const rows = await this.prisma.urgentRequest.findMany({ where, include: { offers: { orderBy: { createdAt: 'asc' } } }, orderBy: { createdAt: 'desc' }, take: 100 });
     // sentReal: tafsilot sahifasi "N ta ijrochiga yuborildi" ni shu ro'yxatdan o'qiydi. Son ishonchsiz bo'lsa null (sentCounts).
     // listed: ijrochilar ro'yxatida hozir ko'rinadimi (providerList bilan bir shart). Sahifa "so'rovingiz
     // ijrochilarga ko'rinib turadi" ni faqat shunda aytadi: yopilgan yoki 48 soatdan eski so'rovda bu yolg'on
@@ -120,6 +131,23 @@ export class UrgentController {
         sentReal: sent.get(r.id) ?? null, listed: r.status === 'OPEN' && r.createdAt >= fresh,
       })),
     };
+  }
+
+  /**
+   * Bitta so'rov: egasi va platforma adminlari ko'radi (ro'yxat qatori bilan bir xil shakl). Ilgari
+   * sahifalar bu yo'lni so'rab, har ochilishda 404 olardi. Boshqa foydalanuvchi uchun 403:
+   * telefon va taklif narxlari faqat egasiga ochiq (ijrochi o'z so'rovini /urgent?scope=provider dan oladi).
+   */
+  @Get(':id') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
+  async one(@CurrentUserId() userId: string, @Param('id') id: string) {
+    const r = await this.prisma.urgentRequest.findUnique({ where: { id }, select: { createdById: true } });
+    if (!r) throw new NotFoundException({ code: 'URGENT_NOT_FOUND' });
+    if (r.createdById !== userId && !(await this.platform.isPlatformAdmin(userId))) throw new ForbiddenException({ code: 'NOT_OWNER' });
+    const { items } = await this.listMine({ id });
+    const item = items[0];
+    if (!item) throw new NotFoundException({ code: 'URGENT_NOT_FOUND' });
+    // Admin begona so'rovda telefonni ko'rmaydi (2026-11-02, ehtiyotkor andoza): raqam faqat egasiga ochiq
+    return r.createdById === userId ? item : { ...item, contactPhone: null };
   }
 
   @Post(':id/offers') @UseGuards(JwtGuard) @ApiCookieAuth('ys_access') @HttpCode(201)

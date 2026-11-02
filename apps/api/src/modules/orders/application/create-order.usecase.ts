@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { Direction, Operation, ServiceCode } from '@yuksaroy/domain';
 import { PlatformConfigService } from '../../../common/platform-config.service';
 import { NotificationsService } from '../../notifications/notifications.service';
@@ -55,6 +55,8 @@ export class CreateOrderUseCase {
 
     const terminal = await this.catalog.findTerminalById(slot.terminalId, now);
     if (!terminal || terminal.status !== 'ACTIVE') throw new ConflictException({ code: 'TERMINAL_UNAVAILABLE' });
+    // Namuna terminalga buyurtma yo'q (egasi qarori, 2026-10-07); avval ushlangan hold ham o'tmaydi
+    if (terminal.isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
     // Terminalni faqat egasi qo'shadi: egasiz obyektda tasdiqlaydigan tomon yo'q, shuning uchun bron ochilmaydi
     if (terminal.orgId === null) throw new ConflictException({ code: 'TERMINAL_NOT_JOINED' });
     // Arms-length: terminal egasi o'z tashkiloti nomidan o'z terminaliga buyurtma bera olmaydi (o'ziga baho qo'yish yo'li)

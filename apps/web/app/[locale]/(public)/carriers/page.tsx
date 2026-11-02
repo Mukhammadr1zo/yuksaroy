@@ -38,12 +38,15 @@ const chip = (type: SearchChip['type'], value: string): SearchChip => ({ type, k
  * hisobga olinmas edi va km narxi reys narxidan "arzonroq" bo'lib chiqardi, ya'ni bitta
  * qator API dan kelganida bir xil, sahifada hisoblanganida boshqacha son ko'rsatardi.
  */
-function summarize(items: L[]): ListingSummary {
+function summarize(all: L[]): ListingSummary & { demo: number } {
+  // Namuna e'lon sonlarga kirmaydi, API summary bilan bir xil (egasi qarori, 2026-10-07)
+  const items = all.filter((x) => !x.isDemo);
   const near = items.filter((x) => x.distanceKm != null).sort((a, b) => a.distanceKm! - b.distanceKm!);
   return {
     ...cheapestByUnit(items),
     onRequest: items.filter((x) => x.priceTiyin == null || x.priceUnit == null).length,
     nearestKm: near[0]?.distanceKm ?? null,
+    demo: all.length - items.length,
   };
 }
 
@@ -91,11 +94,13 @@ export default async function AvtotransportPage({ params, searchParams }: Params
   const raw$ = await sapi<ListingPage>(`/listings${qs({ kind: 'TRUCK', region: corridor ? corridorRegions(cFrom!, cTo!).join(',') : region, near, radius, corridor, q: base.q, sort: raw.sort || 'new', page, limit: local ? 50 : 12 })}`, 60);
   const items = local ? raw$.items.filter((x) => (!truckType || x.truckType === truckType) && (!tonnage || (x.tonnage ?? 0) >= tonnage)) : raw$.items;
   const total = local ? items.length : raw$.total;
-  const s = local ? summarize(items) : raw$.summary;
+  const s: ListingSummary & { demo?: number } = local ? summarize(items) : raw$.summary;
   const pages = local ? 1 : Math.max(1, Math.ceil(raw$.total / raw$.limit));
+  // Haqiqiy son total - demo; nol sanoq chizilmaydi (egasi qarori, 2026-10-07)
+  const real = total - (s.demo ?? 0);
   const decision = [
-    t('decision.count', { count: total }),
-    total && s.onRequest ? t('decision.onRequest', { count: s.onRequest }) : null,
+    real > 0 ? t('decision.count', { count: real }) : null,
+    s.onRequest ? t('decision.onRequest', { count: s.onRequest }) : null,
     s.cheapestTiyin != null ? t('decision.cheapest', { price: listingPrice(s.cheapestTiyin, s.cheapestUnit, lang) }) : null,
     s.nearestKm != null ? t('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
   ].filter(Boolean).join(t('decision.separator'));
@@ -139,7 +144,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
         </div>
       ) : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        <p className="font-mono text-sm text-navy tabular-nums">{decision}</p>
+        {decision ? <p className="font-mono text-sm text-navy tabular-nums">{decision}</p> : null}
         <Link href={mapHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink"><MapTrifoldIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewOnMap')}</Link>
       </div>
 

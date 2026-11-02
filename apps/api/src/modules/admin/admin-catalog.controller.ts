@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Optional, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags, PartialType } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDateString, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Length, Matches, MaxLength, Min } from 'class-validator';
@@ -21,6 +21,10 @@ import { PlatformOwnerGuard } from '../organizations/presentation/platform-owner
 import { noteCount } from './admin-notes.controller';
 import { ownerKindWhere } from './owner-kind.where';
 import { ImpressionsService } from '../impressions/impressions.service';
+
+import { notifyBoth } from '../../common/telegram';
+import { NotificationsService } from '../notifications/notifications.service';
+import { AUTO_CLAIM_ACTION } from '../catalog/application/auto-approve-claim';
 
 /** Terminal (shahobcha yo'l ham shu jadvalda): nom va tur majburiy, qolgani pasport ustunlari. */
 class TerminalCreateDto {
@@ -169,6 +173,7 @@ export class AdminCatalogController {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly impressions: ImpressionsService,
+    @Optional() private readonly notifications?: NotificationsService,
   ) {}
 
   // ───────────────────────── Terminallar ─────────────────────────
@@ -345,6 +350,34 @@ export class AdminCatalogController {
     return t;
   }
 
+  /**
+   * 2026-10-07: telefoni reestrdagi raqamga mos kelgani uchun O'ZI tasdiqlangan da'volar (so'nggi
+   * 60 kun), admin "noto'g'ri" desa qaytarib oladi (PATCH claimStatus, orgId tozalanadi). Faqat hali
+   * APPROVED va keyin admin qarori kelmaganlari: qaytarib olingan yoki qo'lda qayta hal qilingan chiqmaydi.
+   */
+  @Get('catalog/auto-claims')
+  async autoClaims() {
+    const since = new Date(Date.now() - 60 * 86_400_000);
+    const autos = await this.prisma.auditLog.findMany({
+      where: { action: AUTO_CLAIM_ACTION, entity: 'Terminal', createdAt: { gte: since } },
+      orderBy: { createdAt: 'desc' }, take: 100, select: { entityId: true, createdAt: true },
+    });
+    const ids = [...new Set(autos.flatMap((a) => (a.entityId ? [a.entityId] : [])))];
+    if (!ids.length) return [];
+    const [terminals, decided] = await Promise.all([
+      this.prisma.terminal.findMany({
+        where: { id: { in: ids }, claimStatus: 'APPROVED' },
+        select: { id: true, slug: true, name: true, regionCode: true, claimedAt: true, org: { select: { id: true, name: true } } },
+      }),
+      this.prisma.auditLog.findMany({ where: { action: 'terminal.claim.decide', entity: 'Terminal', entityId: { in: ids }, createdAt: { gte: since } }, select: { entityId: true, createdAt: true } }),
+    ]);
+    const autoAt = new Map<string, Date>();
+    for (const a of autos) if (a.entityId && !autoAt.has(a.entityId)) autoAt.set(a.entityId, a.createdAt);
+    const byId = new Map(terminals.map((t) => [t.id, t]));
+    const stale = new Set(decided.filter((d) => d.entityId && d.createdAt > (autoAt.get(d.entityId) ?? 0)).map((d) => d.entityId));
+    return [...autoAt.keys()].filter((id) => byId.has(id) && !stale.has(id)).map((id) => byId.get(id)!);
+  }
+
   @Patch('catalog/terminals/:id')
   async updateTerminal(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: TerminalUpdateDto) {
     const data = terminalData(dto);
@@ -364,8 +397,29 @@ export class AdminCatalogController {
       const owner = dto.claimOrgId ?? (await this.prisma.terminal.findUnique({ where: { id }, select: { claimOrgId: true } }))?.claimOrgId;
       if (owner) (data as Record<string, unknown>).orgId = owner;
     }
+    // 2026-10-07: tasdiqlangan da'vo boshqa holatga o'tsa (qaytarib olish, shu jumladan avtomatik
+    // tasdiqlanganini) tashkilot obyektga egalik qilmaydi: orgId va claimedAt tozalanadi. Aks holda
+    // qator "rad etilgan" ko'rinib, egasi hamon rasm va narx qo'ya olardi. claimOrgId qoladi:
+    // odam "rad etildi" ni ko'rsin (repository dagi izohga qarang).
+    let revoked: { orgId: string | null; name: string } | null = null;
+    if (dto.claimStatus && dto.claimStatus !== 'APPROVED') {
+      const was = await this.prisma.terminal.findUnique({ where: { id }, select: { claimStatus: true, claimOrgId: true, name: true } });
+      if (was?.claimStatus === 'APPROVED') {
+        Object.assign(data, { orgId: null, claimedAt: null });
+        revoked = { orgId: was.claimOrgId ?? null, name: was.name };
+      }
+    }
     const t = await this.prisma.terminal.update({ where: { id }, data: data as Prisma.TerminalUncheckedUpdateInput });
     await this.audit.log({ actorId: userId, action: 'admin.terminal.update', entity: 'Terminal', entityId: id, meta: { fields: Object.keys(data) } });
+    if (revoked) {
+      // 2026-10-07: qaytarib olish ham qaror: terminal.claim.decide izi avto-tasdiqni qayta ishlatmaydi
+      // (auto-approve-claim qo'riqchisi), tashkilot esa sababi bilan xabar oladi.
+      const reason = "Admin tekshiruvdan keyin tasdiqni qaytarib oldi";
+      await this.audit.log({ actorId: userId, action: 'terminal.claim.decide', entity: 'Terminal', entityId: id, meta: { approve: false, reason, orgId: revoked.orgId, revoked: true } });
+      if (revoked.orgId && this.notifications) {
+        void notifyBoth(this.prisma, this.notifications, { target: { orgIds: [revoked.orgId] }, kind: 'claimRejected', inApp: 'claim', href: '/dashboard/objects', vars: { object: revoked.name, reason } }).catch(() => {});
+      }
+    }
     return t;
   }
 

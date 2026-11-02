@@ -5,6 +5,8 @@ import { CurrentUserId, JwtGuard } from '../../identity/presentation/jwt.guard';
 import { AuditService } from '../../../common/audit.service';
 import { PrismaService } from '../../../common/prisma.service';
 import { AdminNotify } from '../../organizations/application/admin-notify';
+import { PlatformAdmin } from '../../organizations/application/platform-admin';
+import { autoApproveClaim } from '../application/auto-approve-claim';
 import { notifyBoth } from '../../../common/telegram';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { CATALOG_REPOSITORY, type CatalogRepository } from '../domain/ports';
@@ -37,6 +39,7 @@ export class TerminalAdminController {
     private readonly prisma: PrismaService,
     private readonly adminNotify: AdminNotify,
     private readonly notifications: NotificationsService,
+    private readonly platformAdmins: PlatformAdmin,
   ) {}
 
   /**
@@ -70,6 +73,12 @@ export class TerminalAdminController {
     // Auditga faqat fayl SONI: audit iz, manba emas. orgId use-case dan olinadi,
     // shunda avtomatik ochilgan tashkilot ham izda qoladi.
     await this.audit.log({ actorId: userId, action: 'terminal.claim', entity: 'Terminal', entityId: id, meta: { orgId, files: evidence.files.length } });
+    // 2026-10-07 egasi qarori: raqam mos kelsa da'vo o'zi tasdiqlanadi; yiqilsa navbatda qoladi
+    const auto = await autoApproveClaim(
+      { repo: this.repo, prisma: this.prisma, audit: this.audit, notifications: this.notifications, adminUserIds: () => this.platformAdmins.adminUserIds() },
+      userId, terminal,
+    ).catch(() => null);
+    if (auto) return auto;
     void this.adminNotify.queued('terminalClaimsPending', terminal.name, id, userId).catch(() => {});
     return terminal;
   }

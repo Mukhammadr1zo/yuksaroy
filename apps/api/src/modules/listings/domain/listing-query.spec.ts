@@ -31,13 +31,27 @@ describe('koridor', () => {
 describe('summarizeListings', () => {
   it('ko\'pchilik birligida eng arzon, narxsizlar soni, eng yaqini', () => {
     const s = summarizeListings([
-      { priceTiyin: 500, priceUnit: 'PER_MONTH', lat: 41.3, lng: 69.28 },
-      { priceTiyin: 300, priceUnit: 'PER_MONTH', lat: null, lng: null },
-      { priceTiyin: 10, priceUnit: 'PER_DAY', lat: 39.65, lng: 66.96 },
-      { priceTiyin: null, priceUnit: null, lat: null, lng: null },
+      { priceTiyin: 500, priceUnit: 'PER_MONTH', lat: 41.3, lng: 69.28, isDemo: false },
+      { priceTiyin: 300, priceUnit: 'PER_MONTH', lat: null, lng: null, isDemo: false },
+      { priceTiyin: 10, priceUnit: 'PER_DAY', lat: 39.65, lng: 66.96, isDemo: false },
+      { priceTiyin: null, priceUnit: null, lat: null, lng: null, isDemo: false },
     ], { lat: 41.311, lng: 69.28 });
-    expect(s).toEqual({ cheapestTiyin: 300, cheapestUnit: 'PER_MONTH', onRequest: 1, nearestKm: 1.2 });
-    expect(summarizeListings([])).toEqual({ cheapestTiyin: null, cheapestUnit: null, onRequest: 0, nearestKm: null });
+    expect(s).toEqual({ cheapestTiyin: 300, cheapestUnit: 'PER_MONTH', onRequest: 1, nearestKm: 1.2, demo: 0 });
+    expect(summarizeListings([])).toEqual({ cheapestTiyin: null, cheapestUnit: null, onRequest: 0, nearestKm: null, demo: 0 });
+  });
+});
+
+describe('summarizeListings: namuna', () => {
+  it("namuna e'lon alohida sanaladi va narx, narxsizlar, masofaga kirmaydi", () => {
+    const s = summarizeListings([
+      { priceTiyin: 100, priceUnit: 'PER_MONTH', lat: 41.3, lng: 69.28, isDemo: true },
+      { priceTiyin: null, priceUnit: null, lat: 41.3, lng: 69.28, isDemo: true },
+      { priceTiyin: 500, priceUnit: 'PER_MONTH', lat: 39.65, lng: 66.96, isDemo: false },
+    ], { lat: 41.3, lng: 69.28 });
+    expect(s.demo).toBe(2);
+    expect(s.cheapestTiyin).toBe(500);
+    expect(s.onRequest).toBe(0);
+    expect(s.nearestKm).toBeGreaterThan(200);
   });
 });
 
@@ -83,9 +97,9 @@ describe('cheapestByUnit', () => {
 
   it("summarizeListings ham shu qoidadan foydalanadi", () => {
     const s = summarizeListings([
-      { priceTiyin: 300_000_000, priceUnit: 'PER_TRIP', lat: null, lng: null },
-      { priceTiyin: 250_000_000, priceUnit: 'PER_TRIP', lat: null, lng: null },
-      { priceTiyin: 250_000, priceUnit: 'PER_KM', lat: null, lng: null },
+      { priceTiyin: 300_000_000, priceUnit: 'PER_TRIP', lat: null, lng: null, isDemo: false },
+      { priceTiyin: 250_000_000, priceUnit: 'PER_TRIP', lat: null, lng: null, isDemo: false },
+      { priceTiyin: 250_000, priceUnit: 'PER_KM', lat: null, lng: null, isDemo: false },
     ]);
     expect(s.cheapestTiyin).toBe(250_000_000);
     expect(s.cheapestUnit).toBe('PER_TRIP');

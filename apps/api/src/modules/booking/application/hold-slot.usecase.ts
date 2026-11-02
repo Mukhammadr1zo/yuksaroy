@@ -1,4 +1,5 @@
 import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../../common/prisma.service';
 import { PlatformConfigService } from '../../../common/platform-config.service';
 import {
   BOOKING_REPOSITORY, HoldExpiredError, HoldNotExtendableError, SlotClosedError, SlotFullError, SlotPastError,
@@ -8,13 +9,16 @@ import {
 /** Slotni vaqtincha ushlab turish (default 10 daq, PlatformConfig). Vizardning 2-ekrani. */
 @Injectable()
 export class HoldSlotUseCase {
-  constructor(@Inject(BOOKING_REPOSITORY) private readonly repo: BookingRepository, private readonly config: PlatformConfigService) {}
+  constructor(@Inject(BOOKING_REPOSITORY) private readonly repo: BookingRepository, private readonly config: PlatformConfigService, private readonly prisma: PrismaService) {}
 
   async hold(userId: string, slotId: string, orgId: string | null) {
     const cfg = await this.config.get();
     const now = new Date();
     const slot = await this.repo.findSlot(slotId);
     if (!slot) throw new NotFoundException({ code: 'SLOT_NOT_FOUND' });
+    // Namuna terminalga joy band qilinmaydi: egasi yo'q, buyurtma hech kimga bormaydi (egasi qarori, 2026-10-07)
+    const t = await this.prisma.terminal.findUnique({ where: { id: slot.terminalId }, select: { isDemo: true } });
+    if (t?.isDemo) throw new ForbiddenException({ code: 'DEMO_TARGET' });
     try {
       const b = await this.repo.hold(slotId, userId, orgId, cfg.slotHoldTtlMin, now);
       return { id: b.id, slotId: b.slotId, holdExpiresAt: b.holdExpiresAt, ttlMinutes: cfg.slotHoldTtlMin, slot: await this.repo.findSlot(slotId) };

@@ -17,6 +17,7 @@
     "submit": "Send claim",
     "sending": "Sending",
     "sent": "Claim sent. The operator will review it; the result appears in your dashboard under My objects.",
+    "autoDone": "Your number matched the one on the object, so it is yours. Find it in your dashboard under My objects.",
     "already": "This siding has already been claimed.",
     "err": "Not sent, please try again.",
     "how": "How a claim works",
@@ -65,6 +66,11 @@
     "noOrgAuto": "Your company is created together with the claim; you can rename it later in the dashboard.",
     "phoneMine": "This is my number, please close it",
     "phoneMineNote": "Give your own number in the form: we compare it with the number on the object.",
-    "phoneMineText": "This is my number: {ref}. Please close it in the catalog. My own number:"
+    "phoneMineText": "This is my number: {ref}. Please close it in the catalog. My own number:",
+    "autoTitle": "Approved automatically",
+    "autoHint": "The claimant phone matched the number on the object, so the claim was approved without an admin. If that is wrong, revoke it: the organisation loses ownership of the object.",
+    "autoRevoke": "Revoke",
+    "autoRevokeConfirm": "Really revoke?",
+    "autoRevoked": "Revoked, the object has no owner now."
   }
 }

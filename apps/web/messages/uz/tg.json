@@ -161,6 +161,7 @@
         "SLOT_FULL": "Bu oynada joy qolmadi. Boshqasini tanlang.",
         "SLOT_CLOSED": "Bu oyna yopiq.",
         "SLOT_PAST": "Bu oyna o'tib ketdi.",
+        "DEMO_TARGET": "Bu namuna terminal, bu yerda joy band qilib bo'lmaydi.",
         "HOLD_EXPIRED": "Ushlab turish muddati tugadi. Oynani qaytadan tanlang.",
         "HOLD_ALREADY_USED": "Bu joy bo'yicha buyurtma allaqachon berilgan.",
         "HOLD_NOT_EXTENDABLE": "Muddat faqat bir marta uzaytiriladi.",

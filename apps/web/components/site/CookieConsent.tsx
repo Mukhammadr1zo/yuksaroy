@@ -71,12 +71,16 @@ export function CookieConsent() {
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const root = document.documentElement.style;
+    const html = document.documentElement;
+    const root = html.style;
     const set = () => root.setProperty('--ad-bottom', `${el.offsetHeight}px`);
     set();
+    // Telefonda chiziq ustiga ko'tarilgan yordam tugmasi sahifa tugmalarini yopardi ("Xaritada
+    // ko'rish"): chiziq turganda u telefonda yashirinadi (HelpWidget shu belgiga qaraydi)
+    html.dataset.consentBar = '';
     const ro = new ResizeObserver(set);
     ro.observe(el);
-    return () => { ro.disconnect(); root.removeProperty('--ad-bottom'); };
+    return () => { ro.disconnect(); root.removeProperty('--ad-bottom'); delete html.dataset.consentBar; };
   }, [show]);
 
   if (!show) return null;

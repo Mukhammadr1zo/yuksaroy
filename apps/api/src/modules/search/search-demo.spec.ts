@@ -24,4 +24,29 @@ describe('POST /search/parse decision', () => {
     const r = await ctl.parse({ q: 'Toshkentda yuklash', lang: 'uz' }, {} as FastifyRequest, '127.0.0.1');
     expect(r.decision).toMatchObject({ terminals: 8, demo: 2, freeToday: 0, cheapestTiyin: 3000 });
   });
+
+  // Viloyat chipi bor, lekin "Bekobod" so'zi qoladi: son butun viloyatniki bo'lmasin (egasi qarori 2026-10-07)
+  const mk = (counts: (q?: string) => number) => {
+    const calls: Array<string | undefined> = [];
+    const repo = {
+      listTerminals: async (f: { q?: string }) => { calls.push(f.q); return []; },
+      countTerminals: async (f: { q?: string }) => counts(f.q),
+      freeTodayByTerminal: async () => ({}),
+    } as unknown as CatalogRepository;
+    return { calls, ctl: new SearchController(repo, {} as TokenService, { enabled: false } as unknown as Yordamchi) };
+  };
+
+  it('viloyat chipi bilan ham qidiruv sozi saqlanadi va havolada qoladi', async () => {
+    const { ctl, calls } = mk((q) => (q ? 2 : 40));
+    const r = await ctl.parse({ q: 'Toshkent viloyati Bekobod', lang: 'uz' }, {} as FastifyRequest, '127.0.0.1');
+    expect(r.decision.terminals).toBe(2);
+    expect(calls[0]).toBeTruthy();
+    expect(r.query.q).toBeTruthy();
+  });
+  it('sozi bilan 0 chiqsa viloyat boyicha sanaydi', async () => {
+    const { ctl, calls } = mk((q) => (q ? 0 : 40));
+    const r = await ctl.parse({ q: 'Toshkent viloyati Bekobod', lang: 'uz' }, {} as FastifyRequest, '127.0.0.1');
+    expect(r.decision.terminals).toBe(40);
+    expect(calls[0]).toBeUndefined();
+  });
 });

@@ -1,27 +1,25 @@
 'use client';
-// Terminal sahifasining mijoz qismi: telefon (kirgan foydalanuvchiga Bearer bilan), "Slot band qilish" (MainButton ham), "Xaritada".
-import { useEffect, useState } from 'react';
+// Terminal sahifasining mijoz qismi: telefon (PhoneReveal: veb bilan bir xil obuna qoidasi), "Slot band qilish" (MainButton ham), "Xaritada".
 import { useTranslations } from 'next-intl';
-import { MapTrifoldIcon, PhoneIcon } from '@phosphor-icons/react';
+import { MapTrifoldIcon } from '@phosphor-icons/react';
 import { Link, useRouter } from '@/i18n/navigation';
-import { api } from '@/lib/api';
+import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { haptic, useMainButton } from './TgProvider';
 import { BTN, BTN_GHOST } from './bits';
 
-export function TerminalCta({ slug, lat, lng }: { slug: string; lat: number | null; lng: number | null }) {
+export function TerminalCta({ id, slug, lat, lng, hasPhone, isDemo }: { id: string; slug: string; lat: number | null; lng: number | null; hasPhone: boolean; isDemo: boolean }) {
   const t = useTranslations('tg.terminal');
+  const tr = useTranslations('terminal');
   const router = useRouter();
-  const [phone, setPhone] = useState<string | null | undefined>(undefined);
-  useEffect(() => { api<{ phone: string | null }>(`/terminals/${slug}`).then((d) => setPhone(d.phone ?? null)).catch(() => setPhone(null)); }, [slug]);
   const book = () => { haptic('medium'); router.push(`/tg/book/${slug}`); };
-  useMainButton({ text: t('book'), onClick: book });
+  // Namuna terminalda joy band qilinmaydi (egasi qarori, 2026-10-07): MainButton ham yashirin
+  useMainButton({ text: t('book'), onClick: book, show: !isDemo });
   return (
     <div className="mt-3 space-y-2">
-      <p className="flex items-center gap-2 px-1 font-mono text-sm">
-        <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />
-        {phone === undefined ? <span className="text-muted">…</span> : phone ? <a href={`tel:${phone}`} className="font-semibold text-navy">{phone}</a> : <span className="text-muted">{t('noPhone')}</span>}
-      </p>
-      <button type="button" onClick={book} className={BTN}>{t('book')}</button>
+      {/* Raqam obunachiga, bosilganda (veb sahifa bilan bir xil /contacts qoidasi): bepul ochilmaydi */}
+      {hasPhone ? <p className="px-1"><PhoneReveal kind="terminal" targetId={id} next={`/tg/terminals/${slug}`} /></p> : <p className="px-1 text-sm text-muted">{t('noPhone')}</p>}
+      {isDemo ? <p className="rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{tr('demoNoBook')}</p>
+        : <button type="button" onClick={book} className={BTN}>{t('book')}</button>}
       {lat != null && lng != null ? (
         <Link href={`/tg/map?cat=terminal&c=${lng},${lat}&z=12`} onClick={() => haptic()} className={BTN_GHOST}><MapTrifoldIcon size={18} className="mr-2" aria-hidden="true" />{t('map')}</Link>
       ) : null}

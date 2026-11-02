@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { ...{ title: t('title'), description: t('description') }, ...alt(locale, '/for-providers') };
 }
 
+// Ikkinchi tugma ochiq /pricing: mehmonga ikkala kabinet havolasi bir xil "Ro'yxatdan o'tish" bo'lib qolardi (2026-11-02)
 /** Xizmat ko'rsatuvchilarga: qiymat kartalari, daromad hisoblagichi (obuna narxi sozlamadan), FAQ, CTA. Kabinet havolalari proxy orqali /login?next= ga tushadi. */
 export default async function ForProvidersPage({ params }: Params) {
   const { locale } = await params;
@@ -32,7 +33,7 @@ export default async function ForProvidersPage({ params }: Params) {
     : [];
   return (
     <>
-      <Hero side="providers" facts={facts} primary="/dashboard/listings/new" secondary="/dashboard/terminals/new" />
+      <Hero side="providers" facts={facts} primary="/dashboard/listings/new" secondary="/pricing" />
       <ValueCards side="providers" items={VALUES} />
       <section className="border-t border-line bg-white">
         <div className="mx-auto max-w-6xl px-6 py-14 md:py-16">

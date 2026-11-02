@@ -78,9 +78,12 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
   const data = await sapi<ListingPage>(`/listings${qs({ kind: kind || EQUIPMENT_KINDS.join(','), deal, region: corridor ? corridorRegions(cFrom!, cTo!).join(',') : region, near, radius, corridor, q: base.q, sort: raw.sort || 'new', page, limit: 12 })}`, 60);
   const pages = Math.max(1, Math.ceil(data.total / data.limit));
   const s = data.summary;
+  // Qaror satri namunasiz (summary shunday keladi): haqiqiy son total - demo, namuna ro'yxatda belgisi bilan qoladi.
+  // Egasi qarori (2026-10-07): nol sanoq chizilmaydi, 1 va undan ko'pi asl soni bilan
+  const real = data.total - (s.demo ?? 0);
   const decision = [
-    t('decision.count', { count: data.total }),
-    data.total && s.onRequest ? t('decision.onRequest', { count: s.onRequest }) : null,
+    real > 0 ? t('decision.count', { count: real }) : null,
+    s.onRequest ? t('decision.onRequest', { count: s.onRequest }) : null,
     s.cheapestTiyin != null ? t('decision.cheapest', { price: listingPrice(s.cheapestTiyin, s.cheapestUnit, lang) }) : null,
     s.nearestKm != null ? t('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
   ].filter(Boolean).join(t('decision.separator'));
@@ -131,7 +134,7 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
         </div>
       ) : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-        <p className="font-mono text-sm text-navy tabular-nums">{decision}</p>
+        {decision ? <p className="font-mono text-sm text-navy tabular-nums">{decision}</p> : null}
         <Link href={mapHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink"><MapTrifoldIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewOnMap')}</Link>
       </div>
 

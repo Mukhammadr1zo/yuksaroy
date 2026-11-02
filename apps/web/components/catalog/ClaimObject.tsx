@@ -11,7 +11,7 @@ export function ClaimObject({ terminalId }: { terminalId: string }) {
   const t = useTranslations('claim');
   const [orgs, setOrgs] = useState<Org[] | null>(null);
   const [orgId, setOrgId] = useState('');
-  const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'already' | 'err'>('idle');
+  const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'auto' | 'already' | 'err'>('idle');
   const at = useAttachments();
   const [note, setNote] = useState('');
   // Moderator "meniki" degan gapni nimaga qarab tekshirishini bilishi kerak
@@ -25,12 +25,13 @@ export function ClaimObject({ terminalId }: { terminalId: string }) {
     e.preventDefault();
     setState('busy');
     try {
-      await post(`/terminals/${terminalId}/claim`, { ...(orgId ? { orgId } : {}), note: note.trim(), files: at.files });
-      setState('sent');
+      const r = await post<{ claimStatus?: string }>(`/terminals/${terminalId}/claim`, { ...(orgId ? { orgId } : {}), note: note.trim(), files: at.files });
+      setState(r?.claimStatus === 'APPROVED' ? 'auto' : 'sent');
     } catch (err: any) { setState(err?.body?.code === 'TERMINAL_CLAIMED' ? 'already' : 'err'); }
   }
 
   if (!orgs) return <p className="text-sm text-muted">...</p>;
+  if (state === 'auto') return <p className="rounded-xl bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{t('autoDone')}</p>;
   if (state === 'sent') return <p className="rounded-xl bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{t('sent')}</p>;
   return (
     <form onSubmit={submit} className="space-y-2">

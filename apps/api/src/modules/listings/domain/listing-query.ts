@@ -59,11 +59,14 @@ const round1 = (x: number) => Math.round(x * 10) / 10;
  * Narx qismi domenda (cheapestByUnit): webdagi mahalliy xulosa ham aynan shundan oladi,
  * aks holda bir xil qator ikki joyda ikki xil son ko'rsatardi.
  */
-export function summarizeListings(all: Pick<ListingRecord, 'priceTiyin' | 'priceUnit' | 'lat' | 'lng'>[], near?: { lat: number; lng: number }) {
+export function summarizeListings(rows: Pick<ListingRecord, 'priceTiyin' | 'priceUnit' | 'lat' | 'lng' | 'isDemo'>[], near?: { lat: number; lng: number }) {
+  // Namuna e'lon ro'yxatda qoladi, lekin sonlarga kirmaydi (egasi qarori, 2026-10-07); haqiqiy son = total - demo
+  const all = rows.filter((l) => !l.isDemo);
   const dists = near ? all.filter((l) => l.lat != null && l.lng != null).map((l) => distanceKm(near.lat, near.lng, l.lat!, l.lng!)) : [];
   return {
     ...cheapestByUnit(all),
     onRequest: all.filter((l) => l.priceTiyin == null || l.priceUnit == null).length,
     nearestKm: dists.length ? round1(Math.min(...dists)) : null,
+    demo: rows.length - all.length,
   };
 }

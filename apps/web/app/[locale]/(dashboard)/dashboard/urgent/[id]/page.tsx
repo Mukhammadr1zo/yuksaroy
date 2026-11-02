@@ -16,7 +16,7 @@ import { OfferStatusPill, UrgentStatusPill, useUrgentLabels } from '@/components
  */
 type Item = UrgentRequest & { sentReal?: number | null; listed?: boolean };
 
-/** GET /urgent/:id bo'lmasa (shartnomada alohida tafsilot yo'li yo'q) ro'yxatdan topiladi. */
+/** GET /urgent/:id (egasi yoki admin). 404 bo'lsa ro'yxatdan qidiriladi: eski server versiyasi uchun zaxira. */
 async function loadOne(id: string): Promise<Item | null> {
   try { return await api<Item>(`/urgent/${id}`); }
   catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; }

@@ -7,6 +7,8 @@ import { ListingCard } from '@/components/catalog/ListingCard';
 import { HUB_PARAMS, RegionHub, isRegion } from '@/components/catalog/RegionHub';
 import { alt } from '@/lib/seo';
 
+// Hub sanog'i namunasiz (egasi qarori, 2026-10-07): faqat namuna bo'lgan hudud indekslanmaydi
+const realCount = (d: ListingPage) => d.total - (d.summary.demo ?? 0);
 export const revalidate = 300;
 export const generateStaticParams = HUB_PARAMS;
 type Params = { params: Promise<{ locale: string; code: string }> };
@@ -16,7 +18,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!isRegion(code)) return {};
   const [t, tr, data] = await Promise.all([getTranslations({ locale, namespace: 'hubs.carriers' }), getTranslations({ locale, namespace: 'region' }), sapi<ListingPage>(`/listings?kind=TRUCK&region=${code}&limit=1`, 300)]);
   // Bo'sh viloyat hubi indekslanmaydi (ichki havolalar uchun follow qoladi)
-  return { title: t('title', { region: tr(code) }), description: t('description', { region: tr(code), count: data.total }), ...alt(locale, `/carriers/region/${code}`), ...(data.total === 0 ? { robots: { index: false, follow: true } } : {}) };
+  return { title: t('title', { region: tr(code) }), description: t('description', { region: tr(code), count: realCount(data) }), ...alt(locale, `/carriers/region/${code}`), ...(realCount(data) === 0 ? { robots: { index: false, follow: true } } : {}) };
 }
 
 /** Viloyat hubi: avtotransport. API region filtri bazaviy viloyat YOKI xizmat hududiga mos keladi. */
@@ -27,7 +29,7 @@ export default async function CarriersRegionPage({ params }: Params) {
   const data = await sapi<ListingPage>(`/listings?kind=TRUCK&region=${code}&limit=50&sort=new`, 300);
   const pins = data.items.filter((x) => x.lat != null && x.lng != null).map((x) => ({ lat: x.lat!, lng: x.lng! }));
   return (
-    <RegionHub cat="carriers" code={code} count={data.total} shown={data.items.length} pins={pins}>
+    <RegionHub cat="carriers" code={code} count={realCount(data)} shown={data.items.length} pins={pins}>
       <div className="grid gap-4 md:grid-cols-2">{data.items.map((x) => <ListingCard key={x.id} l={x} />)}</div>
     </RegionHub>
   );
