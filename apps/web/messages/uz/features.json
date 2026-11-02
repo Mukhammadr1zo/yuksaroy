@@ -72,7 +72,7 @@
       },
       "frozen": {
         "title": "Muzlatilgan tarif va hujjatlar",
-        "body": "Buyurtma yuborilganda narx qotadi. Yakunda akt va hisob-faktura PDF."
+        "body": "Buyurtma yuborilganda narx qotadi. Yakunda akt va to'lov uchun hisob PDF."
       },
       "reviews": {
         "title": "Baholar",
@@ -115,7 +115,7 @@
       },
       "s4": {
         "title": "Bron qiling",
-        "body": "Joyni tanlaysiz, tarif muzlatiladi, yakunda akt va hisob-faktura."
+        "body": "Joyni tanlaysiz, tarif muzlatiladi, yakunda akt va to'lov uchun hisob."
       }
     },
     "numbers": {

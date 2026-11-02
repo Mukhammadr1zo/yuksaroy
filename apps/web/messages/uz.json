@@ -13,7 +13,9 @@
     },
     "terminal": {
       "title": "{name} · YukSaroy",
-      "description": "{kind}, {station} stansiyasi. {hours}.",
+      "head": "{kind}, {station} stansiyasi",
+      "length": "yo'l uzunligi {count} m",
+      "wagons": "{count} vagon sig'adi",
       "notFound": "Terminal topilmadi"
     },
     "texnika": {

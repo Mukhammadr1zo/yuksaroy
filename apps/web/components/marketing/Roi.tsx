@@ -54,39 +54,25 @@ export function ShipperRoi() {
   );
 }
 
-// ponytail: e'lon boshiga oylik qo'shimcha buyurtma; real ko'rsatkich yig'ilgach shu jadval almashadi
-const DEMAND = { low: 1, mid: 2, high: 4 } as const;
-type Demand = keyof typeof DEMAND;
 /**
- * Xizmat ko'rsatuvchi: yillik daromad = 12 x e'lonlar x talab x o'rtacha summa, minus obuna narxi.
- * Xarajat e'lon soniga ko'paytirilmaydi: bitta obuna barcha e'lonlarni qamraydi (ilgari
- * Premium har e'longa alohida sotilardi va hisob e'lon soniga bog'liq edi).
+ * Xizmat ko'rsatuvchi: yillik daromad = 12 x e'lonlar x oyiga buyurtma x o'rtacha summa, minus obuna narxi.
+ * Oyiga buyurtma sonini foydalanuvchining o'zi kiritadi: platforma "odatiy talab" raqamini o'ylab topmaydi.
+ * Xarajat e'lon soniga ko'paytirilmaydi: bitta obuna barcha e'lonlarni qamraydi.
  */
 export function ProviderRoi({ pricePerMonthSom }: { pricePerMonthSom: number }) {
   const t = useTranslations('marketing.providers.roi');
   const [listings, setListings] = useState(3);
   const [avg, setAvg] = useState(2500000);
-  const [demand, setDemand] = useState<Demand>('mid');
+  const [orders, setOrders] = useState(2);
   const price = pricePerMonthSom;
-  const gross = 12 * listings * DEMAND[demand] * avg;
+  const gross = 12 * listings * orders * avg;
   const cost = 12 * price;
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
       <div className="grid content-start gap-4 sm:grid-cols-2">
         <Field label={t('fields.listings')} value={listings} onChange={setListings} />
+        <Field label={t('fields.orders')} value={orders} onChange={setOrders} />
         <Field label={t('fields.avgValue')} value={avg} onChange={setAvg} />
-        <fieldset className="sm:col-span-2">
-          <legend className="text-xs font-semibold text-muted">{t('demand.label')}</legend>
-          <div className="mt-1 grid gap-2 sm:grid-cols-3">
-            {(Object.keys(DEMAND) as Demand[]).map((d) => (
-              <label key={d} className={`has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-teal has-[:focus-visible]:outline-offset-2 cursor-pointer rounded-xl border px-3 py-2 text-center text-sm font-semibold transition ${demand === d ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal'}`}>
-                <input type="radio" name="demand" className="sr-only" checked={demand === d} onChange={() => setDemand(d)} />
-                {t(`demand.${d}`)}
-                <span className="mt-0.5 block font-mono text-[11px] font-normal text-muted">{t('demand.hint', { n: DEMAND[d] })}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
       </div>
       <Result
         rows={[[t('gross'), som(gross)], [t('price'), `- ${som(cost)}`], [t('net'), som(gross - cost), true]]}

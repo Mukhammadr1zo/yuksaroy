@@ -20,7 +20,7 @@
       },
       "eyebrow": "Yuk egalari va ekspeditorlarga",
       "title": "Terminalni tanlang, joyni band qiling, hujjatni oling",
-      "lead": "Tarifni qo'ng'iroqsiz solishtirasiz, bo'sh oynani ko'rib band qilasiz, yakunda akt va hisob-faktura kabinetda turadi.",
+      "lead": "Tarifni qo'ng'iroqsiz solishtirasiz, bo'sh oynani ko'rib band qilasiz, yakunda akt va to'lov uchun hisob kabinetda turadi.",
       "facts": {
         "terminals": "{count} faol terminal",
         "freeSlots": "bugun {count} bo'sh joy"
@@ -40,7 +40,7 @@
         },
         "frozen": {
           "title": "Muzlatilgan narx va hujjatlar",
-          "body": "Buyurtma yuborilganda tarif muzlatiladi. Yakunda akt va hisob-faktura PDF kabinetda tayyor turadi."
+          "body": "Buyurtma yuborilganda tarif muzlatiladi. Yakunda akt va to'lov uchun hisob PDF kabinetda tayyor turadi."
         },
         "chain": {
           "title": "Holatlar zanjiri",
@@ -67,7 +67,7 @@
       },
       "faq": {
         "q1": "Bron uchun ro'yxatdan o'tish shartmi?",
-        "a1": "Narx hisobi va katalog login'siz ochiq. Joy band qilish, so'rov yuborish va telefonni ko'rish uchun kabinet kerak: telefon raqami yoki Google orqali bir daqiqa.",
+        "a1": "Narx hisobi va katalog login'siz ochiq. Joy band qilish va so'rov yuborish uchun kabinet kerak: telefon raqami yoki Google orqali bir daqiqa. Telefon raqamlarini obunachilar ko'radi.",
         "q2": "Narx qanday hisoblanadi?",
         "a2": "Tarif × vazn (yoki vagon soni) + qo'shimcha xizmatlar. Terminal minimal summa qo'ygan bo'lsa, u qo'llanadi. Pilotda platforma komissiyasi 0 %.",
         "q3": "Terminal tasdiqlamasa nima bo'ladi?",
@@ -75,7 +75,7 @@
         "q4": "Tariflar qanchalik ishonchli?",
         "a4": "Egasi tasdiqlagan terminal tarifini terminalning o'zi e'lon qiladi. Tasdiqlanmagan pasport tarifi taxminiy deb belgilanadi.",
         "q5": "Hujjatlarni qayerdan olaman?",
-        "a5": "Buyurtma yakunlangach akt va hisob-faktura PDF kabinetdagi Hujjatlar bo'limida turadi. Har hujjatda muzlatilgan tarif va tarozi natijasi ko'rsatiladi."
+        "a5": "Buyurtma yakunlangach akt va to'lov uchun hisob PDF kabinetdagi Hujjatlar bo'limida turadi. Har hujjatda muzlatilgan tarif ko'rsatiladi."
       },
       "band": {
         "title": "Birinchi buyurtmani bugun bering",
@@ -87,7 +87,14 @@
     "providers": {
       "meta": {
         "title": "Xizmat ko'rsatuvchilarga · YukSaroy",
-        "description": "Terminal, texnika va avtotransport egalariga: standart e'lon, so'rovlar faqat kirganlardan, buyurtma taxtasi va hujjatlar. Daromad hisoblagichi."
+        "description": "Terminal, texnika va avtotransport egalariga: standart e'lon, so'rovlar kabinetda, buyurtma taxtasi va hujjatlar. Daromad hisoblagichi."
+      },
+      "board": {
+        "title": "Yuk taxtasi, xizmat so'rovlari, shoshilinch so'rovlar",
+        "body": "Yuk egalari yukini taxtaga qo'yadi, siz mos yukka taklif yozasiz. Ekspeditor, yuk kassiri va hujjat yordamchisi xizmat profili ochadi va xizmat so'rovlarini kabinetda oladi. Shoshilinch so'rovlarga ham kabinetdan javob berasiz. Mijozning telefoni egasi qo'ygan bo'lsa va obunangiz bo'lsa ko'rinadi, aks holda taklif shu yerda yoziladi.",
+        "cargo": "Yuk taxtasi",
+        "requests": "Xizmat so'rovlari",
+        "urgent": "Shoshilinch so'rovlar"
       },
       "eyebrow": "Terminallar, texnika va avtotransport egalariga",
       "title": "E'lon bering, so'rov va buyurtma oling",
@@ -107,16 +114,16 @@
           "body": "Har e'lon bir xil maydonlar bilan to'ldiriladi, shuning uchun mijoz sizni solishtira oladi va topadi. Viloyat va yo'nalish bo'yicha qidiruvda chiqasiz."
         },
         "inquiries": {
-          "title": "So'rovlar faqat kirganlardan",
-          "body": "Telefon raqamingiz faqat ro'yxatdan o'tgan foydalanuvchiga ko'rinadi. So'rovlar kabinetda, spam yo'q."
+          "title": "So'rovlar kabinetda",
+          "body": "Telefon raqamingiz obunachi mijozlarga ko'rinadi, qolganlari kabinetda sizga yozadi. Spam yo'q."
         },
         "terminal": {
           "title": "Terminal: tarif, joy, buyurtma taxtasi",
           "body": "Tarifni e'lon qilasiz, kunlik sig'imni ochasiz, buyurtmalar taxtada keladi: tasdiqlash, holat belgilash, yakunlash."
         },
         "documents": {
-          "title": "Akt va hisob-faktura avtomatik",
-          "body": "Buyurtma yakunlangach akt va hisob-faktura PDF hosil bo'ladi. To'lovni kabinetda belgilaysiz."
+          "title": "Akt va to'lov uchun hisob avtomatik",
+          "body": "Buyurtma yakunlangach akt va to'lov uchun hisob PDF hosil bo'ladi. To'lovni kabinetda belgilaysiz."
         },
         "claim": {
           "title": "O'z obyektingizni da'vo qiling",
@@ -125,23 +132,17 @@
       },
       "roi": {
         "heading": "Daromad hisobi",
-        "lead": "E'lonlar soni, kutilgan talab va o'rtacha buyurtma summasini kiriting. Platforma narxi hisobdan ayiriladi.",
+        "lead": "E'lonlar soni, har e'londan oyiga nechta buyurtma olishingiz va o'rtacha buyurtma summasini o'zingiz kiriting. Platforma narxi hisobdan ayiriladi.",
         "fields": {
           "listings": "E'lonlar soni",
+          "orders": "Oyiga buyurtma, bitta e'londan",
           "avgValue": "O'rtacha buyurtma summasi, so'm"
-        },
-        "demand": {
-          "label": "Kutilgan talab",
-          "low": "Konservativ",
-          "mid": "Odatiy",
-          "high": "Yuqori talab",
-          "hint": "{n} qo'shimcha buyurtma / e'lon / oy"
         },
         "gross": "Yillik daromad",
         "price": "Platforma narxi (obuna)",
         "priceNote": "{price} / oy, e'lonlar soniga bog'liq emas. Pilotda e'lon berish bepul.",
         "net": "Sof daromad",
-        "formula": "Yillik daromad = 12 × e'lonlar × talab × o'rtacha summa; platforma narxi = 12 × e'lonlar × {price}"
+        "formula": "Yillik daromad = 12 × e'lonlar × oyiga buyurtma × o'rtacha summa; platforma narxi = 12 × {price} (bitta obuna, e'lonlar soniga bog'liq emas)"
       },
       "faq": {
         "q1": "E'lon berish pullikmi?",

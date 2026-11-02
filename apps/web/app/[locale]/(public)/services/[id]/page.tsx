@@ -5,6 +5,7 @@ import { SEARCH_LABELS, SERVICE_TYPE_LABELS, type KycStatus, type RegionCode, ty
 import { Link } from '@/i18n/navigation';
 import { sapiOrNull } from '@/lib/server-api';
 import { uzDate } from '@/lib/format';
+import { pageMeta } from '@/lib/seo';
 import type { ServiceProfileCard } from '@/lib/types-market';
 import { KycBadge } from '@/components/catalog/KycBadge';
 import { MarketPhone } from '@/components/market/bits';
@@ -16,7 +17,8 @@ const load = (id: string) => sapiOrNull<ServiceProfileCard>(`/services/profiles/
 export async function generateMetadata({ params }: Params) {
   const { locale, id } = await params;
   const [p, t] = await Promise.all([load(id), getTranslations({ locale, namespace: 'services.detail' })]);
-  return { title: p ? `${p.title} · YukSaroy` : t('notFound'), description: p?.description.slice(0, 160) };
+  if (!p) return { title: t('notFound') };
+  return pageMeta(locale, `/services/${id}`, { title: `${p.title} · YukSaroy`, description: p.description.slice(0, 160) || p.title, images: p.photos[0] ? [p.photos[0]] : undefined, noindex: p.isDemo });
 }
 
 /** Xizmat profili: nima qiladi, qayerda, tajriba, narx; telefon obunachiga; "So'rov qoldirish" shu tur bilan. */

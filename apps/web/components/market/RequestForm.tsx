@@ -46,6 +46,18 @@ const readDraft = (board: MarketBoard): Partial<Draft> => {
   try { return JSON.parse(sessionStorage.getItem(DRAFT_KEY(board)) || '{}') as Partial<Draft>; } catch { return {}; }
 };
 
+/**
+ * Qidirilgan yo'nalish havoladan olinadi (?fromRegion=&toRegion=): odam /carriers da qidirgan
+ * yo'nalishni qayta tanlamasin. Faqat tanish viloyat kodi o'tadi; havolaga begona qiymat yozilsa e'tibor berilmaydi.
+ */
+const readRoute = (): Pick<Draft, 'fromRegion' | 'toRegion'> => {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const ok = (k: string) => { const v = q.get(k) ?? ''; return (REGIONS as readonly string[]).includes(v) ? v : ''; };
+    return { fromRegion: ok('fromRegion'), toRegion: ok('toRegion') };
+  } catch { return { fromRegion: '', toRegion: '' }; }
+};
+
 export function RequestForm({ board, serviceType }: { board: MarketBoard; serviceType?: string }) {
   const t = useTranslations('market.form');
   const te = useTranslations('market.err');
@@ -57,6 +69,13 @@ export function RequestForm({ board, serviceType }: { board: MarketBoard; servic
     const saved = readDraft(board);
     return { ...EMPTY, ...saved, serviceType: picked || saved.serviceType || '' };
   });
+  // Yo'nalish havoladan sahifa ulangandan keyin o'qiladi: server va birinchi mijoz chizmasi bir xil
+  // bo'lsin (gidratatsiya). Saqlangan qoralama yoki odam tanlagan qiymat havoladan ustun.
+  useEffect(() => {
+    if (!cargo) return;
+    const route = readRoute();
+    setD((p) => ({ ...p, fromRegion: p.fromRegion || route.fromRegion, toRegion: p.toRegion || route.toRegion }));
+  }, [cargo]);
   const [needAuth, setNeedAuth] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [top, setTop] = useState<string | null>(null);

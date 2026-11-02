@@ -10,7 +10,7 @@
         },
         "booking": {
           "title": "Bron va hujjatlar",
-          "body": "Joy band qiling, dalolatnoma va hisob-faktura kabinetda tayyor bo'ladi."
+          "body": "Joy band qiling, dalolatnoma va to'lov uchun hisob kabinetda tayyor bo'ladi."
         },
         "listing": {
           "title": "E'lon berish",
@@ -101,7 +101,7 @@
           },
           "offer": {
             "title": "Xizmat ko'rsataman",
-            "body": "Terminal, shahobcha yo'l, texnika yoki avtotransport egasisiz. E'lon berasiz."
+            "body": "Terminal, shahobcha yo'l, texnika yoki avtotransport egasisiz, yoki ekspeditor, yuk kassiri (tovar kassiri), hujjat yordamchisisiz. E'lon yoki xizmat profili ochasiz."
           }
         },
         "who": {
@@ -157,8 +157,9 @@
           "body": "Tariflar va joylar bilan"
         },
         "kycHint": "Tasdiqlangan tashkilot e'lonlari tekshiruvsiz darhol chiqadi. STIR kiritib, kabinetda tasdiqlashga yuboring.",
+        "profileLink": "Xizmat profilini ochish",
         "kycLink": "Tashkilot sahifasi",
-        "driverHint": "Yakka haydovchi e'loni tekshiruvdan o'tgach faol bo'ladi.",
+        "driverHint": "Telefoni tasdiqlangan haydovchining faqat yuk mashinasi e'loni darhol chiqadi (bir vaqtda 3 tagacha faol e'lon). Telefon tasdiqlanmagan bo'lsa yoki boshqa turdagi e'lon bo'lsa, tekshiruvdan o'tgach faol bo'ladi.",
         "findTerminal": {
           "title": "Terminal topish",
           "body": "Bugungi bo'sh joylar va tariflar"

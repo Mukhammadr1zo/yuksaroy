@@ -72,7 +72,7 @@
       },
       "frozen": {
         "title": "Frozen tariff and documents",
-        "body": "The price is fixed when the order is sent. Act and invoice PDF at the end."
+        "body": "The price is fixed when the order is sent. Act and payment bill PDF at the end."
       },
       "reviews": {
         "title": "Reviews",
@@ -115,7 +115,7 @@
       },
       "s4": {
         "title": "Book",
-        "body": "Pick a spot, the tariff freezes, act and invoice at the end."
+        "body": "Pick a spot, the tariff freezes, act and payment bill at the end."
       }
     },
     "numbers": {

@@ -284,6 +284,12 @@ export function RegisterFlow({ next }: { next: string | null }) {
               <>{t('done.kycHint')}{' '}<Link href="/dashboard/organization" className="font-semibold text-amber-ink hover:underline">{t('done.kycLink')}</Link></>
             ) : who === 'shipper' ? t('done.shipperHint') : t('done.driverHint')}
           </p>
+          {/* Kassir va hujjat yordamchisi tashkilot turini ro'yxatdan tanlamaydi, shuning uchun havola har bir tashkilotga */}
+          {org && (
+            <p className="mt-3 text-sm">
+              <Link href={{ pathname: '/dashboard/market', query: { tab: 'profile' } }} className="font-semibold text-teal-ink hover:underline">{t('done.profileLink')}</Link>
+            </p>
+          )}
         </div>
       )}
     </div>

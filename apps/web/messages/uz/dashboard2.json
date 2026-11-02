@@ -279,6 +279,12 @@
         "dayFree": "{n} joy"
       },
       "orgAuto": "Tashkilotingiz yo'q: buyurtma berilganda ismingiz bilan yuk egasi tashkiloti avtomatik ochiladi, STIR keyin hujjat kerak bo'lganda so'raladi."
+    },
+    "now": {
+      "noPrice": { "title": "{name}: narx qo'yilmagan", "body": "Narxsiz terminalga mijoz buyurtma bera olmaydi" },
+      "noHours": { "title": "{name}: ish vaqti yozilmagan", "body": "Mijoz qachon kelishni bilmaydi" },
+      "noPhoto": { "title": "{name}: rasm yo'q", "body": "Rasmli terminalga ko'proq ishonishadi" },
+      "noFree": { "title": "{name}: bugun bo'sh joy yo'q", "body": "Joy oching, shunda mijoz bron qila oladi" }
     }
   }
 }

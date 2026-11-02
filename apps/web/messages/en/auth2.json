@@ -10,7 +10,7 @@
         },
         "booking": {
           "title": "Booking and documents",
-          "body": "Book a spot; the completion certificate and invoice are ready in your cabinet."
+          "body": "Book a spot; the completion certificate and payment bill are ready in your cabinet."
         },
         "listing": {
           "title": "Post a listing",
@@ -101,7 +101,7 @@
           },
           "offer": {
             "title": "I provide a service",
-            "body": "You own a terminal, a private siding, equipment or trucks. You will post listings."
+            "body": "You own a terminal, a private siding, equipment or trucks, or you are a forwarder, a freight cashier or a document helper. You will post a listing or a service profile."
           }
         },
         "who": {
@@ -157,8 +157,9 @@
           "body": "With tariffs and spots"
         },
         "kycHint": "Listings of a verified organization go live immediately without review. Enter the tax ID and request verification in the cabinet.",
+        "profileLink": "Open service profile",
         "kycLink": "Organization page",
-        "driverHint": "Individual driver listings go live after review.",
+        "driverHint": "Only a driver's truck listing with a verified phone goes live at once (up to 3 active listings at a time). Without a verified phone, or for any other kind of listing, it goes live after review.",
         "findTerminal": {
           "title": "Find a terminal",
           "body": "Free spots today and tariffs"

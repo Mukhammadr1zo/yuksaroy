@@ -48,6 +48,8 @@ const adsDaily = new DailyBucket();
  * chiqarardi. Katalog mayoqlari bu chelakka kirmaydi: u yerda son sotilmaydi.
  */
 const ADS_PER_IP_DAY = 2000;
+/** Terminalga yozilgan so'rov: terminalning o'ziga (terminalId) ham, uning e'loniga (listing) ham. */
+export const terminalInquiryWhere = (id: string, gte: Date) => ({ OR: [{ terminalId: id }, { listing: { terminalId: id } }], createdAt: { gte } });
 const since30 = (now: Date) => new Date(now.getTime() - 30 * 86_400_000);
 
 /** Ko'rsatish hodisalari (ochiq, IP limit) va egasi analitikasi (oxirgi 30 kun). */
@@ -111,7 +113,7 @@ export class ImpressionsController {
     const now = new Date(), gte = since30(now);
     const [s, inquiries, orders] = await Promise.all([
       this.impressions.series('terminal', id, now),
-      this.prisma.inquiry.count({ where: { listing: { terminalId: id }, createdAt: { gte } } }),
+      this.prisma.inquiry.count({ where: terminalInquiryWhere(id, gte) }),
       this.prisma.order.count({ where: { terminalId: id, createdAt: { gte } } }),
     ]);
     return { ...s, inquiries, orders };

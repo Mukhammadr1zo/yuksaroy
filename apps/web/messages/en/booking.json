@@ -30,7 +30,7 @@
       },
       "ask": {
         "title": "Ask a price",
-        "body": "For equipment and truck listings the price is agreed with the owner. The request goes from the cabinet, the owner's phone is visible only to logged-in users.",
+        "body": "For equipment and truck listings the price is agreed with the owner. The request goes from the cabinet, the owner's phone is shown to subscribed customers, the others write to them in the cabinet.",
         "link": "Equipment listings"
       }
     },
@@ -61,7 +61,7 @@
       "heading": "Order state chain",
       "lead": "The terminal marks each step in its cabinet, you see it on the order page. Every mark is timestamped, leaving no room for disputes.",
       "before": "Pending → Confirmed",
-      "after": "Done: act and invoice",
+      "after": "Done: act and payment bill",
       "steps": {
         "ARRIVED": {
           "title": "Arrived",

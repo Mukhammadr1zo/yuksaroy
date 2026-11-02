@@ -5,22 +5,24 @@ import { sapi } from '@/lib/server-api';
 import { url } from '@/lib/seo';
 import { POSTS } from '@/components/marketing/posts';
 
+// Har so'rovda hisoblanadi: build paytida API yetib bo'lmaydi va ~216 ta yo'l bir soatga qotib qolardi. Kesh sapi(..., 3600) da qoladi.
+export const dynamic = 'force-dynamic';
+
 // /sitemap.xml: statik yo'llar, obyekti bor viloyat hublari, tafsilot sahifalari (terminal, e'lon, kompaniya), uch til (uz prefiksiz).
 // Temir yo'l terminallarining cuid manzillari bu yerda yo'q: faqat viloyat hublari; sahifalarning o'zi indekslanaveradi.
 const STATIC = ['', '/terminals', '/equipment', '/carriers', '/companies', '/standards', '/quote', '/map', '/booking', '/for-shippers', '/for-providers', '/urgent', '/cargo', '/services', '/wagon', '/help', '/pricing', '/features', '/features/assistant', '/about', '/contact', '/advertise', '/blog', '/terms', '/privacy', ...POSTS.map((p) => `/blog/${p.slug}`)];
-/** Viloyat hublari: obyekti bor viloyatlar; ro'yxat bo'sh bo'lsa (API yo'q) hammasi qoladi. */
+/** Viloyat hublari: faqat haqiqiy obyekti bor viloyatlar. */
 const hubs = (cat: string, rows: { regionCode: string | null; serviceRegions?: string[] }[]) => {
   const has = new Set(rows.flatMap((r) => [r.regionCode, ...(r.serviceRegions ?? [])]).filter((x): x is string => x !== null));
-  return REGIONS.filter((r) => has.size === 0 || has.has(r)).map((r) => `/${cat}/region/${r}`);
+  return REGIONS.filter((r) => has.has(r)).map((r) => `/${cat}/region/${r}`);
 };
 
-/** Ochiq ro'yxatni oxirigacha varaqlaydi (limit 50, API maksimumi); API yo'q bo'lsa bo'sh. */
-async function all<T>(path: string): Promise<T[]> {
+/** Ochiq ro'yxatni oxirigacha varaqlaydi (limit 50, API maksimumi). API yiqilsa xato ko'tariladi: qisqa ro'yxat berilmaydi, keyingi so'rov qayta urinadi. Namuna qatorlar tashlanadi: Google ularni ko'rmasin. */
+async function all<T extends { isDemo?: boolean }>(path: string): Promise<T[]> {
   const out: T[] = [];
   for (let page = 1; page <= 200; page++) {
-    const d = await sapi<{ items: T[]; total: number }>(`${path}${path.includes('?') ? '&' : '?'}page=${page}&limit=50`, 3600).catch(() => null);
-    if (!d) break;
-    out.push(...d.items);
+    const d = await sapi<{ items: T[]; total: number }>(`${path}${path.includes('?') ? '&' : '?'}page=${page}&limit=50`, 3600);
+    out.push(...d.items.filter((x) => !x.isDemo));
     if (page * 50 >= d.total || d.items.length === 0) break;
   }
   return out;
@@ -30,9 +32,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // lastModified: faqat haqiqiy sana bor yo'llarda (ochiq API'da e'lon publishedAt beradi, terminal va kompaniya bermaydi)
   const seen = new Map<string, string>();
   const [terminals, listings, companies] = await Promise.all([
-    all<{ slug: string; regionCode: string | null }>('/terminals'),
-    all<{ slug: string; kind: string; publishedAt: string | null; regionCode: string | null; serviceRegions: string[] }>('/listings'),
-    all<{ slug: string | null; id: string }>('/companies'),
+    all<{ slug: string; regionCode: string | null; isDemo?: boolean }>('/terminals'),
+    all<{ slug: string; kind: string; publishedAt: string | null; regionCode: string | null; serviceRegions: string[]; isDemo?: boolean }>('/listings'),
+    all<{ slug: string | null; id: string; isDemo?: boolean }>('/companies'),
   ]);
   const listingPaths = listings.map((l) => {
     const p = `${l.kind === 'TRUCK' ? '/carriers' : '/equipment'}/${l.slug}`;

@@ -260,3 +260,30 @@ describe("yaratish javobi haqiqiy oluvchilar sonini aytadi", () => {
     expect(sentTo).toEqual([]);
   });
 });
+
+/** ?from= faqat tanish belgi bo'lsa auditga yoziladi: begona qiymat yozilmaydi va so'rovni yiqitmaydi. */
+describe("so'rov manbai auditga yoziladi", () => {
+  const dto = { board: 'SERVICE' as const, title: 'Ekspeditor kerak', description: 'Eksport hujjatlari', serviceType: 'FORWARDER', regionCode: 'UZ-AN' };
+  const run = async (from?: string) => {
+    const metas: Any[] = [];
+    const p: Any = {
+      $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn({
+        $queryRaw: async () => [{ nextval: 7n }],
+        marketRequest: { create: async ({ data }: Any) => ({ id: 'r7', status: 'OPEN', awardedOfferId: null, isDemo: false, createdAt: now, updatedAt: now, ...data }) },
+      }),
+      telegramLink: { findUnique: async () => null },
+    };
+    const m = { ...market, fanout: async () => ({ userIds: [], sentReal: 0 }) } as unknown as MarketService;
+    const a = { log: async (e: Any) => { metas.push(e.meta); } } as unknown as AuditService;
+    await new MarketController(prisma(p), a, m, tokens, users, sessions).create('u1', { ...dto, from });
+    return metas[0];
+  };
+
+  it.each(['terminals', 'carriers', 'demo'])('%s yoziladi', async (from) => {
+    expect(await run(from)).toMatchObject({ from });
+  });
+
+  it('begona qiymat yozilmaydi', async () => {
+    expect(await run('reklama')).not.toHaveProperty('from');
+  });
+});

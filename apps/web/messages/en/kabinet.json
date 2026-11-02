@@ -148,7 +148,7 @@
         "title": "Kind, model and year make the listing easy to find",
         "regionCode": "Where the equipment is now",
         "serviceRegions": "The base region must be included",
-        "contactPhone": "Visible to signed-in users only",
+        "contactPhone": "The number is shown to subscribed customers, the others write to you in the cabinet",
         "terminalId": "A linked listing also appears on the object page",
         "photos": "JPEG, PNG or WebP, up to 5 MB each, at most {max}"
       },
@@ -463,7 +463,7 @@
         },
         "stir": {
           "title": "The organization has no tax ID",
-          "body": "It is printed on the invoice"
+          "body": "It is printed on the payment bill"
         },
         "rejected": {
           "title": "{count} listings were returned",
@@ -520,7 +520,7 @@
       "windowTitle": "Conversation: {title}",
       "toOwner": "The owner of the object replies",
       "toPlatform": "No owner yet: the platform replies",
-      "loginToWrite": "Sign in to write. The phone number is open to everyone.",
+      "loginToWrite": "Sign in to write. The phone number is shown to subscribed customers only.",
       "login": "Sign in",
       "emptyHint": "Write the first message: for what dates, how much and where to.",
       "asOrg": "Writing as",

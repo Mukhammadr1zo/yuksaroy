@@ -105,6 +105,11 @@ export default async function AvtotransportPage({ params, searchParams }: Params
     s.nearestKm != null ? t('decision.nearest', { km: Math.round(s.nearestKm) }) : null,
   ].filter(Boolean).join(t('decision.separator'));
   const filtered = chips.length > 0 || local || !!raw.q;
+  // Yuk egasi shu yerdan yuk e'loniga o'tadi; qidirilgan yo'nalish bo'lsa forma "qayerdan/qayerga" bilan ochiladi
+  const cargoHref = `/cargo/new${qs({ from: 'carriers', fromRegion: cFrom, toRegion: cTo })}`;
+  const cargoCta = (
+    <Link href={cargoHref} className="inline-block rounded-full bg-teal px-6 py-3 text-center font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('detail.cargoCta')}</Link>
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -151,12 +156,14 @@ export default async function AvtotransportPage({ params, searchParams }: Params
       {items.length === 0 ? (
         <div className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center">
           <p className="font-display text-lg font-bold text-navy">{t('empty.title')}</p>
-          <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.body')}</p>
+          <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t(corridor ? 'empty.carriersBody' : 'empty.carriersBodyAny')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <DashLink href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink>
+            {cargoCta}
             {watchable ? <WatchButton kind="LISTING" params={{ listingKind: 'TRUCK', regionCode: watchRegions[0], truckType }} next={href({})} /> : null}
             {filtered ? <Link href="/carriers" className="text-sm font-semibold text-teal-ink underline">{t('empty.reset')}</Link> : null}
           </div>
+          {/* Tashuvchilarga qaratilgan matn ikkinchi o'rinda: bu sahifaga ko'pincha yuk izlovchi keladi */}
+          <p className="mx-auto mt-8 max-w-[52ch] border-t border-line/70 pt-4 text-sm text-muted">{t('empty.body')} <DashLink href="/dashboard/listings/new" className="font-semibold text-teal-ink underline" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink></p>
         </div>
       ) : (
         <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -164,6 +171,7 @@ export default async function AvtotransportPage({ params, searchParams }: Params
           <Impressions kind="listing" ids={items.map((x) => x.id)} surface="list" />
         </div>
       )}
+      {items.length > 0 ? <div className="mt-8 text-center">{cargoCta}</div> : null}
 
       <Pagination page={raw$.page} pages={pages} href={(n) => href({ page: n })} />
       <RegionChips base="/carriers" />

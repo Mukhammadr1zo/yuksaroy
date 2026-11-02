@@ -4,6 +4,7 @@ import { EyeIcon } from '@phosphor-icons/react/dist/ssr';
 import { Link } from '@/i18n/navigation';
 import { LISTING_LABELS, LISTING_OWNER_LABELS, SEARCH_LABELS, formatSom, type SearchLang } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
+import { pageMeta } from '@/lib/seo';
 import { num, uzDate } from '@/lib/format';
 import type { ListingDetail, ListingPage } from '@/lib/types-listing';
 import { DemoBadge, KIND_ICON, ListingCard, listingHref, regionName } from './ListingCard';
@@ -20,9 +21,14 @@ import { AdSlot } from '@/components/site/AdSlot';
 
 type Section = 'equipment' | 'carriers';
 
-export async function listingMetadata(slug: string) {
+/** Sarlavha, tavsif, canonical va birinchi rasm e'lonning o'zidan; namuna e'lon Google'dan yashiriladi. */
+export async function listingMetadata(locale: string, section: Section, slug: string) {
   const l = await sapiOrNull<ListingDetail>(`/listings/${slug}`, 60);
-  return l ? { title: `${l.title} · YukSaroy`, description: l.description?.slice(0, 160) ?? l.title } : { title: 'YukSaroy' };
+  if (!l) return { title: 'YukSaroy' };
+  return pageMeta(locale, `/${section}/${slug}`, {
+    title: `${l.title} · YukSaroy`, description: l.description?.slice(0, 160) || l.title,
+    images: l.photos[0] ? [l.photos[0]] : undefined, noindex: l.isDemo,
+  });
 }
 
 /** /equipment/[slug] va /carriers/[slug] uchun bitta tafsilot: galereya, xususiyatlar, narx, egasi, so'rov, xarita, o'xshashlar. */
@@ -171,7 +177,10 @@ export async function ListingDetailView({ slug, section }: { slug: string; secti
       <div className="mt-10 max-w-3xl">
         <ListingReviews listingId={l.id} slug={l.slug} />
         {/* Namuna e'lon haqiqiy taklif emas: unga shikoyat ham yozilmaydi */}
-        {l.isDemo ? null : <div className="mt-8"><ReportButton kind="listing" targetId={l.id} /></div>}
+        {/* Namuna e'londa odam boshi berk ko'chada qolmasin: yuk egasi yukini e'lon qiladi, texnika izlovchi shoshilinch so'rov qoldiradi */}
+        {l.isDemo ? (
+          <Link href={truck ? '/cargo/new?from=demo' : '/urgent'} className="mt-8 inline-block rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t(truck ? 'cargoCta' : 'urgentCta')}</Link>
+        ) : <div className="mt-8"><ReportButton kind="listing" targetId={l.id} /></div>}
       </div>
     </div>
   );

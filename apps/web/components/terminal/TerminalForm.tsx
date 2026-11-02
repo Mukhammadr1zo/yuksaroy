@@ -32,6 +32,12 @@ export function TerminalEditor({ initial }: { initial?: MyTerminal }) {
   const t = useTranslations('terminalsAdmin');
   const ta = useTranslations('analytics');
   const [tab, setTab] = useState<Tab>('info');
+  // "Hozir" sahifasidagi vazifa havolasi (?tab=tariffs, ?tab=slots) kerakli bo'limni ochsin. Mount'dan
+  // keyin o'qiladi: server va birinchi chizma bir xil qoladi
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('tab') as Tab | null;
+    if (q && TABS.includes(q)) setTab(q);
+  }, []);
   const uid = useId();
   const [term, setTerm] = useState<MyTerminal | null>(initial ?? null);
   const enabled = term?.services.filter((s) => s.isEnabled).map((s) => s.serviceCode) ?? [];

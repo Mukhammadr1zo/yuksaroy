@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { sapiOrNull } from '@/lib/server-api';
 import type { MarketRequest } from '@/lib/types-market';
+import { pageMeta } from '@/lib/seo';
 import { RequestDetail } from '@/components/market/RequestDetail';
 
 type Params = { params: Promise<{ locale: string; no: string }> };
@@ -11,7 +12,8 @@ const load = (no: string) => sapiOrNull<MarketRequest>(`/market/requests/${encod
 export async function generateMetadata({ params }: Params) {
   const { locale, no } = await params;
   const [r, t] = await Promise.all([load(no), getTranslations({ locale, namespace: 'cargo.detail' })]);
-  return { title: r ? `${r.no} · ${r.title} · YukSaroy` : t('notFound') };
+  if (!r) return { title: t('notFound') };
+  return pageMeta(locale, `/cargo/${no}`, { title: `${r.no} · ${r.title} · YukSaroy`, description: r.description.trim().slice(0, 160) || r.title, images: r.photos[0] ? [r.photos[0]] : undefined, noindex: r.isDemo });
 }
 
 /** Yuk tafsiloti: ochiq sahifa, telefon faqat obunachiga, taklif formasi kirganlarga. */

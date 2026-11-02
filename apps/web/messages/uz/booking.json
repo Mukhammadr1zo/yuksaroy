@@ -30,7 +30,7 @@
       },
       "ask": {
         "title": "Narx so'rash",
-        "body": "Texnika va avtotransport e'lonlarida narx egasi bilan kelishiladi. So'rov kabinetdan yuboriladi, egasining telefoni faqat kirganlarga ko'rinadi.",
+        "body": "Texnika va avtotransport e'lonlarida narx egasi bilan kelishiladi. So'rov kabinetdan yuboriladi, egasining telefoni obunachilarga ko'rinadi, qolganlari unga kabinetda yozadi.",
         "link": "Texnika e'lonlari"
       }
     },
@@ -61,7 +61,7 @@
       "heading": "Buyurtma holatlari zanjiri",
       "lead": "Terminal har bosqichni kabinetda belgilaydi, siz buyurtma sahifasida ko'rasiz. Har belgi vaqt bilan yoziladi, kelishmovchilikka joy qolmaydi.",
       "before": "Tasdiq kutilmoqda → Tasdiqlandi",
-      "after": "Yakunlandi: akt va hisob-faktura",
+      "after": "Yakunlandi: akt va to'lov uchun hisob",
       "steps": {
         "ARRIVED": {
           "title": "Yetib keldi",

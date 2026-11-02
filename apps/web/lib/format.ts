@@ -81,6 +81,9 @@ export function hoursSummary(hours: WeekHours | null, is24h: boolean, locale = '
   return parts.join(' · ') || HOURS_TEXT[L].dayOff;
 }
 
+/** Ish vaqti kiritilganmi: kiritilmagan joyga "Hozir yopiq" deyish yolg'on bo'lardi, chunki bilmaymiz. */
+export const hoursEntered = (hours: WeekHours | null, is24h: boolean) => is24h || DAYS.some((d) => (hours?.[d] ?? []).length > 0);
+
 /** Toshkent vaqti bo'yicha hozir ochiqmi. */
 export function isOpenNow(hours: WeekHours | null, is24h: boolean, now = new Date()): boolean {
   if (is24h) return true;

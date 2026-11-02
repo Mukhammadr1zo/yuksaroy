@@ -53,6 +53,10 @@
     "empty": {
       "title": "Bu filtr bo'yicha e'lon topilmadi",
       "body": "Katalog ochiq, e'lonni egalarning o'zi joylaydi. Birinchi bo'lib joylasangiz, sizni birinchi topishadi.",
+      "carriersBody": "Bu yo'nalishda hozir tashuvchi yo'q. Yukingizni e'lon qiling, tashuvchilar o'zi narx aytadi.",
+      "carriersBodyAny": "Hozir tashuvchi topilmadi. Yukingizni e'lon qiling, tashuvchilar o'zi narx aytadi.",
+      "equipmentBody": "Kerakli vagon yoki teplovoz hozir yo'q. Shoshilib kerak bo'lsa so'rov qoldiring, yoki paydo bo'lganda xabar olish uchun kuzatuvni yoqing.",
+      "urgentCta": "Shoshilinch so'rov",
       "cta": "E'lon berish",
       "reset": "Filtrni tozalash",
       "standard": "E'lon standarti"
@@ -124,6 +128,8 @@
         "openChat": "Yozishmani ochish"
       },
       "demoNote": "Bu namuna e'lon: sayt qanday ishlashini ko'rsatish uchun qo'yilgan, haqiqiy taklif emas. Telefon va yozishma yo'q.",
+      "cargoCta": "Yukingizni e'lon qiling, tashuvchilar o'zi narx aytadi",
+      "urgentCta": "Shunday texnika kerakmi? Shoshilinch so'rov qoldiring",
       "viewsShort": "{count} marta ko'rilgan"
     },
     "reviews": {

@@ -279,6 +279,12 @@
         "dayFree": "{n, plural, one {# place} other {# places}}"
       },
       "orgAuto": "You have no organization: one is created automatically in your name when you place the order; the tax ID is asked later, when documents are issued."
+    },
+    "now": {
+      "noPrice": { "title": "{name}: no price set", "body": "Customers cannot order from a terminal without a price" },
+      "noHours": { "title": "{name}: no working hours", "body": "Customers do not know when to come" },
+      "noPhoto": { "title": "{name}: no photo", "body": "Terminals with photos are trusted more" },
+      "noFree": { "title": "{name}: no free place today", "body": "Open places so customers can book" }
     }
   }
 }

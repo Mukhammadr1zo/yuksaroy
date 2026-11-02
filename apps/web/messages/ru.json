@@ -13,7 +13,9 @@
     },
     "terminal": {
       "title": "{name} · YukSaroy",
-      "description": "{kind}, станция {station}. {hours}.",
+      "head": "{kind}, станция {station}",
+      "length": "длина путей {count} м",
+      "wagons": "вмещает {count} вагонов",
       "notFound": "Терминал не найден"
     },
     "texnika": {

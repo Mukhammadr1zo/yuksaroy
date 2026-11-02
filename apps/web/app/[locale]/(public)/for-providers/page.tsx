@@ -7,6 +7,7 @@ import type { Stats } from '@/lib/types';
 import { CtaBand, Faq, Hero, ValueCards } from '@/components/marketing/bits';
 import { ProviderRoi } from '@/components/marketing/Roi';
 import { alt } from '@/lib/seo';
+import { Link } from '@/i18n/navigation';
 
 export const revalidate = 300;
 type Params = { params: Promise<{ locale: string }> };
@@ -35,6 +36,18 @@ export default async function ForProvidersPage({ params }: Params) {
     <>
       <Hero side="providers" facts={facts} primary="/dashboard/listings/new" secondary="/pricing" />
       <ValueCards side="providers" items={VALUES} />
+      <section className="border-t border-line bg-white">
+        <div className="mx-auto max-w-6xl px-6 py-12">
+          <h2 className="font-display text-2xl font-bold text-navy">{t('board.title')}</h2>
+          <p className="mt-2 max-w-[70ch] text-muted">{t('board.body')}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {(['cargo', 'services', 'urgent'] as const).map((k) => (
+              // Xizmat so'rovlari ijrochiga kabinetda keladi; /services esa buyurtmachi sahifasi
+              <Link key={k} href={k === 'services' ? '/dashboard/market' : `/${k}`} className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-navy transition-colors hover:border-teal">{t(`board.${k === 'services' ? 'requests' : k}`)}</Link>
+            ))}
+          </div>
+        </div>
+      </section>
       <section className="border-t border-line bg-white">
         <div className="mx-auto max-w-6xl px-6 py-14 md:py-16">
           <h2 className="font-display text-2xl font-bold text-navy md:text-3xl">{t('roi.heading')}</h2>

@@ -37,13 +37,15 @@ export const OG_LOCALE: Record<string, string> = { uz: 'uz_UZ', ru: 'ru_RU', en:
 export async function pageMeta(
   locale: string,
   path: string,
-  m: { title: string; description: string; images?: string[] },
+  m: { title: string; description: string; images?: string[]; noindex?: boolean },
 ) {
   const ts = await getTranslations({ locale, namespace: 'seo2' });
   return {
     title: m.title,
     description: m.description,
     ...alt(locale, path),
+    // Namuna sahifa Google'ga kerak emas, lekin havolalarni kuzatish mumkin (follow)
+    ...(m.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: 'website' as const,
       siteName: ts('siteName'),

@@ -20,7 +20,7 @@
       },
       "eyebrow": "For shippers and forwarders",
       "title": "Pick a terminal, book a spot, get the documents",
-      "lead": "Compare tariffs without calling, see a free window and book it, and find the act and invoice waiting in your cabinet at the end.",
+      "lead": "Compare tariffs without calling, see a free window and book it, and find the act and payment bill waiting in your cabinet at the end.",
       "facts": {
         "terminals": "{count, plural, one {# active terminal} other {# active terminals}}",
         "freeSlots": "{count, plural, one {# free spot today} other {# free spots today}}"
@@ -40,7 +40,7 @@
         },
         "frozen": {
           "title": "Frozen price and documents",
-          "body": "The tariff is frozen when the order is sent. At the end the act and invoice PDFs are ready in the cabinet."
+          "body": "The tariff is frozen when the order is sent. At the end the act and payment bill PDFs are ready in the cabinet."
         },
         "chain": {
           "title": "State chain",
@@ -67,7 +67,7 @@
       },
       "faq": {
         "q1": "Do I need to register to book?",
-        "a1": "The price calculator and the catalog are open without login. Booking a spot, sending a request and seeing a phone number need a cabinet: one minute via phone number or Google.",
+        "a1": "The price calculator and the catalog are open without login. Booking a spot and sending a request need a cabinet: one minute via phone number or Google. Phone numbers are shown to subscribed customers.",
         "q2": "How is the price calculated?",
         "a2": "Tariff × weight (or wagon count) + extra services. If the terminal set a minimum amount, it applies. Platform commission is 0 % in the pilot.",
         "q3": "What if the terminal does not confirm?",
@@ -75,7 +75,7 @@
         "q4": "How reliable are the tariffs?",
         "a4": "A tariff of an owner-confirmed terminal is published by the terminal itself. A tariff from an unconfirmed passport is marked as an estimate.",
         "q5": "Where do I get the documents?",
-        "a5": "Once the order is done, the act and invoice PDFs sit in the Documents section of the cabinet. Each document shows the frozen tariff and the weighing result."
+        "a5": "Once the order is done, the act and payment bill PDFs sit in the Documents section of the cabinet. Each document shows the frozen tariff."
       },
       "band": {
         "title": "Place your first order today",
@@ -87,7 +87,14 @@
     "providers": {
       "meta": {
         "title": "For providers · YukSaroy",
-        "description": "For terminal, equipment and truck owners: a standard listing, requests only from logged-in users, an order board and documents. Revenue calculator."
+        "description": "For terminal, equipment and truck owners: a standard listing, requests in the cabinet, an order board and documents. Revenue calculator."
+      },
+      "board": {
+        "title": "Cargo board, service requests, urgent requests",
+        "body": "Cargo owners post a load on the board and you write an offer for a load that fits. Forwarders, freight cashiers and document helpers open a service profile and receive service requests in the cabinet. You answer urgent requests from the cabinet too. A customer's phone is shown if the owner left one and you have a subscription, otherwise you write your offer here.",
+        "cargo": "Cargo board",
+        "requests": "Service requests",
+        "urgent": "Urgent requests"
       },
       "eyebrow": "For terminals, equipment and truck owners",
       "title": "Publish a listing, receive requests and orders",
@@ -107,16 +114,16 @@
           "body": "Every listing has the same fields, so clients can compare and find you. You show up in searches by region and route."
         },
         "inquiries": {
-          "title": "Requests only from logged-in users",
-          "body": "Your phone number is visible only to registered users. Requests arrive in the cabinet, no spam."
+          "title": "Requests arrive in the cabinet",
+          "body": "Your number is shown to subscribed customers, the others write to you in the cabinet. No spam."
         },
         "terminal": {
           "title": "Terminal: tariff, spots, order board",
           "body": "Publish a tariff, open daily capacity, orders arrive on the board: confirm, mark states, complete."
         },
         "documents": {
-          "title": "Act and invoice, automatically",
-          "body": "Once an order is done, the act and invoice PDFs are generated. You mark payment in the cabinet."
+          "title": "Act and payment bill, automatically",
+          "body": "Once an order is done, the act and payment bill PDFs are generated. You mark payment in the cabinet."
         },
         "claim": {
           "title": "Claim your object",
@@ -125,23 +132,17 @@
       },
       "roi": {
         "heading": "Revenue calculator",
-        "lead": "Enter the number of listings, expected demand and the average order value. The platform price is subtracted.",
+        "lead": "Enter the number of listings, how many orders a month you get from one listing and the average order value. The platform price is subtracted.",
         "fields": {
           "listings": "Number of listings",
+          "orders": "Orders a month from one listing",
           "avgValue": "Average order value, UZS"
-        },
-        "demand": {
-          "label": "Expected demand",
-          "low": "Conservative",
-          "mid": "Typical",
-          "high": "High demand",
-          "hint": "{n, plural, one {# extra order} other {# extra orders}} per listing per month"
         },
         "gross": "Yearly revenue",
         "price": "Platform cost (subscription)",
         "priceNote": "{price} / month, whatever the number of listings. Posting is free during the pilot.",
         "net": "Net revenue",
-        "formula": "Yearly revenue = 12 × listings × demand × average value; platform price = 12 × listings × {price}"
+        "formula": "Yearly revenue = 12 × listings × orders a month × average value; platform price = 12 × {price} (one subscription, whatever the number of listings)"
       },
       "faq": {
         "q1": "Is publishing paid?",

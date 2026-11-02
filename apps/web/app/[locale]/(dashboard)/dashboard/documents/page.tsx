@@ -35,13 +35,10 @@ export default function DocumentsPage() {
   // Terminal tashkiloti bo'lsa standart ko'rinish terminalniki.
   // STIR birinchi buyurtmada so'ralmaydi, lekin hisob-fakturada kerak: bo'sh bo'lsa shu yerda eslatiladi.
   useEffect(() => {
-    api<Membership[]>('/orgs/mine')
-      .then((ms) => {
-        const has = ms.some((m) => (m.org.kinds?.length ? m.org.kinds : [m.org.kind]).includes('TERMINAL'));
-        setIsTerminal(has); if (has) setScope('terminal');
-        setNoStir(ms.some((m) => m.isOwner && !m.org.stir));
-      })
-      .catch(() => setIsTerminal(false));
+    // Terminal bor-yo'qligi tashkilot turidan emas, buyurtmalar sahifasidagi kabi haqiqiy terminallar sonidan
+    api<{ terminals: number }>('/orders/summary').then((s) => s.terminals > 0).catch(() => false)
+      .then((has) => { setIsTerminal(has); if (has) setScope('terminal'); });
+    api<Membership[]>('/orgs/mine').then((ms) => setNoStir(ms.some((m) => m.isOwner && !m.org.stir))).catch(() => {});
   }, []);
   useEffect(() => {
     if (isTerminal === null) return;

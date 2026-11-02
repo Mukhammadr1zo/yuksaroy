@@ -8,13 +8,14 @@ import { canExtendListing } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
 import { uzDate } from '@/lib/format';
-import type { Inquiry, Membership, OwnerListing } from '@/lib/types-kabinet';
+import type { Inquiry, Membership, MyTerminal, OwnerListing } from '@/lib/types-kabinet';
 import type { MineDocs } from '@/lib/types-dashboard';
 import { useMe } from '@/components/site/useMe';
 
 type Summary = { terminals: number; byStatus: Record<string, number> };
 type Subs = { active: boolean; endsAt: string | null };
-type Task = { key: string; count?: number; href: string; tone?: 'warn' };
+// name bor bo'lsa vazifa terminal haqida: matni dashboard2.now dan olinadi
+type Task = { key: string; count?: number; href: string; tone?: 'warn'; name?: string };
 
 // Serverdagi eslatma oynasi bilan bir xil: uch kun
 const SUB_WARN = 3 * 86_400_000;
@@ -22,6 +23,7 @@ const SUB_WARN = 3 * 86_400_000;
 export default function NowPage() {
   const t = useTranslations('kabinet.now');
   const tc = useTranslations('kabinet.common');
+  const tn = useTranslations('dashboard2.now');
   const locale = useLocale();
   const me = useMe();
   const [orgs, setOrgs] = useState<Membership[] | null>(null);
@@ -31,22 +33,33 @@ export default function NowPage() {
     if (!me) return;
     let alive = true;
     (async () => {
-      const [ms, inq, docs, listings, sub] = await Promise.all([
+      const [ms, inq, docs, listings, sub, summary, terms] = await Promise.all([
         api<Membership[]>('/orgs/mine').catch(() => [] as Membership[]),
         api<Inquiry[]>('/inquiries?scope=owner').catch(() => [] as Inquiry[]),
         api<MineDocs>('/documents/mine?scope=client&limit=100').catch(() => ({ items: [], total: 0, page: 1, limit: 0 }) as MineDocs),
         api<OwnerListing[]>('/listings/mine').catch(() => [] as OwnerListing[]),
         api<Subs>('/subscription/me').catch(() => null),
+        api<Summary>('/orders/summary').catch(() => ({ terminals: 0, byStatus: {} }) as Summary),
+        api<MyTerminal[]>('/terminals/mine').catch(() => [] as MyTerminal[]),
       ]);
       if (!alive) return;
       setOrgs(ms);
-      const isTerminal = ms.some((m) => (m.org.kinds?.length ? m.org.kinds : [m.org.kind]).includes('TERMINAL'));
-      const pending = isTerminal ? await api<Summary>('/orders/summary').then((s) => s.byStatus?.PENDING ?? 0).catch(() => 0) : 0;
-      if (!alive) return;
+      // Tashkilot turi emas, egasining haqiqiy terminallari: reestrdan olingan shahobcha egasi ham buyurtmani shu yerda ko'radi
+      const pending = summary.terminals > 0 ? (summary.byStatus?.PENDING ?? 0) : 0;
 
       const now = Date.now();
       const list: Task[] = [];
       if (pending) list.push({ key: 'ordersToConfirm', count: pending, href: '/dashboard/orders?tab=incoming', tone: 'warn' });
+      // Terminalning yetishmayotgan joylari (bo'sh joy faqat faol terminalga): mijoz buni ko'rmasa bron qilmaydi. Hammasi to'liq bo'lsa hech narsa qo'shilmaydi.
+      for (const x of terms) {
+        if (!x.orgId) continue;
+        const href = `/dashboard/terminals/${x.id}`;
+        const hasHours = x.is24h || Object.values(x.hours ?? {}).some((d) => d?.length);
+        if (!x.tariffs.length) list.push({ key: 'noPrice', href: `${href}?tab=tariffs`, name: x.name });
+        if (!hasHours) list.push({ key: 'noHours', href, name: x.name });
+        if (!x.photos.length) list.push({ key: 'noPhoto', href, name: x.name });
+        if (x.status === 'ACTIVE' && x.freeToday === 0) list.push({ key: 'noFree', href: `${href}?tab=slots`, name: x.name });
+      }
       const open = inq.filter((i) => i.status === 'OPEN').length;
       if (open) list.push({ key: 'inquiries', count: open, href: '/dashboard/inquiries' });
       const unpaid = docs.items.filter((d) => d.kind === 'INVOICE' && (d.status === 'ISSUED' || d.status === 'OVERDUE')).length;
@@ -84,12 +97,12 @@ export default function NowPage() {
       {tasks && tasks.length ? (
         <ul className="mt-5 space-y-2">
           {tasks.map((x) => (
-            <li key={x.key}>
+            <li key={`${x.key}:${x.href}`}>
               <Link href={x.href} className={`flex items-center gap-3 rounded-card border bg-white p-4 transition-colors duration-150 hover:border-teal ${x.tone === 'warn' ? 'border-amber/50' : 'border-line'}`}>
                 {x.count ? <span className={`flex h-8 min-w-8 items-center justify-center rounded-full px-2 font-mono text-sm font-bold ${x.tone === 'warn' ? 'bg-amber-soft text-amber-ink' : 'bg-teal-soft text-teal-ink'}`}>{x.count}</span> : null}
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{t(`task.${x.key}.title`, { count: x.count ?? 0 })}</span>
-                  <span className="block text-sm text-muted">{t(`task.${x.key}.body`)}</span>
+                  <span className="block font-semibold">{x.name ? tn(`${x.key}.title`, { name: x.name }) : t(`task.${x.key}.title`, { count: x.count ?? 0 })}</span>
+                  <span className="block text-sm text-muted">{x.name ? tn(`${x.key}.body`) : t(`task.${x.key}.body`)}</span>
                 </span>
                 <ArrowRightIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />
               </Link>

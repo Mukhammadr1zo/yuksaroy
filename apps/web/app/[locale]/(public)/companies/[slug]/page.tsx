@@ -11,14 +11,14 @@ import { TerminalCard } from '@/components/catalog/TerminalCard';
 import { KycBadge } from '@/components/catalog/KycBadge';
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { MiniMap, type Pin } from '@/components/catalog/MiniMap';
-import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
+import { Ld, breadcrumbs, pageMeta, url } from '@/lib/seo';
 
 type Params = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateMetadata({ params }: Params) {
   const { locale, slug } = await params;
   const o = await sapiOrNull<CompanyDetail>(`/companies/${slug}`, 60);
-  return o ? { title: `${o.name} · YukSaroy`, description: o.description?.slice(0, 160) ?? o.name, ...alt(locale, `/companies/${slug}`) } : { title: 'YukSaroy' };
+  return o ? pageMeta(locale, `/companies/${slug}`, { title: `${o.name} · YukSaroy`, description: o.description?.slice(0, 160) || o.name, noindex: o.isDemo }) : { title: 'YukSaroy' };
 }
 
 /** Kompaniya sahifasi: sarlavha (turlar, KYC, viloyat), uchta plitka, kontakt, terminallar, shahobcha yo'llar, e'lonlar, xarita. */

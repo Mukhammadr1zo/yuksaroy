@@ -1,5 +1,5 @@
 'use client';
-// Slotlar: sig'im ochish (PUT /terminals/:id/capacity) va keyingi 14 kun jadvali (GET slots, POST slots/:slotId/close).
+// Slotlar: sig'im ochish (standart 60 kun, serverning chegarasi; jadval 14 kunni ko'rsatadi) (PUT /terminals/:id/capacity) va keyingi 14 kun jadvali (GET slots, POST slots/:slotId/close).
 // Katak: bo'sh joy soni, kichik raqam band + ushlangan. Bosish slotni yopadi yoki ochadi, keyin jadval qayta yuklanadi.
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -19,7 +19,7 @@ export function SlotsTab({ terminalId }: { terminalId: string | null }) {
   const te = useTranslations('terminalsAdmin.slots.err');
   const tc = useTranslations('kabinet.common');
   const today = uzToday();
-  const [cap, setCap] = useState({ from: today, to: plusDays(today, 13), weekdaysOnly: false, windows: defaultWindows() });
+  const [cap, setCap] = useState({ from: today, to: plusDays(today, BOOKING.horizonDays * 2 - 1), weekdaysOnly: false, windows: defaultWindows() });
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [err, setErr] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);

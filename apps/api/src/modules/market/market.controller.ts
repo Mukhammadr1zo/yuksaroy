@@ -44,8 +44,8 @@ class CreateRequestDto {
   @IsOptional() @IsString() from?: string;
 }
 
-/** Bozorga ko'priklar: bo'sh terminal katalogi (/terminals). Audit shu belgi bilan sanaydi. */
-const SOURCES = ['terminals'] as const;
+/** Bozorga ko'priklar: bo'sh terminal katalogi (/terminals), bo'sh tashuvchilar ro'yxati (/carriers), namuna e'lon sahifasi. Audit shu belgi bilan sanaydi. */
+const SOURCES = ['terminals', 'carriers', 'demo'] as const;
 
 class OfferDto {
   @IsOptional() @IsInt() @Min(0) @Max(1_000_000_000_000) priceTiyin?: number;

@@ -53,6 +53,10 @@
     "empty": {
       "title": "No listings match this filter",
       "body": "The catalog is open, owners post their own listings. Post first and you will be found first.",
+      "carriersBody": "There are no carriers on this route right now. Post your cargo and carriers will name their own price.",
+      "carriersBodyAny": "No carriers found right now. Post your cargo and carriers will name their own price.",
+      "equipmentBody": "The wagon or locomotive you need is not listed right now. If it is urgent, leave a request, or turn on the watch to hear when one appears.",
+      "urgentCta": "Urgent request",
       "cta": "Post a listing",
       "reset": "Clear filters",
       "standard": "Listing standard"
@@ -124,6 +128,8 @@
         "openChat": "Open the chat"
       },
       "demoNote": "This is a sample listing: it shows how the site works and is not a real offer. No phone or chat.",
+      "cargoCta": "Post your cargo and carriers will name their own price",
+      "urgentCta": "Need equipment like this? Leave an urgent request",
       "viewsShort": "{count, plural, one {# view} other {# views}}"
     },
     "reviews": {

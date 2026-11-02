@@ -1,12 +1,12 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ListingDetailView, listingMetadata } from '@/components/catalog/ListingDetailView';
-import { Ld, alt, breadcrumbs, listingLd } from '@/lib/seo';
+import { Ld, breadcrumbs, listingLd } from '@/lib/seo';
 
 type Params = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateMetadata({ params }: Params) {
   const { locale, slug } = await params;
-  return { ...(await listingMetadata(slug)), ...alt(locale, `/carriers/${slug}`) };
+  return listingMetadata(locale, 'carriers', slug);
 }
 
 export default async function AvtoDetailPage({ params }: Params) {

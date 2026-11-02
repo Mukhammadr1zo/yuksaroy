@@ -2,13 +2,14 @@ import { Link } from '@/i18n/navigation';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { REVIEW } from '@yuksaroy/domain';
+import { BOOKING, REVIEW } from '@yuksaroy/domain';
 import { sapi, sapiOrNull } from '@/lib/server-api';
-import { DAYS, hoursSummary, isOpenNow, num, pricePer, som, uzTime, uzToday } from '@/lib/format';
+import { DAYS, hoursEntered, hoursSummary, isOpenNow, num, pricePer, som, uzTime, uzToday } from '@/lib/format';
 import type { Slot, TerminalDetail } from '@/lib/types';
 import { TerminalReviews } from '@/components/reviews/TerminalReviews';
 import { Impressions } from '@/components/catalog/Impressions';
-import { Ld, alt, breadcrumbs, url } from '@/lib/seo';
+import { Ld, breadcrumbs, pageMeta, url } from '@/lib/seo';
+import { SEARCH_LABELS, type RegionCode, type SearchLang } from '@yuksaroy/domain';
 import { DashLink } from '@/components/site/DashLink';
 import { PhoneReveal } from '@/components/catalog/PhoneReveal';
 import { ChatLauncher } from '@/components/chat/ChatPanel';
@@ -31,9 +32,20 @@ type Params = { params: Promise<{ locale: string; slug: string }> };
 export async function generateMetadata({ params }: Params) {
   const { locale, slug } = await params;
   const [t, tm, tk] = await Promise.all([sapiOrNull<TerminalDetail>(`/terminals/${slug}`), getTranslations({ locale, namespace: 'meta.terminal' }), getTranslations({ locale, namespace: 'kind' })]);
-  return t
-    ? { title: tm('title', { name: t.name }), description: tm('description', { kind: tk(t.kind), station: t.station?.nameUz ?? t.stationNameRaw ?? '', hours: hoursSummary(t.hours, t.is24h, locale) }), ...alt(locale, `/terminals/${slug}`) }
-    : { title: tm('notFound') };
+  if (!t) return { title: tm('notFound') };
+  const station = t.station?.nameUz ?? t.stationNameRaw ?? '';
+  const head = station ? tm('head', { kind: tk(t.kind), station }) : tk(t.kind);
+  // Ish vaqti yo'q bo'lsa "kiritilmagan" deb yozilmaydi: reestrdagi viloyat, yo'l uzunligi va sig'im aytiladi
+  const lengthM = t.rail?.lengthM ?? t.passport?.tracksLengthM;
+  const facts = hoursEntered(t.hours, t.is24h) ? hoursSummary(t.hours, t.is24h, locale) : [
+    t.regionCode ? SEARCH_LABELS[locale as SearchLang]?.region[t.regionCode as RegionCode] ?? '' : '',
+    lengthM ? tm('length', { count: lengthM }) : '',
+    t.rail?.capacityWagons ? tm('wagons', { count: t.rail.capacityWagons }) : '',
+  ].filter(Boolean).join(', ');
+  return pageMeta(locale, `/terminals/${slug}`, {
+    title: tm('title', { name: t.name }), description: facts ? `${head}. ${facts}.` : `${head}.`,
+    images: t.photos[0] ? [t.photos[0]] : undefined, noindex: t.isDemo,
+  });
 }
 
 export default async function TerminalPage({ params }: Params) {
@@ -42,8 +54,8 @@ export default async function TerminalPage({ params }: Params) {
   if (!t) notFound();
   const today = uzToday();
   // tr: terminal nomfazosi; tn nav, tc common, tk kind, ts service, trj rju, td hafta kunlari
-  const [slots, c, tr, tn, tc, tk, ts, trj, td] = await Promise.all([
-    sapi<Slot[]>(`/terminals/${t.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]),
+  const [horizonSlots, c, tr, tn, tc, tk, ts, trj, td] = await Promise.all([
+    sapi<Slot[]>(`/terminals/${t.id}/slots?from=${today}&to=${new Date(new Date(`${today}T00:00:00Z`).getTime() + (BOOKING.horizonDays - 1) * 86_400_000).toISOString().slice(0, 10)}`, 60).catch(() => [] as Slot[]),
     cookies(),
     getTranslations('terminal'), getTranslations('nav'), getTranslations('common'), getTranslations('kind'), getTranslations('service'), getTranslations('rju'), getTranslations('format.day'),
   ]);
@@ -60,6 +72,10 @@ export default async function TerminalPage({ params }: Params) {
   const claimable = registryOnly && t.claimStatus !== 'PENDING';
   const authed = c.has('ys_access') || c.has('ys_refresh');
   const open = isOpenNow(t.hours, t.is24h);
+  // Ro'yxat faqat bugunni ko'rsatadi, tugma esa butun bron ufqi bo'yicha hal qilinadi:
+  // bugun to'lgan, ertaga bo'sh terminalda yagona bron yo'li yo'qolmasin
+  const slots = horizonSlots.filter((s) => s.localDate === today);
+  const hasFree = horizonSlots.some((s) => s.status === 'OPEN' && s.free > 0);
   const p = t.passport ?? {};
   const yes = tc('yes');
   const no = tc('no');
@@ -97,7 +113,7 @@ export default async function TerminalPage({ params }: Params) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-teal-soft px-3 py-1 text-xs font-semibold text-teal-ink">{tk(t.kind)}</span>
             {t.isDemo ? <span className="rounded-full border border-amber/40 bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{tr('demoBadge')}</span> : null}
-            {registryOnly ? null : <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>}
+            {registryOnly || !hoursEntered(t.hours, t.is24h) ? null : <span className={`rounded-full px-3 py-1 font-mono text-xs font-semibold ${open ? 'bg-teal text-white' : 'bg-line text-ink/70'}`}>{tr(open ? 'status.openNow' : 'status.closedNow')} · {hoursSummary(t.hours, t.is24h, locale)}</span>}
             {/* "Tasdiqlanmagan" yorlig'ida text-amber bu fonda 2.33 edi, kodda eng past qiymat:
                 amber faqat fon bo'ladi, matn esa amber-ink. */}
             {registryOnly ? <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-muted">{t.claimStatus === 'PENDING' ? tcl('pendingBadge') : tcl('registryBadge')}</span>
@@ -116,7 +132,7 @@ export default async function TerminalPage({ params }: Params) {
             <>
               <Link href={`/quote?terminal=${t.slug}`} className="rounded-full bg-teal px-6 py-3 text-center font-semibold text-white hover:bg-teal-ink">{tr('cta.quote')}</Link>
               {t.isDemo ? <p className="rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-sm text-muted">{tr('demoNoBook')}</p>
-                : <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink>}
+                : hasFree ? <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="rounded-full border border-navy px-6 py-3 text-center font-semibold text-navy hover:bg-white">{tr('cta.bookSlot')}</DashLink> : null}
             </>
           )}
           {/* Raqam obunachiga, bosilganda: sahifa keshlangan, raqam brauzerdan olinadi (PhoneReveal) */}
@@ -205,7 +221,7 @@ export default async function TerminalPage({ params }: Params) {
               </ul>
             )}
             {t.isDemo ? <p className="mt-3 text-sm text-muted">{tr('demoNoBook')}</p>
-              : <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{tr('slots.book')}</DashLink>}
+              : hasFree ? <DashLink href={`/dashboard/orders/new?terminal=${t.slug}`} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal px-5 py-2.5 text-sm font-semibold text-white transition duration-150 hover:bg-teal-ink active:scale-[0.98]">{tr('slots.book')}</DashLink> : null}
           </section>
           <section hidden={registryOnly} className="rounded-card border border-line bg-white p-5">
             <h2 className="text-sm font-bold">{tr('hours.heading')}</h2>

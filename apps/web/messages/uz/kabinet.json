@@ -148,7 +148,7 @@
         "title": "Turi, model va yil ko'rsatilsa qidiruvda tez topiladi",
         "regionCode": "Texnika hozir qayerda turadi",
         "serviceRegions": "Bazaviy viloyat ham kiritilishi shart",
-        "contactPhone": "Faqat kirgan foydalanuvchilarga ko'rinadi",
+        "contactPhone": "Raqam obunachi mijozlarga ko'rinadi, qolganlari kabinetda yozadi",
         "terminalId": "Bog'lansa e'lon obyekt sahifasida ham chiqadi",
         "photos": "JPEG, PNG yoki WebP, har biri 5 MB gacha, {max} tagacha"
       },
@@ -463,7 +463,7 @@
         },
         "stir": {
           "title": "Tashkilotda STIR yo'q",
-          "body": "Hisob-fakturada ko'rsatiladi"
+          "body": "To'lov uchun hisobda ko'rsatiladi"
         },
         "rejected": {
           "title": "{count} ta e'lon qaytarilgan",
@@ -520,7 +520,7 @@
       "windowTitle": "{title} bilan yozishma",
       "toOwner": "Javob obyekt egasidan keladi",
       "toPlatform": "Egasi hali yo'q: javobni platforma beradi",
-      "loginToWrite": "Yozish uchun kirish kerak. Telefon hammaga ochiq.",
+      "loginToWrite": "Yozish uchun kirish kerak. Telefon raqami faqat obunachilarga ochiq.",
       "login": "Kirish",
       "emptyHint": "Birinchi xabarni yozing: qaysi muddatga, qancha va qayerga kerak.",
       "asOrg": "Kim nomidan",

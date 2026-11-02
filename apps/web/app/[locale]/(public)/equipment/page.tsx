@@ -141,12 +141,15 @@ export default async function TexnikaPage({ params, searchParams }: Params & { s
       {data.items.length === 0 ? (
         <div className="mt-6 rounded-card border border-dashed border-line bg-white p-10 text-center">
           <p className="font-display text-lg font-bold text-navy">{t('empty.title')}</p>
-          <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.body')}</p>
+          <p className="mx-auto mt-2 max-w-[52ch] text-muted">{t('empty.equipmentBody')}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <DashLink href="/dashboard/listings/new" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink>
+            {/* Bu yerga vagon yoki teplovoz izlovchi keladi: yuk formasi emas, shoshilinch so'rov va kuzatuv */}
+            <Link href="/urgent" className="rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{t('empty.urgentCta')}</Link>
             {watchable ? <WatchButton kind="LISTING" params={{ listingKind: kind || undefined, regionCode: watchRegions[0], deal: deal || undefined }} next={href({})} /> : null}
             {filtered ? <Link href="/equipment" className="text-sm font-semibold text-teal-ink underline">{t('empty.reset')}</Link> : null}
           </div>
+          {/* Egalarga qaratilgan matn ikkinchi o'rinda */}
+          <p className="mx-auto mt-8 max-w-[52ch] border-t border-line/70 pt-4 text-sm text-muted">{t('empty.body')} <DashLink href="/dashboard/listings/new" className="font-semibold text-teal-ink underline" signupLabel={tg('guestCta')}>{t('empty.cta')}</DashLink></p>
         </div>
       ) : (
         <div className="mt-4 grid gap-4 md:grid-cols-2">
