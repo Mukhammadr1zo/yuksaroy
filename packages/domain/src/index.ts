@@ -189,6 +189,20 @@ export const PLATFORM_DEFAULTS = {
   helpAskDaily: 30,
   /** Qo'lda to'lov rekvizitlari: karta yoki hisob raqami va qabul qiluvchi. Bo'sh bo'lsa odam murojaat formasiga yuboriladi. */
   payDetails: '' as string,
+  /*
+   * Superadminlarning Telegram faoliyat xabarlari (0 = o'chiq, 1 = yoqiq). Har kalit bitta toifani
+   * boshqaradi (apps/api activity moduli). Tizim hodisalari va xodimlarning sahifa tashriflari
+   * ataylab o'chiq: ular shovqin, kerak bo'lsa ega yoqadi.
+   */
+  activityLogin: 1,
+  activityActions: 1,
+  activityVisits: 1,
+  activityAdmin: 1,
+  activitySystem: 0,
+  /** 1 = admin o'z amallari haqida ham xabar oladi (boshqa adminlar baribir oladi). Ega 2026-11-25 da "adminlarning o'z amallari ham" ni tanladi. */
+  activitySelf: 1,
+  /** 1 = xodimlarning (admin, moderator) sahifa tashriflari ham yuboriladi. */
+  activityAdminVisits: 0,
 } as const;
 export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
 

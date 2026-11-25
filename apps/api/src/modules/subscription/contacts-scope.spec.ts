@@ -36,6 +36,8 @@ function setup(opts: {
   recordFails?: boolean;
   /** Umrbod sanoq so'ralganda bu massivga bitta element tushadi. */
   countProbe?: number[];
+  /** Superadmin xabari: devorga urilganda record() shu massivga tushadi. */
+  activity?: Record<string, unknown>[];
 } = {}) {
   // Bitta massiv: soxta audit.log yozadi, soxta auditLog o'qiydi. Ikkita bo'lsa
   // deduplikatsiya testi yolg'ondan o'tib ketardi.
@@ -108,8 +110,27 @@ function setup(opts: {
       opts.calls?.push({ wall: kind, userId });
     },
   } as unknown as ImpressionsService;
-  return new ContactsController(prisma, config, audit, subs, impressions);
+  const activity = opts.activity ? ({ record: (e: Record<string, unknown>) => { opts.activity!.push(e); } } as never) : undefined;
+  return new ContactsController(prisma, config, audit, subs, impressions, activity);
 }
+
+describe('obuna devori superadmin xabari', () => {
+  it('devorga urilgan odam contact.paywall bilan yoziladi, raqam xabarda yo\'q', async () => {
+    const seen: Record<string, unknown>[] = [];
+    const c = setup({ request: { status: 'OPEN', contactPhone: '+998901234567' }, subscriber: false, activity: seen });
+    await expect(c.reveal('u5', 'request', 'CR-1')).rejects.toMatchObject({ status: 402 });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toMatchObject({ action: 'contact.paywall', actorId: 'u5', entity: 'request' });
+    expect(JSON.stringify(seen)).not.toContain('998901234567');
+  });
+
+  it('obunachi uchun devor yo\'q: xabar yozilmaydi', async () => {
+    const seen: Record<string, unknown>[] = [];
+    const c = setup({ request: { status: 'OPEN', contactPhone: '+998901234567' }, subscriber: true, activity: seen });
+    await c.reveal('u5', 'request', 'CR-1');
+    expect(seen).toHaveLength(0);
+  });
+});
 
 describe('raqam kimga ochiladi', () => {
   it("ochiq so'rov: obunachiga ochiq", async () => {

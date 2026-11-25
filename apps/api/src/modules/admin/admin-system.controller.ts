@@ -24,9 +24,11 @@ class SettingsDto {
 
 const DEFAULTS = PLATFORM_DEFAULTS as unknown as Record<string, string | number>;
 const posInt = (v: unknown) => Number.isInteger(v) && (v as number) > 0;
+/** Yoqish/o'chirish kaliti: faqat son 0 yoki 1 (sozlama API si faqat matn yoki son qabul qiladi). */
+const bit = (v: unknown) => v === 0 || v === 1;
 
 /** Har bir kalitning o'z qoidasi: tur mos kelgani yetarli emas (masalan -5 daqiqa). */
-const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
+export const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   commissionPct: (v) => Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 10000, // bazis punkt: 300 = 3,00 %
   commissionPayer: (v) => v === 'TERMINAL' || v === 'CLIENT',
   commissionThresholdOrders: posInt, // 0 chegara ma'nosiz: komissiya birinchi kundanoq kerak bo'lib qolardi
@@ -38,6 +40,14 @@ const CHECK: Record<PlatformConfigKey, (v: unknown) => boolean> = {
   helpAskDaily: posInt,
   // Rekvizit: bo'sh saqlanmaydi (bo'shatish uchun qator o'chiriladi), 500 belgi yetarli
   payDetails: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 500,
+  // Telegram faoliyat xabarlari: faqat 0 yoki 1
+  activityLogin: bit,
+  activityActions: bit,
+  activityVisits: bit,
+  activityAdmin: bit,
+  activitySystem: bit,
+  activitySelf: bit,
+  activityAdminVisits: bit,
 };
 
 type UploadsInfo = { files: number; bytes: number; scannedAt: Date; capped: boolean; disk: { freeBytes: number; totalBytes: number } | null };

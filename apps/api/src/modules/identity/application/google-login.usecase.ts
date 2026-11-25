@@ -33,6 +33,7 @@ export class GoogleLoginUseCase {
     }
 
     let user: UserRecord | null = await this.users.findByGoogleSub(p.sub);
+    const isNew = !user;
     if (!user) {
       // Email band bo'lsa (boshqa hisobda, tasdiqlanmagan) - uni bu yerda null qoldiramiz:
       // Google identifikatori googleSub orqali ishlaydi, band email yangi kirishni to'smasin.
@@ -40,6 +41,6 @@ export class GoogleLoginUseCase {
       user = await this.users.createByGoogle({ googleSub: p.sub, email: taken ? null : p.email, fullName: p.name, avatarUrl: p.picture });
     }
     const pair = await this.tokens.issuePair(user.id, ctx);
-    return { user, ...pair };
+    return { user, ...pair, isNew };
   }
 }

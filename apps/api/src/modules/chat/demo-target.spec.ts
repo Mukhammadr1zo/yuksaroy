@@ -51,7 +51,7 @@ describe('namuna terminalga yozish', () => {
 
   it('haqiqiy terminalga yozishma ochiladi', async () => {
     const { svc, created } = setup(false);
-    expect(await svc.startTerminal('mijoz', 'sergeli', 'Bugun joy bormi?', null)).toEqual({ id: 'i1' });
+    expect(await svc.startTerminal('mijoz', 'sergeli', 'Bugun joy bormi?', null)).toEqual({ id: 'i1', terminalId: 't1' });
     expect(created).toHaveLength(1);
   });
 });

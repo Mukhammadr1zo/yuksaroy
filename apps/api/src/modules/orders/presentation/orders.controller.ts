@@ -118,7 +118,9 @@ export class OrdersController {
 
   @Post(':no/events') @HttpCode(200)
   async event(@CurrentUserId() userId: string, @Param('no') no: string, @Body() dto: EventDto) {
-    return publicOrder(await this.actions.addEvent(userId, no, dto.code, dto.payload));
+    const o = await this.actions.addEvent(userId, no, dto.code, dto.payload);
+    await this.audit.log({ actorId: userId, action: 'order.event', entity: 'Order', entityId: o.id, meta: { no, code: dto.code } });
+    return publicOrder(o);
   }
 
   @Post(':no/complete') @HttpCode(200)

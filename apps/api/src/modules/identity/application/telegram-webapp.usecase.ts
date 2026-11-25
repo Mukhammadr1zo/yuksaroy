@@ -23,13 +23,14 @@ export class TelegramWebAppUseCase {
     if (!v.ok) throw new TgInitDataError(v.code);
     const tg = v.user;
     const chatId = BigInt(tg.id);
-    const user = (await this.users.findByTelegramChat(chatId)) ?? (await this.users.createByTelegram({
+    const found = await this.users.findByTelegramChat(chatId);
+    const user = found ?? (await this.users.createByTelegram({
       chatId, username: tg.username ?? null,
       fullName: [tg.first_name, tg.last_name].filter(Boolean).join(' ') || null,
       locale: tg.language_code && LOCALES.includes(tg.language_code) ? tg.language_code : 'uz',
       avatarUrl: tg.photo_url ?? null,
     }));
     const pair = await this.tokens.issuePair(user.id, ctx);
-    return { user, ...pair, startParam: v.startParam };
+    return { user, ...pair, startParam: v.startParam, isNew: !found };
   }
 }

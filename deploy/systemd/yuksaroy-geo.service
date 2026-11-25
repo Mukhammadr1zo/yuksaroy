@@ -1,0 +1,14 @@
+[Unit]
+# Joy bazasini (DB-IP City Lite) yuklash, oyiga bir marta. Skript: deploy/geo-update.sh
+# Baza yo'q bo'lsa barcha tashriflar "ZZ" bo'lib qoladi va Telegram xabarida joylashuv chiqmaydi.
+Description=YukSaroy joy bazasini yangilash (DB-IP City Lite)
+Documentation=file:///opt/yuksaroy/docs/runbooks/geo.md
+After=network-online.target
+# After yolg'iz turganda maqsadni o'zi tortib kelmaydi (yuksaroy-health bilan bir xil sabab)
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/yuksaroy/deploy/geo-update.sh
+# Serverda yana to'rtta loyiha bor: yuklash ularni sekinlashtirmasin
+Nice=10

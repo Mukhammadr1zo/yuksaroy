@@ -631,7 +631,14 @@
         "wagonSearchFree": "Free wagon searches",
         "helpAskDaily": "Help chat: questions per day",
         "payDetails": "Payment details",
-        "commissionThresholdOrders": "Commission threshold"
+        "commissionThresholdOrders": "Commission threshold",
+        "activityLogin": "Telegram: sign-ins and sign-ups",
+        "activityActions": "Telegram: user actions",
+        "activityVisits": "Telegram: page visits",
+        "activityAdmin": "Telegram: admin panel actions",
+        "activitySystem": "Telegram: system events",
+        "activitySelf": "Telegram: my own actions too",
+        "activityAdminVisits": "Telegram: admins' page visits"
       },
       "hint": {
         "commissionPct": "In basis points: 300 = 3.00%.",
@@ -642,8 +649,17 @@
         "wagonSearchFree": "Free wagon searches without a subscription (lifetime). 0 = subscription required at once. The subscription price lives in Plans.",
         "helpAskDaily": "How many questions a person can send to the AI per day.",
         "payDetails": "Card or account number and recipient for the subscription payment. This text is shown to the user. If empty, the person is sent to the contact form.",
-        "commissionThresholdOrders": "How many completed orders a month switch the commission on. The pricing and questions pages say 100: update those texts if you change it."
-      }
+        "commissionThresholdOrders": "How many completed orders a month switch the commission on. The pricing and questions pages say 100: update those texts if you change it.",
+        "activityLogin": "Who signed in or registered, how and from where, failed attempts too: sent at once to the admin's bot chat.",
+        "activityActions": "Listings, requests, orders, subscriptions, phone reveals, wagon searches and every other action: one person's actions within a minute merge into one message.",
+        "activityVisits": "Which page a visitor who gave consent opened and where they came from. Visitors who declined are never sent.",
+        "activityAdmin": "Changes made in the admin panel: approvals, rejections, deletions, settings.",
+        "activitySystem": "Things the system did on its own rather than a person (for example an auto-approved ownership claim). Usually off: it is noisy.",
+        "activitySelf": "When on, your own actions also reach your own chat. When off, only other people's do.",
+        "activityAdminVisits": "Admins and moderators opening site pages. Their actions do not depend on this setting."
+      },
+      "on": "On",
+      "off": "Off"
     },
     "listings": {
       "lead": "Every listing by status. The moderation queue is its own section.",
@@ -797,7 +813,8 @@
       "mapAria": "Map of visits by region",
       "unknown": "Not determined",
       "accuracy": "Location comes from the IP address. Inside Uzbekistan this is rough: carriers route traffic through Tashkent address blocks, so the regional split leans towards Tashkent. The country level is reliable.",
-      "noGeo": "Location is not being determined yet: visits are counted, but not where they come from."
+      "noGeo": "Location is not being determined yet: visits are counted, but not where they come from.",
+      "geoCredit": "Location: IP Geolocation by DB-IP (CC BY 4.0)"
     },
     "revenue": {
       "lead": "Recurring money, expiring subscriptions, bank reconciliation and cancellations. Months are cut by Tashkent time; anyone who renewed is not listed as expiring.",

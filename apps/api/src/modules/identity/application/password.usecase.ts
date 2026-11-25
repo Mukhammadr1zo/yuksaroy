@@ -56,11 +56,12 @@ export class PasswordUseCase {
   /** OTP tasdiqlanadi, parol yangilanadi, kirish natijasi qaytadi (cookie controllerda). */
   async reset(rawPhone: string, code: string, password: string, ctx: Ctx) {
     const phone = await this.verifyOtp.consume(rawPhone, code);
-    const existing = (await this.users.findByPhone(phone)) ?? (await this.users.createByPhone(phone));
+    const found = await this.users.findByPhone(phone);
+    const existing = found ?? (await this.users.createByPhone(phone));
     const user = await this.setPassword(existing.id, password);
     // Tiklash odatda parol yo'qolgani yoki o'g'irlangani uchun: eski hamma sessiya yopiladi, faqat shu kirish qoladi
     await this.tokens.revokeOthers(user.id, undefined);
     const pair = await this.tokens.issuePair(user.id, ctx);
-    return { user, ...pair };
+    return { user, ...pair, isNew: !found };
   }
 }

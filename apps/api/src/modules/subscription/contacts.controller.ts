@@ -1,7 +1,8 @@
-import { BadRequestException, Controller, Get, HttpException, NotFoundException, Param, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, HttpException, NotFoundException, Optional, Param, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { uzLocalDate, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
+import { ActivityService } from '../activity/activity.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
 import { PrismaService } from '../../common/prisma.service';
@@ -56,6 +57,7 @@ export class ContactsController {
     private readonly audit: AuditService,
     private readonly subs: SubscriptionService,
     private readonly impressions: ImpressionsService,
+    @Optional() private readonly activity?: ActivityService,
   ) {}
 
   @Get(':kind/:id')
@@ -107,6 +109,8 @@ export class ContactsController {
         // marta yangilash besh qator yozmaydi va deploy sanoqni nolga qaytarmaydi.
         // Javob kutilmaydi va xato yutiladi: u kvota emas, o'lchov.
         void this.impressions.paywallHit(userId, 'phone').catch(() => {});
+        // Superadmin xabari: kim qaysi obyektda obuna devoriga urildi (audit qatori yozilmaydi: u kvota emas)
+        this.activity?.record({ action: 'contact.paywall', actorId: userId, entity: kind, entityId: found.id });
         throw new HttpException({ code: 'SUBSCRIPTION_REQUIRED', priceSom: await this.subs.priceFor('PHONE'), dailyLimit: daily, freeTotal: cfg.phoneRevealFree }, 402);
       }
     }

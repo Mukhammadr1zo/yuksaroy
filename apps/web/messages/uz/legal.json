@@ -79,7 +79,7 @@
         "p1": "Hisob uchun: telefon raqami yoki Google hisobidagi pochta va ism, tanlangan til. Parol qo'ysangiz, parolning o'zi emas, uning shifrlangan izi saqlanadi.",
         "p2": "Siz o'zingiz yozgan narsalar: tashkilot nomi va STIR, e'lon matni va fotolari, buyurtmalar, xabarlar, baholar.",
         "p3": "Xizmat ishlashi uchun: kirish sessiyalari, so'rov kelgan IP manzil va hisobdan qilingan muhim amallar ro'yxati, masalan telefon raqami ochilgani.",
-        "p4": "Tashrif sanog'i: brauzer kuniga bir marta bitta bo'sh so'rov yuboradi. Unda identifikator ham, sahifa manzili ham yo'q; serverga faqat IP boradi va undan davlat bilan viloyat aniqlanadi.",
+        "p4": "Tashrif sanog'i va xabar: cookie roziligini bersangiz, brauzer har sahifada sahifa manzilini va qayerdan kelganingizni yuboradi. Server bazaga faqat kunlik sonni (davlat va viloyat bilan) yozadi; shu bilan birga platforma ma'muriyatiga Telegramda bir zumda xabar boradi: sahifa, qurilma turi, taxminiy joylashuv va IP. Sahifa manzili va IP bazada saqlanmaydi. Rozilik bermasangiz hech narsa yuborilmaydi.",
         "p5": "Brauzeringizda saqlanadigan narsalar: tanlagan tilingiz va kirish belgisi cookie sifatida turadi. Solishtirish ro'yxati, tashrif sanasi va to'ldirilmagan forma matni esa faqat brauzeringizda qoladi, serverga yuborilmaydi."
       },
       "s2": {

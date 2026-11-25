@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { ActivityService } from '../modules/activity/activity.service';
 
 @Injectable()
 export class AuditService {
-  constructor(private readonly prisma: PrismaService) {}
+  // activity ixtiyoriy: audit yozuvi har holda yoziladi, superadminga xabar esa unga qo'shimcha (xato tashlamaydi)
+  constructor(private readonly prisma: PrismaService, @Optional() private readonly activity?: ActivityService) {}
 
   /**
    * Xatolik audit yozuvi tufayli asosiy amalni to'xtatmasin.
@@ -24,6 +26,8 @@ export class AuditService {
       console.error('audit failed', err);
       if (strict) throw err;
     }
+    // Strict xatoda yuqoriga chiqib ketdik (amal bajarilmadi). Bu yerga yetgan bo'lsa amal bo'ldi, qator yozilmagan bo'lsa ham
+    this.activity?.record({ actorId: e.actorId, action: e.action, entity: e.entity, entityId: e.entityId, meta: e.meta, ip: e.ip });
   }
 
   /**
@@ -41,5 +45,13 @@ export class AuditService {
     } catch (err) {
       console.error('audit failed', err);
     }
+    // Bitta xabar: har amal turiga bitta hodisa, nechta qatorni bildirishi count da (40 ta terminal yashirilsa 40 xabar emas)
+    const first = new Map<string, (typeof rows)[number] & { count: number }>();
+    for (const r of rows) {
+      const f = first.get(r.action);
+      if (f) f.count++;
+      else first.set(r.action, { ...r, count: 1 });
+    }
+    for (const r of first.values()) this.activity?.record({ actorId: r.actorId, action: r.action, entity: r.entity, entityId: r.entityId, meta: r.meta, count: r.count });
   }
 }

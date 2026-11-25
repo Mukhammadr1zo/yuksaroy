@@ -631,7 +631,14 @@
         "wagonSearchFree": "Bepul vagon qidiruvi",
         "helpAskDaily": "Yordam chati: kunlik savol",
         "payDetails": "To'lov rekvizitlari",
-        "commissionThresholdOrders": "Komissiya chegarasi"
+        "commissionThresholdOrders": "Komissiya chegarasi",
+        "activityLogin": "Telegram: kirish va ro'yxatdan o'tish",
+        "activityActions": "Telegram: foydalanuvchi amallari",
+        "activityVisits": "Telegram: sahifa tashriflari",
+        "activityAdmin": "Telegram: admin panel amallari",
+        "activitySystem": "Telegram: tizim hodisalari",
+        "activitySelf": "Telegram: o'z amallarim ham kelsin",
+        "activityAdminVisits": "Telegram: adminlarning sahifa tashriflari"
       },
       "hint": {
         "commissionPct": "Bazis punktda: 300 = 3,00 %.",
@@ -642,8 +649,17 @@
         "wagonSearchFree": "Obunasiz odamga nechta vagon qidiruvi bepul (umrbod). 0 = darhol obuna so'raladi. Obuna narxi Tariflar bo'limida.",
         "helpAskDaily": "Bir odam kuniga nechta savolni sun'iy intellektga yubora oladi.",
         "payDetails": "Obuna to'lovi uchun karta yoki hisob raqami va qabul qiluvchi. Shu matn odamga ko'rsatiladi. Bo'sh bo'lsa odam murojaat formasiga yuboriladi.",
-        "commissionThresholdOrders": "Oyiga nechta bajarilgan buyurtmadan keyin komissiya kiritiladi. Narxlar va savollar sahifalarida 100 raqami yozilgan: o'zgartirsangiz o'sha matnlarni ham yangilang."
-      }
+        "commissionThresholdOrders": "Oyiga nechta bajarilgan buyurtmadan keyin komissiya kiritiladi. Narxlar va savollar sahifalarida 100 raqami yozilgan: o'zgartirsangiz o'sha matnlarni ham yangilang.",
+        "activityLogin": "Kim, qaysi usul bilan, qayerdan kirdi yoki ro'yxatdan o'tdi, muvaffaqiyatsiz urinishlar ham: adminning bot chatiga darhol keladi.",
+        "activityActions": "E'lon, so'rov, buyurtma, obuna, raqam ochish, vagon qidirish va boshqa har bir amal: bir odamniki bir daqiqada bitta xabarga yig'iladi.",
+        "activityVisits": "Rozilik bergan mehmonning qaysi sahifani ochgani va qayerdan kelgani. Rozilik bermaganlar yuborilmaydi.",
+        "activityAdmin": "Admin panelda bajarilgan o'zgarishlar: tasdiqlash, rad etish, o'chirish, sozlama.",
+        "activitySystem": "Odam bajarmagan, tizimning o'zi qilgan ishlar (masalan, avtomatik tasdiqlangan da'vo). Odatda o'chiq: shovqin ko'p.",
+        "activitySelf": "Yoqilsa, o'zingiz qilgan amallar ham o'z chatingizga keladi. O'chiq bo'lsa faqat boshqalarniki.",
+        "activityAdminVisits": "Admin va moderatorlarning sayt sahifalarini ochishi. Ularning amallari bu sozlamaga bog'liq emas."
+      },
+      "on": "Yoqilgan",
+      "off": "O'chiq"
     },
     "listings": {
       "lead": "Hamma e'lonlar, holati bo'yicha. Moderatsiya navbati alohida bo'limda.",
@@ -797,7 +813,8 @@
       "mapAria": "Viloyatlar bo'yicha tashriflar xaritasi",
       "unknown": "Aniqlanmadi",
       "accuracy": "Joy IP manzilidan aniqlanadi. O'zbekiston ichida bu qo'pol: aloqa operatorlari trafikni Toshkentdagi manzillardan chiqaradi, shuning uchun viloyat kesimi Toshkentga og'adi. Davlat darajasi ishonchli.",
-      "noGeo": "Joy hali aniqlanmadi: tashriflar sanalyapti, lekin qayerdan kelgani yozilmayapti."
+      "noGeo": "Joy hali aniqlanmadi: tashriflar sanalyapti, lekin qayerdan kelgani yozilmayapti.",
+      "geoCredit": "Joylashuv: IP Geolocation by DB-IP (CC BY 4.0)"
     },
     "revenue": {
       "lead": "Takroriy pul, tugayotganlar, bank bilan solishtiruv va bekorlar. Oy Toshkent vaqti bilan kesiladi; uzaytirgan odam tugayotganlar ro'yxatiga tushmaydi.",

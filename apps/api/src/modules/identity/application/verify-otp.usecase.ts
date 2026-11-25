@@ -40,12 +40,18 @@ export class VerifyOtpUseCase {
 
     const me = currentUserId ? await this.users.findById(currentUserId) : null;
     let user: UserRecord;
+    // isNew: user qatori aynan shu chaqiruvda ochildi; phoneLinked: kirgan telefonsiz user raqamini bog'ladi (superadmin xabari uchun)
+    let isNew = false;
+    let phoneLinked = false;
     if (me && me.phone === null) {
       user = await this.users.claimPhone(me.id, phone); // bo'sh bot-user bo'lsa yutiladi, aks holda PhoneTakenError
+      phoneLinked = true;
     } else {
-      user = (await this.users.findByPhone(phone)) ?? (await this.users.createByPhone(phone));
+      const found = await this.users.findByPhone(phone);
+      isNew = !found;
+      user = found ?? (await this.users.createByPhone(phone));
     }
     const pair = await this.tokens.issuePair(user.id, ctx);
-    return { user, ...pair };
+    return { user, ...pair, isNew, phoneLinked };
   }
 }

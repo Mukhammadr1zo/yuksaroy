@@ -1,12 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpException, Ip, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, Ip, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsIn, IsString, Length, ValidateNested } from 'class-validator';
+import type { FastifyRequest } from 'fastify';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches, MaxLength, ValidateNested } from 'class-validator';
 import { IMPRESSION_SURFACES, type ImpressionSurface } from '@yuksaroy/domain';
+import { ActivityService } from '../activity/activity.service';
+import { env } from '../../common/env';
 import { locate } from '../../common/geoip';
 import { DailyBucket, IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
-import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
+import { TokenService } from '../identity/application/token.service';
+import { CurrentUserId, JwtGuard, optionalUserId } from '../identity/presentation/jwt.guard';
 import { ListingsUseCase } from '../listings/application/listings.usecase';
 import { OrderAccess } from '../orders/application/order-access';
 import { SubscriptionService } from '../subscription/subscription.service';
@@ -28,6 +32,29 @@ export class ImpressionItemDto {
 }
 class ImpressionsDto {
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => ImpressionItemDto) items!: ImpressionItemDto[];
+}
+
+/** Tashrif mayog'i tanasi. Eski mijoz tana yubormaydi: hammasi ixtiyoriy. */
+export class VisitDto {
+  // Faqat ichki yo'l: "//evil" (boshqa sayt), so'rov qatori va # rad etiladi
+  @IsOptional() @IsString() @MaxLength(2000) @Matches(/^\/(?!\/)[^\s?#]*$/) path?: string;
+  @IsOptional() @IsString() @MaxLength(300) referrer?: string;
+  /** Kunlik sanoqqa tushadimi: brauzer kuniga bir marta true yuboradi. false = faqat Telegram xabari uchun. */
+  @IsOptional() @IsBoolean() first?: boolean;
+}
+
+/**
+ * Qayerdan kelgani: faqat host + yo'l (so'rov qatori va # tashlanadi, chunki unda
+ * qidiruv matni bo'lishi mumkin). O'z saytimizdan bo'lsa faqat yo'l. Yaroqsiz bo'lsa undefined.
+ */
+export function reduceReferrer(raw: string | undefined, ownHost = new URL(env.WEB_ORIGIN).host): string | undefined {
+  if (!raw) return undefined;
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return undefined;
+    const path = u.pathname === '/' ? '' : u.pathname;
+    return u.host === ownHost ? (u.pathname || '/') : `${u.host}${path}`;
+  } catch { return undefined; }
 }
 
 const bucket = new IpBucket(60, 60_000); // bitta IP: daqiqasiga 60 ta so'rov
@@ -63,6 +90,8 @@ export class ImpressionsController {
     private readonly listings: ListingsUseCase,
     private readonly access: OrderAccess,
     private readonly subs: SubscriptionService,
+    private readonly tokens: TokenService,
+    private readonly activity: ActivityService,
   ) {}
 
   @Post('events/impressions') @HttpCode(200)
@@ -77,20 +106,31 @@ export class ImpressionsController {
   }
 
   /**
-   * Tashrif mayog'i: brauzer kuniga bir marta yuboradi (qaror brauzerda, chunki bitta
-   * mobil operator minglab odamni bitta ommaviy IP ortiga qo'yadi va IP bo'yicha
-   * ajratish haqiqiy tashriflarni yo'qotib qo'yardi).
+   * Tashrif mayog'i. Brauzer rozilikdan keyin har sahifada yuboradi: `first` kunlik
+   * sanoq uchun (qaror brauzerda, chunki bitta mobil operator minglab odamni bitta
+   * ommaviy IP ortiga qo'yadi), qolganlari faqat superadminga Telegram xabari uchun.
    *
-   * Tanasi yo'q: sahifa manzili ham, boshqa hech narsa ham yuborilmaydi. Serverga
-   * faqat IP keladi va undan davlat bilan viloyat chiqariladi, IP esa saqlanmaydi.
+   * Bazaga faqat kunlik yig'ma (davlat + viloyat) yoziladi: sahifa manzili, qayerdan
+   * kelgani va IP saqlanmaydi, ular faqat adminning Telegram xabariga boradi.
+   * Tana yo'q (eski mijoz) = avvalgidek bitta sanoq, xabarsiz.
    */
   @Post('events/visit') @HttpCode(200)
-  async visit(@Ip() ip: string) {
+  async visit(@Ip() ip: string, @Req() req: FastifyRequest, @Body() dto: VisitDto) {
     if (!bucket.take(ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
-    // Chegara baland va faqat suiiste'molga qarshi: yuqoridagi sababga ko'ra past
-    // chegara oddiy foydalanuvchilarni ham kesib tashlardi
-    if (!visitDaily.take(ip ?? '?', VISITS_PER_IP_DAY).ok) return { ok: true };
-    await this.impressions.recordVisit(await locate(ip));
+    // Kunlik chegara faqat sanoqqa tegadi (Telegram xabari uchun emas): u baland va
+    // faqat suiiste'molga qarshi, past chegara oddiy foydalanuvchilarni ham kesib tashlardi
+    if (dto?.first !== false && visitDaily.take(ip ?? '?', VISITS_PER_IP_DAY).ok) {
+      await this.impressions.recordVisit(await locate(ip));
+    }
+    if (dto?.path) {
+      // Xabar hech qachon so'rovni sindirmasin
+      try {
+        this.activity.visit({
+          userId: optionalUserId(req, this.tokens), path: dto.path.slice(0, 200), referrer: reduceReferrer(dto.referrer),
+          ip, ua: String(req.headers['user-agent'] ?? '').slice(0, 300),
+        });
+      } catch { /* jim */ }
+    }
     return { ok: true };
   }
 

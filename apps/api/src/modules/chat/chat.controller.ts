@@ -62,9 +62,15 @@ export class ChatController {
   }
 
   @Post(':id/messages')
-  send(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: MessageDto) {
+  async send(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: MessageDto) {
     takeMessage(userId);
-    return this.chat.send(userId, id, dto.text ?? '', dto.attachments);
+    const { terminalId, listingId, ...msg } = await this.chat.send(userId, id, dto.text ?? '', dto.attachments);
+    // Faqat uzunlik va fayl soni: xabar matni auditga ham, superadmin xabariga ham tushmaydi
+    await this.audit.log({
+      actorId: userId, action: 'chat.message', entity: 'Inquiry', entityId: id,
+      meta: { len: (dto.text ?? '').trim().length, files: msg.attachments.length, listingId: listingId ?? undefined, terminalId: terminalId ?? undefined },
+    });
+    return msg;
   }
 
   /** "Javob shart emas": faqat qabul qiluvchi tomon, xabar yozilmaydi (egasi qarori, 2026-10-07). */
@@ -92,7 +98,7 @@ export class TerminalInquiryController {
   async start(@CurrentUserId() userId: string, @Param('slug') slug: string, @Body() dto: StartDto) {
     takeNewChat(userId);
     const i = await this.chat.startTerminal(userId, slug, dto.message, dto.orgId ?? null, dto.attachments);
-    await this.audit.log({ actorId: userId, action: 'inquiry.create', entity: 'Inquiry', entityId: i.id, meta: { terminal: slug, orgId: dto.orgId ?? null } });
+    await this.audit.log({ actorId: userId, action: 'inquiry.create', entity: 'Inquiry', entityId: i.id, meta: { terminal: slug, terminalId: i.terminalId, orgId: dto.orgId ?? null } });
     return i;
   }
 }

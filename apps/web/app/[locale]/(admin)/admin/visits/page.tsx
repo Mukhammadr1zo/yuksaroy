@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { SEARCH_LABELS, type RegionCode, type SearchLang } from '@yuksaroy/domain';
 import { api } from '@/lib/api';
+import { countryName as countryLabel } from '@/lib/countries';
 import { num, uzDate } from '@/lib/format';
 import { MAP_BOX, UZ_REGION_PATHS } from '@/lib/uz-map';
 import { CARD, Notice, PageHead, errText } from '@/components/admin/kit';
@@ -39,7 +40,8 @@ export default function AdminVisitsPage() {
   const regionName = (c: string) => SEARCH_LABELS[lang].region[c as RegionCode] ?? c;
   const countryName = (c: string) => {
     if (c === 'ZZ') return tv('unknown');
-    try { return new Intl.DisplayNames([lang, 'en'], { type: 'region' }).of(c) ?? c; } catch { return c; }
+    // O'zbekcha nomlar jadvaldan: brauzer 'uz' uchun kirillcha (Узбекистан) qaytarardi
+    return countryLabel(c, lang);
   };
 
   const maxDay = data ? Math.max(1, ...data.days.map((d) => d.count)) : 1;
@@ -98,6 +100,8 @@ export default function AdminVisitsPage() {
               </svg>
               ) : <p className="mt-3 rounded-card border border-dashed border-line p-6 text-center text-sm text-muted">{tv('noGeo')}</p>}
               <p className="mt-3 text-xs text-muted">{tv('accuracy')}</p>
+              {/* DB-IP Lite litsenziyasi (CC BY 4.0) havolali ko'rsatishni talab qiladi */}
+              <p className="mt-1 text-xs text-muted">{tv('geoCredit')} (<a href="https://db-ip.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-teal-ink">db-ip.com</a>)</p>
             </section>
 
             <section className={`${CARD} min-w-0 p-4`}>

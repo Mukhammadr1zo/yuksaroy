@@ -1,0 +1,14 @@
+[Unit]
+Description=YukSaroy joy bazasini oyiga bir marta yangilash
+Documentation=file:///opt/yuksaroy/docs/runbooks/geo.md
+
+[Timer]
+# DB-IP yangi faylni oyning boshida chiqaradi: 3-sanada tong payti olamiz
+OnCalendar=*-*-03 04:00:00
+# Server o'sha payt o'chiq bo'lsa, yoqilgach bir marta yuklaydi: eski baza oylab qolmasin
+Persistent=true
+# Boshqa taymerlar (zaxira, tekshiruv) bilan bir vaqtga tushmasin
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

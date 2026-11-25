@@ -243,8 +243,10 @@ export class AdminUsersController {
   async remove(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: ReasonDto) {
     // O'z hisobini o'chirish qaytarib bo'lmaydigan amal: admin o'zini anonimlashtirib qo'yardi.
     if (id === userId) throw new ConflictException({ code: 'SELF_ACTION' });
+    // Ism o'chirishdan OLDIN: keyin hisob anonimlashadi, xabarda kim ketgani ko'rinmay qoladi
+    const before = await this.prisma.user.findUnique({ where: { id }, select: { fullName: true } }).catch(() => null);
     const report = await this.del.execute(id);
-    await this.audit.log({ actorId: userId, action: 'admin.user.delete', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null, ...report } });
+    await this.audit.log({ actorId: userId, action: 'admin.user.delete', entity: 'User', entityId: id, meta: { reason: dto.reason ?? null, name: before?.fullName ?? undefined, ...report } });
     return { id, deleted: true };
   }
 }

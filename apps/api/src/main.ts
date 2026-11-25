@@ -16,6 +16,7 @@ import { parseTrustProxy, securityHeaders } from './common/security';
 import { isPrivateFilePath, isPrivateFileRequest } from './common/upload-visibility';
 import { TokenService } from './modules/identity/application/token.service';
 import { optionalUserId } from './modules/identity/presentation/jwt.guard';
+import { contextHook } from './modules/activity/request-context';
 
 async function bootstrap() {
   const isProd = env.NODE_ENV === 'production';
@@ -37,6 +38,9 @@ async function bootstrap() {
   }
 
   await app.register(fastifyCookie as any); // ponytail: @fastify/cookie v11 tip mosligi, ishlashga ta'sir qilmaydi
+
+  // Faoliyat xabari uchun: har so'rovning IP, qurilma va kanali (activity/request-context.ts)
+  fastify.addHook('onRequest', contextHook);
 
   /*
    * Maxfiy yuklamalar qorovuli. Cookie plagini ro'yxatdan o'tgandan KEYIN qo'shiladi:

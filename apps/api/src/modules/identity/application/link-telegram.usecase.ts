@@ -24,7 +24,7 @@ export class LinkTelegramUseCase {
     @Inject(OTP_SENDER) private readonly sender: OtpSender,
   ) {}
 
-  async execute(input: LinkTelegramInput): Promise<{ linked: true; codeSent: boolean }> {
+  async execute(input: LinkTelegramInput): Promise<{ linked: true; codeSent: boolean; isNew: boolean; userId: string }> {
     const phone = normalizePhone(input.phone);
     if (!phone) throw new Error('INVALID_PHONE');
 
@@ -33,13 +33,18 @@ export class LinkTelegramUseCase {
     if (user?.phone === null) {
       try { user = await this.users.claimPhone(user.id, phone); } catch (e) { if (!(e instanceof PhoneTakenError)) throw e; user = null; }
     }
-    if (!user || user.phone !== phone) user = (await this.users.findByPhone(phone)) ?? (await this.users.createByPhone(phone));
+    let isNew = false;
+    if (!user || user.phone !== phone) {
+      const found = await this.users.findByPhone(phone);
+      isNew = !found;
+      user = found ?? (await this.users.createByPhone(phone));
+    }
     await this.users.linkTelegram(user.id, input.chatId, input.username);
 
     // Web'da kutayotgan urinish bormi? Token bo'lsa: aynan o'sha; bo'lmasa telefon bo'yicha oxirgi faol.
     const pending = input.linkToken ? await this.otps.findByLinkToken(input.linkToken) : await this.otps.latestActive(phone);
     if (!pending || pending.phone !== phone || pending.consumedAt || pending.expiresAt < new Date()) {
-      return { linked: true, codeSent: false };
+      return { linked: true, codeSent: false, isNew, userId: user.id };
     }
 
     // Eski kod hash'i web'da yaratilgan; kodni bilmaymiz: yangi kod yaratib almashtiramiz.
@@ -48,6 +53,6 @@ export class LinkTelegramUseCase {
     await this.otps.create({ phone, codeHash: hashSecret(code, env.JWT_SECRET), expiresAt: otpExpiry(), linkToken: null });
     const u = await this.users.findByPhone(phone);
     await this.sender.sendCode(input.chatId, code, u?.locale ?? null);
-    return { linked: true, codeSent: true };
+    return { linked: true, codeSent: true, isNew, userId: user.id };
   }
 }

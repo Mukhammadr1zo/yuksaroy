@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, HttpException, Ip, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, HttpException, Ip, Optional, Post, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IsIn, IsString, Length } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
@@ -6,6 +6,7 @@ import { DailyBucket, IpBucket } from '../../common/ip-bucket';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { TokenService } from '../identity/application/token.service';
 import { optionalUserId } from '../identity/presentation/jwt.guard';
+import { ActivityService } from '../activity/activity.service';
 import { FAQ, HELP_LANGS, type Faq, type HelpLang } from './faq';
 import { HelpLlm } from './help.llm';
 import { match } from './matcher';
@@ -25,7 +26,7 @@ const related = (rows: { faq: Faq }[]) => rows.map(({ faq }) => ({ id: faq.id, q
 @ApiTags('help')
 @Controller('help')
 export class HelpController {
-  constructor(private readonly tokens: TokenService, private readonly cfg: PlatformConfigService, private readonly llm: HelpLlm) {}
+  constructor(private readonly tokens: TokenService, private readonly cfg: PlatformConfigService, private readonly llm: HelpLlm, @Optional() private readonly activity?: ActivityService) {}
 
   /** To'liq ro'yxat: vidjetdagi boshlang'ich savollar va /help sahifasi uchun. */
   @Get('faq') @Header('Cache-Control', 'public, max-age=3600, s-maxage=3600')
@@ -38,6 +39,8 @@ export class HelpController {
     if (!minute.take(ip ?? '?')) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
     const m = match(dto.q, dto.locale);
     const rel = related(m.top);
+    // Superadmin xabari: savol 120 belgigacha qisqartiriladi; mehmon ham yozadi (actorId yo'q)
+    this.activity?.record({ action: 'help.ask', actorId: optionalUserId(req, this.tokens), meta: { q: dto.q.slice(0, 120), faq: m.confident } });
     if (m.confident) return { answer: m.top[0].faq.a, source: 'faq' as const, related: rel };
 
     if (this.llm.enabled) {

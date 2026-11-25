@@ -79,7 +79,7 @@
         "p1": "For the account: a phone number, or the email and name from your Google account, and the language you picked. If you set a password, what is kept is not the password itself but its encrypted trace.",
         "p2": "What you write yourself: organisation name and tax ID (STIR), listing text and photos, orders, messages, reviews.",
         "p3": "For the service to work: sign-in sessions, the IP address a request came from, and a list of important actions on the account, for example that a phone number was opened.",
-        "p4": "Visit count: the browser sends one empty request once a day. It carries no identifier and no page address; only the IP reaches the server, and the country and region are worked out from it.",
+        "p4": "Visit count and notice: if you accept cookies, the browser sends the page address and where you came from on each page. The server writes only the daily count (with country and region) to the database; at the same time the platform administration gets an instant Telegram note with the page, device type, approximate location and IP. The page address and IP are not stored in the database. If you do not consent, nothing is sent.",
         "p5": "What stays in your browser: the language you picked and a sign-in marker live in cookies. The comparison list, the visit date and unfinished form text stay in your browser only and are not sent to the server."
       },
       "s2": {

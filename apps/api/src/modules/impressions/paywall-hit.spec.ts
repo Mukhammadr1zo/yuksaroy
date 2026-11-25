@@ -72,7 +72,7 @@ function metrics(opts: { subscriber: boolean; owner?: boolean }) {
     series: async () => ({ days: [], totals: { all: 0 } }),
     detailViews: async () => ({ l1: 7 }),
   } as unknown as ImpressionsService;
-  const c = new ImpressionsController(impressions, prisma, listings, access, subs);
+  const c = new ImpressionsController(impressions, prisma, listings, access, subs, {} as never, { visit() {} } as never);
   return { c, hits };
 }
 const refusal = async (f: () => Promise<unknown>) => {

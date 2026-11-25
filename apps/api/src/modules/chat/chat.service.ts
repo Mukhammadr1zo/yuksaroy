@@ -205,7 +205,7 @@ export class ChatService {
     });
     if (existing) {
       await this.send(userId, existing.id, text, rawAttachments);
-      return { id: existing.id };
+      return { id: existing.id, terminalId: terminal.id };
     }
     const inquiry = await this.prisma.inquiry.create({
       data: {
@@ -220,7 +220,7 @@ export class ChatService {
     });
     await this.prisma.inquiryMessage.create({ data: { inquiryId: inquiry.id, fromUserId: userId, text, attachments: files as unknown as object, readBy: [userId] } });
     void this.notifyNew(userId, inquiry.id, terminal, text).catch(() => {});
-    return { id: inquiry.id };
+    return { id: inquiry.id, terminalId: terminal.id };
   }
 
   private async notifyNew(fromUserId: string, inquiryId: string, terminal: { name: string; orgId: string | null }, text: string) {
@@ -282,7 +282,8 @@ export class ChatService {
     // Holat qoidasi (mijozning keyingi savoli suhbatni qayta ochadi) inquiry-status.ts da
     await markInquiryMessage(this.prisma, inquiryId, msg.createdAt, role === 'owner');
     void this.notify(userId, inq, role, body || `${files.length} ta fayl`).catch(() => {});
-    return { id: msg.id, text: msg.text, attachments: files, createdAt: msg.createdAt, mine: true, author: null };
+    // terminalId/listingId faqat nazoratchining faoliyat yozuvi uchun: u javobdan olib tashlaydi
+    return { id: msg.id, text: msg.text, attachments: files, createdAt: msg.createdAt, mine: true, author: null, terminalId: inq.terminal?.id ?? null, listingId: inq.listing?.id ?? null };
   }
 
   /**

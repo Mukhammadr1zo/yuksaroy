@@ -45,6 +45,29 @@ const api = (path: string, init?: RequestInit & { headers?: Record<string, strin
     signal: AbortSignal.timeout(10_000),
   });
 
+/**
+ * Superadminlarga bot amali haqida xabar: API ga bir martalik, kutilmaydigan chaqiruv.
+ * Javobni hech qachon sekinlatmaydi va buzmaydi (xato jim yutiladi, 3 s timeout).
+ * Kirish tokeni va boshqa sirlar yuborilmaydi: /start uchun faqat 'login' belgisi.
+ */
+const report = (ctx: Context, action: 'bot.start' | 'bot.help' | 'bot.app' | 'bot.search', extra: { text?: string; start?: string } = {}) => {
+  try {
+    if (!ctx.chat || !ctx.from) return;
+    void api('/activity/internal/bot', {
+      method: 'POST',
+      headers: { 'x-internal-secret': env.INTERNAL_SECRET },
+      body: JSON.stringify({
+        chatId: String(ctx.chat.id).slice(0, 32),
+        username: ctx.from.username?.slice(0, 64),
+        firstName: ctx.from.first_name?.slice(0, 64),
+        action,
+        ...extra,
+      }),
+      signal: AbortSignal.timeout(3_000),
+    }).catch(() => {});
+  } catch { /* hisobot hech qachon javobni buzmasin */ }
+};
+
 type Lang = 'uz' | 'ru' | 'en';
 const langOf = (code?: string): Lang => (code?.startsWith('ru') ? 'ru' : code?.startsWith('en') ? 'en' : 'uz');
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -428,6 +451,7 @@ bot.start(async (ctx) => {
   const payload = ctx.payload?.trim();
   if (payload?.startsWith('login_')) pendingToken.set(ctx.chat.id, payload.slice('login_'.length));
   const lang = langOf(ctx.from.language_code);
+  report(ctx, 'bot.start', { start: payload?.startsWith('login_') ? 'login' : payload ? payload.slice(0, 32) : undefined });
   await ctx.reply(T[lang].welcome, appKeyboard(lang));
   await askContact(ctx, lang, T[lang].askPhone);
 });
@@ -464,13 +488,14 @@ bot.on('contact', async (ctx) => {
   );
 });
 
-bot.command('help', (ctx) => ctx.reply(T[langOf(ctx.from.language_code)].help));
-bot.command('app', (ctx) => { const lang = langOf(ctx.from.language_code); return ctx.reply(T[lang].appHint, appKeyboard(lang)); });
+bot.command('help', (ctx) => { report(ctx, 'bot.help'); return ctx.reply(T[langOf(ctx.from.language_code)].help); });
+bot.command('app', (ctx) => { report(ctx, 'bot.app'); const lang = langOf(ctx.from.language_code); return ctx.reply(T[lang].appHint, appKeyboard(lang)); });
 
 // /qidir matn: 'text' dan oldin ro'yxatga olinadi, aks holda umumiy matn ushlab qoladi
 bot.command('qidir', (ctx) => {
   const lang = langOf(ctx.from.language_code);
   const q = ctx.payload.trim();
+  if (q) report(ctx, 'bot.search', { text: q.slice(0, 200) });
   return q ? search(ctx, q, lang) : ctx.reply(T[lang].hint);
 });
 
@@ -493,7 +518,9 @@ bot.on('text', (ctx) => {
   if (q.startsWith('/')) return ctx.reply(T[lang].help);
   // Yalang'och raqam terminal qidiruvi uchun ma'no bermaydi: u vagon raqami bo'ladi
   const no = wagonNoOf(q);
-  return no ? wagon(ctx, no, lang) : search(ctx, q, lang);
+  if (no) return wagon(ctx, no, lang);
+  report(ctx, 'bot.search', { text: q.slice(0, 200) });
+  return search(ctx, q, lang);
 });
 
 bot.catch((err, ctx) => {

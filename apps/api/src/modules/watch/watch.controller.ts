@@ -3,6 +3,7 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsOptional } from 'class-validator';
 import { Prisma } from '@prisma/client';
 import { DEAL_KINDS, LISTING_KINDS, REGIONS, TRUCK_TYPES, WATCH_KINDS, WATCH_MAX, pickParams, watchSlot, type WatchKind } from '@yuksaroy/domain';
+import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PrismaService } from '../../common/prisma.service';
 import { CurrentUserId, JwtGuard } from '../identity/presentation/jwt.guard';
@@ -32,7 +33,7 @@ const addBucket = new IpBucket(20, 3_600_000);
 @Controller('watches')
 @UseGuards(JwtGuard)
 export class WatchController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly audit: AuditService) {}
 
   /** Mening kuzatuvlarim. Ro'yxat qisqa (WATCH_MAX), sahifalash kerak emas. */
   @Get()
@@ -50,9 +51,12 @@ export class WatchController {
    * oynasidagi so'rovi kirmasin, aks holda chegara 10 dan oshib ketardi.
    */
   @Post()
-  add(@CurrentUserId() userId: string, @Body() dto: WatchDto) {
+  async add(@CurrentUserId() userId: string, @Body() dto: WatchDto) {
     if (!addBucket.take(userId)) throw new HttpException({ code: 'RATE_LIMITED' }, 429);
-    return serialize(`watch:${userId}`, () => this.save(userId, dto));
+    const w = await serialize(`watch:${userId}`, () => this.save(userId, dto));
+    // Takroriy bosish (createdAt yo'q) yangi kuzatuv emas: xabar yuborilmaydi
+    if ('createdAt' in w) await this.audit.log({ actorId: userId, action: 'watch.create', entity: 'Watch', entityId: w.id, meta: { kind: dto.kind } });
+    return w;
   }
 
   /** Bitta o'qish ikki qoidaga javob beradi: aynan shunday kuzatuv bormi va joy bormi. */
@@ -72,7 +76,9 @@ export class WatchController {
   /** O'chirish faqat o'ziniki: begona id hech narsa qilmaydi va bor-yo'qligini aytmaydi. */
   @Delete(':id')
   async remove(@CurrentUserId() userId: string, @Param('id') id: string) {
+    const was = await this.prisma.watch.findFirst({ where: { id, userId }, select: { kind: true } });
     const r = await this.prisma.watch.deleteMany({ where: { id, userId } });
+    if (r.count) await this.audit.log({ actorId: userId, action: 'watch.delete', entity: 'Watch', entityId: id, meta: { kind: was?.kind } });
     return { removed: r.count };
   }
 }

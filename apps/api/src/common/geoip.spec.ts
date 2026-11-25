@@ -24,3 +24,22 @@ describe('joy aniqlash', () => {
     await expect(locate('')).resolves.toEqual({ country: 'ZZ', region: '' });
   });
 });
+
+describe('baza fayli yo\'q bo\'lganda qayta urinish', () => {
+  it("GEOIP_DB berilgan, fayl yo'q: ikki chaqiruv ham ZZ, xato yo'q", async () => {
+    const { vi } = await import('vitest');
+    vi.resetModules();
+    process.env.GEOIP_DB = '/nonexistent/GeoLite2-City.mmdb';
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const { locate: fresh } = await import('./geoip');
+      await expect(fresh('8.8.8.8')).resolves.toEqual({ country: 'ZZ', region: '' });
+      await expect(fresh('8.8.4.4')).resolves.toEqual({ country: 'ZZ', region: '' });
+      expect(warn).toHaveBeenCalledTimes(1); // ogohlantirish bir marta, har chaqiruvda emas
+    } finally {
+      delete process.env.GEOIP_DB;
+      warn.mockRestore();
+      vi.resetModules();
+    }
+  });
+});

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Optional, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ApiTags } from '@nestjs/swagger';
 import { PERSONAL_ROLES, normalizePhone, type Role } from '@yuksaroy/domain';
@@ -18,6 +18,8 @@ import { InternalGuard } from './internal.guard';
 import { USER_REPOSITORY, type UserPatch, type UserRecord, type UserRepository } from '../domain/ports';
 import { PlatformAdmin } from '../../organizations/application/platform-admin';
 import { AuditService } from '../../../common/audit.service';
+import { ActivityService } from '../../activity/activity.service';
+import { maskPhone } from '../../activity/format';
 import { env } from '../../../common/env';
 import { IpBucket } from '../../../common/ip-bucket';
 
@@ -61,13 +63,14 @@ export class AuthController {
     private readonly admin: PlatformAdmin,
     private readonly audit: AuditService,
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
+    @Optional() private readonly activity?: ActivityService,
   ) {}
 
   @Post('otp/request') @HttpCode(200)
   async otpRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(otpBucket, req);
     limitPhone(otpPhoneBucket, normalizePhone(dto.phone));
-    return this.otpRequestOrThrow(dto.phone, dto.locale);
+    return this.otpRequestOrThrow(dto.phone, dto.locale, 'auth.otp.request');
   }
 
   /** Kirgan telefonsiz foydalanuvchi (Google) shu yerda telefonini bog'laydi: yangi user ochilmaydi. */
@@ -78,7 +81,9 @@ export class AuthController {
       const r = await this.verifyOtp.execute(dto.phone, dto.code, ctxOf(req), optionalUserId(req, this.tokens));
       return await this.loggedIn(res, r, req.ip, 'otp');
     } catch (e) {
-      throw this.authError(e);
+      const err = this.authError(e);
+      this.failed('otp', err, dto.phone);
+      throw err;
     }
   }
 
@@ -89,7 +94,11 @@ export class AuthController {
       return await this.loggedIn(res, r, req.ip, 'google');
     } catch (e) {
       if (e instanceof GoogleDisabledError) throw new HttpException({ code: 'GOOGLE_DISABLED' }, 503);
-      if (e instanceof GoogleInvalidError) throw new HttpException({ code: 'GOOGLE_INVALID' }, 401);
+      if (e instanceof GoogleInvalidError) {
+        const err = new HttpException({ code: 'GOOGLE_INVALID' }, 401);
+        this.failed('google', err);
+        throw err;
+      }
       throw e;
     }
   }
@@ -100,9 +109,14 @@ export class AuthController {
     limit(tgBucket, req);
     try {
       const r = await this.tgWebApp.execute(dto.initData, ctxOf(req));
-      return { ...(await this.loggedIn(res, r, req.ip, 'telegram_webapp', 'auth.telegram_webapp')), startParam: r.startParam ?? dto.startParam ?? null };
+      const start = (r.startParam ?? dto.startParam ?? '').slice(0, 40);
+      return { ...(await this.loggedIn(res, r, req.ip, 'telegram_webapp', 'auth.telegram_webapp', start ? { startParam: start } : {})), startParam: r.startParam ?? dto.startParam ?? null };
     } catch (e) {
-      if (e instanceof TgInitDataError) throw new HttpException({ code: e.code }, 401);
+      if (e instanceof TgInitDataError) {
+        const err = new HttpException({ code: e.code }, 401);
+        this.failed('telegram_webapp', err);
+        throw err;
+      }
       throw e;
     }
   }
@@ -115,7 +129,9 @@ export class AuthController {
       const r = await this.password.login(dto.phone, dto.password, ctxOf(req));
       return await this.loggedIn(res, r, req.ip, 'password');
     } catch (e) {
-      throw this.authError(e);
+      const err = this.authError(e);
+      this.failed('password', err, dto.phone);
+      throw err;
     }
   }
 
@@ -130,7 +146,7 @@ export class AuthController {
   async passwordResetRequest(@Body() dto: RequestOtpDto, @Req() req: FastifyRequest) {
     limit(resetBucket, req);
     limitPhone(otpPhoneBucket, normalizePhone(dto.phone));
-    return this.otpRequestOrThrow(dto.phone, dto.locale);
+    return this.otpRequestOrThrow(dto.phone, dto.locale, 'auth.password.reset.request');
   }
 
   @Post('password/reset') @HttpCode(200)
@@ -141,7 +157,9 @@ export class AuthController {
       await this.audit.log({ actorId: r.user.id, action: 'auth.password.reset', ip: req.ip });
       return await this.loggedIn(res, r, req.ip, 'password_reset');
     } catch (e) {
-      throw this.authError(e);
+      const err = this.authError(e);
+      this.failed('password_reset', err, dto.phone);
+      throw err;
     }
   }
 
@@ -155,6 +173,9 @@ export class AuthController {
 
   @Post('logout') @HttpCode(204)
   async logout(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply, @Body() body: { refreshToken?: string }) {
+    // Kim chiqqani: token yaroqli bo'lsa. Mehmon (token yo'q yoki eskirgan) xabar qilinmaydi
+    const who = optionalUserId(req, this.tokens);
+    if (who) this.activity?.record({ action: 'auth.logout', actorId: who });
     // Mini App refresh tokenni tanada yuboradi, sayt cookie'dan (path '/')
     await this.tokens.logout(body?.refreshToken ?? (req as any).cookies?.[REFRESH_COOKIE]);
     this.clearCookies(res);
@@ -169,7 +190,7 @@ export class AuthController {
 
   /** Email yagona (EMAIL_TAKEN) va Google bog'langanda o'zgarmaydi (EMAIL_LOCKED); personalRoles faqat PERSONAL_ROLES. */
   @Patch('me') @UseGuards(JwtGuard)
-  async updateMe(@CurrentUserId() userId: string, @Body() dto: UpdateMeDto) {
+  async updateMe(@CurrentUserId() userId: string, @Body() dto: UpdateMeDto, @Req() req: FastifyRequest) {
     const me = await this.users.findById(userId);
     if (!me) throw new HttpException({ code: 'USER_NOT_FOUND' }, HttpStatus.UNAUTHORIZED);
     const patch: UserPatch = { fullName: dto.fullName?.trim(), locale: dto.locale };
@@ -184,6 +205,9 @@ export class AuthController {
     if (dto.avatarUrl !== undefined) patch.avatarUrl = dto.avatarUrl || null;
     if (dto.personalRoles) patch.personalRoles = dto.personalRoles.filter((r): r is Role => PERSONAL_ROLES.includes(r as Role));
     const u = await this.users.update(userId, patch);
+    // Faqat o'zgargan maydon NOMLARI (qiymat emas: telefon, email, rasm manzili xabarga chiqmaydi)
+    const fields = Object.entries(patch).filter(([k, v]) => v !== undefined && JSON.stringify(v) !== JSON.stringify((me as any)[k])).map(([k]) => k);
+    if (fields.length) await this.audit.log({ actorId: userId, action: 'auth.profile.update', entity: 'User', entityId: userId, ip: req.ip, meta: { fields } });
     return publicUser(u, await perms(this.admin, u.id));
   }
 
@@ -196,7 +220,7 @@ export class AuthController {
     const phone = normalizePhone(dto.phone);
     const me = await this.users.findById(userId);
     if (phone && me?.phone === phone) throw new HttpException({ code: 'SAME_PHONE' }, 400);
-    return this.otpRequestOrThrow(dto.phone, dto.locale);
+    return this.otpRequestOrThrow(dto.phone, dto.locale, 'auth.otp.request', userId);
   }
 
   @Post('phone/change') @HttpCode(200) @UseGuards(JwtGuard)
@@ -204,10 +228,11 @@ export class AuthController {
     limitConsume(req, dto.phone);
     try {
       const phone = await this.verifyOtp.consume(dto.phone, dto.code);
+      const before = await this.users.findById(userId);
       const u = await this.users.claimPhone(userId, phone);
       // Telefon kirish kaliti: eski raqam bilan ochilgan boshqa qurilmalar yopiladi
       await this.tokens.revokeOthers(userId, sidOf(req, this.tokens));
-      await this.audit.log({ actorId: userId, action: 'auth.phone.change', ip: req.ip });
+      await this.audit.log({ actorId: userId, action: 'auth.phone.change', ip: req.ip, meta: { from: before?.phone ?? undefined, to: u.phone ?? undefined } });
       return publicUser(u, await perms(this.admin, userId));
     } catch (e) {
       throw this.authError(e);
@@ -221,7 +246,7 @@ export class AuthController {
     if (!me) throw new HttpException({ code: 'USER_NOT_FOUND' }, HttpStatus.UNAUTHORIZED);
     if (!deleteConfirmed(dto.confirm, me.phone, normalizePhone)) throw new HttpException({ code: 'CONFIRM_MISMATCH' }, 400);
     const report = await this.deleteAccount.execute(userId);
-    await this.audit.log({ actorId: userId, action: 'auth.delete', entity: 'User', entityId: userId, ip: req.ip, meta: report });
+    await this.audit.log({ actorId: userId, action: 'auth.delete', entity: 'User', entityId: userId, ip: req.ip, meta: { ...report, name: me.fullName ?? undefined, phone: me.phone ?? undefined } });
     this.clearCookies(res);
     return { deleted: true, transferred: report.transferred.length, orphanedOrgs: report.orphaned.length };
   }
@@ -229,17 +254,51 @@ export class AuthController {
   /** Bot -> API: kontakt keldi. */
   @Post('internal/telegram/link') @HttpCode(200) @UseGuards(InternalGuard)
   async telegramLink(@Body() dto: TelegramLinkDto) {
-    return this.linkTelegram.execute({ chatId: BigInt(dto.chatId), username: dto.username ?? null, phone: dto.phone, linkToken: dto.linkToken });
+    const { userId, isNew, ...res } = await this.linkTelegram.execute({ chatId: BigInt(dto.chatId), username: dto.username ?? null, phone: dto.phone, linkToken: dto.linkToken });
+    // Superadmin xabari: botga raqam ulashgan odam kim va yangimi (ip bot konteynerniki, ko'rsatilmaydi)
+    await this.audit.log({ actorId: userId, action: 'auth.telegram.link', entity: 'User', entityId: userId, meta: { isNew, username: dto.username ?? undefined, codeSent: res.codeSent } });
+    return res;
   }
 
-  private async otpRequestOrThrow(phone: string, locale?: string | null) {
+  private async otpRequestOrThrow(phone: string, locale: string | null | undefined, action: 'auth.otp.request' | 'auth.password.reset.request', actorId?: string) {
     try {
-      return await this.requestOtp.execute(phone, locale ?? null);
+      const r = await this.requestOtp.execute(phone, locale ?? null);
+      this.noteRequest(action, phone, r.status === 'SENT', actorId);
+      return r;
     } catch (e) {
       if (e instanceof InvalidPhoneError) throw new HttpException({ code: 'INVALID_PHONE' }, 400);
       if (e instanceof TooManyRequestsError) throw new HttpException({ code: 'TOO_MANY_REQUESTS', retryAfter: e.retryAfter }, 429);
       throw e;
     }
+  }
+
+  /**
+   * Superadmin xabari: kira olmadi. Javob kutilmaydi va xato yutiladi. Kod, parol, credential va
+   * initData hech qachon berilmaydi: faqat usul, sabab kodi va yashirilgan raqam. 429 (cheklov) va 5xx xabar qilinmaydi.
+   */
+  private failed(via: string, err: unknown, phone?: string | null) {
+    const activity = this.activity;
+    if (!activity || !(err instanceof HttpException)) return;
+    const status = err.getStatus();
+    const reason = (err.getResponse() as { code?: unknown } | undefined)?.code;
+    if (status === 429 || status >= 500 || typeof reason !== 'string') return;
+    void (async () => {
+      const p = phone ? normalizePhone(phone) : null;
+      // Telefon bazada bo'lsa xabar o'sha odamning oynasiga tushadi (faqat xato yo'lida bitta so'rov)
+      const actorId = p ? await this.users.findByPhone(p).then((u) => u?.id, () => undefined) : undefined;
+      activity.record({ action: 'auth.failed', actorId, guest: p ? { label: maskPhone(p) } : undefined, meta: { via, reason } });
+    })().catch(() => {});
+  }
+
+  /** Superadmin xabari: kod so'raldi (kod o'zi hech qayerga yozilmaydi). */
+  private noteRequest(action: 'auth.otp.request' | 'auth.password.reset.request', phone: string, sent: boolean, actorId?: string) {
+    const activity = this.activity;
+    if (!activity) return;
+    void (async () => {
+      const p = normalizePhone(phone);
+      const id = actorId ?? (p ? await this.users.findByPhone(p).then((u) => u?.id, () => undefined) : undefined);
+      activity.record({ action, actorId: id, guest: p ? { label: maskPhone(p) } : undefined, meta: { sent } });
+    })().catch(() => {});
   }
 
   /** Domen xatolari -> HTTP. Tanilmagan xato o'zgarmay qaytadi. */
@@ -253,9 +312,10 @@ export class AuthController {
   }
 
   /** OTP, Google va parol uchun bir xil: cookie, audit, javob shakli. */
-  private async loggedIn(res: FastifyReply, r: { user: UserRecord; accessToken: string; refreshToken: string }, ip: string, via: string, action = 'auth.login') {
+  private async loggedIn(res: FastifyReply, r: { user: UserRecord; accessToken: string; refreshToken: string; isNew?: boolean; phoneLinked?: boolean }, ip: string, via: string, action = 'auth.login', extra: Record<string, unknown> = {}) {
     this.setCookies(res, r.accessToken, r.refreshToken);
-    await this.audit.log({ actorId: r.user.id, action, ip, meta: { via } });
+    // isNew: bu kirish hisobni ochdi (ro'yxatdan o'tish); phoneLinked: kirgan telefonsiz hisob raqamini bog'ladi
+    await this.audit.log({ actorId: r.user.id, action, ip, meta: { via, isNew: r.isNew === true, ...(r.phoneLinked ? { phoneLinked: true } : {}), ...extra } });
     return { user: publicUser(r.user, await perms(this.admin, r.user.id)), accessToken: r.accessToken, refreshToken: r.refreshToken, needsPhone: r.user.phone === null };
   }
 

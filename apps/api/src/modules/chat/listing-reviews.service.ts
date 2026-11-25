@@ -116,7 +116,8 @@ export class ListingReviewsService {
     const isOwner = r.listing.ownerUserId === userId || (!!r.listing.orgId && orgIds.includes(r.listing.orgId));
     if (!isOwner) throw new ForbiddenException({ code: 'NOT_OWNER' });
     const updated = await this.prisma.listingReview.update({ where: { id: reviewId }, data: { reply: reply.trim().slice(0, 1000), repliedAt: new Date() } });
-    return { id: updated.id, reply: updated.reply, repliedAt: updated.repliedAt };
+    // listingId faqat nazoratchining faoliyat yozuvi uchun: u javobdan olib tashlaydi
+    return { id: updated.id, reply: updated.reply, repliedAt: updated.repliedAt, listingId: updated.listingId };
   }
 
   private async names(userIds: string[]) {

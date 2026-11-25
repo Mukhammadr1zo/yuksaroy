@@ -49,8 +49,11 @@ export class SlotsController {
   }
 
   @Post('terminals/:id/slots/:slotId/close') @HttpCode(200) @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')
-  close(@CurrentUserId() userId: string, @Param('id') id: string, @Param('slotId') slotId: string, @Body() dto: CloseSlotDto) {
-    return this.slots.setSlotClosed(userId, id, slotId, dto.closed);
+  async close(@CurrentUserId() userId: string, @Param('id') id: string, @Param('slotId') slotId: string, @Body() dto: CloseSlotDto) {
+    const slot = await this.slots.setSlotClosed(userId, id, slotId, dto.closed);
+    // Faqat yopish xabar qiladi: qayta ochish kundalik tuzatish, shovqin
+    if (dto.closed) await this.audit.log({ actorId: userId, action: 'slots.close', entity: 'Terminal', entityId: id, meta: { terminalId: id, date: slot?.localDate } });
+    return slot;
   }
 
   @Post('slots/:id/hold') @HttpCode(201) @UseGuards(JwtGuard) @ApiCookieAuth('ys_access')

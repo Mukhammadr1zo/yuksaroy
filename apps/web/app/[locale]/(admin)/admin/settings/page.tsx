@@ -74,6 +74,23 @@ const BOUNDS: Record<string, { min: number; max?: number }> = {
   wagonSearchFree: { min: 0 },
 };
 
+/** Telegram xabar kalitlari (activity...) 0/1: maydon emas, ikki tugmali tanlov. Serverda ham faqat 0 va 1 o'tadi. */
+const isSwitch = (key: string) => key.startsWith('activity');
+const Field = ({ as: Tag, ...p }: { as: 'div' | 'label'; className: string; children: React.ReactNode }) => <Tag {...p} />;
+
+/** Yoqilgan / O'chiq. Brauzer select'i emas: dizayn tizimining tugmalari, klaviaturada Tab bilan o'tiladi. */
+function Switch({ value, onChange, labels }: { value: string; onChange: (v: string) => void; labels: [string, string] }) {
+  const on = value === '1';
+  // Telefonda 44 px (barmoq), kompyuterda ixcham
+  const base = 'rounded-full px-4 py-2.5 sm:py-1.5 text-sm font-semibold transition duration-150 outline-none focus-visible:ring-2 focus-visible:ring-teal/40';
+  return (
+    <div role="group" className="inline-flex gap-1 rounded-full border border-line bg-sand p-1">
+      <button type="button" aria-pressed={on} onClick={() => onChange('1')} className={`${base} ${on ? 'bg-teal text-white' : 'text-muted hover:text-navy'}`}>{labels[0]}</button>
+      <button type="button" aria-pressed={!on} onClick={() => onChange('0')} className={`${base} ${!on ? 'bg-navy text-white' : 'text-muted hover:text-navy'}`}>{labels[1]}</button>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const t = useTranslations('admin');
   const tc = useTranslations('admin.common');
@@ -128,9 +145,12 @@ export default function SettingsPage() {
               <p className="mt-0.5 text-xs text-muted">{ts(`hint.${it.key}`)}</p>
               {it.default === '' ? null : <p className="mt-1 font-mono text-xs text-muted">{ts('default', { value: String(it.default) })}</p>}
             </div>
-            <label className={`w-full ${isText ? '' : 'sm:w-56'}`}>
+            {/* Tugmalar <label> ichida bo'lmasin: yozuvni bosish birinchi tugmani bosib yuborardi */}
+            <Field as={isSwitch(it.key) ? 'div' : 'label'} className={`w-full ${isText ? '' : 'sm:w-56'}`}>
               <span className={`mb-1 block ${LABEL}`}>{it.key}</span>
-              {it.key === 'commissionPayer' ? (
+              {isSwitch(it.key) ? (
+                <Switch value={vals[it.key] ?? '0'} onChange={(v) => setVals((x) => ({ ...x, [it.key]: v }))} labels={[ts('on'), ts('off')]} />
+              ) : it.key === 'commissionPayer' ? (
                 <select className={INPUT} value={vals[it.key] ?? ''} onChange={(e) => setVals((v) => ({ ...v, [it.key]: e.target.value }))}>
                   <option value="TERMINAL">TERMINAL</option>
                   <option value="CLIENT">CLIENT</option>
@@ -146,7 +166,7 @@ export default function SettingsPage() {
               )}
               {/* Bazis punkt saqlanadi (300 = 3,00 %): odam "3" yozib 3 % deb o'ylamasin, foizni jonli ko'rsatamiz */}
               {it.key === 'commissionPct' ? <span className="mt-1 block font-mono text-xs text-teal-ink">= {(Number(vals[it.key]) / 100).toFixed(2)} %</span> : null}
-            </label>
+            </Field>
           </div>
           );
         })}

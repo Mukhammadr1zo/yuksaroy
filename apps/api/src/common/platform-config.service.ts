@@ -16,6 +16,14 @@ export interface PlatformConfigValues {
   helpAskDaily: number;
   /** Qo'lda to'lov rekvizitlari (matn); bo'sh bo'lishi mumkin. */
   payDetails: string;
+  /** Superadminlarning Telegram faoliyat xabarlari: 0 = o'chiq, 1 = yoqiq (modules/activity). */
+  activityLogin: number;
+  activityActions: number;
+  activityVisits: number;
+  activityAdmin: number;
+  activitySystem: number;
+  activitySelf: number;
+  activityAdminVisits: number;
 }
 
 /** PlatformConfig jadvali + PLATFORM_DEFAULTS. 60 s kesh - sozlama admin tomonidan kamdan-kam o'zgaradi. */
