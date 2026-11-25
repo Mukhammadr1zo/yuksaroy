@@ -18,7 +18,7 @@ function countryName(cc: string): string {
   try {
     regionNames ??= new Intl.DisplayNames(['uz'], { type: 'region' });
     // Uzbek ICU harfi ʻ (U+02BB) o'rniga ASCII tutuq belgisi: boshqa matnlar bilan bir xil ko'rinsin
-    return (regionNames.of(cc) ?? cc).replace(/[ʻʼ’]/g, "'");
+    return (regionNames.of(cc) ?? cc).replace(/[\u02BB\u02BC\u2019]/g, "'");
   } catch {
     return cc;
   }
