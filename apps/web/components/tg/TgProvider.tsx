@@ -231,6 +231,9 @@ function useTyping(pathname: string) {
     // shut: maydon fokusda, lekin klaviatura yopilgan. Androidda tizim "Orqaga"si klaviaturani yopadi, fokus esa qoladi va
     // focusout kelmaydi; buni oyna balandligi to'liq holatiga qaytganidan bilamiz. Balandlik yana kamaysa klaviatura qayta ochilgan.
     let shut = false;
+    // low: klaviatura balandligidagi oyna ko'rilgan va hali qaytmagan. Faqat shundan keyingi qaytish "klaviatura yopildi" deb olinadi:
+    // aks holda klaviatura ochilayotgandagi kichik qadamlar yoki Telegram tugmasi (~56 px) panelni bir lahza ko'rsatib qo'yardi
+    let low = false;
     const vv = window.visualViewport;
     let full = vv?.height ?? 0;
     const read = () => editable(document.activeElement) && !shut;
@@ -239,7 +242,9 @@ function useTyping(pathname: string) {
     const onVv = () => {
       if (!vv) return;
       full = Math.max(full, vv.height);
-      shut = vv.height >= full - 120; // klaviatura kamida 200 px; Telegram tugmasi (~56 px) bu chegaradan kichik
+      if (vv.height < full - 120) { low = true; shut = false; } // klaviatura kamida 200 px
+      else if (low) { low = false; shut = true; }
+      else return;
       if (editable(document.activeElement)) setTyping(!shut);
     };
     // Zaxira: bosish bilan holat qayta tekshiriladi (maydon o'chirilsa yoki almashsa focusout kelmaganda panel yashirin qolmasin)
@@ -272,9 +277,16 @@ function BackSync({ tg, off }: { tg: TgWebApp | null; off: boolean }) {
       router.back();
       if (can) return;
       // Eski iOS: history.length oldinga yozuvlarni ham sanaydi, shuning uchun birinchi yozuvda back() jim qoladi.
-      // Manzil o'zgarmasa shu tabning ildiziga o'tiladi: tugma o'lik bo'lib qolmaydi.
-      const href = window.location.href;
-      window.setTimeout(() => { if (window.location.href === href) router.replace(root); }, 300);
+      // Tarixda siljish bo'lmasa (popstate kelmasa) shu tabning ildiziga o'tiladi: tugma o'lik bo'lib qolmaydi.
+      // 600 ms: sekin qurilmada kechikkan siljish ustidan yozib yubormaslik uchun; xarita kamerasi replaceState qilsa ham adashmaydi.
+      const path = window.location.pathname;
+      let moved = false;
+      const onPop = () => { moved = true; };
+      window.addEventListener('popstate', onPop, { once: true });
+      window.setTimeout(() => {
+        window.removeEventListener('popstate', onPop);
+        if (!moved && window.location.pathname === path) router.replace(root);
+      }, 600);
     };
     tg.BackButton.onClick(back);
     if (off || (isTabRoot(pathname) && !hasQuery)) tg.BackButton.hide(); else tg.BackButton.show(); // chiqilgach fallback'da orqaga tugma yo'q
