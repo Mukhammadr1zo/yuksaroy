@@ -22,6 +22,7 @@ import { Link } from '@/i18n/navigation';
 import { SUBSCRIPTION_FALLBACK } from '@yuksaroy/domain';
 import { ApiError, api, hasSession, tgTokens } from '@/lib/api';
 import { num } from '@/lib/format';
+import { openOut } from '@/lib/open-out';
 
 type Kind = 'listing' | 'terminal' | 'org' | 'service' | 'request' | 'offer';
 type State =
@@ -68,21 +69,21 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
       <span className="inline-flex flex-col items-start gap-1">
         {/* flex-wrap: tor ustunlarda (kompaniya kartasi, do'kon yon ustuni) raqam va tugma bir qatorga sig'maydi */}
         <span className="inline-flex flex-wrap items-center gap-2">
-          <a href={`tel:${st.phone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-2 font-mono text-sm font-semibold text-navy hover:text-teal-ink">
+          <a data-reveal href={`tel:${st.phone.replace(/[^+\d]/g, '')}`} className="inline-flex items-center gap-2 font-mono text-sm font-semibold text-navy hover:text-teal-ink">
             <PhoneIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />{st.phone}
           </a>
           {/* Xavfsiz bo'lmagan ulanishda nusxalash ishlamaydi: raqamning o'zi ko'rinib turaveradi */}
           <button
-            type="button"
+            type="button" data-reveal
             onClick={async () => { try { await navigator.clipboard.writeText(st.phone); setCopied(true); window.setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); } }}
             className="rounded-full border border-line px-2 py-0.5 text-xs text-muted transition hover:border-teal hover:text-teal-ink"
           >{copied ? t('copied') : t('copy')}</button>
         </span>
-        <Link href={report} className="text-xs text-muted underline underline-offset-4 hover:text-teal-ink">{t('badPhone')}</Link>
+        <Link data-reveal href={report} onClick={openOut(locale, report)} className="text-xs text-muted underline underline-offset-4 hover:text-teal-ink">{t('badPhone')}</Link>
       </span>
     );
   }
-  if (st.s === 'login') return <p className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('login')} <Link href={`/login?next=${encodeURIComponent(next)}`} className={cta}>{t('loginCta')}</Link></p>;
+  if (st.s === 'login') return <p className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('login')} <Link data-reveal href={`/login?next=${encodeURIComponent(next)}`} className={cta}>{t('loginCta')}</Link></p>;
   if (st.s === 'subscribe') {
     // Telegram Mini App da kabinet cookie'si yo'q: /dashboard u yerda kirish sahifasiga qaytaradi,
     // shuning uchun Mini App o'z obuna sahifasiga boradi (karta bir xil)
@@ -95,16 +96,16 @@ export function PhoneReveal({ kind, targetId, next }: { kind: Kind; targetId: st
         <span className={hint}><LockSimpleIcon size={14} aria-hidden="true" />{t('subscribeWhat')}</span>
         <span className="mt-0.5 block">{t('subscribePrice', { price: num(st.priceSom, locale), n: st.dailyLimit })}</span>
         <span className="mt-0.5 block">{t('subscribeChat')}</span>
-        <Link href={tgTokens() !== null ? '/tg/subscription' : '/dashboard/subscription'} className={`${cta} mt-1 inline-block`}>{t('subscribeCta')}</Link>
+        <Link data-reveal href={tgTokens() !== null ? '/tg/subscription' : '/dashboard/subscription'} className={`${cta} mt-1 inline-block`}>{t('subscribeCta')}</Link>
       </span>
     );
   }
   if (st.s === 'limit') return <p className={hint}>{t('limitCount', { n: st.limit })}</p>;
   if (st.s === 'none') return <p className={hint}>{t('none')}</p>;
-  if (st.s === 'err') return <p className={hint}>{t('err')} <button type="button" onClick={reveal} className={cta}>{t('retry')}</button></p>;
+  if (st.s === 'err') return <p className={hint}>{t('err')} <button type="button" data-reveal onClick={reveal} className={cta}>{t('retry')}</button></p>;
   return (
     <button
-      type="button" onClick={reveal} disabled={st.s === 'busy'}
+      type="button" data-reveal data-phone-btn onClick={reveal} disabled={st.s === 'busy'}
       className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy transition hover:border-teal hover:text-teal-ink disabled:opacity-60"
     >
       <PhoneIcon size={16} aria-hidden="true" />{st.s === 'busy' ? t('loading') : t('show')}

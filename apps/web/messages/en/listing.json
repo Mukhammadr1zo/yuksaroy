@@ -125,7 +125,8 @@
         "sent": "Inquiry sent. The reply appears in your dashboard under Inquiries.",
         "err": "Not sent, please try again.",
         "short": "Write at least 5 characters.",
-        "openChat": "Open the chat"
+        "openChat": "Open the chat",
+        "sentTg": "Request sent. The answer will arrive as a Telegram message."
       },
       "demoNote": "This is a sample listing: it shows how the site works and is not a real offer. No phone or chat.",
       "cargoCta": "Post your cargo and carriers will name their own price",

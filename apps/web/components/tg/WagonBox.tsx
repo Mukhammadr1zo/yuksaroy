@@ -11,16 +11,17 @@
  * sessiya tugaganda keladi. Kirish sahifasi o'rniga relogin tugmasi ko'rsatiladi:
  * /tg ichida login formasi yo'q.
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { MagnifyingGlassIcon, TrainRegionalIcon } from '@phosphor-icons/react';
 import { normalizeWagonNo } from '@yuksaroy/domain';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError, api } from '@/lib/api';
 import { num, uzDate, uzDateTime, uzToday } from '@/lib/format';
 import type { WagonEvent, WagonMe, WagonResult } from '@/lib/types-wagon';
 import { haptic, useTg } from './TgProvider';
-import { BTN, CARD, Empty, Err, INPUT, Row } from './bits';
+import { BTN, CARD, Empty, Err, INPUT, LoadError, Row } from './bits';
 
 type Code = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'generic';
 type St =
@@ -42,24 +43,30 @@ export function WagonBox() {
   const tb = useTranslations('tg.boot');
   const locale = useLocale();
   const { relogin } = useTg();
+  const router = useRouter();
+  const sp = useSearchParams();
+  // Qidiruvdan kelgan ?no= faqat bir marta ishlaydi: strict mode, qayta chizish va Orqaga pullik so'rovni takrorlamasin
+  const auto = useRef(false);
   const [text, setText] = useState('');
   const [st, setSt] = useState<St>({ s: 'idle' });
   const [me, setMe] = useState<WagonMe | null>(null);
+  // Kvota yuklanmasa jim qolmaydi: qayta urinish tugmasi (qidiruv o'zi kvotasiz ham ishlayveradi)
+  const [meFailed, setMeFailed] = useState(false);
 
-  useEffect(() => {
+  const loadMe = useCallback(() => {
+    setMeFailed(false);
     api<WagonMe>('/wagon/me')
       .then((m) => { setMe(m); if (!m.configured) setSt({ s: 'err', code: 'WAGON_NOT_CONFIGURED' }); })
-      .catch(() => {});
+      .catch(() => setMeFailed(true));
   }, []);
+  useEffect(() => { loadMe(); }, [loadMe]);
 
   // Raqam serverdagi qoida bo'yicha tekshiriladi: 7 yoki 8 raqam, oradagi belgilar tashlanadi
   const no = normalizeWagonNo(text);
   const busy = st.s === 'busy';
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function run(no: string | null) {
     if (!no) { setSt({ s: 'err', code: 'WAGON_NO_INVALID' }); return; }
-    haptic();
     setSt({ s: 'busy' });
     try {
       // Server 10 soniya kutadi, brauzer sal ko'proq: undan keyin "hozir qidirib bo'lmadi"
@@ -71,6 +78,25 @@ export function WagonBox() {
     // Kvota ham, oxirgi qidirganlarim ham o'zgardi: bitta arzon so'rov
     api<WagonMe>('/wagon/me').then(setMe).catch(() => {});
   }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (no) haptic();
+    // Maydon qidiruv paytida disabled bo'ladi: fokusni oldindan qo'yib yuboramiz, aks holda tab paneli yashirin qolishi mumkin
+    (document.activeElement as HTMLElement | null)?.blur();
+    void run(no);
+  }
+
+  // /tg/search dan raqam bilan kelinsa: maydon to'ladi, qidiruv bir marta ishlaydi, ?no= URL dan olib tashlanadi
+  useEffect(() => {
+    const raw = sp.get('no');
+    if (!raw || auto.current) return;
+    auto.current = true;
+    const n = normalizeWagonNo(raw);
+    setText(n ?? raw);
+    router.replace('/tg/wagon');
+    void run(n);
+  }, [sp]);
 
   return (
     <div>
@@ -88,11 +114,11 @@ export function WagonBox() {
       </form>
       <p className="mt-2 text-xs text-muted">{t('hint')}</p>
 
-      {me ? (
+      {meFailed ? <div className="mt-3"><LoadError onRetry={loadMe} /></div> : me ? (
         <p className="mt-2 text-sm text-muted">
           {me.subscriber ? t('quotaSub') : t('quotaFree', { left: me.remainingFree })}
           {/* Bepul qidiruv tugagan: odam devorga urilmasdan oldin obunaga yo'l ko'rsin */}
-          {!me.subscriber && me.remainingFree === 0 ? <> <Link href="/tg/subscription" className="font-semibold text-teal-ink underline">{t('subscribeCta')}</Link></> : null}
+          {!me.subscriber && me.remainingFree === 0 ? <> <Link href="/tg/subscription" className="inline-flex min-h-11 items-center font-semibold text-teal-ink underline">{t('subscribeCta')}</Link></> : null}
         </p>
       ) : null}
 

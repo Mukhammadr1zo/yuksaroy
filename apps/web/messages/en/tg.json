@@ -14,7 +14,9 @@
     "common": {
       "loading": "Loading",
       "failed": "Failed. Please try again.",
-      "loadFailed": "Could not load. Reopen the app.",
+      "loadFailed": "Could not load.",
+      "searchPh": "Station or wagon number",
+      "wagonSuggest": "Where is wagon {no}?",
       "back": "Back",
       "all": "All",
       "openSite": "Open on the platform",
@@ -28,7 +30,6 @@
       "hello": "Hello, {name}",
       "helloNoName": "Hello",
       "phoneOk": "Phone {phone}",
-      "searchPh": "Unloading in Andijan, 20 wagons",
       "searchAria": "Search",
       "search": "Search",
       "wagon": "Where is the wagon",
@@ -39,17 +40,10 @@
         "truck": "Road transport"
       },
       "bookable": "Terminals with free spots today",
-      "bookableEmpty": "No open spots today. Next days are on the terminal page.",
-      "orders": "My open orders",
+      "orders": "My orders",
       "ordersAll": "All",
       "urgent": "Urgent request",
-      "urgentHint": "Locomotive, repair or crane: a request to providers in your region",
-      "links": {
-        "orders": "Orders",
-        "listings": "My listings",
-        "map": "Map",
-        "profile": "Profile"
-      }
+      "urgentHint": "Locomotive, repair or crane: a request to providers in your region"
     },
     "phone": {
       "title": "Confirm your phone",
@@ -64,11 +58,18 @@
     },
     "search": {
       "title": "Search",
-      "ph": "Station, region, service",
       "empty": "Nothing found. Try another word or region.",
       "unresolved": "not understood: {words}",
       "map": "On the map",
-      "more": "{shown} / {total} shown"
+      "more": "{shown} / {total} shown",
+      "removeFilter": "Remove filter: {name}",
+      "clear": "Clear filters",
+      "toMap": "View on the map",
+      "byRegion": "By region",
+      "byStation": "By station",
+      "station": "Station",
+      "loadMore": "Show more",
+      "moreFailed": "Could not load more rows."
     },
     "wagon": {
       "title": "Where is the wagon",
@@ -108,7 +109,7 @@
       "tariffs": "Tariffs",
       "noTariffs": "No tariff published, price on request.",
       "slotsToday": "Spots today",
-      "noSlots": "No open spots today. Next days are in the booking step.",
+      "noSlots": "No open spots today. You can see other days in the booking step.",
       "free": "{count} free",
       "phone": "Phone",
       "noPhone": "No phone listed",
@@ -116,7 +117,19 @@
       "map": "On the map",
       "hours": "Working hours",
       "noRating": "No rating",
-      "unverified": "Details not confirmed by the terminal's owner"
+      "unverified": "Details not confirmed by the terminal's owner",
+      "address": "Address",
+      "minSum": "at least {sum}",
+      "capacity": "fits {count, plural, one {# wagon} other {# wagons}}",
+      "length": "{count} m",
+      "tracks": "{count, plural, one {# track} other {# tracks}}",
+      "loads": "loads {count, plural, one {# wagon} other {# wagons}}",
+      "unloads": "unloads {count, plural, one {# wagon} other {# wagons}}",
+      "hasPhone": "Phone listed",
+      "sameStation": "{count, plural, one {# more terminal} other {# more terminals}} at this station",
+      "claimTitle": "Is this your terminal?",
+      "claimBody": "If you own it, you send the claim on the website: choose your organization and an operator checks it. The app stays open, the website opens in the browser.",
+      "claimCta": "Continue on the website"
     },
     "book": {
       "title": "Book a spot",
@@ -251,18 +264,22 @@
       "specs": "Specifications",
       "owner": "Owner",
       "contact": "Contact",
-      "loginNote": "The price is public; phone and inquiry go through your Telegram account."
+      "loginNote": "Everyone sees the price. The phone number opens with a subscription, and messages go through your Telegram account."
     },
     "urgent": {
       "title": "Urgent request",
       "lead": "Type, region and phone. Nearby providers offer a price and time.",
       "mine": "My requests",
-      "provider": "Open requests (provider)",
+      "provider": "Incoming requests",
       "phoneFirst": "A phone is required for a request.",
-      "share": "Share status",
+      "share": "Share",
       "shareText": "Urgent request {no} status (no prices)",
       "offersCount": "{count, plural, one {# offer} other {# offers}}",
-      "notFound": "Request not found."
+      "notFound": "Request not found.",
+      "wagons": "{count, plural, one {# wagon} other {# wagons}}",
+      "noName": "Provider",
+      "noOrg": "Requests go to provider organizations: locomotive services, equipment owners and carriers. Add your organization on the website and requests from your region will appear here.",
+      "noOrgCta": "Add an organization on the website"
     },
     "listings": {
       "title": "My listings",
@@ -298,7 +315,8 @@
         "err": {
           "LISTING_INVALID": "The form is incomplete: fix the marked fields.",
           "UPLOAD": "Photo upload failed."
-        }
+        },
+        "truckTypePick": "Choose a body type"
       }
     },
     "profile": {
@@ -310,17 +328,51 @@
       "locale": "Language",
       "site": "Platform",
       "siteLinks": {
-        "dashboard": "Dashboard",
-        "terminals": "Terminals",
-        "listings": "Listings"
+        "dashboard": "Dashboard"
       },
       "logout": "Sign out",
       "loggedOut": "Signed out. Next time you open the app you sign in through Telegram.",
       "telegram": "Telegram @{username}",
-      "subscription": "Subscription: phone numbers and wagon search"
+      "subscription": "Subscription: phone numbers and wagon search",
+      "siteHint": "Opens the website in your browser"
     },
     "map": {
       "title": "Map"
+    },
+    "tabs": {
+      "home": "Home",
+      "search": "Search",
+      "map": "Map",
+      "my": "My items",
+      "profile": "Profile",
+      "aria": "Main sections"
+    },
+    "state": {
+      "title": "The page did not open",
+      "body": "The connection to the internet or the server may have dropped. Please try again.",
+      "retry": "Try again",
+      "home": "Home",
+      "notFound": "Page not found",
+      "notFoundBody": "The link may be out of date. Find what you need with search.",
+      "search": "Go to search"
+    },
+    "my": {
+      "title": "My items",
+      "lead": "Your orders, requests and listings",
+      "orders": "My orders",
+      "mine": "My requests",
+      "incoming": "Incoming requests",
+      "incomingEmpty": "No new requests yet.",
+      "listings": "My listings",
+      "all": "All",
+      "newListing": "Post a listing",
+      "empty": {
+        "title": "Nothing here yet",
+        "body": "Your orders, urgent requests and listings will appear here.",
+        "search": "Find a terminal",
+        "urgent": "Urgent request",
+        "listing": "Post a listing"
+      }
     }
   }
 }

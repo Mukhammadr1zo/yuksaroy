@@ -12,18 +12,126 @@
   /* Tailwind tokenlari shu doirada qayta bog'lanadi: sand = fon, ink = matn, muted = maslahat, line = chiziq */
   --color-sand: var(--tg-bg);
   --color-ink: var(--tg-text);
-  --color-muted: var(--tg-hint);
+  /* Telegram "hint" yorug' temada kartada 2.5:1 edi: matn rangining 62% i fonga aralashtiriladi, uch temada ham 5.4:1 dan yuqori. Chiziq hint dan qoladi */
+  --color-muted: color-mix(in srgb, var(--tg-text) 62%, var(--tg-bg));
   --color-line: var(--tg-line);
+  /* Pastki xavfsiz hudud: brauzer env() yoki Telegram o'z o'zgaruvchisi (Bot API 8+), qaysi biri katta */
+  --tg-safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--tg-safe-area-inset-bottom, 0px));
+  /* Tab paneli egallagan balandlik (xavfsiz hudud bilan); panel yashirin bo'lsa 0. To'liq balandlikdagi sahifalar shuni ayiradi */
+  --tg-tabbar-space: 0px;
   background: var(--tg-bg);
   color: var(--tg-text);
   min-height: var(--tg-vh, 100dvh);
   padding-bottom: env(safe-area-inset-bottom);
+  /* Ilova hissi: kulrang teginish chaqnashi va ikki marta bosib kattalashtirish kechikishi yo'q */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+/* 60px panel + 8px pastki oraliq + xavfsiz hudud: oxirgi karta panel ostida qolmaydi */
+.tg-root[data-tabbar] {
+  --tg-tabbar-space: calc(68px + var(--tg-safe-bottom));
+  padding-bottom: var(--tg-tabbar-space);
+}
+/* Sahifa chetidan tortilganda butun WebView sakramasin */
+:root:has(.tg-root), :root:has(.tg-root) body { overscroll-behavior-y: contain; }
+.tg-root button { -webkit-user-select: none; user-select: none; }
 /* Kartalar: Telegram'ning ikkinchi foni (tashqarida oq) */
 .tg-root .bg-white { background-color: var(--tg-card); }
 /* Telegram tugma rangi: MainButton bilan bir xil ko'rinadigan ikkinchi darajali tugma */
 .tg-btn-tg { background: var(--tg-button); color: var(--tg-button-text); }
-.tg-root a { -webkit-tap-highlight-color: transparent; }
+
+/* Sahifaga kirish: qisqa ko'tarilish. backwards: tugagach transform qolmaydi, aks holda main ichidagi
+   fixed oynalar (chat, rasm ko'rish) main ga bog'lanib qolardi */
+/* opacity 0 dan emas: skelet (loading.tsx) dan keyin bir kadr bo'sh ekran qolmasin */
+@keyframes tg-in { from { opacity: .6; transform: translateY(6px); } }
+.tg-root main { animation: tg-in 180ms cubic-bezier(.16, 1, .3, 1) backwards; }
+
+/* Tab paneli: suzuvchi shaffof kapsula, kontent ustida, MainButton va klaviatura paytida pastga yashirinadi */
+.tg-tabbar {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(8px + var(--tg-safe-bottom));
+  z-index: 40;
+  width: min(calc(100% - 24px), 424px);
+  height: 60px;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding-inline: 4px;
+  border-radius: 22px;
+  border: 1px solid var(--tg-line);
+  background: color-mix(in srgb, var(--tg-card) 86%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 10px 28px rgb(11 35 64 / 0.12), 0 1px 3px rgb(11 35 64 / 0.06);
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 180ms cubic-bezier(.16, 1, .3, 1), opacity 180ms ease, visibility 0s;
+}
+.tg-root:not([data-tabbar]) .tg-tabbar {
+  transform: translateY(calc(100% + 16px + var(--tg-safe-bottom)));
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 160ms ease-in, opacity 160ms ease-in, visibility 0s linear 160ms;
+}
+[data-tg-scheme="dark"] .tg-tabbar { box-shadow: 0 10px 28px rgb(0 0 0 / 0.45), 0 1px 3px rgb(0 0 0 / 0.3); }
+/* Panel ortidagi parda: suriladigan kontent panel yonidan va ostidan (uy chizig'i atrofida) ko'rinib qolmaydi, fonga singib ketadi.
+   Balandligi panel egallagan joy bilan teng, shuning uchun sahifa oxiridagi kontentni ham, xaritani ham yopmaydi */
+.tg-root::after {
+  content: "";
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 39;
+  height: calc(68px + var(--tg-safe-bottom));
+  background: linear-gradient(to bottom, transparent, var(--tg-bg) 45%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease-in;
+}
+.tg-root[data-tabbar]::after { opacity: 1; transition: opacity 180ms ease; }
+.tg-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  border-radius: 18px;
+  /* Telegram "hint" rangi kartada atigi 2.8:1 edi: matn rangining 68% i kartaga aralashtiriladi, yorug' va qorong'i temada 5:1 dan yuqori */
+  color: color-mix(in srgb, var(--tg-text) 68%, var(--tg-card));
+  outline: none;
+  transition: transform 120ms ease-out, color 160ms ease;
+}
+.tg-tab:active { transform: scale(0.96); }
+.tg-tab:focus-visible { box-shadow: inset 0 0 0 2px var(--color-teal); }
+.tg-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 30px;
+  border-radius: 999px;
+  transition: background-color 160ms ease;
+}
+.tg-tab-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 700;
+}
+.tg-tab[aria-current="page"] { color: var(--color-teal-ink); }
+/* Shaffof teal: Telegram yorug' temasida karta kulrang (#f0f0f4 kabi), qattiq teal-soft unda deyarli ko'rinmasdi */
+.tg-tab[aria-current="page"] .tg-tab-icon { background: color-mix(in srgb, var(--color-teal) 14%, transparent); }
+[data-tg-scheme="dark"] .tg-tab[aria-current="page"] .tg-tab-icon { background: var(--color-teal-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-root main { animation: none; }
+  .tg-tabbar, .tg-root:not([data-tabbar]) .tg-tabbar, .tg-root::after, .tg-root[data-tabbar]::after, .tg-tab, .tg-tab-icon { transition: none; }
+  .tg-tab:active { transform: none; }
+}
 
 /* Qorong'i tema: to'q "siyoh" matnlar och rangga, och chip fonlari shaffof rangga */
 [data-tg-scheme="dark"] { color-scheme: dark; }
@@ -41,6 +149,31 @@
 [data-tg-scheme="dark"] .tg-root .bg-line\/40, [data-tg-scheme="dark"] .tg-root .bg-line\/60 { background-color: rgb(255 255 255 / 0.08); }
 
 /* Gorizontal tasmalar: chiziqsiz, kartalar bo'yicha to'xtaydi */
-.tg-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; }
+.tg-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; scrollbar-width: none; padding-bottom: 2px; }
 .tg-strip::-webkit-scrollbar { display: none; }
 .tg-strip > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+/* Telefonni ochish (PhoneReveal): sayt bilan umumiy komponent, Mini App'da tugma va havolalar 44px */
+.tg-root [data-reveal] { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Xarita (/tg/map): MapView app rejimi. Sayt xaritasi bu qoidalardan o'zgarmaydi (.ys-map-app faqat Mini App'da) */
+/* Shaffof oq yuzalar (legenda, chizish ko'rsatmasi) Telegram temasiga ergashsin: qorong'i temada oq dog' bo'lmasin */
+.tg-root .ys-map .bg-white\/90 { background-color: color-mix(in srgb, var(--tg-card) 90%, transparent); }
+/* Yaqinlashtirish tugmalari 44 px (maplibre standarti 29 px) */
+.tg-root .ys-map-app .maplibregl-ctrl-group button { width: 44px; height: 44px; }
+
+/* Mini App da yopish va olib tashlash tugmalari 44 px: sayt (.tap-40) o'zgarmaydi */
+.tg-root .tap-40::after { width: 44px; height: 44px; }
+
+/* Aloqa guruhi (terminal sahifasi): telefon va asosiy harakat yonma-yon teng 48 px tugmalar; bittasi bo'lsa to'liq kenglik.
+   :has qo'llanmasa ham tugmalar ishlaydi, faqat raqam ochilgach yarim ustunda turadi */
+.tg-cta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tg-cta:not(:has(.tg-phone)) > *, .tg-cta > .tg-phone:only-child { grid-column: 1 / -1; }
+/* Raqam ochilgach (yoki kirish/obuna matni chiqqach) telefon bloki butun qatorni oladi va yozish tugmasi ostida turadi */
+.tg-cta:has(.tg-phone > :not([data-phone-btn])) > * { grid-column: 1 / -1; }
+.tg-cta > .tg-phone:has(> :not([data-phone-btn])) { order: 2; }
+/* Tor ustunda (160 px) uzun yozuv ikki qatorga o'tadi, kesilmaydi */
+.tg-phone > [data-phone-btn] { display: flex; width: 100%; min-height: 48px; justify-content: center; gap: 6px; padding-inline: 12px; font-size: 15px; line-height: 1.2; text-align: center; }
+/* Ochilgan raqam, nusxalash, "noto'g'ri raqam" va kirish/obuna havolalari: 44 px teginish joyi */
+.tg-phone [data-reveal]:is(a, button):not([data-phone-btn]) { display: inline-flex; align-items: center; min-height: 44px; }
+.tg-phone [data-reveal]:is(button):not([data-phone-btn]) { padding-inline: 12px; font-size: 14px; }

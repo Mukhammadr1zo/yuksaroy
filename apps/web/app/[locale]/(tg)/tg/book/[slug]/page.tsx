@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { OPERATIONS, type Operation } from '@yuksaroy/domain';
 import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError, api, authHeaders, post } from '@/lib/api';
-import { som } from '@/lib/format';
+import { som, tonne } from '@/lib/format';
 import type { Hold, Order, QuoteOffer, QuoteResponse, Slot, TerminalDetail } from '@/lib/types';
 import type { Membership } from '@/lib/types-kabinet';
 import { CargoSearch, type CargoPick } from '@/components/catalog/CargoSearch';
@@ -191,7 +191,7 @@ export default function TgBookPage() {
             {offer.terminal.isDemo ? <div className="mt-1"><DemoBadge /></div> : null}
             {offers.length > 1 ? (
               <details className="mt-2 text-sm">
-                <summary className="cursor-pointer text-teal-ink">{t('otherOffers')} ({offers.length - 1})</summary>
+                <summary className="cursor-pointer py-3 text-teal-ink">{t('otherOffers')} ({offers.length - 1})</summary>
                 <ul className="mt-2 space-y-1">{offers.filter((o) => o.terminal.id !== offer.terminal.id).map((o) => <li key={o.terminal.id}><button type="button" onClick={() => void pickOffer(o)} className="flex w-full min-h-11 items-center justify-between gap-2 rounded-xl border border-line px-3 text-left"><span className="min-w-0 truncate">{o.terminal.name}</span>{o.terminal.isDemo ? <DemoBadge /> : null}<span className="ml-auto font-mono tabular-nums">{som(o.totalTiyin, locale)}</span></button></li>)}</ul>
               </details>
             ) : null}
@@ -199,7 +199,7 @@ export default function TgBookPage() {
           <div className={`${CARD} p-4`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-bold">{t('slot')}</h2>
-              {hold ? <span className="flex items-center gap-2 rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{t('held')} <SlaTimer until={hold.holdExpiresAt} onExpire={onHoldExpired} /><button type="button" onClick={extend} disabled={busy} className="underline">{t('extend')}</button></span> : null}
+              {hold ? <span className="flex items-center gap-2 rounded-full bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{t('held')} <SlaTimer until={hold.holdExpiresAt} onExpire={onHoldExpired} />{/* after: ko'rinadigan matn kichik, teginish maydoni 44px dan katta */}<button type="button" onClick={extend} disabled={busy} className="relative underline after:absolute after:-inset-x-2 after:-inset-y-4 after:content-['']">{t('extend')}</button></span> : null}
             </div>
             <div className="mt-3"><SlotGrid slots={slots} selectedId={hold?.slotId ?? null} onSelect={pickSlot} busy={busy} /></div>
           </div>
@@ -213,7 +213,7 @@ export default function TgBookPage() {
             <dl className="mt-2">
               <Row k={t('operation')} v={t(operation)} />
               <Row k={t('summary.cargo')} v={cargo?.name ?? t('summary.noCargo')} />
-              <Row k={t('summary.weight')} v={`${(weightKg / 1000).toLocaleString('ru-RU')} t`} mono />
+              <Row k={t('summary.weight')} v={tonne((weightKg / 1000).toLocaleString('ru-RU'), locale)} mono />
               <Row k={t('summary.wagons')} v={wagons} mono />
               {selectedSlot ? <Row k={t('summary.time')} v={slotLabel(selectedSlot.startsAt, selectedSlot.endsAt)} /> : null}
             </dl>

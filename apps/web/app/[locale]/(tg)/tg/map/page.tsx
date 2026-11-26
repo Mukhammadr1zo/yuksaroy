@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { getLocale, setRequestLocale } from 'next-intl/server';
+import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
 import type { SearchLang } from '@yuksaroy/domain';
 import { MapView } from '@/components/map/MapView';
 import { parseState } from '@/components/map/state';
@@ -16,6 +16,7 @@ export default async function TgMapPage({ params, searchParams }: { params: Prom
   const { locale } = await params;
   setRequestLocale(locale);
   const lang = (await getLocale()) as SearchLang;
+  const t = await getTranslations('tg.map');
   const sp = await searchParams;
   const initial = parseState((k) => one(sp[k]));
   const [terms, lists] = await Promise.all([
@@ -27,9 +28,12 @@ export default async function TgMapPage({ params, searchParams }: { params: Prom
   // guruhida turadi, kartasi hech qachon chizilmaydi: sahifa yukini oshirmasin
   for (const x of terms?.items ?? []) if (x.lat != null && x.lng != null) cards[`terminal:${x.id}`] = <TerminalRow key={x.id} t={x} lang={lang} />;
   for (const l of lists?.items ?? []) cards[`${l.kind === 'TRUCK' ? 'truck' : 'equipment'}:${l.id}`] = <ListingRow key={l.id} l={l} lang={lang} />;
+  // Balandlik: ekran minus tab paneli. Panel yashirin bo'lsa ildiz pastki xavfsiz hudud bilan to'ldiriladi (tg.css), shuning uchun
+  // ikkisining kattasi ayiriladi: aks holda sahifa xavfsiz hudud qadar surilib qoladi
   return (
-    <main id="main" className="flex h-[var(--tg-vh,100dvh)] flex-col">
-      <MapView initial={initial} cards={cards} />
+    <main id="main" className="flex flex-col" style={{ height: 'calc(var(--tg-vh, 100dvh) - max(var(--tg-tabbar-space, 0px), env(safe-area-inset-bottom, 0px)))' }}>
+      <h1 className="sr-only">{t('title')}</h1>
+      <MapView initial={initial} cards={cards} app />
     </main>
   );
 }

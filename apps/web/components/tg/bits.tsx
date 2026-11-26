@@ -2,10 +2,11 @@
 // Mini App uchun mayda bo'laklar: tugma sinflari, skeleton, bo'sh holat, terminal va e'lon qatorlari (ixcham, 44px teginish), telefon kartasi.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { ArrowClockwiseIcon, ImageIcon } from '@phosphor-icons/react';
 import { LISTING_LABELS, SEARCH_LABELS, type SearchLang } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { api } from '@/lib/api';
-import { pricePer } from '@/lib/format';
+import { km, num, pricePer, tonne } from '@/lib/format';
 import type { TerminalCard } from '@/lib/types';
 import type { Me } from '@/lib/types-auth';
 import type { ListingCard } from '@/lib/types-listing';
@@ -45,12 +46,47 @@ export function Row({ k, v, mono }: { k: string; v: ReactNode; mono?: boolean })
 export function Err({ children }: { children: ReactNode }) {
   return <p role="alert" className="rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{children}</p>;
 }
+/** Yuklab bo'lmadi: bir xil matn va 44px "Qayta urinish". "Ilovani qayta oching" demaydi, chunki odam shu yerning o'zida qayta urina oladi. */
+export function LoadError({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations('tg.common');
+  const ts = useTranslations('tg.state');
+  return (
+    <div role="alert" className="flex items-center justify-between gap-3 rounded-card border border-red-200 bg-red-50 py-1.5 pl-4 pr-1.5 text-sm text-red-700">
+      <span>{t('loadFailed')}</span>
+      <button type="button" onClick={() => { haptic(); onRetry(); }} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 font-semibold active:scale-[0.97]">
+        <ArrowClockwiseIcon size={16} weight="bold" aria-hidden="true" />{ts('retry')}
+      </button>
+    </div>
+  );
+}
+/** Topilmadi: matn va tegishli ro'yxatga yoki qidiruvga 44px havola, ko'cha tugamasin. */
+export function Missing({ text, href, label }: { text: string; href: string; label: string }) {
+  return (
+    <div className="text-center">
+      <p className="text-sm text-muted">{text}</p>
+      <Link href={href} onClick={() => haptic()} className={`${BTN_GHOST} mt-4`}>{label}</Link>
+    </div>
+  );
+}
 
-/** Terminal qatori: nom (namuna bo'lsa "Namuna" yorlig'i), tur, viloyat, bugungi bo'sh slot (bitta qatorli tabletka), narx "dan", baho. Tor ustunda ham qatorlar sinmaydi. */
+/**
+ * Terminal qatori: nom (namuna bo'lsa "Namuna" yorlig'i), tur, viloyat. Egasi bor terminalda bugungi bo'sh slot va narx "dan", baho.
+ * Reestr shahobchasida (egasi tasdiqlamagan) slot va narx hammasida bir xil ("yo'q" / "so'rov bo'yicha"), shuning uchun
+ * o'rniga ularni bir-biridan ajratadigan reestr raqamlari: sig'im, uzunlik, yo'llar va telefon bor-yo'qligi. Tor ustunda qatorlar sinmaydi.
+ */
 export function TerminalRow({ t, lang }: { t: TerminalCard; lang: SearchLang }) {
   const L = SEARCH_LABELS[lang];
   const tt = useTranslations('card');
+  const tm = useTranslations('tg.terminal');
   const free = t.freeToday ?? 0;
+  const registry = t.rail !== null && !t.claimed;
+  const facts = registry
+    ? [
+        t.rail!.capacityWagons ? tm('capacity', { count: t.rail!.capacityWagons }) : null,
+        t.rail!.lengthM ? tm('length', { count: num(t.rail!.lengthM, lang) }) : null,
+        t.rail!.trackCount ? tm('tracks', { count: t.rail!.trackCount }) : null,
+      ].filter(Boolean).join(' · ')
+    : '';
   return (
     <Link href={`/tg/terminals/${t.slug}`} onClick={() => haptic()} className={`${CARD} block p-3 active:bg-sand`}>
       {/* flex-1: yorliqlar o'ngda yonma-yon turadi, qisqa nomda o'rtaga suzib ketmaydi */}
@@ -60,11 +96,22 @@ export function TerminalRow({ t, lang }: { t: TerminalCard; lang: SearchLang }) 
         {t.is24h ? <span className="shrink-0 rounded-full bg-teal-soft px-2 py-0.5 font-mono text-[11px] font-semibold text-teal-ink">24/7</span> : null}
       </div>
       <p className="mt-0.5 truncate text-xs text-muted">{L.kind[t.kind]}</p>
-      <p className="truncate text-xs text-muted">{regionName(t.regionCode, lang)}{t.distanceKm != null ? ` · ${Math.round(t.distanceKm)} km` : ''}</p>
-      <span className={`mt-2 inline-block max-w-full truncate whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${free > 0 ? 'bg-teal-soft text-teal-ink' : 'bg-sand text-muted'}`}>
-        {free > 0 ? tt('slots.freeToday', { count: free }) : tt('slots.none')}
-      </span>
-      <p className="mt-1.5 truncate font-mono text-sm font-semibold text-navy tabular-nums">{t.fromPriceTiyin != null ? tt('price.from', { price: pricePer(t.fromPriceTiyin, 'PER_TON', lang) }) : tt('price.onRequest')}</p>
+      <p className="truncate text-xs text-muted">{regionName(t.regionCode, lang)}{t.distanceKm != null ? ` · ${km(t.distanceKm, lang)}` : ''}</p>
+      {registry ? (
+        <>
+          {facts ? <p className="mt-2 break-words font-mono text-sm font-semibold text-navy">{facts}</p> : null}
+          <span className={`mt-1.5 inline-block max-w-full truncate whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${t.rail!.hasPhone ? 'bg-teal-soft text-teal-ink' : 'bg-sand text-muted'}`}>
+            {t.rail!.hasPhone ? tm('hasPhone') : tm('noPhone')}
+          </span>
+        </>
+      ) : (
+        <>
+          <span className={`mt-2 inline-block max-w-full truncate whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${free > 0 ? 'bg-teal-soft text-teal-ink' : 'bg-sand text-muted'}`}>
+            {free > 0 ? tt('slots.freeToday', { count: free }) : tt('slots.none')}
+          </span>
+          <p className="mt-1.5 truncate font-mono text-sm font-semibold text-navy tabular-nums">{t.fromPriceTiyin != null ? tt('price.from', { price: pricePer(t.fromPriceTiyin, 'PER_TON', lang) }) : tt('price.onRequest')}</p>
+        </>
+      )}
       {t.ratingAvg != null ? <p className="mt-1 font-mono text-[11px] text-muted">★ {t.ratingAvg.toFixed(1)} ({t.ratingCount})</p> : null}
     </Link>
   );
@@ -72,17 +119,26 @@ export function TerminalRow({ t, lang }: { t: TerminalCard; lang: SearchLang }) 
 
 
 /** E'lon qatori: rasm yoki bo'sh, sarlavha (namuna bo'lsa "Namuna" yorlig'i), tur va yil, viloyat, narx. */
+/** E'lon rasmi. Rasm bo'lmasa bo'sh katak emas, belgi turadi (qidiruv, E'lonlarim va Ishlarim shu bittasidan foydalanadi). */
+export function ListingThumb({ photo }: { photo?: string | null }) {
+  return (
+    <div className="flex h-16 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-sand text-muted">
+      {photo ? <img src={cardSrc(photo)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <ImageIcon size={24} weight="duotone" className="opacity-60" aria-hidden="true" />}
+    </div>
+  );
+}
+
 export function ListingRow({ l, lang }: { l: ListingCard; lang: SearchLang }) {
   const L = LISTING_LABELS[lang];
   const tc = useTranslations('tg.common');
   const tl = useTranslations('listing.card');
   const truck = l.kind === 'TRUCK';
   const sub = truck
-    ? [l.truckType ? L.truckType[l.truckType as keyof typeof L.truckType] ?? l.truckType : null, l.tonnage ? `${l.tonnage} t` : null]
+    ? [l.truckType ? L.truckType[l.truckType as keyof typeof L.truckType] ?? l.truckType : null, l.tonnage ? tonne(l.tonnage, lang) : null]
     : [L.kind[l.kind], l.year, l.condition ? L.condition[l.condition] : null];
   return (
     <Link href={tgListingHref(l)} onClick={() => haptic()} className={`${CARD} flex gap-3 p-3 active:bg-sand`}>
-      <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-sand">{l.photo ? <img src={cardSrc(l.photo)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : null}</div>
+      <ListingThumb photo={l.photo} />
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className="min-w-0 truncate font-bold">{l.title}</p>

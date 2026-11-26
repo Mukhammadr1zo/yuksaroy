@@ -6,11 +6,12 @@ import { useTranslations } from 'next-intl';
 import { ORDER_EVENT_LABELS, ORDER_STATUS_LABELS, ORDER_STUCK_DAYS, type OrderEventCode, type OrderStatus } from '@yuksaroy/domain';
 import { ApiError, api, post } from '@/lib/api';
 import type { Order } from '@/lib/types';
+import { tonne } from '@/lib/format';
 import { PriceLines, StatusPill, dateTime, slotLabel } from '@/components/order/bits';
 import { SlaTimer } from '@/components/order/SlaTimer';
 import { OrderReview } from '@/components/reviews/OrderReview';
 import { confirmTg, haptic, useTg } from '@/components/tg/TgProvider';
-import { BTN, BTN_GHOST, CARD, Err, INPUT, Row, Skeleton, useLang } from '@/components/tg/bits';
+import { BTN, BTN_GHOST, CARD, Err, INPUT, LoadError, Missing, Row, Skeleton, useLang } from '@/components/tg/bits';
 
 type Docs = { documents: { id: string; no: string; kind: string; kindLabel: string; status: string }[]; invoice: { no: string; status: string; statusLabel: string; amountTiyin: number } | null };
 
@@ -27,12 +28,16 @@ export default function TgOrderPage() {
   // Yuklanmagan ro'yxat bo'sh ro'yxat emas: aks holda tarmoq xatosi "akt va hisob tuzilmagan" bo'lib o'qilardi
   const [docsFailed, setDocsFailed] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Buyurtma yo'q (404) bilan yuklanmadi boshqa narsa: birinchisida ro'yxatga havola, ikkinchisida qayta urinish
+  const [gone, setGone] = useState(false);
+  const [loadFail, setLoadFail] = useState(false);
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
 
-  const load = useCallback(() => api<Order>(`/orders/${no}`).then(setOrder).catch((e) => setErr(e instanceof ApiError && e.status === 404 ? t('notFound') : tc('failed'))), [no, t, tc]);
-  useEffect(() => { void load(); api<Docs>(`/orders/${no}/documents`).then(setDocs).catch(() => setDocsFailed(true)); }, [load, no]);
+  const load = useCallback(() => api<Order>(`/orders/${no}`).then((x) => { setOrder(x); setLoadFail(false); }).catch((e) => { if (e instanceof ApiError && e.status === 404) setGone(true); else setLoadFail(true); }), [no]);
+  const loadDocs = useCallback(() => { setDocsFailed(false); api<Docs>(`/orders/${no}/documents`).then(setDocs).catch(() => setDocsFailed(true)); }, [no]);
+  useEffect(() => { void load(); loadDocs(); }, [load, loadDocs]);
   useEffect(() => {
     if (o?.status !== 'PENDING') return;
     const i = setInterval(() => void load(), 20_000);
@@ -65,7 +70,8 @@ export default function TgOrderPage() {
     } catch { setErr(tc('failed')); }
   }
 
-  if (err && !o) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err}</main>;
+  if (!o && gone) return <main id="main" className="mx-auto max-w-md px-4 py-10"><Missing text={t('notFound')} href="/tg/orders" label={t('title')} /></main>;
+  if (!o && loadFail) return <main id="main" className="mx-auto max-w-md px-4 pt-4"><LoadError onRetry={() => { setLoadFail(false); void load(); }} /></main>;
   if (!o) return <main id="main" className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
   // closeAt faqat mijoz tomoniga keladi; qoidalar sayt kabinetidagi buyurtma sahifasi bilan bir xil
   const now = Date.now();
@@ -91,7 +97,7 @@ export default function TgOrderPage() {
           <Row k={td('operation')} v={tb(o.operation)} />
           <Row k={td('slot')} v={o.slot ? slotLabel(o.slot.startsAt, o.slot.endsAt) : td('noSlot')} />
           <Row k={td('cargo')} v={o.cargoName ?? t('noCargo')} />
-          <Row k={td('weight')} v={`${(o.weightKg / 1000).toLocaleString('ru-RU')} t`} mono />
+          <Row k={td('weight')} v={tonne((o.weightKg / 1000).toLocaleString('ru-RU'), lang)} mono />
           <Row k={td('wagons')} v={String(o.wagonCount)} mono />
           {o.wagonNumbers.length ? <Row k={td('wagonNumbers')} v={o.wagonNumbers.join(', ')} mono /> : null}
           {o.storageDays ? <Row k={td('storage')} v={td('days', { count: o.storageDays })} /> : null}
@@ -108,12 +114,12 @@ export default function TgOrderPage() {
       <section className={`${CARD} mt-3 p-4`}>
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{td('documents')}</h2>
         {/* Mijoz yopgan buyurtmaga hujjat tuzilmaydi: "yakunlangach chiqadi" degan va'da u yerda yolg'on bo'lardi */}
-        {docsFailed ? <p className="mt-1 text-sm text-muted">{tc('loadFailed')}</p> : !docs ? <Skeleton n={1} h="h-10" /> : docs.documents.length === 0 ? <p className="mt-1 text-sm text-muted">{td(o.status === 'DONE' ? 'noDocsDone' : 'noDocs')}</p> : (
+        {docsFailed ? <div className="mt-2"><LoadError onRetry={loadDocs} /></div> : !docs ? <Skeleton n={1} h="h-10" /> : docs.documents.length === 0 ? <p className="mt-1 text-sm text-muted">{td(o.status === 'DONE' ? 'noDocsDone' : 'noDocs')}</p> : (
           <ul className="mt-2 divide-y divide-line">
             {docs.documents.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                 <span><span className="font-semibold">{d.kindLabel}</span> <span className="font-mono text-xs text-muted">{d.no}</span></span>
-                <button type="button" onClick={() => openDoc(d.id)} className="min-h-10 rounded-full border border-line px-3 text-xs font-semibold">{td('openDoc')}</button>
+                <button type="button" onClick={() => openDoc(d.id)} className="min-h-11 rounded-full border border-line px-3 text-xs font-semibold">{td('openDoc')}</button>
               </li>
             ))}
           </ul>

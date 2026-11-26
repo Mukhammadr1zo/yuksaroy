@@ -37,13 +37,16 @@ export function SubscriptionCard() {
   const [err, setErr] = useState(false);
   const [created, setCreated] = useState<Created | null>(null);
 
+  // again: "Qayta urinish" bosilganda so'rov takrorlanadi (xato sahifasi boshi berk bo'lmasin)
+  const [again, setAgain] = useState(0);
+
   useEffect(() => {
     api<Me>('/subscription/me').then((m) => {
       setMe(m);
       // Birinchi tarif oldindan tanlangan: forma hech qachon narxsiz turmaydi
       if (m.catalog?.length) setCode(m.catalog[0]!.code);
     }).catch(() => setFailed(true));
-  }, []);
+  }, [again]);
 
   async function cancelOrder(id: string) {
     setBusy(true); setErr(false);
@@ -68,7 +71,12 @@ export function SubscriptionCard() {
     catch { setErr(true); } finally { setBusy(false); }
   }
 
-  if (failed) return <p role="alert" className="text-sm text-red-700">{t('loadFailed')}</p>;
+  if (failed) return (
+    <div role="alert" className="flex items-center justify-between gap-3 rounded-card border border-red-200 bg-red-50 py-1.5 pl-4 pr-1.5 text-sm text-red-700">
+      <span>{t('loadFailed')}</span>
+      <button type="button" onClick={() => { setFailed(false); setAgain((n) => n + 1); }} className="inline-flex min-h-11 shrink-0 items-center rounded-full px-3 font-semibold active:scale-[0.97]">{t('retry')}</button>
+    </div>
+  );
   if (!me) return <p className="text-sm text-muted">{t('title')}</p>;
 
   // Kutilayotgan buyurtma: hozir yaratilgani yoki oldingi safar yaratilib to'lanmagani

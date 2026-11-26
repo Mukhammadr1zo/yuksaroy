@@ -56,12 +56,17 @@ export function ListingContact({ endpoint, next, cta }: { endpoint: string; next
       </>
     );
   }
-  if (state === 'sent') return (
-    <div className="rounded-xl bg-teal-soft px-4 py-3 text-sm text-teal-ink">
-      <p className="font-semibold">{t('inquiry.sent')}</p>
-      {threadId ? <Link href={`/dashboard/inquiries/${threadId}`} className="mt-1 inline-block font-semibold underline">{t('inquiry.openChat')}</Link> : null}
-    </div>
-  );
+  if (state === 'sent') {
+    // Mini App ichida kabinet havolasi ilovadan chiqarib yuborardi: javob botdan Telegram xabari bo'lib keladi.
+    // 'sent' faqat bosishdan keyin bo'ladi, ya'ni brauzerda (gidratatsiyadan keyin), window'ni shu yerda o'qish xavfsiz
+    const inApp = !!window.Telegram?.WebApp?.initData;
+    return (
+      <div className="rounded-xl bg-teal-soft px-4 py-3 text-sm text-teal-ink">
+        <p className="font-semibold">{inApp ? t('inquiry.sentTg') : t('inquiry.sent')}</p>
+        {threadId && !inApp ? <Link href={`/dashboard/inquiries/${threadId}`} className="mt-1 inline-block font-semibold underline">{t('inquiry.openChat')}</Link> : null}
+      </div>
+    );
+  }
   if (!open) return <button type="button" onClick={() => setOpen(true)} className="w-full rounded-full bg-teal px-6 py-3 font-semibold text-white transition hover:bg-teal-ink active:scale-[0.98]">{cta ?? t('ask')}</button>;
   return (
     <form onSubmit={send} className="space-y-2">

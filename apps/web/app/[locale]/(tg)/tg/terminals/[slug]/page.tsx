@@ -1,14 +1,16 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SEARCH_LABELS, type SearchLang } from '@yuksaroy/domain';
-import { sapi, sapiOrNull } from '@/lib/server-api';
-import { hoursSummary, pricePer, som, stationName, uzTime, uzToday } from '@/lib/format';
-import type { Slot, TerminalDetail } from '@/lib/types';
-import { Link } from '@/i18n/navigation';
+import { qs, sapi, sapiOrNull } from '@/lib/server-api';
+import { hoursSummary, num, pricePer, som, stationName, uzTime, uzToday } from '@/lib/format';
+import type { Page, Slot, TerminalCard, TerminalDetail } from '@/lib/types';
 import { regionName } from '@/components/tg/labels';
-import { TerminalCta } from '@/components/tg/TerminalCta';
+import { Missing } from '@/components/tg/bits';
+import { ClaimOnSite, RegistryCta, TerminalCta } from '@/components/tg/TerminalCta';
 import { Impressions } from '@/components/catalog/Impressions';
+import { RailPassportCard } from '@/components/catalog/RailPassport';
 
 // /tg/terminals/[slug]: ixcham tafsilot: nom, tur, viloyat, baho, tariflar ustuni, bugungi slotlar tasmasi, telefon (kirganlarga), bron va xarita tugmalari. MainButton = bron.
+// Reestr shahobchasi (egasi tasdiqlamagan): tarif va bron yo'q, shuning uchun sahifa tupik bo'lmasin: telefon, platformaga yozish, xarita, shu stansiyadagi boshqalar, pasport va da'vo.
 export const revalidate = 60;
 type Params = { params: Promise<{ locale: string; slug: string }> };
 
@@ -16,15 +18,31 @@ export default async function TgTerminalPage({ params }: Params) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const lang = locale as SearchLang;
-  const [t, ts, tcl, tr] = await Promise.all([getTranslations('tg.terminal'), getTranslations('service'), getTranslations('claim'), getTranslations('terminal')]);
+  const [t, ts, tcl, tr, tst] = await Promise.all([getTranslations('tg.terminal'), getTranslations('service'), getTranslations('claim'), getTranslations('terminal'), getTranslations('tg.state')]);
   const x = await sapiOrNull<TerminalDetail>(`/terminals/${slug}`, 60);
-  if (!x) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{t('notFound')}</main>;
+  if (!x) return <main id="main" className="mx-auto max-w-md px-4 py-10"><Missing text={t('notFound')} href="/tg/search" label={tst('search')} /></main>;
   const today = uzToday();
   const slots = x.rail !== null && !x.claimed ? [] : await sapi<Slot[]>(`/terminals/${x.id}/slots?from=${today}&to=${today}`, 60).catch(() => [] as Slot[]);
   const L = SEARCH_LABELS[lang];
   // Reestrdan kelgan, egasi tasdiqlanmagan temir yo'l terminali: tarif, slot va bron bo'lishi mumkin emas.
   // Ularni chizish "bo'sh terminal" taassurotini berardi, holbuki bu reestr yozuvi (veb sahifada ham shunday).
   const registryOnly = x.rail !== null && !x.claimed;
+  // Reestr yozuvidagi farqlovchi raqamlar bir qatorda: odam sahifani ochmay terminal kerakmi-yo'qmi bilib olsin
+  const rl = registryOnly ? x.rail : null;
+  const facts = rl ? [
+    rl.capacityWagons ? t('capacity', { count: rl.capacityWagons }) : null,
+    rl.lengthM ? t('length', { count: num(rl.lengthM, lang) }) : null,
+    rl.trackCount ? t('tracks', { count: rl.trackCount }) : null,
+  ].filter(Boolean).join(' · ') : '';
+  // Faqat noldan katta qismlar: 0 "noma'lum" degani, "yuklay olmaydi" emas (pasport kartasi ham nolni yashiradi)
+  const loadUnload = rl ? [rl.loadCapacity ? t('loads', { count: rl.loadCapacity }) : null, rl.unloadCapacity ? t('unloads', { count: rl.unloadCapacity }) : null].filter(Boolean).join(' / ') || null : null;
+  // Shu stansiyadagi boshqalar: stansiya + viloyat bo'yicha ro'yxat API si bilan bir xil so'rov (qidiruvdagi havola ham shu paramlar), o'zi va namunalar sanalmaydi
+  // Ikkilamchi son: so'rov yiqilsa butun sahifa emas, faqat shu qator yashiriladi
+  const near = rl && x.station ? await sapi<Page<TerminalCard>>(`/terminals${qs({ station: x.station.id, region: x.regionCode, limit: 1 })}`, 300).catch(() => null) : null;
+  const moreN = near ? near.total - (near.summary?.demo ?? 0) - 1 : 0;
+  const more = moreN > 0 && x.station ? { n: moreN, href: `/tg/search?cat=terminal${x.regionCode ? `&region=${x.regionCode}` : ''}&station=${x.station.id}` } : null;
+  // Obyektning o'z nuqtasi bo'lmasa stansiyaniki (reestr shahobchalarining aksariyatida nuqta stansiyada turadi), veb sahifadagidek
+  const point = x.lat != null && x.lng != null ? { lat: x.lat, lng: x.lng } : x.station?.lat != null && x.station?.lng != null ? { lat: x.station.lat, lng: x.station.lng } : null;
 
   return (
     <main id="main" className="mx-auto max-w-md px-4 pb-28 pt-4">
@@ -35,7 +53,7 @@ export default async function TgTerminalPage({ params }: Params) {
         {/* Namuna saytdagi terminal sahifasidagidek belgilanadi (o'sha yorliq va izoh) */}
         {x.isDemo ? <span className="rounded-full border border-amber/40 bg-amber-soft px-3 py-1 text-xs font-semibold text-amber-ink">{tr('demoBadge')}</span> : null}
         {x.is24h ? <span className="rounded-full bg-teal px-3 py-1 font-mono text-xs font-semibold text-white">24/7</span> : null}
-        <span className="font-mono text-xs text-muted">{x.ratingAvg != null ? `★ ${x.ratingAvg.toFixed(1)} (${x.ratingCount})` : t('noRating')}</span>
+        {registryOnly ? null : <span className="font-mono text-xs text-muted">{x.ratingAvg != null ? `★ ${x.ratingAvg.toFixed(1)} (${x.ratingCount})` : t('noRating')}</span>}
       </div>
       <h1 className="font-display mt-2 break-words text-xl font-bold">{x.name}</h1>
       <p className="mt-1 text-sm text-muted">{stationName(x)} · {regionName(x.regionCode, lang)}</p>
@@ -43,20 +61,15 @@ export default async function TgTerminalPage({ params }: Params) {
         : !x.claimed ? <p className="mt-2 text-xs text-amber-ink">{t('unverified')}</p> : null}
       {x.isDemo ? <p className="mt-2 rounded-xl border border-dashed border-line bg-sand px-3 py-2 text-xs text-muted">{tr('demoNote')}</p> : null}
 
-      {registryOnly ? (
-        <section className="mt-4 rounded-card border border-line bg-white p-4">
-          <h2 className="text-sm font-bold">{tcl('passport')}</h2>
-          <dl className="mt-2 text-sm">
-            {([[tcl('registryNo'), x.rail?.registryNo], [tcl('length'), x.rail?.lengthM ? `${x.rail.lengthM} m` : null],
-               [tcl('tracks'), x.rail?.trackCount], [tcl('capacity'), x.rail?.capacityWagons]] as [string, unknown][])
-              .filter(([, v]) => v !== null && v !== undefined && v !== '')
-              .map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4 py-1"><dt className="text-muted">{k}</dt><dd className="text-right font-mono tabular-nums">{String(v)}</dd></div>
-              ))}
-          </dl>
-          {x.rail?.contactName ? <p className="mt-2 text-sm">{tcl('contactHeading')}: <span className="font-semibold">{x.rail.contactName}</span></p> : null}
-          <Link href={`/terminals/${x.slug}`} className="mt-3 inline-block text-sm font-semibold text-teal-ink underline">{tcl('openFull')}</Link>
-        </section>
+      {registryOnly && rl ? (
+        <>
+          {facts ? <p className="mt-3 break-words font-mono text-sm font-semibold text-navy">{facts}</p> : null}
+          {loadUnload ? <p className="mt-1 text-xs text-muted">{loadUnload}</p> : null}
+          <RegistryCta id={x.id} slug={x.slug} name={x.name} point={point} hasPhone={x.hasPhone} isDemo={!!x.isDemo} more={more} />
+          {/* mineRef yo'q: "raqam meniki" havolasi saytning /contact sahifasiga olib chiqardi, ilovadan chiqmaslik kerak */}
+          <div className="mt-4"><RailPassportCard rail={rl} mineRef={null} /></div>
+          {x.claimStatus !== 'PENDING' ? <ClaimOnSite slug={x.slug} /> : null}
+        </>
       ) : (
       <section className="mt-4 rounded-card border border-line bg-white p-4">
         <h2 className="text-sm font-bold">{t('tariffs')}</h2>
@@ -65,7 +78,7 @@ export default async function TgTerminalPage({ params }: Params) {
             {x.tariffs.map((r) => (
               <li key={r.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                 <span>{ts(r.serviceCode)}{r.cargoGroupCode ? <span className="ml-1 font-mono text-xs text-muted">{r.cargoGroupCode}</span> : null}</span>
-                <span className="text-right font-mono tabular-nums"><span className="font-semibold text-navy">{pricePer(r.priceTiyin, r.unit, lang)}</span>{r.minTiyin ? <span className="block text-[11px] text-muted">min {som(r.minTiyin, lang)}</span> : null}</span>
+                <span className="text-right font-mono tabular-nums"><span className="font-semibold text-navy">{pricePer(r.priceTiyin, r.unit, lang)}</span>{r.minTiyin ? <span className="block text-[11px] text-muted">{t('minSum', { sum: som(r.minTiyin, lang) })}</span> : null}</span>
               </li>
             ))}
           </ul>
@@ -96,7 +109,7 @@ export default async function TgTerminalPage({ params }: Params) {
       <section className="mt-3 rounded-card border border-line bg-white p-4">
         <dl className="text-sm">
           <div className="flex justify-between gap-4 py-1"><dt className="text-muted">{t('hours')}</dt><dd className="text-right font-mono tabular-nums">{hoursSummary(x.hours, x.is24h, lang)}</dd></div>
-          {x.address ? <div className="flex justify-between gap-4 py-1"><dt className="text-muted">·</dt><dd className="text-right">{x.address}</dd></div> : null}
+          {x.address ? <div className="flex justify-between gap-4 py-1"><dt className="text-muted">{t('address')}</dt><dd className="text-right">{x.address}</dd></div> : null}
         </dl>
       </section>
       )}

@@ -1,5 +1,6 @@
 'use client';
-// Profil: ism va avatar, telefon (requestContact orqali bog'lash), til (PATCH /auth/me + URL prefiksi), to'liq sayt havolalari, chiqish (tg token tozalanadi).
+// Profil: ism va avatar, telefon (requestContact orqali bog'lash), til (PATCH /auth/me + URL prefiksi), saytdagi kabinet, chiqish (tg token tozalanadi).
+// Terminal va e'lon katalogi ilovaning o'zida (Qidiruv tabi), shuning uchun saytdagi nusxalariga havola yo'q.
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRightIcon, ArrowSquareOutIcon } from '@phosphor-icons/react';
@@ -11,7 +12,6 @@ import { haptic, useTg } from '@/components/tg/TgProvider';
 import { BTN_GHOST, CARD, CHIP, PhoneCard } from '@/components/tg/bits';
 
 const LOCALE_LABEL: Record<Locale, string> = { uz: "O'zbekcha", ru: 'Русский', en: 'English' };
-const SITE = [['dashboard', '/dashboard'], ['terminals', '/terminals'], ['listings', '/equipment']] as const;
 
 export default function TgProfilePage() {
   const t = useTranslations('tg.profile');
@@ -64,11 +64,11 @@ export default function TgProfilePage() {
 
       <section className="mt-5">
         <h2 className="text-sm font-bold">{t('site')}</h2>
-        <ul className={`${CARD} mt-2 divide-y divide-line`}>
-          {SITE.map(([k, p]) => (
-            <li key={k}><button type="button" onClick={() => open(p)} className="flex min-h-12 w-full items-center justify-between px-4 text-left text-sm font-semibold"><span>{t(`siteLinks.${k}`)}</span><ArrowSquareOutIcon size={16} className="text-muted" aria-hidden="true" /></button></li>
-          ))}
-        </ul>
+        {/* Tashqi havola: tugma o'zi saytda (brauzerda) ochilishini aytadi, foydalanuvchi ilovadan chiqib ketganiga hayron qolmaydi */}
+        <button type="button" onClick={() => open('/dashboard')} className={`${CARD} mt-2 flex min-h-14 w-full items-center justify-between gap-3 px-4 py-2.5 text-left active:bg-sand`}>
+          <span className="min-w-0"><span className="block text-sm font-semibold">{t('siteLinks.dashboard')}</span><span className="block text-xs text-muted">{t('siteHint')}</span></span>
+          <ArrowSquareOutIcon size={18} className="shrink-0 text-muted" aria-hidden="true" />
+        </button>
       </section>
 
       <button type="button" onClick={out} className={`${BTN_GHOST} mt-8 text-red-700`}>{t('logout')}</button>

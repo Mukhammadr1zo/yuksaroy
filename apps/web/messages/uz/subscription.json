@@ -25,6 +25,7 @@
     "afterPay": "To'lov tasdiqlangach obuna yoqiladi. Tasdiq odatda 1 ish kuni ichida.",
     "extend": "Uzaytirish",
     "loadFailed": "Ma'lumot yuklanmadi.",
+    "retry": "Qayta urinish",
     "noPlans": "Tarif hali belgilanmagan. Keyinroq urinib ko'ring.",
     "reveal": {
       "show": "Raqamni ko'rish",

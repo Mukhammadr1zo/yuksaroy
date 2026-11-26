@@ -3,6 +3,7 @@
 // URL holati (kamera c,z: replaceState; filtr: pushState), hover va bosish, mobil pastki panel (peek / half / full),
 // hudud chizish (ko'pburchak, ?area= base64url; tashqaridagi obyekt xira va ro'yxatdan chiqadi, API aralashmaydi).
 // compact: landing mobil tasmasi (interaktiv emas, bosish -> /map). Nuqtalar /v1/map-objects.geojson dan, 404 bo'lsa bo'sh.
+// app: faqat /tg/map (Mini App): havolalar /tg yo'llariga, filtr replaceState, 44 px boshqaruv, native select o'rniga tugmalar, yuklash xatosi. Propsiz sayt avvalgidek.
 // Ro'yxat bo'lib chiziladi (LIST_PAGE): ilgari ko'rinishdagi yuzlab qator va ulardagi rasmlar birdan chizilardi.
 import { LngLatBounds, Map as MLMap, NavigationControl, setWorkerUrl, type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -11,7 +12,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { CalendarCheckIcon, CrosshairIcon, ListBulletsIcon, MagnifyingGlassIcon, PolygonIcon, ShippingContainerIcon, TrainIcon, TruckIcon, type Icon } from '@phosphor-icons/react';
 import { LISTING_LABELS, REGIONS, REGION_CENTERS, SEARCH_LABELS, chipLabel, distanceKm, formatSom, type PriceUnit, type RegionCode, type SearchLang, type TerminalKind } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
-import { pricePer } from '@/lib/format';
+import { km as kmLabel, pricePer } from '@/lib/format';
 import { DemoBadge } from '@/components/market/bits';
 import { MAX_BOUNDS, PIN, STYLE, UZ_BOUNDS, WORKER_URL, addBaseLayers, localize, pinLayers, z } from './mapStyle';
 import { addPinIcons } from './pinIcons';
@@ -90,6 +91,10 @@ function circle([lng, lat]: [number, number], km: number, n = 64): [number, numb
 const point = (lng: number, lat: number, properties: Record<string, unknown> = {}): Feat => ({ type: 'Feature', properties, geometry: { type: 'Point', coordinates: [lng, lat] } });
 const href = (o: Obj) =>
   o.p.kind === 'terminal' ? `/terminals/${o.p.slug}` : o.p.kind === 'equipment' ? `/equipment/${o.p.slug}` : o.p.kind === 'truck' ? `/carriers/${o.p.slug}` : `/terminals?kind=RAIL&q=${encodeURIComponent(o.p.name)}`;
+/** Mini App ichidagi manzillar: stansiya guruhi Qidiruvning region + station filtriga ochiladi (station = guruh id'si, API shuni qabul qiladi). */
+const appHref = (o: Obj) =>
+  o.p.kind === 'terminal' ? `/tg/terminals/${o.p.slug}` : o.p.kind === 'equipment' ? `/tg/equipment/${o.p.slug}` : o.p.kind === 'truck' ? `/tg/carriers/${o.p.slug}`
+  : `/tg/search?cat=terminal&region=${o.p.regionCode}&station=${o.p.id}`;
 const keyOf = (e: MapLayerMouseEvent) => { const p = e.features?.[0]?.properties; return p ? `${p.kind}:${p.id}` : null; };
 const inRegion = (o: Obj, regions: RegionCode[]) => !regions.length || regions.includes(o.p.regionCode as RegionCode);
 
@@ -97,7 +102,7 @@ const inRegion = (o: Obj, regions: RegionCode[]) => !regions.length || regions.i
  * only: faqat shu kalitlar (`kind:id`) chiziladi, masalan do'kon sahifasida tashkilot obyektlari.
  * bare (compact bilan): faqat xarita qatlami; ramkani (StripFrame) chaqiruvchi o'zi chizadi, bosh sahifa shunday qiladi.
  */
-export function MapView({ initial, cards, compact = false, bare = false, only }: { initial: MapState; cards?: Record<string, ReactNode>; compact?: boolean; bare?: boolean; only?: string[] }) {
+export function MapView({ initial, cards, compact = false, bare = false, only, app = false }: { initial: MapState; cards?: Record<string, ReactNode>; compact?: boolean; bare?: boolean; only?: string[]; app?: boolean }) {
   const locale = useLocale();
   const lang = locale as SearchLang;
   const t = useTranslations('map');
@@ -142,6 +147,12 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
   // Pin bosilganda ro'yxatda shu qatorga suriladi: qator hali chizilmagan bo'lishi mumkin, shuning uchun render'dan keyin
   const scrollTo = useRef<string | null>(null);
   const regionsAsked = useRef(false);
+  // Yuklash xatosi faqat Mini App'da ko'rsatiladi: saytda 404 va xato avvalgidek "bo'sh xarita"
+  const [failed, setFailed] = useState(false);
+  const [tries, setTries] = useState(0);
+  // 44 px tegish joyi: faqat app. Havola va tugmalar bir xil markazlanadi
+  const hit = app ? 'min-h-11 ' : '';
+  const hitLink = app ? 'inline-flex min-h-11 items-center ' : '';
 
   // 1) Xarita: asos, qatlamlar, hodisalar, geojson yuklash
   useEffect(() => {
@@ -155,20 +166,6 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
     map.touchZoomRotate.disableRotation();
     if (!compact) map.addControl(new NavigationControl({ showCompass: false }), 'bottom-right');
     mapRef.current = map;
-
-    const ctl = new AbortController();
-    fetch('/api/v1/map-objects.geojson', { signal: ctl.signal })
-      .then((r) => (r.ok ? r.json() : EMPTY))
-      .catch(() => EMPTY)
-      .then((d: FC) => {
-        if (ctl.signal.aborted) return;
-        const keep = only ? new Set(only) : null;
-        setObjs(d.features.filter((f) => f.geometry.type === 'Point').map((f) => {
-          const p = f.properties as unknown as Props;
-          const [lng, lat] = f.geometry.coordinates as [number, number];
-          return { key: `${p.kind}:${p.id}`, p, lng: lng!, lat: lat! };
-        }).filter((o) => !keep || keep.has(o.key)));
-      });
 
     map.on('load', async () => {
       localize(map, localeRef.current);
@@ -273,9 +270,38 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
     window.addEventListener('popstate', onPop);
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(el.current);
-    return () => { ctl.abort(); window.clearTimeout(tm); window.removeEventListener('popstate', onPop); ro.disconnect(); mapRef.current = null; map.remove(); };
+    return () => { window.clearTimeout(tm); window.removeEventListener('popstate', onPop); ro.disconnect(); mapRef.current = null; map.remove(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Ma'lumot yuklash alohida effektda: Mini App'da "Qayta urinish" shuni qayta ishga tushiradi
+  useEffect(() => {
+    const ctl = new AbortController();
+    setFailed(false);
+    fetch('/api/v1/map-objects.geojson', { signal: ctl.signal })
+      .then((r) => (r.ok ? r.json() : app ? Promise.reject(new Error('geojson')) : EMPTY))
+      .catch(() => (app ? null : EMPTY))
+      .then((d: FC | null) => {
+        if (ctl.signal.aborted) return;
+        if (!d) return setFailed(true);
+        const keep = only ? new Set(only) : null;
+        setObjs(d.features.filter((f) => f.geometry.type === 'Point').map((f) => {
+          const p = f.properties as unknown as Props;
+          const [lng, lat] = f.geometry.coordinates as [number, number];
+          return { key: `${p.kind}:${p.id}`, p, lng: lng!, lat: lat! };
+        }).filter((o) => !keep || keep.has(o.key)));
+      });
+    return () => ctl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tries]);
+
+  // Mini App: pastga surish xaritani emas, ilovani yopmasin
+  useEffect(() => {
+    if (!app) return;
+    const w = window.Telegram?.WebApp;
+    w?.disableVerticalSwipes?.();
+    return () => w?.enableVerticalSwipes?.();
+  }, [app]);
 
   useEffect(() => { if (ready && mapRef.current) localize(mapRef.current, locale); }, [locale, ready]);
 
@@ -443,8 +469,10 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
     if (eff.area.length) return null;
     if (eff.free && !eff.cat.includes('terminal')) return null;
     // free yoqilganda xaritada ham faqat terminal qoladi, demak havola ham terminal katalogiga
-    const path = eff.free || eff.cat.length !== 1 ? '/terminals' : CAT_PATH[eff.cat[0]!];
+    const path = app ? '/tg/search' : eff.free || eff.cat.length !== 1 ? '/terminals' : CAT_PATH[eff.cat[0]!];
     const p = new URLSearchParams();
+    // Qidiruv sahifasida toifa har doim param bilan keladi: bir nechta toifa yoki 'bugun bo'sh' bo'lsa terminal
+    if (app) p.set('cat', eff.free || eff.cat.length !== 1 ? 'terminal' : eff.cat[0]!);
     if (eff.corridorKey) p.set('corridor', eff.corridorKey);
     else if (eff.regions.length) p.set('region', eff.regions.join(','));
     if (eff.near) { p.set('near', `${eff.near[0].toFixed(5)},${eff.near[1].toFixed(5)}`); p.set('radius', String(eff.radius)); }
@@ -475,11 +503,12 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
 
   // 4) Filtr o'zgarishi: holat + pushState (kamera xaritadan), kerak bo'lsa kadr
   const apply = (next: MapState, refit = false) => {
+    // app: Orqaga bir bosishda xaritadan chiqsin, shuning uchun tarixga yozilmaydi (replaceState)
     wantFrame.current = refit;
     setS(next); setSel(null);
     const map = mapRef.current;
     const c = map?.getCenter();
-    window.history.pushState(null, '', `${window.location.pathname}${toParams({ ...next, c: c ? [c.lng, c.lat] : null, z: map?.getZoom() ?? null })}`);
+    window.history[app ? 'replaceState' : 'pushState'](null, '', `${window.location.pathname}${toParams({ ...next, c: c ? [c.lng, c.lat] : null, z: map?.getZoom() ?? null })}`);
   };
   const toggle = (k: Kind) => {
     const on = eff.cat.includes(k);
@@ -533,13 +562,13 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
         <div className="flex items-start gap-2">
           <p className="min-w-0 flex-1 truncate font-bold">{o.p.name}</p>
           {o.p.isDemo ? <DemoBadge /> : null}
-          {o.km != null ? <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{Math.round(o.km)} km</span> : null}
+          {o.km != null ? <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{app ? kmLabel(o.km, locale) : `${Math.round(o.km)} km`}</span> : null}
         </div>
         <p className="text-xs text-muted">{kindLabel(o)} · {region(o)}</p>
         {o.p.kind === 'siding' ? <p className="mt-0.5 text-[11px] text-amber-ink">{t('siding.approx')}</p> : null}
         {priceLine(o) ? <p className="mt-1 font-mono text-xs text-navy tabular-nums">{priceLine(o)}</p> : null}
       </div>
-      <Link href={href(o)} className="shrink-0 text-xs font-semibold text-teal-ink hover:text-navy">{o.p.kind === 'siding' ? t('siding.open') : t('popup.open')}</Link>
+      <Link href={app ? appHref(o) : href(o)} className={`${hitLink}shrink-0 text-xs font-semibold text-teal-ink hover:text-navy`}>{o.p.kind === 'siding' ? t('siding.open') : t('popup.open')}</Link>
     </div>
   );
 
@@ -548,7 +577,7 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
     // chiziladi. Birinchi ikkisida qobiqning o'z <main id="main"> i bor, ya'ni bu yerda main
     // bo'lsa ikkita main bir-birining ichiga tushardi va id ham takrorlanardi.
     // Xarita sahifalarida main o'sha sahifaning o'zida turadi.
-    <div className="ys-map relative flex min-h-0 flex-1 lg:[--sheet:0px]" style={{ '--sheet': SNAP[snap] } as CSSProperties}>
+    <div className={`ys-map ${app ? 'ys-map-app ' : ''}relative flex min-h-0 flex-1 lg:[--sheet:0px]`} style={{ '--sheet': SNAP[snap] } as CSSProperties}>
       {/* Panel: lg da chap ustun (400px), telefonda pastki varaq (peek / half / full) */}
       <section
         aria-label={t('list.aria')}
@@ -559,18 +588,19 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
             type="button" aria-label={t('sheet.handle')}
             onPointerDown={(e) => { drag.current = e.clientY; e.currentTarget.setPointerCapture(e.pointerId); }}
             onPointerUp={onHandleUp}
-            className="mx-auto block h-6 w-16 touch-none cursor-grab before:mx-auto before:mt-2.5 before:block before:h-1.5 before:w-10 before:rounded-full before:bg-line before:content-['']"
+            className={`mx-auto block ${app ? 'h-11 before:mt-4' : 'h-6 before:mt-2.5'} w-16 touch-none cursor-grab before:mx-auto before:block before:h-1.5 before:w-10 before:rounded-full before:bg-line before:content-['']`}
           />
           <p className="line-clamp-2 px-4 pb-2 font-mono text-sm text-navy tabular-nums">{decision}</p>
         </div>
-        <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
+        {/* Mini App: yig'ilgan holatda faqat tutqich va sanoq; qidiruv qatorining 8 px uchi tab paneli ustida ko'rinib qolmasin */}
+        <div ref={listRef} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4${app && snap === 'peek' ? ' max-lg:invisible' : ''}`}>
           <form
             onSubmit={(e) => { e.preventDefault(); apply({ ...s, q: String(new FormData(e.currentTarget).get('q') ?? '').trim(), region: '', corridor: '', near: null, radius: 0, free: false, cat: [] }, true); }}
             className="mx-4 mt-4 flex items-center gap-2 rounded-full border border-line bg-white p-1 focus-within:border-teal focus-within:ring-2 focus-within:ring-teal/25"
           >
             <MagnifyingGlassIcon size={18} weight="regular" aria-hidden="true" className="ml-2 shrink-0 text-muted" />
-            <input key={s.q} name="q" type="search" defaultValue={s.q} placeholder={t('search.placeholder')} aria-label={t('search.aria')} className="min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-muted/70" />
-            <button className="shrink-0 rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-teal-ink">{t('search.submit')}</button>
+            <input key={s.q} name="q" type="search" defaultValue={s.q} placeholder={t(app ? 'search.placeholderApp' : 'search.placeholder')} aria-label={t('search.aria')} className={`min-w-0 flex-1 text-ellipsis bg-transparent py-1.5 ${app ? 'min-h-11 text-base' : 'text-sm'} outline-none placeholder:text-muted/70`} />
+            <button className={`${hit}shrink-0 rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-teal-ink`}>{t('search.submit')}</button>
           </form>
 
           {eff.chips.length || eff.unresolved.length ? (
@@ -580,7 +610,7 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
                 return (
                   <span key={c.key} className="inline-flex items-center gap-1 rounded-full bg-teal-soft py-1 pl-3 pr-1.5 text-sm font-semibold text-teal-ink">
                     {label}
-                    <button type="button" aria-label={tc('chips.remove', { label })} onClick={() => apply(withoutChip(s, eff, c), true)} className="rounded-full px-1.5 leading-none hover:bg-teal/15">×</button>
+                    <button type="button" aria-label={tc('chips.remove', { label })} onClick={() => apply(withoutChip(s, eff, c), true)} className={`${app ? 'min-h-11 min-w-11 ' : ''}rounded-full px-1.5 leading-none hover:bg-teal/15`}>×</button>
                   </span>
                 );
               })}
@@ -592,7 +622,7 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
             {KINDS.map((k) => {
               const on = eff.cat.includes(k);
               return (
-                <button key={k} type="button" aria-pressed={on} onClick={() => toggle(k)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}>
+                <button key={k} type="button" aria-pressed={on} onClick={() => toggle(k)} className={`${hit}inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}>
                   <KindBadge kind={k} />
                   {t(`cat.${k}`)}
                   <span className={`font-mono tabular-nums ${on ? 'text-white/70' : 'text-muted'}`}>{counts[k]}</span>
@@ -607,6 +637,19 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
             Endi joy yetmasa tugmalar keyingi qatorga o'tadi. nowrap: base-select matnni bo'ladi.
           */}
           <div className="flex flex-wrap gap-2 px-4 pt-3">
+            {app ? (
+              // Mini App: native ochiladigan ro'yxat o'rniga bosiladigan viloyat tasmasi
+              <div role="group" aria-label={tf('region.all')} className="tg-strip scroll-px-4 -mx-4 w-[calc(100%+2rem)] px-4">
+                {['', ...REGIONS].map((r) => {
+                  const on = (eff.regions.length === 1 ? eff.regions[0] : '') === r;
+                  return (
+                    <button key={r} type="button" aria-pressed={on} onClick={() => apply({ ...materialize(s, eff), region: r, corridor: '' }, true)} className={`min-h-11 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition ${on ? 'border-navy bg-navy text-white' : 'border-line bg-white text-ink/80'}`}>
+                      {r ? tr(r) : tf('region.all')}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
             <select
               value={eff.regions.length === 1 ? eff.regions[0] : ''}
               onChange={(e) => apply({ ...materialize(s, eff), region: e.target.value, corridor: '' }, true)}
@@ -616,9 +659,10 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
               <option value="">{tf('region.all')}</option>
               {REGIONS.map((r) => <option key={r} value={r}>{tr(r)}</option>)}
             </select>
+            )}
             <button
               type="button" onClick={locate} disabled={busy}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition disabled:opacity-60 ${eff.near ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
+              className={`${hit}inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition disabled:opacity-60 ${eff.near ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
             >
               <CrosshairIcon size={16} weight="regular" aria-hidden="true" />
               {busy ? tc('nearMe.busy') : eff.near ? tc('nearMe.active', { radius: eff.radius }) : tc('nearMe.idle')}
@@ -627,7 +671,7 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
             <button
               type="button" aria-pressed={eff.free}
               onClick={() => apply({ ...materialize(s, eff), free: !eff.free })}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${eff.free ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
+              className={`${hit}inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${eff.free ? 'border-teal bg-teal-soft text-teal-ink' : 'border-line bg-white text-ink/80 hover:border-teal hover:text-teal-ink'}`}
             >
               <CalendarCheckIcon size={16} weight="regular" aria-hidden="true" />
               {chipLabel(FREE_CHIP, lang)}
@@ -639,17 +683,17 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pt-4">
             <p className="hidden font-mono text-sm text-navy tabular-nums lg:block">{decision}</p>
             {listHref ? (
-              <Link href={listHref} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink">
+              <Link href={listHref} className={`${hit}inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-navy transition-colors duration-150 hover:border-teal hover:text-teal-ink`}>
                 <ListBulletsIcon size={16} weight="duotone" className="text-teal" aria-hidden="true" />{th('viewList')}
               </Link>
             ) : null}
           </div>
 
-          {!objs ? <p className="px-4 pt-4 text-sm text-muted">{t('loading')}</p>
+          {!objs ? (failed ? null : <p className="px-4 pt-4 text-sm text-muted">{t('loading')}</p>)
           : listed.length === 0 ? (
             <div className="m-4 rounded-card border border-dashed border-line p-8 text-center text-muted">
               <p>{t('empty.title')}</p>
-              <button type="button" onClick={() => frame(focusRef.current, true)} className="mt-3 text-sm font-semibold text-teal-ink underline">{t('empty.zoomOut')}</button>
+              <button type="button" onClick={() => frame(focusRef.current, true)} className={`${hit}mt-3 text-sm font-semibold text-teal-ink underline`}>{t('empty.zoomOut')}</button>
             </div>
           ) : (
             // ponytail: virtualizatsiya yo'q, faqat bo'lib chizish (LIST_PAGE); chizilgan qatorlar ming-minglab bo'lsa qo'shiladi
@@ -675,14 +719,14 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
         <ul aria-label={t('legend.aria')} className="pointer-events-none absolute bottom-[calc(var(--sheet)+12px)] left-3 z-10 flex max-w-[calc(100%-80px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-line bg-white/90 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.08em] text-muted transition-[bottom] duration-300">
           {KINDS.map((k) => <li key={k} className="flex items-center gap-1.5"><KindBadge kind={k} />{t(`legend.${k}`)}</li>)}
           <li className="normal-case tracking-normal text-muted/70">
-            <a className="pointer-events-auto hover:text-navy" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a>
+            <a className={`${hitLink}pointer-events-auto hover:text-navy`} href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap</a>
             {', '}
-            <a className="pointer-events-auto hover:text-navy" href="https://carto.com/attributions" target="_blank" rel="noreferrer">© CARTO</a>
+            <a className={`${hitLink}pointer-events-auto hover:text-navy`} href="https://carto.com/attributions" target="_blank" rel="noreferrer">© CARTO</a>
           </li>
         </ul>
 
         {draft ? null : (
-          <button type="button" onClick={() => setSnap(snap === 'peek' ? 'half' : 'peek')} className="absolute right-3 top-3 z-10 rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-navy lg:hidden">
+          <button type="button" onClick={() => setSnap(snap === 'peek' ? 'half' : 'peek')} className={`${hit}absolute right-3 top-3 z-10 rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-navy lg:hidden`}>
             {snap === 'peek' ? t('sheet.list') : t('sheet.map')}
           </button>
         )}
@@ -692,19 +736,26 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
           {draft ? (
             <>
               <span className="rounded-full border border-teal bg-white px-3 py-1.5 font-mono text-sm text-teal-ink tabular-nums">{t('draw.points', { count: draft.length })}</span>
-              <button type="button" onClick={finishDraw} disabled={draft.length < 3} className="rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-teal-ink disabled:opacity-50">{t('draw.finish')}</button>
-              <button type="button" onClick={() => setDraft(null)} className="rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-ink/80 hover:border-teal hover:text-teal-ink">{t('draw.cancel')}</button>
+              <button type="button" onClick={finishDraw} disabled={draft.length < 3} className={`${hit}rounded-full bg-teal px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-teal-ink disabled:opacity-50`}>{t('draw.finish')}</button>
+              <button type="button" onClick={() => setDraft(null)} className={`${hit}rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-ink/80 hover:border-teal hover:text-teal-ink`}>{t('draw.cancel')}</button>
               <p className="w-full rounded-card border border-line bg-white/90 px-3 py-1.5 text-xs text-muted sm:w-auto">{t('draw.hint')}</p>
             </>
           ) : eff.area.length ? (
             <>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-teal bg-teal-soft px-3 py-1.5 text-sm font-semibold text-teal-ink"><PolygonIcon size={16} weight="regular" aria-hidden="true" />{t('draw.active')}</span>
-              <button type="button" onClick={clearArea} className="rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-ink/80 hover:border-teal hover:text-teal-ink">{t('draw.clear')}</button>
+              <button type="button" onClick={clearArea} className={`${hit}rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-ink/80 hover:border-teal hover:text-teal-ink`}>{t('draw.clear')}</button>
             </>
           ) : (
-            <button type="button" onClick={startDraw} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-navy transition hover:border-teal hover:text-teal-ink"><PolygonIcon size={16} weight="regular" aria-hidden="true" />{t('draw.start')}</button>
+            <button type="button" onClick={startDraw} className={`${hit}inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-1.5 text-sm font-semibold text-navy transition hover:border-teal hover:text-teal-ink`}><PolygonIcon size={16} weight="regular" aria-hidden="true" />{t('draw.start')}</button>
           )}
         </div>
+
+        {failed ? (
+          <div role="alert" className="absolute inset-x-3 top-20 z-10 flex items-center justify-between gap-3 rounded-card border border-line bg-white p-3 text-sm">
+            <span className="font-semibold">{t('loadFailed')}</span>
+            <button type="button" onClick={() => setTries((n) => n + 1)} className="min-h-11 shrink-0 rounded-full bg-teal px-4 font-semibold text-white">{t('retry')}</button>
+          </div>
+        ) : null}
 
         {popObj && pos ? (
           <div className="pointer-events-none absolute z-10 w-64 -translate-x-1/2 -translate-y-full" style={{ left: Math.min(Math.max(pos.x, 136), (el.current?.clientWidth ?? 400) - 136), top: pos.y - 16 }}>
@@ -717,7 +768,7 @@ export function MapView({ initial, cards, compact = false, bare = false, only }:
               {priceLine(popObj) ? <p className="mt-1 font-mono text-xs text-navy tabular-nums">{priceLine(popObj)}</p> : null}
               {popKm != null ? <p className="mt-1 font-mono text-xs tabular-nums text-muted">{t('popup.distance', { km: Math.round(popKm) })}</p> : null}
               {popObj.p.accuracy !== 'exact' ? <p className="mt-1 text-[11px] text-amber-ink">{popObj.p.accuracy === 'station' ? t('siding.approx') : t('approxRegion')}</p> : null}
-              {sel ? <Link href={href(popObj)} className="mt-2 inline-block text-sm font-semibold text-teal-ink hover:text-navy">{popObj.p.kind === 'siding' ? t('siding.open') : t('popup.open')} →</Link> : null}
+              {sel ? <Link href={app ? appHref(popObj) : href(popObj)} className={`mt-2 ${app ? 'inline-flex min-h-11 items-center' : 'inline-block'} text-sm font-semibold text-teal-ink hover:text-navy`}>{popObj.p.kind === 'siding' ? t('siding.open') : t('popup.open')} →</Link> : null}
             </div>
           </div>
         ) : null}

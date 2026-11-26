@@ -72,17 +72,17 @@
     "demo": "Namuna",
     "sent": {
       "cargo": "{count} ta tashuvchiga yuborildi.",
-      "service": "{count} ta ijrochiga yuborildi.",
+      "service": "{count} ta xizmat ko'rsatuvchiga yuborildi.",
       "noneCargo": "Bu hududda hali tashuvchi yo'q.",
-      "noneService": "Bu hududda hali ijrochi yo'q.",
+      "noneService": "Bu hududda hali xizmat ko'rsatuvchi yo'q.",
       "noneCargoPast": "Yuborilgan paytda bu hududda tashuvchi yo'q edi.",
-      "noneServicePast": "Yuborilgan paytda bu hududda ijrochi yo'q edi.",
+      "noneServicePast": "Yuborilgan paytda bu hududda xizmat ko'rsatuvchi yo'q edi.",
       "onBoardCargo": "So'rovingiz doskada turadi.",
       "onBoardService": "So'rovingiz ro'yxatda turadi."
     },
     "status": {
       "OPEN": "Ochiq",
-      "AWARDED": "Ijrochi tanlangan",
+      "AWARDED": "Xizmat ko'rsatuvchi tanlangan",
       "DONE": "Ish bajarildi",
       "CLOSED": "Yopilgan",
       "CANCELLED": "Bekor qilingan"
@@ -123,7 +123,7 @@
       "truckType": "Kuzov turi",
       "truckAny": "Farqi yo'q",
       "phone": "Telefon (ixtiyoriy)",
-      "phoneHint": "Raqam faqat obunachi ijrochilarga ochiladi. Bo'sh qoldirsangiz, ular takliflarini shu yerda yozadi.",
+      "phoneHint": "Raqam faqat obunachi xizmat ko'rsatuvchilarga ochiladi. Bo'sh qoldirsangiz, ular takliflarini shu yerda yozadi.",
       "submit": "E'lon qilish",
       "sending": "Yuborilmoqda",
       "errCount": "To'ldirilmagan maydonlar: {count} ta. Birinchisiga o'tdingiz.",
@@ -144,7 +144,7 @@
       "tgHint": "Telegram bog'lanmagan: takliflar haqida xabar bormaydi.",
       "tgCta": "Botni ochish",
       "photos": "Yukning surati",
-      "photosHint": "Ijrochi nimani olib ketishini ko'rib, aniq taklif beradi.",
+      "photosHint": "Xizmat ko'rsatuvchi nimani olib ketishini ko'rib, aniq taklif beradi.",
       "shareTg": "Telegramda ulashish",
       "shareText": "So'rov {no}"
     },
@@ -175,7 +175,7 @@
       "boardSERVICE": "Xizmat so'rovi",
       "where": "Qayerda",
       "offers": "Takliflar",
-      "provider": "Tanlangan ijrochi",
+      "provider": "Tanlangan xizmat ko'rsatuvchi",
       "noProvider": "hali tanlanmagan",
       "providerPrivate": "tanlangan",
       "timeline": "Voqealar",
@@ -184,7 +184,7 @@
       "event": {
         "CREATED": "So'rov qoldirildi",
         "OFFER": "Taklif keldi",
-        "AWARDED": "Ijrochi tanlandi",
+        "AWARDED": "Xizmat ko'rsatuvchi tanlandi",
         "DONE": "Ish bajarildi",
         "CLOSED": "So'rov yopildi",
         "CANCELLED": "So'rov bekor qilindi"
@@ -206,12 +206,12 @@
       "noOffers": "Hali taklif yo'q.",
       "award": "Tanlash",
       "awarding": "Tanlanmoqda",
-      "awardedNote": "Ijrochi tanlandi. Ish tugagach Ish bajarildi tugmasini bosing.",
-      "doneNote": "Ish bajarildi deb belgilandi. Bu ijrochining hisobida ko'rinadi.",
+      "awardedNote": "Xizmat ko'rsatuvchi tanlandi. Ish tugagach Ish bajarildi tugmasini bosing.",
+      "doneNote": "Ish bajarildi deb belgilandi. Bu xizmat ko'rsatuvchining hisobida ko'rinadi.",
       "close": "Yopish",
       "markDone": "Ish bajarildi",
       "markingDone": "Yozilmoqda",
-      "confirmDone": "Ish bajarildi deb belgilanadi, so'rov yopiladi va bu ijrochining hisobiga yoziladi. Davom etasizmi?",
+      "confirmDone": "Ish bajarildi deb belgilanadi, so'rov yopiladi va bu xizmat ko'rsatuvchining hisobiga yoziladi. Davom etasizmi?",
       "closing": "Yopilmoqda",
       "cancel": "Bekor qilish",
       "cancelling": "Bekor qilinmoqda",
@@ -264,16 +264,16 @@
       "err": {
         "RELIST_NOT_ALLOWED": "So'rovni qaytarib bo'lmadi. Sahifani yangilang."
       },
-      "confirmAward": "Shu ijrochini tanlaysizmi? So'rovga yozgan raqamingiz unga ochiladi, qolgan takliflar yopiladi.",
-      "winnerPhone": "Tanlangan ijrochining raqami",
-      "awardAsk": "Raqamingizni ijrochiga ko'rsatamizmi?",
-      "awardAskHint": "Tanlangan ijrochi shu raqamni ko'radi va sizga qo'ng'iroq qiladi. Hisobingizdagi raqam o'zi ochilmaydi. Xohlamasangiz, raqamsiz tanlang: qolgan takliflar baribir yopiladi.",
-      "awardPhone": "Ijrochiga ko'rsatiladigan raqam",
+      "confirmAward": "Shu xizmat ko'rsatuvchini tanlaysizmi? So'rovga yozgan raqamingiz unga ochiladi, qolgan takliflar yopiladi.",
+      "winnerPhone": "Tanlangan xizmat ko'rsatuvchining raqami",
+      "awardAsk": "Raqamingizni xizmat ko'rsatuvchiga ko'rsatamizmi?",
+      "awardAskHint": "Tanlangan xizmat ko'rsatuvchi shu raqamni ko'radi va sizga qo'ng'iroq qiladi. Hisobingizdagi raqam o'zi ochilmaydi. Xohlamasangiz, raqamsiz tanlang: qolgan takliflar baribir yopiladi.",
+      "awardPhone": "Xizmat ko'rsatuvchiga ko'rsatiladigan raqam",
       "awardShare": "Raqamni ko'rsatib tanlash",
       "awardNoShare": "Raqamsiz tanlash",
       "awardBack": "Bekor",
       "awardPhoneBad": "Raqam noto'g'ri. Masalan: +998 90 123 45 67",
-      "noPhoneShared": "Siz ijrochiga raqam ko'rsatmadingiz. U sizga qo'ng'iroq qila olmaydi: uning raqami yuqorida."
+      "noPhoneShared": "Siz xizmat ko'rsatuvchiga raqam ko'rsatmadingiz. U sizga qo'ng'iroq qila olmaydi: uning raqami yuqorida."
     }
   }
 }

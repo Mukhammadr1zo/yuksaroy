@@ -125,7 +125,8 @@
         "sent": "So'rov yuborildi. Javobni kabinetdagi So'rovlar bo'limida ko'rasiz.",
         "err": "Yuborilmadi, qayta urinib ko'ring.",
         "short": "Kamida 5 ta belgi yozing.",
-        "openChat": "Yozishmani ochish"
+        "openChat": "Yozishmani ochish",
+        "sentTg": "So'rov yuborildi. Javob Telegramda xabar bo'lib keladi."
       },
       "demoNote": "Bu namuna e'lon: sayt qanday ishlashini ko'rsatish uchun qo'yilgan, haqiqiy taklif emas. Telefon va yozishma yo'q.",
       "cargoCta": "Yukingizni e'lon qiling, tashuvchilar o'zi narx aytadi",

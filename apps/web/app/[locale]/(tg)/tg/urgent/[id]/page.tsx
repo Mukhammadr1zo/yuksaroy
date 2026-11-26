@@ -8,7 +8,7 @@ import { som, uzDateTime } from '@/lib/format';
 import { asList, offerName, type UrgentRequest } from '@/lib/types-urgent';
 import { OfferStatusPill, UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
 import { confirmTg, haptic, useTg } from '@/components/tg/TgProvider';
-import { BTN, BTN_GHOST, CARD, Err, Row, Skeleton } from '@/components/tg/bits';
+import { BTN, BTN_GHOST, CARD, Err, LoadError, Missing, Row, Skeleton } from '@/components/tg/bits';
 
 /**
  * Ro'yxatda keladi. sentReal: so'rov nechta haqiqiy ijrochiga ketgani (son ishonchsiz bo'lsa null).
@@ -33,10 +33,12 @@ export default function TgUrgentDetail() {
   const L = useUrgentLabels();
   const [r, setR] = useState<Item | null | undefined>(undefined);
   const [err, setErr] = useState<string | null>(null);
+  // Topilmadi (so'rov yo'q) bilan yuklanmadi (tarmoq) farqlanadi: ikkinchisida qayta urinish tugmasi
+  const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const load = () => loadOne(id).then(setR).catch(() => { setErr(tc('loadFailed')); setR(null); });
+  const load = () => loadOne(id).then((x) => { setR(x); setFailed(false); }).catch(() => { setFailed(true); setR(null); });
   useEffect(() => { void load(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function act(what: 'award' | 'close', offerId?: string) {
@@ -50,7 +52,11 @@ export default function TgUrgentDetail() {
   const copy = async () => { if (!url) return; try { await navigator.clipboard.writeText(url); setCopied(true); window.setTimeout(() => setCopied(false), 2000); } catch { /* clipboard yo'q */ } };
 
   if (r === undefined) return <main id="main" className="mx-auto max-w-md px-4 pt-4"><Skeleton /></main>;
-  if (!r) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center text-sm text-muted">{err ?? tu('notFound')}</main>;
+  if (!r) return (
+    <main id="main" className="mx-auto max-w-md px-4 py-10">
+      {failed ? <LoadError onRetry={() => { setR(undefined); void load(); }} /> : <Missing text={tu('notFound')} href="/tg/urgent" label={tu('mine')} />}
+    </main>
+  );
   const offers = r.offers ?? [];
   const canClose = r.status === 'OPEN' || r.status === 'AWARDED';
 
@@ -98,7 +104,7 @@ export default function TgUrgentDetail() {
         <ul className="mt-2 space-y-2">
           {offers.map((o) => (
             <li key={o.id} className={`${CARD} p-3 ${o.status === 'AWARDED' ? 'border-teal' : ''}`}>
-              <div className="flex flex-wrap items-center gap-2"><span className="font-semibold">{offerName(o) ?? '·'}</span><OfferStatusPill status={o.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(o.createdAt, locale)}</span></div>
+              <div className="flex flex-wrap items-center gap-2"><span className="font-semibold">{offerName(o) ?? tu('noName')}</span><OfferStatusPill status={o.status} /><span className="ml-auto font-mono text-xs text-muted">{uzDateTime(o.createdAt, locale)}</span></div>
               <p className="mt-1 font-mono text-sm text-navy tabular-nums">{o.priceTiyin != null ? som(o.priceTiyin, locale) : t('onRequest')}{o.etaMinutes != null ? ` · ${t('eta', { min: o.etaMinutes })}` : ''}</p>
               {o.message ? <p className="mt-1 whitespace-pre-line text-sm">{o.message}</p> : null}
               {r.status === 'OPEN' && o.status === 'SENT' ? <button type="button" onClick={() => act('award', o.id)} disabled={busy !== null} className={`${BTN} mt-2`}>{busy === o.id ? t('awarding') : t('award')}</button> : null}

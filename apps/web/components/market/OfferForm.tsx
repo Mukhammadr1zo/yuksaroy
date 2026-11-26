@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigation';
 import { ApiError, hasSession, post } from '@/lib/api';
 import { regionRouteKm } from '@yuksaroy/domain';
 import { som, somPerKm, uzDateTime } from '@/lib/format';
+import { openOut } from '@/lib/open-out';
 import type { MarketOffer, MarketRequest } from '@/lib/types-market';
 import { BTN_NAVY, Field, INPUT, Notice } from '@/components/kabinet/bits';
 import { OfferStatusPill } from './bits';
@@ -99,7 +100,7 @@ export function OfferForm({ request, next, preview = false, me = null, source }:
       {err ? (
         <Notice tone="err">
           {err === 'generic' || err === 'RATE_LIMITED' ? te(err) : t(err)}
-          {err === 'NOT_PROVIDER' ? <> <Link href="/dashboard/market?tab=profile" className="font-semibold underline underline-offset-4">{t('NOT_PROVIDER_CTA')}</Link></> : null}
+          {err === 'NOT_PROVIDER' ? <> <Link href="/dashboard/market?tab=profile" onClick={openOut(locale, '/dashboard/market?tab=profile')} className="font-semibold underline underline-offset-4">{t('NOT_PROVIDER_CTA')}</Link></> : null}
         </Notice>
       ) : null}
       <div><button type="submit" disabled={busy} className={BTN_NAVY}>{busy ? t('sending') : t('send')}</button></div>

@@ -5,7 +5,7 @@
       "title": "Shoshilinch xizmat so'rovi · YukSaroy",
       "description": "Teplovoz chaqirish, vagon ta'miri yoki kran kerak bo'lsa: bitta so'rov, yaqin atrofdagi xizmat ko'rsatuvchilar taklif yuboradi."
     },
-    "status": { "OPEN": "Ochiq", "AWARDED": "Ijrochi tanlangan", "CLOSED": "Yopilgan", "CANCELLED": "Bekor qilingan" },
+    "status": { "OPEN": "Ochiq", "AWARDED": "Xizmat ko'rsatuvchi tanlangan", "CLOSED": "Yopilgan", "CANCELLED": "Bekor qilingan" },
     "offerStatus": { "SENT": "Yuborilgan", "AWARDED": "Tanlangan", "DECLINED": "Rad etilgan" },
     "kindDesc": {
       "LOCO_CALL": "Vagonlar stansiyada yoki shahobcha yo'lda turib qoldi, manevr teplovozi kerak.",
@@ -39,7 +39,7 @@
       "kind": "Tur",
       "region": "Viloyat",
       "status": "Holat",
-      "provider": "Tanlangan ijrochi",
+      "provider": "Tanlangan xizmat ko'rsatuvchi",
       "noProvider": "hali tanlanmagan",
       "offers": "Takliflar",
       "timeline": "Voqealar",
@@ -48,7 +48,7 @@
       "event": {
         "CREATED": "So'rov yuborildi",
         "OFFER": "Taklif keldi",
-        "AWARDED": "Ijrochi tanlandi",
+        "AWARDED": "Xizmat ko'rsatuvchi tanlandi",
         "CLOSED": "So'rov yopildi",
         "CANCELLED": "So'rov bekor qilindi"
       }
@@ -57,7 +57,7 @@
       "title": "Shoshilinch so'rovlar",
       "lead": "Teplovoz, ta'mir yoki kran so'rovlari va ularga kelgan takliflar.",
       "tabMine": "Mening so'rovlarim",
-      "tabProvider": "Ochiq so'rovlar (ijrochi)",
+      "tabProvider": "Kelgan so'rovlar",
       "new": "Yangi so'rov",
       "empty": "Hali so'rov yo'q. Yangi so'rov bir daqiqada tayyor bo'ladi.",
       "notReady": "Shoshilinch xizmat hozircha ishga tushmagan. Birozdan keyin urinib ko'ring.",
@@ -95,9 +95,9 @@
       "copied": "Nusxalandi",
       "offers": "Takliflar",
       "noOffers": "Hali taklif yo'q.",
-      "sent": "{count} ta ijrochiga yuborildi.",
-      "sentNone": "Yuborilgan paytda bu hududda ijrochi yo'q edi.",
-      "stillVisible": "So'rovingiz ijrochilarga ko'rinib turadi.",
+      "sent": "{count} ta xizmat ko'rsatuvchiga yuborildi.",
+      "sentNone": "Yuborilgan paytda bu hududda xizmat ko'rsatuvchi yo'q edi.",
+      "stillVisible": "So'rovingiz xizmat ko'rsatuvchilarga ko'rinib turadi.",
       "onRequest": "narx aytilmagan",
       "eta": "{min} daqiqada",
       "award": "Tanlash",
@@ -105,7 +105,7 @@
       "close": "So'rovni yopish",
       "closing": "Yopilmoqda",
       "confirmClose": "So'rov yopiladi, yangi takliflar kelmaydi. Davom etasizmi?",
-      "awardedNote": "Ijrochi tanlandi. Ish tugagach so'rovni yoping."
+      "awardedNote": "Xizmat ko'rsatuvchi tanlandi. Ish tugagach so'rovni yoping."
     },
     "provider": {
       "title": "Ochiq so'rovlar",

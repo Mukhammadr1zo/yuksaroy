@@ -25,6 +25,7 @@
     "afterPay": "The subscription starts once the payment is confirmed, usually within 1 business day.",
     "extend": "Extend",
     "loadFailed": "Could not load.",
+    "retry": "Try again",
     "noPlans": "No plan is set yet. Try again later.",
     "reveal": {
       "show": "Show number",

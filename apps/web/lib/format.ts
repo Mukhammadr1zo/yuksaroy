@@ -44,6 +44,10 @@ export const pricePer = (tiyin: number, unit: TariffUnit, locale = 'uz') => `${s
 const KM: Record<Lang, string> = { uz: 'km', ru: 'км', en: 'km' };
 /** "312 km" */
 export const km = (n: number, locale = 'uz') => `${num(Math.round(n), locale)} ${KM[lang(locale)]}`;
+// "t" ru da "т": og'irlik ham uch tilda ko'rinadi, km bilan bir xil usul
+const TON: Record<Lang, string> = { uz: 't', ru: 'т', en: 't' };
+/** "12.5 t"; n tayyor matn bo'lishi ham mumkin (ru-RU kasr bilan) */
+export const tonne = (n: number | string, locale = 'uz') => `${n} ${TON[lang(locale)]}`;
 /**
  * "13 158 so'm / km": taklif narxi yo'l uzunligiga bo'linadi.
  * Nega kerak: bitta reysning jami narxi boshqa reys bilan solishtirilmaydi, km narxi solishtiriladi.

@@ -1,6 +1,6 @@
 'use client';
 // Shoshilinch so'rov: tur plitkalari, viloyat, stansiya, vagon, tavsif, telefon (profil raqami oldindan) -> POST /urgent. Pastda mening so'rovlarim.
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { CraneIcon, QuestionIcon, TrainIcon, WrenchIcon } from '@phosphor-icons/react';
 import { REGIONS, URGENT_KINDS, type UrgentKind } from '@yuksaroy/domain';
@@ -11,7 +11,7 @@ import { asList, type UrgentRequest } from '@/lib/types-urgent';
 import { UrgentStatusPill, useUrgentLabels } from '@/components/kabinet/UrgentBits';
 import { PhoneField } from '@/components/ui/fields';
 import { haptic, useClosingConfirmation, useMainButton, useTg } from '@/components/tg/TgProvider';
-import { CARD, Empty, Err, INPUT, PhoneCard, Skeleton } from '@/components/tg/bits';
+import { CARD, Empty, Err, INPUT, LoadError, PhoneCard, Skeleton } from '@/components/tg/bits';
 
 const ICON: Record<UrgentKind, typeof TrainIcon> = { LOCO_CALL: TrainIcon, WAGON_REPAIR: WrenchIcon, CRANE: CraneIcon, OTHER: QuestionIcon };
 type Draft = { kind: UrgentKind; regionCode: string; stationName: string; wagonCount: string; description: string; contactPhone: string };
@@ -31,7 +31,10 @@ export default function TgUrgentPage() {
   const [err, setErr] = useState<string | null>(null);
   const set = (p: Partial<Draft>) => setD((x) => ({ ...x, ...p }));
 
-  useEffect(() => { api<unknown>('/urgent?scope=mine').then((r) => setItems(asList<UrgentRequest>(r))).catch(() => setItems([])); }, []);
+  // Yuklanmagan ro'yxat bo'sh ro'yxat emas: aks holda tarmoq xatosi "hali so'rov yo'q" bo'lib o'qilardi
+  const [listFailed, setListFailed] = useState(false);
+  const loadMine = useCallback(() => { setListFailed(false); setItems(null); api<unknown>('/urgent?scope=mine').then((r) => setItems(asList<UrgentRequest>(r))).catch(() => { setItems([]); setListFailed(true); }); }, []);
+  useEffect(() => { loadMine(); }, [loadMine]);
   useEffect(() => { if (me?.phone) setD((x) => ({ ...x, contactPhone: x.contactPhone || me.phone || '' })); }, [me?.phone]);
   const dirty = !!(d.regionCode || d.description || d.stationName);
   useClosingConfirmation(dirty);
@@ -87,8 +90,8 @@ export default function TgUrgentPage() {
       </form>
 
       <section className="mt-8">
-        <div className="mb-2 flex items-baseline justify-between gap-3"><h2 className="text-sm font-bold">{t('mine')}</h2><Link href="/tg/urgent/offers" className="text-xs font-semibold text-teal-ink">{t('provider')}</Link></div>
-        {!items ? <Skeleton n={2} h="h-16" /> : items.length === 0 ? <Empty>{tf('empty')}</Empty> : (
+        <div className="mb-2 flex items-baseline justify-between gap-3"><h2 className="text-sm font-bold">{t('mine')}</h2><Link href="/tg/urgent/offers" className="inline-flex min-h-11 items-center text-sm font-semibold text-teal-ink">{t('provider')}</Link></div>
+        {listFailed ? <LoadError onRetry={loadMine} /> : !items ? <Skeleton n={2} h="h-16" /> : items.length === 0 ? <Empty>{tf('empty')}</Empty> : (
           <ul className="space-y-2">
             {items.map((r) => (
               <li key={r.id}>

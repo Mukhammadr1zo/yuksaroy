@@ -63,7 +63,7 @@ export default function TgNewListingPage() {
     } catch (e) { const code = e instanceof ApiError ? String(e.body?.code ?? '') : ''; setErr(code && tf.has(`err.${code}`) ? tf(`err.${code}`) : tc('failed')); setBusy(false); }
   }
   useMainButton({ text: busy ? tf('sending') : tf('submit'), onClick: () => void submit(), show: kind === 'TRUCK' && !done, disabled: !valid, busy });
-  const openSite = () => { haptic(); tg?.openLink(`${window.location.origin}/dashboard/listings/new`); };
+  const openSite = () => { haptic(); tg?.openLink(`${window.location.origin}${lang === 'uz' ? '' : `/${lang}`}/dashboard/listings/new`); };
 
   if (done) return <main id="main" className="mx-auto max-w-md px-4 py-10 text-center"><p className="rounded-card border border-teal/30 bg-teal-soft px-4 py-3 text-sm font-semibold text-teal-ink">{tf(done === 'ACTIVE' ? 'done.ACTIVE' : 'done.PENDING_REVIEW')}</p></main>;
 
@@ -88,7 +88,7 @@ export default function TgNewListingPage() {
           <label className="block text-sm font-semibold">{tf('title')}<input value={title} required minLength={3} maxLength={120} placeholder={tf('titlePh')} onChange={(e) => setTitle(e.target.value)} className={`${INPUT} mt-1 font-normal`} /></label>
           <div className="grid grid-cols-[1.4fr_1fr] gap-3">
             <label className="block text-sm font-semibold">{tf('truckType')}
-              <select value={truckType} required onChange={(e) => setTruckType(e.target.value)} className={`${INPUT} mt-1 font-normal`}><option value="">·</option>{TRUCK_TYPES.map((w) => <option key={w} value={w}>{L.truckType[w]}</option>)}</select>
+              <select value={truckType} required onChange={(e) => setTruckType(e.target.value)} className={`${INPUT} mt-1 font-normal`}><option value="">{tf('truckTypePick')}</option>{TRUCK_TYPES.map((w) => <option key={w} value={w}>{L.truckType[w]}</option>)}</select>
             </label>
             <label className="block text-sm font-semibold">{tf('tonnage')}<input inputMode="numeric" required value={tonnage} onChange={(e) => setTonnage(e.target.value.replace(/\D/g, '').slice(0, 3))} className={`${INPUT} mt-1 font-mono font-normal`} /></label>
           </div>
@@ -99,7 +99,7 @@ export default function TgNewListingPage() {
             <legend className="text-sm font-semibold">{tf('serviceRegions')}</legend>
             <p className="mb-1.5 text-xs text-muted">{tf('serviceRegionsHint')}</p>
             <div className="flex flex-wrap gap-1.5">
-              {REGIONS.map((r) => { const on = serviceRegions.includes(r); const base = r === regionCode; return <button key={r} type="button" aria-pressed={on} disabled={base} onClick={() => { haptic(); setRegions(on ? regions.filter((x) => x !== r) : [...regions, r]); }} className={`${CHIP(on)} min-h-10 px-3 text-xs`}>{tr(r)}</button>; })}
+              {REGIONS.map((r) => { const on = serviceRegions.includes(r); const base = r === regionCode; return <button key={r} type="button" aria-pressed={on} disabled={base} onClick={() => { haptic(); setRegions(on ? regions.filter((x) => x !== r) : [...regions, r]); }} className={CHIP(on)}>{tr(r)}</button>; })}
             </div>
           </fieldset>
           <div className="grid grid-cols-[1.4fr_1fr] gap-3">
@@ -114,7 +114,8 @@ export default function TgNewListingPage() {
               {photos.map((p, i) => (
                 <div key={p} className="relative h-20 w-24 overflow-hidden rounded-xl border border-line bg-sand">
                   <img src={p} alt={tgal('photoN', { n: i + 1 })} className="h-full w-full object-cover" />
-                  <button type="button" aria-label={tf('remove')} onClick={() => setPhotos(photos.filter((_, j) => j !== i))} className="absolute right-1 top-1 rounded-full bg-white/90 px-2 text-xs font-semibold text-red-700">x</button>
+                  {/* Ko'rinadigan "x" kichik, teginish maydoni esa 44px */}
+                  <button type="button" aria-label={tf('remove')} onClick={() => setPhotos(photos.filter((_, j) => j !== i))} className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center"><span className="rounded-full bg-white/90 px-2 text-xs font-semibold text-red-700">x</span></button>
                 </div>
               ))}
               <button type="button" disabled={uploading || photos.length >= 10} onClick={() => file.current?.click()} className="flex h-20 w-24 items-center justify-center rounded-xl border border-dashed border-line bg-white text-xs font-semibold text-muted disabled:opacity-60">{uploading ? tf('uploading') : tf('addPhoto')}</button>

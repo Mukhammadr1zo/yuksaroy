@@ -11,6 +11,7 @@
     "zoomOut": "Zoom out",
     "search": {
       "placeholder": "For example: Termez to Tashkent, container",
+      "placeholderApp": "Station or route",
       "aria": "Search on the map",
       "submit": "Search"
     },
@@ -56,6 +57,8 @@
       "handle": "Panel height"
     },
     "loading": "Loading the map",
+    "loadFailed": "Could not load",
+    "retry": "Try again",
     "strip": {
       "aria": "Map: all objects, tap to open"
     },
