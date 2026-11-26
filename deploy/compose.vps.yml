@@ -23,7 +23,10 @@ services:
       NODE_OPTIONS: --max-old-space-size=320
 
   web:
-    mem_limit: 300m
+    # 300m dan 384m ga: uyum chegarasi 240 MB, unga Node ning o'zi va rasm kutubxonasi
+    # qo'shilsa 300 dan oshadi va konteyner o'z sahifalarini swapga chiqara boshlaydi
+    # (21 soatlik ishda 255 MB o'lchangan). Uyum chegarasi o'zgarmaydi.
+    mem_limit: 384m
     ports: ["127.0.0.1:3310:3000"]
     environment:
       NODE_OPTIONS: --max-old-space-size=240

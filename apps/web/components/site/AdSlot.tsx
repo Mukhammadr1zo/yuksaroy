@@ -459,7 +459,8 @@ export function SiteAds() {
   useEffect(() => {
     let alive = true;
     api<Rails>(`/ads/rails?locale=${locale}`)
-      .then((r) => { if (alive) setRails(r); })
+      // Reklama to'suvchi so'rovga bo'sh javob qaytarsa r yo'q bo'ladi: eski holat qoladi, sahifa yiqilmaydi
+      .then((r) => { if (alive && r) setRails(r); })
       .catch(() => {}); // reklama yo'qligi sahifaning ishiga ta'sir qilmaydi
     return () => { alive = false; };
   }, [locale]);
