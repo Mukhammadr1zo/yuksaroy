@@ -225,6 +225,39 @@ jobs:
             | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
               "cd '$DIR' && if grep -q '^D_RAILWAY_EMAIL=' .env 2>/dev/null; then cat > /dev/null; echo 'vagon sozlamasi allaqachon bor'; else cat >> .env && echo 'vagon sozlamasi qoshildi'; fi"
 
+      # Online to'lov kalitlari (Payme, Click, Uzum). Sir qo'yilmagan bo'lsa qadam hech narsa
+      # qilmaydi: tizim o'chiq qoladi va obuna sahifasi qo'lda to'lov hamda sinovni ko'rsatadi.
+      # Vagon sozlamasi bilan bir xil yo'l: qiymatlar quvur orqali, serverda mavjud kalit qayta
+      # yozilmaydi (o'zgartirish kerak bo'lsa serverdagi .env da qo'lda), faqat yo'qlari qo'shiladi.
+      - name: Online to'lov sozlamasi (ixtiyoriy)
+        env:
+          H: ${{ secrets.VPS_HOST }}
+          U: ${{ secrets.VPS_USER }}
+          P: ${{ secrets.VPS_PORT || 22 }}
+          DIR: ${{ vars.VPS_PATH || '/opt/yuksaroy' }}
+          PAYME_MERCHANT_ID: ${{ secrets.PAYME_MERCHANT_ID }}
+          PAYME_KEY: ${{ secrets.PAYME_KEY }}
+          PAYME_TEST: ${{ vars.PAYME_TEST }}
+          PAYME_LOGIN: ${{ secrets.PAYME_LOGIN }}
+          CLICK_SERVICE_ID: ${{ secrets.CLICK_SERVICE_ID }}
+          CLICK_MERCHANT_ID: ${{ secrets.CLICK_MERCHANT_ID }}
+          CLICK_SECRET_KEY: ${{ secrets.CLICK_SECRET_KEY }}
+          UZUM_SERVICE_ID: ${{ secrets.UZUM_SERVICE_ID }}
+          UZUM_LOGIN: ${{ secrets.UZUM_LOGIN }}
+          UZUM_PASSWORD: ${{ secrets.UZUM_PASSWORD }}
+        run: |
+          lines=""
+          for k in PAYME_MERCHANT_ID PAYME_KEY PAYME_TEST PAYME_LOGIN CLICK_SERVICE_ID CLICK_MERCHANT_ID CLICK_SECRET_KEY UZUM_SERVICE_ID UZUM_LOGIN UZUM_PASSWORD; do
+            v="${!k}"
+            [ -n "$v" ] && lines="$lines$k=$v"$'\n'
+          done
+          if [ -z "$lines" ]; then
+            echo "to'lov kalitlari yo'q, o'tkazib yuborildi"
+            exit 0
+          fi
+          printf '%s' "$lines" | ssh -i ~/.ssh/id -p "$P" "$U@$H" \
+            "cd '$DIR' && touch .env && while IFS= read -r l; do k=\${l%%=*}; if grep -q \"^\$k=.\" .env; then echo \"\$k allaqachon bor\"; else sed -i \"/^\$k=\$/d\" .env; echo \"\$l\" >> .env; echo \"\$k qoshildi\"; fi; done"
+
       # Tashriflar xaritasi va Telegram xabarlari uchun joy bazasi (DB-IP City Lite, kalit kerak emas).
       # Serverda turadi, obrazga kirmaydi. Skript deploy/ nusxasi bilan keladi; fayl bor va
       # 40 kundan yangi bo'lsa tegmaydi. Oylik yangilashni taymer qiladi (docs/runbooks/geo.md).

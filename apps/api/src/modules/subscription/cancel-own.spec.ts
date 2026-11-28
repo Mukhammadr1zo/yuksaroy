@@ -14,6 +14,8 @@ function fake(row: { status: string } | null, count: number) {
       findFirst: async (a: { where: Record<string, unknown> }) =>
         ('status' in a.where ? null : row), // me() ichidagi ikkinchi chaqiruvlar bo'sh
       updateMany: async (a: { where: Record<string, unknown> }) => { updates.push(a.where); return { count }; },
+      // me() dagi sinov tekshiruvi (provider = 'trial' qatorlari): bu testda yo'q
+      count: async () => 0,
     },
     // me() tariflarni ham beradi; bu testda ular yo'q, narx zaxira sondan
     plan: { findMany: async () => [] },

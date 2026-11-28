@@ -17,11 +17,15 @@ import type { PlanCard } from '@/lib/subscription-price';
 import { BTN_GHOST, BTN_PRIMARY, INPUT, Notice } from '@/components/kabinet/bits';
 import { ConsentLine } from '@/components/site/ConsentLine';
 
-type Pending = { id: string; no: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string } };
+/** Ulangan online to'lov tizimlari: bo'sh obyekt = faqat qo'lda to'lov. */
+type PayLinks = { payme?: string; click?: string; uzum?: { serviceId: string; account: string; url: string } };
+type Pending = { id: string; no: string; months: number; amountTiyin: number; createdAt: string; payInstructions: { method: string; details: string }; payLinks?: PayLinks };
 type Grant = 'PHONE' | 'WAGON';
 /** pricePerMonthSom null: shu ruxsatni beradigan tarif hozir sotuvda yo'q. */
 type Plan = { grant: Grant; active: boolean; endsAt: string | null; pricePerMonthSom: number | null };
-type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; wagonSearchDaily?: number; plans: Plan[]; catalog?: PlanCard[]; pending: Pending | null };
+type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; wagonSearchDaily?: number; plans: Plan[]; catalog?: PlanCard[]; pending: Pending | null;
+  /** Bir martalik bepul sinov: faqat online to'lov ulanmaguncha (server hal qiladi). */
+  trial?: { days: number; available: boolean } };
 type Created = { order: { id: string; no: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -68,9 +72,28 @@ export function SubscriptionCard() {
     e.preventDefault();
     if (!chosen) return;
     setBusy(true); setErr(false);
-    try { setCreated(await post<Created>('/subscription/orders', { months, planCode: chosen.code })); }
+    try {
+      setCreated(await post<Created>('/subscription/orders', { months, planCode: chosen.code }));
+      // To'lov tugmalari (Payme, Click) /subscription/me dagi kutilayotgan buyurtma bilan keladi
+      api<Me>('/subscription/me').then(setMe).catch(() => {});
+    }
     catch { setErr(true); } finally { setBusy(false); }
   }
+
+  async function startTrial() {
+    setBusy(true); setErr(false);
+    try { setMe(await post<Me>('/subscription/trial', {})); }
+    catch { setErr(true); api<Me>('/subscription/me').then(setMe).catch(() => {}); }
+    finally { setBusy(false); }
+  }
+
+  /** To'lov sahifasi: Mini App ichida Telegram brauzerida, saytda yangi varaqda. */
+  const openPay = (url: string) => (e: React.MouseEvent) => {
+    const w = window.Telegram?.WebApp;
+    if (!w?.initData) return;
+    e.preventDefault();
+    w.openLink(url);
+  };
 
   if (failed) return (
     <div role="alert" className="flex items-center justify-between gap-3 rounded-card border border-red-200 bg-red-50 py-1.5 pl-4 pr-1.5 text-sm text-red-700">
@@ -84,6 +107,8 @@ export function SubscriptionCard() {
   const pending = created
     ? { id: created.order.id, no: created.order.no, months: created.order.months, amountTiyin: created.order.amountTiyin, details: created.payInstructions.details }
     : me.pending ? { id: me.pending.id, no: me.pending.no, months: me.pending.months, amountTiyin: me.pending.amountTiyin, details: me.pending.payInstructions.details } : null;
+
+  const links: PayLinks = (pending && me.pending?.id === pending.id ? me.pending.payLinks : undefined) ?? {};
 
   // Ruxsatlar bir xil bo'lsa ro'yxat chizilmaydi: bugungi obunachilarga u hech narsa bermaydi
   const mixed = (me.plans ?? []).some((p) => p.active !== me.plans[0]!.active || p.endsAt !== me.plans[0]!.endsAt);
@@ -127,6 +152,17 @@ export function SubscriptionCard() {
         </ul>
       ) : null}
 
+      {/* Bepul sinov: obuna yo'q, kutilayotgan buyurtma yo'q va server taklif qilsa */}
+      {me.trial?.available && !pending ? (
+        <section className="mt-6 max-w-md rounded-card border border-teal bg-teal-soft p-5">
+          <p className="font-display text-lg font-bold text-navy">{t('trial.title', { days: me.trial.days })}</p>
+          <p className="mt-1 text-sm text-ink/80">{t('trial.lead', { days: me.trial.days })}</p>
+          {err ? <div className="mt-2"><Notice tone="err">{t('failed')}</Notice></div> : null}
+          <button type="button" disabled={busy} onClick={startTrial} className={`${BTN_PRIMARY} mt-3`}>{busy ? t('sending') : t('trial.cta')}</button>
+          <p className="mt-2 text-xs text-muted">{t('trial.note')}</p>
+        </section>
+      ) : null}
+
       {pending ? (
         <section className="mt-6 max-w-md rounded-card border border-line bg-white p-5 text-sm">
           <Notice tone="ok">{t('pending')}</Notice>
@@ -135,7 +171,24 @@ export function SubscriptionCard() {
             <div className="flex justify-between gap-4"><dt className="text-muted">{t('months')}</dt><dd className="font-mono">{t('month', { n: pending.months })}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-muted">{t('amount')}</dt><dd className="font-mono font-semibold tabular-nums">{som(pending.amountTiyin, locale)}</dd></div>
           </dl>
-          <p className="mt-3 text-xs font-semibold text-muted">{t('pay')}</p>
+          {/* Online to'lov: tizim tasdiqlashi bilan obuna o'zi yoqiladi, admin kutilmaydi */}
+          {links.payme || links.click || links.uzum ? (
+            <>
+              <p className="mt-3 text-xs font-semibold text-muted">{t('online.title')}</p>
+              <div className="mt-2 grid gap-2">
+                {links.payme ? <a href={links.payme} target="_blank" rel="noopener noreferrer" onClick={openPay(links.payme)} className={`${BTN_PRIMARY} text-center`}>{t('online.payme')}</a> : null}
+                {links.click ? <a href={links.click} target="_blank" rel="noopener noreferrer" onClick={openPay(links.click)} className={`${BTN_PRIMARY} text-center`}>{t('online.click')}</a> : null}
+                {links.uzum ? (
+                  <>
+                    <a href={links.uzum.url} target="_blank" rel="noopener noreferrer" onClick={openPay(links.uzum.url)} className={`${BTN_PRIMARY} text-center`}>{t('online.uzumCta')}</a>
+                    <p className="text-xs text-muted">{t('online.uzum', { account: links.uzum.account })}</p>
+                  </>
+                ) : null}
+              </div>
+              <p className="mt-2 text-xs text-muted">{t('online.after')}</p>
+              <p className="mt-4 text-xs font-semibold text-muted">{t('online.manual')}</p>
+            </>
+          ) : <p className="mt-3 text-xs font-semibold text-muted">{t('pay')}</p>}
           <p className="mt-1 whitespace-pre-line rounded-xl bg-sand p-3">{pending.details}</p>
           <p className="mt-2 text-xs text-muted">{t('afterPay')}</p>
           {/* Muddatni o'zgartirishning yagona yo'li: ochiq buyurtma turganda forma chizilmaydi */}

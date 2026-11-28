@@ -94,6 +94,21 @@
       "WAGON": "Vagon qidiruvi"
     },
     "grantUntil": "{until} gacha",
-    "grantOff": "ochiq emas"
+    "grantOff": "ochiq emas",
+    "trial": {
+      "title": "{days} kun bepul sinab ko'ring",
+      "lead": "Telefon raqamlari, vagon qidiruvi va boshqa imkoniyatlar {days} kun davomida to'liq ochiladi. Karta va to'lov so'ralmaydi.",
+      "cta": "Bepul sinovni boshlash",
+      "note": "Sinov har bir hisobga bir marta beriladi. Tugagach obunani shu sahifada rasmiylashtirasiz."
+    },
+    "online": {
+      "title": "Online to'lov",
+      "payme": "Payme orqali to'lash",
+      "click": "Click orqali to'lash",
+      "uzumCta": "Uzum Bank orqali to'lash",
+      "uzum": "Havola ochilmasa: Uzum Bank ilovasida «YukSaroy» xizmatini toping va hisob raqami sifatida {account} ni kiriting.",
+      "after": "To'lov o'tishi bilan obuna o'zi yoqiladi, admin tasdig'i kerak emas.",
+      "manual": "Yoki bank o'tkazmasi"
+    }
   }
 }

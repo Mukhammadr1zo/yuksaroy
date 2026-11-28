@@ -985,6 +985,7 @@ model Subscription {
   /// oldin qo'yiladi: sikl qayta ishga tushsa ham odamga ikkinchi xabar ketmaydi.
   remindedAt  DateTime? @db.Timestamptz(3)
   createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  payments    PaymentTxn[]
 
   @@index([userId, endsAt])
   @@index([status])
@@ -1274,4 +1275,31 @@ model Plan {
   subscriptions Subscription[]
 
   @@index([active, sort])
+}
+
+/// Online to'lov tranzaksiyasi (Payme, Click, Uzum). Bitta obuna buyurtmasiga bir nechta urinish
+/// bo'lishi mumkin, lekin bir vaqtda faqat bittasi ochiq (state 1). Tizim takror so'rasa
+/// (provider, extId) noyobligi ikkinchi qatorni to'sadi va mavjud qator qaytariladi.
+model PaymentTxn {
+  id             String       @id @default(cuid())
+  /// 'payme' | 'click' | 'uzum'
+  provider       String
+  /// Tizimdagi tranzaksiya raqami (Payme id, Click click_trans_id, Uzum transId)
+  extId          String
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amountTiyin    BigInt
+  /// 1 yaratildi, 2 to'landi, -1 to'lovgacha bekor, -2 to'lovdan keyin bekor (pul qaytarildi)
+  state          Int          @default(1)
+  /// Bekor qilish sababi (Payme reason kodi), boshqalarda bo'sh
+  reason         Int?
+  /// Tizim yuborgan yaratilish vaqti (Payme `time`, ms): GetStatement shu bo'yicha so'raydi
+  providerTime   BigInt?
+  createdAt      DateTime     @default(now()) @db.Timestamptz(3)
+  performedAt    DateTime?    @db.Timestamptz(3)
+  cancelledAt    DateTime?    @db.Timestamptz(3)
+
+  @@unique([provider, extId])
+  @@index([subscriptionId])
+  @@index([provider, providerTime])
 }
