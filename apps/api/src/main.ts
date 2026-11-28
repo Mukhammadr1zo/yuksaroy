@@ -39,6 +39,11 @@ async function bootstrap() {
 
   await app.register(fastifyCookie as any); // ponytail: @fastify/cookie v11 tip mosligi, ishlashga ta'sir qilmaydi
 
+  // Click to'lov tizimi so'rovni oddiy forma (x-www-form-urlencoded) bilan yuboradi: Fastify uni
+  // sukut bo'yicha tanimaydi (415). Takror kalitda oxirgisi olinadi, 64 KB dan katta tana rad etiladi.
+  fastify.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string', bodyLimit: 65_536 },
+    (_req: unknown, body: string, done: (e: Error | null, v?: unknown) => void) => done(null, Object.fromEntries(new URLSearchParams(body))));
+
   // Faoliyat xabari uchun: har so'rovning IP, qurilma va kanali (activity/request-context.ts)
   fastify.addHook('onRequest', contextHook);
 

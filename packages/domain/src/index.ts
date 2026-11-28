@@ -215,6 +215,11 @@ export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
  */
 // wagonSearchDaily: obunachining kunlik yangi vagon qidiruvi (egasi qarori 2026-11-28: 99 000 so'mga kuniga 5 ta)
 export const SUBSCRIPTION_FALLBACK = { priceMonthSom: 99000, phoneRevealDaily: 50, wagonSearchDaily: 5 } as const;
+/**
+ * Bepul sinov: har odamga bir marta, sukut tarif shu kunga (egasi qarori 2026-11-28).
+ * Faqat online to'lov ulanmaguncha taklif qilinadi: tizim yoqilgach tugma o'zi yo'qoladi.
+ */
+export const SUBSCRIPTION_TRIAL_DAYS = 10;
 
 /** Tiyin → "12 670 so'm". */
 const CURRENCY_WORD: Record<SearchLang, string> = { uz: "so'm", ru: 'сум', en: 'UZS' };

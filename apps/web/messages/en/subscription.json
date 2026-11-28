@@ -94,6 +94,21 @@
       "WAGON": "Wagon search"
     },
     "grantUntil": "until {until}",
-    "grantOff": "not open"
+    "grantOff": "not open",
+    "trial": {
+      "title": "Try it free for {days} days",
+      "lead": "Phone numbers, wagon search and everything else are fully open for {days} days. No card or payment needed.",
+      "cta": "Start the free trial",
+      "note": "The trial is given once per account. After it ends you can subscribe on this page."
+    },
+    "online": {
+      "title": "Pay online",
+      "payme": "Pay with Payme",
+      "click": "Pay with Click",
+      "uzumCta": "Pay with Uzum Bank",
+      "uzum": "If the link does not open: in the Uzum Bank app find the YukSaroy service and enter {account} as the account number.",
+      "after": "The subscription turns on by itself as soon as the payment goes through, no admin approval needed.",
+      "manual": "Or a bank transfer"
+    }
   }
 }

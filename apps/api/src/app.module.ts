@@ -23,6 +23,7 @@ import { WagonModule } from './modules/wagon/wagon.module';
 import { HelpModule } from './modules/help/help.module';
 import { WatchModule } from './modules/watch/watch.module';
 import { AdsModule } from './modules/ads/ads.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { HealthController } from './health.controller';
 
@@ -36,6 +37,7 @@ import { HealthController } from './health.controller';
     MarketModule, WagonModule, HelpModule, WatchModule, // xizmatlar markazi va yuk bozori, vagon qidiruvi, yordam chati, kuzatuv
     ActivityModule, // superadminlarga faoliyat xabari: botdan keladigan ichki yo'l
     AdsModule, // yon tomondagi reklama: platformaning o'zi sotadi, uchinchi tomon kodi yo'q
+    PaymentsModule, // online to'lov: Payme va Click, to'lov kelganda obuna o'zi yoqiladi
   ],
   controllers: [HealthController],
 })

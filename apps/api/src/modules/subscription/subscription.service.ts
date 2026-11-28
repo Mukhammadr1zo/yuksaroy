@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Plan } from '@prisma/client';
-import { SUBSCRIPTION_FALLBACK, SUBSCRIPTION_GRANTS, type PlanLimitKey, type SubscriptionGrant } from '@yuksaroy/domain';
+import { SUBSCRIPTION_FALLBACK, SUBSCRIPTION_GRANTS, SUBSCRIPTION_TRIAL_DAYS, type PlanLimitKey, type SubscriptionGrant } from '@yuksaroy/domain';
+import { onlinePayOn, payLinks } from '../payments/pay-links';
 import { PrismaService } from '../../common/prisma.service';
 import { PlatformConfigService } from '../../common/platform-config.service';
 import { REVEAL_ACTIONS } from '../../common/reveal-actions';
@@ -252,12 +253,14 @@ export class SubscriptionService {
 
   async me(userId: string) {
     const now = new Date();
-    const [act, pending, cfg, catalog] = await Promise.all([
+    const [act, pending, cfg, catalog, trialUsed] = await Promise.all([
       this.active(userId, undefined, now),
       this.prisma.subscription.findFirst({ where: { userId, status: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
       this.config.get(),
       this.activePlans(),
+      this.prisma.subscription.count({ where: { userId, provider: 'trial' } }),
     ]);
+    const online = onlinePayOn();
     // Sukut tarif va ruxsat narxlari o'sha ro'yxatdan: qo'shimcha so'rov yo'q
     const def = pickDefault(catalog);
     // Har ruxsat turi alohida: faolmi, qachongacha, qancha turadi. Eski maydonlar
@@ -284,7 +287,11 @@ export class SubscriptionService {
       phoneRevealDaily: planLimit(phoneRow?.limits, 'phoneRevealDaily', planLimit(def?.limits, 'phoneRevealDaily', SUBSCRIPTION_FALLBACK.phoneRevealDaily)),
       wagonSearchFree: cfg.wagonSearchFree,
       wagonSearchDaily: planLimit(wagonRow?.limits, 'wagonSearchDaily', planLimit(def?.limits, 'wagonSearchDaily', SUBSCRIPTION_FALLBACK.wagonSearchDaily)),
-      pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions(cfg.payDetails) } : null,
+      // payLinks: ulangan online to'lov tizimlari (bo'sh = faqat qo'lda to'lov)
+      pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions(cfg.payDetails), payLinks: payLinks(pending) } : null,
+      online,
+      // Sinov: online to'lov hali ulanmagan, odam uni ishlatmagan va hozir obunasi yo'q
+      trial: { days: SUBSCRIPTION_TRIAL_DAYS, available: !online && trialUsed === 0 && act === null && !!def },
     };
   }
 
@@ -403,10 +410,41 @@ export class SubscriptionService {
   }
 
   /**
+   * Bepul sinov: sukut tarif (ruxsat va chegaralari bilan) SUBSCRIPTION_TRIAL_DAYS kunga, darhol faol.
+   *
+   * Bir odamga bir marta (provider = 'trial' qatori bor bo'lsa rad). Online to'lov ulangan
+   * bo'lsa taklif qilinmaydi (TRIAL_OFF), faol obunasi bor odamga ham (TRIAL_ACTIVE).
+   * Summa 0, paidAt bo'sh: daromad varag'iga tushmaydi. Navbat tranzaksiyada, Serializable:
+   * ikki marta bosilsa ikkinchisi yiqiladi va TRIAL_USED qaytadi.
+   */
+  async startTrial(userId: string, now = new Date()) {
+    if (onlinePayOn()) throw new ConflictException({ code: 'TRIAL_OFF' });
+    const p = await this.defaultPlan();
+    if (!p) throw new ConflictException({ code: 'NO_PLAN' });
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        if (await tx.subscription.count({ where: { userId, provider: 'trial' } })) throw new ConflictException({ code: 'TRIAL_USED' });
+        if (await tx.subscription.count({ where: { userId, status: 'ACTIVE', endsAt: { gt: now } } })) throw new ConflictException({ code: 'TRIAL_ACTIVE' });
+        const [{ nextval }] = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('pay_no_seq')`;
+        const endsAt = new Date(now.getTime() + SUBSCRIPTION_TRIAL_DAYS * 86_400_000);
+        return tx.subscription.create({
+          data: {
+            no: `SINOV-${Number(nextval)}`, userId, months: 1, grants: p.grants, amountTiyin: 0n, status: 'ACTIVE', provider: 'trial',
+            planId: p.id, limits: p.limits == null ? undefined : (p.limits as Prisma.InputJsonValue), startsAt: now, endsAt,
+          },
+        });
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2034') throw new ConflictException({ code: 'TRIAL_USED' });
+      throw e;
+    }
+  }
+
+  /**
    * To'lov tasdiqlandi. Faol obuna bo'lsa yangi muddat uning tugashidan boshlanadi,
    * bo'lmasa hozirdan: erta to'lagan odam kunlarini yo'qotmaydi.
    */
-  async confirm(id: string, now = new Date()) {
+  async confirm(id: string, now = new Date(), provider?: string) {
     const out = await this.prisma.$transaction(async (tx) => {
       const s = await tx.subscription.findUnique({ where: { id } });
       if (!s) throw new NotFoundException({ code: 'SUBSCRIPTION_NOT_FOUND' });
@@ -429,11 +467,13 @@ export class SubscriptionService {
       const endsAt = extendPremium(cur?.endsAt ?? null, s.months, now);
       const startsAt = cur?.endsAt ?? now;
       // Holat sharti yangilashning o'zida: ikki admin bir vaqtda bossa faqat bittasi o'tadi
-      const r = await tx.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' } });
+      // provider: online to'lovda tizim nomi ('payme', 'click', 'uzum'), admin tasdig'ida avvalgisi
+      const via = provider ?? s.provider ?? 'manual';
+      const r = await tx.subscription.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: via } });
       if (r.count === 0) throw new ConflictException({ code: 'SUBSCRIPTION_NOT_PENDING' });
       // E'lonni ko'tarish telefon obunasining imtiyozi: arzon vagon tarifi uni bepul bermasin
       if (s.grants.includes('PHONE')) await raiseListings(tx, s.userId, endsAt);
-      return subscriptionView({ ...s, status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: s.provider ?? 'manual' });
+      return subscriptionView({ ...s, status: 'ACTIVE', startsAt, endsAt, paidAt: now, provider: via });
     });
     // Tranzaksiyadan keyin: o'zgarish qaytarib olinsa yolg'on xabar ketmasin
     this.tell(out.userId, 'subscriptionActive', { until: out.endsAt?.toISOString().slice(0, 10) ?? '' });

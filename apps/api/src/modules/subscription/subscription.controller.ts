@@ -109,6 +109,14 @@ export class SubscriptionController {
     return this.subs.me(userId);
   }
 
+  /** Bir martalik bepul sinov (online to'lov ulanmaguncha): sukut tarif SUBSCRIPTION_TRIAL_DAYS kunga. */
+  @Post('subscription/trial') @HttpCode(201)
+  async trial(@CurrentUserId() userId: string) {
+    const s = await this.subs.startTrial(userId);
+    await this.audit.log({ actorId: userId, action: 'subscription.trial', entity: 'Subscription', entityId: s.id, meta: { no: s.no, endsAt: s.endsAt } });
+    return this.subs.me(userId);
+  }
+
   @Post('subscription/orders') @HttpCode(201)
   async order(@CurrentUserId() userId: string, @Body() dto: OrderDto) {
     const r = await this.subs.order(userId, dto.months, dto.grant, dto.planCode);

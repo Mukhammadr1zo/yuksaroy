@@ -45,6 +45,19 @@ const schema = z.object({
   D_RAILWAY_URL: opt(z.string().url()),
   D_RAILWAY_EMAIL: opt(z.string()),
   D_RAILWAY_PASSWORD: opt(z.string()),
+  // Ixtiyoriy: online to'lov. Har tizim faqat hamma kaliti bo'lsa yoqiladi, aks holda tugmasi ko'rinmaydi
+  // va to'lov avvalgidek qo'lda (rekvizit + admin tasdig'i). *_TEST=1: tizimning sinov muhiti.
+  PAYME_MERCHANT_ID: opt(z.string().min(8)),
+  PAYME_KEY: opt(z.string().min(8)),
+  PAYME_TEST: opt(z.enum(['0', '1'])),
+  // Basic auth logini: amalda "Paycom", Payme boshqasini bersa shu yerga
+  PAYME_LOGIN: opt(z.string().min(3)),
+  CLICK_SERVICE_ID: opt(z.string().regex(/^\d+$/)),
+  CLICK_MERCHANT_ID: opt(z.string().regex(/^\d+$/)),
+  CLICK_SECRET_KEY: opt(z.string().min(6)),
+  UZUM_SERVICE_ID: opt(z.string().regex(/^\d+$/)),
+  UZUM_LOGIN: opt(z.string().min(3)),
+  UZUM_PASSWORD: opt(z.string().min(6)),
   // Ixtiyoriy: deploy commit (Dockerfile.api ARG). Bo'sh bo'lsa tizim sahifasi "noma'lum (lokal qurilish)" deydi
   GIT_SHA: opt(z.string()),
 });
