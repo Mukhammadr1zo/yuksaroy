@@ -39,10 +39,9 @@ async function bootstrap() {
 
   await app.register(fastifyCookie as any); // ponytail: @fastify/cookie v11 tip mosligi, ishlashga ta'sir qilmaydi
 
-  // Click to'lov tizimi so'rovni oddiy forma (x-www-form-urlencoded) bilan yuboradi: Fastify uni
-  // sukut bo'yicha tanimaydi (415). Takror kalitda oxirgisi olinadi, 64 KB dan katta tana rad etiladi.
-  fastify.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string', bodyLimit: 65_536 },
-    (_req: unknown, body: string, done: (e: Error | null, v?: unknown) => void) => done(null, Object.fromEntries(new URLSearchParams(body))));
+  // Click to'lov tizimi so'rovni forma (x-www-form-urlencoded) bilan yuboradi. Uni NestJS ning
+  // FastifyAdapter i o'zi o'qiydi (registerUrlencodedContentParser): bu yerda ikkinchi parser
+  // qo'shilsa Fastify FST_ERR_CTP_ALREADY_PRESENT bilan ishga tushmaydi (2026-11-28 deploy yiqilgan).
 
   // Faoliyat xabari uchun: har so'rovning IP, qurilma va kanali (activity/request-context.ts)
   fastify.addHook('onRequest', contextHook);
