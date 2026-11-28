@@ -106,7 +106,7 @@
       "payme": "Pay with Payme",
       "click": "Pay with Click",
       "uzumCta": "Pay with Uzum Bank",
-      "uzum": "If the link does not open: in the Uzum Bank app find the “YukSaroy” service and enter {account} as the account number.",
+      "uzum": "If the link does not open: in the Uzum Bank app find the YukSaroy service and enter {account} as the account number.",
       "after": "The subscription turns on by itself as soon as the payment goes through, no admin approval needed.",
       "manual": "Or a bank transfer"
     }
