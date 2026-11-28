@@ -32,6 +32,8 @@ type Detail = {
   kycRequestedAt: string | null; kycNote: string | null; kycDocs: ClaimFile[] | null;
   phone: string | null; address: string | null; regionCode: string | null; description: string | null; telegram: string | null; website: string | null;
   isDemo: boolean; createdAt: string;
+  /** Vagon operatori: spravkadagi kompaniya nomi («Mening vagonlarim») */
+  fleetName: string | null;
   counts: { terminals: number; listings: number; orders: number }; members: Member[]; notesCount: number;
 };
 type Form = { name: string; slug: string; stir: string; kycStatus: string; kycNote: string };
@@ -213,6 +215,8 @@ function General({ d, reload }: { d: Detail; reload: () => Promise<void> }) {
         <Fact k={tc('createdAt')} v={uzDate(d.createdAt, locale)} mono />
       </dl>
 
+      <FleetLink d={d} reload={reload} />
+
       <Section title={t('orgs.members')} count={d.members.length}>
         <div className="divide-y divide-line rounded-card border border-line bg-white">
           {d.members.length === 0 ? <p className="px-3 py-4 text-center text-sm text-muted">{tc('none')}</p> : null}
@@ -362,5 +366,57 @@ function MoneyTab({ id }: { id: string }) {
         <DataTable cols={subCols} rows={m.subscriptions} keyOf={(r) => r.id} empty={to('money.none')} href={(r) => `/admin/subscriptions?open=${r.id}`} />
       </Section>
     </div>
+  );
+}
+
+/**
+ * Vagon operatori: tashkilotni spravkadagi kompaniya nomiga bog'lash («Mening vagonlarim»).
+ * Nom qo'lda yozilmaydi, d-railway ro'yxatidan tanlanadi: bitta harf xatosi parkni bo'sh qilib qo'yardi.
+ */
+function FleetLink({ d, reload }: { d: Detail; reload: () => Promise<void> }) {
+  const t = useTranslations('fleet.admin');
+  const [q, setQ] = useState('');
+  const [items, setItems] = useState<{ name: string; wagons: number }[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+
+  async function search(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true); setNote(null);
+    try { setItems((await api<{ items: { name: string; wagons: number }[] }>(`/admin/fleet/companies?${new URLSearchParams({ q })}`)).items); }
+    catch { setNote({ tone: 'err', text: t('failed') }); } finally { setBusy(false); }
+  }
+  async function save(fleetName: string | null) {
+    setBusy(true); setNote(null);
+    try {
+      await api(`/admin/orgs/${d.id}/fleet`, { method: 'PATCH', body: JSON.stringify({ fleetName }) });
+      setNote({ tone: 'ok', text: t('saved') }); setItems(null); await reload();
+    } catch { setNote({ tone: 'err', text: t('failed') }); } finally { setBusy(false); }
+  }
+
+  return (
+    <Section title={t('title')}>
+      <p className="text-sm text-muted">{t('lead')}</p>
+      <p className="mt-2 text-sm font-semibold">{d.fleetName ? t('current', { name: d.fleetName }) : t('notLinked')}</p>
+      {d.fleetName && d.kycStatus !== 'VERIFIED' ? <div className="mt-2"><Notice tone="warn">{t('notVerified')}</Notice></div> : null}
+      <form onSubmit={search} className="mt-3 flex flex-wrap gap-2">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('searchPh')} maxLength={80} className={`${INPUT} min-w-0 flex-1`} />
+        <button type="submit" disabled={busy} className={BTN}>{t('search')}</button>
+        {d.fleetName ? <button type="button" disabled={busy} onClick={() => void save(null)} className={BTN_GHOST}>{t('unlink')}</button> : null}
+      </form>
+      {items ? (
+        <ul className="mt-2 divide-y divide-line rounded-card border border-line bg-white">
+          {items.length === 0 ? <li className="px-3 py-3 text-sm text-muted">-</li> : null}
+          {items.map((c) => (
+            <li key={c.name} className="flex items-center gap-3 px-3 py-2 text-sm">
+              <span className="min-w-0 flex-1 truncate font-semibold">{c.name}</span>
+              <span className="shrink-0 font-mono text-xs text-muted tabular-nums">{t('wagons', { n: c.wagons })}</span>
+              <button type="button" disabled={busy} onClick={() => void save(c.name)} className={BTN_GHOST}>{t('link')}</button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {note ? <div className="mt-2"><Notice tone={note.tone}>{note.text}</Notice></div> : null}
+    </Section>
   );
 }

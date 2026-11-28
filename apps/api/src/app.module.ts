@@ -24,6 +24,7 @@ import { HelpModule } from './modules/help/help.module';
 import { WatchModule } from './modules/watch/watch.module';
 import { AdsModule } from './modules/ads/ads.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { FleetModule } from './modules/fleet/fleet.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { HealthController } from './health.controller';
 
@@ -38,6 +39,7 @@ import { HealthController } from './health.controller';
     ActivityModule, // superadminlarga faoliyat xabari: botdan keladigan ichki yo'l
     AdsModule, // yon tomondagi reklama: platformaning o'zi sotadi, uchinchi tomon kodi yo'q
     PaymentsModule, // online to'lov: Payme va Click, to'lov kelganda obuna o'zi yoqiladi
+    FleetModule, // «Mening vagonlarim»: vagon operatorining parki d-railway spravkasidan
   ],
   controllers: [HealthController],
 })

@@ -3,7 +3,7 @@
 // har birining o'z skeleti va o'z xato qutisi bor, biri yiqilsa qolganlari ko'rinaveradi. Qatorlar ro'yxat sahifalaridagi bilan bir xil.
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { LightningIcon, MagnifyingGlassIcon, PlusIcon, TrayIcon } from '@phosphor-icons/react';
+import { LightningIcon, MagnifyingGlassIcon, PlusIcon, TrainIcon, TrayIcon } from '@phosphor-icons/react';
 import { LISTING_LABELS } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api } from '@/lib/api';
@@ -52,6 +52,7 @@ function useSection<T>(load: () => Promise<Got<T>>): [St<T>, () => void] {
 
 export default function TgMyPage() {
   const t = useTranslations('tg.my');
+  const tf = useTranslations('fleet');
   const [orders, reOrders] = useSection(loadOrders);
   const [mine, reMine] = useSection(loadMine);
   const [incoming, reIncoming] = useSection(loadIncoming);
@@ -66,6 +67,12 @@ export default function TgMyPage() {
     <main id="main" className="mx-auto max-w-md px-4 pb-8 pt-4">
       <h1 className="font-display text-xl font-bold">{t('title')}</h1>
       <p className="mt-0.5 text-sm text-muted">{t('lead')}</p>
+
+      {/* Vagon operatorlari uchun: tasdiqlanmagan bo'lsa sahifaning o'zi qanday ulanishni tushuntiradi */}
+      <Link href="/tg/fleet" onClick={() => haptic()} className={`${CARD} mt-4 flex items-center gap-3 p-4 active:bg-sand`}>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-soft text-teal-ink"><TrainIcon size={22} weight="duotone" aria-hidden="true" /></span>
+        <span className="min-w-0"><span className="block font-bold">{tf('title')}</span><span className="block text-xs text-muted">{tf('lead')}</span></span>
+      </Link>
 
       {empty ? <EmptyHub /> : null}
 

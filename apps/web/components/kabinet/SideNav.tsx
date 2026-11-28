@@ -9,6 +9,7 @@ import { api, hasSession } from '@/lib/api';
 const LINKS: { href: string; key: string; exact?: boolean }[] = [
   { href: '/dashboard', key: 'now', exact: true },
   { href: '/dashboard/objects', key: 'objects' },
+  { href: '/dashboard/fleet', key: 'fleet' },
   { href: '/dashboard/orders', key: 'orders' },
   { href: '/dashboard/inquiries', key: 'chats' },
   { href: '/dashboard/market', key: 'market' },

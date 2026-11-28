@@ -57,6 +57,25 @@ export class DRailwayClient {
     return body.events.length ? { count: body.count ?? body.events.length, events: body.events } : null;
   }
 
+  /**
+   * Istalgan o'qish yo'li (JSON): history() bilan bir xil token, bir martalik qayta kirish va 10 s muddat.
+   * 404 -> null, boshqa xato UpstreamError. «Mening vagonlarim» (/ys-fleet/*) shu bilan o'qiydi.
+   */
+  async json<T>(path: string, timeoutMs = 10_000): Promise<T | null> {
+    if (!this.configured) throw new UpstreamError('not configured');
+    const signal = AbortSignal.timeout(timeoutMs);
+    let res = await this.get(path, signal);
+    if (res.status === 401) {
+      this.token = null;
+      res = await this.get(path, signal);
+    }
+    if (res.status === 404) return null;
+    if (!res.ok) throw new UpstreamError(`${path.split('?')[0]} ${res.status}`);
+    const body = (await res.json().catch(() => undefined)) as T | undefined;
+    if (body === undefined) throw new UpstreamError('json body');
+    return body;
+  }
+
   private base() { return (this.cfg.url as string).replace(/\/$/, ''); }
 
   private async get(path: string, signal: AbortSignal): Promise<Response> {

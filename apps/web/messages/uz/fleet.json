@@ -1,0 +1,47 @@
+{
+  "fleet": {
+    "title": "Mening vagonlarim",
+    "lead": "So'nggi spravka bo'yicha: har bir vagon qayerda, yuklangan yoki bo'sh, qaysi poyezdda.",
+    "asOf": "Spravka: {at}",
+    "verified": "Tasdiqlangan operator",
+    "kpi": { "total": "jami", "loaded": "yuklangan", "empty": "bo'sh", "inTrain": "poyezdda" },
+    "idleBanner": "{n} ta bo'sh vagon stansiyada {days} sutkadan ortiq turibdi. Ko'rish",
+    "filter": { "all": "Hammasi", "loaded": "Yuklangan", "empty": "Bo'sh", "inTrain": "Poyezdda", "idle": "{days}+ sutka bo'sh" },
+    "searchPh": "Vagon raqami yoki stansiya",
+    "state": { "loaded": "Yuklangan", "empty": "Bo'sh" },
+    "idle": "{n} sutka bo'sh",
+    "from": "yuklangan: {from}",
+    "train": "Poyezd {ix}",
+    "trainSize": "{n} vagon",
+    "trainLoading": "Tarkib yuklanmoqda",
+    "trainFailed": "Tarkibni yuklab bo'lmadi.",
+    "mine": "sizniki",
+    "ownerUnknown": "egasi ko'rsatilmagan",
+    "more": "Yana ko'rsatish ({n})",
+    "empty": "Bu bo'limda vagon yo'q.",
+    "none": {
+      "title": "Bu bo'lim vagon operatorlari uchun",
+      "body": "Tashkilotingizni ro'yxatdan o'tkazing va tasdiqlash uchun hujjat yuboring. Admin tasdiqlab, tashkilotni spravkadagi nomingizga bog'lagach, bu yerda barcha vagonlaringiz ko'rinadi.",
+      "cta": "Tashkilotni ro'yxatdan o'tkazish"
+    },
+    "errors": {
+      "FLEET_NOT_CONFIGURED": "Vagon ma'lumoti hozircha ulanmagan.",
+      "FLEET_UPSTREAM": "Ma'lumot manbasi javob bermadi. Birozdan keyin qayta urinib ko'ring.",
+      "generic": "Yuklab bo'lmadi."
+    },
+    "admin": {
+      "title": "Vagon operatori",
+      "lead": "Tashkilotni spravkadagi kompaniya nomiga bog'lang. Tashkilot tasdiqlangan bo'lsa, a'zolari «Mening vagonlarim» da shu kompaniyaning vagonlarini ko'radi.",
+      "current": "Bog'langan: {name}",
+      "notLinked": "Bog'lanmagan",
+      "searchPh": "Kompaniya nomi (spravkadagidek)",
+      "search": "Qidirish",
+      "wagons": "{n} vagon",
+      "link": "Bog'lash",
+      "unlink": "Bog'lanishni olib tashlash",
+      "notVerified": "Tashkilot hali tasdiqlanmagan: bog'lansa ham tasdiqlangunga qadar ko'rinmaydi.",
+      "saved": "Saqlandi",
+      "failed": "Bajarilmadi"
+    }
+  }
+}
