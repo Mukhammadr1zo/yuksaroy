@@ -5,7 +5,7 @@
     "lead": "Enter a wagon number: its last known location, which station it is at, loaded or empty. The first search is free.",
     "label": "Wagon numbers",
     "placeholder": "For example 24567890, 24567891",
-    "hint": "One number per line or separated by commas, up to 20. Each has 7 or 8 digits.",
+    "hint": "One number per line or separated by commas, up to 5. Each has 7 or 8 digits.",
     "submit": "Search",
     "submitMany": "Search {n} numbers",
     "searching": "Searching",
@@ -50,12 +50,12 @@
     },
     "seo": {
       "title": "Track a wagon by number: first search free | YukSaroy",
-      "description": "Wagon location by number in Uzbekistan: which station it is at, loaded or empty, and what time the data refers to. The first search is free, up to 20 numbers at once."
+      "description": "Wagon location by number in Uzbekistan: which station it is at, loaded or empty, and what time the data refers to. The first search is free, up to 5 numbers at once."
     },
     "about": {
       "h2": "How to find out where a wagon is",
       "p1": "Enter the wagon number and the page shows its last known location: which station it is at, whether it is loaded or empty, and what time the data refers to. Route history is not shown, only the current position.",
-      "p2": "The number has 7 or 8 digits. A leading zero does not matter: 01234567 and 1234567 are the same wagon. You can enter up to 20 numbers at once, one per line or separated by commas."
+      "p2": "The number has 7 or 8 digits. A leading zero does not matter: 01234567 and 1234567 are the same wagon. You can enter up to 5 numbers at once, one per line or separated by commas."
     },
     "how": {
       "h2": "Three steps",
@@ -86,7 +86,7 @@
       "q1": "Where do I get the wagon number?",
       "a1": "The number is painted on the side of the wagon and written in the shipping papers. It is 7 or 8 digits.",
       "q2": "How many wagons can I check at once?",
-      "a2": "Up to 20. Each number counts as a separate search.",
+      "a2": "Up to 5. Each number counts as a separate search.",
       "q3": "How fresh is the data?",
       "a3": "Reports are refreshed once or twice a day. The answer shows what time the data refers to.",
       "q4": "The wagon was not found, what now?",

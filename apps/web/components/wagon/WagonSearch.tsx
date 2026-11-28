@@ -13,7 +13,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { LockSimpleIcon, MagnifyingGlassIcon, TrainIcon } from '@phosphor-icons/react';
-import { parseWagonNos } from '@yuksaroy/domain';
+import { WAGON, parseWagonNos } from '@yuksaroy/domain';
 import { Link } from '@/i18n/navigation';
 import { ApiError, api, hasSession } from '@/lib/api';
 import { num, uzDate, uzDateTime, uzToday } from '@/lib/format';
@@ -27,7 +27,7 @@ type State =
   | { s: 'result'; r: WagonResult } | { s: 'subscribe'; priceSom?: number } | { s: 'err'; code: Err };
 
 /** Bir joylashtirishda shuncha raqam: har biri alohida qidiruv, undan ortig'i kvotani birdan yeb qo'yardi. */
-const BATCH_MAX = 20;
+const BATCH_MAX = WAGON.batchMax;
 const ERRS: Record<number, Err> = { 400: 'WAGON_NO_INVALID', 429: 'RATE_LIMITED', 502: 'WAGON_UPSTREAM', 503: 'WAGON_NOT_CONFIGURED' };
 const STATE_TONE: Record<WagonEvent['state'], string> = { loaded: 'bg-teal text-white', empty: 'bg-line text-ink', unknown: 'bg-sand text-muted' };
 

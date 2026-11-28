@@ -614,8 +614,12 @@ export const MARKET = {
   staleDays: 30,
 } as const;
 
-/** Vagon raqami: 7 yoki 8 raqam (oxirgisi nazorat raqami). Faqat raqamlar saqlanadi. */
-export const WAGON = { noMinDigits: 7, noMaxDigits: 8 } as const;
+/**
+ * Vagon raqami: 7 yoki 8 raqam (oxirgisi nazorat raqami). Faqat raqamlar saqlanadi.
+ * batchMax: bir so'rovda (sayt, Mini App, bot) shuncha raqam qidiriladi. Har biri alohida
+ * qidiruv va kvotadan yeydi; ortig'i bitta xabarda kvotani birdan tugatardi (egasi qarori 2026-11-28).
+ */
+export const WAGON = { noMinDigits: 7, noMaxDigits: 8, batchMax: 5 } as const;
 export function normalizeWagonNo(value: string): string | null {
   const digits = value.replace(/\D/g, '');
   return digits.length >= WAGON.noMinDigits && digits.length <= WAGON.noMaxDigits ? digits : null;
