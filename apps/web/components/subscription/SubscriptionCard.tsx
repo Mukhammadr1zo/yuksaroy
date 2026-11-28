@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircleIcon, LockSimpleOpenIcon } from '@phosphor-icons/react';
+import { SUBSCRIPTION_FALLBACK } from '@yuksaroy/domain';
 import { api, post } from '@/lib/api';
 import { som, uzDate, uzDateTime } from '@/lib/format';
 import type { PlanCard } from '@/lib/subscription-price';
@@ -20,7 +21,7 @@ type Pending = { id: string; no: string; months: number; amountTiyin: number; cr
 type Grant = 'PHONE' | 'WAGON';
 /** pricePerMonthSom null: shu ruxsatni beradigan tarif hozir sotuvda yo'q. */
 type Plan = { grant: Grant; active: boolean; endsAt: string | null; pricePerMonthSom: number | null };
-type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; plans: Plan[]; catalog?: PlanCard[]; pending: Pending | null };
+type Me = { active: boolean; endsAt: string | null; expired: { endsAt: string; reveals: number } | null; pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; wagonSearchDaily?: number; plans: Plan[]; catalog?: PlanCard[]; pending: Pending | null };
 type Created = { order: { id: string; no: string; months: number; amountTiyin: number }; payInstructions: { details: string } };
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -95,7 +96,7 @@ export function SubscriptionCard() {
           Qamrov sanog'i (nechta terminal bor) bu yerda emas - u qarorga hech narsa bermaydi. */}
       <ul className="mt-3 max-w-md space-y-1.5 text-sm text-ink/85">
         <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.phones', { n: me.phoneRevealDaily })}</li>
-        <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.wagon', { free: me.wagonSearchFree })}</li>
+        <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.wagon', { free: me.wagonSearchFree, daily: me.wagonSearchDaily ?? SUBSCRIPTION_FALLBACK.wagonSearchDaily })}</li>
         <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" aria-hidden="true" />{t('limits.chat')}</li>
       </ul>
 

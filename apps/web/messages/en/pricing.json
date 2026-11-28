@@ -6,7 +6,7 @@
     },
     "eyebrow": "Pricing",
     "title": "Browsing is free. Working needs a subscription.",
-    "lead": "The catalogue, map and requests are open to everyone and prices are not hidden from guests. A subscription opens phone numbers, lifts the wagon search limit and lifts your listings higher.",
+    "lead": "The catalogue, map and requests are open to everyone and prices are not hidden from guests. A subscription opens phone numbers, lets you search several wagons a day and lifts your listings higher.",
     "perMonth": "UZS / month",
     "free": {
       "name": "Free",
@@ -23,7 +23,7 @@
       "note": "per person",
       "badge": "Everything included",
       "f1": "Phone numbers of listing and terminal owners, up to {phones} a day",
-      "f2": "Unlimited wagon search ({free} free without a subscription)",
+      "f2": "Wagon search: {daily} a day ({free} free without a subscription)",
       "f3": "All your listings rank higher in the list",
       "f4": "Metrics: views and enquiries over 30 days",
       "f5": "From 1 to 12 months, you choose",

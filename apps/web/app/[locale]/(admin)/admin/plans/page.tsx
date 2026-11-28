@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { PLAN_LOCALES, SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
+import { PLAN_LOCALES, SUBSCRIPTION_FALLBACK, SUBSCRIPTION_GRANTS, type SubscriptionGrant } from '@yuksaroy/domain';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { api, post } from '@/lib/api';
 import { num } from '@/lib/format';
@@ -24,20 +24,20 @@ import { AuditLink, BTN, BTN_GHOST, type Col, ConfirmButton, DataTable, Drawer, 
 type Lang = (typeof PLAN_LOCALES)[number];
 type Plan = {
   id: string; code: string; name: Record<string, string>; features: Record<string, string[]>;
-  priceMonthSom: number; grants: string[]; limits: { phoneRevealDaily?: number } | null;
+  priceMonthSom: number; grants: string[]; limits: { phoneRevealDaily?: number; wagonSearchDaily?: number } | null;
   maxMonths: number; sort: number; active: boolean;
 };
 /** Formadagi holat: tavsif har tilda bitta matn maydoni, satrlar keyin ajratiladi. */
 type Draft = {
   code: string; name: Record<string, string>; features: Record<string, string>;
-  priceMonthSom: number; grants: SubscriptionGrant[]; phoneRevealDaily: string;
+  priceMonthSom: number; grants: SubscriptionGrant[]; phoneRevealDaily: string; wagonSearchDaily: string;
   maxMonths: number; sort: number; active: boolean;
 };
 
 const blank = () => Object.fromEntries(PLAN_LOCALES.map((l) => [l, ''])) as Record<string, string>;
 const NEW = (): Draft => ({
   code: '', name: blank(), features: blank(), priceMonthSom: 99_000,
-  grants: [...SUBSCRIPTION_GRANTS], phoneRevealDaily: '', maxMonths: 12, sort: 0, active: true,
+  grants: [...SUBSCRIPTION_GRANTS], phoneRevealDaily: '', wagonSearchDaily: String(SUBSCRIPTION_FALLBACK.wagonSearchDaily), maxMonths: 12, sort: 0, active: true,
 });
 const toDraft = (p: Plan): Draft => ({
   code: p.code,
@@ -46,6 +46,8 @@ const toDraft = (p: Plan): Draft => ({
   priceMonthSom: p.priceMonthSom,
   grants: p.grants.filter((g): g is SubscriptionGrant => (SUBSCRIPTION_GRANTS as readonly string[]).includes(g)),
   phoneRevealDaily: p.limits?.phoneRevealDaily ? String(p.limits.phoneRevealDaily) : '',
+  // Eski tarifda son yo'q: bo'sh maydon = zaxira son (SUBSCRIPTION_FALLBACK.wagonSearchDaily)
+  wagonSearchDaily: p.limits?.wagonSearchDaily ? String(p.limits.wagonSearchDaily) : '',
   maxMonths: p.maxMonths, sort: p.sort, active: p.active,
 });
 
@@ -104,7 +106,11 @@ export default function AdminPlansPage() {
       name: Object.fromEntries(PLAN_LOCALES.map((l) => [l, d.name[l]!.trim()])),
       features: Object.fromEntries(PLAN_LOCALES.map((l) => [l, lines(d.features[l] ?? '')])),
       grants: d.grants,
-      limits: needsDaily ? { phoneRevealDaily: daily } : {},
+      // Vagon soni ixtiyoriy: bo'sh bo'lsa yozilmaydi va zaxira son ishlaydi
+      limits: {
+        ...(needsDaily ? { phoneRevealDaily: daily } : {}),
+        ...(sheet.d.grants.includes('WAGON') && Number(d.wagonSearchDaily) > 0 ? { wagonSearchDaily: Number(d.wagonSearchDaily) } : {}),
+      },
       priceMonthSom: Number(d.priceMonthSom) || 0,
       maxMonths: Number(d.maxMonths) || 12,
       sort: Number(d.sort) || 0,
@@ -135,6 +141,7 @@ export default function AdminPlansPage() {
     { key: 'grants', head: tp('grants'), cell: (r) => r.grants.map((g) => tp(`grant.${g}`)).join(', ') },
     // Faqat vagon tarifida kunlik son yo'q: chiziqcha, son emas
     { key: 'daily', head: tp('phoneRevealDaily'), num: true, cell: (r) => (r.limits?.phoneRevealDaily ? num(r.limits.phoneRevealDaily, locale) : '-') },
+    { key: 'wagonDaily', head: tp('wagonSearchDaily'), num: true, cell: (r) => (!r.grants.includes('WAGON') ? '-' : num(r.limits?.wagonSearchDaily ?? SUBSCRIPTION_FALLBACK.wagonSearchDaily, locale)) },
     { key: 'maxMonths', head: tp('maxMonths'), num: true, cell: (r) => r.maxMonths },
     { key: 'active', head: tc('status'), cell: (r) => <Pill tone={r.active ? 'ok' : 'neutral'}>{r.active ? tp('onSale') : tp('offSale')}</Pill> },
   ];
@@ -208,6 +215,11 @@ export default function AdminPlansPage() {
             {/* Yulduzcha: telefon ruxsati belgilanganida maydon majburiy, tugma usiz ochilmaydi */}
             <Labeled label={`${tp('phoneRevealDaily')}${needsDaily ? ' *' : ''}`} className="block">
               <input type="number" min={1} className={INPUT} value={sheet.d.phoneRevealDaily} disabled={!needsDaily} onChange={(e) => set({ phoneRevealDaily: e.target.value })} />
+            </Labeled>
+            {/* Obunachining kunlik yangi vagon qidiruvi. Bo'sh: zaxira son */}
+            <Labeled label={tp('wagonSearchDaily')} className="block">
+              <input type="number" min={1} className={INPUT} value={sheet.d.wagonSearchDaily} disabled={!sheet.d.grants.includes('WAGON')}
+                placeholder={String(SUBSCRIPTION_FALLBACK.wagonSearchDaily)} onChange={(e) => set({ wagonSearchDaily: e.target.value })} />
             </Labeled>
             <p className="text-xs text-muted">{tp('limitHint')}</p>
             <div className="grid gap-3 sm:grid-cols-2">

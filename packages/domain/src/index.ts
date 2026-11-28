@@ -213,7 +213,8 @@ export type PlatformConfigKey = keyof typeof PLATFORM_DEFAULTS;
  * kunlik son yo'q (limits null); veb API ga yeta olmaganda narxni ko'rsatishi kerak.
  * Ikkisi ham bugungi haqiqiy qiymat, ya'ni eski mijoz uchun hech narsa o'zgarmaydi.
  */
-export const SUBSCRIPTION_FALLBACK = { priceMonthSom: 99000, phoneRevealDaily: 50 } as const;
+// wagonSearchDaily: obunachining kunlik yangi vagon qidiruvi (egasi qarori 2026-11-28: 99 000 so'mga kuniga 5 ta)
+export const SUBSCRIPTION_FALLBACK = { priceMonthSom: 99000, phoneRevealDaily: 50, wagonSearchDaily: 5 } as const;
 
 /** Tiyin → "12 670 so'm". */
 const CURRENCY_WORD: Record<SearchLang, string> = { uz: "so'm", ru: 'сум', en: 'UZS' };
@@ -614,8 +615,12 @@ export const MARKET = {
   staleDays: 30,
 } as const;
 
-/** Vagon raqami: 7 yoki 8 raqam (oxirgisi nazorat raqami). Faqat raqamlar saqlanadi. */
-export const WAGON = { noMinDigits: 7, noMaxDigits: 8 } as const;
+/**
+ * Vagon raqami: 7 yoki 8 raqam (oxirgisi nazorat raqami). Faqat raqamlar saqlanadi.
+ * batchMax: bir so'rovda (sayt, Mini App, bot) shuncha raqam qidiriladi. Har biri alohida
+ * qidiruv va kvotadan yeydi; ortig'i bitta xabarda kvotani birdan tugatardi (egasi qarori 2026-11-28).
+ */
+export const WAGON = { noMinDigits: 7, noMaxDigits: 8, batchMax: 5 } as const;
 export function normalizeWagonNo(value: string): string | null {
   const digits = value.replace(/\D/g, '');
   return digits.length >= WAGON.noMinDigits && digits.length <= WAGON.noMaxDigits ? digits : null;
@@ -749,11 +754,11 @@ export type SubscriptionGrant = (typeof SUBSCRIPTION_GRANTS)[number];
  * Tarif ichida admin belgilay oladigan chegaralar.
  *
  * Oq ro'yxat: admin ixtiyoriy nom yozib yangi imkoniyat "o'ylab topa" olmaydi. Faqat
- * kod chindan tekshiradigan chegara shu yerda turadi. Hozir bittasi: obunachining
- * kunlik telefon ochish soni. Kod o'qimaydigan kalit qo'shilsa u ekranda son bo'lib
- * ko'rinardi-yu hech narsani cheklamasdi.
+ * kod chindan tekshiradigan chegara shu yerda turadi: obunachining kunlik telefon
+ * ochish soni va kunlik yangi vagon qidiruvi soni. Kod o'qimaydigan kalit qo'shilsa u
+ * ekranda son bo'lib ko'rinardi-yu hech narsani cheklamasdi.
  */
-export const PLAN_LIMIT_KEYS = ['phoneRevealDaily'] as const;
+export const PLAN_LIMIT_KEYS = ['phoneRevealDaily', 'wagonSearchDaily'] as const;
 export type PlanLimitKey = (typeof PLAN_LIMIT_KEYS)[number];
 
 /** Tarif nomi va tavsif satrlari uch tilda: admin yozgan matnni tarjima tizimi tarjima qila olmaydi. */

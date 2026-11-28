@@ -179,7 +179,7 @@ const T: Record<Lang, {
     linkedApp: "Telefon bog'landi, ilovaga qayting.",
     linkedCode: "Raqam bog'landi. Kirish kodi keyingi xabarda keladi.",
     linkedNoCode: "Raqam bog'landi. Endi platformada telefon raqamingizni kiriting, kod shu yerga keladi.",
-    help: "YukSaroy: yuk logistikasi bozori.\n\nQidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\nVagon qayerda: vagon raqamini yuboring yoki /vagon 24567890 deb yozing. Oxirgi joylashuvi, stansiyasi va yuklangan yo bo'shligi chiqadi. Buning uchun telefon raqamingiz tasdiqlangan bo'lishi kerak.\n\nKirish: /start yuboring va telefon raqamingizni tasdiqlang. Platformada raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.",
+    help: "YukSaroy: yuk logistikasi bozori.\n\nQidiruv: nima kerakligini oddiy so'zlar bilan yozing yoki /qidir buyrug'idan foydalaning, masalan: \"Andijonda tushirish\". Bot terminallar sonini, bugungi bo'sh joylarni va eng arzon tarifni ko'rsatadi.\n\nVagon qayerda: vagon raqamini yuboring yoki /vagon 24567890 deb yozing, bir xabarda 5 tagacha raqam. Oxirgi joylashuvi, stansiyasi va yuklangan yo bo'shligi chiqadi. Buning uchun telefon raqamingiz tasdiqlangan bo'lishi kerak.\n\nKirish: /start yuboring va telefon raqamingizni tasdiqlang. Platformada raqamingizni kiritganingizda kirish kodi shu yerga keladi, kod 5 daqiqa amal qiladi.",
   },
   ru: {
     som: 'сум', filter: 'Фильтр', open: 'Открыть', inApp: 'В приложении', app: 'Открыть приложение', map: 'На карте', demo: 'Образец, не настоящее предложение',
@@ -198,7 +198,7 @@ const T: Record<Lang, {
     linkedApp: 'Номер привязан, вернитесь в приложение.',
     linkedCode: 'Номер привязан. Код для входа придёт следующим сообщением.',
     linkedNoCode: 'Номер привязан. Теперь введите его на платформе, код придёт сюда.',
-    help: 'YukSaroy: маркетплейс грузовой логистики.\n\nПоиск: напишите простыми словами, что нужно, или используйте /qidir. Бот покажет число терминалов, свободные места на сегодня и самый дешёвый тариф.\n\nГде вагон: отправьте номер вагона или напишите /vagon 24567890. Придёт последнее местоположение, станция и гружёный или порожний. Для этого нужен подтверждённый номер телефона.\n\nВход: отправьте /start и подтвердите номер. Когда введёте его на платформе, код придёт сюда и будет действовать 5 минут.',
+    help: 'YukSaroy: маркетплейс грузовой логистики.\n\nПоиск: напишите простыми словами, что нужно, или используйте /qidir. Бот покажет число терминалов, свободные места на сегодня и самый дешёвый тариф.\n\nГде вагон: отправьте номер вагона или напишите /vagon 24567890, до 5 номеров в одном сообщении. Придёт последнее местоположение, станция и гружёный или порожний. Для этого нужен подтверждённый номер телефона.\n\nВход: отправьте /start и подтвердите номер. Когда введёте его на платформе, код придёт сюда и будет действовать 5 минут.',
   },
   en: {
     som: 'UZS', filter: 'Filter', open: 'Open', inApp: 'In the app', app: 'Open the app', map: 'On map', demo: 'Sample, not a real offer',
@@ -217,7 +217,7 @@ const T: Record<Lang, {
     linkedApp: 'Phone linked, go back to the app.',
     linkedCode: 'Phone linked. The sign-in code arrives in the next message.',
     linkedNoCode: 'Phone linked. Enter the number on the platform and the code will arrive here.',
-    help: 'YukSaroy: a freight logistics marketplace.\n\nSearch: describe what you need in plain words or use /qidir. The bot shows the number of terminals, free spots today and the cheapest tariff.\n\nWhere is my wagon: send a wagon number or write /vagon 24567890. You get its last known location, station and whether it is loaded or empty. This needs your phone number confirmed.\n\nSign in: send /start and confirm your phone number. When you enter it on the platform, the code arrives here and is valid for 5 minutes.',
+    help: 'YukSaroy: a freight logistics marketplace.\n\nSearch: describe what you need in plain words or use /qidir. The bot shows the number of terminals, free spots today and the cheapest tariff.\n\nWhere is my wagon: send a wagon number or write /vagon 24567890, up to 5 numbers per message. You get its last known location, station and whether it is loaded or empty. This needs your phone number confirmed.\n\nSign in: send /start and confirm your phone number. When you enter it on the platform, the code arrives here and is valid for 5 minutes.',
   },
 };
 
@@ -228,21 +228,34 @@ type WagonRes = {
   wagonNo: string;
   found: boolean;
   current: { date: string; station: string | null; state: 'loaded' | 'empty' | 'unknown' } | null;
-  quota: { subscriber: boolean; freeUsed: number; freeTotal: number; priceSom: number };
+  quota: { subscriber: boolean; freeUsed: number; freeTotal: number; priceSom: number; dailyUsed?: number; dailyLimit?: number };
 };
 
+/** Bir xabarda shuncha raqam qidiriladi: domain dagi WAGON.batchMax bilan bir xil (bot domain ga bog'lanmaydi). */
+const WAGON_BATCH_MAX = 5;
+
 /**
- * Matndagi vagon raqami yoki null.
+ * Matndagi vagon raqamlari yoki null.
  *
- * Faqat raqam, probel va chiziqchadan tashkil topgan matn tekshiriladi: shunda "Andijonda
- * tushirish" kabi so'rov xatolik bilan vagon deb qabul qilinmaydi. Raqamlar soni domain
- * dagi WAGON bilan bir xil (7 yoki 8); bot domain paketiga bog'lanmaydi, shuning uchun
- * shart shu yerda takrorlangan.
+ * Faqat raqam, probel, vergul, nuqtali vergul, chiziqcha va yangi qatordan tashkil topgan
+ * matn tekshiriladi: shunda "Andijonda tushirish" kabi so'rov vagon deb qabul qilinmaydi.
+ * Raqamlar probel, vergul yoki yangi qator bilan ajraladi; chiziqcha raqam ichida qoladi
+ * ("2456-7890" bitta vagon). Raqamlar soni domain dagi WAGON bilan bir xil (7 yoki 8).
+ * Takror raqam bir marta olinadi (boshidagi nol farq qilmaydi). Birorta ham to'g'ri
+ * raqam bo'lmasa null: matn terminal qidiruviga ketadi, avvalgidek.
  */
-const wagonNoOf = (text: string): string | null => {
-  if (!/^[\d\s-]+$/.test(text)) return null;
-  const d = text.replace(/\D/g, '');
-  return d.length >= 7 && d.length <= 8 ? d : null;
+const wagonNosOf = (text: string): { ok: string[]; bad: string[] } | null => {
+  if (!/^[\d\s,;-]+$/.test(text)) return null;
+  const ok: string[] = []; const bad: string[] = []; const seen = new Set<string>();
+  for (const part of text.split(/[\s,;]+/)) {
+    const d = part.replace(/-/g, '');
+    if (!d) continue;
+    const key = d.replace(/^0+(?=\d)/, '');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    (d.length >= 7 && d.length <= 8 ? ok : bad).push(d);
+  }
+  return ok.length ? { ok, bad } : null;
 };
 
 /** Sana hisobotdan ISO ko'rinishda keladi; vaqti bo'lsa kesiladi, boshqa shakl tegilmaydi. */
@@ -253,62 +266,78 @@ const W: Record<Lang, {
   btn: string; hint: string; notLinked: string; notFound: (no: string) => string;
   current: string; stationUnknown: string; state: Record<'loaded' | 'empty' | 'unknown', string>;
   date: string; subscribe: string; price: (som: string) => string; subscribeCta: string;
-  quotaFree: (left: number) => string; err: Record<string, string>;
+  quotaFree: (left: number) => string; quotaSub: (left: number, n: number) => string; err: Record<string, string>;
+  rowNotFound: string; rowSkipped: string; invalid: (list: string) => string; tooMany: (n: number) => string;
 }> = {
   uz: {
     btn: 'Vagon qayerda',
-    hint: "Vagon raqamini yozing, masalan: 24567890. Raqam 7 yoki 8 ta raqamdan iborat.",
+    hint: "Vagon raqamini yozing, masalan: 24567890. Raqam 7 yoki 8 ta raqamdan iborat. Bir xabarda 5 tagacha raqam: probel, vergul yoki har qatorga bittadan.",
+    rowNotFound: 'topilmadi', rowSkipped: 'qidirilmadi',
+    invalid: (list) => `Noto'g'ri raqam (7 yoki 8 ta raqam kerak): ${list}`,
+    tooMany: (n) => `Bir xabarda eng ko'pi ${n} ta raqam qidiriladi, qolganini keyingi xabarda yuboring.`,
     notLinked: "Vagon qidiruvi uchun telefon raqamingizni tasdiqlash kerak.",
     notFound: (no) => `${no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.`,
     current: 'Oxirgi joylashuvi', stationUnknown: "Stansiya ko'rsatilmagan",
     state: { loaded: 'Yuklangan', empty: "Bo'sh", unknown: "Holati noma'lum" },
     date: 'Vaqti',
-    subscribe: 'Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.',
+    subscribe: 'Bepul qidiruv tugadi. Obuna bilan kuniga 5 tagacha vagon qidirasiz.',
     price: (som) => `Oyiga ${som} so'm.`, subscribeCta: "Obuna bo'lish",
     quotaFree: (left) => `Bepul qidiruv qoldi: ${left} ta`,
+    quotaSub: (left, n) => `Bugun qoldi: ${left} / ${n} ta qidiruv`,
     err: {
       WAGON_NO_INVALID: "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
       WAGON_NOT_CONFIGURED: "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
       WAGON_UPSTREAM: "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
       RATE_LIMITED: "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
+      WAGON_DAILY_LIMIT: "Bugungi qidiruvlar tugadi. Ertaga yana qidirishingiz mumkin.",
       generic: "Qidirilmadi. Qayta urinib ko'ring.",
     },
   },
   ru: {
     btn: 'Где вагон',
-    hint: 'Напишите номер вагона, например: 24567890. Номер состоит из 7 или 8 цифр.',
+    hint: 'Напишите номер вагона, например: 24567890. Номер состоит из 7 или 8 цифр. В одном сообщении до 5 номеров: через пробел, запятую или по одному в строке.',
+    rowNotFound: 'не найден', rowSkipped: 'не искали',
+    invalid: (list) => `Неверный номер (нужно 7 или 8 цифр): ${list}`,
+    tooMany: (n) => `В одном сообщении ищется не больше ${n} номеров, остальные отправьте следующим сообщением.`,
     notLinked: 'Для поиска вагона нужно подтвердить номер телефона.',
     notFound: (no) => `Вагон ${no} не найден. Проверьте номер и попробуйте снова.`,
     current: 'Последнее местоположение', stationUnknown: 'Станция не указана',
     state: { loaded: 'Гружёный', empty: 'Порожний', unknown: 'Состояние неизвестно' },
     date: 'Время',
-    subscribe: 'Бесплатный поиск закончился. Для поиска без ограничений нужна подписка.',
+    subscribe: 'Бесплатный поиск закончился. С подпиской можно искать до 5 вагонов в день.',
     price: (som) => `${som} сум в месяц.`, subscribeCta: 'Оформить подписку',
     quotaFree: (left) => `Осталось бесплатных поисков: ${left}`,
+    quotaSub: (left, n) => `Сегодня осталось: ${left} из ${n} поисков`,
     err: {
       WAGON_NO_INVALID: 'Номер должен состоять из 7 или 8 цифр.',
       WAGON_NOT_CONFIGURED: 'Поиск вагона пока не работает. Скоро заработает.',
       WAGON_UPSTREAM: 'Сейчас найти не получилось. Попробуйте чуть позже.',
       RATE_LIMITED: 'Слишком много запросов. Продолжить можно через час.',
+      WAGON_DAILY_LIMIT: 'Поиски на сегодня закончились. Завтра можно искать снова.',
       generic: 'Не удалось найти. Попробуйте ещё раз.',
     },
   },
   en: {
     btn: 'Where is my wagon',
-    hint: 'Send a wagon number, for example: 24567890. The number has 7 or 8 digits.',
+    hint: 'Send a wagon number, for example: 24567890. The number has 7 or 8 digits. Up to 5 numbers in one message: separated by spaces, commas or one per line.',
+    rowNotFound: 'not found', rowSkipped: 'not searched',
+    invalid: (list) => `Invalid number (7 or 8 digits needed): ${list}`,
+    tooMany: (n) => `At most ${n} numbers are searched per message, send the rest in the next one.`,
     notLinked: 'Wagon search needs your phone number confirmed.',
     notFound: (no) => `Wagon ${no} was not found. Check the number and try again.`,
     current: 'Last known location', stationUnknown: 'Station not given',
     state: { loaded: 'Loaded', empty: 'Empty', unknown: 'State unknown' },
     date: 'Time',
-    subscribe: 'Your free search is used up. Unlimited searches need a subscription.',
+    subscribe: 'Your free search is used up. A subscription lets you search up to 5 wagons a day.',
     price: (som) => `${som} UZS per month.`, subscribeCta: 'Subscribe',
     quotaFree: (left) => `Free searches left: ${left}`,
+    quotaSub: (left, n) => `Left today: ${left} of ${n} searches`,
     err: {
       WAGON_NO_INVALID: 'The number must have 7 or 8 digits.',
       WAGON_NOT_CONFIGURED: 'Wagon search is not working yet. It will be available soon.',
       WAGON_UPSTREAM: 'The search did not go through. Try again in a little while.',
       RATE_LIMITED: 'Too many searches. You can continue in an hour.',
+      WAGON_DAILY_LIMIT: "Today's searches are used up. You can search again tomorrow.",
       generic: 'Search failed. Try again.',
     },
   },
@@ -393,8 +422,10 @@ async function search(ctx: Context, q: string, lang: Lang) {
  * Kvota, obuna devori va 6 soatlik kesh serverda: bot ularni bilmaydi va bila olmaydi.
  * Shu tufayli botdan qidirish bilan saytdan qidirish bir xil hisoblanadi.
  */
-async function wagon(ctx: Context, no: string, lang: Lang) {
-  const w = W[lang];
+type WagonErr = { code: string; priceSom?: number };
+
+/** Bitta raqam: natija yoki xato kodi. Tarmoq xatosi 'DOWN' bo'ladi. */
+async function lookupWagon(ctx: Context, no: string): Promise<{ r: WagonRes } | { e: WagonErr }> {
   let res: Response;
   try {
     res = await api('/wagon/internal/telegram/search', {
@@ -403,38 +434,95 @@ async function wagon(ctx: Context, no: string, lang: Lang) {
       body: JSON.stringify({ chatId: String(ctx.chat?.id ?? ''), no }),
     });
   } catch {
-    return ctx.reply(T[lang].down);
+    return { e: { code: 'DOWN' } };
   }
-
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { code?: string; priceSom?: number } | null;
-    const code = body?.code ?? '';
-    // Telefon tasdiqlanmagan: matn bilan tushuntirmaymiz, darhol tugmani beramiz
-    if (code === 'NOT_LINKED') return askContact(ctx, lang, w.notLinked);
-    if (code === 'SUBSCRIPTION_REQUIRED') {
-      const price = body?.priceSom ? ` ${w.price(body.priceSom.toLocaleString('ru-RU').replace(/\s/g, ' '))}` : '';
-      // Obuna sahifasi ikki tomonda ikki xil yo'lda: Mini App da /tg/subscription,
-      // saytda /dashboard/subscription. Oldin ikkalasi uchun ham ikkinchisi berilardi,
-      // ya'ni Mini App tugmasi mavjud bo'lmagan /tg/dashboard/subscription ga olib borardi.
-      const rows = rowsOf([[appBtn(w.subscribeCta, '/subscription', lang, '/dashboard/subscription')]]);
-      return ctx.reply(`${w.subscribe}${price}`, rows.length ? Markup.inlineKeyboard(rows) : undefined);
-    }
-    return ctx.reply(w.err[code] ?? w.err.generic!);
+    return { e: { code: body?.code ?? '', priceSom: body?.priceSom } };
+  }
+  return { r: (await res.json()) as WagonRes };
+}
+
+/** Xato javobi. Natija qatorlari bo'lsa (partiya yarim yo'lda to'xtagan) ular xato matnidan oldin turadi. */
+function replyWagonErr(ctx: Context, lang: Lang, e: WagonErr, head = '') {
+  const w = W[lang];
+  const pre = head ? `${head}\n\n` : '';
+  const html = { parse_mode: 'HTML' as const, link_preview_options: { is_disabled: true } };
+  if (e.code === 'DOWN') return ctx.reply(`${pre}${esc(T[lang].down)}`, html);
+  // Telefon tasdiqlanmagan: matn bilan tushuntirmaymiz, darhol tugmani beramiz
+  if (e.code === 'NOT_LINKED') return askContact(ctx, lang, w.notLinked);
+  if (e.code === 'SUBSCRIPTION_REQUIRED') {
+    const price = e.priceSom ? ` ${w.price(e.priceSom.toLocaleString('ru-RU').replace(/\s/g, ' '))}` : '';
+    // Obuna sahifasi ikki tomonda ikki xil yo'lda: Mini App da /tg/subscription,
+    // saytda /dashboard/subscription. Oldin ikkalasi uchun ham ikkinchisi berilardi,
+    // ya'ni Mini App tugmasi mavjud bo'lmagan /tg/dashboard/subscription ga olib borardi.
+    const rows = rowsOf([[appBtn(w.subscribeCta, '/subscription', lang, '/dashboard/subscription')]]);
+    return ctx.reply(`${pre}${esc(w.subscribe + price)}`, { ...html, ...(rows.length ? Markup.inlineKeyboard(rows) : {}) });
+  }
+  return ctx.reply(`${pre}${esc(w.err[e.code] ?? w.err.generic!)}`, html);
+}
+
+/**
+ * Kvota satri: obunasizga qolgan bepul qidiruv, obunachiga bugungi qolgan qidiruv
+ * (kunlik chegara, egasi qarori 2026-11-28). API eski bo'lsa (son kelmasa) obunachiga satr yo'q.
+ */
+const quotaLine = (lang: Lang, r: WagonRes) => {
+  const q = r.quota;
+  if (!q.subscriber) return W[lang].quotaFree(Math.max(0, q.freeTotal - q.freeUsed));
+  return typeof q.dailyLimit === 'number' ? W[lang].quotaSub(Math.max(0, q.dailyLimit - (q.dailyUsed ?? 0)), q.dailyLimit) : null;
+};
+
+/**
+ * Vagon(lar) qayerda. Bitta raqam: avvalgi katta javob. Bir nechta (WAGON_BATCH_MAX gacha):
+ * har biri bitta qator bitta xabarda. Raqamlar ketma-ket so'raladi va birinchi xatoda
+ * to'xtaydi (obuna devori, chegara, manba): qolganlari "qidirilmadi" bo'lib qoladi, saytdagidek.
+ */
+async function wagons(ctx: Context, list: { ok: string[]; bad: string[] }, lang: Lang) {
+  const w = W[lang];
+  const nos = list.ok.slice(0, WAGON_BATCH_MAX);
+  const notes = [
+    list.bad.length ? esc(w.invalid(list.bad.join(', '))) : null,
+    list.ok.length > WAGON_BATCH_MAX ? esc(w.tooMany(WAGON_BATCH_MAX)) : null,
+  ].filter((x): x is string => x !== null);
+
+  if (nos.length === 1) {
+    const x = await lookupWagon(ctx, nos[0]!);
+    if ('e' in x) return replyWagonErr(ctx, lang, x.e, notes.join('\n'));
+    const r = x.r;
+    if (!r.found || !r.current) return ctx.reply([...notes, esc(w.notFound(r.wagonNo))].join('\n\n'), { parse_mode: 'HTML' });
+    const c = r.current;
+    const lines = [
+      ...(notes.length ? [...notes, ''] : []),
+      `<b>${esc(c.station ?? w.stationUnknown)}</b>`,
+      `${w.current} · ${esc(r.wagonNo)}`,
+      `${w.state[c.state]} · ${w.date}: ${esc(dayOf(c.date))}`,
+    ];
+    const q = quotaLine(lang, r);
+    if (q) lines.push('', q);
+    return ctx.reply(lines.join('\n'), { parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
   }
 
-  const r = (await res.json()) as WagonRes;
-  if (!r.found || !r.current) return ctx.reply(w.notFound(r.wagonNo));
-  const c = r.current;
-  const lines = [
-    `<b>${esc(c.station ?? w.stationUnknown)}</b>`,
-    `${w.current} · ${esc(r.wagonNo)}`,
-    `${w.state[c.state]} · ${w.date}: ${esc(dayOf(c.date))}`,
-  ];
-  // Obunachiga kvota satri yozilmaydi: unda cheksiz, ya'ni bu son hech qanday qarorga yaramaydi
-  if (!r.quota.subscriber) {
-    lines.push('', w.quotaFree(Math.max(0, r.quota.freeTotal - r.quota.freeUsed)));
+  const rows: string[] = [];
+  let last: WagonRes | null = null;
+  let stop: WagonErr | null = null;
+  for (const no of nos) {
+    if (stop) { rows.push(`${esc(no)} · ${w.rowSkipped}`); continue; }
+    const x = await lookupWagon(ctx, no);
+    if ('e' in x) {
+      // Telefon bog'lanmagan: natija yo'q, darhol kontakt tugmasi
+      if (x.e.code === 'NOT_LINKED') return replyWagonErr(ctx, lang, x.e);
+      stop = x.e; rows.push(`${esc(no)} · ${w.rowSkipped}`); continue;
+    }
+    last = x.r;
+    const c = x.r.found ? x.r.current : null;
+    rows.push(c
+      ? `<b>${esc(x.r.wagonNo)}</b> · ${esc(c.station ?? w.stationUnknown)} · ${w.state[c.state]} · ${esc(dayOf(c.date))}`
+      : `<b>${esc(x.r.wagonNo)}</b> · ${w.rowNotFound}`);
   }
-  return ctx.reply(lines.join('\n'), { parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+  const head = [...(notes.length ? [...notes, ''] : []), ...rows].join('\n');
+  if (stop) return replyWagonErr(ctx, lang, stop, head);
+  const q = last ? quotaLine(lang, last) : null;
+  return ctx.reply(q ? `${head}\n\n${q}` : head, { parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
 }
 
 // ── Kirish oqimi ──
@@ -504,8 +592,8 @@ bot.command('vagon', (ctx) => {
   const q = ctx.payload.trim();
   if (!q) return ctx.reply(W[lang].hint);
   // Raqam shakli serverda ham tekshiriladi; bu yerda tekshirish bekor chaqiruvni to'xtatadi
-  const no = wagonNoOf(q);
-  return no ? wagon(ctx, no, lang) : ctx.reply(W[lang].err.WAGON_NO_INVALID!);
+  const list = wagonNosOf(q);
+  return list ? wagons(ctx, list, lang) : ctx.reply(W[lang].err.WAGON_NO_INVALID!);
 });
 
 // Erkin matn: login kutilayotgan bo'lsa kontakt so'raymiz, aks holda qidiruv
@@ -516,9 +604,9 @@ bot.on('text', (ctx) => {
   if (pendingToken.has(ctx.chat.id)) { pendingToken.delete(ctx.chat.id); return askContact(ctx, lang, T[lang].askPhoneLogin); }
   const q = ctx.message.text.trim();
   if (q.startsWith('/')) return ctx.reply(T[lang].help);
-  // Yalang'och raqam terminal qidiruvi uchun ma'no bermaydi: u vagon raqami bo'ladi
-  const no = wagonNoOf(q);
-  if (no) return wagon(ctx, no, lang);
+  // Yalang'och raqam(lar) terminal qidiruvi uchun ma'no bermaydi: ular vagon raqamlari
+  const list = wagonNosOf(q);
+  if (list) return wagons(ctx, list, lang);
   report(ctx, 'bot.search', { text: q.slice(0, 200) });
   return search(ctx, q, lang);
 });

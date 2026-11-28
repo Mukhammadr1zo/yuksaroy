@@ -5,7 +5,7 @@
     "lead": "Vagon raqamini kiriting: oxirgi joylashuvi, qaysi stansiyada turgani, yuklangan yoki bo'shligi. Birinchi qidiruv bepul.",
     "label": "Vagon raqamlari",
     "placeholder": "Masalan 24567890, 24567891",
-    "hint": "Har qatorga yoki vergul bilan bitta raqam, 20 tagacha. Har biri 7 yoki 8 ta raqam.",
+    "hint": "Har qatorga yoki vergul bilan bitta raqam, 5 tagacha. Har biri 7 yoki 8 ta raqam.",
     "submit": "Qidirish",
     "submitMany": "{n} ta raqamni qidirish",
     "searching": "Qidirilmoqda",
@@ -15,6 +15,7 @@
     "costNote": "Har bir raqam alohida qidiruv sifatida sanaladi.",
     "freeRepeat": "Topilgan vagonni 6 soat ichida qayta qidirish bepul.",
     "notEnoughFree": "Kiritilgan raqam {n} ta, bepul qidiruv {left} ta. Qolganlari uchun obuna kerak.",
+    "notEnoughDaily": "Kiritilgan raqam {n} ta, bugungi qidiruv esa {left} ta qoldi. Qolganini ertaga qidiring.",
     "rowWait": "Navbatda",
     "rowNotFound": "Topilmadi",
     "rowSkipped": "Qidirilmadi",
@@ -22,8 +23,8 @@
     "guest": "Qidirish uchun kirish kerak. Birinchi qidiruv bepul.",
     "loginCta": "Kirish",
     "quotaFree": "Bepul qidiruv qoldi: {left} ta",
-    "quotaSub": "Obunachi: cheksiz qidiruv",
-    "subscribe": "Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.",
+    "quotaSub": "Obunachi: bugun {left} / {n} ta qidiruv qoldi",
+    "subscribe": "Bepul qidiruv tugadi. Obuna bilan kuniga 5 tagacha vagon qidirasiz.",
     "subscribeCta": "Obuna bo'lish",
     "notFound": "{no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.",
     "current": "Oxirgi joylashuvi",
@@ -40,7 +41,8 @@
       "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
       "WAGON_UPSTREAM": "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
       "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
-      "generic": "Qidirilmadi. Qayta urinib ko'ring."
+      "generic": "Qidirilmadi. Qayta urinib ko'ring.",
+      "WAGON_DAILY_LIMIT": "Bugungi qidiruvlar tugadi. Ertaga (Toshkent vaqti bilan yarim tundan keyin) yana qidirishingiz mumkin."
     },
     "price": "Oyiga {price} so'm.",
     "recent": {
@@ -50,12 +52,12 @@
     },
     "seo": {
       "title": "Vagon qayerda: raqami bo'yicha izlash, birinchisi bepul | YukSaroy",
-      "description": "Vagon raqamini kiriting va oxirgi joylashuvini ko'ring: qaysi stansiyada turgani, yuklangan yoki bo'shligi. Birinchi qidiruv bepul, bir vaqtda 20 tagacha raqam."
+      "description": "Vagon raqamini kiriting va oxirgi joylashuvini ko'ring: qaysi stansiyada turgani, yuklangan yoki bo'shligi. Birinchi qidiruv bepul, bir vaqtda 5 tagacha raqam."
     },
     "about": {
       "h2": "Vagon qayerda ekanini qanday bilish mumkin",
       "p1": "Vagon raqamini kiritsangiz, sahifa uning oxirgi joylashuvini ko'rsatadi: qaysi stansiyada turgani, yuklangan yoki bo'shligi va bu ma'lumot qaysi vaqtga tegishli ekani. Yo'nalish tarixi ko'rsatilmaydi, faqat hozirgi holat.",
-      "p2": "Raqam 7 yoki 8 ta raqamdan iborat. Boshidagi nol ahamiyatsiz: 01234567 va 1234567 bitta vagon. Bir vaqtda 20 tagacha raqam kiritish mumkin, har qatorga yoki vergul bilan ajratib."
+      "p2": "Raqam 7 yoki 8 ta raqamdan iborat. Boshidagi nol ahamiyatsiz: 01234567 va 1234567 bitta vagon. Bir vaqtda 5 tagacha raqam kiritish mumkin, har qatorga yoki vergul bilan ajratib."
     },
     "how": {
       "h2": "Uch qadam",
@@ -86,7 +88,7 @@
       "q1": "Vagon raqamini qayerdan olaman?",
       "a1": "Raqam vagonning yon tomonida yozilgan va yuk hujjatlarida ko'rsatiladi. 7 yoki 8 ta raqam.",
       "q2": "Nechta vagonni birdan izlash mumkin?",
-      "a2": "Bir vaqtda 20 tagacha. Har bir raqam alohida qidiruv sifatida sanaladi.",
+      "a2": "Bir vaqtda 5 tagacha. Har bir raqam alohida qidiruv sifatida sanaladi.",
       "q3": "Ma'lumot qanchalik yangi?",
       "a3": "Hisobotlar kuniga bir-ikki marta yangilanadi. Javobda ma'lumot qaysi vaqtga tegishli ekani yozib turadi.",
       "q4": "Vagon topilmasa nima qilaman?",
@@ -96,7 +98,7 @@
       "q6": "Kirish kerakmi?",
       "a6": "Ha. Bepul qidiruv soni har foydalanuvchi uchun alohida sanaladi, shuning uchun qidiruv hisobga bog'lanadi. Kirish kodi Telegram botga keladi.",
       "q7": "Vagon qidirish qancha turadi?",
-      "a7": "Birinchi qidiruv bepul. O'sha vagonni 6 soat ichida qayta ko'rish ham sanalmaydi. Undan keyin obuna kerak, u cheksiz qidiruvni ochadi."
+      "a7": "Birinchi qidiruv bepul. O'sha vagonni 6 soat ichida qayta ko'rish ham sanalmaydi. Undan keyin obuna kerak: u bilan kuniga 5 tagacha yangi vagon qidirasiz."
     },
     "free": {
       "h2": "Birinchi qidiruv bepul",

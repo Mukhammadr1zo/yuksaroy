@@ -1107,6 +1107,7 @@
       "price": "Per month, som",
       "grants": "What it unlocks",
       "phoneRevealDaily": "Numbers a day",
+      "wagonSearchDaily": "Wagon searches a day",
       "limitHint": "Required for a plan that opens phone numbers: how many numbers a subscriber can reveal a day. Not needed for a wagon-search-only plan.",
       "maxMonths": "Longest term, months",
       "sort": "Order",

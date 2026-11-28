@@ -4,14 +4,14 @@ import { sapi } from './server-api';
 /** Sotuvdagi tarif. Nomi va tavsifi admin yozgan matn, shuning uchun tarjima faylidan emas. */
 export type PlanCard = {
   code: string; name: Record<string, string>; features: Record<string, string[]>;
-  priceMonthSom: number; grants: string[]; maxMonths: number; limits: { phoneRevealDaily?: number } | null;
+  priceMonthSom: number; grants: string[]; maxMonths: number; limits: { phoneRevealDaily?: number; wagonSearchDaily?: number } | null;
 };
 /**
  * Obuna narxi va kunlik raqam soni tarifda (Plan jadvali) turadi, shuning uchun serverdan
  * olinadi. Bepul sonlar esa sozlamada: ular obunasiz odamga tegishli, tarifga emas.
  */
 export type SubPrice = {
-  pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number;
+  pricePerMonthSom: number; phoneRevealDaily: number; wagonSearchFree: number; wagonSearchDaily: number;
   wagonPerMonthSom: number | null; plans: PlanCard[];
 };
 
@@ -20,6 +20,7 @@ const FALLBACK: SubPrice = {
   pricePerMonthSom: SUBSCRIPTION_FALLBACK.priceMonthSom,
   phoneRevealDaily: SUBSCRIPTION_FALLBACK.phoneRevealDaily,
   wagonSearchFree: PLATFORM_DEFAULTS.wagonSearchFree,
+  wagonSearchDaily: SUBSCRIPTION_FALLBACK.wagonSearchDaily,
   wagonPerMonthSom: null,
   plans: [],
 };

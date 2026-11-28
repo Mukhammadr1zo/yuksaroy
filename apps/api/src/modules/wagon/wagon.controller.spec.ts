@@ -13,14 +13,15 @@ import { WagonController } from './wagon.controller';
  * soxta prisma faqat kontroller ishlatadigan to'rtta so'rovni biladi.
  */
 type Row = { id: string; userId: string; wagonNo: string; found: boolean; result: unknown; createdAt: Date };
-type Where = { userId?: string; wagonNo?: string; createdAt?: { gt: Date }; result?: { not: unknown } };
+type Where = { userId?: string; wagonNo?: string; createdAt?: { gt?: Date; gte?: Date }; result?: { not: unknown } };
 
 function fakePrisma() {
   const rows: Row[] = [];
   const match = (r: Row, w: Where) =>
     (w.userId === undefined || r.userId === w.userId) &&
     (w.wagonNo === undefined || r.wagonNo === w.wagonNo) &&
-    (w.createdAt === undefined || r.createdAt > w.createdAt.gt) &&
+    (w.createdAt?.gt === undefined || r.createdAt > w.createdAt.gt) &&
+    (w.createdAt?.gte === undefined || r.createdAt >= w.createdAt.gte) &&
     (w.result === undefined || r.result !== null);
   const wagonSearch = {
     findFirst: async ({ where, orderBy }: { where: Where; orderBy?: { createdAt: 'desc' } }) => {
@@ -59,6 +60,8 @@ function fakeLinks(links: Record<string, string>) {
 function setup(opts: {
   freeTotal?: number;
   subscriber?: boolean;
+  /** Obunachining kunlik chegarasi. Sukut katta: soatlik chegara testlari kunlik chegaraga urilmasin. */
+  dailyLimit?: number;
   missFirst?: Set<string>;
   links?: Record<string, string>;
   /** To'lov devorining sanog'i shu massivga tushadi. */
@@ -83,7 +86,11 @@ function setup(opts: {
     prisma,
     { get: async () => ({ wagonSearchFree: opts.freeTotal ?? 1 }) } as unknown as PlatformConfigService,
     // Narx tarifdan: devor tanasidagi priceSom shu yerdan keladi
-    { isActive: async () => opts.subscriber ?? false, priceFor: async () => 99_000 } as unknown as SubscriptionService,
+    {
+      active: async () => (opts.subscriber ? { id: 'sub', endsAt: new Date(Date.now() + 86_400_000), limits: null } : null),
+      wagonDailyLimitFor: async () => opts.dailyLimit ?? 1000,
+      priceFor: async () => 99_000,
+    } as unknown as SubscriptionService,
     { log: async () => {} } as unknown as AuditService,
     upstream,
     {
@@ -159,11 +166,35 @@ describe('WagonController.search', () => {
     expect(rows).toHaveLength(1);
   });
 
-  it('obunachi cheksiz, har qidiruv qator yozadi', async () => {
+  it('obunachi bepul kvotaga qaramaydi, har qidiruv qator yozadi', async () => {
     const { c, rows } = setup({ freeTotal: 0, subscriber: true });
     expect(await status(c.search('s', { no: '1234567' }))).toBe(200);
     expect(await status(c.search('s', { no: '7654321' }))).toBe(200);
     expect(rows).toHaveLength(2);
+  });
+
+  it("obunachiga kuniga 5 ta yangi qidiruv, 6-si WAGON_DAILY_LIMIT; o'z takrori sanalmaydi; ertasi kuni yangilanadi", async () => {
+    const { c } = setup({ freeTotal: 0, subscriber: true, dailyLimit: 5 });
+    // Toshkent 10:00
+    vi.setSystemTime(new Date('2026-11-28T05:00:00Z'));
+    for (let i = 0; i < 5; i++) expect(await status(c.search('d-1', { no: String(6100001 + i) }))).toBe(200);
+    // O'zi qidirgan vagonni qayta ochish chegaradan tashqari
+    expect(await status(c.search('d-1', { no: '6100001' }))).toBe(200);
+    const err = await c.search('d-1', { no: '6100009' }).catch((e: HttpException) => e);
+    expect(err).toBeInstanceOf(HttpException);
+    expect((err as HttpException).getStatus()).toBe(429);
+    expect((err as HttpException).getResponse()).toMatchObject({ code: 'WAGON_DAILY_LIMIT', dailyLimit: 5, dailyUsed: 5 });
+    // Toshkent yarim tuni (19:00 UTC) o'tdi: yangi kun
+    vi.setSystemTime(new Date('2026-11-28T19:30:00Z'));
+    expect(await status(c.search('d-1', { no: '6100009' }))).toBe(200);
+  });
+
+  it('me kunlik sonni beradi', async () => {
+    const { c } = setup({ subscriber: true, dailyLimit: 5 });
+    vi.setSystemTime(new Date('2026-11-28T05:00:00Z'));
+    await c.search('d-2', { no: '6200001' });
+    const me = await c.me('d-2');
+    expect(me).toMatchObject({ subscriber: true, dailyLimit: 5, dailyUsed: 1 });
   });
 });
 
@@ -252,7 +283,7 @@ describe('WagonController.telegramSearch', () => {
     expect(await status(c.telegramSearch({ chatId: '777', no: '4500002' }))).toBe(402);
   });
 
-  it('obunachi botdan ham cheksiz qidiradi', async () => {
+  it('obunachi botdan ham bepul kvotasiz qidiradi', async () => {
     const { c } = setup({ subscriber: true, freeTotal: 0, links: { '777': 'u-tg-sub' } });
     vi.setSystemTime(new Date('2026-09-25T09:00:00Z'));
     for (let i = 0; i < 3; i++) {

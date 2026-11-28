@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, HttpCode, HttpException, Po
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { IsString, MaxLength } from 'class-validator';
 import { Prisma } from '@prisma/client';
-import { normalizeWagonNo } from '@yuksaroy/domain';
+import { normalizeWagonNo, uzLocalDate, uzLocalToUtc } from '@yuksaroy/domain';
 import { AuditService } from '../../common/audit.service';
 import { IpBucket } from '../../common/ip-bucket';
 import { PlatformConfigService } from '../../common/platform-config.service';
@@ -125,6 +125,11 @@ export class WagonController {
       this.quota(userId),
     ]);
     const own = !!ownRow;
+    // Obunachining kunlik chegarasi (egasi qarori 2026-11-28): o'zining 6 soatlik takrori sanalmaydi,
+    // shuning uchun tekshiruv ham faqat yangi qidiruvda. Ertasi kuni (Toshkent vaqti) son yangilanadi.
+    if (!own && q.subscriber && q.dailyUsed >= q.dailyLimit) {
+      throw new HttpException({ code: 'WAGON_DAILY_LIMIT', ...q }, 429);
+    }
     if (!own && !canSearch(q.subscriber, q.freeUsed, q.freeTotal)) {
       /*
        * Devorning MAXRAJI: shu yerda to'xtab ketgan ODAM sanaladi, kuniga bir marta
@@ -159,6 +164,7 @@ export class WagonController {
     if (!own) {
       await this.prisma.wagonSearch.create({ data: { userId, wagonNo, found, result: cached ? Prisma.DbNull : (result as unknown as Prisma.InputJsonValue) } });
       q.freeUsed++;
+      q.dailyUsed++;
     }
     await this.audit.log({ actorId: userId, action: 'wagon.search', entity: 'Wagon', entityId: wagonNo, meta: { found, fromCache: !!cached } });
     return { wagonNo, found, ...result, quota: q };
@@ -171,9 +177,15 @@ export class WagonController {
      * to'liq obuna ham, faqat vagon tarifi ham ochadi, devor odam chindan to'laydigan
      * summani ko'rsatishi kerak. Bepul son sozlamada: u obunasiz odamga tegishli.
      */
-    const [subscriber, cfg, freeUsed, priceSom] = await Promise.all([
-      this.subs.isActive(userId, 'WAGON'), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } }), this.subs.priceFor('WAGON'),
+    const dayStart = uzLocalToUtc(uzLocalDate(new Date()), '00:00');
+    const [act, cfg, freeUsed, dailyUsed, priceSom] = await Promise.all([
+      this.subs.active(userId, 'WAGON'), this.config.get(), this.prisma.wagonSearch.count({ where: { userId } }),
+      // Bugungi yangi qidiruvlar: har qator bitta yangi qidiruv (o'zining takrori qator yozmaydi)
+      this.prisma.wagonSearch.count({ where: { userId, createdAt: { gte: dayStart } } }),
+      this.subs.priceFor('WAGON'),
     ]);
-    return { subscriber, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom };
+    // Kunlik son obuna qatoridan (sotib olingandagi tarif), bo'lmasa sukut tarif, bo'lmasa zaxira
+    const dailyLimit = await this.subs.wagonDailyLimitFor(act?.limits);
+    return { subscriber: act !== null, freeUsed, freeTotal: cfg.wagonSearchFree, priceSom, dailyUsed, dailyLimit };
   }
 }

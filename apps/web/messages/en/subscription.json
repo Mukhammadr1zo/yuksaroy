@@ -5,7 +5,7 @@
     "lead": "Monthly subscription. What it opens:",
     "limits": {
       "phones": "{n} phone numbers a day",
-      "wagon": "Wagon search unlimited, {free, plural, =0 {no free tries without a subscription} other {# free without a subscription}}",
+      "wagon": "Wagon search: {daily} a day, {free, plural, =0 {no free tries without a subscription} other {# free without a subscription}}",
       "chat": "Chat is free without a subscription too"
     },
     "active": "Subscription active",

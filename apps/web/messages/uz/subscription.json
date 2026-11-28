@@ -5,7 +5,7 @@
     "lead": "Oylik obuna. Nimani ochadi:",
     "limits": {
       "phones": "Kuniga {n} ta telefon raqami",
-      "wagon": "Vagon qidiruvi cheksiz, {free, plural, =0 {obunasiz bepul urinish yo'q} other {obunasiz # tasi bepul}}",
+      "wagon": "Vagon qidiruvi: kuniga {daily} ta, {free, plural, =0 {obunasiz bepul urinish yo'q} other {obunasiz # tasi bepul}}",
       "chat": "Yozishma obunasiz ham bepul"
     },
     "active": "Obuna faol",

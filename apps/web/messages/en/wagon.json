@@ -5,7 +5,7 @@
     "lead": "Enter a wagon number: its last known location, which station it is at, loaded or empty. The first search is free.",
     "label": "Wagon numbers",
     "placeholder": "For example 24567890, 24567891",
-    "hint": "One number per line or separated by commas, up to 20. Each has 7 or 8 digits.",
+    "hint": "One number per line or separated by commas, up to 5. Each has 7 or 8 digits.",
     "submit": "Search",
     "submitMany": "Search {n} numbers",
     "searching": "Searching",
@@ -15,6 +15,7 @@
     "costNote": "Each number counts as a separate search.",
     "freeRepeat": "Searching a found wagon again within 6 hours is free.",
     "notEnoughFree": "You entered {n} numbers and have {left} free searches. The rest need a subscription.",
+    "notEnoughDaily": "You entered {n} numbers and have {left} searches left today. Search the rest tomorrow.",
     "rowWait": "Queued",
     "rowNotFound": "Not found",
     "rowSkipped": "Not searched",
@@ -22,8 +23,8 @@
     "guest": "Sign in to search. The first search is free.",
     "loginCta": "Sign in",
     "quotaFree": "Free searches left: {left}",
-    "quotaSub": "Subscriber: unlimited searches",
-    "subscribe": "Your free search is used up. Unlimited searches need a subscription.",
+    "quotaSub": "Subscriber: {left} of {n} searches left today",
+    "subscribe": "Your free search is used up. A subscription lets you search up to 5 wagons a day.",
     "subscribeCta": "Subscribe",
     "notFound": "Wagon {no} was not found. Check the number and try again.",
     "current": "Last known location",
@@ -40,7 +41,8 @@
       "WAGON_NOT_CONFIGURED": "Wagon search is not working yet. It will be available soon.",
       "WAGON_UPSTREAM": "The search did not go through. Try again in a little while.",
       "RATE_LIMITED": "Too many searches. You can continue in an hour.",
-      "generic": "Search failed. Try again."
+      "generic": "Search failed. Try again.",
+      "WAGON_DAILY_LIMIT": "Today's searches are used up. You can search again tomorrow (after midnight Tashkent time)."
     },
     "price": "{price} som a month.",
     "recent": {
@@ -50,12 +52,12 @@
     },
     "seo": {
       "title": "Track a wagon by number: first search free | YukSaroy",
-      "description": "Wagon location by number in Uzbekistan: which station it is at, loaded or empty, and what time the data refers to. The first search is free, up to 20 numbers at once."
+      "description": "Wagon location by number in Uzbekistan: which station it is at, loaded or empty, and what time the data refers to. The first search is free, up to 5 numbers at once."
     },
     "about": {
       "h2": "How to find out where a wagon is",
       "p1": "Enter the wagon number and the page shows its last known location: which station it is at, whether it is loaded or empty, and what time the data refers to. Route history is not shown, only the current position.",
-      "p2": "The number has 7 or 8 digits. A leading zero does not matter: 01234567 and 1234567 are the same wagon. You can enter up to 20 numbers at once, one per line or separated by commas."
+      "p2": "The number has 7 or 8 digits. A leading zero does not matter: 01234567 and 1234567 are the same wagon. You can enter up to 5 numbers at once, one per line or separated by commas."
     },
     "how": {
       "h2": "Three steps",
@@ -86,7 +88,7 @@
       "q1": "Where do I get the wagon number?",
       "a1": "The number is painted on the side of the wagon and written in the shipping papers. It is 7 or 8 digits.",
       "q2": "How many wagons can I check at once?",
-      "a2": "Up to 20. Each number counts as a separate search.",
+      "a2": "Up to 5. Each number counts as a separate search.",
       "q3": "How fresh is the data?",
       "a3": "Reports are refreshed once or twice a day. The answer shows what time the data refers to.",
       "q4": "The wagon was not found, what now?",
@@ -96,7 +98,7 @@
       "q6": "Do I need to sign in?",
       "a6": "Yes. Free searches are counted per user, so a search is tied to an account. The sign-in code arrives in the Telegram bot.",
       "q7": "How much does a wagon search cost?",
-      "a7": "The first search is free. Opening the same wagon again within 6 hours does not count either. After that you need a subscription, which opens unlimited search."
+      "a7": "The first search is free. Opening the same wagon again within 6 hours does not count either. After that you need a subscription, which lets you search up to 5 new wagons a day."
     },
     "free": {
       "h2": "The first search is free",

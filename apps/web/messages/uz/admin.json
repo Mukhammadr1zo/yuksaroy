@@ -1107,6 +1107,7 @@
       "price": "Bir oyi, so'm",
       "grants": "Nima ochiladi",
       "phoneRevealDaily": "Kuniga raqam",
+      "wagonSearchDaily": "Kuniga vagon qidiruvi",
       "limitHint": "Telefon raqamini ochadigan tarifda majburiy: obunachi kuniga nechta raqam ocha oladi. Faqat vagon qidiruvi tarifida kerak emas.",
       "maxMonths": "Eng uzun muddat, oy",
       "sort": "Tartib",
