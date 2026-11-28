@@ -130,6 +130,9 @@ model Organization {
   address        String?
   regionCode     String? // viloyat kodi (ESR/SOATO): katalog filtrlari uchun
   storefront     Json? // /k/[slug] do'kon: { tagline, about, logoUrl, coverUrl, showListings, showTerminals, contactTelegram, contactPhonePublic }
+  /// Vagon operatori: spravkadagi kompaniya nomi (d-railway /ys-fleet/companies dan). Faqat admin qo'yadi;
+  /// tashkilot tasdiqlangan (VERIFIED) va shu nom bor bo'lsa a'zolari «Mening vagonlarim» ni ko'radi.
+  fleetName      String?
   createdAt      DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt      DateTime     @updatedAt @db.Timestamptz(3)
   members        Membership[]

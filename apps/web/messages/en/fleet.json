@@ -1,0 +1,47 @@
+{
+  "fleet": {
+    "title": "My wagons",
+    "lead": "From the latest spravka: where each wagon is, loaded or empty, and which train it is in.",
+    "asOf": "Spravka: {at}",
+    "verified": "Verified operator",
+    "kpi": { "total": "total", "loaded": "loaded", "empty": "empty", "inTrain": "in trains" },
+    "idleBanner": "{n} empty wagons have stood at a station for more than {days} days. Show",
+    "filter": { "all": "All", "loaded": "Loaded", "empty": "Empty", "inTrain": "In a train", "idle": "Empty {days}+ days" },
+    "searchPh": "Wagon number or station",
+    "state": { "loaded": "Loaded", "empty": "Empty" },
+    "idle": "empty {n} days",
+    "from": "loaded at: {from}",
+    "train": "Train {ix}",
+    "trainSize": "{n} wagons",
+    "trainLoading": "Loading the train",
+    "trainFailed": "Could not load the train.",
+    "mine": "yours",
+    "ownerUnknown": "owner not given",
+    "more": "Show more ({n})",
+    "empty": "No wagons here.",
+    "none": {
+      "title": "This section is for wagon operators",
+      "body": "Register your organization and send documents for verification. Once the admin approves it and links it to your name in the spravka, all your wagons appear here.",
+      "cta": "Register the organization"
+    },
+    "errors": {
+      "FLEET_NOT_CONFIGURED": "Wagon data is not connected yet.",
+      "FLEET_UPSTREAM": "The data source did not respond. Try again shortly.",
+      "generic": "Could not load."
+    },
+    "admin": {
+      "title": "Wagon operator",
+      "lead": "Link the organization to the company name in the spravka. If the organization is verified, its members see that company's wagons in My wagons.",
+      "current": "Linked: {name}",
+      "notLinked": "Not linked",
+      "searchPh": "Company name (as in the spravka)",
+      "search": "Search",
+      "wagons": "{n} wagons",
+      "link": "Link",
+      "unlink": "Remove the link",
+      "notVerified": "The organization is not verified yet: even when linked, the section opens only after verification.",
+      "saved": "Saved",
+      "failed": "Failed"
+    }
+  }
+}
