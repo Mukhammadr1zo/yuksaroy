@@ -13,7 +13,24 @@ export interface UpstreamEvent {
   snapshot_date?: string | null;
   station?: string | null;
   state?: string | null;
+  dest_station?: string | null;
+  operation?: string | null;
+  cargo?: string | null;
+  weight?: number | null;
+  /** Spravka qatori (va_sprd): yuklangan vagonda { from, load_date } */
+  extra?: Record<string, unknown> | null;
 }
+
+/**
+ * Yuklangan vagonning yo'li: qayerda va qachon yuklandi, qayerga ketyapti, nima ortilgan.
+ * Faqat obunachiga beriladi (egasi qarori 2026-11-28). Ijarachi va kompaniya yo'q.
+ */
+export interface WagonTrip { from: string | null; loadDate: string | null; dest: string | null; cargo: string | null; weightT: number | null }
+/** Vaqt chizig'idagi bitta qadam: sana, stansiya, operatsiya, holat. */
+export interface WagonStep { date: string; station: string | null; op: string | null; state: WagonEvent['state'] }
+
+/** Vaqt chizig'i shuncha qadamdan oshmaydi: telefon ekrani va bot xabari uchun yetarli. */
+export const TIMELINE_MAX = 20;
 
 export const EVENTS_MAX = 50;
 /** Bir xil vagon 6 soat ichida qayta so'ralsa upstream chaqirilmaydi: hisobotlar kuniga bir-ikki marta yangilanadi. */
@@ -56,6 +73,12 @@ export function mapEvents(rows: readonly UpstreamEvent[]): WagonEvent[] {
  * hodisa bo'lsa eng keyingi event_date olinadi. snapshot_date yo'q bo'lsa event_date bo'yicha.
  */
 export function deriveCurrent(rows: readonly UpstreamEvent[]): WagonEvent | null {
+  const best = latest(rows);
+  return best ? mapEvents([best])[0] : null;
+}
+
+/** Eng so'nggi hisobotdagi hodisa (deriveCurrent bilan bir xil tanlov). */
+function latest(rows: readonly UpstreamEvent[]): UpstreamEvent | null {
   let best: UpstreamEvent | null = null;
   for (const r of rows) {
     if (!str(r.event_date)) continue;
@@ -64,7 +87,52 @@ export function deriveCurrent(rows: readonly UpstreamEvent[]): WagonEvent | null
     const b = `${str(best.snapshot_date) ?? best.event_date}|${best.event_date}`;
     if (a > b) best = r;
   }
-  return best ? mapEvents([best])[0] : null;
+  return best;
+}
+
+/** Yuklash operatsiyasi (ruscha hisobot nomlari: "Погрузка", "ПОГР"). */
+const isLoading = (op: string | null) => !!op && /погр/i.test(op);
+
+/**
+ * Yo'l: so'nggi hodisadan manzil va yuk; yuklangan joy va sana spravka qatoridagi `extra` dan,
+ * u bo'lmasa tarixdagi oxirgi yuklash operatsiyasidan. Bo'sh vagonda manzil bo'lsa ham yuk yo'q.
+ * Hech narsa topilmasa null.
+ */
+export function deriveTrip(rows: readonly UpstreamEvent[]): WagonTrip | null {
+  const best = latest(rows);
+  if (!best) return null;
+  const loaded = stateOf(best.state) === 'loaded';
+  let from = unshout(str(best.extra?.from));
+  let loadDate = str(best.extra?.load_date)?.slice(0, 10) ?? null;
+  if (loaded && !from) {
+    const load = [...rows].filter((r) => str(r.event_date) && isLoading(str(r.operation)))
+      .sort((a, b) => ((a.event_date as string) < (b.event_date as string) ? 1 : -1))[0];
+    if (load) { from = unshout(str(load.station)); loadDate = loadDate ?? (load.event_date as string).slice(0, 10); }
+  }
+  const trip: WagonTrip = {
+    from: loaded ? from : null, loadDate: loaded ? loadDate : null,
+    dest: unshout(str(best.dest_station)), cargo: loaded ? unshout(str(best.cargo)) : null,
+    weightT: loaded && typeof best.weight === 'number' && best.weight > 0 ? best.weight : null,
+  };
+  return trip.from || trip.dest || trip.cargo ? trip : null;
+}
+
+/**
+ * Vaqt chizig'i: hodisalar sana bo'yicha, ketma-ket bir stansiyadagi takrorlar bitta qadam
+ * (vagon stansiyada turganda har hisobot yangi qator beradi). Yangisi birinchi, eng ko'pi TIMELINE_MAX.
+ */
+export function deriveTimeline(rows: readonly UpstreamEvent[]): WagonStep[] {
+  const asc = rows.filter((r) => !!str(r.event_date))
+    .map((r) => ({ date: r.event_date as string, station: unshout(str(r.station)), op: unshout(str(r.operation)), state: stateOf(r.state) }))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  const steps: WagonStep[] = [];
+  for (const s of asc) {
+    const prev = steps.at(-1);
+    // O'sha stansiya va o'sha holat: yangi qadam emas, faqat oxirgi operatsiya yangilanadi
+    if (prev && prev.station === s.station && prev.state === s.state) { if (s.op) prev.op = s.op; continue; }
+    steps.push({ ...s });
+  }
+  return steps.reverse().slice(0, TIMELINE_MAX);
 }
 
 /**

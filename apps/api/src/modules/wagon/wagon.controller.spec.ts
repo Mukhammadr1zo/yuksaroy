@@ -189,6 +189,19 @@ describe('WagonController.search', () => {
     expect(await status(c.search('d-1', { no: '6100009' }))).toBe(200);
   });
 
+  it("yo'l va vaqt chizig'i faqat obunachiga, boshqaga locked belgisi", async () => {
+    const sub = setup({ subscriber: true });
+    const a = await sub.c.search('t-sub', { no: '6300001' }) as Record<string, unknown>;
+    expect(a).toHaveProperty('trip');
+    expect(a).toHaveProperty('timeline');
+    expect(a).not.toHaveProperty('locked');
+    const free = setup({ freeTotal: 5 });
+    const b = await free.c.search('t-free', { no: '6300002' }) as Record<string, unknown>;
+    expect(b).not.toHaveProperty('trip');
+    expect(b).not.toHaveProperty('timeline');
+    expect(b).toHaveProperty('locked');
+  });
+
   it('me kunlik sonni beradi', async () => {
     const { c } = setup({ subscriber: true, dailyLimit: 5 });
     vi.setSystemTime(new Date('2026-11-28T05:00:00Z'));

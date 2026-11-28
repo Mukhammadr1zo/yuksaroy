@@ -19,6 +19,7 @@ import { ApiError, api, hasSession } from '@/lib/api';
 import { num, uzDate, uzDateTime, uzToday } from '@/lib/format';
 import { BTN_PRIMARY, BTN_GHOST, INPUT, Notice } from '@/components/kabinet/bits';
 import type { WagonEvent, WagonMe, WagonResult, WagonRow } from '@/lib/types-wagon';
+import { TripView } from './TripView';
 
 type Err = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'WAGON_DAILY_LIMIT' | 'generic';
 type State =
@@ -226,7 +227,13 @@ function BatchRow({ row, locale }: { row: WagonRow; locale: string }) {
   return (
     <li className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line py-2.5 last:border-0">
       <span className="font-mono font-semibold tabular-nums">{row.no}</span>
-      <span className="min-w-0 flex-1 wrap-anywhere">{c ? (c.station ?? t('stationUnknown')) : ''}</span>
+      <span className="min-w-0 flex-1 wrap-anywhere">
+        {c ? (c.station ?? t('stationUnknown')) : ''}
+        {/* Obunachiga qisqa yo'l: qayerdan -> qayerga · yuk */}
+        {row.s === 'done' && row.r.trip ? (
+          <span className="block text-xs text-muted">{[row.r.trip.from, row.r.trip.dest].filter(Boolean).join(' → ')}{row.r.trip.cargo ? ` · ${row.r.trip.cargo}` : ''}</span>
+        ) : null}
+      </span>
       <span className={`rounded-full px-3 py-1 text-xs font-semibold ${tone}`}>{badge}</span>
       <span className="font-mono text-xs tabular-nums text-muted">{c ? dayLabel(c.date, locale) : ''}</span>
     </li>
@@ -248,6 +255,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
         <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <Row k={t('date')} v={dayLabel(c.date, locale)} mono />
         </dl>
+      <TripView r={r} locale={locale} subscribeHref="/dashboard/subscription" />
       <p className="mt-4 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
     </section>
   );

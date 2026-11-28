@@ -19,10 +19,20 @@ export type WagonRow = { no: string } & (
   | { s: 'done'; r: WagonResult }
 );
 
+/** Yuklangan vagonning yo'li (faqat obunachiga): qayerda va qachon yuklandi, qayerga, nima ortilgan. */
+export interface WagonTrip { from: string | null; loadDate: string | null; dest: string | null; cargo: string | null; weightT: number | null }
+/** Vaqt chizig'idagi qadam, yangisi birinchi. */
+export interface WagonStep { date: string; station: string | null; op: string | null; state: WagonEvent['state'] }
+
 export interface WagonResult {
   wagonNo: string;
   found: boolean;
   current: WagonEvent | null;
+  /** Obunachiga: yo'l va vaqt chizig'i. Obunasizga ular kelmaydi, faqat `locked`. */
+  trip?: WagonTrip | null;
+  timeline?: WagonStep[];
+  /** Obunasiz: obunada ko'rinadigan yo'l bor (karta ostida taklif chiziladi). */
+  locked?: boolean;
   /** Yangisi birinchi, eng ko'pi 50 ta. */
   fetchedAt: string;
   quota: WagonQuota;
