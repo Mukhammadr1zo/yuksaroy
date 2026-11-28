@@ -83,6 +83,7 @@
       "remove": "{no} ni olib tashlash",
       "tooMany": "Eng ko'pi {n} ta raqam qidiriladi, ortiqchasi tashlandi.",
       "notEnoughFree": "{n} ta raqam tanlandi, bepul qidiruv esa {left} ta qoldi.",
+      "notEnoughDaily": "{n} ta raqam tanlandi, bugungi qidiruv esa {left} ta qoldi.",
       "submitMany": "{n} ta vagonni qidirish",
       "progress": "Qidirilmoqda: {done} / {total}",
       "rowNotFound": "Topilmadi",
@@ -91,8 +92,8 @@
       "submit": "Qidirish",
       "searching": "Qidirilmoqda",
       "quotaFree": "Bepul qidiruv qoldi: {left} ta",
-      "quotaSub": "Obunachi: cheksiz qidiruv",
-      "subscribe": "Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.",
+      "quotaSub": "Obunachi: bugun {left} / {n} ta qidiruv qoldi",
+      "subscribe": "Bepul qidiruv tugadi. Obuna bilan kuniga 5 tagacha vagon qidirasiz.",
       "subscribeCta": "Obuna bo'lish",
       "price": "Oyiga {price} so'm.",
       "guest": "Sessiya tugadi. Qidirish uchun qayta kiring.",
@@ -112,7 +113,8 @@
         "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
         "WAGON_UPSTREAM": "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
         "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
-        "generic": "Qidirilmadi. Qayta urinib ko'ring."
+        "generic": "Qidirilmadi. Qayta urinib ko'ring.",
+        "WAGON_DAILY_LIMIT": "Bugungi qidiruvlar tugadi. Ertaga yana qidirishingiz mumkin."
       }
     },
     "terminal": {

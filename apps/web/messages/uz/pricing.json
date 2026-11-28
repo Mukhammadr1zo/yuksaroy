@@ -6,7 +6,7 @@
     },
     "eyebrow": "Tariflar",
     "title": "Ko'rish bepul. Ishlash obuna bilan.",
-    "lead": "Katalog, xarita va so'rovlar hamma uchun ochiq, narxlar mehmonlardan ham yashirilmaydi. Obuna telefon raqamlarini ochadi, vagon qidiruvini cheksiz qiladi va e'lonlaringizni yuqoriga chiqaradi.",
+    "lead": "Katalog, xarita va so'rovlar hamma uchun ochiq, narxlar mehmonlardan ham yashirilmaydi. Obuna telefon raqamlarini ochadi, kuniga bir necha vagonni qidirish imkonini beradi va e'lonlaringizni yuqoriga chiqaradi.",
     "perMonth": "so'm / oy",
     "free": {
       "name": "Bepul",
@@ -23,7 +23,7 @@
       "note": "bitta odamga",
       "badge": "Hammasi ichida",
       "f1": "E'lon va terminal egalarining telefon raqami, kuniga {phones} tagacha",
-      "f2": "Vagon qidiruvi cheksiz ({free} tasi obunasiz ham bepul)",
+      "f2": "Vagon qidiruvi kuniga {daily} ta ({free} tasi obunasiz ham bepul)",
       "f3": "Barcha e'lonlaringiz ro'yxatda yuqorida chiqadi",
       "f4": "Ko'rsatkichlar: 30 kunlik ko'rishlar va so'rovlar",
       "f5": "Muddat 1 dan 12 oygacha, o'zingiz tanlaysiz",

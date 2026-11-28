@@ -41,7 +41,7 @@ export default async function PricingPage({ params }: Params) {
   const t = await getTranslations('pricing');
   const sub = await subscriptionPrice();
 
-  const vars = { phones: sub.phoneRevealDaily, free: sub.wagonSearchFree };
+  const vars = { phones: sub.phoneRevealDaily, free: sub.wagonSearchFree, daily: sub.wagonSearchDaily };
   const fromI18n = (key: 'free' | 'subscription' | 'team', n: number, href: string, priceSom: number | null): Card => ({
     key, name: t(`${key}.name`), priceSom, note: t(`${key}.note`), href, cta: t(`${key}.cta`), hot: key === 'subscription',
     features: Array.from({ length: n }, (_, i) => t(`${key}.f${i + 1}`, vars)),

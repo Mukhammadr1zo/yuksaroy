@@ -20,7 +20,7 @@ import { num, uzDate, uzDateTime, uzToday } from '@/lib/format';
 import { BTN_PRIMARY, BTN_GHOST, INPUT, Notice } from '@/components/kabinet/bits';
 import type { WagonEvent, WagonMe, WagonResult, WagonRow } from '@/lib/types-wagon';
 
-type Err = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'generic';
+type Err = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'WAGON_DAILY_LIMIT' | 'generic';
 type State =
   | { s: 'idle' } | { s: 'guest' } | { s: 'busy' }
   // Narx devor javobidan keladi: odam uni izlab boshqa sahifaga ketmasin
@@ -114,6 +114,8 @@ export function WagonSearch() {
     const status = e instanceof ApiError ? e.status : 0;
     if (status === 401) { setSt({ s: 'guest' }); return; }
     if (status === 402) { setSt({ s: 'subscribe', priceSom: (e as ApiError).body?.priceSom }); return; }
+    // Obunachining kunlik chegarasi ham 429, lekin matni boshqa: "bir soatdan keyin" emas, "ertaga"
+    if (status === 429 && (e as ApiError).body?.code === 'WAGON_DAILY_LIMIT') { setSt({ s: 'err', code: 'WAGON_DAILY_LIMIT' }); return; }
     setSt({ s: 'err', code: ERRS[status] ?? 'generic' });
   }
 
@@ -146,6 +148,8 @@ export function WagonSearch() {
         {/* Bepul qidiruv partiyaga yetmasligi OLDINDAN aytiladi: odam yarim yo'lda devorga urilmasin */}
         {me && !me.subscriber && nos.length > me.remainingFree ? (
           <p className="mt-2 text-xs text-amber-ink">{t('notEnoughFree', { n: nos.length, left: me.remainingFree })}</p>
+        ) : me && me.subscriber && nos.length > Math.max(0, me.dailyLimit - me.dailyUsed) ? (
+          <p className="mt-2 text-xs text-amber-ink">{t('notEnoughDaily', { n: nos.length, left: Math.max(0, me.dailyLimit - me.dailyUsed) })}</p>
         ) : null}
         <p className="mt-2 text-xs text-muted">{t('costNote')} {t('freeRepeat')}</p>
         {guest ? (
@@ -154,7 +158,7 @@ export function WagonSearch() {
           </p>
         ) : me ? (
           <p className="mt-3 text-sm text-muted">
-            {me.subscriber ? t('quotaSub') : t('quotaFree', { left: me.remainingFree })}
+            {me.subscriber ? t('quotaSub', { left: Math.max(0, me.dailyLimit - me.dailyUsed), n: me.dailyLimit }) : t('quotaFree', { left: me.remainingFree })}
             {/* Bepul qidiruv tugagan: odam devorga urilmasdan oldin obunaga yo'l ko'rsin */}
             {!me.subscriber && me.remainingFree === 0 ? <> <Link href="/dashboard/subscription" className={cta}>{t('subscribeCta')}</Link></> : null}
           </p>

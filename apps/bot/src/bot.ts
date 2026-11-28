@@ -228,7 +228,7 @@ type WagonRes = {
   wagonNo: string;
   found: boolean;
   current: { date: string; station: string | null; state: 'loaded' | 'empty' | 'unknown' } | null;
-  quota: { subscriber: boolean; freeUsed: number; freeTotal: number; priceSom: number };
+  quota: { subscriber: boolean; freeUsed: number; freeTotal: number; priceSom: number; dailyUsed?: number; dailyLimit?: number };
 };
 
 /** Bir xabarda shuncha raqam qidiriladi: domain dagi WAGON.batchMax bilan bir xil (bot domain ga bog'lanmaydi). */
@@ -266,7 +266,7 @@ const W: Record<Lang, {
   btn: string; hint: string; notLinked: string; notFound: (no: string) => string;
   current: string; stationUnknown: string; state: Record<'loaded' | 'empty' | 'unknown', string>;
   date: string; subscribe: string; price: (som: string) => string; subscribeCta: string;
-  quotaFree: (left: number) => string; err: Record<string, string>;
+  quotaFree: (left: number) => string; quotaSub: (left: number, n: number) => string; err: Record<string, string>;
   rowNotFound: string; rowSkipped: string; invalid: (list: string) => string; tooMany: (n: number) => string;
 }> = {
   uz: {
@@ -280,14 +280,16 @@ const W: Record<Lang, {
     current: 'Oxirgi joylashuvi', stationUnknown: "Stansiya ko'rsatilmagan",
     state: { loaded: 'Yuklangan', empty: "Bo'sh", unknown: "Holati noma'lum" },
     date: 'Vaqti',
-    subscribe: 'Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.',
+    subscribe: 'Bepul qidiruv tugadi. Obuna bilan kuniga 5 tagacha vagon qidirasiz.',
     price: (som) => `Oyiga ${som} so'm.`, subscribeCta: "Obuna bo'lish",
     quotaFree: (left) => `Bepul qidiruv qoldi: ${left} ta`,
+    quotaSub: (left, n) => `Bugun qoldi: ${left} / ${n} ta qidiruv`,
     err: {
       WAGON_NO_INVALID: "Raqam 7 yoki 8 ta raqamdan iborat bo'lishi kerak.",
       WAGON_NOT_CONFIGURED: "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
       WAGON_UPSTREAM: "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
       RATE_LIMITED: "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
+      WAGON_DAILY_LIMIT: "Bugungi qidiruvlar tugadi. Ertaga yana qidirishingiz mumkin.",
       generic: "Qidirilmadi. Qayta urinib ko'ring.",
     },
   },
@@ -302,14 +304,16 @@ const W: Record<Lang, {
     current: 'Последнее местоположение', stationUnknown: 'Станция не указана',
     state: { loaded: 'Гружёный', empty: 'Порожний', unknown: 'Состояние неизвестно' },
     date: 'Время',
-    subscribe: 'Бесплатный поиск закончился. Для поиска без ограничений нужна подписка.',
+    subscribe: 'Бесплатный поиск закончился. С подпиской можно искать до 5 вагонов в день.',
     price: (som) => `${som} сум в месяц.`, subscribeCta: 'Оформить подписку',
     quotaFree: (left) => `Осталось бесплатных поисков: ${left}`,
+    quotaSub: (left, n) => `Сегодня осталось: ${left} из ${n} поисков`,
     err: {
       WAGON_NO_INVALID: 'Номер должен состоять из 7 или 8 цифр.',
       WAGON_NOT_CONFIGURED: 'Поиск вагона пока не работает. Скоро заработает.',
       WAGON_UPSTREAM: 'Сейчас найти не получилось. Попробуйте чуть позже.',
       RATE_LIMITED: 'Слишком много запросов. Продолжить можно через час.',
+      WAGON_DAILY_LIMIT: 'Поиски на сегодня закончились. Завтра можно искать снова.',
       generic: 'Не удалось найти. Попробуйте ещё раз.',
     },
   },
@@ -324,14 +328,16 @@ const W: Record<Lang, {
     current: 'Last known location', stationUnknown: 'Station not given',
     state: { loaded: 'Loaded', empty: 'Empty', unknown: 'State unknown' },
     date: 'Time',
-    subscribe: 'Your free search is used up. Unlimited searches need a subscription.',
+    subscribe: 'Your free search is used up. A subscription lets you search up to 5 wagons a day.',
     price: (som) => `${som} UZS per month.`, subscribeCta: 'Subscribe',
     quotaFree: (left) => `Free searches left: ${left}`,
+    quotaSub: (left, n) => `Left today: ${left} of ${n} searches`,
     err: {
       WAGON_NO_INVALID: 'The number must have 7 or 8 digits.',
       WAGON_NOT_CONFIGURED: 'Wagon search is not working yet. It will be available soon.',
       WAGON_UPSTREAM: 'The search did not go through. Try again in a little while.',
       RATE_LIMITED: 'Too many searches. You can continue in an hour.',
+      WAGON_DAILY_LIMIT: "Today's searches are used up. You can search again tomorrow.",
       generic: 'Search failed. Try again.',
     },
   },
@@ -456,9 +462,15 @@ function replyWagonErr(ctx: Context, lang: Lang, e: WagonErr, head = '') {
   return ctx.reply(`${pre}${esc(w.err[e.code] ?? w.err.generic!)}`, html);
 }
 
-const quotaLine = (lang: Lang, r: WagonRes) =>
-  // Obunachiga kvota satri yozilmaydi: unda cheksiz, ya'ni bu son hech qanday qarorga yaramaydi
-  r.quota.subscriber ? null : W[lang].quotaFree(Math.max(0, r.quota.freeTotal - r.quota.freeUsed));
+/**
+ * Kvota satri: obunasizga qolgan bepul qidiruv, obunachiga bugungi qolgan qidiruv
+ * (kunlik chegara, egasi qarori 2026-11-28). API eski bo'lsa (son kelmasa) obunachiga satr yo'q.
+ */
+const quotaLine = (lang: Lang, r: WagonRes) => {
+  const q = r.quota;
+  if (!q.subscriber) return W[lang].quotaFree(Math.max(0, q.freeTotal - q.freeUsed));
+  return typeof q.dailyLimit === 'number' ? W[lang].quotaSub(Math.max(0, q.dailyLimit - (q.dailyUsed ?? 0)), q.dailyLimit) : null;
+};
 
 /**
  * Vagon(lar) qayerda. Bitta raqam: avvalgi katta javob. Bir nechta (WAGON_BATCH_MAX gacha):

@@ -24,7 +24,7 @@ import type { WagonEvent, WagonMe, WagonResult, WagonRow } from '@/lib/types-wag
 import { haptic, useTg } from './TgProvider';
 import { BTN, CARD, Empty, Err, INPUT, LoadError, Row } from './bits';
 
-type Code = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'generic';
+type Code = 'WAGON_NO_INVALID' | 'WAGON_NOT_CONFIGURED' | 'WAGON_UPSTREAM' | 'RATE_LIMITED' | 'WAGON_DAILY_LIMIT' | 'generic';
 type St =
   | { s: 'idle' } | { s: 'busy' } | { s: 'guest' }
   | { s: 'result'; r: WagonResult }
@@ -166,6 +166,8 @@ export function WagonBox() {
         {all.length > WAGON.batchMax ? <p className="mt-2 text-xs text-amber-ink">{t('tooMany', { n: WAGON.batchMax })}</p> : null}
         {me && !me.subscriber && nos.length > 1 && nos.length > me.remainingFree ? (
           <p className="mt-2 text-xs text-amber-ink">{t('notEnoughFree', { n: nos.length, left: me.remainingFree })}</p>
+        ) : me && me.subscriber && nos.length > Math.max(0, me.dailyLimit - me.dailyUsed) ? (
+          <p className="mt-2 text-xs text-amber-ink">{t('notEnoughDaily', { n: nos.length, left: Math.max(0, me.dailyLimit - me.dailyUsed) })}</p>
         ) : null}
         <button type="submit" disabled={busy || !nos.length} className={`${BTN} mt-3 gap-2`}>
           <MagnifyingGlassIcon size={18} aria-hidden="true" />
@@ -176,7 +178,7 @@ export function WagonBox() {
 
       {meFailed ? <div className="mt-3"><LoadError onRetry={loadMe} /></div> : me ? (
         <p className="mt-2 text-sm text-muted">
-          {me.subscriber ? t('quotaSub') : t('quotaFree', { left: me.remainingFree })}
+          {me.subscriber ? t('quotaSub', { left: Math.max(0, me.dailyLimit - me.dailyUsed), n: me.dailyLimit }) : t('quotaFree', { left: me.remainingFree })}
           {/* Bepul qidiruv tugagan: odam devorga urilmasdan oldin obunaga yo'l ko'rsin */}
           {!me.subscriber && me.remainingFree === 0 ? <> <Link href="/tg/subscription" className="inline-flex min-h-11 items-center font-semibold text-teal-ink underline">{t('subscribeCta')}</Link></> : null}
         </p>
@@ -263,6 +265,8 @@ function errState(e: unknown): St {
   const status = e instanceof ApiError ? e.status : 0;
   if (status === 401) return { s: 'guest' };
   if (status === 402) return { s: 'subscribe', priceSom: (e as ApiError).body?.priceSom };
+  // Obunachining kunlik chegarasi ham 429, lekin matni boshqa: "bir soatdan keyin" emas, "ertaga"
+  if (status === 429 && (e as ApiError).body?.code === 'WAGON_DAILY_LIMIT') return { s: 'err', code: 'WAGON_DAILY_LIMIT' };
   return { s: 'err', code: ERRS[status] ?? 'generic' };
 }
 

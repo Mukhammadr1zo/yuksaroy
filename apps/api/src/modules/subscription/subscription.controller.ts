@@ -81,6 +81,8 @@ export class SubscriptionPublicController {
       pricePerMonthSom: def?.priceMonthSom ?? SUBSCRIPTION_FALLBACK.priceMonthSom,
       phoneRevealDaily: planLimit(def?.limits, 'phoneRevealDaily', SUBSCRIPTION_FALLBACK.phoneRevealDaily),
       wagonSearchFree: cfg.wagonSearchFree,
+      // Obunachining kunlik vagon qidiruvi: vagonni ochadigan eng arzon tarifniki, bo'lmasa sukut tarif, bo'lmasa zaxira
+      wagonSearchDaily: planLimit(cheapestIn(plans, 'WAGON')?.limits, 'wagonSearchDaily', planLimit(def?.limits, 'wagonSearchDaily', SUBSCRIPTION_FALLBACK.wagonSearchDaily)),
       // null: vagon qidiruvini alohida sotadigan tarif yo'q, sahifa alohida narx chizmaydi
       wagonPerMonthSom: cheapestIn(plans, 'WAGON')?.priceMonthSom ?? null,
       plans: plans.map(catalogView),

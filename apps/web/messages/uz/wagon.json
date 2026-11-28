@@ -15,6 +15,7 @@
     "costNote": "Har bir raqam alohida qidiruv sifatida sanaladi.",
     "freeRepeat": "Topilgan vagonni 6 soat ichida qayta qidirish bepul.",
     "notEnoughFree": "Kiritilgan raqam {n} ta, bepul qidiruv {left} ta. Qolganlari uchun obuna kerak.",
+    "notEnoughDaily": "Kiritilgan raqam {n} ta, bugungi qidiruv esa {left} ta qoldi. Qolganini ertaga qidiring.",
     "rowWait": "Navbatda",
     "rowNotFound": "Topilmadi",
     "rowSkipped": "Qidirilmadi",
@@ -22,8 +23,8 @@
     "guest": "Qidirish uchun kirish kerak. Birinchi qidiruv bepul.",
     "loginCta": "Kirish",
     "quotaFree": "Bepul qidiruv qoldi: {left} ta",
-    "quotaSub": "Obunachi: cheksiz qidiruv",
-    "subscribe": "Bepul qidiruv tugadi. Cheksiz qidiruv uchun obuna kerak.",
+    "quotaSub": "Obunachi: bugun {left} / {n} ta qidiruv qoldi",
+    "subscribe": "Bepul qidiruv tugadi. Obuna bilan kuniga 5 tagacha vagon qidirasiz.",
     "subscribeCta": "Obuna bo'lish",
     "notFound": "{no} raqamli vagon topilmadi. Raqamni tekshirib qayta urinib ko'ring.",
     "current": "Oxirgi joylashuvi",
@@ -40,7 +41,8 @@
       "WAGON_NOT_CONFIGURED": "Vagon qidiruvi hozircha ishlamayapti. Tez orada ishga tushadi.",
       "WAGON_UPSTREAM": "Hozir qidirib bo'lmadi. Birozdan keyin qayta urinib ko'ring.",
       "RATE_LIMITED": "Juda ko'p qidiruv. Bir soatdan keyin davom etadi.",
-      "generic": "Qidirilmadi. Qayta urinib ko'ring."
+      "generic": "Qidirilmadi. Qayta urinib ko'ring.",
+      "WAGON_DAILY_LIMIT": "Bugungi qidiruvlar tugadi. Ertaga (Toshkent vaqti bilan yarim tundan keyin) yana qidirishingiz mumkin."
     },
     "price": "Oyiga {price} so'm.",
     "recent": {
@@ -96,7 +98,7 @@
       "q6": "Kirish kerakmi?",
       "a6": "Ha. Bepul qidiruv soni har foydalanuvchi uchun alohida sanaladi, shuning uchun qidiruv hisobga bog'lanadi. Kirish kodi Telegram botga keladi.",
       "q7": "Vagon qidirish qancha turadi?",
-      "a7": "Birinchi qidiruv bepul. O'sha vagonni 6 soat ichida qayta ko'rish ham sanalmaydi. Undan keyin obuna kerak, u cheksiz qidiruvni ochadi."
+      "a7": "Birinchi qidiruv bepul. O'sha vagonni 6 soat ichida qayta ko'rish ham sanalmaydi. Undan keyin obuna kerak: u bilan kuniga 5 tagacha yangi vagon qidirasiz."
     },
     "free": {
       "h2": "Birinchi qidiruv bepul",

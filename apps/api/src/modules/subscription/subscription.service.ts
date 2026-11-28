@@ -225,6 +225,15 @@ export class SubscriptionService {
   }
 
   /**
+   * Obunachining kunlik yangi vagon qidiruvi: xuddi shu zanjir (obuna qatori, sukut tarif, zaxira).
+   * Eski obuna qatorida bu son yo'q: ular ham sukut tarif yoki zaxira sonini oladi.
+   */
+  async wagonDailyLimitFor(limits: unknown): Promise<number> {
+    const def = (await this.defaultPlan())?.limits;
+    return planLimit(limits, 'wagonSearchDaily', planLimit(def, 'wagonSearchDaily', SUBSCRIPTION_FALLBACK.wagonSearchDaily));
+  }
+
+  /**
    * Bitta e'lonni obuna muddatigacha ko'taradi: obunachi yangi e'lon bersa, u keyingi
    * tasdiqni kutmasdan darhol yuqorida chiqadi. Obunasi yo'q bo'lsa hech narsa qilmaydi.
    */
@@ -260,6 +269,7 @@ export class SubscriptionService {
     // Kunlik raqam chegarasi TELEFON obunasining qatoridan: vagon tarifi bilan kelgan
     // odamga telefon chegarasi ko'rsatilsa u yo'q huquqning sonini ko'rardi
     const phoneRow = rows[SUBSCRIPTION_GRANTS.indexOf('PHONE')];
+    const wagonRow = rows[SUBSCRIPTION_GRANTS.indexOf('WAGON')];
     return {
       active: act !== null,
       endsAt: act?.endsAt ?? null,
@@ -273,6 +283,7 @@ export class SubscriptionService {
       // bo'lmasa sukut tarifniki: dailyLimitFor bilan bir xil zanjir, lekin so'rovsiz
       phoneRevealDaily: planLimit(phoneRow?.limits, 'phoneRevealDaily', planLimit(def?.limits, 'phoneRevealDaily', SUBSCRIPTION_FALLBACK.phoneRevealDaily)),
       wagonSearchFree: cfg.wagonSearchFree,
+      wagonSearchDaily: planLimit(wagonRow?.limits, 'wagonSearchDaily', planLimit(def?.limits, 'wagonSearchDaily', SUBSCRIPTION_FALLBACK.wagonSearchDaily)),
       pending: pending ? { ...subscriptionView(pending), payInstructions: payInstructions(cfg.payDetails) } : null,
     };
   }

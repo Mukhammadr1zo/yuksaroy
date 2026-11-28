@@ -83,6 +83,7 @@
       "remove": "Remove {no}",
       "tooMany": "At most {n} numbers are searched, the rest were dropped.",
       "notEnoughFree": "{n} numbers picked, but only {left} free searches left.",
+      "notEnoughDaily": "{n} numbers picked, but only {left} searches left today.",
       "submitMany": "Search {n} wagons",
       "progress": "Searching: {done} / {total}",
       "rowNotFound": "Not found",
@@ -91,8 +92,8 @@
       "submit": "Search",
       "searching": "Searching",
       "quotaFree": "Free searches left: {left}",
-      "quotaSub": "Subscriber: unlimited searches",
-      "subscribe": "Your free search is used up. Unlimited searches need a subscription.",
+      "quotaSub": "Subscriber: {left} of {n} searches left today",
+      "subscribe": "Your free search is used up. A subscription lets you search up to 5 wagons a day.",
       "subscribeCta": "Subscribe",
       "price": "{price} som a month.",
       "guest": "The session ended. Sign in again to search.",
@@ -112,7 +113,8 @@
         "WAGON_NOT_CONFIGURED": "Wagon search is not working yet. It will be available soon.",
         "WAGON_UPSTREAM": "The search did not go through. Try again in a little while.",
         "RATE_LIMITED": "Too many searches. You can continue in an hour.",
-        "generic": "Search failed. Try again."
+        "generic": "Search failed. Try again.",
+        "WAGON_DAILY_LIMIT": "Today's searches are used up. You can search again tomorrow."
       }
     },
     "terminal": {

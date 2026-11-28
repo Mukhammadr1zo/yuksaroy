@@ -6,7 +6,8 @@ export interface WagonEvent {
   state: 'loaded' | 'empty' | 'unknown';
 }
 
-export interface WagonQuota { subscriber: boolean; freeUsed: number; freeTotal: number }
+/** dailyUsed/dailyLimit: obunachining bugungi (Toshkent kuni) yangi qidiruvlari va chegarasi. */
+export interface WagonQuota { subscriber: boolean; freeUsed: number; freeTotal: number; dailyUsed: number; dailyLimit: number }
 
 /** Oxirgi qidirganlarim: takrorsiz, yangisidan eskisiga, eng ko'pi 10 ta. */
 export interface WagonRecent { wagonNo: string; found: boolean }
