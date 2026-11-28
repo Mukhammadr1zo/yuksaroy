@@ -78,7 +78,7 @@
       "ph": "24567890",
       "hint": "7 yoki 8 ta raqam. Bir vaqtda {n} tagacha: raqamni yozib «Qo'shish» ni bosing. Har bir raqam alohida qidiruv. O'zingiz qidirgan vagonni 6 soat ichida qayta ochish bepul.",
       "add": "Qo'shish",
-      "full": "{n} ta raqam tanlandi",
+      "full": "{n} ta tanlandi",
       "picked": "Tanlangan raqamlar",
       "remove": "{no} ni olib tashlash",
       "tooMany": "Eng ko'pi {n} ta raqam qidiriladi, ortiqchasi tashlandi.",

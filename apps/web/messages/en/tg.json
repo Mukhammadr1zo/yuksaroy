@@ -78,7 +78,7 @@
       "ph": "24567890",
       "hint": "7 or 8 digits. Up to {n} at once: type a number and tap Add. Each number counts as a separate search. Reopening a wagon you searched yourself within 6 hours is free.",
       "add": "Add",
-      "full": "{n} numbers picked",
+      "full": "{n} picked",
       "picked": "Picked numbers",
       "remove": "Remove {no}",
       "tooMany": "At most {n} numbers are searched, the rest were dropped.",
