@@ -228,6 +228,10 @@ type WagonRes = {
   wagonNo: string;
   found: boolean;
   current: { date: string; station: string | null; state: 'loaded' | 'empty' | 'unknown' } | null;
+  /** Faqat obunachiga: yo'l va vaqt chizig'i (yangisi birinchi). Obunasizga `locked`. */
+  trip?: { from: string | null; loadDate: string | null; dest: string | null; cargo: string | null; weightT: number | null } | null;
+  timeline?: { date: string; station: string | null; op: string | null }[];
+  locked?: boolean;
   quota: { subscriber: boolean; freeUsed: number; freeTotal: number; priceSom: number; dailyUsed?: number; dailyLimit?: number };
 };
 
@@ -268,11 +272,14 @@ const W: Record<Lang, {
   date: string; subscribe: string; price: (som: string) => string; subscribeCta: string;
   quotaFree: (left: number) => string; quotaSub: (left: number, n: number) => string; err: Record<string, string>;
   rowNotFound: string; rowSkipped: string; invalid: (list: string) => string; tooMany: (n: number) => string;
+  from: string; dest: string; cargo: string; steps: string; locked: string;
 }> = {
   uz: {
     btn: 'Vagon qayerda',
     hint: "Vagon raqamini yozing, masalan: 24567890. Raqam 7 yoki 8 ta raqamdan iborat. Bir xabarda 5 tagacha raqam: probel, vergul yoki har qatorga bittadan.",
     rowNotFound: 'topilmadi', rowSkipped: 'qidirilmadi',
+    from: 'Yuklangan', dest: 'Manzil', cargo: 'Yuk', steps: "Yo'l tarixi",
+    locked: "Qayerda yuklangani, manzili, yuk nomi va yo'l tarixi obunachilarga ko'rinadi.",
     invalid: (list) => `Noto'g'ri raqam (7 yoki 8 ta raqam kerak): ${list}`,
     tooMany: (n) => `Bir xabarda eng ko'pi ${n} ta raqam qidiriladi, qolganini keyingi xabarda yuboring.`,
     notLinked: "Vagon qidiruvi uchun telefon raqamingizni tasdiqlash kerak.",
@@ -297,6 +304,8 @@ const W: Record<Lang, {
     btn: 'Где вагон',
     hint: 'Напишите номер вагона, например: 24567890. Номер состоит из 7 или 8 цифр. В одном сообщении до 5 номеров: через пробел, запятую или по одному в строке.',
     rowNotFound: 'не найден', rowSkipped: 'не искали',
+    from: 'Погружен', dest: 'Назначение', cargo: 'Груз', steps: 'История пути',
+    locked: 'Где погружен, куда идёт, название груза и история пути видны подписчикам.',
     invalid: (list) => `Неверный номер (нужно 7 или 8 цифр): ${list}`,
     tooMany: (n) => `В одном сообщении ищется не больше ${n} номеров, остальные отправьте следующим сообщением.`,
     notLinked: 'Для поиска вагона нужно подтвердить номер телефона.',
@@ -321,6 +330,8 @@ const W: Record<Lang, {
     btn: 'Where is my wagon',
     hint: 'Send a wagon number, for example: 24567890. The number has 7 or 8 digits. Up to 5 numbers in one message: separated by spaces, commas or one per line.',
     rowNotFound: 'not found', rowSkipped: 'not searched',
+    from: 'Loaded at', dest: 'Destination', cargo: 'Cargo', steps: 'Route history',
+    locked: 'Where it was loaded, its destination, the cargo and the route history are shown to subscribers.',
     invalid: (list) => `Invalid number (7 or 8 digits needed): ${list}`,
     tooMany: (n) => `At most ${n} numbers are searched per message, send the rest in the next one.`,
     notLinked: 'Wagon search needs your phone number confirmed.',
@@ -463,6 +474,26 @@ function replyWagonErr(ctx: Context, lang: Lang, e: WagonErr, head = '') {
 }
 
 /**
+ * Yo'l satrlari (obunachiga): yuklangan joy va sana, manzil, yuk, oxirgi 5 qadam.
+ * Obunasizga bitta "obunada ko'rinadi" satri, yo'l bo'lmasa hech narsa.
+ */
+function tripLines(lang: Lang, r: WagonRes): string[] {
+  const w = W[lang];
+  const t = r.trip;
+  if (!t && !(r.timeline && r.timeline.length > 1)) return r.locked ? ['', `<i>${esc(w.locked)}</i>`] : [];
+  const out: string[] = [''];
+  if (t?.from) out.push(`${w.from}: <b>${esc(t.from)}</b>${t.loadDate ? ` · ${esc(t.loadDate)}` : ''}`);
+  if (t?.dest) out.push(`${w.dest}: <b>${esc(t.dest)}</b>`);
+  if (t?.cargo) out.push(`${w.cargo}: <b>${esc(t.cargo)}</b>${t.weightT ? ` · ${t.weightT} t` : ''}`);
+  const steps = (r.timeline ?? []).slice(0, 5);
+  if (steps.length > 1) {
+    out.push('', `${w.steps}:`);
+    for (const s of steps) out.push(`${esc(dayOf(s.date))} · ${esc(s.station ?? w.stationUnknown)}${s.op ? ` · ${esc(s.op)}` : ''}`);
+  }
+  return out;
+}
+
+/**
  * Kvota satri: obunasizga qolgan bepul qidiruv, obunachiga bugungi qolgan qidiruv
  * (kunlik chegara, egasi qarori 2026-11-28). API eski bo'lsa (son kelmasa) obunachiga satr yo'q.
  */
@@ -496,6 +527,7 @@ async function wagons(ctx: Context, list: { ok: string[]; bad: string[] }, lang:
       `<b>${esc(c.station ?? w.stationUnknown)}</b>`,
       `${w.current} · ${esc(r.wagonNo)}`,
       `${w.state[c.state]} · ${w.date}: ${esc(dayOf(c.date))}`,
+      ...tripLines(lang, r),
     ];
     const q = quotaLine(lang, r);
     if (q) lines.push('', q);
@@ -517,6 +549,8 @@ async function wagons(ctx: Context, list: { ok: string[]; bad: string[] }, lang:
     const c = x.r.found ? x.r.current : null;
     rows.push(c
       ? `<b>${esc(x.r.wagonNo)}</b> · ${esc(c.station ?? w.stationUnknown)} · ${w.state[c.state]} · ${esc(dayOf(c.date))}`
+        // Obunachiga qisqa yo'l: qayerdan -> qayerga · yuk
+        + (x.r.trip ? `\n   ${esc([x.r.trip.from, x.r.trip.dest].filter(Boolean).join(' → '))}${x.r.trip.cargo ? ` · ${esc(x.r.trip.cargo)}` : ''}` : '')
       : `<b>${esc(x.r.wagonNo)}</b> · ${w.rowNotFound}`);
   }
   const head = [...(notes.length ? [...notes, ''] : []), ...rows].join('\n');

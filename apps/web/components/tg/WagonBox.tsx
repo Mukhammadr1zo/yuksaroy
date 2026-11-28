@@ -21,6 +21,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError, api } from '@/lib/api';
 import { num, uzDate, uzDateTime, uzToday } from '@/lib/format';
 import type { WagonEvent, WagonMe, WagonResult, WagonRow } from '@/lib/types-wagon';
+import { TripView } from '@/components/wagon/TripView';
 import { haptic, useTg } from './TgProvider';
 import { BTN, CARD, Empty, Err, INPUT, LoadError, Row } from './bits';
 
@@ -254,6 +255,12 @@ function BatchRow({ row, locale }: { row: WagonRow; locale: string }) {
           <span className="shrink-0 font-mono text-xs tabular-nums text-muted">{dayLabel(c.date, locale)}</span>
         </p>
       ) : null}
+      {/* Obunachiga qisqa yo'l: qayerdan -> qayerga · yuk */}
+      {row.s === 'done' && row.r.trip ? (
+        <p className="mt-0.5 break-words text-xs text-muted">
+          {[row.r.trip.from, row.r.trip.dest].filter(Boolean).join(' → ')}{row.r.trip.cargo ? ` · ${row.r.trip.cargo}` : ''}
+        </p>
+      ) : null}
     </li>
   );
 }
@@ -284,6 +291,7 @@ function Result({ r, locale }: { r: WagonResult; locale: string }) {
       </div>
       <span className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${TONE[c.state]}`}>{t(`state.${c.state}`)}</span>
       <dl className="mt-1"><Row k={t('date')} v={dayLabel(c.date, locale)} mono /></dl>
+      <TripView r={r} locale={locale} subscribeHref="/tg/subscription" />
       <p className="mt-2 text-xs text-muted">{t('fetchedAt', { at: uzDateTime(r.fetchedAt, locale) })}</p>
     </section>
   );

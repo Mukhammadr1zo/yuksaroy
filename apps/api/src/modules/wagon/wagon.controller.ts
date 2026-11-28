@@ -12,7 +12,7 @@ import { InternalGuard } from '../identity/presentation/internal.guard';
 import { ImpressionsService } from '../impressions/impressions.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { DRailwayClient } from './d-railway.client';
-import { CACHE_MS, canSearch, deriveCurrent, serialize, upstreamNo, type WagonEvent } from './wagon.rules';
+import { CACHE_MS, canSearch, deriveCurrent, deriveTimeline, deriveTrip, serialize, upstreamNo, type WagonEvent, type WagonStep, type WagonTrip } from './wagon.rules';
 
 class SearchDto {
   @IsString() @MaxLength(20) no!: string;
@@ -26,9 +26,11 @@ class TelegramSearchDto {
 
 /**
  * Bazada saqlanadigan natija: kesh ham, foydalanuvchiga javob ham shu.
- * Harakat tarixi saqlanmaydi va yuborilmaydi: sahifa faqat joriy joylashuvni ko'rsatadi.
+ * Yo'l (qayerdan, qayerga, yuk) va vaqt chizig'i ham saqlanadi, lekin faqat obunachiga
+ * yuboriladi (egasi qarori 2026-11-28); qolganga joriy joy va "obunada ko'proq" belgisi.
+ * Eski kesh qatorlarida trip/timeline yo'q: ular 6 soatda yangilanadi.
  */
-type Stored = { current: WagonEvent | null; fetchedAt: string };
+type Stored = { current: WagonEvent | null; fetchedAt: string; trip?: WagonTrip | null; timeline?: WagonStep[] };
 
 // Upstream ga chindan boradigan qidiruv: foydalanuvchi bo'yicha soatiga 30 ta
 const searchBucket = new IpBucket(30, 3_600_000);
@@ -158,7 +160,9 @@ export class WagonController {
         throw new HttpException({ code: 'WAGON_UPSTREAM' }, 502);
       }
       found = h !== null;
-      result = { current: h ? deriveCurrent(h.events) : null, fetchedAt: new Date().toISOString() };
+      result = h
+        ? { current: deriveCurrent(h.events), trip: deriveTrip(h.events), timeline: deriveTimeline(h.events), fetchedAt: new Date().toISOString() }
+        : { current: null, fetchedAt: new Date().toISOString() };
     }
     // ponytail: o'zining qatori bor, kesh esa eskirgan (kam uchraydi) bo'lsa yangi natija saqlanmaydi: har qator kvota sanaydi
     if (!own) {
@@ -167,7 +171,10 @@ export class WagonController {
       q.dailyUsed++;
     }
     await this.audit.log({ actorId: userId, action: 'wagon.search', entity: 'Wagon', entityId: wagonNo, meta: { found, fromCache: !!cached } });
-    return { wagonNo, found, ...result, quota: q };
+    const { trip = null, timeline = [], ...base } = result;
+    // Obunachiga to'liq yo'l; boshqaga faqat "bor" belgisi (devor ortida nima borligini bilsin)
+    const more = q.subscriber ? { trip, timeline } : { locked: !!trip || timeline.length > 1 };
+    return { wagonNo, found, ...base, ...more, quota: q };
   }
 
   private async quota(userId: string) {

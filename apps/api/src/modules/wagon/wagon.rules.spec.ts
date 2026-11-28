@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canSearch, deriveCurrent, mapEvents, serialize, upstreamNo } from './wagon.rules';
+import { canSearch, deriveCurrent, deriveTimeline, deriveTrip, mapEvents, serialize, upstreamNo } from './wagon.rules';
 
 describe('vagon kvotasi', () => {
   it('obunachi cheksiz, qolganlarga freeTotal ta', () => {
@@ -74,5 +74,32 @@ describe('foydalanuvchi navbati', () => {
     const b = serialize('u2', async () => { log.push('b:start'); });
     await Promise.all([a, b]);
     expect(log).toEqual(['a:start', 'b:start', 'a:end']);
+  });
+});
+
+describe("yo'l va vaqt chizig'i (obunachi uchun)", () => {
+  const hist = [
+    { event_date: '2026-11-20', snapshot_date: '2026-11-20', station: 'АХАНГАРАН', state: 'loaded', operation: 'ПОГРУЗКА', dest_station: 'СЕРГЕЛИ', cargo: 'ЦЕМЕНТ' },
+    { event_date: '2026-11-21', snapshot_date: '2026-11-21', station: 'АХАНГАРАН', state: 'loaded', operation: 'Отправление', dest_station: 'СЕРГЕЛИ', cargo: 'ЦЕМЕНТ' },
+    { event_date: '2026-11-23', snapshot_date: '2026-11-23', station: 'ЧУКУРСАЙ', state: 'loaded', operation: 'Прибытие', dest_station: 'СЕРГЕЛИ', cargo: 'ЦЕМЕНТ', weight: 68 },
+  ];
+
+  it("spravka extra bo'lsa yuklangan joy va sana undan", () => {
+    const withExtra = [...hist, { event_date: '2026-11-24T06:00+05:00', snapshot_date: '2026-11-24T06:00+05:00', module: 'va_sprd', station: 'ЧУКУРСАЙ', state: 'loaded', dest_station: 'СЕРГЕЛИ', cargo: 'ЦЕМЕНТ', extra: { from: 'Ахангаран', load_date: '2026-11-19' } }];
+    expect(deriveTrip(withExtra)).toEqual({ from: 'Ахангаран', loadDate: '2026-11-19', dest: 'Сергели', cargo: 'Цемент', weightT: null });
+  });
+
+  it("extra bo'lmasa oxirgi yuklash operatsiyasidan; bo'sh vagonda yuk va yuklangan joy yo'q", () => {
+    expect(deriveTrip(hist)).toEqual({ from: 'Ахангаран', loadDate: '2026-11-20', dest: 'Сергели', cargo: 'Цемент', weightT: 68 });
+    expect(deriveTrip([{ event_date: '2026-11-25', station: 'СЕРГЕЛИ', state: 'empty', dest_station: 'АНГРЕН', cargo: 'ЦЕМЕНТ' }]))
+      .toEqual({ from: null, loadDate: null, dest: 'Ангрен', cargo: null, weightT: null });
+    expect(deriveTrip([{ event_date: '2026-11-25', station: 'A', state: 'empty' }])).toBeNull();
+  });
+
+  it("vaqt chizig'i: bir stansiyadagi takrorlar bitta qadam, yangisi birinchi", () => {
+    const t = deriveTimeline(hist);
+    expect(t.map((s) => s.station)).toEqual(['Чукурсай', 'Ахангаран']);
+    expect(t[1]).toMatchObject({ date: '2026-11-20', op: 'Отправление', state: 'loaded' });
+    expect(deriveTimeline([])).toEqual([]);
   });
 });
